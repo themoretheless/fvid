@@ -35,6 +35,7 @@ pub struct Decoder {
     sequence: Option<Sequence>,
     operating_point: usize,
     initial_sequence: Option<Sequence>,
+    configuration_fields: Option<[u8; 2]>,
     initial_hdr: HdrMetadata,
     references: [Option<Decoded>; 8],
     showable: [bool; 8],
@@ -61,6 +62,7 @@ impl Decoder {
             sequence: None,
             operating_point: 0,
             initial_sequence: None,
+            configuration_fields: None,
             initial_hdr: HdrMetadata::default(),
             references: std::array::from_fn(|_| None),
             showable: [false; 8],
@@ -104,7 +106,9 @@ impl Decoder {
                 return Err(invalid("invalid AV1 configuration marker"));
             }
             if record[0] & 0x7f != 1 {
-                return Err(crate::unsupported("unsupported AV1 codec configuration version"));
+                return Err(crate::unsupported(
+                    "unsupported AV1 codec configuration version",
+                ));
             }
             if record[3] & 0xe0 != 0 {
                 return Err(invalid("nonzero AV1 configuration reserved bits"));
@@ -116,11 +120,16 @@ impl Decoder {
             for (index, obu) in Obus::new(&record[4..]).enumerate() {
                 let obu = obu?;
                 if obu.kind == 1 {
-                    if sequence_seen { return Err(invalid("repeated AV1 configuration sequence header")); }
-                    if index != 0 { return Err(invalid("AV1 configuration sequence header must be first")); }
+                    if sequence_seen {
+                        return Err(invalid("repeated AV1 configuration sequence header"));
+                    }
+                    if index != 0 {
+                        return Err(invalid("AV1 configuration sequence header must be first"));
+                    }
                     sequence_seen = true;
                 }
             }
+            decoder.configuration_fields = Some([record[1], record[2]]);
             if !decoder.decode_packet(&record[4..])?.is_empty() || decoder.pending.is_some() {
                 return Err(invalid("AV1 codec configuration contains coded frames"));
             }
@@ -131,10 +140,12 @@ impl Decoder {
     }
     pub fn reset(&mut self) {
         let sequence = self.initial_sequence.clone();
+        let configuration_fields = self.configuration_fields;
         let hdr = self.initial_hdr;
         let operating_point = self.operating_point;
         *self = Self::new(self.budget);
         self.operating_point = operating_point;
+        self.configuration_fields = configuration_fields;
         self.sequence = sequence.clone();
         self.initial_sequence = sequence;
         self.hdr = hdr;
@@ -402,6 +413,13 @@ impl Decoder {
             match obu.kind {
                 1 => {
                     let sequence = Sequence::parse(obu.payload)?;
+                    if let Some(fields) = self.configuration_fields {
+                        if fields != sequence.codec_configuration_fields()? {
+                            return Err(invalid(
+                                "AV1 configuration fields disagree with sequence header",
+                            ));
+                        }
+                    }
                     if self.operating_point >= sequence.operating_points.len() {
                         return Err(invalid("AV1 operating point index not present in sequence"));
                     }

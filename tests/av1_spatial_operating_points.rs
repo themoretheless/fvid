@@ -43,7 +43,11 @@ fn owned_spatial_operating_points_pixels_scaled_interlayer_reset_and_configurati
     );
     let end = seq.payload.as_ptr() as usize - data.as_ptr() as usize + seq.payload.len();
     assert_eq!(&data[..2], &[0x12, 0]);
-    let mut config = vec![0x81, 0, 0, 0];
+    let fields = fvid::codec::av1_sequence::Sequence::parse(seq.payload)
+        .unwrap()
+        .codec_configuration_fields()
+        .unwrap();
+    let mut config = vec![0x81, fields[0], fields[1], 0];
     config.extend_from_slice(&data[2..end]);
     for point in manifest["points"].as_array().unwrap() {
         let op = point["point"].as_u64().unwrap() as usize;

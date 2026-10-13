@@ -2,6 +2,7 @@
 """Owned AV1 separate headers/tile groups; no private media or FFmpeg."""
 import argparse,hashlib,itertools,json,subprocess,tempfile,struct
 from pathlib import Path
+from av1_fixture_configuration import configuration
 from generate_av1_scaled_reference_samples import CASES,stream
 from generate_av1_show_existing_samples import webm,obu
 
@@ -9,7 +10,7 @@ def mp4(data,sequence,size):
  from generate_audio_resample_window_fixture import atom,word
  ftyp=atom(b'ftyp',b'isom'+word(0)+b'isomav01');mdat=atom(b'mdat',data)
  entry=bytearray(78);entry[6:8]=(1).to_bytes(2,'big');entry[24:28]=struct.pack('>HH',*size);entry[40:42]=(1).to_bytes(2,'big');entry[74:76]=(24).to_bytes(2,'big')
- stsd=atom(b'stsd',word(0,1)+atom(b'av01',entry+atom(b'av1C',bytes([0x81,0,0,0])+sequence)))
+ stsd=atom(b'stsd',word(0,1)+atom(b'av01',entry+atom(b'av1C',configuration(sequence))))
  stbl=atom(b'stbl',stsd+atom(b'stts',word(0,1,1,1))+atom(b'stsz',word(0,0,1,len(data)))+atom(b'stsc',word(0,1,1,1,1))+atom(b'stco',word(0,1,len(ftyp)+8))+atom(b'stss',word(0,1,1)))
  dinf=atom(b'dinf',atom(b'dref',word(0,1)+atom(b'url ',word(1))))
  tkhd=bytearray(84);tkhd[12:16]=word(1);tkhd[20:24]=word(1);tkhd[40:44]=tkhd[56:60]=word(65536);tkhd[72:76]=word(0x40000000);tkhd[76:84]=word(size[0]<<16,size[1]<<16)

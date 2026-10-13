@@ -2,6 +2,7 @@
 """Owned spatial SVC container wrappers. No external codecs needed for wrapping."""
 import hashlib,json,struct
 from pathlib import Path
+from av1_fixture_configuration import configuration
 from generate_audio_resample_window_fixture import atom,word,ebml
 ROOT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 def pieces(data):
@@ -15,7 +16,7 @@ def pieces(data):
             if not b&128:break
         at+=n;yield (h>>3)&15,sid,data[begin:at]
 def webm(packets,seq,size=(64,48)):
-    track=ebml('d7',b'\1')+ebml('83',b'\1')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
+    track=ebml('d7',b'\1')+ebml('83',b'\1')+ebml('86',b'V_AV1')+ebml('63a2',configuration(seq))
     track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',size[0].to_bytes(max(1,(size[0].bit_length()+7)//8),'big'))+ebml('ba',size[1].to_bytes(max(1,(size[1].bit_length()+7)//8),'big')))
     cluster=ebml('e7',b'\0')
     for i,p in enumerate(packets):cluster+=ebml('a3',b'\x81'+(i*20).to_bytes(2,'big')+bytes([128 if i==0 else 0])+p)
@@ -25,7 +26,7 @@ def mp4(packets,seq,size=(64,48)):
     count=len(packets)
     ftyp=atom(b'ftyp',b'isom'+word(0)+b'isomav01');mdat=atom(b'mdat',b''.join(packets))
     entry=bytearray(78);entry[6:8]=(1).to_bytes(2,'big');entry[24:28]=struct.pack('>HH',*size);entry[40:42]=(1).to_bytes(2,'big');entry[74:76]=(24).to_bytes(2,'big')
-    stsd=atom(b'stsd',word(0,1)+atom(b'av01',entry+atom(b'av1C',bytes([0x81,0,0,0])+seq)))
+    stsd=atom(b'stsd',word(0,1)+atom(b'av01',entry+atom(b'av1C',configuration(seq))))
     stbl=atom(b'stbl',stsd+atom(b'stts',word(0,1,count,1))+atom(b'stsz',word(0,0,count,*map(len,packets)))+atom(b'stsc',word(0,1,1,count,1))+atom(b'stco',word(0,1,len(ftyp)+8))+atom(b'stss',word(0,1,1)))
     dinf=atom(b'dinf',atom(b'dref',word(0,1)+atom(b'url ',word(1))))
     tkhd=bytearray(84);tkhd[12:16]=word(1);tkhd[20:24]=word(count);tkhd[40:44]=tkhd[56:60]=word(65536);tkhd[72:76]=word(0x40000000);tkhd[76:84]=word(size[0]<<16,size[1]<<16)

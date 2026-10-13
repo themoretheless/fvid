@@ -2,7 +2,7 @@
   "file": "av1-temporal-operating-points.obu",
   "sha256": "0b811f441493423710aacbb0758b35f94e692094afca53a42e839c6f4aad81c1",
   "webm": "av1-temporal-operating-points.webm",
-  "webm_sha256": "28ad44b2cc04c20e9f81ff2d518f81e2ac53e223dd4ccd6422e719872aa1198d",
+  "webm_sha256": "9a528154c12214c96023799dcc21f40296744dd3d75d178a40477c0151d227b0",
   "temporal_ids": [
     0,
     2,

@@ -109,6 +109,40 @@ fn invalid_configuration_structure_is_refused_by_decoder_and_player() {
         let file = case["file"].as_str().unwrap();
         let input = movie(file);
         let config = input.tracks()[0].configuration.clone();
+        if case["inband"] == true {
+            let mut decoder = Decoder::from_configuration(&config, BUDGET).unwrap();
+            let mut input = movie(file);
+            let mut packet = Vec::new();
+            input.read_packet(0, 0, &mut packet).unwrap();
+            for _ in 0..2 {
+                let result = decoder
+                    .decode_packet(&packet)
+                    .err()
+                    .expect("mismatch accepted");
+                assert!(matches!(result, fvid::Error::Invalid(_)));
+                assert_eq!(result.to_string(), error, "{file}");
+                decoder.reset();
+            }
+            let mut reader = Mp4VideoReader::open_software(
+                Cursor::new(std::fs::read(root().join(file)).unwrap()),
+                Limits::default(),
+                BUDGET,
+            )
+            .unwrap();
+            for _ in 0..2 {
+                assert_eq!(
+                    reader
+                        .read_frame()
+                        .err()
+                        .expect("mismatch accepted")
+                        .to_string(),
+                    error,
+                    "{file}"
+                );
+                reader.rewind();
+            }
+            continue;
+        }
         if !config.is_empty() {
             let result = Decoder::from_configuration(&config, BUDGET)
                 .err()

@@ -181,12 +181,13 @@ fn malformed_separate_frames_have_specific_errors() {
             "{}: {error}",
             r["file"]
         );
-        assert!(d
-            .decode_packet(&[])
-            .err()
-            .unwrap()
-            .to_string()
-            .contains("requires reset"));
+        assert!(
+            d.decode_packet(&[])
+                .err()
+                .unwrap()
+                .to_string()
+                .contains("requires reset")
+        );
     }
 }
 #[test]
@@ -278,31 +279,34 @@ fn pending_header_reset_padding_and_compressed_budget_are_checked() {
     assert!(d.decode_packet(&header).unwrap().is_empty());
     let mut padded = obus[1].payload.to_vec();
     padded.extend_from_slice(&[0, 0]);
-    assert!(d
-        .decode_packet(&packet(7, 0, 0, &padded))
-        .unwrap()
-        .is_empty());
+    assert!(
+        d.decode_packet(&packet(7, 0, 0, &padded))
+            .unwrap()
+            .is_empty()
+    );
     assert_eq!(d.decode_packet(&tile).unwrap().len(), 1);
     d.reset();
     assert!(d.decode_packet(&seq).unwrap().is_empty());
     assert!(d.decode_packet(&header).unwrap().is_empty());
     d.reset();
     assert!(d.decode_packet(&seq).unwrap().is_empty());
-    assert!(d
-        .decode_packet(&tile)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("tile group without frame header"));
+    assert!(
+        d.decode_packet(&tile)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("tile group without frame header")
+    );
     let mut d = Decoder::new(obus[1].payload.len() + obus[2].payload.len() - 1);
     d.decode_packet(&seq).unwrap();
     d.decode_packet(&header).unwrap();
-    assert!(d
-        .decode_packet(&tile)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("pending tiles exceed memory budget"));
+    assert!(
+        d.decode_packet(&tile)
+            .err()
+            .unwrap()
+            .to_string()
+            .contains("pending tiles exceed memory budget")
+    );
 }
 
 #[test]
@@ -313,12 +317,13 @@ fn end_of_input_and_configuration_reject_incomplete_frames() {
         let bytes = std::fs::read(root().join(r["file"].as_str().unwrap())).unwrap();
         let mut d = Decoder::new(16 << 20);
         assert!(d.decode_packet(&bytes).unwrap().is_empty());
-        assert!(d
-            .finish()
-            .err()
-            .unwrap()
-            .to_string()
-            .contains(r["error"].as_str().unwrap()));
+        assert!(
+            d.finish()
+                .err()
+                .unwrap()
+                .to_string()
+                .contains(r["error"].as_str().unwrap())
+        );
         let data = std::fs::read(root().join(r["webm"].as_str().unwrap())).unwrap();
         let mut reader =
             fvid::playback_webm::WebmVideoReader::open(Cursor::new(data), 16 << 20).unwrap();
@@ -333,16 +338,26 @@ fn end_of_input_and_configuration_reject_incomplete_frames() {
         }
     }
     let bytes = std::fs::read(root().join(m["fixtures"][0]["file"].as_str().unwrap())).unwrap();
-    let mut configuration = vec![0x81, 0, 0, 0];
+    let sequence = fvid::codec::av1::Obus::new(&bytes)
+        .map(Result::unwrap)
+        .find(|o| o.kind == 1)
+        .unwrap();
+    let fields = fvid::codec::av1_sequence::Sequence::parse(sequence.payload)
+        .unwrap()
+        .codec_configuration_fields()
+        .unwrap();
+    let mut configuration = vec![0x81, fields[0], fields[1], 0];
     for o in fvid::codec::av1::Obus::new(&bytes).take(2) {
         let o = o.unwrap();
         configuration.extend(packet(o.kind, o.temporal_id, o.spatial_id, o.payload));
     }
-    assert!(Decoder::from_configuration(&configuration, 16 << 20)
-        .err()
-        .expect("coded configuration accepted")
-        .to_string()
-        .contains("configuration contains coded frames"));
+    assert!(
+        Decoder::from_configuration(&configuration, 16 << 20)
+            .err()
+            .expect("coded configuration accepted")
+            .to_string()
+            .contains("configuration contains coded frames")
+    );
     let mut d = Decoder::new(16 << 20);
     d.finish().unwrap();
     d.decode_packet(&bytes).unwrap();

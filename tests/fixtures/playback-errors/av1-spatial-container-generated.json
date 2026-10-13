@@ -11,11 +11,11 @@
       "artifacts": [
         {
           "file": "av1-spatial-container-complete.webm",
-          "sha256": "2c867736d3cf9ad1f1f400a4b739b66ef5e7055a4f79ef2fc961ccde75c5a226"
+          "sha256": "d248ff989b8550c6064e48b00ecb4fd2297564390efaece7ad3fa9d635aff35e"
         },
         {
           "file": "av1-spatial-container-complete.mp4",
-          "sha256": "8b4a1ddc8f785a1f987f06b0908de8c0cb5e0aa1d7870a0f5720a6f6e2867f70"
+          "sha256": "39af169a3bbfd44359f296fca0b0df56f233f88d72b6b279c1442b7ecdd2c637"
         }
       ]
     },
@@ -30,11 +30,11 @@
       "artifacts": [
         {
           "file": "av1-spatial-container-missing-last-upper.webm",
-          "sha256": "685a92ab890e53081a5ce0bdd45af7b9c47b7e25477a1767532fba31252c7ffb"
+          "sha256": "2c4b3dc32d6b8399b79149e42c77d6f0488e5b943c5c49e40e7a42300c2bfd39"
         },
         {
           "file": "av1-spatial-container-missing-last-upper.mp4",
-          "sha256": "3c0d77099f5dfb9f3f2c34ce1f67ffee7dd8682d5164ff472a881bfc4f307339"
+          "sha256": "c8b1d712ed058dcf103e2d3500cfe38baa882e34c25e32c4638b2e76e5384904"
         }
       ]
     },
@@ -44,11 +44,11 @@
       "artifacts": [
         {
           "file": "av1-spatial-container-invalid-two-units.webm",
-          "sha256": "58b74413a42217cb2580309bf0c4f9552f648cc85b27ae8d013a92037ba9545f"
+          "sha256": "5baba682795ce06083d09a9cf25132a951d9bc09a002b931452b03c4b0e570a4"
         },
         {
           "file": "av1-spatial-container-invalid-two-units.mp4",
-          "sha256": "196dd8579dc4c7d0fcada5a641e1c313918a30ddecc8cf042393ed3b43e6cdcd"
+          "sha256": "06da4ec612c7ad0abf6da4f161f3ead842ea418ccb68df36b304793342f9c517"
         }
       ]
     },
@@ -58,11 +58,11 @@
       "artifacts": [
         {
           "file": "av1-spatial-container-invalid-repeated-layers.webm",
-          "sha256": "21e928113af664fbf44303187ff2df8127e0e16b9160a5aaf73a91e925bb2b07"
+          "sha256": "d13aee164259a08db42e6da9c8e0e0e5cbdd6f999795c877a7f62513e339e8d0"
         },
         {
           "file": "av1-spatial-container-invalid-repeated-layers.mp4",
-          "sha256": "2f0308a0845feef87237a9f271f35a5a32bf25fd18f58dfde479508502eccf70"
+          "sha256": "d82756d1c47f012b06a9e51c82ba065cdc84edd398bb32acdcbf783ea1290e4b"
         }
       ]
     }

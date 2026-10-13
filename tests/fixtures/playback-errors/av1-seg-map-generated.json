@@ -6,7 +6,7 @@
       "reference": "av1-seg-map-n1-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n1-q0-lf0.webm",
-      "webm_sha256": "03a4de5b334f91a65bd6065d5ab391bbab64518a049b3bdb45208bbf220991a9",
+      "webm_sha256": "6436f4ff473df726a2b3c2ea6b5a21348164f5aa10682baf611bd94359e09687",
       "maps": [
         [
           0,
@@ -480,7 +480,7 @@
       "reference": "av1-seg-map-n1-q1-lf0.yuv",
       "reference_sha256": "4245f96583d15825fe6e7829db91b0876e2624411bcc159901a163903642b714",
       "webm": "av1-seg-map-n1-q1-lf0.webm",
-      "webm_sha256": "955408b177c93d53778299843bc6fb3a2a1f8e2e3427fd0ee7ce908dbc4a0865",
+      "webm_sha256": "4aa682c36fa504dd86c1f0d0f2ac2be286d092f0ea66f6b1e9be10d60c155303",
       "maps": [
         [
           0,
@@ -954,7 +954,7 @@
       "reference": "av1-seg-map-n1-q0-lf1.yuv",
       "reference_sha256": "8d5737d187df1a194720cd6aa2a8b4ec37a2eba93f5d22a8cdbc878bf24e9449",
       "webm": "av1-seg-map-n1-q0-lf1.webm",
-      "webm_sha256": "82754b6b07bb0f8cd141f8275faf870737edace09d449fd05778f8bb8ae755bb",
+      "webm_sha256": "f8d0e872af2206faf294a6bafe53eeb13a0447683b0f2b667e21620f1351fe98",
       "maps": [
         [
           0,
@@ -1428,7 +1428,7 @@
       "reference": "av1-seg-map-n2-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n2-q0-lf0.webm",
-      "webm_sha256": "5792741e842b84d73836d33dd39346959a825bb1f45d08f430c5c9cdd240751c",
+      "webm_sha256": "66f640ec84b47a1e5461245eed1a0dab2b26c7c40d74dfd7b45e8016d9c90462",
       "maps": [
         [
           0,
@@ -1902,7 +1902,7 @@
       "reference": "av1-seg-map-n2-q1-lf0.yuv",
       "reference_sha256": "c8970547651fad91fd8d1b9249ce9a58ca3410445808c03fd08c49227fc04a49",
       "webm": "av1-seg-map-n2-q1-lf0.webm",
-      "webm_sha256": "83fd887daeb23618b6c9f5edefe1c8076f893216ee8a63d1d7cb92ad0bb64d56",
+      "webm_sha256": "12b1b7bbb52d3820fdaac13e2c794ef46028a80f4f488d34cc3335e14d5b4ad6",
       "maps": [
         [
           0,
@@ -2376,7 +2376,7 @@
       "reference": "av1-seg-map-n2-q0-lf1.yuv",
       "reference_sha256": "b3a45a8a98bcb5043f9c1c08e34b0109b24cdd77e157d76b1c013f8ac565863f",
       "webm": "av1-seg-map-n2-q0-lf1.webm",
-      "webm_sha256": "593e289125db72c0e8fc5a37e62293e47031e78ac250ff4d29cffbad8f33ebd5",
+      "webm_sha256": "e453a693b274144626f9b59afeae61cca0fb75e7e9ce01d5726e6a47d813196a",
       "maps": [
         [
           0,
@@ -2850,7 +2850,7 @@
       "reference": "av1-seg-map-n3-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n3-q0-lf0.webm",
-      "webm_sha256": "32251c22c3ffb5eb3f3893dd9e5961ce04665b4d7ea26cfc1fe74a569e544d62",
+      "webm_sha256": "bb7cd1ef649fcb9ed661600d07c08a6cc9ae1909d5f037b10d9bcba1b6e5b1dd",
       "maps": [
         [
           0,
@@ -3324,7 +3324,7 @@
       "reference": "av1-seg-map-n3-q1-lf0.yuv",
       "reference_sha256": "0217ca7b0ee220b44e0d1a03556a13dae9fca1b6150b94d9248a2b826c316ef1",
       "webm": "av1-seg-map-n3-q1-lf0.webm",
-      "webm_sha256": "cfa10553637489b60cb981f39c05ef69756ee4e1a5343ce2529ee1f6a4915304",
+      "webm_sha256": "ee00cad92d3d3347e42b6ab09d2cc308536449dc21bb2eafdfe8cc2894c9374e",
       "maps": [
         [
           0,
@@ -3798,7 +3798,7 @@
       "reference": "av1-seg-map-n3-q0-lf1.yuv",
       "reference_sha256": "b02f423ca20aead684b23cc62688d6c43f1e22b2d3ae507157755575d623e105",
       "webm": "av1-seg-map-n3-q0-lf1.webm",
-      "webm_sha256": "b663a9bda6dea43b0d427c21fdf6f22cded95128e1112717dff4d049daaec490",
+      "webm_sha256": "86e602f21067dfeac5cbff7a58c27b29017f24557534112ef4e87136251a6755",
       "maps": [
         [
           0,
@@ -4272,7 +4272,7 @@
       "reference": "av1-seg-map-n4-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n4-q0-lf0.webm",
-      "webm_sha256": "80d39b6f5abbbb2b365931e7c57d4c97297827bb7c17a87e5e81bcf5b6c7705b",
+      "webm_sha256": "d9d371423b060f0aeda0c00728b4e2d3ad6d9fdcb5550f03ec07ed22fe6af29e",
       "maps": [
         [
           0,
@@ -4746,7 +4746,7 @@
       "reference": "av1-seg-map-n4-q1-lf0.yuv",
       "reference_sha256": "d4f5434b5449b365b86332fd35bcadb6f3eb5bbbf8d063ac336b296f39c65890",
       "webm": "av1-seg-map-n4-q1-lf0.webm",
-      "webm_sha256": "318558424b0e00664bd0d3fefd0422125cab5f1b78969dd437d0ec6b32ec88b2",
+      "webm_sha256": "fc061549d80e9214589063ec43c3c70d21ea9be3e4ee5725727aec517b04c1b3",
       "maps": [
         [
           0,
@@ -5220,7 +5220,7 @@
       "reference": "av1-seg-map-n4-q0-lf1.yuv",
       "reference_sha256": "4660ac61cf1275c53f6dd90ca3efcab5cfea9612f68b8c379c705847fd7e5c09",
       "webm": "av1-seg-map-n4-q0-lf1.webm",
-      "webm_sha256": "9c2096b667f70ef2cfaf86d49ef9b00a83e984a72d00f6632e72e12a24fb4010",
+      "webm_sha256": "04528907e2930f5bcd9ddc7653b070db1338c2201fd7e9d78456b083a2319105",
       "maps": [
         [
           0,
@@ -5694,7 +5694,7 @@
       "reference": "av1-seg-map-n5-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n5-q0-lf0.webm",
-      "webm_sha256": "0c2586af7dac080bea57263e9debb3a589d9fceba66b7fc309a5ad2bc9e87123",
+      "webm_sha256": "906f744f998c83d12309f2108ed3eb6c5b7b6827b02b83bb51fb62d73a02c3f4",
       "maps": [
         [
           0,
@@ -6168,7 +6168,7 @@
       "reference": "av1-seg-map-n5-q1-lf0.yuv",
       "reference_sha256": "7e1f07f0633d4152ac3484ff7823c905c6987365895d7446eaf66b12eb62ea41",
       "webm": "av1-seg-map-n5-q1-lf0.webm",
-      "webm_sha256": "9f33b5e4bca0d37e2859b6dc2789ffb852e8556c1786caa4bef741bceac78e89",
+      "webm_sha256": "210f83461e103735019e081508bc1a582fa4d07662a57a8871d127e4c2700b95",
       "maps": [
         [
           0,
@@ -6642,7 +6642,7 @@
       "reference": "av1-seg-map-n5-q0-lf1.yuv",
       "reference_sha256": "3df9cfc8414b5ff71627c9f8b97939977a601278e739300c63b64dd4bfe7f820",
       "webm": "av1-seg-map-n5-q0-lf1.webm",
-      "webm_sha256": "65ebb8c7a9e37d6e7df87481e86dd815c45ca2c1db7e265baf86d38820852be2",
+      "webm_sha256": "be0d16fbb0e6243323b69581322a53bfadb0f2ec91036b2435f245cc56453102",
       "maps": [
         [
           0,
@@ -7116,7 +7116,7 @@
       "reference": "av1-seg-map-n6-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n6-q0-lf0.webm",
-      "webm_sha256": "bc2b5bf2ce703bc92d234d8664589e749c5e87b7582f6be2a7b0945fc18ddb0f",
+      "webm_sha256": "c4a81242249c0ad899eeeda9a3b2d4d81b6e3252e451d8958b89bc8758767b3a",
       "maps": [
         [
           0,
@@ -7590,7 +7590,7 @@
       "reference": "av1-seg-map-n6-q1-lf0.yuv",
       "reference_sha256": "0217ca7b0ee220b44e0d1a03556a13dae9fca1b6150b94d9248a2b826c316ef1",
       "webm": "av1-seg-map-n6-q1-lf0.webm",
-      "webm_sha256": "c101d644080ac4c8712b9b63014152d83be9a7f7dd60c0b96e1fbe2d80b9712c",
+      "webm_sha256": "f4b16edcaf6d2fde00734c7447904f2ad404a65c6f2fce5eadd0a3bfb8b5a557",
       "maps": [
         [
           0,
@@ -8064,7 +8064,7 @@
       "reference": "av1-seg-map-n6-q0-lf1.yuv",
       "reference_sha256": "b02f423ca20aead684b23cc62688d6c43f1e22b2d3ae507157755575d623e105",
       "webm": "av1-seg-map-n6-q0-lf1.webm",
-      "webm_sha256": "5f8b929abc2489d7e7051935973ca5937fc045e858d649bc0a234a03cd88df22",
+      "webm_sha256": "ae71ead8f5fe8c0bc914c7e15fd42e23387c506019df46b687741f5552509a46",
       "maps": [
         [
           0,
@@ -8538,7 +8538,7 @@
       "reference": "av1-seg-map-n7-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n7-q0-lf0.webm",
-      "webm_sha256": "92b98a80d5a7f2536ff05529e408858f54307ad01bfd17b9eac2f5fd4bc313d9",
+      "webm_sha256": "f3577073443ebc5ff1c5c7294c576f56a1be7399c37648be841f3d37336fded3",
       "maps": [
         [
           0,
@@ -9012,7 +9012,7 @@
       "reference": "av1-seg-map-n7-q1-lf0.yuv",
       "reference_sha256": "19f2046ace5cb5e77c4b7dae97ce3c9efd5a3fac9501bb0d4e35c094fe288f7c",
       "webm": "av1-seg-map-n7-q1-lf0.webm",
-      "webm_sha256": "54c7ff1e160926c62c30153afe4a4a3ea5280daa073031d0714f9012ff8323d6",
+      "webm_sha256": "5be8b98760977681b1e9593197620a55a1f54551ac0dad2789062f12b09c4926",
       "maps": [
         [
           0,
@@ -9486,7 +9486,7 @@
       "reference": "av1-seg-map-n7-q0-lf1.yuv",
       "reference_sha256": "1eb0e474263ed3f6168bcf75404763c9759b053df7f7b8ff8ccb56ae87495ecc",
       "webm": "av1-seg-map-n7-q0-lf1.webm",
-      "webm_sha256": "6899154d4ffee09c28e210415cc4b99ee4caefa83aa82f5bb81a24535b762374",
+      "webm_sha256": "ca56d12f33e58e43e8e0e7f88463fcc6d895bb5ebaac1d23b25aa4c609170c78",
       "maps": [
         [
           0,
@@ -9960,7 +9960,7 @@
       "reference": "av1-seg-map-n8-q0-lf0.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n8-q0-lf0.webm",
-      "webm_sha256": "8530e6fd05b4df2a30de7bd67442340dcfc6e2c18dc160a2cafd385eb083b7f2",
+      "webm_sha256": "205a9a7aed9d97ac39a0716ec0e7fff1be801ec5d618b233329e40bd589eeca7",
       "maps": [
         [
           0,
@@ -10434,7 +10434,7 @@
       "reference": "av1-seg-map-n8-q1-lf0.yuv",
       "reference_sha256": "5cc475bcfb9a80836a0e11084fcf02f60001f3796f21494dc1610ba4ac09a279",
       "webm": "av1-seg-map-n8-q1-lf0.webm",
-      "webm_sha256": "9650ec7d88a2cdfbedd72c4ef75d4219ae9170df4cf7fb5b10fc2699114bf960",
+      "webm_sha256": "07d3c2cf096e12aa5432436fac07673d0009ab43a8f51faf736ddad8fcbc0baa",
       "maps": [
         [
           0,
@@ -10908,7 +10908,7 @@
       "reference": "av1-seg-map-n8-q0-lf1.yuv",
       "reference_sha256": "3804f14ec6cd8b27c1e0805850878349bb41c32261f1e7c166f8d181a6ff513b",
       "webm": "av1-seg-map-n8-q0-lf1.webm",
-      "webm_sha256": "3ffc1d7d2f5424a228842e9a9df8d8ee5c52c08d728672e877dcd8d9f646ffa9",
+      "webm_sha256": "1f8933ac190628f6c025137ca261fad20891b0130a1523328da33e870427cff7",
       "maps": [
         [
           0,
@@ -11382,7 +11382,7 @@
       "reference": "av1-seg-map-n1-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n1-q0-lf0-intra.webm",
-      "webm_sha256": "718f10f3b88cdf4da5cb6872ab00779a6ee586a49e1f8bc5a87db41610292fee",
+      "webm_sha256": "6f1ae341c9615c5ea59949328f8dd4b778cf10405a8096fb5d7ef7c5874bf619",
       "maps": [
         [
           0,
@@ -11856,7 +11856,7 @@
       "reference": "av1-seg-map-n1-q1-lf0-intra.yuv",
       "reference_sha256": "020291bfbcba4ee5f6dd4da132ff1a887988a5d901ca6c0d48be372d2b75af9f",
       "webm": "av1-seg-map-n1-q1-lf0-intra.webm",
-      "webm_sha256": "e82265610c44414b0e9aed264162383f5a392066f15a91ea44d93c836a4b00b0",
+      "webm_sha256": "1bd7f3ffde68ea7471f7fbc1745914e1f95e3c88166ad4f2688c5ce717a6dba3",
       "maps": [
         [
           0,
@@ -12330,7 +12330,7 @@
       "reference": "av1-seg-map-n1-q0-lf1-intra.yuv",
       "reference_sha256": "8d5737d187df1a194720cd6aa2a8b4ec37a2eba93f5d22a8cdbc878bf24e9449",
       "webm": "av1-seg-map-n1-q0-lf1-intra.webm",
-      "webm_sha256": "600041dfcdefd2981b5f3f505bd7fb9238ff3352cffbe3337e97d011381e2f6e",
+      "webm_sha256": "383851daa78970f7ca3e6063bb0bc2c55e7eda2520a5e25a726396fee29418c3",
       "maps": [
         [
           0,
@@ -12804,7 +12804,7 @@
       "reference": "av1-seg-map-n2-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n2-q0-lf0-intra.webm",
-      "webm_sha256": "394a63079bb3edd4235ae4c1b3a82147e158eb912c5a7ac56ad5f06224db9083",
+      "webm_sha256": "f95e3531b3a10b28f0f80d166600e3e7ce3ddec78bd75d5fff00bffdbcf7fb72",
       "maps": [
         [
           0,
@@ -13278,7 +13278,7 @@
       "reference": "av1-seg-map-n2-q1-lf0-intra.yuv",
       "reference_sha256": "d6b55c00668ef9fa2680dc926feef7e9849b4ff9e414d3ccc7e9783e53e17254",
       "webm": "av1-seg-map-n2-q1-lf0-intra.webm",
-      "webm_sha256": "89f84d97fef11568a8d0f644233ac847a8c1c8ad9bc6d47208abc8618cf97da7",
+      "webm_sha256": "0496252a75d71490bfd6b6d96c0928f9f1cac5532f6c50a015910fc3c92cdaa1",
       "maps": [
         [
           0,
@@ -13752,7 +13752,7 @@
       "reference": "av1-seg-map-n2-q0-lf1-intra.yuv",
       "reference_sha256": "6bf12edbfe0767064c133c42eb0fc1a2d95024478683d206be0a581e861ca781",
       "webm": "av1-seg-map-n2-q0-lf1-intra.webm",
-      "webm_sha256": "17aff29351499f6a2c216103da0e163a7c71854971cd536de2a70116592f0454",
+      "webm_sha256": "8fe7d52007428b71e3847f8502c578c03f5c0d597004a58cc37366928f2bdb5a",
       "maps": [
         [
           0,
@@ -14226,7 +14226,7 @@
       "reference": "av1-seg-map-n3-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n3-q0-lf0-intra.webm",
-      "webm_sha256": "0082eccbadd9f7bbcfa1288ad45b204f1a84490350eb547e837b82214b3d1871",
+      "webm_sha256": "e00a39afde6ec322290df706191b680ebc52893d2bc1e1c2d5540894ed65d21b",
       "maps": [
         [
           0,
@@ -14700,7 +14700,7 @@
       "reference": "av1-seg-map-n3-q1-lf0-intra.yuv",
       "reference_sha256": "a3120849bab9b98447698556618a5ab91ad3a0350bf298221d702e6cd91f1c02",
       "webm": "av1-seg-map-n3-q1-lf0-intra.webm",
-      "webm_sha256": "c6d86b064dc1d36ee799d2717383d3fe89efbf826bb2231863b59ea1766badef",
+      "webm_sha256": "d987015e97a690614f7c8d66fd1d3437a921d1d9ad3bd621aeae07d99608d1e4",
       "maps": [
         [
           0,
@@ -15174,7 +15174,7 @@
       "reference": "av1-seg-map-n3-q0-lf1-intra.yuv",
       "reference_sha256": "4040f8ad44457941e99571089d534548f214ecd87e4bf7da37e4e2eb0a94b76a",
       "webm": "av1-seg-map-n3-q0-lf1-intra.webm",
-      "webm_sha256": "3393856b169ebfc7315e5008d914d749a3afd981bb94129acd619a94f8fa2d09",
+      "webm_sha256": "9f321c235836645f3670a8041c4a1e55c5e76daba1e771052119d38b81a98f06",
       "maps": [
         [
           0,
@@ -15648,7 +15648,7 @@
       "reference": "av1-seg-map-n4-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n4-q0-lf0-intra.webm",
-      "webm_sha256": "04477e63c9996ddd1536417caa5a88bf284791c8726e843f171393364b728405",
+      "webm_sha256": "0d8a8bb5e616371c0c878d39e1ac32abb9ddc5005bc9a790da23b0906ad09918",
       "maps": [
         [
           0,
@@ -16122,7 +16122,7 @@
       "reference": "av1-seg-map-n4-q1-lf0-intra.yuv",
       "reference_sha256": "f8e3c4cc0cd308ca5e58aa146b12fe11d71c7a900846545240652d608c2777d5",
       "webm": "av1-seg-map-n4-q1-lf0-intra.webm",
-      "webm_sha256": "75319256b3fc0bd2a7a4b4c04469688ee77e5c1fd3efd135670c9f1a18b9e93e",
+      "webm_sha256": "17a1aa1c94a515ec1543b848dca11c14cd267221a87d9c9efbe3e6698f887f3c",
       "maps": [
         [
           0,
@@ -16596,7 +16596,7 @@
       "reference": "av1-seg-map-n4-q0-lf1-intra.yuv",
       "reference_sha256": "82dadced3edf7a837d4a0d0c33a88c7bae8a40686e37fb36a135c9de8f9e4066",
       "webm": "av1-seg-map-n4-q0-lf1-intra.webm",
-      "webm_sha256": "033d5da0b2f8226bc7cc86ab77fa71383461c2058ca34a9a36ffcd5386d7d760",
+      "webm_sha256": "7c2441496b2ab7e1bfa0b2f6b646c7baf172fbfdd7ce7b2a6637ed462bcfb8d6",
       "maps": [
         [
           0,
@@ -17070,7 +17070,7 @@
       "reference": "av1-seg-map-n5-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n5-q0-lf0-intra.webm",
-      "webm_sha256": "f821e997a27c9dad11fdb7dedeb195c59bc1e824cf7ae4766a62d8ce5941ab77",
+      "webm_sha256": "fc8a24c9a197baebc3c3d496e68e28b8794aa741bd31e5497b4630d2fc7d1d08",
       "maps": [
         [
           0,
@@ -17544,7 +17544,7 @@
       "reference": "av1-seg-map-n5-q1-lf0-intra.yuv",
       "reference_sha256": "336e5563b7e417a0a9d5e22e450967000f0ec2a71d5692dcbaa072c5f3d5e82a",
       "webm": "av1-seg-map-n5-q1-lf0-intra.webm",
-      "webm_sha256": "54a1598097007447de71c28ac8d92a7fc49bf66985e9da711b769e947b888265",
+      "webm_sha256": "b14d60e0acec28cdbaf37a9bfc825074317cb629f2f727888ee2257bc391631a",
       "maps": [
         [
           0,
@@ -18018,7 +18018,7 @@
       "reference": "av1-seg-map-n5-q0-lf1-intra.yuv",
       "reference_sha256": "4bbc288839d9a167cfc907a3c719bacea25be5a251deda919c140609ad42238d",
       "webm": "av1-seg-map-n5-q0-lf1-intra.webm",
-      "webm_sha256": "2f737e480231a44e9bc819fb32a26defcd2e19f67e536118d6ab8560bc94778c",
+      "webm_sha256": "354c2b84e345717de51a60bbb3c6a7432fc0a249f7c2281c6f46fbed8e8d1690",
       "maps": [
         [
           0,
@@ -18492,7 +18492,7 @@
       "reference": "av1-seg-map-n6-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n6-q0-lf0-intra.webm",
-      "webm_sha256": "b4f68171ecd379aa354b653e501e1f8167a814e2afed873302b2ee7ddaaa67c2",
+      "webm_sha256": "11870dbeae7e6d25e777070853a368367983d23be9d797bfb027ad079b42703e",
       "maps": [
         [
           0,
@@ -18966,7 +18966,7 @@
       "reference": "av1-seg-map-n6-q1-lf0-intra.yuv",
       "reference_sha256": "a3120849bab9b98447698556618a5ab91ad3a0350bf298221d702e6cd91f1c02",
       "webm": "av1-seg-map-n6-q1-lf0-intra.webm",
-      "webm_sha256": "2906a87b38d4632b1704aa76d68c15ae3c63043cfadd6640da279ea40dbbe881",
+      "webm_sha256": "5397c505360e09fdebdcff570d1de2ea25cb20a4503682924d040f6fcd397ae0",
       "maps": [
         [
           0,
@@ -19440,7 +19440,7 @@
       "reference": "av1-seg-map-n6-q0-lf1-intra.yuv",
       "reference_sha256": "4040f8ad44457941e99571089d534548f214ecd87e4bf7da37e4e2eb0a94b76a",
       "webm": "av1-seg-map-n6-q0-lf1-intra.webm",
-      "webm_sha256": "ca2cf195398d1a56985b75fc3b9cf2819d2652123704abb9601e2824e79cdf65",
+      "webm_sha256": "6bd5f4fd8c99513fc36ea32e801635e2dc6501cbf8fe737389366d55123732d3",
       "maps": [
         [
           0,
@@ -19914,7 +19914,7 @@
       "reference": "av1-seg-map-n7-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n7-q0-lf0-intra.webm",
-      "webm_sha256": "cc9b1505c783713c5f1bd81e66608efe8182874483287005f902ada3b4cfd6f8",
+      "webm_sha256": "dc3169f6783c0e6bf2beb67737047320b0542b7a70ed047f361b4edac3fdf742",
       "maps": [
         [
           0,
@@ -20388,7 +20388,7 @@
       "reference": "av1-seg-map-n7-q1-lf0-intra.yuv",
       "reference_sha256": "f5c2c7706af5bae933488b5579845c02ca776d092143b18822b12607b2a46f13",
       "webm": "av1-seg-map-n7-q1-lf0-intra.webm",
-      "webm_sha256": "4c3667940c061bd80657b95b8e4c6cd72f9f358c8fd964f00ef392264c9a9e6c",
+      "webm_sha256": "bb708a99cd7da799d2a03ba1483770ac64d3b603c8de8a5183a92c08a988644a",
       "maps": [
         [
           0,
@@ -20862,7 +20862,7 @@
       "reference": "av1-seg-map-n7-q0-lf1-intra.yuv",
       "reference_sha256": "13fcb53470c599c6d5dda0e8cb9b4352b0a3300b3e500a8daa15c5a8d810d538",
       "webm": "av1-seg-map-n7-q0-lf1-intra.webm",
-      "webm_sha256": "5d14d9b02ea506bf4b44e4fbda9653e9a822200b2534a013ec2d8c1c4bea5c4c",
+      "webm_sha256": "2e102ab8572919e5a9f7e8306670ad8875ffb3fa8fc9f06081bd9fd5f49cd617",
       "maps": [
         [
           0,
@@ -21336,7 +21336,7 @@
       "reference": "av1-seg-map-n8-q0-lf0-intra.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n8-q0-lf0-intra.webm",
-      "webm_sha256": "3b3720df74aaf35aa07d8ededc87ddaa886db08486acb9bd6c78db1227e1a908",
+      "webm_sha256": "60ca12be41395da7eb8ac4f88bb45052b03d73cfa2e5579e7c456ea93308f3c1",
       "maps": [
         [
           0,
@@ -21810,7 +21810,7 @@
       "reference": "av1-seg-map-n8-q1-lf0-intra.yuv",
       "reference_sha256": "8466aeeabefa9fa317bcfd4ff69a911536c45371269943b4907aa7f0b88ac3bc",
       "webm": "av1-seg-map-n8-q1-lf0-intra.webm",
-      "webm_sha256": "266fb2a5031006f64c3614bb794d07bd3b24e8965ca1b1eaecf820b9e1878a94",
+      "webm_sha256": "5aad1a868a508d678b7737c264463454bd999ce58d94a3760bcbc6761e9bd28c",
       "maps": [
         [
           0,
@@ -22284,7 +22284,7 @@
       "reference": "av1-seg-map-n8-q0-lf1-intra.yuv",
       "reference_sha256": "004a3533ff4b53bd23c606657a80c16890bd915f948b85a0c87b20d34fddd4c0",
       "webm": "av1-seg-map-n8-q0-lf1-intra.webm",
-      "webm_sha256": "cfa626efe1daa80e5f246d6fc1b04a3e362f71d328c5f4ab01afdd7ee0efa8bc",
+      "webm_sha256": "f185329e8213dcd44636045d07026d428b89fddaed9561918fee7f4f778b6494",
       "maps": [
         [
           0,
@@ -22758,7 +22758,7 @@
       "reference": "av1-seg-map-n1-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n1-q0-lf0-adapt.webm",
-      "webm_sha256": "97436d5a1c27bb95326aa5095491db45c7ec641e36232c2b8d999d7e11aab05e",
+      "webm_sha256": "b80866d5076f2b0d6f9d4ba7c36a5dc1213e760855992d275e55e8d53e5c79b3",
       "maps": [
         [
           0,
@@ -23232,7 +23232,7 @@
       "reference": "av1-seg-map-n1-q1-lf0-adapt.yuv",
       "reference_sha256": "4245f96583d15825fe6e7829db91b0876e2624411bcc159901a163903642b714",
       "webm": "av1-seg-map-n1-q1-lf0-adapt.webm",
-      "webm_sha256": "a1954c749783e21505aa60f5ccd3abe10c11e19934b780c4629d9bba75e76ca7",
+      "webm_sha256": "4f68b3688f8fddf7257f1704a0931e471b318676df218f795a7cfcd6ad216922",
       "maps": [
         [
           0,
@@ -23706,7 +23706,7 @@
       "reference": "av1-seg-map-n1-q0-lf1-adapt.yuv",
       "reference_sha256": "8d5737d187df1a194720cd6aa2a8b4ec37a2eba93f5d22a8cdbc878bf24e9449",
       "webm": "av1-seg-map-n1-q0-lf1-adapt.webm",
-      "webm_sha256": "56f432d1c1972be037c6a2cd443c42c753888c0b50dc5181b9ade0354222a50a",
+      "webm_sha256": "d29304af46f0d4694fca7f102085c3669388e7174f984d3027bf884906c04a3f",
       "maps": [
         [
           0,
@@ -24180,7 +24180,7 @@
       "reference": "av1-seg-map-n2-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n2-q0-lf0-adapt.webm",
-      "webm_sha256": "afbb3c73c6f5c95c870876b182157e71e25e33f5a1f0a10799a27fe9c181862c",
+      "webm_sha256": "107f6f8a7aa99c380b7c48c0373da8f39c7146859dd3ac950bb557f708589c03",
       "maps": [
         [
           0,
@@ -24654,7 +24654,7 @@
       "reference": "av1-seg-map-n2-q1-lf0-adapt.yuv",
       "reference_sha256": "c8970547651fad91fd8d1b9249ce9a58ca3410445808c03fd08c49227fc04a49",
       "webm": "av1-seg-map-n2-q1-lf0-adapt.webm",
-      "webm_sha256": "d586f3607f03632d91418c8205a736171fbfec49631a8b0e1369fdbcc5514340",
+      "webm_sha256": "a068635856e74d19b4705e5e05d4603068031e32a2eaacbb2f2377fcff297b50",
       "maps": [
         [
           0,
@@ -25128,7 +25128,7 @@
       "reference": "av1-seg-map-n2-q0-lf1-adapt.yuv",
       "reference_sha256": "b3a45a8a98bcb5043f9c1c08e34b0109b24cdd77e157d76b1c013f8ac565863f",
       "webm": "av1-seg-map-n2-q0-lf1-adapt.webm",
-      "webm_sha256": "0b6fc76780609b2fb7f09578a09e281fc48d1c57bf43c907d3fed72454b763fa",
+      "webm_sha256": "fdf7ad4de78749dd59effe3ffe56e2c956b17539942dd7730f1f0da6eb911f65",
       "maps": [
         [
           0,
@@ -25602,7 +25602,7 @@
       "reference": "av1-seg-map-n3-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n3-q0-lf0-adapt.webm",
-      "webm_sha256": "fb8ba9992c82fef02d71daa8ee74af050b95156ca8a624b5253fbe58d5ce5026",
+      "webm_sha256": "5756a548da05914288f7a586bbf3b8ae1b59e8b29fd1a58552f625ebca9c4795",
       "maps": [
         [
           0,
@@ -26076,7 +26076,7 @@
       "reference": "av1-seg-map-n3-q1-lf0-adapt.yuv",
       "reference_sha256": "0217ca7b0ee220b44e0d1a03556a13dae9fca1b6150b94d9248a2b826c316ef1",
       "webm": "av1-seg-map-n3-q1-lf0-adapt.webm",
-      "webm_sha256": "adbdd0ecce9a087d0d5a1e55365474f3f85e179360af70a9754282141c2aa3fb",
+      "webm_sha256": "b4bbb5d85d6f2360f8a7aa50487ad7e7a906836ecc636141c012270ecbbaba3b",
       "maps": [
         [
           0,
@@ -26550,7 +26550,7 @@
       "reference": "av1-seg-map-n3-q0-lf1-adapt.yuv",
       "reference_sha256": "b02f423ca20aead684b23cc62688d6c43f1e22b2d3ae507157755575d623e105",
       "webm": "av1-seg-map-n3-q0-lf1-adapt.webm",
-      "webm_sha256": "b3463ce2a20393b092f2fdec13600c1e3b5aebe892aaba9f8d7b9846b10ecc5f",
+      "webm_sha256": "e8288835fa109e9ef5236c832969aa4e54e2aa0ff0e6dca722c14ccc1727ade0",
       "maps": [
         [
           0,
@@ -27024,7 +27024,7 @@
       "reference": "av1-seg-map-n4-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n4-q0-lf0-adapt.webm",
-      "webm_sha256": "22ee91cfee28d8cd5cb9ae564ae8c985e7fb37ab8e6f84b516d8330a614b22ed",
+      "webm_sha256": "7292c636190c0f4325e457e34135f595344718029b35caf3e34ac258138641fa",
       "maps": [
         [
           0,
@@ -27498,7 +27498,7 @@
       "reference": "av1-seg-map-n4-q1-lf0-adapt.yuv",
       "reference_sha256": "d4f5434b5449b365b86332fd35bcadb6f3eb5bbbf8d063ac336b296f39c65890",
       "webm": "av1-seg-map-n4-q1-lf0-adapt.webm",
-      "webm_sha256": "699c782117dc89363dc0acf4bac8b84af17cbe6859272c64bc5f41fc5e998467",
+      "webm_sha256": "7afe8504f7494d4d4792e7f93ed2ef5a1ab9dbaccc31915b0a60e69be39fefc6",
       "maps": [
         [
           0,
@@ -27972,7 +27972,7 @@
       "reference": "av1-seg-map-n4-q0-lf1-adapt.yuv",
       "reference_sha256": "4660ac61cf1275c53f6dd90ca3efcab5cfea9612f68b8c379c705847fd7e5c09",
       "webm": "av1-seg-map-n4-q0-lf1-adapt.webm",
-      "webm_sha256": "c92972ca02204dee7519c3866382054f24888d119c7fbcf7316acf62c8bb7ca8",
+      "webm_sha256": "1d6cdb7e1ffebe390d8528b1404ebb53372ffa4d016d09fe528b484c410b47b2",
       "maps": [
         [
           0,
@@ -28446,7 +28446,7 @@
       "reference": "av1-seg-map-n5-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n5-q0-lf0-adapt.webm",
-      "webm_sha256": "ef8e91dd72fa98c08b9cae976dc934aff9032ba7b08f7f676b19fd2b22a2b2ff",
+      "webm_sha256": "c5533d46a053e9a5118a2a64a1bcbfe03cfb0efc31912c6a37187085aa71c7aa",
       "maps": [
         [
           0,
@@ -28920,7 +28920,7 @@
       "reference": "av1-seg-map-n5-q1-lf0-adapt.yuv",
       "reference_sha256": "7e1f07f0633d4152ac3484ff7823c905c6987365895d7446eaf66b12eb62ea41",
       "webm": "av1-seg-map-n5-q1-lf0-adapt.webm",
-      "webm_sha256": "8a902c99253b5042d374a5d33e70d772d69f02f54b8538b5c6d3fdddfa9dcaa9",
+      "webm_sha256": "236fe3b2a16edf16ff904bb4547c7113c5b04e0ca52b1dfa5c1f8c7b0902b81e",
       "maps": [
         [
           0,
@@ -29394,7 +29394,7 @@
       "reference": "av1-seg-map-n5-q0-lf1-adapt.yuv",
       "reference_sha256": "3df9cfc8414b5ff71627c9f8b97939977a601278e739300c63b64dd4bfe7f820",
       "webm": "av1-seg-map-n5-q0-lf1-adapt.webm",
-      "webm_sha256": "b6a9f79497240cda1317c77d6f54e161456ed5417054ea47ed6d57b81df970bb",
+      "webm_sha256": "83e28b5c8c3cf2019d3a918889c4e7ab83a60c1a8f0c393ea382f67133974c26",
       "maps": [
         [
           0,
@@ -29868,7 +29868,7 @@
       "reference": "av1-seg-map-n6-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n6-q0-lf0-adapt.webm",
-      "webm_sha256": "fbaf1ff0c0f5a0c7d32e42624c667b678ee588261e89483f5b8898af63e3570a",
+      "webm_sha256": "f449e11013245eb855280700c88c82892effe7d484ba75fb6bbc53292ef97f6f",
       "maps": [
         [
           0,
@@ -30342,7 +30342,7 @@
       "reference": "av1-seg-map-n6-q1-lf0-adapt.yuv",
       "reference_sha256": "0217ca7b0ee220b44e0d1a03556a13dae9fca1b6150b94d9248a2b826c316ef1",
       "webm": "av1-seg-map-n6-q1-lf0-adapt.webm",
-      "webm_sha256": "c846be390aff6e44affea15dc94ffb0e78925e869151d849fbb0aa7872917e57",
+      "webm_sha256": "c54fef531abaf5115b4e7475c3a9c6154594d911f90458bc0300c8c144420a5f",
       "maps": [
         [
           0,
@@ -30816,7 +30816,7 @@
       "reference": "av1-seg-map-n6-q0-lf1-adapt.yuv",
       "reference_sha256": "b02f423ca20aead684b23cc62688d6c43f1e22b2d3ae507157755575d623e105",
       "webm": "av1-seg-map-n6-q0-lf1-adapt.webm",
-      "webm_sha256": "d0e4b37d154bb008b193993998a7b80a81ada36c7740c9369d483f80e6475d4d",
+      "webm_sha256": "995b5f42e6d2309b464ffe274712ea534134ccaabc901975ed51e3013f6f8662",
       "maps": [
         [
           0,
@@ -31290,7 +31290,7 @@
       "reference": "av1-seg-map-n7-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n7-q0-lf0-adapt.webm",
-      "webm_sha256": "3bcaf6dcda9b1da74da8a52adda0c87efcafedf1caae0a14490147867ffdc1c2",
+      "webm_sha256": "5698f3a18194cb9a1791fbaadbdfd99c4b4970fc7c3aeaee90ceaf3dc2fb418d",
       "maps": [
         [
           0,
@@ -31764,7 +31764,7 @@
       "reference": "av1-seg-map-n7-q1-lf0-adapt.yuv",
       "reference_sha256": "19f2046ace5cb5e77c4b7dae97ce3c9efd5a3fac9501bb0d4e35c094fe288f7c",
       "webm": "av1-seg-map-n7-q1-lf0-adapt.webm",
-      "webm_sha256": "91958afce6da3c4bb355f625eac37780018e88588433e94a56fafca936bd4d6b",
+      "webm_sha256": "2343199c82c07721ecb507989df3ddd47b9cc83a7aad290f6fdf04aa07170298",
       "maps": [
         [
           0,
@@ -32238,7 +32238,7 @@
       "reference": "av1-seg-map-n7-q0-lf1-adapt.yuv",
       "reference_sha256": "1eb0e474263ed3f6168bcf75404763c9759b053df7f7b8ff8ccb56ae87495ecc",
       "webm": "av1-seg-map-n7-q0-lf1-adapt.webm",
-      "webm_sha256": "6d776320632be9bc4cb51db06e1286ecf1425ddf783e6b24c208aa7b952d3023",
+      "webm_sha256": "649121aa10d7472b2e06bde6f0c5235f493633ae86294432204e90670efd8091",
       "maps": [
         [
           0,
@@ -32712,7 +32712,7 @@
       "reference": "av1-seg-map-n8-q0-lf0-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n8-q0-lf0-adapt.webm",
-      "webm_sha256": "c826afb4a008ec2e51eee3f3697b3bddab1846d0a21c44f356197fc5ed727b75",
+      "webm_sha256": "8a37693faa1e581190c1cbfbee67728cdde0ded51c177d36a624a009baef5e1e",
       "maps": [
         [
           0,
@@ -33186,7 +33186,7 @@
       "reference": "av1-seg-map-n8-q1-lf0-adapt.yuv",
       "reference_sha256": "5cc475bcfb9a80836a0e11084fcf02f60001f3796f21494dc1610ba4ac09a279",
       "webm": "av1-seg-map-n8-q1-lf0-adapt.webm",
-      "webm_sha256": "1d6cbeb9145f4f9c5c0aba59fadb0be00c24103c1a42ed074099662e9b6ed54d",
+      "webm_sha256": "2eafd6e03fd1acbc158e52eeed5609e1aa5c7fa1aa59e491effbc02dcd76dab8",
       "maps": [
         [
           0,
@@ -33660,7 +33660,7 @@
       "reference": "av1-seg-map-n8-q0-lf1-adapt.yuv",
       "reference_sha256": "3804f14ec6cd8b27c1e0805850878349bb41c32261f1e7c166f8d181a6ff513b",
       "webm": "av1-seg-map-n8-q0-lf1-adapt.webm",
-      "webm_sha256": "224a6595256e10388596b9e4681527333251e90afd85dc6085f59ed8ff1fd4f6",
+      "webm_sha256": "ab057ba1564aba855f7d4d8ce9c8c6371d498beabab3adb257dbe87b4fa75595",
       "maps": [
         [
           0,
@@ -34134,7 +34134,7 @@
       "reference": "av1-seg-map-n1-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n1-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "0c209df0a109211ce241ba5cb2af7c0e08e1470d369fb9cdce9438b6bacf4220",
+      "webm_sha256": "81794fd6e6eb86993940c275667918039dc017e452a81d5158b67cdbf07aec85",
       "maps": [
         [
           0,
@@ -34608,7 +34608,7 @@
       "reference": "av1-seg-map-n1-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "020291bfbcba4ee5f6dd4da132ff1a887988a5d901ca6c0d48be372d2b75af9f",
       "webm": "av1-seg-map-n1-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "6ba05dfd2b962bb65a841182fa50300ec2172de1da5e84b1126ea3b150d07e1e",
+      "webm_sha256": "e4a240a931460cba80a07a7f23db500764fb1315e2c1389fc44f399fed529bf5",
       "maps": [
         [
           0,
@@ -35082,7 +35082,7 @@
       "reference": "av1-seg-map-n1-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "8d5737d187df1a194720cd6aa2a8b4ec37a2eba93f5d22a8cdbc878bf24e9449",
       "webm": "av1-seg-map-n1-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "0da1dd07eef30616a7215944ced05a80ad65683001713474d391ea80dc19cea1",
+      "webm_sha256": "7c42f1f0ead5fad37294692f413e8040cac22034cd6e3136470bf531e4076662",
       "maps": [
         [
           0,
@@ -35556,7 +35556,7 @@
       "reference": "av1-seg-map-n2-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n2-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "99b7d0e21a30f463eb4639beffe568301248a47528df2d9a9c452702b964bba9",
+      "webm_sha256": "d6d78106d693e59a74de631566405bd9b05a3974bfb3a3007c4de828341a94a5",
       "maps": [
         [
           0,
@@ -36030,7 +36030,7 @@
       "reference": "av1-seg-map-n2-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "d6b55c00668ef9fa2680dc926feef7e9849b4ff9e414d3ccc7e9783e53e17254",
       "webm": "av1-seg-map-n2-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "fdacd277e4bfdaf9ea85afe128717054c2a7e7243fabd5194fdd2f540bc2b09f",
+      "webm_sha256": "3a4c4e32c2abe436fc0b624f3fd417c08eac8a9fef306cdc19a994b651042d4f",
       "maps": [
         [
           0,
@@ -36504,7 +36504,7 @@
       "reference": "av1-seg-map-n2-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "6bf12edbfe0767064c133c42eb0fc1a2d95024478683d206be0a581e861ca781",
       "webm": "av1-seg-map-n2-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "9f9e0c78c4042f59cbdd8a3dde14f3ac867e5ab68b14c0e6715033d32255bde1",
+      "webm_sha256": "499c3d578061022557e1b014d947e10b0e1d0c07a8eb38f4f72a91dfc9a71cdb",
       "maps": [
         [
           0,
@@ -36978,7 +36978,7 @@
       "reference": "av1-seg-map-n3-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n3-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "71f8946ad4eb0e6ed38982765fb5dfc6b19347ab1528092a65cf715f5e0282ed",
+      "webm_sha256": "e2c43ee5d1994a4f547266e1b85c745c393222d95734e09e77aa9dd266ff21c0",
       "maps": [
         [
           0,
@@ -37452,7 +37452,7 @@
       "reference": "av1-seg-map-n3-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "a3120849bab9b98447698556618a5ab91ad3a0350bf298221d702e6cd91f1c02",
       "webm": "av1-seg-map-n3-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "f98f1cee61af074d2a54ddb80fb8909b04ad3eff683a307260ad7e112bd7b0e1",
+      "webm_sha256": "b30fb0a072eae445ba8339cc2bb05dadbd769424d0739fc46b9f4261b4335a0a",
       "maps": [
         [
           0,
@@ -37926,7 +37926,7 @@
       "reference": "av1-seg-map-n3-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "4040f8ad44457941e99571089d534548f214ecd87e4bf7da37e4e2eb0a94b76a",
       "webm": "av1-seg-map-n3-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "ebf16b5ed5d80c6992f637c5ac3ef1763f90bbfde96cfad69d668ccd43706a2f",
+      "webm_sha256": "3169f99a3f9f71c08efe527cdd4ba9a6a14dad874fab9b73b0d9eef0c55aaa4d",
       "maps": [
         [
           0,
@@ -38400,7 +38400,7 @@
       "reference": "av1-seg-map-n4-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n4-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "baef8236335ce8d7b807da75616d080e75e8bcd7b359452d3c3adfacbfd6a3cf",
+      "webm_sha256": "3b8419f814b11eebe3036fedd383090fc8ad8914b54f95ba12693555b6d3d778",
       "maps": [
         [
           0,
@@ -38874,7 +38874,7 @@
       "reference": "av1-seg-map-n4-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "f8e3c4cc0cd308ca5e58aa146b12fe11d71c7a900846545240652d608c2777d5",
       "webm": "av1-seg-map-n4-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "ca0474a9d51520ba96d5147ee36b7ee577dd8729f21218f89b68280207001d07",
+      "webm_sha256": "ff9d7209e044e308095a539f82cea52b9e311031b109863683f644a94eab4309",
       "maps": [
         [
           0,
@@ -39348,7 +39348,7 @@
       "reference": "av1-seg-map-n4-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "82dadced3edf7a837d4a0d0c33a88c7bae8a40686e37fb36a135c9de8f9e4066",
       "webm": "av1-seg-map-n4-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "e86f4a964bff3a60c217196c20612ab019123ac2abc4d083e0b0cb307fa0cda7",
+      "webm_sha256": "10af3065ef3d579081fdc6fdef57a4384154eea27aced09fbb858baa164b7b93",
       "maps": [
         [
           0,
@@ -39822,7 +39822,7 @@
       "reference": "av1-seg-map-n5-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n5-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "3a283422209039ff0ff112cdf0cc4a48a1f2d1d580a1edd8072e899ed9b931b7",
+      "webm_sha256": "5b116695ea6cbe8c4eb0e33c3079b4d707e91c00066e20417a504bf549e58038",
       "maps": [
         [
           0,
@@ -40296,7 +40296,7 @@
       "reference": "av1-seg-map-n5-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "336e5563b7e417a0a9d5e22e450967000f0ec2a71d5692dcbaa072c5f3d5e82a",
       "webm": "av1-seg-map-n5-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "f41785f0cc55a4457de5c991fc3fc9207bf14d0cea47903812c3d2e7e7e04f70",
+      "webm_sha256": "0e55ca6597f40df4e6de209a926304e0d316bb8cde347d2d54450dc3556cee3d",
       "maps": [
         [
           0,
@@ -40770,7 +40770,7 @@
       "reference": "av1-seg-map-n5-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "4bbc288839d9a167cfc907a3c719bacea25be5a251deda919c140609ad42238d",
       "webm": "av1-seg-map-n5-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "61a3b9643a365d328b0c9e9f2b2e18542e5d895cd83e99cb253c6e8ce6314dcf",
+      "webm_sha256": "a0e00c81b053905ddf7b7fc12b2e09bc6776091b737e72851df77235c2a38e05",
       "maps": [
         [
           0,
@@ -41244,7 +41244,7 @@
       "reference": "av1-seg-map-n6-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n6-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "7cef4c24e7d3df3f5ba4e8d7d1c4837dbc8e052a31d898851dab04f3034afe20",
+      "webm_sha256": "9da3d9bfa5892764545022ae757427172bb141656d050425ffa317c683c44c53",
       "maps": [
         [
           0,
@@ -41718,7 +41718,7 @@
       "reference": "av1-seg-map-n6-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "a3120849bab9b98447698556618a5ab91ad3a0350bf298221d702e6cd91f1c02",
       "webm": "av1-seg-map-n6-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "82e71032913761469b03ca21d72d166ae243e269a3a41a2316303ba665377e03",
+      "webm_sha256": "854bbeb3716203878ed45de28de641c89ed863a5ba9fdd0a798e47f65238a202",
       "maps": [
         [
           0,
@@ -42192,7 +42192,7 @@
       "reference": "av1-seg-map-n6-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "4040f8ad44457941e99571089d534548f214ecd87e4bf7da37e4e2eb0a94b76a",
       "webm": "av1-seg-map-n6-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "3889de6fbe2eabe38a8183298d49c2ad5b84e176b4b65740fa28a57be3b2173f",
+      "webm_sha256": "748996f0e70a0c2b29ad4b1a1af0c2a9b60763f3a88ee7702037f1a8aaf66e8c",
       "maps": [
         [
           0,
@@ -42666,7 +42666,7 @@
       "reference": "av1-seg-map-n7-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n7-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "4f6eb381ba16848bab67aeec90e24301e20ee5287bf226e045eaa49c3c869318",
+      "webm_sha256": "484a03b9b9b20b74a7d157ffaa4030d2f0157f6fa2b6b51e3a1f062246147242",
       "maps": [
         [
           0,
@@ -43140,7 +43140,7 @@
       "reference": "av1-seg-map-n7-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "f5c2c7706af5bae933488b5579845c02ca776d092143b18822b12607b2a46f13",
       "webm": "av1-seg-map-n7-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "6ba25716d002026625a9799fdfbe0cae4e7b6baa981dfbe0599c215a6d0352f7",
+      "webm_sha256": "15944d436e9b09ca3271000b4b8b65f7cc6f24dcf5b3ee32e9894ad84a12051d",
       "maps": [
         [
           0,
@@ -43614,7 +43614,7 @@
       "reference": "av1-seg-map-n7-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "13fcb53470c599c6d5dda0e8cb9b4352b0a3300b3e500a8daa15c5a8d810d538",
       "webm": "av1-seg-map-n7-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "e166b97594bfa5b304ef81048fd4d67ab1465cbf4b57b69a85c7fc63f3c32f35",
+      "webm_sha256": "8235e69c4cc541cd4b876623f4222d68c8e68aa70523857edeffa190bc505b93",
       "maps": [
         [
           0,
@@ -44088,7 +44088,7 @@
       "reference": "av1-seg-map-n8-q0-lf0-intra-adapt.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n8-q0-lf0-intra-adapt.webm",
-      "webm_sha256": "79b3f1b35c0bb24067a765d80a636d1c3b39a12382cc5be6ba7b657a37c9e97e",
+      "webm_sha256": "5903a04b6f45a08fe6d0ac86623033ec4105d4bc09246602156681cd001d329e",
       "maps": [
         [
           0,
@@ -44562,7 +44562,7 @@
       "reference": "av1-seg-map-n8-q1-lf0-intra-adapt.yuv",
       "reference_sha256": "8466aeeabefa9fa317bcfd4ff69a911536c45371269943b4907aa7f0b88ac3bc",
       "webm": "av1-seg-map-n8-q1-lf0-intra-adapt.webm",
-      "webm_sha256": "750862eb0b2ed961f29cc9c91f80bc538315f1571981f206b4e0c30330eab674",
+      "webm_sha256": "7f25a959673ef6e6032327984b10d90c40705166554a73dbce0208639a7dfaba",
       "maps": [
         [
           0,
@@ -45036,7 +45036,7 @@
       "reference": "av1-seg-map-n8-q0-lf1-intra-adapt.yuv",
       "reference_sha256": "004a3533ff4b53bd23c606657a80c16890bd915f948b85a0c87b20d34fddd4c0",
       "webm": "av1-seg-map-n8-q0-lf1-intra-adapt.webm",
-      "webm_sha256": "554bed5e3d7595356de4ca7d6e0f419f053dd478eb70a4ff7f4a239113db19e7",
+      "webm_sha256": "3261363e29c185daf008998c461d7df8e1db8ec418271a19fcd1b325777caf0f",
       "maps": [
         [
           0,
@@ -45510,7 +45510,7 @@
       "reference": "av1-seg-map-n1-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n1-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "18dc04db7aa392e701d17c7d8ec2067112b73330c2c994318eb5eb9a9e53dbf1",
+      "webm_sha256": "b366987e182d00dd334a87438148838ecfed4de3ba7790557f1eea7212a75f50",
       "maps": [
         [
           0,
@@ -45984,7 +45984,7 @@
       "reference": "av1-seg-map-n1-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "4245f96583d15825fe6e7829db91b0876e2624411bcc159901a163903642b714",
       "webm": "av1-seg-map-n1-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "78db44cf0daa186ebaae0303915446572cc6af48fb158c678f60ab20f978119e",
+      "webm_sha256": "cce68b299630430b73b27124ba92f2fb1db89f3ca812abc2efe0b98eced4c7f0",
       "maps": [
         [
           0,
@@ -46458,7 +46458,7 @@
       "reference": "av1-seg-map-n1-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "8d5737d187df1a194720cd6aa2a8b4ec37a2eba93f5d22a8cdbc878bf24e9449",
       "webm": "av1-seg-map-n1-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "02efd5da3975170547537dbf336e3545060da7f13e67d7aa03f246177d3db100",
+      "webm_sha256": "4ac0a8eb1b521d686adf37f4eda68f81ff7c789da6969f88dd3fd74657005b15",
       "maps": [
         [
           0,
@@ -46932,7 +46932,7 @@
       "reference": "av1-seg-map-n2-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n2-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "abed96b09d576ec5800acc95e6d56546d16889d2fe60237df1d8f7be75847bb0",
+      "webm_sha256": "68c14edff360abed9dfbb0da5f4ba8d463a0a29f8eac3ed2af9b8d6c7a3e30f2",
       "maps": [
         [
           0,
@@ -47406,7 +47406,7 @@
       "reference": "av1-seg-map-n2-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "c8970547651fad91fd8d1b9249ce9a58ca3410445808c03fd08c49227fc04a49",
       "webm": "av1-seg-map-n2-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "54be14de375b22c8db7c37d95a2d28ee4c86f55d06105d703ad7b122851c2b02",
+      "webm_sha256": "18d147eaf766db2da364460444ee4a22cc7b6bf2c255a894ce0d701b0b60ca50",
       "maps": [
         [
           0,
@@ -47880,7 +47880,7 @@
       "reference": "av1-seg-map-n2-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "b3a45a8a98bcb5043f9c1c08e34b0109b24cdd77e157d76b1c013f8ac565863f",
       "webm": "av1-seg-map-n2-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "9854387b91b9aac6b3a52bdd9122e462fdc4fc37b654f94cd320f174c70ac0d4",
+      "webm_sha256": "162d0fdf0b61e776c31c90a003cebc5faf5b5e7e593c7c99c2f358184f9f2b6c",
       "maps": [
         [
           0,
@@ -48354,7 +48354,7 @@
       "reference": "av1-seg-map-n3-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n3-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "3ef91664edce9573b75ebe7e4fcbb0294f66625d352b87ab61e672751e656dd1",
+      "webm_sha256": "eea4e40af050395f8a8f253d6184c950e28e92f51261a1f6101266a6cd9fcae7",
       "maps": [
         [
           0,
@@ -48828,7 +48828,7 @@
       "reference": "av1-seg-map-n3-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "0217ca7b0ee220b44e0d1a03556a13dae9fca1b6150b94d9248a2b826c316ef1",
       "webm": "av1-seg-map-n3-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "cfcfd8fbecf0e6a762fca8f4106b693385596cb40931618d69a1c673123e72f3",
+      "webm_sha256": "1210a717d2c05412c8509562f3e4af245345c5fce480adfe647b16c197920386",
       "maps": [
         [
           0,
@@ -49302,7 +49302,7 @@
       "reference": "av1-seg-map-n3-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "b02f423ca20aead684b23cc62688d6c43f1e22b2d3ae507157755575d623e105",
       "webm": "av1-seg-map-n3-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "0a9b2b413a40266f3c74a1cd97bb5af950cf984daa8188b983fb1b10d48916ef",
+      "webm_sha256": "27abb04e8ff673755138937495c871cd3cfb2655038df3e5c421ad6fe877d824",
       "maps": [
         [
           0,
@@ -49776,7 +49776,7 @@
       "reference": "av1-seg-map-n4-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n4-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "0163ef71a8bf8d8b00b9ffa2514fe91c307c77e136bf77f39801274e091b14b4",
+      "webm_sha256": "a84cc603e50f334fcec941b3e216d6eae99f66f03b0071c88f53675c77757cac",
       "maps": [
         [
           0,
@@ -50250,7 +50250,7 @@
       "reference": "av1-seg-map-n4-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "d4f5434b5449b365b86332fd35bcadb6f3eb5bbbf8d063ac336b296f39c65890",
       "webm": "av1-seg-map-n4-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "0c2b4c7a20d327b4cd7ccf4d4c47716da6f796a5762bd7ba29335fe9973a9e1c",
+      "webm_sha256": "8f6b8e85c8b96cafd79a59539180e1bdfb532d48e4ea846c9a8c25df53f9d4c8",
       "maps": [
         [
           0,
@@ -50724,7 +50724,7 @@
       "reference": "av1-seg-map-n4-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "4660ac61cf1275c53f6dd90ca3efcab5cfea9612f68b8c379c705847fd7e5c09",
       "webm": "av1-seg-map-n4-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "c3c615e2ea43d62ca38868c27c181eccd7783ab8d58307a43d2f1d20b0752f65",
+      "webm_sha256": "06df2be2c1b055d60e8e52ae6c0723db10131463470b9e601a2cff46b4e424f3",
       "maps": [
         [
           0,
@@ -51198,7 +51198,7 @@
       "reference": "av1-seg-map-n5-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n5-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "ad9455474b7422f769b52870fc23a1a0cb1dd3d7fa703f10c2847e2a6cfd414d",
+      "webm_sha256": "178f3890cce06f41341123ce1e7d39cf14899a17191760b05f67afe1f1648bc2",
       "maps": [
         [
           0,
@@ -51672,7 +51672,7 @@
       "reference": "av1-seg-map-n5-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "7e1f07f0633d4152ac3484ff7823c905c6987365895d7446eaf66b12eb62ea41",
       "webm": "av1-seg-map-n5-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "7af5a355fc150548e383f9c6576482f76c835fe4e89a9f63b64d7e13b790c1fc",
+      "webm_sha256": "3fac3bb8af6d8012f8d136a8310ebb93020f31e527fb09f01621d6c94bdeae3d",
       "maps": [
         [
           0,
@@ -52146,7 +52146,7 @@
       "reference": "av1-seg-map-n5-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "3df9cfc8414b5ff71627c9f8b97939977a601278e739300c63b64dd4bfe7f820",
       "webm": "av1-seg-map-n5-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "de6397427dba850ba06d704501867134f9bcefdf25465ce5b0e015f5b11d356a",
+      "webm_sha256": "a41d4b61bf341b1e0f485dd7bc1d45ff8bc0a2ea8440fa957a13c0ea17e649e4",
       "maps": [
         [
           0,
@@ -52620,7 +52620,7 @@
       "reference": "av1-seg-map-n6-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n6-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "3fab3cca48b63f3d0bd9ef4e2c4cbff6ddc4dbdaa049b2c033b7dde5c836edf5",
+      "webm_sha256": "b1e1d0203a5be757a637b3c3b3281c8b4fc66c688fdb31f1b4c9eac945528591",
       "maps": [
         [
           0,
@@ -53094,7 +53094,7 @@
       "reference": "av1-seg-map-n6-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "0217ca7b0ee220b44e0d1a03556a13dae9fca1b6150b94d9248a2b826c316ef1",
       "webm": "av1-seg-map-n6-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "ba4c8eccd0e314080b338681588d90ab5889631a705b3a68d979d42c74c0f22f",
+      "webm_sha256": "48e135c27ca6957fc0a22f34aaebb57a9a37d7368c2e4a62c077dbf639396003",
       "maps": [
         [
           0,
@@ -53568,7 +53568,7 @@
       "reference": "av1-seg-map-n6-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "b02f423ca20aead684b23cc62688d6c43f1e22b2d3ae507157755575d623e105",
       "webm": "av1-seg-map-n6-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "eb8e5e10745d8444ca6c0c0e3bce46a3d3156baacae6a0a84255d1a3113d2617",
+      "webm_sha256": "ea0c7a2ca43bd251d1f5c5c18f6d5c6d46fca002f8ee5396ff5120295d370bbc",
       "maps": [
         [
           0,
@@ -54042,7 +54042,7 @@
       "reference": "av1-seg-map-n7-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n7-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "ef5e948868b4f3b5de086e988aef856affa344ed56d1d4b242b93f2aa8141d3a",
+      "webm_sha256": "f7e368c47c6dc1b1556b5872d9ea3220d2f210234eb7c26dc5f604b9ad06b30b",
       "maps": [
         [
           0,
@@ -54516,7 +54516,7 @@
       "reference": "av1-seg-map-n7-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "19f2046ace5cb5e77c4b7dae97ce3c9efd5a3fac9501bb0d4e35c094fe288f7c",
       "webm": "av1-seg-map-n7-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "2168488cbd58f670ad57d5f60949c37c6915354bae4d5b1d5c02d1b5061a7fc3",
+      "webm_sha256": "233f39867d19182579ccd26a7634a99763160a31101b023ea7e7da343bf777bd",
       "maps": [
         [
           0,
@@ -54990,7 +54990,7 @@
       "reference": "av1-seg-map-n7-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "1eb0e474263ed3f6168bcf75404763c9759b053df7f7b8ff8ccb56ae87495ecc",
       "webm": "av1-seg-map-n7-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "5015d2345dcd68e4465cddf773a40265098efa71e1cb7e462899e84f50effc33",
+      "webm_sha256": "d29452414951ff89af6e8f8b4da429f6cbc9d605a7dffe8fa4c5f3a8789cef6a",
       "maps": [
         [
           0,
@@ -55464,7 +55464,7 @@
       "reference": "av1-seg-map-n8-q0-lf0-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n8-q0-lf0-adapt-publish.webm",
-      "webm_sha256": "db52adc6197ff339f235d1bb5daebdb4b7d8b3b0c7cd0f474d26b3feb83cefa1",
+      "webm_sha256": "25b5a8793d7806688cfddef58c84668ab7f7053693cbd4b996810fead8e66305",
       "maps": [
         [
           0,
@@ -55938,7 +55938,7 @@
       "reference": "av1-seg-map-n8-q1-lf0-adapt-publish.yuv",
       "reference_sha256": "5cc475bcfb9a80836a0e11084fcf02f60001f3796f21494dc1610ba4ac09a279",
       "webm": "av1-seg-map-n8-q1-lf0-adapt-publish.webm",
-      "webm_sha256": "6495f9e0a9ad5b26b1b6d83d04b95ed8698430ad3a392aff8ec9550b19f82bb1",
+      "webm_sha256": "83bf2a9553f6769ea65cb6ef292f770e9da07b9fb3295facd45fc179f4edfbf6",
       "maps": [
         [
           0,
@@ -56412,7 +56412,7 @@
       "reference": "av1-seg-map-n8-q0-lf1-adapt-publish.yuv",
       "reference_sha256": "3804f14ec6cd8b27c1e0805850878349bb41c32261f1e7c166f8d181a6ff513b",
       "webm": "av1-seg-map-n8-q0-lf1-adapt-publish.webm",
-      "webm_sha256": "fc9377d4ba79e8edfc05d945543d0c1b320b2be75d44a060800402917b07ee28",
+      "webm_sha256": "a8183ebc5ebe2708c6d2fa95a82c9b14c7a4198aa1b098821aa14a81d2a1f7ef",
       "maps": [
         [
           0,
@@ -56886,7 +56886,7 @@
       "reference": "av1-seg-map-n1-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n1-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "be8feb894b037233a4557d305065f840dd90b6309e3e2b30efd00362a2ad5f87",
+      "webm_sha256": "18acd4f8558b6c9922d45a92d5af8bb90a2d7b001fd59eb6b921391055c2059b",
       "maps": [
         [
           0,
@@ -57360,7 +57360,7 @@
       "reference": "av1-seg-map-n1-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "020291bfbcba4ee5f6dd4da132ff1a887988a5d901ca6c0d48be372d2b75af9f",
       "webm": "av1-seg-map-n1-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "c6b0a8e7b0235d26904f359ca37460bf99a71ddbb10c95021ab59479c4caaa23",
+      "webm_sha256": "e14babe6dbbc975084b7bb1a1adff3d46a9fd846a5a8ee98b5128810389e233a",
       "maps": [
         [
           0,
@@ -57834,7 +57834,7 @@
       "reference": "av1-seg-map-n1-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "8d5737d187df1a194720cd6aa2a8b4ec37a2eba93f5d22a8cdbc878bf24e9449",
       "webm": "av1-seg-map-n1-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "ae22332fd5e0a974d292b82ba4ff5b482dbe8c6d72095eba54267a0910c00bfa",
+      "webm_sha256": "0797bca62782baafca6f018439c7f8f221193cfda2c5441e7d16110d7cbd7b93",
       "maps": [
         [
           0,
@@ -58308,7 +58308,7 @@
       "reference": "av1-seg-map-n2-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n2-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "ce523182ba342bbf7bffc80d029d9d52d352c2c0a5d777a0eaeff1ad94d8318f",
+      "webm_sha256": "180431549d6803ecbfca254cbc630e4bc34b5102060bbf3de8d00220bb10268c",
       "maps": [
         [
           0,
@@ -58782,7 +58782,7 @@
       "reference": "av1-seg-map-n2-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "d6b55c00668ef9fa2680dc926feef7e9849b4ff9e414d3ccc7e9783e53e17254",
       "webm": "av1-seg-map-n2-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "a56f0829a9c5abc1d55090c1768a4a761451b087183d64f6756cfb041972a121",
+      "webm_sha256": "2a5ef3e15415af3722b2f53e8e03fd0b1c546e197d089803e180da62b2d22b43",
       "maps": [
         [
           0,
@@ -59256,7 +59256,7 @@
       "reference": "av1-seg-map-n2-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "6bf12edbfe0767064c133c42eb0fc1a2d95024478683d206be0a581e861ca781",
       "webm": "av1-seg-map-n2-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "d8ce032f4d1c9727a4439c9602d29be20469bd2b880f4e09808bd102b25275ee",
+      "webm_sha256": "cf7efde62d426c1573ec5f25c8ce7ea88c7f8c951d91c6cfb27bb17af034559d",
       "maps": [
         [
           0,
@@ -59730,7 +59730,7 @@
       "reference": "av1-seg-map-n3-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n3-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "34d2bd9187f38bc063796776a5c399e8127716438a3bd7626cedb3b79de87d84",
+      "webm_sha256": "384558003bdfb3251351a9f3a96b9c7af893aad17f0eda5ac30403aa0edf3d2f",
       "maps": [
         [
           0,
@@ -60204,7 +60204,7 @@
       "reference": "av1-seg-map-n3-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "a3120849bab9b98447698556618a5ab91ad3a0350bf298221d702e6cd91f1c02",
       "webm": "av1-seg-map-n3-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "78175fb1c6fb372155794d5f4e18e43df089e11b2b2ca80a20f8501311fd4945",
+      "webm_sha256": "c72805f39c9b2214b1931725acf05f9b9a4e09729bd9a23ba323bc26e35a2975",
       "maps": [
         [
           0,
@@ -60678,7 +60678,7 @@
       "reference": "av1-seg-map-n3-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "4040f8ad44457941e99571089d534548f214ecd87e4bf7da37e4e2eb0a94b76a",
       "webm": "av1-seg-map-n3-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "fec6b4cbb1a07025d83545000d8f1f3cc8ebf8444bc534b7bb4d7126d8a743d0",
+      "webm_sha256": "799b9eff8220b8bb715fae4a63a20ce3c5db31acf51a27d17cd98b3911a3576e",
       "maps": [
         [
           0,
@@ -61152,7 +61152,7 @@
       "reference": "av1-seg-map-n4-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n4-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "d69aff1776188a14bfc99ef499bff265ddf0f44df6d59f3755b63a902b9ae672",
+      "webm_sha256": "cece97070c2279bfa4f521348c9078921b05199a274f27e27b2d75a768755486",
       "maps": [
         [
           0,
@@ -61626,7 +61626,7 @@
       "reference": "av1-seg-map-n4-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "f8e3c4cc0cd308ca5e58aa146b12fe11d71c7a900846545240652d608c2777d5",
       "webm": "av1-seg-map-n4-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "ae586bc5e2ae19418c93874c830e414857a625b737237ca1201e348e4aa6525d",
+      "webm_sha256": "40a43f5c1e45b495e12f9d8900310d14ebc470dad4dc39d09fd3ae41235135f9",
       "maps": [
         [
           0,
@@ -62100,7 +62100,7 @@
       "reference": "av1-seg-map-n4-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "82dadced3edf7a837d4a0d0c33a88c7bae8a40686e37fb36a135c9de8f9e4066",
       "webm": "av1-seg-map-n4-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "1c89c6b65b3cabcd093e48f35858df4937761bbe8fb0fe40c3fc7e364b2aeb72",
+      "webm_sha256": "bfbc522f1f3b12a612b0b8a7abc4e6bb62be2a453073f8a2e3c18c26130ff5cc",
       "maps": [
         [
           0,
@@ -62574,7 +62574,7 @@
       "reference": "av1-seg-map-n5-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n5-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "6651128234d29145e16178c7a8baa35d4c0a9b0fc9e82ec36f70ab9cffea17ba",
+      "webm_sha256": "0535d381594c6b958d143fa25b65652f1353859e5d4ad5ded0578b52437e35d6",
       "maps": [
         [
           0,
@@ -63048,7 +63048,7 @@
       "reference": "av1-seg-map-n5-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "336e5563b7e417a0a9d5e22e450967000f0ec2a71d5692dcbaa072c5f3d5e82a",
       "webm": "av1-seg-map-n5-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "8ddddd9fcd63d922b34f1cb884f356f4b6cb7b40891cb021175b0e18c4e44a21",
+      "webm_sha256": "0c156b33eef4eabaa891083469d77c8fd6773079d7d9638649a5962caa8759ba",
       "maps": [
         [
           0,
@@ -63522,7 +63522,7 @@
       "reference": "av1-seg-map-n5-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "4bbc288839d9a167cfc907a3c719bacea25be5a251deda919c140609ad42238d",
       "webm": "av1-seg-map-n5-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "d8d880d06b9e844b2acc6fc4b45f80035d678474234e4b03611209364c58c5e3",
+      "webm_sha256": "a0c9f555c308705af16862a92cd682dcb942848009ff1a550f134e14e1298897",
       "maps": [
         [
           0,
@@ -63996,7 +63996,7 @@
       "reference": "av1-seg-map-n6-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n6-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "b591383a6bae4fe36bc648e2c1e003cdb8c3443f8178f65db57efbbabbf2ff80",
+      "webm_sha256": "991e105d346d1f15a149f0b697de7db279e6ad13d6ba860f749fd2e6b2755365",
       "maps": [
         [
           0,
@@ -64470,7 +64470,7 @@
       "reference": "av1-seg-map-n6-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "a3120849bab9b98447698556618a5ab91ad3a0350bf298221d702e6cd91f1c02",
       "webm": "av1-seg-map-n6-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "7dda24ab9259b95ec4924b048f077869af8a5ed8582750debe92679b7cf8ad20",
+      "webm_sha256": "2b4e37ef0ffef19b1f8e341c27d418b23ed25f3f43f3c26b02b954bad053e7b3",
       "maps": [
         [
           0,
@@ -64944,7 +64944,7 @@
       "reference": "av1-seg-map-n6-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "4040f8ad44457941e99571089d534548f214ecd87e4bf7da37e4e2eb0a94b76a",
       "webm": "av1-seg-map-n6-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "dde0dddbdf48b205a6433c8d6befbb7aa683f840b7560f54abb6fe2365a9a8b6",
+      "webm_sha256": "751548dc7b0077a12cd06b15e347684e6277c11062e693a2086de1770640af23",
       "maps": [
         [
           0,
@@ -65418,7 +65418,7 @@
       "reference": "av1-seg-map-n7-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n7-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "2da6f760096e6f73a6187c9c298f9adf3aebe86c90f2606e979d14735e54f63d",
+      "webm_sha256": "3893eaee4a71b9f5d12e6a7dc798a3ba92656ef4621b4aabaadd47c3887da344",
       "maps": [
         [
           0,
@@ -65892,7 +65892,7 @@
       "reference": "av1-seg-map-n7-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "f5c2c7706af5bae933488b5579845c02ca776d092143b18822b12607b2a46f13",
       "webm": "av1-seg-map-n7-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "491cde56a8f3fdd0273d59d944825c06e05f15cd513d2e30d9889ca498f22dbe",
+      "webm_sha256": "c42689cb506c4110ad17b892c19be5ef74b084f709023d5c69362dc5ecf183f2",
       "maps": [
         [
           0,
@@ -66366,7 +66366,7 @@
       "reference": "av1-seg-map-n7-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "13fcb53470c599c6d5dda0e8cb9b4352b0a3300b3e500a8daa15c5a8d810d538",
       "webm": "av1-seg-map-n7-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "f6b29b7897960dbeddc30f7fe3d3d0373124a65da4beeecdc3e4363028151402",
+      "webm_sha256": "72e7f2c0cab6672b332904093ebefb9250c1efaed7bc9eaff99fd34e2c050b1f",
       "maps": [
         [
           0,
@@ -66840,7 +66840,7 @@
       "reference": "av1-seg-map-n8-q0-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "64e151b8cd6de59c99f4faba4be849f2a9121d5c593037b49a1e4a85ba4a9f47",
       "webm": "av1-seg-map-n8-q0-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "7c9f388672feeda366b6cb8977a1b587d0d237fb0d116608d361119b22a51ad2",
+      "webm_sha256": "ec421ad7fd415674849290fa64c71999cacf843486c4f3d2de247f8e03e65d60",
       "maps": [
         [
           0,
@@ -67314,7 +67314,7 @@
       "reference": "av1-seg-map-n8-q1-lf0-intra-adapt-publish.yuv",
       "reference_sha256": "8466aeeabefa9fa317bcfd4ff69a911536c45371269943b4907aa7f0b88ac3bc",
       "webm": "av1-seg-map-n8-q1-lf0-intra-adapt-publish.webm",
-      "webm_sha256": "03526666f503323bbddd292f8d661a9b41028e4bb2ecaf73f3ada5199b8c1158",
+      "webm_sha256": "04e2841020453effa33ce3d703e1c9bc72124e3dc2cf11ec1cff435c05039602",
       "maps": [
         [
           0,
@@ -67788,7 +67788,7 @@
       "reference": "av1-seg-map-n8-q0-lf1-intra-adapt-publish.yuv",
       "reference_sha256": "004a3533ff4b53bd23c606657a80c16890bd915f948b85a0c87b20d34fddd4c0",
       "webm": "av1-seg-map-n8-q0-lf1-intra-adapt-publish.webm",
-      "webm_sha256": "687c21500c6f73b7b9ff71f9f8c5cf87d6a194f703c4076582976833717df989",
+      "webm_sha256": "8bcc797115b264424efc33f53db4733a08977a90cfd78e951348ec8240963127",
       "maps": [
         [
           0,

@@ -57,7 +57,11 @@ fn all_nine_operating_points_pixels_filtering_reset_configuration_and_display() 
     assert_eq!(boundaries.len(), 8);
     boundaries.push(data.len());
     let end = sequence.payload.as_ptr() as usize - data.as_ptr() as usize + sequence.payload.len();
-    let mut config = vec![0x81, 0, 0, 0];
+    let fields = fvid::codec::av1_sequence::Sequence::parse(sequence.payload)
+        .unwrap()
+        .codec_configuration_fields()
+        .unwrap();
+    let mut config = vec![0x81, fields[0], fields[1], 0];
     config.extend_from_slice(&data[2..end]);
     let mut coverage = [[0u64; 3]; 3];
     let mut temporal_coverage = [0u64; 3];

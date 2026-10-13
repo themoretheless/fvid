@@ -6,7 +6,7 @@
       "reference": "av1-global-near-m0-ref1-q1-mask1-tx0-adapt0-dc1.yuv",
       "reference_sha256": "e8072e4ee29258cd0a24589de129b948fde8069eb414f63a82c52ba2e760399f",
       "webm": "av1-global-near-m0-ref1-q1-mask1-tx0-adapt0-dc1.webm",
-      "webm_sha256": "74c8c0a1b690f9dc8e6e71b78ab709620a7783857198b1a924d712baeac1e271",
+      "webm_sha256": "46fcdd10d74288eebbbef44863a9011f2e4d0fc4cc35830400534d1d806d992a",
       "global_frames": [
         [
           [
@@ -457,7 +457,7 @@
       "reference": "av1-global-near-m0-ref7-q1-mask1-tx0-adapt0-dc1.yuv",
       "reference_sha256": "e8072e4ee29258cd0a24589de129b948fde8069eb414f63a82c52ba2e760399f",
       "webm": "av1-global-near-m0-ref7-q1-mask1-tx0-adapt0-dc1.webm",
-      "webm_sha256": "799ef1a6a9a15e299174f36df2f56c4ae334989293dc74ca0a4d08cb16423436",
+      "webm_sha256": "70218469d1397380308e5b84abbab2b7d94652604cbf01d2d8bb640357c0e91d",
       "global_frames": [
         [
           [
@@ -908,7 +908,7 @@
       "reference": "av1-global-near-m1-ref1-q1-mask1-tx0-adapt0-dc1.yuv",
       "reference_sha256": "8056082c0b15623fe1177383cbfa68d45804957c13091c5f45897507c1287c0d",
       "webm": "av1-global-near-m1-ref1-q1-mask1-tx0-adapt0-dc1.webm",
-      "webm_sha256": "d91e513e9ca38efad66dc219cd214beffc3a7269321a20a1162fc23706a351b7",
+      "webm_sha256": "25295c0cd1db205bbf8c3fa561ad664362cd6b8b9238740513c9ff985e9393d3",
       "global_frames": [
         [
           [
@@ -1359,7 +1359,7 @@
       "reference": "av1-global-near-m1-ref7-q1-mask1-tx0-adapt0-dc1.yuv",
       "reference_sha256": "8056082c0b15623fe1177383cbfa68d45804957c13091c5f45897507c1287c0d",
       "webm": "av1-global-near-m1-ref7-q1-mask1-tx0-adapt0-dc1.webm",
-      "webm_sha256": "a4cc98a1407172c574d14613bb7b32750e6a49396c3ddfc06c9bfd2bd592140e",
+      "webm_sha256": "4a3a018b0b775b1b343fd7971eec7dd0d596d425d316296e6b7997b5bcbab8b7",
       "global_frames": [
         [
           [

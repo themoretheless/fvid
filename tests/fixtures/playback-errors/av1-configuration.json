@@ -48,12 +48,93 @@
       "error": "AV1 configuration sequence header must be first"
     },
     {
+      "file": "av1-configuration-mismatch-profile.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-level.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-tier.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-high-bitdepth.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-twelve-bit.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-monochrome.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-subsampling-x.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-subsampling-y.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
+      "file": "av1-configuration-mismatch-chroma-position.mp4",
+      "error": "AV1 configuration fields disagree with sequence header"
+    },
+    {
       "file": "av1-configuration-inband.mp4",
       "error": null
     },
     {
       "file": "av1-configuration-duplicate-inband.mp4",
       "error": null
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-profile.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-level.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-tier.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-high-bitdepth.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-twelve-bit.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-monochrome.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-subsampling-x.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-subsampling-y.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
+    },
+    {
+      "file": "av1-configuration-inband-mismatch-chroma-position.mp4",
+      "error": "AV1 configuration fields disagree with sequence header",
+      "inband": true
     }
   ],
   "provenance": "Owned separate-frame/tile-group bytes, authored av1C records and MP4 wrapping. No private source, FFmpeg, external codec or network."

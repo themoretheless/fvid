@@ -2042,3 +2042,19 @@ define the record fields, configOBU ordering and sync-sample requirements.
 Comparison of every av1C profile/level/colour hint against sequence headers and
 full presentation-delay model validation remain separate work; these fixtures
 qualify initialization and structural checks only.
+
+2026-10-13 AV1 codec configuration summary validation: owned MP4 fixtures in
+`av1-configuration.json` independently toggle profile, operating-point-zero
+level/tier, high-bitdepth, twelve-bit, monochrome, subsampling X/Y and chroma
+position. Both configOBUs and later in-band sequence headers require the exact
+summary match; reset/rewind retain the validation. The valid controls still
+compare native decoded pixels against the saved separate-tile oracle.
+
+`av1_fixture_configuration.py` derives fixture summary bytes with the native
+Rust sequence parser via the offline `av1_configuration_fields` example. It runs
+only during explicit generation, never ordinary tests. The owned container
+corpus formerly used zero placeholders. `repair_av1_fixture_configuration.py`
+(dry run by default, `--apply` to write) updates just bytes 1/2 of av1C/AV1
+CodecPrivate and corresponding saved manifest hashes, preserving packet bytes,
+lengths, offsets and pixel oracles. Deliberately malformed configuration fixtures
+are excluded; regenerate those with `generate_av1_configuration_samples.py`.

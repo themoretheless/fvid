@@ -12,7 +12,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth8-lossless1-sb64.webm",
-      "webm_sha256": "6ea6e085c413f1227b84830796710fdb610fd7376bab1870942dd62c5d515a6b",
+      "webm_sha256": "db1884895f4c57ba196c0c376860d73ca97c6c350a2347165408690153e69e79",
       "depth": 8,
       "sb": 64,
       "lossless": true,
@@ -36,7 +36,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth8-lossless1-sb128.webm",
-      "webm_sha256": "b0b26d1843bc31b1d2bd157f1a8f85186608e1b400eb2952176b3dc7a12c6b9d",
+      "webm_sha256": "0d407894a5346174516ec805dc5b64fe2a01c3a02043557206ca41665c10a66e",
       "depth": 8,
       "sb": 128,
       "lossless": true,
@@ -60,7 +60,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth8-lossless0-sb64.webm",
-      "webm_sha256": "8a56f988e0249342c0eccea068aa57be4198f9c17967e2482f38f3ce77ae66e3",
+      "webm_sha256": "db5135cb0aec56c7c7a634f6cc1e3a2724840ed9a39e3a87baeeddc1ce225829",
       "depth": 8,
       "sb": 64,
       "lossless": false,
@@ -84,7 +84,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth8-lossless0-sb128.webm",
-      "webm_sha256": "393dab84ac17e7b12b59f4aa541d2dbaec969a50192b73edcab9cca0e397317f",
+      "webm_sha256": "36efff60e5df2f86a2857401810b3179502aa1237656e8205248eee95678165b",
       "depth": 8,
       "sb": 128,
       "lossless": false,
@@ -108,7 +108,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth10-lossless1-sb64.webm",
-      "webm_sha256": "3aa96d59461d5b6a0cef5fa7cd0e1b9dde582f386aa1e50b937dcbaf42eabcfb",
+      "webm_sha256": "6bf0b0f2fedb4966616e5129663a13932d5801bbd8a91f2c5bc8d8ac7a7c9cf9",
       "depth": 10,
       "sb": 64,
       "lossless": true,
@@ -132,7 +132,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth10-lossless1-sb128.webm",
-      "webm_sha256": "a0dbe66f4f1ac2e95cce328ec2902925c3b35c61da5a1e9d6c1cf7fc909957c8",
+      "webm_sha256": "e1122394f7ca95b9ede27421dcef789aa78935ed97e0920589f56a669b284600",
       "depth": 10,
       "sb": 128,
       "lossless": true,
@@ -156,7 +156,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth10-lossless0-sb64.webm",
-      "webm_sha256": "1f3ca806fea8116d3ba8045f0a607720b89a7c31880c9d0ba61006f0cc256169",
+      "webm_sha256": "8edd514d2210e01288420cd757f1610af10396c5205de6037c7d74ef1fdc1658",
       "depth": 10,
       "sb": 64,
       "lossless": false,
@@ -180,7 +180,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth10-lossless0-sb128.webm",
-      "webm_sha256": "008ea996a208902dd63c2eb9ea6143c7df56a238191a72fa7e7a0a30427eda59",
+      "webm_sha256": "1f9d90f0c53cf70e89278d3a7a01c0aa4a592b558f45c77e46a19811b1710212",
       "depth": 10,
       "sb": 128,
       "lossless": false,
@@ -204,7 +204,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth12-lossless1-sb64.webm",
-      "webm_sha256": "55496da3f6033569a9ca50ec47522ee3a54df6c93ed9015a65be5b080539d10a",
+      "webm_sha256": "e3b313de60231ff315c080e070d92bba2d33baa6b0ed7d26864d5fec2b2204bd",
       "depth": 12,
       "sb": 64,
       "lossless": true,
@@ -228,7 +228,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth12-lossless1-sb128.webm",
-      "webm_sha256": "d3f7f67459a4f89194dc239566ebaa345e507e31c5326a5f7b20ab4829d7a3b8",
+      "webm_sha256": "5f7cea6bc14ac2a50c6003de850a75d619321c7174951d2261fa390c6ee59a9d",
       "depth": 12,
       "sb": 128,
       "lossless": true,
@@ -252,7 +252,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth12-lossless0-sb64.webm",
-      "webm_sha256": "75b4f6d74f42f7e20021903c9c431be8a7a096316364aea48233a4158af181bb",
+      "webm_sha256": "624d114d6b1bc6ba312a8b83bf04861365755262935314f99e9318d21e1815bf",
       "depth": 12,
       "sb": 64,
       "lossless": false,
@@ -276,7 +276,7 @@
         "dav1d"
       ],
       "webm": "av1-intrabc-tools-depth12-lossless0-sb128.webm",
-      "webm_sha256": "707002ff1b3104721e85535da119c5d7ce720ebe49a1c3d99ed18b2aec6fd469",
+      "webm_sha256": "9e69780e18e74aa7598b015c8d537d1de178e0f449c648ba932797d96ba28ced",
       "depth": 12,
       "sb": 128,
       "lossless": false,

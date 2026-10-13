@@ -2,6 +2,7 @@
 """Owned 32x32 flat AV1 timing/frame-ID/show-existing synthetic streams."""
 import argparse,hashlib,json,subprocess
 from pathlib import Path
+from av1_fixture_configuration import configuration
 class Bits:
     def __init__(self):self.bits=[]
     def u(self,v,n=1):self.bits.extend((v>>i)&1 for i in range(n-1,-1,-1))
@@ -75,7 +76,7 @@ def webm(data,dimensions=(32,32)):
             packets.append((pending+piece,kind==6 and not reduced and not (data[payload_start]&16)));pending=b''
     if separate_hidden is not None:packets.append((pending,separate_hidden))
     header=ebml('1a45dfa3',ebml('4282',b'webm'))
-    track=ebml('d7',b'\x01')+ebml('83',b'\x01')+ebml('86',b'V_AV1')+ebml('63a2',bytes([0x81,0,0,0])+seq)
+    track=ebml('d7',b'\x01')+ebml('83',b'\x01')+ebml('86',b'V_AV1')+ebml('63a2',configuration(seq))
     track+=ebml('23e383',(20000000).to_bytes(4,'big'))+ebml('e0',ebml('b0',dimensions[0].to_bytes(max(1,(dimensions[0].bit_length()+7)//8),'big'))+ebml('ba',dimensions[1].to_bytes(max(1,(dimensions[1].bit_length()+7)//8),'big')))
     cluster=ebml('e7',b'\x00')
     for i,(packet,hidden_frame) in enumerate(packets):cluster+=ebml('a3',b'\x81'+(i*20).to_bytes(2,'big')+bytes([(128 if i==0 else 0)|(8 if hidden_frame else 0)])+packet)

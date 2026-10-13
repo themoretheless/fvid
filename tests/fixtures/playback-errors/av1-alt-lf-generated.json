@@ -1171,7 +1171,7 @@
       },
       "refmode": false,
       "webm": "av1-alt-lf-mixed-refmode0.webm",
-      "webm_sha256": "fa1e51e6299e9099406ed59216d2fce1623cbebd73cbe18f3c5784f0f0f0c7a1"
+      "webm_sha256": "4f85d89952927c95df01246a13ad9afeba4ea740f8d7ef513b25e689224b83eb"
     },
     {
       "file": "av1-alt-lf-mixed-refmode1.obu",
@@ -1192,7 +1192,7 @@
       },
       "refmode": true,
       "webm": "av1-alt-lf-mixed-refmode1.webm",
-      "webm_sha256": "9520e180d4c3d7895835f143c57ec26865961c83a5b5b8f1c96e59532a1b4b60"
+      "webm_sha256": "5a1efebc04d660f120314009a6040724fc870b15fb1940772fe8dc52f4f2d43d"
     },
     {
       "file": "av1-alt-lf-vertical-zero-refmode0.obu",
@@ -1210,7 +1210,7 @@
       },
       "refmode": false,
       "webm": "av1-alt-lf-vertical-zero-refmode0.webm",
-      "webm_sha256": "4253bda453b1b2ab450877d17b452de1596c235cb07e51ee2ce31d51ae8ca38a"
+      "webm_sha256": "1244b44b8be678d597c9922bc5685075fcb29bfd3b7c859b91ac6676bea45233"
     },
     {
       "file": "av1-alt-lf-vertical-zero-refmode1.obu",
@@ -1228,7 +1228,7 @@
       },
       "refmode": true,
       "webm": "av1-alt-lf-vertical-zero-refmode1.webm",
-      "webm_sha256": "f5ebaf7732445ce3946d52b7430071fe47dbbdc71a85033ba0034583702073ae"
+      "webm_sha256": "7a86d97b8c3f748195fb493015b7a157dc9db24b8c7ca70358718187cec02faa"
     },
     {
       "file": "av1-alt-lf-chroma-zero-refmode0.obu",
@@ -1247,7 +1247,7 @@
       },
       "refmode": false,
       "webm": "av1-alt-lf-chroma-zero-refmode0.webm",
-      "webm_sha256": "964d4f2053e1ea8c4af6b688eb1abbb5cc681843bb61a95a4d6731911f8e3ecc"
+      "webm_sha256": "00a04b41ad324a69a44067c69d62fa8526bed07a8f91f9fe0cb58dcc452a5d4c"
     },
     {
       "file": "av1-alt-lf-chroma-zero-refmode1.obu",
@@ -1266,7 +1266,7 @@
       },
       "refmode": true,
       "webm": "av1-alt-lf-chroma-zero-refmode1.webm",
-      "webm_sha256": "eebba4b783cf4a3581290bff90e31690b046e9721bd75c89ddcab5ac312aa68b"
+      "webm_sha256": "d987512b0f172a8c9ca8e4a7d16cebe49af00c2646d63ee4b19c85daff6d5b23"
     },
     {
       "file": "av1-alt-lf-all-zero-refmode0.obu",
@@ -1287,7 +1287,7 @@
       },
       "refmode": false,
       "webm": "av1-alt-lf-all-zero-refmode0.webm",
-      "webm_sha256": "dc6d2e8af5701bcafff2f9e0a230596d3c5b1d7cc4458b59e2070b998461e728"
+      "webm_sha256": "6ce3e0e91fcfd3b47e1cb139963741ccc6397b3560f5d9d5f599e4594ed8550b"
     },
     {
       "file": "av1-alt-lf-all-zero-refmode1.obu",
@@ -1308,7 +1308,7 @@
       },
       "refmode": true,
       "webm": "av1-alt-lf-all-zero-refmode1.webm",
-      "webm_sha256": "cbdde7b8d1ae8725915b0af9034f2e751dfa8ff1ab5c07298c90f3409720fe87"
+      "webm_sha256": "2afb5dff194fba06a15506f77adbcf6d517e8c11dad80492813e822c3bcb0e8c"
     },
     {
       "file": "av1-alt-lf-shift-cross-refmode0.obu",
@@ -1329,7 +1329,7 @@
       },
       "refmode": false,
       "webm": "av1-alt-lf-shift-cross-refmode0.webm",
-      "webm_sha256": "e9a186e351966454e236b0b018e0ef6e3cc5dcc1ffe0fad65ff44b80593f07be"
+      "webm_sha256": "93373649cd67eda2e03bc861773d235e8256e52fed17094061076fc42b7cfdd3"
     },
     {
       "file": "av1-alt-lf-shift-cross-refmode1.obu",
@@ -1350,7 +1350,7 @@
       },
       "refmode": true,
       "webm": "av1-alt-lf-shift-cross-refmode1.webm",
-      "webm_sha256": "deb6322a41e2d78df72402f5941f2b1c31d892fbe5278456f7121984ad0c48b1"
+      "webm_sha256": "fa9355926edf089ffdb80e8fa22a006551c95bdc637515859db96e770bf89b09"
     }
   ]
 }

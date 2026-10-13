@@ -8,7 +8,7 @@
       "slot": 0,
       "primary": 0,
       "webm": "av1-seg-inherit-empty-slot0-primary0.webm",
-      "webm_sha256": "322e507b7dbdece109f6535a20dc8e9ba8930f1b7641e09509625b179fcaa89f"
+      "webm_sha256": "0da15468220652d5e542e7d0d76def988e1a4c99297b5f807c66fd9eafb17076"
     },
     {
       "file": "av1-seg-inherit-empty-slot0-primary1.obu",
@@ -58,7 +58,7 @@
       "slot": 0,
       "primary": 6,
       "webm": "av1-seg-inherit-empty-slot0-primary6.webm",
-      "webm_sha256": "b8cb1ac1d202b2078b7cf33163a1c62a8f4bea4c7c8f195e6d4b253cb6205eb8"
+      "webm_sha256": "c58599c9828c30184f5de3bd80c5c99f8e388ec5ceddc0d07f3a6c6f332cad1f"
     },
     {
       "file": "av1-seg-inherit-empty-slot1-primary0.obu",
@@ -404,7 +404,7 @@
       "slot": 7,
       "primary": 0,
       "webm": "av1-seg-inherit-empty-slot7-primary0.webm",
-      "webm_sha256": "2cf6df7f85be1b0064aed2059231a0a8f6d8bb898741a6df91814198af2954ba"
+      "webm_sha256": "d935e8f47994e42e15b35b2cf9721c796386c5dbc3479874e53ac300949bc96f"
     },
     {
       "file": "av1-seg-inherit-empty-slot7-primary1.obu",
@@ -454,7 +454,7 @@
       "slot": 7,
       "primary": 6,
       "webm": "av1-seg-inherit-empty-slot7-primary6.webm",
-      "webm_sha256": "c070f9d097b6445c5409d66004d0b4e15a5642cd2a3987e9e27093bde398dbbc"
+      "webm_sha256": "21b85904e741adad86756fee5944b33a265ba92c713c1288f33d8295aa896660"
     },
     {
       "file": "av1-seg-inherit-unused-negative-slot0-primary0.obu",
@@ -464,7 +464,7 @@
       "slot": 0,
       "primary": 0,
       "webm": "av1-seg-inherit-unused-negative-slot0-primary0.webm",
-      "webm_sha256": "7c47886341667dae98cf606042b1a721a8265444b2bdfa638ec3412e2816641c"
+      "webm_sha256": "f372afcf5e4ca453980c336c63a0399c4fc8ca0c4a37f2ffdf86fac258ea18da"
     },
     {
       "file": "av1-seg-inherit-unused-negative-slot0-primary1.obu",
@@ -514,7 +514,7 @@
       "slot": 0,
       "primary": 6,
       "webm": "av1-seg-inherit-unused-negative-slot0-primary6.webm",
-      "webm_sha256": "9073e65d56a3c7d4bfb242fb854c9e3728d73ed3eac6004fa28ed929d2db77b4"
+      "webm_sha256": "97bd1f674e78d86711398b65b705ed3e315e1c47c32881376a17d890ea654630"
     },
     {
       "file": "av1-seg-inherit-unused-negative-slot1-primary0.obu",
@@ -860,7 +860,7 @@
       "slot": 7,
       "primary": 0,
       "webm": "av1-seg-inherit-unused-negative-slot7-primary0.webm",
-      "webm_sha256": "ae17a86a2f30728634a8350cfa4cf83eaa580efe5e2c6a6f15220cecb0f75f14"
+      "webm_sha256": "f7996d3fec92b43126ea624f15c708d093c626648b8b501f2c88d3b585e88d99"
     },
     {
       "file": "av1-seg-inherit-unused-negative-slot7-primary1.obu",
@@ -910,7 +910,7 @@
       "slot": 7,
       "primary": 6,
       "webm": "av1-seg-inherit-unused-negative-slot7-primary6.webm",
-      "webm_sha256": "f00b36e8062763dbbd1fbb86fe7705bb3c133d5b44e9fd249cd0f1a9e72cf617"
+      "webm_sha256": "fe668a59fbc788d1dd070404740eead387928b9a5f0817c8690cb3d61b79d39c"
     },
     {
       "file": "av1-seg-inherit-unused-positive-slot0-primary0.obu",
@@ -920,7 +920,7 @@
       "slot": 0,
       "primary": 0,
       "webm": "av1-seg-inherit-unused-positive-slot0-primary0.webm",
-      "webm_sha256": "7b794d92a9da362991807ec130347a951cbcdfa4a8da0e44a5aae005ba84cdff"
+      "webm_sha256": "cf489767c0415e91aa1e36af72ef90da00d1ef85f10397312c8f15f87b72bb43"
     },
     {
       "file": "av1-seg-inherit-unused-positive-slot0-primary1.obu",
@@ -970,7 +970,7 @@
       "slot": 0,
       "primary": 6,
       "webm": "av1-seg-inherit-unused-positive-slot0-primary6.webm",
-      "webm_sha256": "0121835fa0587619832a54ea98b6ab45ae3497ebd4a4b840453370dfc5731dd7"
+      "webm_sha256": "14b2f207e255487dbbf59cc77a6cf75e6bd37746b4432f0983e7a90d6ffc4d09"
     },
     {
       "file": "av1-seg-inherit-unused-positive-slot1-primary0.obu",
@@ -1316,7 +1316,7 @@
       "slot": 7,
       "primary": 0,
       "webm": "av1-seg-inherit-unused-positive-slot7-primary0.webm",
-      "webm_sha256": "09c340748b90dab1e5c6d5a8cbdd825065a2387d841ac8f57347cbe1f7aa2821"
+      "webm_sha256": "69a30379ee6f53f1429ab637bad2d8daf21c2327433ce7ff21cac0d56c553200"
     },
     {
       "file": "av1-seg-inherit-unused-positive-slot7-primary1.obu",
@@ -1366,7 +1366,7 @@
       "slot": 7,
       "primary": 6,
       "webm": "av1-seg-inherit-unused-positive-slot7-primary6.webm",
-      "webm_sha256": "1eaacb137dcf0a09d3cc8d50b80f3528edd7b8e3bdfb8f006f245cc3c397598f"
+      "webm_sha256": "8ced60c2b9e9263e230fba978d9a0e69ce62df3e4807fb1a66d08697fb668b1b"
     },
     {
       "file": "av1-seg-inherit-active-zero-slot0-primary0.obu",
@@ -1376,7 +1376,7 @@
       "slot": 0,
       "primary": 0,
       "webm": "av1-seg-inherit-active-zero-slot0-primary0.webm",
-      "webm_sha256": "655331c3c04967e2ddbe056ef2f0d7de13927c7506be32b318968b850cfad6b3"
+      "webm_sha256": "95fe854bbc075b6ebed887df5b16a35655c488e622fc036fc399d90c8c455735"
     },
     {
       "file": "av1-seg-inherit-active-zero-slot0-primary1.obu",
@@ -1426,7 +1426,7 @@
       "slot": 0,
       "primary": 6,
       "webm": "av1-seg-inherit-active-zero-slot0-primary6.webm",
-      "webm_sha256": "f9d668347b517e512486ebb6f2c78753248d0f16933b7c310137e3631ac89d8f"
+      "webm_sha256": "914255debfb04ce73ec04b7fff1883aecc9a9783f348013af708ab1d5fc58b55"
     },
     {
       "file": "av1-seg-inherit-active-zero-slot1-primary0.obu",
@@ -1772,7 +1772,7 @@
       "slot": 7,
       "primary": 0,
       "webm": "av1-seg-inherit-active-zero-slot7-primary0.webm",
-      "webm_sha256": "07d1ea10395a2427dad7a49987cfb492deb4504d3c49fe58492041cfbdeaae06"
+      "webm_sha256": "a6688a5c2bb292b789109f00d8e7a5d58aefe56bd32a122295a71899ea8b6585"
     },
     {
       "file": "av1-seg-inherit-active-zero-slot7-primary1.obu",
@@ -1822,7 +1822,7 @@
       "slot": 7,
       "primary": 6,
       "webm": "av1-seg-inherit-active-zero-slot7-primary6.webm",
-      "webm_sha256": "eed6dbaeee26b7af787787eb6d938c094be1e88644ef2c3e5120c0ab658f9621"
+      "webm_sha256": "4c56473eb2333080e21d62ee5349557c344ee8101e519168b22923b053627b0c"
     }
   ],
   "refusals": [

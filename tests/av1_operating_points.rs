@@ -84,7 +84,11 @@ fn owned_temporal_operating_points_pixels_selection_configuration_reset_and_seek
     assert_eq!(starts.len(), 8);
     starts.push(data.len());
     let seq_end = seq.payload.as_ptr() as usize - data.as_ptr() as usize + seq.payload.len();
-    let mut config = vec![0x81, 0, 0, 0];
+    let fields = fvid::codec::av1_sequence::Sequence::parse(seq.payload)
+        .unwrap()
+        .codec_configuration_fields()
+        .unwrap();
+    let mut config = vec![0x81, fields[0], fields[1], 0];
     // The first delimiter is two bytes and the codec config stores the sequence OBU.
     assert_eq!(data[..2], [0x12, 0]);
     config.extend_from_slice(&data[2..seq_end]);

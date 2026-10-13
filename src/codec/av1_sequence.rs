@@ -152,6 +152,32 @@ fn color(b: &mut BitReader<'_>, profile: u8) -> Result<Color> {
     })
 }
 impl Sequence {
+    /// The two av1C summary bytes describe operating point zero, even when
+    /// playback selects a different operating point.
+    pub fn codec_configuration_fields(&self) -> Result<[u8; 2]> {
+        let point = self
+            .operating_points
+            .first()
+            .ok_or_else(|| invalid("AV1 configuration requires operating point zero"))?;
+        if self.profile > 2
+            || point.level > 31
+            || !matches!(self.color.depth, 8 | 10 | 12)
+            || self.color.chroma_position > 3
+        {
+            return Err(invalid("invalid AV1 configuration summary fields"));
+        }
+        Ok([
+            (self.profile << 5) | point.level,
+            (u8::from(point.tier) << 7)
+                | (u8::from(self.color.depth > 8) << 6)
+                | (u8::from(self.color.depth == 12) << 5)
+                | (u8::from(self.color.monochrome) << 4)
+                | (u8::from(self.color.subsampling[0]) << 3)
+                | (u8::from(self.color.subsampling[1]) << 2)
+                | self.color.chroma_position,
+        ])
+    }
+
     pub fn parse(payload: &[u8]) -> Result<Self> {
         let b = &mut BitReader::new(payload);
         let profile = b.read(3)? as u8;
@@ -359,6 +385,31 @@ mod tests {
             mutated[i] ^= 0xff;
             let _ = Sequence::parse(&mutated);
         }
+    }
+    #[test]
+    fn configuration_summary_uses_operating_point_zero_and_all_color_fields() {
+        let header = Obus::new(include_bytes!("../../tests/fixtures/av1/sequence.obu"))
+            .map(Result::unwrap)
+            .find(|o| o.kind == 1)
+            .unwrap();
+        let mut sequence = Sequence::parse(header.payload).unwrap();
+        let original = sequence.codec_configuration_fields().unwrap();
+        assert_eq!(original[1], 0x0c);
+        let mut other = sequence.operating_points[0].clone();
+        other.level = 23;
+        other.tier = true;
+        sequence.operating_points.push(other);
+        assert_eq!(sequence.codec_configuration_fields().unwrap(), original);
+        sequence.profile = 2;
+        sequence.operating_points[0].level = 17;
+        sequence.operating_points[0].tier = true;
+        sequence.color.depth = 12;
+        sequence.color.monochrome = true;
+        sequence.color.subsampling = [true, false];
+        sequence.color.chroma_position = 2;
+        assert_eq!(sequence.codec_configuration_fields().unwrap(), [0x51, 0xfa]);
+        sequence.operating_points.clear();
+        assert!(sequence.codec_configuration_fields().is_err());
     }
     #[test]
     fn uvlc_saturates_at_32_zero_bits() {

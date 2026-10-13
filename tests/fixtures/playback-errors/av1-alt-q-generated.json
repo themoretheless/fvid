@@ -9,7 +9,7 @@
       "base": 1,
       "delta": -255,
       "webm": "av1-alt-q-target0-base1-delta-255.webm",
-      "webm_sha256": "846e5dede3d44b9011163b5342785e9a749d3c0b3d3fd5a9612953a51068d29b"
+      "webm_sha256": "90b9222ae4846cd846a53cc48df4853a4d1146d36cc0446e23daa4b2cbe55b10"
     },
     {
       "file": "av1-alt-q-target0-base4-delta-255.obu",
@@ -56,7 +56,7 @@
       "base": 255,
       "delta": -255,
       "webm": "av1-alt-q-target0-base255-delta-255.webm",
-      "webm_sha256": "0a0f0afc9d1419ce862d2a615e017ad8fb3aac42388db6dd01dfee07f224cb07"
+      "webm_sha256": "9653345c9fbce78a165fb35cbb2e119bc6ed86fe65da57ae9276b9cb2cb33346"
     },
     {
       "file": "av1-alt-q-target64-base1-delta63.obu",
@@ -67,7 +67,7 @@
       "base": 1,
       "delta": 63,
       "webm": "av1-alt-q-target64-base1-delta63.webm",
-      "webm_sha256": "90d8142702806a432d53c63546ff32ab910b9d84d6ac23c1e0fcc74cf53299e1"
+      "webm_sha256": "c7d9df6a0af51bd758262fab3b0f1cfb832134aed764d615974d813c08cbeca2"
     },
     {
       "file": "av1-alt-q-target64-base8-delta56.obu",
@@ -177,7 +177,7 @@
       "base": 255,
       "delta": -191,
       "webm": "av1-alt-q-target64-base255-delta-191.webm",
-      "webm_sha256": "cd3c04de9c991b0b6120ad4c9e6e95e64b58f37f612834d7a77f504091a2bfe9"
+      "webm_sha256": "550dda112a936beefba4a1574a479e46613747eba411a2c3007d3bf47800db16"
     },
     {
       "file": "av1-alt-q-target255-base1-delta255.obu",
@@ -188,7 +188,7 @@
       "base": 1,
       "delta": 255,
       "webm": "av1-alt-q-target255-base1-delta255.webm",
-      "webm_sha256": "4158f805848fa79fc663a42c49e556825840345ef8f82ccdf2f5fbc3dab35235"
+      "webm_sha256": "9199aac4af623d7c167d5b886bbdac6618b5b10afa523ea947738e5f860ae770"
     },
     {
       "file": "av1-alt-q-target255-base64-delta191.obu",
@@ -235,7 +235,7 @@
       "base": 255,
       "delta": 255,
       "webm": "av1-alt-q-target255-base255-delta255.webm",
-      "webm_sha256": "d54c20d2e288669377ffee0fca71b0b7997efe09fdf99ffb0cd3d8b14f5a1b0b"
+      "webm_sha256": "7a86ecec043da77ebbefbcc5b877059bcf1ce922c77b4ce6bb538ced673e930c"
     }
   ]
 }

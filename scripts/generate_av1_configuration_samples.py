@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Owned AV1 av1C/container regressions. No codec executable or network."""
+"""Owned AV1 av1C/container regressions. No external codec executable or network."""
 import json
 from pathlib import Path
 from generate_av1_separate_frame_samples import mp4
@@ -58,6 +58,13 @@ def main():
         ('version',b'\x82'+prefix[1:]+sequence,'unsupported AV1 codec configuration version'),
         ('repeated-sequence',prefix+sequence+sequence,'repeated AV1 configuration sequence header'),
         ('late-sequence',prefix+b'\x12\x00'+sequence,'AV1 configuration sequence header must be first')]
+    # Toggle every summary field independently; coded sample bytes stay identical.
+    for field, byte, mask in [('profile',1,0x20),('level',1,1),('tier',2,0x80),
+            ('high-bitdepth',2,0x40),('twelve-bit',2,0x20),('monochrome',2,0x10),
+            ('subsampling-x',2,8),('subsampling-y',2,4),('chroma-position',2,1)]:
+        bad = bytearray(prefix); bad[byte] ^= mask
+        cases.append(('mismatch-'+field,bytes(bad)+sequence,
+            'AV1 configuration fields disagree with sequence header'))
     manifest=[]
     for name,record,error in cases:
         file='av1-configuration-'+name+'.mp4'
@@ -68,6 +75,13 @@ def main():
     manifest.append(dict(file='av1-configuration-inband.mp4',error=None))
     (D/'av1-configuration-duplicate-inband.mp4').write_bytes(replace_record(mp4(data,sequence,(128,128)),prefix+sequence))
     manifest.append(dict(file='av1-configuration-duplicate-inband.mp4',error=None))
+    for field, byte, mask in [('profile',1,0x20),('level',1,1),('tier',2,0x80),
+            ('high-bitdepth',2,0x40),('twelve-bit',2,0x20),('monochrome',2,0x10),
+            ('subsampling-x',2,8),('subsampling-y',2,4),('chroma-position',2,1)]:
+        bad = bytearray(prefix); bad[byte] ^= mask
+        file = 'av1-configuration-inband-mismatch-'+field+'.mp4'
+        (D/file).write_bytes(replace_record(mp4(data,sequence,(128,128)),bytes(bad)))
+        manifest.append(dict(file=file,error='AV1 configuration fields disagree with sequence header',inband=True))
     (D/'av1-configuration.json').write_text(json.dumps(dict(seed=seed, width=128,height=128,cases=manifest,
         provenance='Owned separate-frame/tile-group bytes, authored av1C records and MP4 wrapping. No private source, FFmpeg, external codec or network.'),indent=2)+'\n')
 

@@ -14,7 +14,7 @@
       ],
       "mirror": true,
       "webm": "av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.webm",
-      "webm_sha256": "4dab66ed172e2e7027b8738551479b234a59d2be36d94685845014c09c003cb5",
+      "webm_sha256": "608951c0692ff29be0db4de372f904028c7572717b41b06aa691202e0f3a823d",
       "depth": 8,
       "colors": 3,
       "chroma": true,
