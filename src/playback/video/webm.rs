@@ -189,7 +189,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 && let Ok(packet) = demux.read_packet(index) {
                     // The packet is the later of the two statements, so it wins
                     // and the CodecPrivate fills whatever it left out.
-                    let (stated, light) = crate::codec::av1_metadata::signal_from_bytes(&packet);
+                    let (stated, light) = crate::codec::av1_metadata::signal_from_container_sample(&packet);
                     seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
                 }
             seed
@@ -831,7 +831,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     }
                 }
                 VideoDecoder::Av1(d) => {
-                    if let Some(decoded) = d.decode_temporal_unit(&packet)? {
+                    if let Some(decoded) = d.decode_container_sample(&packet)? {
                         visible = Some(Frame {
                             decoded: Picture::Av1(decoded),
                             pts,

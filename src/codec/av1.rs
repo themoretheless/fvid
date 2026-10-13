@@ -15,10 +15,23 @@ pub struct Obu<'a> {
 /// Length-delimited Annex B and RTP aggregation are different framing formats.
 pub struct Obus<'a> {
     remaining: &'a [u8],
+    implicit_final_size: bool,
 }
 impl<'a> Obus<'a> {
     pub fn new(packet: &'a [u8]) -> Self {
-        Self { remaining: packet }
+        Self {
+            remaining: packet,
+            implicit_final_size: false,
+        }
+    }
+    /// MP4/Matroska AV1 sample framing: a size-less OBU fills the remainder of this
+    /// sample. The caller must supply exactly one demuxed sample, not a stream.
+    /// Configuration OBUs still require explicit sizes and use `new`.
+    pub fn from_container_sample(sample: &'a [u8]) -> Self {
+        Self {
+            remaining: sample,
+            implicit_final_size: true,
+        }
     }
 }
 
@@ -40,14 +53,14 @@ fn leb128(bytes: &[u8]) -> Result<(usize, usize)> {
     Err(invalid("unterminated AV1 LEB128"))
 }
 
-fn read_obu(packet: &[u8]) -> Result<(Obu<'_>, &[u8])> {
+fn read_obu(packet: &[u8], implicit_final_size: bool) -> Result<(Obu<'_>, &[u8])> {
     let h = *packet
         .first()
         .ok_or_else(|| invalid("missing AV1 OBU header"))?;
     if h & 0x81 != 0 {
         return Err(invalid("invalid AV1 OBU reserved/forbidden bits"));
     }
-    if h & 2 == 0 {
+    if h & 2 == 0 && !implicit_final_size {
         return Err(invalid("AV1 low-overhead OBU requires a size field"));
     }
     let mut offset = 1;
@@ -64,7 +77,11 @@ fn read_obu(packet: &[u8]) -> Result<(Obu<'_>, &[u8])> {
         spatial_id = (e >> 3) & 3;
         offset += 1;
     }
-    let (length, consumed) = leb128(&packet[offset..])?;
+    let (length, consumed) = if h & 2 != 0 {
+        leb128(&packet[offset..])?
+    } else {
+        (packet.len() - offset, 0)
+    };
     offset += consumed;
     let end = offset
         .checked_add(length)
@@ -93,7 +110,7 @@ impl<'a> Iterator for Obus<'a> {
         if self.remaining.is_empty() {
             return None;
         }
-        match read_obu(self.remaining) {
+        match read_obu(self.remaining, self.implicit_final_size) {
             Ok((obu, tail)) => {
                 self.remaining = tail;
                 Some(Ok(obu))
@@ -140,6 +157,54 @@ mod tests {
         ] {
             let mut obus = Obus::new(packet);
             assert!(obus.next().unwrap().is_err(), "{packet:?}");
+            assert!(obus.next().is_none());
+        }
+    }
+    #[test]
+    fn sample_framing_implicit_tail_is_bounded_by_sample_not_header_patterns() {
+        let packet = [0x12, 0, 0x2c, 0x68, 0x12, 0, 0x32, 0xff];
+        let obus = Obus::from_container_sample(&packet)
+            .collect::<Result<Vec<_>>>()
+            .unwrap();
+        assert_eq!(obus.len(), 2);
+        assert_eq!(
+            (obus[1].kind, obus[1].temporal_id, obus[1].spatial_id),
+            (5, 3, 1)
+        );
+        assert_eq!(obus[1].payload, &packet[4..]);
+        let mut strict = Obus::new(&packet);
+        strict.next().unwrap().unwrap();
+        assert_eq!(
+            strict.next().unwrap().unwrap_err().to_string(),
+            "AV1 low-overhead OBU requires a size field"
+        );
+        assert!(strict.next().is_none());
+        assert!(
+            Obus::from_container_sample(&[0x10])
+                .next()
+                .unwrap()
+                .unwrap()
+                .payload
+                .is_empty()
+        );
+        for end in 0..=packet.len() {
+            let _ = Obus::from_container_sample(&packet[..end]).collect::<Result<Vec<_>>>();
+        }
+    }
+    #[test]
+    fn sample_framing_implicit_tail_keeps_header_and_delimiter_validation() {
+        for (packet, error) in [
+            (
+                &[0x28 | 0x80][..],
+                "invalid AV1 OBU reserved/forbidden bits",
+            ),
+            (&[0x29][..], "invalid AV1 OBU reserved/forbidden bits"),
+            (&[0x2c][..], "truncated AV1 OBU extension"),
+            (&[0x2c, 1][..], "invalid AV1 OBU extension reserved bits"),
+            (&[0x10, 0][..], "AV1 temporal delimiter must be empty"),
+        ] {
+            let mut obus = Obus::from_container_sample(packet);
+            assert_eq!(obus.next().unwrap().unwrap_err().to_string(), error);
             assert!(obus.next().is_none());
         }
     }

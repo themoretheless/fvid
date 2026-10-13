@@ -1,0 +1,84 @@
+{
+  "seed": "av1-separate-tiles-w128-h128-groups2",
+  "cases": [
+    {
+      "file": "av1-implicit-size-tile-group.mp4",
+      "sha256": "85f0b84a2af38e5544e2eb558fd00378398043b7410b8e193004cac8e9b09abe",
+      "last_kind": 4
+    },
+    {
+      "file": "av1-implicit-size-tile-group-extension.mp4",
+      "sha256": "f1cf5cabf88df894cab6e87bae22065ae8951a184279ded1c9eb338b5557fd63",
+      "last_kind": 4
+    },
+    {
+      "file": "av1-implicit-size-padding.mp4",
+      "sha256": "1cf41c4805647f5fa492205b6a99a34626f9438864b729836a291a0d7d341961",
+      "last_kind": 15
+    },
+    {
+      "file": "av1-implicit-size-metadata.mp4",
+      "sha256": "87328dbb44dec85448bf905cbcbd33d19f1b631b9e3e87e7d5c6adb828f2e948",
+      "last_kind": 5
+    },
+    {
+      "file": "av1-implicit-size-invalid-extension-truncated.mp4",
+      "sha256": "d3d73c64bd2c9b5aab7ecadc27d911ec274a47e04544c0aa6ff3a7bb97a5f9d6",
+      "error": "truncated AV1 OBU extension",
+      "configuration": false
+    },
+    {
+      "file": "av1-implicit-size-invalid-extension-reserved.mp4",
+      "sha256": "75ec9d7992240756ef6215a987a7081331d07654e5afe72f01343068756bdd32",
+      "error": "invalid AV1 OBU extension reserved bits",
+      "configuration": false
+    },
+    {
+      "file": "av1-implicit-size-invalid-configuration.mp4",
+      "sha256": "b46c8ab243ea1d304e995a7a9e72462b3cc997ac8abe22c4b58912e2b8d47e41",
+      "error": "AV1 low-overhead OBU requires a size field",
+      "configuration": true
+    }
+  ],
+  "webm_cases": [
+    {
+      "file": "av1-implicit-size-tile-group.webm",
+      "sha256": "c433236d523e0672cac36467a768332df3c1120baa3014cbe5beb47c931ac803",
+      "last_kind": 4
+    },
+    {
+      "file": "av1-implicit-size-tile-group-extension.webm",
+      "sha256": "412066efe7edcb9a84a1957f51d373d6f4a64bb62f28d94de01419ff415ae9cf",
+      "last_kind": 4
+    },
+    {
+      "file": "av1-implicit-size-padding.webm",
+      "sha256": "9d802958c9243ae3678da47b8161d92c896275bdc2a4bf48ed6d94a0bfc88e3b",
+      "last_kind": 15
+    },
+    {
+      "file": "av1-implicit-size-metadata.webm",
+      "sha256": "009938876c34c9918b04af9bfb1f5c6831b2e2b26d87b4e94e8c49d72d2a5418",
+      "last_kind": 5
+    },
+    {
+      "file": "av1-implicit-size-invalid-extension-truncated.webm",
+      "sha256": "aaeca873f57550d830ddb731d606c519c37e097c2bd2d9d1e187519d2ff37444",
+      "error": "truncated AV1 OBU extension",
+      "configuration": false
+    },
+    {
+      "file": "av1-implicit-size-invalid-extension-reserved.webm",
+      "sha256": "4c710040e0d959b8e82af9d44d2fec7aa1d71eac34a73b3d7a7c7bb7f815fe95",
+      "error": "invalid AV1 OBU extension reserved bits",
+      "configuration": false
+    },
+    {
+      "file": "av1-implicit-size-invalid-configuration.webm",
+      "sha256": "cacf50f20709b4e1ebd155fbfaae3a00a8573704d492f0cc3e527628a6dc6e17",
+      "error": "AV1 low-overhead OBU requires a size field",
+      "configuration": true
+    }
+  ],
+  "provenance": "Owned separate-tile stream; only final OBU size framing modified or owned metadata/padding appended. No private media or external codec."
+}

@@ -132,9 +132,17 @@ pub fn hdr_from_packet(packet: &[u8]) -> Result<HdrMetadata> {
 /// they do not fail the open, because the picture route meets the same bytes
 /// later and reports what it makes of them there.
 pub fn signal_from_bytes(bytes: &[u8]) -> (ColourDescription, HdrMetadata) {
+    signal_from_obus(Obus::new(bytes))
+}
+/// Static signal from exactly one demuxed MP4/Matroska sample, including an implicit
+/// final OBU. Codec configuration and raw low-overhead streams use explicit sizes.
+pub fn signal_from_container_sample(bytes: &[u8]) -> (ColourDescription, HdrMetadata) {
+    signal_from_obus(Obus::from_container_sample(bytes))
+}
+fn signal_from_obus(obus: Obus<'_>) -> (ColourDescription, HdrMetadata) {
     let mut colour = None;
     let mut hdr = HdrMetadata::default();
-    for obu in Obus::new(bytes) {
+    for obu in obus {
         let Ok(obu) = obu else { continue };
         if obu.kind == OBU_SEQUENCE_HEADER {
             if colour.is_none() {

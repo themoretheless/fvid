@@ -232,7 +232,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         {
             // The sample is the later statement of the two, so it wins and the
             // configuration record fills whatever it left out.
-            let (stated, light) = av1_metadata::signal_from_bytes(&packet);
+            let (stated, light) = av1_metadata::signal_from_container_sample(&packet);
             seed = (stated.filled_with(seed.0), light.filled_with(seed.1));
         }
         self.open_signal = Some(seed);
@@ -540,7 +540,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 Ok(None)
             }
             Decoder::Av1(d) => {
-                if let Some(decoded) = d.decode_temporal_unit(&self.packet)? {
+                if let Some(decoded) = d.decode_container_sample(&self.packet)? {
                     if decoded.show {
                         let p = &decoded.picture;
                         let colour = crate::playback_native::AvcColour {

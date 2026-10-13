@@ -126,7 +126,7 @@ pub(crate) fn try_decode(
                 }
             }
         } else {
-            let decoded_frames = match av1.decode_packet(&packet) {
+            let decoded_frames = match av1.decode_container_packet(&packet) {
                 Ok(value) => value,
                 Err(fvid_codecs::Error::Unsupported(_)) => return Ok(None),
                 Err(error) => return Err(error.to_string()),

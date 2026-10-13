@@ -2058,3 +2058,20 @@ corpus formerly used zero placeholders. `repair_av1_fixture_configuration.py`
 CodecPrivate and corresponding saved manifest hashes, preserving packet bytes,
 lengths, offsets and pixel oracles. Deliberately malformed configuration fixtures
 are excluded; regenerate those with `generate_av1_configuration_samples.py`.
+
+2026-10-13 AV1 MP4/Matroska implicit final OBU sizes: `av1-implicit-size.json`
+contains owned two-tile-group MP4 and WebM samples whose last tile group omits its size
+field, with and without extension headers. Additional samples end in an implicit
+padding OBU or an owned HDR CLL metadata OBU (1234/567). All four variants in each container reproduced
+`AV1 low-overhead OBU requires a size field` before the fix. Enabled acceptance
+compares saved exact pixels, timestamps, sync seek, rewind, direct decoder reset
+and metadata available at open. The ordinary raw low-overhead API remains strict.
+
+A separate bounded sample iterator/API permits the final OBU to fill the sample
+remainder without copying bytes or guessing subsequent headers inside payloads.
+Malformed extension headers still fail and poison the decoder until reset;
+configOBUs still require explicit sizes. Three saved negative samples in each
+container verify those refusals. WebM playback and the fvid-media stats decoder
+use the same bounded framing. Regenerate explicitly with
+`python3 scripts/generate_av1_implicit_size_samples.py`; no ordinary test invokes
+it, external codecs, FFmpeg or the network.

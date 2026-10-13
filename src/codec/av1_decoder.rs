@@ -178,10 +178,18 @@ impl Decoder {
         Ok(())
     }
     pub fn decode_packet(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
+        self.decode_packet_framed(data, false)
+    }
+    /// Decode all frames in one externally bounded MP4/Matroska sample.
+    /// Its final OBU may omit its size; the caller supplies the exact boundary.
+    pub fn decode_container_packet(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
+        self.decode_packet_framed(data, true)
+    }
+    fn decode_packet_framed(&mut self, data: &[u8], sample_framing: bool) -> Result<Vec<Decoded>> {
         if self.failed {
             return Err(invalid("AV1 decoder requires reset after error"));
         }
-        let result = self.decode_inner(data);
+        let result = self.decode_inner(data, sample_framing);
         if result.is_err() {
             self.failed = true;
         }
@@ -191,10 +199,27 @@ impl Decoder {
     /// spatial layer. Raw `decode_packet` keeps all layers available to callers.
     /// Multiple temporal units or repeated shown layers need separate timestamps.
     pub fn decode_temporal_unit(&mut self, data: &[u8]) -> Result<Option<Decoded>> {
+        self.decode_temporal_unit_framed(data, false)
+    }
+    /// Decode exactly one demuxed MP4/Matroska sample. Its final OBU may omit the
+    /// size field; raw low-overhead packets and codec configuration may not.
+    pub fn decode_container_sample(&mut self, data: &[u8]) -> Result<Option<Decoded>> {
+        self.decode_temporal_unit_framed(data, true)
+    }
+    fn decode_temporal_unit_framed(
+        &mut self,
+        data: &[u8],
+        sample_framing: bool,
+    ) -> Result<Option<Decoded>> {
         let result = (|| {
             let mut frame_seen = false;
             let mut ended = false;
-            for obu in Obus::new(data) {
+            let obus = if sample_framing {
+                Obus::from_container_sample(data)
+            } else {
+                Obus::new(data)
+            };
+            for obu in obus {
                 let obu = obu?;
                 if obu.kind == 2 && frame_seen {
                     ended = true;
@@ -210,7 +235,7 @@ impl Decoder {
             }
             let mut selected: Option<Decoded> = None;
             let mut shown_layers = 0u8;
-            for frame in self.decode_packet(data)? {
+            for frame in self.decode_packet_framed(data, sample_framing)? {
                 if !frame.show {
                     continue;
                 }
@@ -389,9 +414,14 @@ impl Decoder {
         }
         Ok(retained)
     }
-    fn decode_inner(&mut self, data: &[u8]) -> Result<Vec<Decoded>> {
+    fn decode_inner(&mut self, data: &[u8], sample_framing: bool) -> Result<Vec<Decoded>> {
         let mut output = Vec::new();
-        for obu in Obus::new(data) {
+        let obus = if sample_framing {
+            Obus::from_container_sample(data)
+        } else {
+            Obus::new(data)
+        };
+        for obu in obus {
             let obu = obu?;
             // AV1 5.3: drop excluded extended OBUs before inspecting payload or
             // changing pending frames, references, CDFs or metadata. Sequence
