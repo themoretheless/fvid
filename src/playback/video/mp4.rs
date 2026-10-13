@@ -565,26 +565,75 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         let coded_width = p.size[0] as usize;
                         let coded_height = p.size[1] as usize;
                         let crop = [0; 4];
+                        let explicit_geometry = decoded.color.monochrome
+                            || decoded.color.subsampling != [true, true]
+                            || coded_width % 2 != 0
+                            || coded_height % 2 != 0;
+                        if explicit_geometry {
+                            self.decoded_planar = Some(Arc::new(
+                                crate::playback_native::av1_picture(p, &decoded.color, colour)?,
+                            ));
+                            let picture = IntraPicture {
+                                coded_width,
+                                coded_height,
+                                crop,
+                                bit_depth: p.depth,
+                                y: Vec::new(),
+                                cb: Vec::new(),
+                                cr: Vec::new(),
+                            };
+                            return Ok(Some((Arc::new(picture), None)));
+                        }
+                        // AV1 planes carry their own padded stride, which is
+                        // not necessarily the visible width (e.g. 70 -> 72).
+                        let narrow = |i: usize| -> Result<Vec<u16>> {
+                            let plane = &p.planes[i];
+                            let shift = usize::from(i != 0);
+                            let width = coded_width >> shift;
+                            let height = coded_height >> shift;
+                            if width > plane.width
+                                || height > plane.height
+                                || plane.width.checked_mul(plane.height)
+                                    != Some(plane.samples.len())
+                            {
+                                return Err(invalid("invalid AV1 plane storage"));
+                            }
+                            let count = width
+                                .checked_mul(height)
+                                .ok_or_else(|| invalid("AV1 planar size overflow"))?;
+                            let mut samples = Vec::new();
+                            samples
+                                .try_reserve_exact(count)
+                                .map_err(|_| invalid("AV1 planar allocation failed"))?;
+                            for row in 0..height {
+                                samples.extend_from_slice(
+                                    &plane.samples[row * plane.width..row * plane.width + width],
+                                );
+                            }
+                            Ok(samples)
+                        };
                         let picture = IntraPicture {
                             coded_width,
                             coded_height,
                             crop,
                             bit_depth: p.depth,
-                            y: p.planes[0].samples.clone(),
-                            cb: p.planes[1].samples.clone(),
-                            cr: p.planes[2].samples.clone(),
+                            y: narrow(0)?,
+                            cb: narrow(1)?,
+                            cr: narrow(2)?,
                         };
-                        let planes = crate::playback_native::coded_planes_to_planar8(
-                            &picture.y,
-                            &picture.cb,
-                            &picture.cr,
-                            coded_width,
-                            coded_height,
-                            crop,
-                            p.depth,
-                            colour,
-                        );
-                        return Ok(Some((Arc::new(picture), Some(Arc::new(planes)))));
+                        let planes = (p.depth == 8).then(|| {
+                            Arc::new(crate::playback_native::coded_planes_to_planar8(
+                                &picture.y,
+                                &picture.cb,
+                                &picture.cr,
+                                coded_width,
+                                coded_height,
+                                crop,
+                                p.depth,
+                                colour,
+                            ))
+                        });
+                        return Ok(Some((Arc::new(picture), planes)));
                     }
                 }
                 Ok(None)

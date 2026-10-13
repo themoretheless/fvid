@@ -1,0 +1,162 @@
+{
+  "cases": [
+    {
+      "file": "av1-library-plain.mp4",
+      "sha256": "bdd5ef2f030e5cfd7b07ed62f17e60704aeb070a4bc3956bec436df1672a82ec",
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "file": "av1-library-repeat.mp4",
+      "sha256": "249360fdeb62f46812e1ee3da5eb0da55c8d4c08f980be22880020bfe1826c2d",
+      "indices": [
+        2,
+        3,
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "file": "av1-library-leading.mp4",
+      "sha256": "c74400d9e7abbb8a62f4de6cf87e1d744c919ac21ff2fb6503c0ff1c85e40767",
+      "indices": [
+        4,
+        5
+      ]
+    },
+    {
+      "file": "av1-library-disjoint.mp4",
+      "sha256": "8c4377efbe1afddac7561a38a9c5db7a5696f384a55ddac28b562bef64f87bec",
+      "indices": [
+        0,
+        1,
+        6,
+        7
+      ]
+    },
+    {
+      "file": "av1-library-odd10.mp4",
+      "sha256": "c404a3ce508fe7f09b607df8beb0563635ef4fe5a030d023909baaba653926ec",
+      "indices": [
+        0,
+        1
+      ],
+      "width": 70,
+      "height": 70,
+      "depth": 10,
+      "reference": "../av1/odd10.yuv"
+    },
+    {
+      "file": "av1-library-lossless12.mp4",
+      "sha256": "7b2bff52c01f8662bd297f3cfb27b572d7f8efe010212cb26e57c3bfa27df876",
+      "indices": [
+        0,
+        1
+      ],
+      "width": 48,
+      "height": 48,
+      "depth": 12,
+      "reference": "../av1/lossless12.yuv"
+    },
+    {
+      "file": "av1-library-odd-geometry-depth8.mp4",
+      "sha256": "02df7d5865e807f36762dbc4c9b48bf80ca6cc5795eb2ca8feffd246f554d0cb",
+      "indices": [
+        0
+      ],
+      "width": 191,
+      "height": 127,
+      "depth": 8,
+      "reference": "av1-restoration-odd-depth8-colors3-chroma1-layout0-vflip1-q32-orientation0.yuv"
+    },
+    {
+      "file": "av1-library-odd-geometry-depth10.mp4",
+      "sha256": "6017f7af55d0b63636f15292332ee927afe7668d3f0158b035894e95321e1f04",
+      "indices": [
+        0
+      ],
+      "width": 191,
+      "height": 127,
+      "depth": 10,
+      "reference": "av1-restoration-odd-depth10-colors3-chroma1-layout0-vflip1-q32-orientation0.yuv"
+    },
+    {
+      "file": "av1-library-chroma422-depth8.mp4",
+      "sha256": "6e76924aeb7cb711882c9892403e8480840543b524cc650fb2c2372f196925c2",
+      "indices": [
+        0,
+        1
+      ],
+      "width": 64,
+      "height": 48,
+      "depth": 8,
+      "reference": "av1-chroma-layout422-depth8-lossless1.yuv",
+      "subsampling": [
+        1,
+        0
+      ]
+    },
+    {
+      "file": "av1-library-chroma422-depth10.mp4",
+      "sha256": "2daabdebcb0a6e0708f8068cfae3c0fb840b5981ff327eb27d32ee5a303b7def",
+      "indices": [
+        0,
+        1
+      ],
+      "width": 64,
+      "height": 48,
+      "depth": 10,
+      "reference": "av1-chroma-layout422-depth10-lossless1.yuv",
+      "subsampling": [
+        1,
+        0
+      ]
+    },
+    {
+      "file": "av1-library-chroma444-depth8.mp4",
+      "sha256": "c0e3ba74281ef9c9568fea85df07056f8fd2139ea1673583ba3e681b81493a48",
+      "indices": [
+        0,
+        1
+      ],
+      "width": 64,
+      "height": 48,
+      "depth": 8,
+      "reference": "av1-chroma-layout444-depth8-lossless1.yuv",
+      "subsampling": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "av1-library-chroma444-depth12.mp4",
+      "sha256": "2ab65fbc508bd3f20c1a39088b68a0437096a0850debf0cf53817c2ae6c90091",
+      "indices": [
+        0,
+        1
+      ],
+      "width": 64,
+      "height": 48,
+      "depth": 12,
+      "reference": "av1-chroma-layout444-depth12-lossless1.yuv",
+      "subsampling": [
+        0,
+        0
+      ]
+    }
+  ],
+  "width": 64,
+  "height": 48,
+  "reference": "av1-temporal-operating-points-op0.yuv",
+  "provenance": "Owned temporal-SVC sequence/packets and saved independent pixel oracle; authored MP4 edit lists. No private media, FFmpeg, external codec or network."
+}

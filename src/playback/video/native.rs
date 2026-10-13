@@ -16,7 +16,7 @@ use std::{
 #[path = "packed.rs"]
 mod packed;
 pub use packed::PackedPlanar;
-pub(crate) use packed::{hevc_picture, vp9_picture};
+pub(crate) use packed::{av1_picture, hevc_picture, vp9_picture};
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
 

@@ -342,3 +342,80 @@ pub(crate) fn vp9_picture(p: &crate::codec::vp9_picture::Picture, colour: AvcCol
     }
     PackedPlanar::new(GeometryFrame { width, height, subsampling: Some(factors), data }, p.depth, colour)
 }
+
+/// Pack visible AV1 rows with their own strides and explicit chroma geometry.
+/// Monochrome pictures get neutral chroma for the renderer, at the coded depth.
+pub(crate) fn av1_picture(
+    p: &crate::codec::av1_picture::Picture,
+    signal: &crate::codec::av1_sequence::Color,
+    colour: AvcColour,
+) -> Result<PackedPlanar> {
+    if !(8..=16).contains(&p.depth) {
+        return Err(invalid("invalid AV1 planar depth"));
+    }
+    let [width, height] = p.size.map(|n| n as usize);
+    let factors = if signal.monochrome {
+        [2, 2]
+    } else {
+        signal.subsampling.map(|s| 1usize << usize::from(s))
+    };
+    let bytes = if p.depth == 8 { 1 } else { 2 };
+    let chroma = width
+        .div_ceil(factors[0])
+        .checked_mul(height.div_ceil(factors[1]))
+        .ok_or_else(|| invalid("AV1 chroma size overflow"))?;
+    let count = width
+        .checked_mul(height)
+        .and_then(|n| chroma.checked_mul(2).and_then(|c| n.checked_add(c)))
+        .and_then(|n| n.checked_mul(bytes))
+        .ok_or_else(|| invalid("AV1 planar size overflow"))?;
+    let mut data = Vec::new();
+    data.try_reserve_exact(count)
+        .map_err(|_| invalid("AV1 planar allocation failed"))?;
+    for (i, plane) in p.planes.iter().enumerate() {
+        let w = if i == 0 {
+            width
+        } else {
+            width.div_ceil(factors[0])
+        };
+        let h = if i == 0 {
+            height
+        } else {
+            height.div_ceil(factors[1])
+        };
+        let neutral = signal.monochrome && i != 0;
+        if !neutral
+            && (w > plane.width
+                || h > plane.height
+                || plane.width.checked_mul(plane.height) != Some(plane.samples.len()))
+        {
+            return Err(invalid("invalid AV1 plane storage"));
+        }
+        for y in 0..h {
+            for x in 0..w {
+                let sample = if neutral {
+                    1u16 << (p.depth - 1)
+                } else {
+                    plane.samples[y * plane.width + x]
+                };
+                if bytes == 1 {
+                    data.push(
+                        u8::try_from(sample).map_err(|_| invalid("8-bit AV1 sample overflow"))?,
+                    );
+                } else {
+                    data.extend_from_slice(&sample.to_le_bytes());
+                }
+            }
+        }
+    }
+    PackedPlanar::new(
+        GeometryFrame {
+            width,
+            height,
+            subsampling: Some(factors),
+            data,
+        },
+        p.depth,
+        colour,
+    )
+}

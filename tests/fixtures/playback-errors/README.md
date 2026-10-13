@@ -2075,3 +2075,26 @@ container verify those refusals. WebM playback and the fvid-media stats decoder
 use the same bounded framing. Regenerate explicitly with
 `python3 scripts/generate_av1_implicit_size_samples.py`; no ordinary test invokes
 it, external codecs, FFmpeg or the network.
+
+2026-10-13 AV1 media-library MP4 admission: `av1-library.json` wraps the owned
+8-picture temporal-SVC stream into plain/repeated/disjoint/leading-edit MP4
+files, retaining the independent saved oracle. The old media-library decode
+refused the plain MP4 with `owned video decode does not yet support this
+container, codec or transform`. The enabled acceptance checks counts, exact
+presentation ordering/timestamps, negate, framestep, reverse and FFV1 export.
+The shared WebM streaming adapter also accepts bounded implicit final sizes and
+selects the highest displayed spatial layer, matching native playback.
+
+10/12-bit synthetic wrappers retain existing independently decoded oracles.
+The 70x70 AV1 wrapper exposed padded-row aliasing in MP4 playback: byte 140
+(the first byte of row 1) differed from the saved 10-bit reference. Visible rows
+now use each AV1 plane's stride. Additional 191x127 8/10-bit wrappers qualify
+ceil-divided chroma geometry through playback, filters and lossless export.
+Generate explicitly with `python3 scripts/generate_av1_library_samples.py`;
+ordinary tests only read saved fixtures. No private input or external codec is
+used by the generator or tests.
+The same AV1 library acceptance now includes owned 4:2:2 (8/10-bit) and 4:4:4
+(8/12-bit) wrappers, retaining their original saved chroma-plane oracles. Invalid
+configuration and in-band header failures must retain the precise owned error
+and leave a pre-existing export destination unchanged. RGB AV1 streaming export
+remains a separate capability gap, not counted as covered by these YUV cases.

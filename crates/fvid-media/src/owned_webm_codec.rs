@@ -113,16 +113,10 @@ impl Decoder {
                 }
             }
             Kind::Av1(decoder) => {
-                for decoded in decoder.decode_packet(packet).map_err(core_error)? {
-                    if !decoded.show {
-                        continue;
-                    }
-                    if shown.is_some() {
-                        return Err(
-                            "multiple visible frames in one WebM packet need distinct timestamps"
-                                .into(),
-                        );
-                    }
+                if let Some(decoded) = decoder
+                    .decode_container_sample(packet)
+                    .map_err(core_error)?
+                {
                     if decoded.color.matrix == 0 && !decoded.color.monochrome {
                         return Err(format!("{UNSUPPORTED_PREFIX}RGB AV1 streaming transforms"));
                     }
@@ -138,24 +132,28 @@ impl Decoder {
                         decoded.color.transfer,
                     ));
                     self.mono = Some(decoded.color.monochrome);
-                    let picture = &decoded.picture;
-                    let planes = picture
-                        .planes
-                        .each_ref()
-                        .map(|plane| (plane.width, plane.height, plane.samples.as_slice()));
-                    shown = Some(pack(
-                        picture.size,
-                        picture.depth,
-                        planes,
-                        decoded.color.subsampling,
-                        decoded.color.monochrome,
-                    )?);
+                    shown = Some(pack_av1(&decoded)?);
                 }
             }
         }
         Ok(shown)
     }
 }
+pub(crate) fn pack_av1(decoded: &av1_decoder::Decoded) -> Result<Decoded> {
+    let picture = &decoded.picture;
+    let planes = picture
+        .planes
+        .each_ref()
+        .map(|plane| (plane.width, plane.height, plane.samples.as_slice()));
+    pack(
+        picture.size,
+        picture.depth,
+        planes,
+        decoded.color.subsampling,
+        decoded.color.monochrome,
+    )
+}
+
 fn pack(
     size: [u32; 2],
     depth: u8,

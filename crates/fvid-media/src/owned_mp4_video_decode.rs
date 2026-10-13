@@ -1,7 +1,9 @@
-//! Owned AVC/HEVC packet decoding with shared MP4 presentation edits.
+//! Owned AVC/HEVC/AV1 packet decoding with shared MP4 presentation edits.
 use fvid_codecs::{
     Error,
-    codec::{avc_decoder::AvcDecoder, hevc_decoder::HevcDecoder},
+    codec::{
+        av1_decoder::Decoder as Av1Decoder, avc_decoder::AvcDecoder, hevc_decoder::HevcDecoder,
+    },
 };
 use fvid_media_info::{DecodeStats, DecodeTransform};
 use std::{fs::File, io::BufReader, path::Path};
@@ -46,7 +48,11 @@ pub(crate) fn decode_presented(
         return Ok(None);
     };
     let track = &reader.tracks()[index];
-    if !matches!(&track.codec, b"avc1" | b"avc3" | b"hvc1" | b"hev1") || track.rotation != 0 {
+    if !matches!(
+        &track.codec,
+        b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"av01"
+    ) || track.rotation != 0
+    {
         return Ok(None);
     }
     let edits = match crate::owned_video_timeline::map_edits(
@@ -75,6 +81,7 @@ pub(crate) fn decode_presented(
     let configuration = track.configuration.clone();
     let samples = track.samples.len();
     let avc = matches!(&track.codec, b"avc1" | b"avc3");
+    let av1 = track.codec == *b"av01";
     let mut stats = DecodeStats {
         backend: "owned MP4 compressed video decode",
         video_frames: 0,
@@ -166,6 +173,7 @@ pub(crate) fn decode_presented(
                     depth: picture.bit_depth,
                     sub: [true, true],
                     mono: false,
+                    rgb: false,
                 });
                 spool_count += 1;
             }
@@ -173,6 +181,88 @@ pub(crate) fn decode_presented(
         if decoder.has_pending_field() {
             return Err("unpaired AVC field at end of MP4".into());
         }
+    } else if av1 {
+        if configuration.is_empty() {
+            return Err("MP4 AV1 configuration is absent".into());
+        }
+        let mut decoder = match Av1Decoder::from_configuration(&configuration, usize::MAX) {
+            Ok(value) => value,
+            Err(Error::Unsupported(_)) => return Ok(None),
+            Err(error) => return Err(error.to_string()),
+        };
+        for sample in 0..samples {
+            check_options(options, sample)?;
+            let timing = reader.tracks()[index]
+                .samples
+                .get(sample)
+                .ok_or("missing MP4 sample timing")?;
+            reader
+                .read_packet(index, sample, &mut packet)
+                .map_err(|e| e.to_string())?;
+            let decoded = match decoder.decode_container_sample(&packet) {
+                Ok(value) => value,
+                Err(Error::Unsupported(_)) => return Ok(None),
+                Err(error) => return Err(error.to_string()),
+            };
+            let Some(decoded) = decoded else { continue };
+            let picture = &decoded.picture;
+            let rgb = decoded.color.matrix == 0 && !decoded.color.monochrome;
+            if let Some(spool) = spool.as_mut() {
+                // The existing FFV1 planar bridge does not carry RGB planes.
+                if rgb {
+                    return Ok(None);
+                }
+                let current = (
+                    picture.size,
+                    picture.depth,
+                    decoded.color.subsampling,
+                    decoded.color.monochrome,
+                );
+                if storage_format.is_some_and(|previous| previous != current) {
+                    return Ok(None);
+                }
+                storage_format = Some(current);
+                pixels = crate::owned_webm_codec::pack_av1(&decoded)?.frame.data;
+                spool.push(&pixels, 0, 0)?;
+            }
+            // AV1 code 2 is unspecified: an explicit nclx signal fills it.
+            let named = |sequence: u8, container: u8| {
+                if sequence == 2 && container != 0 {
+                    container
+                } else {
+                    sequence
+                }
+            };
+            let colour = crate::owned_matroska::ColourDescription {
+                primaries: named(decoded.color.primaries, container_colour.primaries),
+                transfer: named(decoded.color.transfer, container_colour.transfer),
+                matrix: named(decoded.color.matrix, container_colour.matrix),
+                full_range: decoded.color.full_range,
+            };
+            let mut hdr = crate::owned_webm_codec::hdr_metadata(decoder.hdr());
+            hdr.mastering = hdr.mastering.or(container_hdr.mastering);
+            if hdr.light.max_cll == 0.0 {
+                hdr.light.max_cll = container_hdr.light.max_cll;
+            }
+            if hdr.light.max_fall == 0.0 {
+                hdr.light.max_fall = container_hdr.light.max_fall;
+            }
+            frames.push(FrameMetadata {
+                colour,
+                hdr,
+                slot: spool_count,
+                pts: timing.pts,
+                duration: i64::from(timing.duration),
+                sample,
+                size: picture.size,
+                depth: picture.depth,
+                sub: decoded.color.subsampling,
+                mono: decoded.color.monochrome,
+                rgb,
+            });
+            spool_count += 1;
+        }
+        decoder.finish().map_err(|error| error.to_string())?;
     } else {
         let mut decoder = match HevcDecoder::from_configuration(&configuration, usize::MAX) {
             Ok(value) => value,
@@ -254,6 +344,7 @@ pub(crate) fn decode_presented(
                     depth: output_depth,
                     sub,
                     mono: chroma == 0,
+                    rgb: false,
                 });
                 spool_count += 1;
             }
@@ -340,11 +431,12 @@ pub(crate) struct FrameMetadata {
     pub depth: u8,
     pub sub: [bool; 2],
     pub mono: bool,
+    rgb: bool,
 }
 impl FrameMetadata {
     fn account(&self, stats: &mut DecodeStats) -> Result<()> {
         crate::owned_compressed_video::account(
-            stats, self.size, self.depth, self.sub, self.mono, false,
+            stats, self.size, self.depth, self.sub, self.mono, self.rgb,
         )
     }
 }
@@ -400,6 +492,7 @@ mod tests {
             depth: 8,
             sub: [true, true],
             mono: false,
+            rgb: false,
         }
     }
     #[test]
