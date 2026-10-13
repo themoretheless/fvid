@@ -1995,6 +1995,23 @@ chroma, packed neutral chroma, rewind and common/native seek. Region-truncated
 retains complete headers but only one CABAC byte for the enhancement P picture:
 failed prediction must preserve POC, parameter bindings and queued output and
 allow a successful complete retry. Ordinary tests generate nothing and require
-neither FFmpeg nor network. Coded acceptance here is 8-bit; the standalone
-resampling atlas additionally covers 10/16-bit. Monochrome/chroma conversion
-remains explicitly unsupported and is not qualified by these fixtures.
+neither FFmpeg nor network. Coded acceptance covers an 8-bit base and 8/10-bit
+enhancement; the standalone resampling atlas additionally covers 16-bit.
+Scalable Monochrome profiles require matching chroma_format_idc for the layers
+(H.265 V11, H.11.1.2); mismatches now produce a profile-conformance refusal.
+
+
+`hevc-layered-mono-inter-depth10-{identity,region}.mp4` qualify coded bit-depth
+scalability from an 8-bit base to a 10-bit enhancement. The dependent SPS inherits
+its representation from VPS and keeps the owned 8-bit PCM sample syntax. Saved
+16-bit little-endian oracles include PCM expansion and direct 10-bit rational FIR
+rounding. Tests compare every sample, validate effective SPS depths and enabled
+inter-layer prediction without temporal RPS, and check packed neutral chroma,
+rewind and common/native seek. Depth10-region-truncated retains complete headers
+but one CABAC byte: failure must preserve parameter bindings, POC and queued
+output, followed by successful exact-pixel retry. Existing 8-bit files remain
+byte-identical. Two Y4M cases separately require Invalid for mono/chroma mixing
+under the scalable profile constraint; these are conformance refusals rather
+than acceptance for a conversion algorithm. The sample atlas now has 73 cases.
+
+Normative profile constraint: [ITU-T H.265 V11 (01/2026), H.11.1.2](https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202601-I%21%21PDF-E&lang=e&type=items).

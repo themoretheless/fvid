@@ -89,13 +89,38 @@ def main():
     width, height = meta['dimensions']
     pixels = (D/(seed+'.yuv')).read_bytes()
     assert pixels[:width*height] == pixels[width*height:2*width*height]
-    for name, pps in [('region', region_pps), ('identity', identity_pps)]:
+    for name, pps in [('region', region_pps), ('identity', identity_pps), ('depth10-region', region_pps), ('depth10-identity', identity_pps)]:
+        target_depth = 10 if name.startswith('depth10') else 8
+        is_region = name.endswith('region')
         controls = [raw_vps, params[33][0], params[34][0], pps]
+        if target_depth == 10:
+            # A dependent enhancement SPS inherits its 10-bit representation
+            # from VPS; keep the owned 8-bit PCM depth and entropy suffix.
+            high = json.loads(subprocess.check_output([helper, str(D/'hevc-pcm-mono-full10-rext10.mp4')], cwd=ROOT))
+            high_params = configuration(bytes(high['configuration']))
+            high_ptl = bits(unescape(high_params[33][0][2:]))[8:104]
+            value = bits(unescape(params[33][0][2:]))
+            r = Reader(value,104); r.ue(); assert r.ue() == 0
+            r.ue(); r.ue()
+            if r.read(1):
+                for _ in range(4): r.ue()
+            r.ue(); r.ue()
+            poc_start = r.at; r.ue(); poc_end = r.at
+            r.read(1); r.ue(); r.ue(); r.ue()
+            suffix = r.at
+            body = '0000111'+ue(1)+'0'+value[poc_start:poc_end]+value[suffix:value.rfind('1')+1]
+            high_sps = ((33<<9)|(3<<3)|1).to_bytes(2,'big')+escape(packed(body))
+            high_vps,_,_ = vps(dict(fmt,depth=[10,10]),base_format=fmt,output_highest=True)
+            value = bits(unescape(high_vps[2:]))
+            high_vps = high_vps[:2]+escape(packed(value[:32]+high_ptl+value[128:]))
+            high_pps = parameter_ids(pps,0,[1,1])
+            controls = [high_vps,params[33][0],high_sps,params[34][0],high_pps]
+
         stream = b''.join(b'\0\0\0\1'+n for n in [*controls,*sum(groups,[])])
         prefix = 'hevc-layered-mono-inter-'+name
         (D/(prefix+'.mp4')).write_bytes(mux(stream, meta['depth'], width, height,
             chroma_format=0, chroma_depth=meta['chroma_depth'], access_units=groups, multilayer=True))
-        if name == 'region':
+        if is_region:
             bad_groups = [g[:] for g in groups]
             last = bad_groups[-1][-1]
             source_header = meta['packets'][1][-1]
@@ -108,13 +133,19 @@ def main():
                 chroma_format=0, chroma_depth=meta['chroma_depth'], access_units=bad_groups, multilayer=True))
 
         case = dict(reference_size=[width,height], current_size=[width,height],
-            reference_format=0, current_format=0, reference_depth=[8,8], current_depth=[8,8],
-            scaled=[0]*4, region=[2]*4 if name=='region' else [0]*4, phases=None)
+            reference_format=0, current_format=0, reference_depth=[8,8], current_depth=[target_depth,target_depth],
+            scaled=[0]*4, region=[2]*4 if is_region else [0]*4, phases=None)
         expected = oracle(case, [list(pixels[width*height:2*width*height]),[],[]], derive(case))[0]
-        if name == 'region': assert bytes(expected) != pixels[width*height:2*width*height]
-        (D/(prefix+'.yuv')).write_bytes(pixels[:width*height]+bytes(expected))
+        if target_depth == 8:
+            if is_region: assert bytes(expected) != pixels[width*height:2*width*height]
+            saved = pixels[:width*height]+bytes(expected)
+        else:
+            import struct
+            values = [v*4 for v in pixels[:width*height]]+expected
+            saved = struct.pack('<'+'H'*len(values),*values)
+        (D/(prefix+'.yuv')).write_bytes(saved)
         (D/(prefix+'.json')).write_text(json.dumps(dict(seed=seed, region=case['region'],
-            width=width, height=height, frames=2, depth=8,
+            width=width, height=height, frames=2, depth=target_depth,
             provenance='Owned saved PCM/CABAC seed, authored Annex F/H headers and rational luma FIR oracle. No private source, FFmpeg or external codec.'), separators=(',',':'))+'\n')
 
 

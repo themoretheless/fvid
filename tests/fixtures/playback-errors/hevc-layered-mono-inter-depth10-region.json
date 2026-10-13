@@ -1,0 +1,1 @@
+{"seed":"hevc-pcm-mono-reference-rext8","region":[2,2,2,2],"width":64,"height":64,"frames":2,"depth":10,"provenance":"Owned saved PCM/CABAC seed, authored Annex F/H headers and rational luma FIR oracle. No private source, FFmpeg or external codec."}

@@ -135,6 +135,8 @@ def main():
     add('mono-offset',reference_format=0,current_format=0,reference_size=[8,6],current_size=[20,16],scaled=[1,-1,2,1],region=[-1,1,1,-1],current_depth=[10,16])
     for rd,cd in [(8,16),(16,8)]:
         add(f'mono-unused-chroma-{rd}-{cd}',reference_format=0,current_format=0,reference_size=[8,6],current_size=[8,6],reference_depth=[16,rd],current_depth=[16,cd])
+    add('bad-mono-from-chroma',reference_format=1,current_format=0,error='require matching chroma formats')
+    add('bad-chroma-from-mono',reference_format=0,current_format=1,error='require matching chroma formats')
     add('bad-inferred-phase',error='phase exceeds range')
     add('bad-downscale',current_size=[2,2],error='cannot downscale')
     add('bad-depth',reference_depth=[10,10],error='cannot reduce')

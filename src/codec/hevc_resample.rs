@@ -87,7 +87,7 @@ impl Resampling {
             return Err(invalid("HEVC resampling reference depth is invalid"));
         }
         if (current.chroma_format == 0) != (reference.chroma_format == 0) {
-            return Err(crate::unsupported("HEVC monochrome/chroma inter-layer conversion"));
+            return Err(invalid("HEVC scalable monochrome layers require matching chroma formats"));
         }
         let cs = subsampling(current)?;
         let rs = subsampling(reference)?;
