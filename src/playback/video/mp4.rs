@@ -169,7 +169,12 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 work_budget,
             )?)),
             b"vp09" => Decoder::Vp9(Box::new(vp9::Decoder::new(work_budget))),
-            b"av01" => Decoder::Av1(Box::new(av1::Decoder::new(work_budget))),
+            b"av01" => {
+                if track.configuration.is_empty() {
+                    return Err(invalid("MP4 AV1 configuration is absent"));
+                }
+                Decoder::Av1(Box::new(av1::Decoder::from_configuration(&track.configuration, work_budget)?))
+            },
             _ => unreachable!(),
         };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]

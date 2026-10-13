@@ -2015,3 +2015,30 @@ under the scalable profile constraint; these are conformance refusals rather
 than acceptance for a conversion algorithm. The sample atlas now has 73 cases.
 
 Normative profile constraint: [ITU-T H.265 V11 (01/2026), H.11.1.2](https://www.itu.int/rec/dologin_pub.asp?id=T-REC-H.265-202601-I%21%21PDF-E&lang=e&type=items).
+
+### AV1 codec configuration and MP4 initialization
+
+`generate_av1_configuration_samples.py` reuses the original separate-frame /
+tile-group 128x128 seed and wraps unchanged coded payloads in small MP4s.
+Configuration-only sequence cases have an empty sync-sample list, with the
+sequence header in av1C. They specifically reproduced `AV1 frame precedes
+sequence header`: the MP4 source constructed an unseeded decoder and ignored
+the configuration OBUs. The source now initializes and resets the native decoder
+from av1C. In-band and duplicate-inband controls keep ordinary sync samples;
+their repeated sequence is legal across configuration and sample boundaries.
+The records use matching profile/level/colour hints and include nclx colour data.
+
+Acceptance compares every saved Y/Cb/Cr sample, original PTS/duration, direct
+codec decoding, decoder reset and player rewind/seek. Delay-present values 0 and
+15 are structurally accepted. Nonzero reserved bits, missing marker, empty or
+truncated container records, repeated config sequence and a sequence after
+another config OBU are exact refusal cases; unknown versions remain Unsupported.
+The old unchecked-reserved/sequence-order acceptance was reproduced separately
+before these expectations were enabled. Ordinary tests neither generate files
+nor invoke FFmpeg, an external codec or network.
+
+[AOM AV1-ISOBMFF v1.3, sections 2.3 and 2.4](https://aomediacodec.github.io/av1-isobmff/)
+define the record fields, configOBU ordering and sync-sample requirements.
+Comparison of every av1C profile/level/colour hint against sequence headers and
+full presentation-delay model validation remain separate work; these fixtures
+qualify initialization and structural checks only.

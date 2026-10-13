@@ -100,10 +100,26 @@ impl Decoder {
             if record.len() < 4 {
                 return Err(invalid("truncated AV1 codec configuration record"));
             }
-            if record[0] != 0x81 {
-                return Err(crate::unsupported(
-                    "unsupported AV1 codec configuration version",
-                ));
+            if record[0] & 0x80 == 0 {
+                return Err(invalid("invalid AV1 configuration marker"));
+            }
+            if record[0] & 0x7f != 1 {
+                return Err(crate::unsupported("unsupported AV1 codec configuration version"));
+            }
+            if record[3] & 0xe0 != 0 {
+                return Err(invalid("nonzero AV1 configuration reserved bits"));
+            }
+            if record[3] & 0x10 == 0 && record[3] & 0x0f != 0 {
+                return Err(invalid("nonzero AV1 configuration delay reserved bits"));
+            }
+            let mut sequence_seen = false;
+            for (index, obu) in Obus::new(&record[4..]).enumerate() {
+                let obu = obu?;
+                if obu.kind == 1 {
+                    if sequence_seen { return Err(invalid("repeated AV1 configuration sequence header")); }
+                    if index != 0 { return Err(invalid("AV1 configuration sequence header must be first")); }
+                    sequence_seen = true;
+                }
             }
             if !decoder.decode_packet(&record[4..])?.is_empty() || decoder.pending.is_some() {
                 return Err(invalid("AV1 codec configuration contains coded frames"));

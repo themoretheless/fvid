@@ -1,0 +1,60 @@
+{
+  "seed": "av1-separate-tiles-w128-h128-groups2",
+  "width": 128,
+  "height": 128,
+  "cases": [
+    {
+      "file": "av1-configuration-valid.mp4",
+      "error": null
+    },
+    {
+      "file": "av1-configuration-delay-one.mp4",
+      "error": null
+    },
+    {
+      "file": "av1-configuration-delay-sixteen.mp4",
+      "error": null
+    },
+    {
+      "file": "av1-configuration-reserved-high.mp4",
+      "error": "nonzero AV1 configuration reserved bits"
+    },
+    {
+      "file": "av1-configuration-reserved-delay.mp4",
+      "error": "nonzero AV1 configuration delay reserved bits"
+    },
+    {
+      "file": "av1-configuration-marker.mp4",
+      "error": "invalid AV1 configuration marker"
+    },
+    {
+      "file": "av1-configuration-empty.mp4",
+      "error": "MP4 AV1 configuration is absent"
+    },
+    {
+      "file": "av1-configuration-truncated.mp4",
+      "error": "truncated AV1 codec configuration record"
+    },
+    {
+      "file": "av1-configuration-version.mp4",
+      "error": "unsupported AV1 codec configuration version"
+    },
+    {
+      "file": "av1-configuration-repeated-sequence.mp4",
+      "error": "repeated AV1 configuration sequence header"
+    },
+    {
+      "file": "av1-configuration-late-sequence.mp4",
+      "error": "AV1 configuration sequence header must be first"
+    },
+    {
+      "file": "av1-configuration-inband.mp4",
+      "error": null
+    },
+    {
+      "file": "av1-configuration-duplicate-inband.mp4",
+      "error": null
+    }
+  ],
+  "provenance": "Owned separate-frame/tile-group bytes, authored av1C records and MP4 wrapping. No private source, FFmpeg, external codec or network."
+}
