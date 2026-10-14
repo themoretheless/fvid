@@ -11,6 +11,41 @@ pub(crate) fn process(
     t: Option<f64>,
     curves: Option<&crate::owned_curves::Curves>,
 ) -> Result<Option<GeometryFrame>> {
+    process_with_fill(frame, depth, request, n, t, curves, 0, false)
+}
+
+pub(crate) fn process_opacity(
+    frame: &GeometryFrame,
+    depth: u8,
+    request: &DecodeTransform,
+    media_sampling: bool,
+) -> Result<Option<GeometryFrame>> {
+    if !(8..=16).contains(&depth) {
+        return Err("invalid opacity depth".into());
+    }
+    process_with_fill(
+        frame,
+        depth,
+        request,
+        0,
+        None,
+        None,
+        (1u32 << depth) - 1,
+        media_sampling,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn process_with_fill(
+    frame: &GeometryFrame,
+    depth: u8,
+    request: &DecodeTransform,
+    n: u64,
+    t: Option<f64>,
+    curves: Option<&crate::owned_curves::Curves>,
+    fill: u32,
+    media_sampling: bool,
+) -> Result<Option<GeometryFrame>> {
     let mut remaining = request.clone();
     remaining.crop = None;
     remaining.horizontal_flip = false;
@@ -59,6 +94,15 @@ pub(crate) fn process(
             return Err("empty RGB transform geometry".into());
         }
         let mut data = buffer(storage(w, h)?)?;
+        if fill != 0 {
+            if depth == 8 {
+                data.fill(fill as u8);
+            } else {
+                for sample in data.chunks_exact_mut(2) {
+                    sample.copy_from_slice(&(fill as u16).to_le_bytes());
+                }
+            }
+        }
         for y in 0..h {
             for x in 0..w {
                 if let Some((sx, sy)) = position(x, y) {
@@ -123,7 +167,7 @@ pub(crate) fn process(
         })?;
     }
     if let Some(angle) = request.rotate {
-        current = crate::owned_rotate::rotate(&current, angle.degrees, depth, true)?;
+        current = crate::owned_rotate::rotate_rgb_fill(&current, angle.degrees, depth, true, fill)?;
     }
     if let Some(pad) = request.pad {
         let (w, h, ox, oy) = (
@@ -146,8 +190,16 @@ pub(crate) fn process(
         let (w, h) = (scale.width as usize, scale.height as usize);
         current = map(&current, w, h, &|x, y| {
             Some((
-                (x as u128 * current.width as u128 / w as u128) as usize,
-                (y as u128 * current.height as u128 / h as u128) as usize,
+                if media_sampling {
+                    crate::owned_y4m_decode::point_sample(x, current.width, w)
+                } else {
+                    (x as u128 * current.width as u128 / w as u128) as usize
+                },
+                if media_sampling {
+                    crate::owned_y4m_decode::point_sample(y, current.height, h)
+                } else {
+                    (y as u128 * current.height as u128 / h as u128) as usize
+                },
             ))
         })?;
     }

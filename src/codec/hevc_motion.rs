@@ -470,7 +470,7 @@ fn interpolate_block_with_format(
     c: usize,
     rect: [u32; 4],
     mv: [i16; 2],
-    scratch: &mut Vec<i32>,
+    scratch: &mut [i32],
     output: &mut [i32],
     chroma_format: u8,
 ) {
@@ -510,7 +510,6 @@ fn interpolate_block_with_format(
         return;
     }
     let horizontal_len = w * (h + extra);
-    scratch.resize(horizontal_len, 0);
     let horizontal = &mut scratch[..horizontal_len];
     horizontal.fill(0);
     for row in 0..h + extra {
@@ -535,12 +534,11 @@ fn interpolate_block_with_format(
                 }
                 let left = x + start + k as i32;
                 if left >= 0 && left as usize + w <= width as usize {
-                    for (out, &value) in target
-                        .iter_mut()
-                        .zip(&source[left as usize..left as usize + w])
-                    {
-                        *out += weight * i32::from(value);
-                    }
+                    fvid_cpu::hevc_fir_accumulate_u16(
+                        target,
+                        &source[left as usize..left as usize + w],
+                        weight,
+                    );
                 } else {
                     for (col, out) in target.iter_mut().enumerate() {
                         *out += weight
@@ -564,12 +562,11 @@ fn interpolate_block_with_format(
             if weight == 0 {
                 continue;
             }
-            for (out, &value) in target
-                .iter_mut()
-                .zip(&horizontal[(row + k) * w..(row + k + 1) * w])
-            {
-                *out += weight * value;
-            }
+            fvid_cpu::hevc_fir_accumulate_i32(
+                target,
+                &horizontal[(row + k) * w..(row + k + 1) * w],
+                weight,
+            );
         }
         for out in target {
             *out >>= 6;
@@ -742,16 +739,21 @@ pub(crate) fn predict_with_current(
         + weights.map_or(0, |w| w.denominators[usize::from(component != 0)]);
     let max = (1 << depth) - 1;
     let block_size = w as usize * h as usize;
+    let max_horizontal = w as usize * (h as usize + if component == 0 { 7 } else { 3 });
     let mut output = vec![0u16; block_size];
     if count == 1 {
-        let mut block_output = vec![0i32; block_size];
+        let needed = max_horizontal + block_size;
+        if scratch.len() < needed {
+            scratch.resize(needed, 0);
+        }
+        let (interp_scratch, block_output) = scratch[..needed].split_at_mut(max_horizontal);
         interpolate_block_with_format(
             first_input.0.view(current)?,
             component,
             [x, y, w, h],
             first_input.1,
-            scratch,
-            &mut block_output,
+            interp_scratch,
+            block_output,
             chroma_format,
         );
         for (out, &value) in output.iter_mut().zip(block_output.iter()) {
@@ -760,24 +762,28 @@ pub(crate) fn predict_with_current(
         }
     } else {
         let second_input = second_input.unwrap();
-        let mut first_result = vec![0i32; block_size];
+        let needed = max_horizontal + 2 * block_size;
+        if scratch.len() < needed {
+            scratch.resize(needed, 0);
+        }
+        let (interp_scratch, results) = scratch[..needed].split_at_mut(max_horizontal);
+        let (first_result, second_result) = results.split_at_mut(block_size);
         interpolate_block_with_format(
             first_input.0.view(current)?,
             component,
             [x, y, w, h],
             first_input.1,
-            scratch,
-            &mut first_result,
+            interp_scratch,
+            first_result,
             chroma_format,
         );
-        let mut second_result = vec![0i32; block_size];
         interpolate_block_with_format(
             second_input.0.view(current)?,
             component,
             [x, y, w, h],
             second_input.1,
-            scratch,
-            &mut second_result,
+            interp_scratch,
+            second_result,
             chroma_format,
         );
         let offset = (first_input.3 + second_input.3 + 1) << precision;
@@ -988,7 +994,7 @@ mod tests {
                                 (displacement << bits[0]) + fx as i16,
                                 (displacement << bits[1]) + fy as i16,
                             ];
-                            let mut scratch = Vec::new();
+                            let mut scratch = vec![0i32; 8 * 15];
                             let mut output = vec![0i32; 64];
                             interpolate_block_with_format(
                                 View {

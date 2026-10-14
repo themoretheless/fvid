@@ -82,6 +82,8 @@ pub enum Pixels {
         Option<Arc<Grade>>,
     ),
     Rgb(Vec<u8>),
+    /// Unassociated display codes; alpha is composited after picture adjustments.
+    Rgba(Vec<u8>),
     /// 8-bit planes, and the grade they still owe the window. A plane picture
     /// only keeps its planes when that grade is one table the fragment shader
     /// can bind — see [`Grade::shader_look`] — so the second half is never a
@@ -181,12 +183,17 @@ fn into_pixels(
         RawFrame::Rgb(rgb) => Pixels::Rgb(rgb),
         RawFrame::Planar(p) => {
             p.validate()?;
-            if p.frame.data.len() > budget {
+            if p.frame.data.len().checked_add(p.alpha.as_ref().map_or(0, Vec::len)).is_none_or(|n| n > budget) {
                 return Err(crate::invalid(
                     "source-depth frame exceeds presentation budget",
                 ));
             }
-            if p.frame.subsampling.is_none() {
+            if p.alpha.is_some() {
+                let mut rgba=Vec::new();
+                if rotation!=0 {p.rotated(rotation)?.to_rgba(&mut rgba,budget)?;}
+                else {p.to_rgba(&mut rgba,budget)?;}
+                Pixels::Rgba(rgba)
+            } else if p.frame.subsampling.is_none() {
                 let mut rgb = Vec::new();
                 if rotation != 0 { p.rotated(rotation)?.to_rgb(&mut rgb, budget)?; }
                 else { p.to_rgb(&mut rgb, budget)?; }
@@ -240,6 +247,16 @@ fn into_pixels(
             grade.apply(&mut rgb);
             Ok(Pixels::Rgb(rgb))
         }
+        Pixels::Rgba(mut rgba) => {
+            let count=rgba.len()/4;
+            let size=count.checked_mul(3).filter(|&n|rgba.len().checked_add(n).is_some_and(|n|n<=budget))
+                .ok_or_else(||crate::invalid("RGBA grade exceeds presentation budget"))?;
+            let mut rgb=crate::buffer(size)?;
+            for (src,dst) in rgba.chunks_exact(4).zip(rgb.chunks_exact_mut(3)) {dst.copy_from_slice(&src[..3]);}
+            grade.apply(&mut rgb);
+            for (src,dst) in rgb.chunks_exact(3).zip(rgba.chunks_exact_mut(4)) {dst[..3].copy_from_slice(src);}
+            Ok(Pixels::Rgba(rgba))
+        }
         Pixels::Rgb(mut rgb) => {
             grade.apply(&mut rgb);
             Ok(Pixels::Rgb(rgb))
@@ -267,7 +284,7 @@ fn into_pixels(
 }
 
 /// Handle to the decoding threads; dropping it stops them.
-type CachePackets = Arc<std::sync::RwLock<Vec<(u64, u64, Duration, Duration)>>>;
+type CachePackets = Arc<std::sync::RwLock<Arc<[(u64, u64, Duration, Duration)]>>>;
 
 pub struct Playback {
     cache_packets: CachePackets,
@@ -309,7 +326,7 @@ impl Playback {
         grade: Option<Grade>,
         first: Option<RawFrame>,
     ) -> Self {
-        let cache_packets = Arc::new(std::sync::RwLock::new(reader.cache_packets()));
+        let cache_packets = Arc::new(std::sync::RwLock::new(Arc::from(reader.cache_packets())));
         let worker_packets = cache_packets.clone();
         let budget = reader.rgb_budget();
         let [width, height] = reader.dimensions();
@@ -399,8 +416,11 @@ impl Playback {
         &self,
         known: usize,
     ) -> Option<Vec<(u64, u64, Duration, Duration)>> {
-        let packets = self.cache_packets.read().unwrap_or_else(|p| p.into_inner());
-        (packets.len() != known).then(|| packets.clone())
+        let packets = {
+            let guard = self.cache_packets.read().unwrap_or_else(|p| p.into_inner());
+            (guard.len() != known).then(|| Arc::clone(&guard))?
+        };
+        Some(packets.to_vec())
     }
 
     /// How many pictures the queue can hold for this item.
@@ -455,8 +475,18 @@ impl Playback {
 
 impl Drop for Playback {
     fn drop(&mut self) {
-        let _ = self.commands.send(Command::Stop);
+        while self.commands.try_send(Command::Stop).is_err() {
+            while self.events.try_recv().is_ok() {}
+            if self.decoder.as_ref().is_none_or(|t| t.is_finished()) {
+                break;
+            }
+            thread::sleep(Duration::from_micros(200));
+        }
         if let Some(thread) = self.decoder.take() {
+            while !thread.is_finished() {
+                while self.events.try_recv().is_ok() {}
+                thread::sleep(Duration::from_micros(200));
+            }
             let _ = thread.join();
         }
         // The converter may be blocked handing over a frame; keep draining
@@ -511,10 +541,12 @@ impl<R: BufRead + Seek> Worker<R> {
     }
     fn stage(&self, raw: RawFrame) -> Stage {
         if self.reader.cache_packet_count() != self.indexed_count {
+            let snapshot: Arc<[(u64, u64, Duration, Duration)]> =
+                Arc::from(self.reader.cache_packets());
             *self
                 .cache_packets
                 .write()
-                .unwrap_or_else(|p| p.into_inner()) = self.reader.cache_packets();
+                .unwrap_or_else(|p| p.into_inner()) = snapshot;
         }
         Stage::Raw {
             raw,
@@ -543,23 +575,51 @@ impl<R: BufRead + Seek> Worker<R> {
             }
         }
     }
-    /// Returns false when the thread should exit.
-    fn handle(&mut self, command: Command) -> bool {
-        match command {
-            Command::Play => self.playing = true,
-            Command::Pause => self.playing = false,
-            Command::Rewind => {
-                self.generation += 1;
-                self.playing = true;
-                self.ended = false;
+    /// Drain all queued commands, coalescing superseded `Seek` and `Rewind`
+    /// operations so a burst of timeline scrubbing only decodes the final GOP
+    /// while preserving exact `generation` and `playing` state transitions.
+    fn drain_commands(&mut self, first: Option<Command>) -> bool {
+        enum DeferredNav {
+            Rewind,
+            Seek(Duration),
+        }
+        let mut nav: Option<DeferredNav> = None;
+        let mut next = first;
+        loop {
+            let cmd = match next.take() {
+                Some(c) => c,
+                None => match self.commands.try_recv() {
+                    Ok(c) => c,
+                    Err(TryRecvError::Empty) => break,
+                    Err(TryRecvError::Disconnected) => return false,
+                },
+            };
+            match cmd {
+                Command::Play => self.playing = true,
+                Command::Pause => self.playing = false,
+                Command::Rewind => {
+                    self.generation += 1;
+                    self.playing = true;
+                    self.ended = false;
+                    nav = Some(DeferredNav::Rewind);
+                }
+                Command::Seek(target) => {
+                    self.generation += 1;
+                    self.ended = false;
+                    nav = Some(DeferredNav::Seek(target));
+                }
+                Command::StageReady => {}
+                Command::Stop => return false,
+            }
+        }
+        match nav {
+            Some(DeferredNav::Rewind) => {
                 self.pending = Some(match self.reader.rewind() {
                     Ok(()) => self.decode_next(),
                     Err(error) => Stage::Event(Event::Error(error.to_string())),
                 });
             }
-            Command::Seek(target) => {
-                self.generation += 1;
-                self.ended = false;
+            Some(DeferredNav::Seek(target)) => {
                 // Preserve the normal GPU plane path for the target picture.
                 self.pending = Some(match self.reader.seek_raw(target) {
                     Ok(Some(raw)) => self.stage(raw),
@@ -567,24 +627,15 @@ impl<R: BufRead + Seek> Worker<R> {
                     Err(error) => Stage::Event(Event::Error(error.to_string())),
                 });
             }
-            Command::StageReady => {}
-            Command::Stop => return false,
+            None => {}
         }
         true
     }
     fn run(mut self) {
         loop {
             // Drain every waiting command before doing any more work.
-            loop {
-                match self.commands.try_recv() {
-                    Ok(command) => {
-                        if !self.handle(command) {
-                            return;
-                        }
-                    }
-                    Err(TryRecvError::Empty) => break,
-                    Err(TryRecvError::Disconnected) => return,
-                }
+            if !self.drain_commands(None) {
+                return;
             }
             if let Some(stage) = self.pending.take() {
                 match self.stages.try_send(stage) {
@@ -594,7 +645,7 @@ impl<R: BufRead + Seek> Worker<R> {
                         self.pending = Some(stage);
                         match self.commands.recv_timeout(Duration::from_millis(2)) {
                             Ok(command) => {
-                                if !self.handle(command) {
+                                if !self.drain_commands(Some(command)) {
                                     return;
                                 }
                             }
@@ -613,7 +664,7 @@ impl<R: BufRead + Seek> Worker<R> {
             // Nothing to do until the window says so.
             match self.commands.recv() {
                 Ok(command) => {
-                    if !self.handle(command) {
+                    if !self.drain_commands(Some(command)) {
                         return;
                     }
                 }
@@ -626,6 +677,28 @@ impl<R: BufRead + Seek> Worker<R> {
 #[cfg(test)]
 mod precision_tests {
     use super::*;
+    #[test]
+    fn alpha_converter_rotates_all_channels_and_counts_source_opacity_storage() {
+        for layout in ["gray","420","444","rgb"] {
+            for depth in [8,10,12,16] {
+                let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/fixtures/playback-errors/ffv1-alpha-{layout}-{depth}-coder1-v1.mkv"));
+                let mut reader=NativeReader::software(std::io::Cursor::new(std::fs::read(path).unwrap()),32<<20).unwrap();
+                let Some(RawFrame::Planar(p))=reader.read_frame_raw().unwrap() else {panic!("alpha raw frame")};
+                for rotation in [0,90,180,270] {
+                    let upright=p.rotated(rotation).unwrap();let mut expected=Vec::new();upright.to_rgba(&mut expected,1024).unwrap();
+                    let Pixels::Rgba(actual)=into_pixels(RawFrame::Planar(p.clone()),rotation,1024,None).unwrap() else {panic!("alpha lost in converter")};
+                    assert_eq!(actual,expected);
+                }
+                if depth==16 && layout=="rgb" {
+                    let bytes=p.frame.data.len()+p.alpha.as_ref().unwrap().len();
+                    assert!(bytes>p.frame.width*p.frame.height*7);
+                    let error=into_pixels(RawFrame::Planar(p),0,bytes-1,None).err().unwrap();
+                    assert!(error.to_string().contains("source-depth frame exceeds presentation budget"));
+                }
+            }
+        }
+    }
+
     #[test]
     fn identity_rgb_frames_use_rgb_presentation_without_yuv_shader() {
         for depth in [8, 10, 12] {

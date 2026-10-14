@@ -2222,16 +2222,80 @@ this addition.
 
 The unsupported lists in the earlier dated entries are historical. The owned
 decoder now accepts v0/v1 and configured v3, default/custom Range and Golomb–Rice,
-YCbCr, monochrome and interleaved RGB at 8/10/12/16 bits. The encoder still emits
+YCbCr, monochrome and interleaved RGB at every integer depth from 8 through 16 bits. The encoder still emits
 self-contained v1 Range packets. Nonkeyframe quantizer-set changes are decoded:
 equal/shrinking banks retain their adaptation, growing banks are recreated, and
 keyframes restore the configured initial states. Zero Range probabilities,
 including coded initial states, are supported. The codec API also retains alpha in
 `Decoded.alpha` as a separate full-resolution plane at the source depth. V1
 `encode_with_alpha`, `encode_rgb_with_alpha` and `encode_gray_with_alpha` preserve
-color and opacity independently, without premultiplication. Native presentation
-and filtered export still refuse alpha until their sidecar-plane path is wired;
-this does not establish complete FFV1 profile parity.
+color and opacity independently, without premultiplication. Owned FFV1 export
+carries alpha through crop, flips, transpose, rotate, pad, nearest scale and
+color-only negate/curves/colorbalance/colorlevels/colorchannelmixer; reverse and
+shuffle spool color and alpha together. Explicit black padding and rotation fill
+are opaque; source transparency is retained. Other alpha filter combinations
+remain explicitly unsupported. Native raw playback retains the source-depth
+alpha plane. The playback converter emits unassociated RGBA8, grades RGB without
+changing alpha, and the display shader interpolates premultiplied texels before
+compositing the adjusted/custom-shader result onto the opaque black video
+backdrop. Legacy `read_frame`/`into_rgb` explicitly present onto black; `into_rgba`
+and raw Planar frames keep opacity available to callers. This does not establish
+complete FFV1 profile parity. Color-only GeometryFrame/Planar8 outputs and
+three-plane uploads explicitly refuse to discard alpha; they are not alpha
+playback APIs. Stereo/360 view effects consume the composited display image,
+while the underlying raw frame and owned FFV1 export retain unassociated alpha.
+
+`VideoGeometry::apply_packed` and `apply_packed_media` return a PackedPlanar
+containing transformed color and optional alpha at the original sample depth.
+The display variants also apply container rotation and stored crop before user
+geometry. Color follows the existing native/media sampling conventions; alpha
+uses the same full-resolution point mapping and component-wise bilinear rotation.
+Padding and rotation canvas fill are opaque. The older GeometryFrame-returning
+API remains color-only and refuses alpha rather than dropping it.
+
+The offline `alpha_geometry` acceptance tests cover all 672 authored alpha
+frames, with independent row-based expectations for crop, reflection, transpose,
+padding and nearest resize. They separately check container orientation/crop,
+opaque oblique rotation fill, source immutability, malformed requests and an
+in-memory transform/owned-FFV1 encode/decode round trip at every tested depth and
+layout. A separate two-frame RGB16-alpha Matroska fixture contains real projection
+roll and crop tags; its test verifies decoded metadata, orientation/crop ordering
+and every output color/alpha sample, including color underneath zero opacity.
+These tests do not require FFmpeg, a GPU, network or fixture regeneration.
+The owned FFV1 file exporter also materializes stored crop and quarter-turn
+rotation before user geometry. It preserves source-depth color and alpha,
+consumes the display tags once, and inverts pixel aspect for quarter turns.
+Misaligned chroma crops and unnamed output subsampling promote to 4:4:4 by
+sample replication, without narrowing precision or converting through RGB.
+`ffv1_display_export` independently checks 1328 synthetic combinations of
+metadata, alpha/no-alpha, Range/custom Range/Rice, v0/v1/v3 and chroma exponents;
+the exponent matrix covers all 25 pairs from 0 through 4 at 8 and 16 bits.
+Separate cases check reverse/shuffle ordering, non-square aspect with resize,
+and matching YUV color/alpha nearest-neighbor sample phase. Ordinary tests
+read committed fixtures and require neither FFmpeg nor network access.
+The packed native display API shares this normalization. Its acceptance test
+reads every one of the same 1328 videos through `NativeReader`, applies both
+native and media display geometry, and compares every color/alpha word with
+independent arrays. The misaligned 4:2:0 crop formerly failed with
+`video geometry must align with chroma samples`; it now promotes chroma before
+user geometry and preserves opacity. Generic user crop alignment constraints
+remain unchanged.
+
+`PackedPlanar::with_alpha` retains the same full-resolution, source-depth opacity
+plane and rotates it with the color samples. `to_rgba` explicitly produces
+unassociated 8-bit RGBA, preserving color beneath transparent pixels; its budget
+includes RGB scratch plus RGBA output. RGB-only and planar8 conversions refuse
+to discard an attached alpha plane. This frame API is tested with every authored
+legacy/v3 alpha frame at all four quarter-turns. Separate export acceptance tests
+compare flipped color and alpha for all 228 cases, check reverse/shuffle pairing,
+compose geometry with negate, and verify atomic refusal of malformed alpha.
+Sixteen independently generated opaque-alpha videos reproduce the oblique-rotation
+fill failure: ordinary RGB zero fill would introduce transparency, whereas the
+opacity transform preserves opaque black fill at canvas edges. Native acceptance
+also checks exact raw samples, intervals, rewind/seek and threaded RGBA/grade
+pairing. The ignored physical-GPU RGBA test checks final compositing, picture
+adjustments, custom shader ordering and transparent-edge resampling against an
+independent premultiplied bilinear oracle. Ordinary tests require no GPU.
 
 `Decoder::from_configuration` validates the v3 record CRC, quantizer sets,
 predicted initial states, raster and entropy mode. Each slice has independent
@@ -2258,14 +2322,16 @@ exact samples, backward/forward seek intervals, native export and the budget
 boundary across retained and expanded banks. The former quantizer-change refusal
 reproducer now has a passing pixel acceptance test.
 
-`ffv1_alpha` covers 60 v0/v1 and 48 v3 authored cases (312 frames): Range, custom
-Range and Rice, gray/YUV/RGB at 8/10/12/16 bits, separate alpha adaptation, v3
+`ffv1_alpha` covers 120 v0/v1 and 108 v3 authored cases (672 frames): Range, custom
+Range and Rice, gray/YUV/RGB at every depth from 8 through 16 bits, separate alpha adaptation, v3
 alpha-bank growth/shrink and keyframe reset. V1 encoder packets must match the
 independent Python keyframe bytes. RGB with alpha uses Green-base RCT even at
 10/12 bits; color under zero-opacity pixels remains intact. Malformed RGB alpha,
 input storage, recovery and the aggregate budget are checked separately. The
-native/filtered-export tests intentionally assert refusal, not alpha playback
-acceptance.
+native-player acceptance tests now check the source-depth alpha plane, display
+RGBA, timing and navigation. Export acceptance checks the separate alpha plane
+through spatial and temporal operations; 16 additional opaque videos cover
+oblique rotation fill.
 
 ### Owned FFV1 Matroska playback and raw media path (2026-09-29)
 
@@ -4220,3 +4286,91 @@ refusal tests do not claim acceptance of undefined geometry.
 Root codec-routing acceptance includes AVC/HEVC/VP9/AV1; standalone `fvid-media`
 remains limited to Y4M/FFV1 dispatch. Other production operations and media/CUDA
 features still require legacy migration before full FFmpeg independence is proven.
+
+### FFV1 v1 historical zero sample-depth compatibility
+
+The v1 header now interprets `bits_per_raw_sample = 0` as eight bits, matching
+[RFC 9043 section 4.2.7](https://www.rfc-editor.org/rfc/rfc9043.html#section-4.2.7)
+and the existing v3 decoder behavior. FVid encoders still write explicit depths.
+`generate_ffv1_zero_depth.py` authors 24 independent two-frame movies: Rice,
+Range and custom Range, gray/4:2:0/4:4:4/RGB, with and without alpha. The native
+acceptance test checks every color/opacity byte, retained context history,
+rewind and seeks. A second acceptance test exports all 24 sources with a
+horizontal flip, checks each output color/alpha byte and packet interval, and
+independently parses the output range header to require explicit eight-bit
+depth. This forces decode/filter/encode rather than packet passthrough.
+The original first-frame `unsupported FFV1 sample depth` failure was reproduced
+before the fix. Ordinary tests read these synthetic
+fixtures without FFmpeg, network access or generation.
+
+The alpha fixture matrix explicitly requires every combination of depth 8..16,
+three entropy coders, gray/4:2:0/4:4:4/RGB, v1/v3 and v0 at eight bits. The
+independent fixture predictor distinguishes signed 16-bit YUV samples from
+15-bit RGB's unsigned 16-bit transformed components. This prevents an invalid
+RGB15 reproducer from masquerading as a decoder failure. These matrices qualify
+source-depth decode, owned encode/export, alpha geometry, native seek/rewind and
+RGBA presentation; they do not prove AVC mixed-component-depth support.
+
+### AVC mixed component-depth progressive intra support
+
+`generate_avc_component_depths.py` writes 49 original, two-frame, progressive
+4:2:0 I_PCM movies using High 4:4:4 Predictive profile syntax, spanning separate
+luma/chroma depths 8..14. Independent arrays store each component in LE words;
+ordinary tests need no external decoder or generation. Seven equal-depth
+controls and all 42 mixed-depth cases decode both frames exactly and again after
+reset. The former precise `mixed component bit depths are not yet supported`
+refusal was reproduced before the fix; its acceptance test is now enabled.
+This matrix qualifies I_PCM, not all residual/interlaced reconstruction tools.
+
+`IntraPicture` carries `bit_depth` for luma and `chroma_bit_depth` for Cb/Cr.
+Constructors and field/reference views retain both values; reference compatibility
+checks compare both. `component_depths()` reports Y/Cb/Cr precision, and
+`write_planar` chooses byte/word storage separately for each plane. Planar8 narrows
+each component by its own shift. RGB conversion uses distinct luma/chroma ranges
+and offsets; an independent formula checks all 49 pairs in full and limited
+range. Packed conversion and native geometry raise lower-precision components
+to the maximum depth by left shift without dropping source bits. Exact
+sample tests cover all 49 pairs. The software raw path keeps high precision when
+chroma exceeds eight bits even if luma is eight-bit.
+
+The MP4 acceptance reads all 49 authored movies in software, checks each
+component and its precision, rewinds, seeks forward/backward and verifies
+presentation intervals. Lossless MP4-to-FFV1 export forces horizontal flip and
+checks every normalized output sample plus packet PTS/duration. This caught a
+separate `component sample exceeds depth` refusal: the old export packer used
+luma depth for all components. It now uses `component_depths()` and a common
+maximum precision for frame metadata and spooled storage.
+
+Progressive inter prediction now retains separate luma/chroma precision in
+`Reference420` and `Prediction420`, including field views of reference planes.
+Uni/bi weights, residual reconstruction and clipping use the matching component
+depth. Macroblock assembly rejects either component-depth mismatch. Progressive
+inter deblocking receives each plane's depth and its own QP depth offset.
+The original single-depth constructors remain compatible wrappers.
+
+An additional 49 authored IDR I_PCM → P-skip movies reproduce the former
+`unsupported inter-picture reconstruction tools` failure at Y8/C9 and now check
+exact reference samples after P prediction and reset for all depth pairs.
+Both the 49 intra and 49 P-skip movies also pass software MP4 playback,
+forward/backward seek, rewind and forced-flip FFV1 export, with independent
+sample arrays and unchanged packet cadence.
+Independent primitive tests check uni/bi offset scaling, zero transform residual
+and unit bypass residual with per-component saturation at both depth endpoints.
+These are not weighted/residual bitstream acceptance tests.
+
+`generate_avc_component_fractional.py` adds 784 two-frame axial-motion movies:
+all 49 component-depth pairs, horizontal/vertical vectors ±1/±2/±3/±4 in
+quarter-luma units, edge extension, six-tap half-sample clipping and rounded
+quarter averages. Chroma independently covers all seven fractional phases in
+eighth-chroma units. The scalar oracle implements the interpolation equations
+independently of FVid; the formulas can also be inspected in
+[OpenH264's reference interpolation](https://raw.githubusercontent.com/cisco/openh264/master/codec/common/src/mc.cpp).
+No external codec executes during generation or tests. Exact decoder samples,
+reset and the full MP4/seek/rewind/forced-flip FFV1 export path pass for all
+882 intra/P-skip/axial-motion movies. The focused existing AVC unit gate also
+passes 200 tests after the component-precision changes.
+
+Diagonal fractional motion, B pictures, weighted/nonzero transformed residual
+bitstreams and field/MBAFF mixed-depth streams still require their own
+qualification and remaining implementation. Full mixed-component-depth support
+remains unfinished.

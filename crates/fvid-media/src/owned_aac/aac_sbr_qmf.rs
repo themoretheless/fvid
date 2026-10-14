@@ -1,11 +1,7 @@
 //! Owned 32-band SBR analysis QMF, normative complex modulation.
 use super::{Result, aac_sbr_qmf_window::WINDOW, invalid};
+pub use fvid_cpu::Complex64 as Complex;
 use std::sync::OnceLock;
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Complex {
-    pub re: f64,
-    pub im: f64,
-}
 fn modulation() -> &'static [[Complex; 64]; 32] {
     static MATRIX: OnceLock<[[Complex; 64]; 32]> = OnceLock::new();
     MATRIX.get_or_init(|| {

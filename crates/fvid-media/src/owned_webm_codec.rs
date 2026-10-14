@@ -15,6 +15,7 @@ fn core_error(error: Error) -> String {
 pub(crate) struct Decoded {
     pub frame: GeometryFrame,
     pub depth: u8,
+    pub alpha: Option<Vec<u8>>,
 }
 enum Kind {
     Ffv1(crate::owned_ffv1_decoder::Decoder),
@@ -69,9 +70,9 @@ impl Decoder {
         match &mut self.kind {
             Kind::Ffv1(decoder) => {
                 let decoded = decoder.decode(packet)?;
-                if decoded.alpha.is_some() {return Err(format!("{UNSUPPORTED_PREFIX}FFV1 alpha streaming transforms"));}
                 self.mono = decoder.monochrome();
                 return Ok(Some(Decoded {
+                    alpha: decoded.alpha,
                     frame: decoded.frame,
                     depth: decoded.depth,
                 }));
@@ -93,7 +94,7 @@ impl Decoder {
                         self.colour = Some((true, 0, 1, 13));
                         self.mono = Some(false);
                         let p = &decoded.picture;
-                        shown = Some(Decoded { frame: crate::owned_frame::pack_gbr(p.size, p.depth,
+                        shown = Some(Decoded { alpha: None, frame: crate::owned_frame::pack_gbr(p.size, p.depth,
                             p.planes.each_ref().map(|plane| (plane.width, plane.height, plane.samples.as_slice())))?, depth: p.depth });
                         continue;
                     }
@@ -176,7 +177,7 @@ pub(crate) fn pack_av1(decoded: &av1_decoder::Decoded) -> Result<Decoded> {
                 }
             }
         }
-        return Ok(Decoded { frame: GeometryFrame { width, height, subsampling: None, data }, depth: picture.depth });
+        return Ok(Decoded { alpha: None, frame: GeometryFrame { width, height, subsampling: None, data }, depth: picture.depth });
     }
     let planes = picture
         .planes
@@ -256,6 +257,7 @@ pub(crate) fn pack(
         }
     }
     Ok(Decoded {
+        alpha: None,
         frame: GeometryFrame {
             width,
             height,

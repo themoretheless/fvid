@@ -127,6 +127,7 @@ pub fn decode_pcm_slices(
             sps.crop[3] as usize / 2,
         ],
         bit_depth: sps.bit_depth_luma,
+        chroma_bit_depth: sps.bit_depth_chroma,
         y: samples(pixels)?,
         cb: samples(pixels / 4)?,
         cr: samples(pixels / 4)?,
@@ -247,6 +248,7 @@ pub(super) fn split_frame(
                 picture.crop[3] / 2,
             ],
             bit_depth: picture.bit_depth,
+            chroma_bit_depth: picture.chroma_bit_depth,
             y: split(&picture.y, w, h)?,
             cb: split(&picture.cb, w / 2, h / 2)?,
             cr: split(&picture.cr, w / 2, h / 2)?,
@@ -271,7 +273,7 @@ pub fn weave_pair(first: &PcmField, second: &PcmField, budget: usize) -> Result<
         || top.pps_id != bottom.pps_id
         || a.coded_width != b.coded_width
         || a.coded_height != b.coded_height
-        || a.bit_depth != b.bit_depth
+        || a.bit_depth != b.bit_depth || a.chroma_bit_depth != b.chroma_bit_depth
         || a.crop != b.crop
     {
         return Err(invalid("AVC fields are not complementary"));
@@ -305,6 +307,7 @@ pub fn weave_pair(first: &PcmField, second: &PcmField, budget: usize) -> Result<
         coded_height: h,
         crop: [a.crop[0], a.crop[1], crop_top, crop_bottom],
         bit_depth: a.bit_depth,
+        chroma_bit_depth: a.chroma_bit_depth,
         y: samples(pixels)?,
         cb: samples(pixels / 4)?,
         cr: samples(pixels / 4)?,
@@ -360,7 +363,7 @@ pub fn decode_skip_field(
         || pps.sps_id != sps.id
         || reference.picture.coded_width != w as usize
         || reference.picture.coded_height != height as usize / 2
-        || reference.picture.bit_depth != sps.bit_depth_luma
+        || reference.picture.bit_depth != sps.bit_depth_luma || reference.picture.chroma_bit_depth != sps.bit_depth_chroma
         || sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
@@ -402,6 +405,7 @@ pub fn decode_skip_field(
             coded_height: height as usize / 2,
             crop: reference.picture.crop,
             bit_depth: sps.bit_depth_luma,
+            chroma_bit_depth: sps.bit_depth_chroma,
             y,
             cb,
             cr,
@@ -669,7 +673,7 @@ pub(super) fn decode_inter_field_impl(
         .ok_or_else(|| invalid("AVC P field size overflow"))?;
     if reference.picture.coded_width != w as usize
         || reference.picture.coded_height != height as usize / 2
-        || reference.picture.bit_depth != sps.bit_depth_luma
+        || reference.picture.bit_depth != sps.bit_depth_luma || reference.picture.chroma_bit_depth != sps.bit_depth_chroma
         || sps.chroma_format != 1
         || sps.separate_colour_plane
         || sps.bit_depth_luma != sps.bit_depth_chroma
@@ -688,7 +692,7 @@ pub(super) fn decode_inter_field_impl(
         if candidate.picture.coded_width != reference.picture.coded_width
             || candidate.picture.coded_height != reference.picture.coded_height
             || candidate.picture.crop != reference.picture.crop
-            || candidate.picture.bit_depth != reference.picture.bit_depth
+            || candidate.picture.bit_depth != reference.picture.bit_depth || candidate.picture.chroma_bit_depth != reference.picture.chroma_bit_depth
         {
             return Err(unsupported("AVC field reference geometry differs"));
         }
@@ -724,6 +728,7 @@ pub(super) fn decode_inter_field_impl(
             coded_height: height as usize / 2,
             crop: reference.picture.crop,
             bit_depth: sps.bit_depth_luma,
+            chroma_bit_depth: sps.bit_depth_chroma,
             y: samples(pixels)?,
             cb: samples(pixels / 4)?,
             cr: samples(pixels / 4)?,

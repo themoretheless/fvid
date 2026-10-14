@@ -1774,6 +1774,7 @@ fn display_rgb(frame: &Frame) -> crate::Result<Vec<u8>> {
                 Ok(rgb)
             }
             Pixels::Rgb(rgb) => Ok(rgb.clone()),
+            Pixels::Rgba(rgba) => crate::playback_native::rgba_to_rgb_on_black(rgba, usize::MAX),
         }
 }
 
@@ -2801,7 +2802,7 @@ impl Player {
                         self.texture = None;
                         self.rgb_frame = None;
                     }
-                    Pixels::Rgb(rgb) => {
+                    Pixels::Rgb(rgb) | Pixels::Rgba(rgb) => {
                         // Keep immutable display codes; picture settings and
                         // custom effects run in the GPU callback on redraw.
                         self.texture = None;
@@ -9040,6 +9041,7 @@ mod tests {
                     rgb
                 }
                 Pixels::Rgb(rgb) => rgb.clone(),
+                Pixels::Rgba(rgba) => crate::playback_native::rgba_to_rgb_on_black(rgba, budget).unwrap(),
                 Pixels::Planar(planes, grade) => {
                     let mut rgb = Vec::new();
                     crate::playback_native::planar8_to_rgb(planes, &mut rgb, budget)

@@ -182,6 +182,7 @@ fn all_quarter_turns_match_reference_and_main10_padding_is_neutral() {
             coded_height: 4,
             crop: [0; 4],
             bit_depth: 10,
+            chroma_bit_depth: 10,
             y: (0..32).map(|i| 64 + 13 * i).collect(),
             cb: (0..8).map(|i| 500 + 7 * i).collect(),
             cr: (0..8).map(|i| 600 - 9 * i).collect(),

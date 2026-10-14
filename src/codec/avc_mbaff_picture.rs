@@ -361,6 +361,7 @@ fn decode_optional_slices_impl(
         coded_height: h,
         crop: sps.crop.map(|n| n as usize),
         bit_depth: sps.bit_depth_luma,
+        chroma_bit_depth: sps.bit_depth_chroma,
         y: plane(pixels)?,
         cb: plane(pixels / 4)?,
         cr: plane(pixels / 4)?,
@@ -431,7 +432,7 @@ fn decode_optional_slices_impl(
                 };
                 if reference.coded_width != w
                     || reference.coded_height != h
-                    || reference.bit_depth != picture.bit_depth
+                    || reference.bit_depth != picture.bit_depth || reference.chroma_bit_depth != picture.chroma_bit_depth
                 {
                     return Err(invalid("MBAFF P reference geometry/depth mismatch"));
                 }
@@ -742,7 +743,7 @@ pub(crate) fn reconstruct_intra_macroblock(
         .checked_mul(h)
         .ok_or_else(|| invalid("MBAFF picture size overflow"))?;
     if sps.coded_dimensions() != (w as u32, h as u32)
-        || picture.bit_depth != sps.bit_depth_luma
+        || picture.bit_depth != sps.bit_depth_luma || picture.chroma_bit_depth != sps.bit_depth_chroma
         || picture.y.len() != pixels
         || picture.cb.len() != pixels / 4
         || picture.cr.len() != pixels / 4
@@ -758,6 +759,7 @@ pub(crate) fn reconstruct_intra_macroblock(
         coded_height: view_h,
         crop: [0; 4],
         bit_depth: picture.bit_depth,
+        chroma_bit_depth: picture.chroma_bit_depth,
         y: plane(w * view_h)?,
         cb: plane(w * view_h / 4)?,
         cr: plane(w * view_h / 4)?,
@@ -882,6 +884,7 @@ pub fn decode_intra_slices(
         coded_height: h,
         crop: sps.crop.map(|n| n as usize),
         bit_depth: sps.bit_depth_luma,
+        chroma_bit_depth: sps.bit_depth_chroma,
         y: plane(pixels)?,
         cb: plane(pixels / 4)?,
         cr: plane(pixels / 4)?,
@@ -1043,6 +1046,7 @@ mod inter_tests {
             coded_height: 32,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![20; 512],
             cb: vec![60; 128],
             cr: vec![100; 128],
@@ -1055,6 +1059,7 @@ mod inter_tests {
             coded_height: 32,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
         };
         let l0 = [FrameReference {
             id: 42,
@@ -1134,6 +1139,7 @@ mod inter_tests {
             coded_height: 32,
             crop: [0; 4],
             bit_depth: depth,
+            chroma_bit_depth: depth,
             y: vec![9; 1024],
             cb: vec![9; 256],
             cr: vec![9; 256],

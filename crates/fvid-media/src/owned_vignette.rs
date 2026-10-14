@@ -253,10 +253,13 @@ impl Vignette {
                 return Err("vignette aspect exceeds floating point geometry".into());
             }
             let radius = (frame.width as f64 / 2.).hypot(frame.height as f64 / 2.);
+            let mut dx_table = Vec::with_capacity(frame.width);
+            for x in 0..frame.width {
+                dx_table.push(((x as f64 - parameters[1]) * xs as f64).trunc());
+            }
             for y in 0..frame.height {
-                for x in 0..frame.width {
-                    let dx = ((x as f64 - parameters[1]) * xs as f64).trunc();
-                    let dy = ((y as f64 - parameters[2]) * ys as f64).trunc();
+                let dy = ((y as f64 - parameters[2]) * ys as f64).trunc();
+                for &dx in &dx_table {
                     let distance = dx.hypot(dy) / radius;
                     let factor = if distance > 1. {
                         0.
@@ -289,30 +292,35 @@ impl Vignette {
         let center = ((1u32 << (depth - 1)) - 1) as f32;
         let bytes = if depth == 8 { 1 } else { 2 };
         let mut offset = 0;
-        let shapes = if let Some([sx, sy]) = frame.subsampling {
-            vec![
-                (frame.width, frame.height, 1, 1, false, 1),
-                (
-                    frame.width.div_ceil(sx),
-                    frame.height.div_ceil(sy),
-                    sx,
-                    sy,
-                    true,
-                    1,
-                ),
-                (
-                    frame.width.div_ceil(sx),
-                    frame.height.div_ceil(sy),
-                    sx,
-                    sy,
-                    true,
-                    1,
-                ),
-            ]
-        } else {
-            vec![(frame.width, frame.height, 1, 1, false, 3)]
-        };
-        for (width, height, sx, sy, chroma, channels) in shapes {
+        let planar_shapes;
+        let packed_shapes;
+        let shapes: &[(usize, usize, usize, usize, bool, usize)] =
+            if let Some([sx, sy]) = frame.subsampling {
+                planar_shapes = [
+                    (frame.width, frame.height, 1, 1, false, 1),
+                    (
+                        frame.width.div_ceil(sx),
+                        frame.height.div_ceil(sy),
+                        sx,
+                        sy,
+                        true,
+                        1,
+                    ),
+                    (
+                        frame.width.div_ceil(sx),
+                        frame.height.div_ceil(sy),
+                        sx,
+                        sy,
+                        true,
+                        1,
+                    ),
+                ];
+                &planar_shapes
+            } else {
+                packed_shapes = [(frame.width, frame.height, 1, 1, false, 3)];
+                &packed_shapes
+            };
+        for &(width, height, sx, sy, chroma, channels) in shapes {
             for y in 0..height {
                 for x in 0..width {
                     for _ in 0..channels {

@@ -140,7 +140,7 @@ pub(crate) fn decode_presented(
                 if let Some(spool) = spool.as_mut() {
                     let current = (
                         [width as u32, height as u32],
-                        picture.bit_depth,
+                        picture.bit_depth.max(picture.chroma_bit_depth),
                         [true, true],
                         false,
                     );
@@ -171,7 +171,7 @@ pub(crate) fn decode_presented(
                         u32::try_from(width).map_err(|_| "AVC width overflow")?,
                         u32::try_from(height).map_err(|_| "AVC height overflow")?,
                     ],
-                    depth: picture.bit_depth,
+                    depth: picture.bit_depth.max(picture.chroma_bit_depth),
                     sub: [true, true],
                     mono: false,
                     rgb: false,
@@ -1083,7 +1083,7 @@ fn pack_avc(p: &fvid_codecs::codec::avc_picture::IntraPicture) -> Result<Vec<u8>
     pack_cropped(
         [p.coded_width, p.coded_height],
         p.crop,
-        [p.bit_depth; 3],
+        p.component_depths(),
         [true, true],
         false,
         [&p.y, &p.cb, &p.cr],

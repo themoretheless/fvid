@@ -1,14 +1,16 @@
 //! Local window playback. Software decode to a display-sized BGRA buffer, optional
 //! device audio, and an egui window. Not a streaming server and not a hardware presenter.
 use super::*;
+#[allow(unused_imports)]
 use serde::Serialize;
 use std::collections::VecDeque;
+#[allow(unused_imports)]
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicI32, AtomicI64, AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Instant;
 
-include!("owned_play_controls_impl.rs");
+pub use crate::owned_play_controls::*;
 
 struct VideoFrame {
     pts_us: i64,

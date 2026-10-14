@@ -5,7 +5,7 @@ type Result<T> = std::result::Result<T, String>;
 pub struct YaepBlur {
     radius: usize,
     planes: u8,
-    sigma: u128,
+    sigma: u64,
     enable: crate::owned_timeline::Timeline,
 }
 impl YaepBlur {
@@ -47,7 +47,7 @@ impl YaepBlur {
             match key {
                 "radius" | "r" => radius = v as usize,
                 "planes" | "p" => planes = v as u8,
-                "sigma" | "s" => sigma = v as u128,
+                "sigma" | "s" => sigma = v as u64,
                 _ => return Err("unknown yaepblur option".into()),
             }
         }
@@ -188,17 +188,17 @@ impl YaepBlur {
         channel: usize,
     ) -> Result<()> {
         let bytes = if depth == 8 { 1 } else { 2 };
-        let read = |x: usize, y: usize| -> u128 {
+        let read = |x: usize, y: usize| -> u64 {
             let at = ((y * w + x) * stride + channel) * bytes;
             if bytes == 1 {
-                input[at] as u128
+                input[at] as u64
             } else {
-                u16::from_le_bytes([input[at], input[at + 1]]) as u128
+                u16::from_le_bytes([input[at], input[at + 1]]) as u64
             }
         };
         let mut columns = Vec::new();
         columns.try_reserve_exact(w).map_err(|e| e.to_string())?;
-        columns.resize(w, (0u128, 0u128));
+        columns.resize(w, (0u64, 0u64));
         let mut top = 0;
         let mut bottom = 0;
         for y in 0..h {
@@ -222,16 +222,21 @@ impl YaepBlur {
             bottom = high;
             let mut left = 0;
             let mut right = (r + 1).min(w);
-            let mut sum = 0;
-            let mut square = 0;
+            let mut sum = 0u64;
+            let mut square = 0u64;
             for &(s, q) in &columns[..right] {
                 sum += s;
                 square += q;
             }
             for x in 0..w {
-                let count = ((bottom - top) * (right - left)) as u128;
+                let count = ((bottom - top) * (right - left)) as u64;
                 let mean = sum / count;
-                let variance = (square - sum * sum / count) / count;
+                let sq_mean = if sum <= u32::MAX as u64 {
+                    (sum * sum) / count
+                } else {
+                    ((sum as u128 * sum as u128) / count as u128) as u64
+                };
+                let variance = (square - sq_mean) / count;
                 let pixel = read(x, y);
                 let value =
                     ((self.sigma * mean + variance * pixel) / (self.sigma + variance)) as u16;

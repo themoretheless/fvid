@@ -338,10 +338,10 @@ impl V3 {
                 model_bytes = other + state.context_bytes();
                 state
             };
-            let left = (x as u128 * width as u128 / gw as u128) as usize;
-            let top = (y as u128 * height as u128 / gh as u128) as usize;
-            let right = ((x + sw) as u128 * width as u128 / gw as u128) as usize;
-            let bottom = ((y + sh) as u128 * height as u128 / gh as u128) as usize;
+            let left = (x as u64 * width as u64 / gw as u64) as usize;
+            let top = (y as u64 * height as u64 / gh as u64) as usize;
+            let right = ((x + sw) as u64 * width as u64 / gw as u64) as usize;
+            let bottom = ((y + sh) as u64 * height as u64 / gh as u64) as usize;
             let mut rice = if self.config.coder == 0 {
                 r.bit(&mut 129)?;
                 let at =

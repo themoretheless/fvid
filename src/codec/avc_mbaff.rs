@@ -195,8 +195,8 @@ pub fn neighbour_location(
         false
     };
     let block = layout(address, width_mbs, height_mbs, mbaff, field, subsampling)?;
-    let x = block.origin[0] as i128 + offset[0] as i128;
-    let y = block.origin[1] as i128 + offset[1] as i128 * block.row_step as i128;
+    let x = block.origin[0] as i64 + offset[0] as i64;
+    let y = block.origin[1] as i64 + offset[1] as i64 * block.row_step as i64;
     let (Ok(x), Ok(y)) = (usize::try_from(x), usize::try_from(y)) else {
         return Ok(None);
     };

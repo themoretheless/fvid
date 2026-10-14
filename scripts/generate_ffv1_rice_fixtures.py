@@ -69,12 +69,13 @@ def header(depth, rgb, chroma, shifts, varied, key, version=1):
             for v in ([0,126] if varied and i==0 else [127]):r.integer(model,v)
     r.bit([129],0,False)
     return r.finish()
-def coded_line(p,w,y,bits,varied):
+def coded_line(p,w,y,bits,varied,signed_samples=None):
+    if signed_samples is None:signed_samples=bits==16
     def read(x,y):
         if y<0 or x < -1:return 0
         if x == -1:return 0 if y==0 else read(0,y-1)
         value=p[y*w+min(x,w-1)]
-        return signed(value,16) if bits==16 else value
+        return signed(value,16) if signed_samples else value
     diffs=[];contexts=[]
     for x in range(w):
         l,t,tl=read(x-1,y),read(x,y-1),read(x-1,y-1)

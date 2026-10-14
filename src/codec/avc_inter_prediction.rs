@@ -145,7 +145,14 @@ pub fn predict_macroblock(
     references: [&[&Reference420<'_>]; 2],
     weights: Option<&[[[ComponentWeight; 3]; 2]]>,
 ) -> Result<Prediction420> {
-    predict_macroblock_impl(origin, depth, partitions, motion, references, weights, None)
+    predict_macroblock_impl(origin, [depth;2], partitions, motion, references, weights, None)
+}
+/// Predict with independent luma/chroma precision.
+pub fn predict_macroblock_components(
+    origin:[i32;2],depths:[u8;2],partitions:&[Partition],motion:&[[Neighbour;2]],
+    references:[&[&Reference420<'_>];2],weights:Option<&[[[ComponentWeight;3];2]]>,
+)->Result<Prediction420> {
+    predict_macroblock_impl(origin,depths,partitions,motion,references,weights,None)
 }
 /// References are the modified frame lists, not pre-expanded field lists.
 /// Weights, if supplied, must already use the selected frame indices.
@@ -174,7 +181,7 @@ pub fn predict_macroblock_mbaff(
     ];
     predict_macroblock_impl(
         origin,
-        depth,
+        [depth;2],
         partitions,
         motion,
         references,
@@ -184,7 +191,7 @@ pub fn predict_macroblock_mbaff(
 }
 fn predict_macroblock_impl(
     origin: [i32; 2],
-    depth: u8,
+    depths: [u8;2],
     partitions: &[Partition],
     motion: &[[Neighbour; 2]],
     references: [&[&Reference420<'_>]; 2],
@@ -199,10 +206,10 @@ fn predict_macroblock_impl(
     {
         return Err(invalid("invalid AVC macroblock prediction inputs"));
     }
-    let mut assembled = MacroblockPrediction::new(depth)?;
+    let mut assembled = MacroblockPrediction::new_components(depths)?;
     // One buffer per list, reused across partitions, so predictions are never
     // moved by value through the blend and weight steps.
-    let mut buffers = [Prediction420::empty(depth), Prediction420::empty(depth)];
+    let mut buffers = [Prediction420::empty_components(depths), Prediction420::empty_components(depths)];
     let mut scratch = super::avc_motion::Scratch::new();
     for (index, (partition, vectors)) in partitions.iter().zip(motion).enumerate() {
         let actual = vectors.map(|v| matches!(v, Neighbour::Inter { .. }));

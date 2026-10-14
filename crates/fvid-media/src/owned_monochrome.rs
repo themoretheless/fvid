@@ -89,6 +89,19 @@ impl Monochrome {
             return Err("monochrome sample exceeds precision".into());
         }
         let inverse = (maximum as f32).recip();
+        let mut luma_lut = Vec::with_capacity(maximum as usize + 1);
+        for code in 0..=maximum {
+            let luma = code as f32 * inverse;
+            let envelope = if luma < 0.6 {
+                let t = (luma / 0.6 - 1.0).abs();
+                1.0 - t * t
+            } else {
+                let t = (1.0 - luma) / (1.0 - 0.6);
+                t * t * (3.0 - 2.0 * t)
+            };
+            let weight = envelope + (1.0 - envelope) * (1.0 - self.high);
+            luma_lut.push((luma, weight));
+        }
         // Chroma gain is shared by each subsampled cell; calculate exp once.
         for cy in 0..frame.height.div_ceil(sy) {
             for cx in 0..cw {
@@ -103,15 +116,7 @@ impl Monochrome {
                 for row in row..row.saturating_add(sy).min(frame.height) {
                     for column in column..column.saturating_add(sx).min(frame.width) {
                         let index = row * frame.width + column;
-                        let luma = read(&frame.data, index) as f32 * inverse;
-                        let envelope = if luma < 0.6 {
-                            let t = (luma / 0.6 - 1.0).abs();
-                            1.0 - t * t
-                        } else {
-                            let t = (1.0 - luma) / (1.0 - 0.6);
-                            t * t * (3.0 - 2.0 * t)
-                        };
-                        let weight = envelope + (1.0 - envelope) * (1.0 - self.high);
+                        let (luma, weight) = luma_lut[read(&frame.data, index) as usize];
                         let result = (1.0 - weight) * luma + weight * response * luma;
                         write(
                             &mut frame.data,

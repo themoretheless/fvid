@@ -42,6 +42,7 @@ impl LayeredVideoFrame {
             coded_height: p.dimensions[1] as usize,
             crop: p.crop.map(|n| n as usize),
             bit_depth: p.depth[0],
+            chroma_bit_depth: p.depth[1],
             y: vec![],
             cb: vec![],
             cr: vec![],

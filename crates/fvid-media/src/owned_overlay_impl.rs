@@ -101,12 +101,12 @@ pub fn overlay_opaque_depth(
             return Err(invalid("overlay placement must align with chroma samples"));
         }
     for (plane, (dst, src)) in target.iter().zip(source).enumerate() {
-        let px = i128::from(x) / dst.sx as i128;
-        let py = i128::from(y) / dst.sy as i128;
+        let px = x / dst.sx as i64;
+        let py = y / dst.sy as i64;
         let left = px.max(0);
         let top = py.max(0);
-        let right = (px + src.width as i128).min(dst.width as i128);
-        let bottom = (py + src.height as i128).min(dst.height as i128);
+        let right = (px.saturating_add(src.width as i64)).min(dst.width as i64);
+        let bottom = (py.saturating_add(src.height as i64)).min(dst.height as i64);
         if right <= left || bottom <= top {
             continue;
         }

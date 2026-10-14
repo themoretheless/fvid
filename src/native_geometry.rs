@@ -65,6 +65,60 @@ impl VideoGeometry {
     pub fn apply(&self, frame: &RawFrame, width: usize, height: usize) -> Result<GeometryFrame> {
         self.apply_with_sampling(frame, width, height, false)
     }
+    /// Transform color and optional full-resolution opacity without narrowing.
+    pub fn apply_packed(&self, frame: &crate::playback_native::PackedPlanar) -> Result<crate::playback_native::PackedPlanar> {
+        self.apply_packed_sampling(frame, false)
+    }
+    /// The same operation with the existing media-compatible sampling convention.
+    pub fn apply_packed_media(&self, frame: &crate::playback_native::PackedPlanar) -> Result<crate::playback_native::PackedPlanar> {
+        self.apply_packed_sampling(frame, true)
+    }
+    fn apply_packed_sampling(&self, frame: &crate::playback_native::PackedPlanar, media: bool) -> Result<crate::playback_native::PackedPlanar> {
+        frame.validate()?;
+        let source=&frame.frame;
+        let color=self.apply_samples(&source.data,source.width,source.height,source.subsampling,frame.depth,frame.colour.full,media)?;
+        let alpha=if let Some(alpha)=&frame.alpha {
+            let bytes=if frame.depth==8 {1} else {2};
+            let mut data=crate::buffer(alpha.len().checked_mul(3).ok_or_else(||invalid("alpha geometry size overflow"))?)?;
+            for (sample,pixel) in alpha.chunks_exact(bytes).zip(data.chunks_exact_mut(3*bytes)) {
+                for channel in pixel.chunks_exact_mut(bytes) {channel.copy_from_slice(sample);}
+            }
+            let output=self.apply_samples_filled(&data,source.width,source.height,None,frame.depth,true,media,Some(((1u32<<frame.depth)-1) as u16))?;
+            if (output.width,output.height)!=(color.width,color.height) {return Err(invalid("color and alpha geometry disagree"));}
+            let mut data=crate::buffer(output.data.len()/3)?;
+            for (pixel,sample) in output.data.chunks_exact(3*bytes).zip(data.chunks_exact_mut(bytes)) {sample.copy_from_slice(&pixel[..bytes]);}
+            Some(data)
+        } else {None};
+        crate::playback_native::PackedPlanar::with_alpha(color,frame.depth,frame.colour,alpha)
+    }
+    /// Container orientation and crop precede user geometry for both color and alpha.
+    /// Insets are left, top, right, bottom in display coordinates.
+    pub fn apply_packed_display(
+        &self, frame: &crate::playback_native::PackedPlanar, rotation: u16, insets: [u32;4],
+    ) -> Result<crate::playback_native::PackedPlanar> {
+        self.apply_packed_display_sampling(frame,rotation,insets,false)
+    }
+    pub fn apply_packed_display_media(
+        &self, frame: &crate::playback_native::PackedPlanar, rotation: u16, insets: [u32;4],
+    ) -> Result<crate::playback_native::PackedPlanar> {
+        self.apply_packed_display_sampling(frame,rotation,insets,true)
+    }
+    fn apply_packed_display_sampling(
+        &self, frame: &crate::playback_native::PackedPlanar, rotation: u16, insets: [u32;4], media: bool,
+    ) -> Result<crate::playback_native::PackedPlanar> {
+        frame.validate()?;
+        let [l,t,r,b]=insets;
+        let coded=match rotation {
+            0=>[l,t,r,b],90=>[t,r,b,l],180=>[r,b,l,t],270=>[b,l,t,r],
+            _=>return Err(invalid("invalid stored display rotation")),
+        };
+        let (color,alpha)=fvid_media::owned_display_geometry::apply(
+            &frame.frame,frame.alpha.as_deref(),frame.depth,coded.map(u64::from),rotation,
+        ).map_err(|e|invalid(&e))?;
+        let normalized=crate::playback_native::PackedPlanar::with_alpha(color,frame.depth,frame.colour,alpha)?;
+        self.apply_packed_sampling(&normalized,media)
+    }
+
     /// Point sampling and pad colour compatible with the existing media adapter.
     /// Native `apply` retains its exact-centre and neutral-chroma contract.
     pub fn apply_media(
@@ -95,7 +149,7 @@ impl VideoGeometry {
                 (Cow::Owned(p.frame.data), 2, 2, false)
             }
             RawFrame::Rgb(data) => (Cow::Borrowed(data.as_slice()), 1, 1, true),
-            RawFrame::Avc { picture, .. } => {
+            RawFrame::Avc { picture, colour } => {
                 let [left, right, top, bottom] = picture.crop;
                 if picture
                     .coded_width
@@ -125,12 +179,14 @@ impl VideoGeometry {
                 if picture.dimensions() != (width, height) {
                     return Err(invalid("inconsistent picture dimensions"));
                 }
-                let mut data = Vec::new();
-                picture.write_planar(&mut data)?;
-                (Cow::Owned(data), 2, 2, false)
+                let packed=crate::playback_native::PackedPlanar::from_picture(picture,*colour,usize::MAX)?;
+                (Cow::Owned(packed.frame.data), 2, 2, false)
             }
             RawFrame::Planar(p) => {
                 p.validate()?;
+                if p.alpha.is_some() {
+                    return Err(crate::unsupported("color-only geometry cannot discard alpha"));
+                }
                 if (p.frame.width, p.frame.height) != (width, height) {
                     return Err(invalid("inconsistent packed plane dimensions"));
                 }
@@ -183,7 +239,7 @@ impl VideoGeometry {
         let (depth, full) = match frame {
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             RawFrame::Surface { surface, .. } => (surface.depth(), surface.full_range()),
-            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Avc { picture, colour } => (picture.bit_depth.max(picture.chroma_bit_depth), colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
             RawFrame::Planar(p) => (p.depth, p.colour.full),
             // The legacy untagged Y4M variant represents limited-range samples.
@@ -241,7 +297,7 @@ impl VideoGeometry {
         let (depth, full) = match frame {
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             RawFrame::Surface { surface, .. } => (surface.depth(), surface.full_range()),
-            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Avc { picture, colour } => (picture.bit_depth.max(picture.chroma_bit_depth), colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
             RawFrame::Planar(p) => (p.depth, p.colour.full),
             RawFrame::Rgb(_) => (8, true),
@@ -288,7 +344,7 @@ impl VideoGeometry {
         let (depth, full) = match frame {
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             RawFrame::Surface { surface, .. } => (surface.depth(), surface.full_range()),
-            RawFrame::Avc { picture, colour } => (picture.bit_depth, colour.full),
+            RawFrame::Avc { picture, colour } => (picture.bit_depth.max(picture.chroma_bit_depth), colour.full),
             RawFrame::Planar8(p) => (8, p.colour.full),
             RawFrame::Planar(p) => (p.depth, p.colour.full),
             RawFrame::Rgb(_) => (8, true),
@@ -319,14 +375,23 @@ impl VideoGeometry {
         full: bool,
         media: bool,
     ) -> Result<GeometryFrame> {
+        self.apply_samples_filled(data,width,height,subsampling,depth,full,media,None)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn apply_samples_filled(
+        &self, data: &[u8], width: usize, height: usize,
+        subsampling: Option<[usize;2]>, depth: u8, full: bool, media: bool, rgb_fill: Option<u16>,
+    ) -> Result<GeometryFrame> {
         if let Some(rotation) = self.rotate {
             let before = Self { pad: None, scale: None, rotate: None, ..*self };
-            let source = before.apply_samples(data, width, height, subsampling, depth, full, media)?;
-            let rotated = fvid_media::owned_rotate::rotate(&source, rotation.degrees, depth, full)
-                .map_err(|e| invalid(&e))?;
+            let source = before.apply_samples_filled(data, width, height, subsampling, depth, full, media,rgb_fill)?;
+            let rotated=match rgb_fill {
+                Some(fill)=>fvid_media::owned_rotate::rotate_rgb_with_fill(&source,rotation.degrees,depth,fill),
+                None=>fvid_media::owned_rotate::rotate(&source,rotation.degrees,depth,full),
+            }.map_err(|e|invalid(&e))?;
             let after = Self { pad: self.pad, scale: self.scale, ..Default::default() };
             if after.is_identity() { return Ok(rotated); }
-            return after.apply_samples(&rotated.data, rotated.width, rotated.height, rotated.subsampling, depth, full, media);
+            return after.apply_samples_filled(&rotated.data, rotated.width, rotated.height, rotated.subsampling, depth, full, media,rgb_fill);
         }
         let rgb = subsampling.is_none();
         let [sx, sy] = subsampling.unwrap_or([1, 1]);
@@ -412,7 +477,7 @@ impl VideoGeometry {
                 .try_reserve(out_size)
                 .map_err(|_| invalid("cannot allocate transformed frame"))?;
             let black: u16 = if rgb {
-                0
+                rgb_fill.unwrap_or(0)
             } else if media && !full {
                 let code = if plane == 0 { 16u32 } else { 128 };
                 ((code * ((1u32 << depth) - 1) + 127) / 255) as u16
@@ -424,7 +489,12 @@ impl VideoGeometry {
                 16u16 << (depth - 8)
             };
             let mut fill = [0u8; 6];
-            if !rgb { fill[..2].copy_from_slice(&black.to_le_bytes()); }
+            if rgb {
+                let sample=if depth==8 {1} else {2};
+                for channel in 0..3 {
+                    if sample==1 {fill[channel]=black as u8;} else {fill[2*channel..2*channel+2].copy_from_slice(&black.to_le_bytes());}
+                }
+            } else {fill[..2].copy_from_slice(&black.to_le_bytes());}
             for row in 0..dh {
                 let py = sample_index(row, canvas_h.div_ceil(ody), dh, media);
                 for col in 0..dw {

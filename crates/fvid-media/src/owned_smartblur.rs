@@ -349,27 +349,39 @@ fn filter_plane(
         .map_err(|e| e.to_string())?;
     let maximum = (1i64 << depth) - 1;
     let ceiling = (1i64 << (depth + 7)) - 1;
-    for y in 0..height {
-        for row in &axes.horizontal {
-            let sum: i64 = row
-                .weights
-                .iter()
-                .enumerate()
-                .map(|(i, &weight)| sample(y * width + row.start + i) * i64::from(weight))
-                .sum();
-            horizontal.push((sum >> 7).min(ceiling));
+    if bytes == 1 {
+        for y in 0..height {
+            let src_row = &source[y * width..(y + 1) * width];
+            for row in &axes.horizontal {
+                let mut sum = 0i64;
+                for (&s, &weight) in src_row[row.start..row.start + row.weights.len()]
+                    .iter()
+                    .zip(&row.weights)
+                {
+                    sum += i64::from(s) * i64::from(weight);
+                }
+                horizontal.push((sum >> 7).min(ceiling));
+            }
+        }
+    } else {
+        for y in 0..height {
+            let row_base = y * width;
+            for row in &axes.horizontal {
+                let mut sum = 0i64;
+                for (i, &weight) in row.weights.iter().enumerate() {
+                    sum += sample(row_base + row.start + i) * i64::from(weight);
+                }
+                horizontal.push((sum >> 7).min(ceiling));
+            }
         }
     }
     let threshold = i64::from(plane.threshold) * (1i64 << (depth - 8));
     for (y, row) in axes.vertical.iter().enumerate() {
         for x in 0..width {
-            let sum: i64 = (1 << 18)
-                + row
-                    .weights
-                    .iter()
-                    .enumerate()
-                    .map(|(i, &weight)| horizontal[(row.start + i) * width + x] * i64::from(weight))
-                    .sum::<i64>();
+            let mut sum = 1i64 << 18;
+            for (i, &weight) in row.weights.iter().enumerate() {
+                sum += horizontal[(row.start + i) * width + x] * i64::from(weight);
+            }
             let filtered = (sum >> 19).clamp(0, maximum);
             let original = sample(y * width + x);
             let difference = original - filtered;

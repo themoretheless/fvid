@@ -2,7 +2,7 @@
 /// left as the characters it happens to decode to rather than as a file it
 /// refuses: a name is worth showing however it was written, and a file with a
 /// badly coded one still plays.
-fn lenient_text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Option<String> {
+pub(crate) fn lenient_text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Option<String> {
     Some(
         String::from_utf8_lossy(&bytes(r, e, max).ok()?)
             .trim_end_matches('\0')
@@ -13,7 +13,7 @@ fn lenient_text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Option<Str
 /// `fields` would take as the whole list being bad. A `Tags` master is where
 /// this is needed: some muxers rewrite it in place and leave a byte of padding
 /// behind the last tag, and the tags standing before it are still the file's.
-fn fields_to_first_gap<R: Read + Seek>(
+pub(crate) fn fields_to_first_gap<R: Read + Seek>(
     r: &mut R,
     e: Element,
     count: &mut usize,
@@ -44,7 +44,7 @@ fn fields_to_first_gap<R: Read + Seek>(
 /// attachment. A list this reader cannot walk, or one that names nothing of the
 /// kind, leaves the file stating nothing instead of failing it — as does a tag
 /// of a name this player has no line for.
-fn read_tags_collect<R: Read + Seek>(
+pub(crate) fn read_tags_collect<R: Read + Seek>(
     r: &mut R,
     e: Element,
     count: &mut usize,
@@ -140,7 +140,7 @@ fn read_tags_collect<R: Read + Seek>(
 /// `TimestampScale` states so the scale — which the `Info` may still be to come
 /// by — can be applied later. A list this reader cannot walk leaves no
 /// chapters at all rather than failing the file, which plays fine without them.
-fn read_chapters<R: Read + Seek>(
+pub(crate) fn read_chapters<R: Read + Seek>(
     r: &mut R,
     e: Element,
     count: &mut usize,

@@ -5,6 +5,7 @@ use crate::{Result, invalid};
 pub struct Reference420<'a> {
     planes: Option<[ReferencePlane<'a>; 3]>,
     depth: u8,
+    chroma_depth: u8,
 }
 #[derive(Clone, Copy, Debug)]
 pub struct ComponentWeight {
@@ -30,6 +31,7 @@ pub struct Prediction420 {
     pub cb: [u16; 64],
     pub cr: [u16; 64],
     depth: u8,
+    chroma_depth: u8,
 }
 impl<'a> Reference420<'a> {
     /// Select matching luma/chroma row parity without allocating field planes.
@@ -45,6 +47,7 @@ impl<'a> Reference420<'a> {
                 None => None,
             },
             depth: self.depth,
+            chroma_depth: self.chroma_depth,
         })
     }
     /// A non-existing DPB slot carries no pixels. It may remain unused in an
@@ -56,6 +59,7 @@ impl<'a> Reference420<'a> {
         Ok(Self {
             planes: None,
             depth,
+            chroma_depth: depth,
         })
     }
     /// Plane strides are in samples. Construct once per reference frame, since
@@ -67,16 +71,27 @@ impl<'a> Reference420<'a> {
         strides: [usize; 3],
         depth: u8,
     ) -> Result<Self> {
+        Self::new_components(planes,width,height,strides,[depth;2])
+    }
+    pub fn new_components(
+        planes: [&'a [u16]; 3],
+        width: usize,
+        height: usize,
+        strides: [usize; 3],
+        depths: [u8;2],
+    ) -> Result<Self> {
+        let depth=depths[0];
         if width % 2 != 0 || height % 2 != 0 {
             return Err(invalid("AVC 4:2:0 reference dimensions must be even"));
         }
         Ok(Self {
             planes: Some([
                 ReferencePlane::new(planes[0], width, height, strides[0], depth)?,
-                ReferencePlane::new(planes[1], width / 2, height / 2, strides[1], depth)?,
-                ReferencePlane::new(planes[2], width / 2, height / 2, strides[2], depth)?,
+                ReferencePlane::new(planes[1], width / 2, height / 2, strides[1], depths[1])?,
+                ReferencePlane::new(planes[2], width / 2, height / 2, strides[2], depths[1])?,
             ]),
             depth,
+            chroma_depth: depths[1],
         })
     }
     /// `new` for planes this decoder reconstructed: skips the full-picture
@@ -88,16 +103,27 @@ impl<'a> Reference420<'a> {
         strides: [usize; 3],
         depth: u8,
     ) -> Result<Self> {
+        Self::from_decoded_components(planes,width,height,strides,[depth;2])
+    }
+    pub fn from_decoded_components(
+        planes: [&'a [u16]; 3],
+        width: usize,
+        height: usize,
+        strides: [usize; 3],
+        depths: [u8;2],
+    ) -> Result<Self> {
+        let depth=depths[0];
         if width % 2 != 0 || height % 2 != 0 {
             return Err(invalid("AVC 4:2:0 reference dimensions must be even"));
         }
         Ok(Self {
             planes: Some([
                 ReferencePlane::from_decoded(planes[0], width, height, strides[0], depth)?,
-                ReferencePlane::from_decoded(planes[1], width / 2, height / 2, strides[1], depth)?,
-                ReferencePlane::from_decoded(planes[2], width / 2, height / 2, strides[2], depth)?,
+                ReferencePlane::from_decoded(planes[1], width / 2, height / 2, strides[1], depths[1])?,
+                ReferencePlane::from_decoded(planes[2], width / 2, height / 2, strides[2], depths[1])?,
             ]),
             depth,
+            chroma_depth: depths[1],
         })
     }
     /// Origin and size are in luma samples, vector in quarter-luma units.
@@ -107,7 +133,7 @@ impl<'a> Reference420<'a> {
         motion: [i32; 2],
         size: [usize; 2],
     ) -> Result<Prediction420> {
-        let mut out = Prediction420::empty(self.depth);
+        let mut out = Prediction420::empty_components([self.depth,self.chroma_depth]);
         self.predict_into(origin, motion, size, &mut out, &mut Scratch::new())?;
         Ok(out)
     }
@@ -146,6 +172,7 @@ impl<'a> Reference420<'a> {
         out.width = width;
         out.height = height;
         out.depth = self.depth;
+        out.chroma_depth = self.chroma_depth;
         let count = width * height;
         planes[0].luma_with(origin, motion, width, height, &mut out.y[..count], scratch)?;
         let chroma_origin = [origin[0] / 2, origin[1] / 2];
@@ -171,6 +198,10 @@ impl<'a> Reference420<'a> {
 impl Prediction420 {
     /// A zero 16x16 buffer for `predict_into`.
     pub fn empty(depth: u8) -> Self {
+        Self::empty_components([depth;2])
+    }
+    pub fn empty_components(depths:[u8;2]) -> Self {
+        let depth=depths[0];
         Self {
             width: 16,
             height: 16,
@@ -178,6 +209,7 @@ impl Prediction420 {
             cb: [0; 64],
             cr: [0; 64],
             depth,
+            chroma_depth: depths[1],
         }
     }
     pub fn dimensions(&self) -> (usize, usize) {
@@ -202,7 +234,7 @@ impl Prediction420 {
         .enumerate()
         {
             let w = weights[component];
-            weight_block(samples, w.weight, w.offset, w.denominator, self.depth)?;
+            weight_block(samples, w.weight, w.offset, w.denominator, if component==0 {self.depth}else{self.chroma_depth})?;
         }
         Ok(())
     }
@@ -217,7 +249,7 @@ impl Prediction420 {
         other: &Self,
         weights: [[ComponentWeight; 3]; 2],
     ) -> Result<()> {
-        if self.width != other.width || self.height != other.height || self.depth != other.depth {
+        if self.width != other.width || self.height != other.height || self.depth != other.depth || self.chroma_depth != other.chroma_depth {
             return Err(invalid("AVC prediction geometry or bit depth mismatch"));
         }
         let count = self.width * self.height;
@@ -242,7 +274,7 @@ impl Prediction420 {
                 [w[0].weight, w[1].weight],
                 [w[0].offset, w[1].offset],
                 w[0].denominator,
-                self.depth,
+                if component==0 {self.depth}else{self.chroma_depth},
             )?;
         }
         Ok(())
@@ -288,7 +320,7 @@ impl Prediction420 {
                 Some(&chroma_dc[component]),
                 8,
             )?;
-            *plane = super::avc_transform::reconstruct(plane, &residual, self.depth)?;
+            *plane = super::avc_transform::reconstruct(plane, &residual, self.chroma_depth)?;
         }
         Ok(self)
     }
@@ -314,7 +346,7 @@ impl Prediction420 {
         qs: [u8; 3],
         switching: bool,
     ) -> Result<Self> {
-        if self.dimensions() != (16, 16) || self.depth != 8 {
+        if self.dimensions() != (16, 16) || self.depth != 8 || self.chroma_depth != 8 {
             return Err(invalid("SP requires an eight-bit 16x16 prediction"));
         }
         for index in 0..16 {
@@ -392,7 +424,7 @@ impl Prediction420 {
             let dc = chroma_dc_2x2(
                 &chroma_dc[component],
                 qp[component + 1],
-                self.depth,
+                self.chroma_depth,
                 weights4[component + 1][0],
             )?;
             for index in 0..4 {
@@ -401,11 +433,11 @@ impl Prediction420 {
                 let residual = residual_4x4(
                     &chroma_ac[component][index],
                     qp[component + 1],
-                    self.depth,
+                    self.chroma_depth,
                     &weights4[component + 1],
                     Some(dc[index]),
                 )?;
-                let block = reconstruct_4x4(&pred, &residual, self.depth)?;
+                let block = reconstruct_4x4(&pred, &residual, self.chroma_depth)?;
                 for row in 0..4 {
                     plane[(y + row) * 8 + x..(y + row) * 8 + x + 4]
                         .copy_from_slice(&block[row * 4..row * 4 + 4]);
@@ -423,27 +455,16 @@ pub struct MacroblockPrediction {
     covered: u16,
 }
 impl MacroblockPrediction {
-    pub fn new(depth: u8) -> Result<Self> {
-        if !(8..=14).contains(&depth) {
-            return Err(invalid("AVC prediction bit depth out of range"));
-        }
-        Ok(Self {
-            picture: Prediction420 {
-                width: 16,
-                height: 16,
-                y: [0; 256],
-                cb: [0; 64],
-                cr: [0; 64],
-                depth,
-            },
-            covered: 0,
-        })
+    pub fn new(depth:u8)->Result<Self> {Self::new_components([depth;2])}
+    pub fn new_components(depths:[u8;2])->Result<Self> {
+        if depths.iter().any(|d|!(8..=14).contains(d)) {return Err(invalid("AVC prediction bit depth out of range"));}
+        Ok(Self {picture:Prediction420::empty_components(depths),covered:0})
     }
     /// Origin is relative to this macroblock. Invalid input leaves it unchanged.
     pub fn insert(&mut self, origin: [usize; 2], partition: &Prediction420) -> Result<()> {
         let [x, y] = origin;
         let (w, h) = partition.dimensions();
-        if partition.depth != self.picture.depth
+        if partition.depth != self.picture.depth || partition.chroma_depth != self.picture.chroma_depth
             || x > 16 - w
             || y > 16 - h
             || x % 4 != 0
@@ -461,14 +482,11 @@ impl MacroblockPrediction {
             return Err(invalid("overlapping AVC prediction partitions"));
         }
         // Predictions are clipped to the bit depth when interpolated and weighted.
-        debug_assert!({
-            let max = (1u16 << self.picture.depth) - 1;
-            partition.y[..w * h]
-                .iter()
-                .chain(&partition.cb[..w * h / 4])
-                .chain(&partition.cr[..w * h / 4])
-                .all(|&v| v <= max)
-        });
+        debug_assert!([
+            (&partition.y[..w*h],self.picture.depth),
+            (&partition.cb[..w*h/4],self.picture.chroma_depth),
+            (&partition.cr[..w*h/4],self.picture.chroma_depth),
+        ].into_iter().all(|(plane,depth)|plane.iter().all(|&v|u32::from(v)<(1u32<<depth))));
         // Rows are 4 to 16 samples; plain loops beat a memmove call per row.
         for row in 0..h {
             let dst = &mut self.picture.y[(y + row) * 16 + x..][..w];

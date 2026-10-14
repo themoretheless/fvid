@@ -251,9 +251,10 @@ impl DownloadedInput {
         let result: Result<()> = (|| {
             loop {
                 cancelled(options)?;
-                let count = body
-                    .read(&mut scratch)
-                    .map_err(|e| format!("HTTP media body read: {e}"))?;
+                let count = match body.read(&mut scratch) {
+                    Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                    result => result.map_err(|e| format!("HTTP media body read: {e}"))?,
+                };
                 if count == 0 {
                     break;
                 }
@@ -318,6 +319,109 @@ mod tests {
     use super::*;
     const VIDEO: &[u8] = include_bytes!("../../../tests/fixtures/playback-errors/rotate-grid.y4m");
     #[test]
+    fn unknown_length_body_does_not_read_a_whole_chunk_past_its_byte_budget() {
+        const CLIP: &[u8] = include_bytes!("../../../tests/fixtures/playback-errors/http-byte-limit.y4m");
+        struct Counted { source: std::io::Cursor<&'static [u8]>, bytes: usize }
+        impl Read for Counted {
+            fn read(&mut self, output: &mut [u8]) -> std::io::Result<usize> {
+                let count = self.source.read(output)?;
+                self.bytes += count;
+                Ok(count)
+            }
+        }
+        let control = DownloadedInput::from_body(CLIP, None, "y4m", &Default::default()).unwrap();
+        assert_eq!(crate::owned_y4m_decode::decode_video(control.path()).unwrap().video_frames, 3);
+        for limit in [0, 1, 31, CLIP.len() as u64 - 1] {
+            let mut body = Counted { source: std::io::Cursor::new(CLIP), bytes: 0 };
+            let options = DownloadOptions { max_bytes: Some(limit), ..Default::default() };
+            let error = DownloadedInput::from_body(&mut body, None, "y4m", &options).unwrap_err();
+            assert!(error.contains("byte limit"));
+            assert!(body.bytes as u64 <= limit + 1, "budget {limit} consumed {} bytes", body.bytes);
+        }
+        for limit in [CLIP.len() as u64, u64::MAX] {
+            let options = DownloadOptions { max_bytes: Some(limit), ..Default::default() };
+            let input = DownloadedInput::from_body(CLIP, None, "y4m", &options).unwrap();
+            assert_eq!(std::fs::read(input.path()).unwrap(), CLIP);
+        }
+    }
+    #[test]
+    fn interrupted_body_read_keeps_the_valid_video_and_permanent_errors_fail() {
+        const CLIP: &[u8] =
+            include_bytes!("../../../tests/fixtures/playback-errors/http-interrupted-body.y4m");
+        struct Body {
+            inner: std::io::Cursor<&'static [u8]>,
+            kind: std::io::ErrorKind,
+            fired: bool,
+            at: u64,
+        }
+        impl Read for Body {
+            fn read(&mut self, bytes: &mut [u8]) -> std::io::Result<usize> {
+                let position = self.inner.position();
+                if position == self.at && !self.fired {
+                    self.fired = true;
+                    return Err(std::io::Error::new(
+                        self.kind,
+                        "synthetic body interruption",
+                    ));
+                }
+                let count = if position < self.at {
+                    bytes.len().min((self.at - position) as usize)
+                } else {
+                    bytes.len()
+                };
+                self.inner.read(&mut bytes[..count])
+            }
+        }
+        let manifest: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/playback-errors/http-interrupted-body.json"
+        ))
+        .unwrap();
+        let at = manifest["interrupt_at"].as_u64().unwrap();
+        let body = |kind| Body {
+            inner: std::io::Cursor::new(CLIP),
+            kind,
+            fired: false,
+            at,
+        };
+        for length in [None, Some(CLIP.len() as u64)] {
+            let control =
+                DownloadedInput::from_body(CLIP, length, "y4m", &Default::default()).unwrap();
+            assert_eq!(
+                crate::owned_y4m_decode::decode_video(control.path())
+                    .unwrap()
+                    .video_frames,
+                3
+            );
+            let input = DownloadedInput::from_body(
+                body(std::io::ErrorKind::Interrupted),
+                length,
+                "y4m",
+                &Default::default(),
+            )
+            .unwrap();
+            assert_eq!(
+                std::fs::read(input.path()).unwrap(),
+                std::fs::read(control.path()).unwrap()
+            );
+            assert_eq!(
+                crate::owned_y4m_decode::decode_video(input.path())
+                    .unwrap()
+                    .video_frames,
+                3
+            );
+        }
+        assert_eq!(
+            DownloadedInput::from_body(
+                body(std::io::ErrorKind::PermissionDenied),
+                None,
+                "y4m",
+                &Default::default()
+            )
+            .unwrap_err(),
+            "HTTP media body read: synthetic body interruption"
+        );
+    }
+    #[test]
     fn finite_body_is_seekable_and_retained_until_owner_drop() {
         let input =
             DownloadedInput::from_body(VIDEO, Some(VIDEO.len() as u64), "y4m", &Default::default())
@@ -361,9 +465,11 @@ mod tests {
             max_bytes: Some(1),
             ..Default::default()
         };
-        assert!(DownloadedInput::from_body(VIDEO, None, "y4m", &limited)
-            .unwrap_err()
-            .contains("byte limit"));
+        assert!(
+            DownloadedInput::from_body(VIDEO, None, "y4m", &limited)
+                .unwrap_err()
+                .contains("byte limit")
+        );
         let flag = CancelFlag::new();
         let trigger = flag.clone();
         let options = DownloadOptions {
@@ -371,9 +477,11 @@ mod tests {
             progress: Some(ProgressHook::new(move |_| trigger.cancel())),
             ..Default::default()
         };
-        assert!(DownloadedInput::from_body(VIDEO, None, "y4m", &options)
-            .unwrap_err()
-            .contains("cancelled"));
+        assert!(
+            DownloadedInput::from_body(VIDEO, None, "y4m", &options)
+                .unwrap_err()
+                .contains("cancelled")
+        );
     }
     #[test]
     fn standalone_scope_refuses_before_network_and_other_schemes_are_excluded() {
@@ -432,11 +540,10 @@ mod tests {
                 3
             );
         }
-        assert!(DownloadedInput::download(
-            &format!("http://{address}/truncated"),
-            &Default::default()
-        )
-        .is_err());
+        assert!(
+            DownloadedInput::download(&format!("http://{address}/truncated"), &Default::default())
+                .is_err()
+        );
         server.join().unwrap();
     }
 }
@@ -535,9 +642,11 @@ mod hls_tests {
         );
         let events = events.lock().unwrap();
         assert_eq!(events.iter().filter(|event| event.done).count(), 1);
-        assert!(events
-            .windows(2)
-            .all(|pair| pair[0].payload_bytes <= pair[1].payload_bytes));
+        assert!(
+            events
+                .windows(2)
+                .all(|pair| pair[0].payload_bytes <= pair[1].payload_bytes)
+        );
         let path = input.path().to_owned();
         drop(input);
         assert!(!path.exists());

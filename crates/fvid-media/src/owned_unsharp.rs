@@ -133,29 +133,31 @@ impl Unsharp {
             horizontal.resize(count, 0u64);
             for row in 0..h {
                 for x in 0..w {
-                    let mut sum = 0;
+                    let mut sum = 0u64;
                     for k in 0..mx as usize {
                         let px =
-                            (x as i128 + k as i128 - rx as i128).clamp(0, w as i128 - 1) as usize;
+                            (x as i64 + k as i64 - rx as i64).clamp(0, w as i64 - 1) as usize;
                         sum += read(start + row * w + px) * wx[k];
                     }
                     horizontal[row * w + x] = sum;
                 }
             }
             let shift = (mx + my - 2) as u32;
+            let round = 1u64 << (shift - 1);
+            let amount = i64::from(amount);
             for row in 0..h {
                 for x in 0..w {
                     let mut sum = 0u64;
                     for k in 0..my as usize {
                         let py =
-                            (row as i128 + k as i128 - ry as i128).clamp(0, h as i128 - 1) as usize;
+                            (row as i64 + k as i64 - ry as i64).clamp(0, h as i64 - 1) as usize;
                         sum += horizontal[py * w + x] * wy[k];
                     }
-                    let blurred = (sum as u32).wrapping_add(1u32 << (shift - 1)) >> shift;
+                    let blurred = (sum.wrapping_add(round) >> shift) as i64;
                     let index = start + row * w + x;
                     let original = read(index) as i64;
                     let value = (original
-                        + (((original - i64::from(blurred)) * i64::from(amount)) >> 16))
+                        + (((original - blurred) * amount) >> 16))
                         .clamp(0, max);
                     if bps == 1 {
                         output[index] = value as u8;

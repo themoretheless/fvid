@@ -6,11 +6,17 @@ use std::io::{Read, Seek, SeekFrom};
 pub use fvid_media::owned_matroska::Chapter;
 use fvid_media::owned_opus_packet::{duration_ns as opus_lace_duration, header_channels as opus_lace_channels};
 use fvid_media::owned_aac::config::AudioSpecificConfig as WebmAacConfig;
+mod reader_ebml {
+    use super::*;
+    include!("../../crates/fvid-media/src/owned_ebml_impl.rs");
+    include!("../../crates/fvid-media/src/owned_matroska_metadata_read_impl.rs");
+}
 include!("../../crates/fvid-media/src/owned_webm_reader_impl.rs");
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::reader_ebml::vint;
     use std::io::Cursor;
     fn atom(id: &[u8], payload: &[u8]) -> Vec<u8> {
         assert!(payload.len() < 127);

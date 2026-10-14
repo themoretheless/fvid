@@ -106,7 +106,7 @@ impl ColorCorrect {
                 let start = y + plane * c;
                 let (lo, hi) = match self.analyze {
                     Analyze::Average => {
-                        let sum = (0..c).map(|i| read(start + i) as u128).sum::<u128>();
+                        let sum = (0..c).map(|i| read(start + i) as u64).sum::<u64>();
                         let v = imax * sum as f32 / c as f32 - 0.5;
                         (v, v)
                     }

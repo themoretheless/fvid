@@ -32,6 +32,7 @@ pub(crate) fn try_webm(source:&Path,transform:&DecodeTransform)->Result<Option<D
 
 pub(crate) struct FrameView<'a> {
     pub pixels: &'a [u8],
+    pub alpha: Option<&'a [u8]>,
     pub width: u32,
     pub height: u32,
     pub depth: u8,
@@ -139,17 +140,15 @@ pub(crate) fn decode_webm(
     let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
         return Err("input has no video stream".into());
     };
-    if track.crop != [0; 4]
-        || track.rotation != 0
-    {
-        return Ok(None);
-    }
+    let stored_crop=track.crop;
+    let stored_rotation=track.rotation;
     let number = track.number;
     let track_hdr=track.hdr;
     let full_range = track.colour.full_range;
     let matrix = if track.colour.matrix == 0 {6} else {track.colour.matrix};
     let default_duration = track.default_duration_ns;
-    let source_info = (track.pixel_aspect(), default_duration);
+    let (n,d)=track.pixel_aspect();
+    let source_info = (if matches!(stored_rotation,90|270) {(d,n)} else {(n,d)}, default_duration);
     let width = u32::try_from(track.width).map_err(|_| "FFV1 width exceeds API range")?;
     let height = u32::try_from(track.height).map_err(|_| "FFV1 height exceeds API range")?;
     // No implicit policy ceiling: allocation sizes are checked by the decoder.
@@ -210,7 +209,7 @@ pub(crate) fn decode_webm(
             .checked_add(1)
             .ok_or("FFV1 input packet count overflow")?;
         let packet = reader.read_packet(index).map_err(|e| e.to_string())?;
-        let decoded = match decoder.decode(&packet) {
+        let mut decoded = match decoder.decode(&packet) {
             Ok(Some(frame)) => frame,
             Ok(None)=>continue,
             Err(error) if error.starts_with(crate::owned_ffv1_decoder::UNSUPPORTED_PREFIX) || error.starts_with(crate::owned_webm_codec::UNSUPPORTED_PREFIX) => {
@@ -219,6 +218,19 @@ pub(crate) fn decode_webm(
             Err(error) => return Err(error),
         };
         if !visible {continue;}
+        if crate::owned_display_geometry::needs(&decoded.frame,stored_crop,stored_rotation) {
+            let (frame,alpha)=crate::owned_display_geometry::apply(&decoded.frame,decoded.alpha.as_deref(),decoded.depth,stored_crop,stored_rotation)?;
+            decoded.frame=frame;decoded.alpha=alpha;
+        }
+
+        let alpha = if let Some(alpha) = decoded.alpha.as_deref() {
+            let Some(alpha) = transform_alpha(&decoded.frame, alpha, decoded.depth, &frame_transform)? else {
+                return Ok(None);
+            };
+            if transform.overlay.is_some() { return Ok(None); }
+            Some(alpha)
+        } else { None };
+
         let origin=*origin.get_or_insert(pts_ns);
         let time=i128::from(pts_ns)-i128::from(origin);
         let past_end=transform.interval.is_some_and(|(_,to)|time>=i128::from(to)*1000);
@@ -299,6 +311,7 @@ pub(crate) fn decode_webm(
         if emit {
             let monochrome = stats.pixel_format.starts_with("gray");
             let subsampling = if stats.pixel_format.starts_with("rgb") { None } else { Some(subsampling(&stats.pixel_format)) };
+            let pixels = transformed.as_deref().unwrap_or(&decoded.frame.data);
             let metadata = (
                 stats.width,
                 stats.height,
@@ -311,20 +324,29 @@ pub(crate) fn decode_webm(
                 primaries,
                 transfer,
                 hdr,
+                (pixels.len(), alpha.as_ref().map(Vec::len)),
             );
             if (temporal || compressed) && frame_metadata.is_some_and(|previous| previous != metadata) {
                 return Ok(None);
             }
             frame_metadata = Some(metadata);
             temporal_format = Some(stats.pixel_format.clone());
-            let pixels = transformed.as_deref().unwrap_or(&decoded.frame.data);
+            let combined = alpha.as_ref().map(|alpha| -> Result<Vec<u8>> {
+                let length = pixels.len().checked_add(alpha.len()).ok_or("alpha frame storage overflow")?;
+                let mut data = crate::owned_frame::buffer(length)?;
+                data[..pixels.len()].copy_from_slice(pixels);
+                data[pixels.len()..].copy_from_slice(alpha);
+                Ok(data)
+            }).transpose()?;
+            let pixels = combined.as_deref().unwrap_or(pixels);
             let retain = visit.is_some();
             let mut sink = |data: &[u8], pts: u64, duration: u64| -> Result<()> {
                 if let Some(reverse) = reverse.as_mut() {
                     reverse.push(data, pts, duration)?;
                 } else if let Some(callback) = visit.as_deref_mut() {
                     callback(FrameView {
-                        pixels: data,
+                        pixels: &data[..metadata.11.0],
+                        alpha: metadata.11.1.map(|_| &data[metadata.11.0..]),
                         width: metadata.0,
                         height: metadata.1,
                         depth: metadata.2,
@@ -379,7 +401,8 @@ pub(crate) fn decode_webm(
             }
             if let Some(callback) = visit.as_deref_mut() {
                 callback(FrameView {
-                    pixels: data,
+                    pixels: &data[..metadata.11.0],
+                    alpha: metadata.11.1.map(|_| &data[metadata.11.0..]),
                     width: metadata.0,
                     height: metadata.1,
                     depth: metadata.2,
@@ -398,7 +421,61 @@ pub(crate) fn decode_webm(
             Ok(())
         })?;
     }
+    if let Some(metadata) = frame_metadata {
+        if metadata.11.1.is_some() {
+            stats.pixel_format = if stats.pixel_format.starts_with("rgb") {
+                if metadata.2 == 8 {"rgba".into()} else {"rgba64le".into()}
+            } else if stats.pixel_format.starts_with("gray") {
+                if metadata.2 == 8 {"ya8".into()} else {"ya16le".into()}
+            } else {stats.pixel_format.replacen("yuv", "yuva", 1)};
+        }
+    }
     Ok(Some((stats, consumed)))
+}
+
+// Opacity has its own geometry and is never passed through color filters.
+fn transform_alpha(
+    frame: &crate::owned_frame::GeometryFrame,
+    alpha: &[u8],
+    depth: u8,
+    request: &DecodeTransform,
+) -> Result<Option<Vec<u8>>> {
+    let mut remaining = request.clone();
+    remaining.crop = None;
+    remaining.horizontal_flip = false;
+    remaining.vertical_flip = false;
+    remaining.transpose = None;
+    remaining.rotate = None;
+    remaining.pad = None;
+    remaining.scale = None;
+    remaining.negate = None;
+    remaining.curves = None;
+    remaining.colorbalance = None;
+    remaining.colorlevels = None;
+    remaining.colorchannelmixer = None;
+    if remaining != DecodeTransform::default() { return Ok(None); }
+    let geometry = DecodeTransform {
+        crop: request.crop, horizontal_flip: request.horizontal_flip,
+        vertical_flip: request.vertical_flip, transpose: request.transpose,
+        rotate: request.rotate, pad: request.pad, scale: request.scale,
+        ..Default::default()
+    };
+    let bytes = if depth == 8 {1} else {2};
+    let expected = frame.width.checked_mul(frame.height).and_then(|n| n.checked_mul(bytes))
+        .ok_or("alpha geometry size overflow")?;
+    if alpha.len() != expected { return Err("invalid alpha geometry storage".into()); }
+    let mut data = crate::owned_frame::buffer(expected.checked_mul(3).ok_or("alpha geometry size overflow")?)?;
+    for (sample, pixel) in alpha.chunks_exact(bytes).zip(data.chunks_exact_mut(3*bytes)) {
+        for channel in pixel.chunks_exact_mut(bytes) {channel.copy_from_slice(sample);}
+    }
+    let input = crate::owned_frame::GeometryFrame {width: frame.width, height: frame.height, subsampling: None, data};
+    let output = crate::owned_rgb_transform::process_opacity(&input, depth, &geometry, frame.subsampling.is_some())?
+        .ok_or("alpha geometry was not admitted")?;
+    let mut alpha = crate::owned_frame::buffer(output.data.len()/3)?;
+    for (pixel, sample) in output.data.chunks_exact(3*bytes).zip(alpha.chunks_exact_mut(bytes)) {
+        sample.copy_from_slice(&pixel[..bytes]);
+    }
+    Ok(Some(alpha))
 }
 
 fn subsampling(format: &str) -> [usize; 2] {

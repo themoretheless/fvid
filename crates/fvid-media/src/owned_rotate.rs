@@ -9,6 +9,31 @@ pub fn rotate(
     depth: u8,
     full_range: bool,
 ) -> Result<GeometryFrame> {
+    rotate_rgb_fill(frame, degrees, depth, full_range, 0)
+}
+
+/// Rotate packed RGB samples with an explicit equal-component canvas fill.
+/// Opacity geometry uses full-depth white fill for the opaque black backdrop.
+pub fn rotate_rgb_with_fill(
+    frame: &GeometryFrame,
+    degrees: f64,
+    depth: u8,
+    fill: u16,
+) -> Result<GeometryFrame> {
+    if frame.subsampling.is_some() || !(8..=16).contains(&depth) || u32::from(fill) >= 1u32 << depth
+    {
+        return Err("invalid RGB rotation fill or sample format".into());
+    }
+    rotate_rgb_fill(frame, degrees, depth, true, u32::from(fill))
+}
+
+pub(crate) fn rotate_rgb_fill(
+    frame: &GeometryFrame,
+    degrees: f64,
+    depth: u8,
+    full_range: bool,
+    rgb_fill: u32,
+) -> Result<GeometryFrame> {
     if !degrees.is_finite() || !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
         return Err("invalid rotation geometry, angle or depth".into());
     }
@@ -84,7 +109,7 @@ pub fn rotate(
         .enumerate()
     {
         let fill = if rgb {
-            0
+            rgb_fill
         } else if plane > 0 {
             128u32 << (depth - 8)
         } else if full_range {

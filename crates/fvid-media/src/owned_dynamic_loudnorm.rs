@@ -151,7 +151,7 @@ pub(crate) fn process<F: FnMut() -> Result<()>>(
             .iter()
             .enumerate()
             .map(|(tap, weight)| {
-                let index = (i as i128 + tap as i128 - 10).clamp(0, blocks as i128 - 1) as usize;
+                let index = (i as i64 + tap as i64 - 10).clamp(0, blocks as i64 - 1) as usize;
                 weight * anchors[index]
             })
             .sum::<f64>()

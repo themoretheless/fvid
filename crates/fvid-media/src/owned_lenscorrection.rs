@@ -2,7 +2,7 @@
 use crate::owned_frame::GeometryFrame;
 use std::cell::RefCell;
 type Result<T> = std::result::Result<T, String>;
-const UNIT: i128 = 1 << 24;
+const UNIT: i64 = 1 << 24;
 #[derive(Debug)]
 struct Map {
     width: usize,
@@ -103,25 +103,23 @@ impl LensCorrection {
         let mut values = Vec::new();
         values.try_reserve_exact(size).map_err(|e| e.to_string())?;
         let center = [
-            (self.center[0] * w as f64) as i128,
-            (self.center[1] * h as f64) as i128,
+            (self.center[0] * w as f64) as i64,
+            (self.center[1] * h as f64) as i64,
         ];
-        let inverse = (1i128 << 62) / (w as i128 * w as i128 + h as i128 * h as i128);
+        let inverse = (1i64 << 62) / (w as i64 * w as i64 + h as i64 * h as i64);
         for y in 0..h {
+            let dy = y as i64 - center[1];
+            let dy_sq = dy * dy;
             for x in 0..w {
-                let dx = x as i128 - center[0];
-                let dy = y as i128 - center[1];
-                let distance = ((dx * dx + dy * dy) * inverse + (1 << 31)) >> 32;
+                let dx = x as i64 - center[0];
+                let distance = ((dx * dx + dy_sq) * inverse + (1 << 31)) >> 32;
                 let fourth = (distance * distance + (1 << 27)) >> 28;
                 let multiplier = UNIT
-                    + ((distance * self.coefficients[0] as i128
-                        + fourth * self.coefficients[1] as i128
+                    + ((distance * self.coefficients[0]
+                        + fourth * self.coefficients[1]
                         + (1 << 27))
                         >> 28);
-                values.push(
-                    i64::try_from(multiplier)
-                        .map_err(|_| "lenscorrection radial multiplier overflow")?,
-                );
+                values.push(multiplier);
             }
         }
         // Keep only the current frame's small set of plane geometries across playback.
@@ -282,31 +280,31 @@ impl LensCorrection {
             .ok_or("lenscorrection map missing")?;
         let bytes = if depth == 8 { 1 } else { 2 };
         let center = [
-            (self.center[0] * w as f64) as i128,
-            (self.center[1] * h as f64) as i128,
+            (self.center[0] * w as f64) as i64,
+            (self.center[1] * h as f64) as i64,
         ];
         let mask = UNIT - 1;
         let fill = self.fill_sample(component, depth);
-        let read = |x: usize, y: usize| -> u128 {
+        let read = |x: usize, y: usize| -> u64 {
             let at = ((y * w + x) * stride + channel) * bytes;
             if bytes == 1 {
-                input[at] as u128
+                input[at] as u64
             } else {
-                u16::from_le_bytes([input[at], input[at + 1]]) as u128
+                u16::from_le_bytes([input[at], input[at + 1]]) as u64
             }
         };
         for y in 0..h {
             for x in 0..w {
-                let m = map.multipliers[y * w + x] as i128;
-                let delta = [x as i128 - center[0], y as i128 - center[1]];
+                let m = map.multipliers[y * w + x];
+                let delta = [x as i64 - center[0], y as i64 - center[1]];
                 let source = [
                     center[0] + ((m * delta[0] + UNIT / 2) >> 24),
                     center[1] + ((m * delta[1] + UNIT / 2) >> 24),
                 ];
                 let value = if source[0] < 0
                     || source[1] < 0
-                    || source[0] >= w as i128
-                    || source[1] >= h as i128
+                    || source[0] >= w as i64
+                    || source[1] >= h as i64
                 {
                     fill
                 } else {
@@ -314,22 +312,22 @@ impl LensCorrection {
                     if !self.bilinear {
                         read(u, v) as u16
                     } else {
-                        let fraction = |d: i128| -> u128 {
+                        let fraction = |d: i64| -> u64 {
                             if d >= 0 {
-                                ((m * d + UNIT / 2) & mask) as u128
+                                ((m * d + UNIT / 2) & mask) as u64
                             } else {
-                                (mask - ((m * (-d) + UNIT / 2) & mask)) as u128
+                                (mask - ((m * (-d) + UNIT / 2) & mask)) as u64
                             }
                         };
                         let a = fraction(delta[0]);
                         let b = fraction(delta[1]);
-                        let limit = mask as u128;
+                        let limit = mask as u64;
                         let nextu = (u + 1).min(w - 1);
                         let nextv = (v + 1).min(h - 1);
                         let top = (limit - a) * read(u, v) + a * read(nextu, v);
                         let bottom = (limit - a) * read(u, nextv) + a * read(nextu, nextv);
-                        (((limit - b) * top + b * bottom + (1u128 << 47)) >> 48)
-                            .min((1u128 << depth) - 1) as u16
+                        (((limit - b) * top + b * bottom + (1u64 << 47)) >> 48)
+                            .min((1u64 << depth) - 1) as u16
                     }
                 };
                 let at = ((y * w + x) * stride + channel) * bytes;

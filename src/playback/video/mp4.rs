@@ -414,6 +414,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         coded_height: h + h % 2,
                         crop: [0, w % 2, 0, h % 2],
                         bit_depth: surface.depth(),
+                        chroma_bit_depth: surface.depth(),
                         y: Vec::new(),
                         cb: Vec::new(),
                         cr: Vec::new(),
@@ -458,6 +459,11 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                     coded_height,
                     crop,
                     bit_depth: p.depth[0],
+                    chroma_bit_depth: if d.parameters().0.chroma_format == 0 {
+                        p.depth[0]
+                    } else {
+                        p.depth[1]
+                    },
                     y: p.planes[0].samples().to_vec(),
                     cb: if d.parameters().0.chroma_format == 0 {
                         vec![1 << (p.depth[0] - 1); coded_width / 2 * (coded_height / 2)]
@@ -516,6 +522,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                             coded_height,
                             crop: [0; 4],
                             bit_depth: p.depth,
+                            chroma_bit_depth: p.depth,
                             y: p.planes[0].samples.clone(),
                             cb: p.planes[1].samples.clone(),
                             cr: p.planes[2].samples.clone(),
@@ -578,6 +585,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                                 coded_height,
                                 crop,
                                 bit_depth: p.depth,
+                                chroma_bit_depth: p.depth,
                                 y: Vec::new(),
                                 cb: Vec::new(),
                                 cr: Vec::new(),
@@ -617,6 +625,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                             coded_height,
                             crop,
                             bit_depth: p.depth,
+                            chroma_bit_depth: p.depth,
                             y: narrow(0)?,
                             cb: narrow(1)?,
                             cr: narrow(2)?,
@@ -1027,6 +1036,7 @@ pub(crate) fn hardware_frame(
                 coded_height: h + h % 2,
                 crop: [0, w % 2, 0, h % 2],
                 bit_depth: planes.depth,
+                chroma_bit_depth: planes.depth,
                 y,
                 cb: words(planes.cb),
                 cr: words(planes.cr),
@@ -1040,6 +1050,7 @@ pub(crate) fn hardware_frame(
         coded_height: h + h % 2,
         crop: [0, w % 2, 0, h % 2],
         bit_depth: 8,
+        chroma_bit_depth: 8,
         y: Vec::new(),
         cb: Vec::new(),
         cr: Vec::new(),

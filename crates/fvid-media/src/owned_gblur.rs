@@ -85,63 +85,74 @@ impl GaussianBlur {
         if self.planes & 7 == 0 || self.sigma == [0.0, 0.0] {
             return Ok(());
         }
+        let mut kernels: [Option<(usize, Vec<f64>)>; 2] = [None, None];
+        for axis in 0..2 {
+            let sigma = self.sigma[axis] / (self.steps as f64).sqrt();
+            if sigma != 0.0 {
+                let radius = (sigma * 4.0).ceil() as usize;
+                let mut weights = Vec::new();
+                weights
+                    .try_reserve_exact(2 * radius + 1)
+                    .map_err(|e| e.to_string())?;
+                for i in 0..=2 * radius {
+                    let d = i as f64 - radius as f64;
+                    weights.push((-d * d / (2.0 * sigma * sigma)).exp());
+                }
+                let sum: f64 = weights.iter().sum();
+                for weight in &mut weights {
+                    *weight /= sum;
+                }
+                kernels[axis] = Some((radius, weights));
+            }
+        }
         let mut base = 0;
         for (plane, (w, h)) in sizes.into_iter().enumerate() {
             let area = w * h;
             if self.planes & (1 << plane) != 0 {
                 let mut data = Vec::new();
                 data.try_reserve_exact(area).map_err(|e| e.to_string())?;
-                for i in 0..area {
-                    let offset = base + i * bytes;
-                    data.push(if bytes == 1 {
-                        f64::from(frame.data[offset])
-                    } else {
-                        f64::from(u16::from_le_bytes([
-                            frame.data[offset],
-                            frame.data[offset + 1],
-                        ]))
-                    });
+                if bytes == 1 {
+                    for &b in &frame.data[base..base + area] {
+                        data.push(f64::from(b));
+                    }
+                } else {
+                    for chunk in frame.data[base..base + area * 2].chunks_exact(2) {
+                        data.push(f64::from(u16::from_le_bytes([chunk[0], chunk[1]])));
+                    }
                 }
                 let mut scratch = Vec::new();
                 scratch.try_reserve_exact(area).map_err(|e| e.to_string())?;
                 scratch.resize(area, 0.0);
                 for _ in 0..self.steps {
-                    for axis in 0..2 {
-                        let sigma = self.sigma[axis] / (self.steps as f64).sqrt();
-                        if sigma == 0.0 {
-                            continue;
-                        }
-                        let radius = (sigma * 4.0).ceil() as usize;
-                        let mut weights = Vec::new();
-                        weights
-                            .try_reserve_exact(2 * radius + 1)
-                            .map_err(|e| e.to_string())?;
-                        for i in 0..=2 * radius {
-                            let d = i as f64 - radius as f64;
-                            weights.push((-d * d / (2.0 * sigma * sigma)).exp());
-                        }
-                        let sum: f64 = weights.iter().sum();
-                        for weight in &mut weights {
-                            *weight /= sum;
-                        }
+                    if let Some((radius, ref weights)) = kernels[0] {
+                        let r_i64 = radius as i64;
+                        let max_x = w as i64 - 1;
                         for y in 0..h {
+                            let src_row = &data[y * w..(y + 1) * w];
+                            let dst_row = &mut scratch[y * w..(y + 1) * w];
                             for x in 0..w {
                                 let mut value = 0.0;
-                                for (i, weight) in weights.iter().enumerate() {
-                                    let delta = i as i64 - radius as i64;
-                                    let xx = if axis == 0 {
-                                        (x as i64 + delta).clamp(0, w as i64 - 1) as usize
-                                    } else {
-                                        x
-                                    };
-                                    let yy = if axis == 1 {
-                                        (y as i64 + delta).clamp(0, h as i64 - 1) as usize
-                                    } else {
-                                        y
-                                    };
-                                    value += data[yy * w + xx] * weight;
+                                for (i, &weight) in weights.iter().enumerate() {
+                                    let xx = (x as i64 + i as i64 - r_i64).clamp(0, max_x) as usize;
+                                    value += src_row[xx] * weight;
                                 }
-                                scratch[y * w + x] = value;
+                                dst_row[x] = value;
+                            }
+                        }
+                        std::mem::swap(&mut data, &mut scratch);
+                    }
+                    if let Some((radius, ref weights)) = kernels[1] {
+                        let r_i64 = radius as i64;
+                        let max_y = h as i64 - 1;
+                        for y in 0..h {
+                            let dst_row = &mut scratch[y * w..(y + 1) * w];
+                            for x in 0..w {
+                                let mut value = 0.0;
+                                for (i, &weight) in weights.iter().enumerate() {
+                                    let yy = (y as i64 + i as i64 - r_i64).clamp(0, max_y) as usize;
+                                    value += data[yy * w + x] * weight;
+                                }
+                                dst_row[x] = value;
                             }
                         }
                         std::mem::swap(&mut data, &mut scratch);

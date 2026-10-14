@@ -174,6 +174,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![0; 256],
             cb: vec![0; 64],
             cr: vec![0; 64],

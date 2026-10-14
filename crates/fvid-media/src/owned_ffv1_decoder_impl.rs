@@ -174,7 +174,8 @@ impl Decoder {
         let depth = if version == 0 {
             8
         } else {
-            r.integer(&mut h, false)?
+            // RFC 9043 section 4.2.7: accept historical zero as eight bits.
+            match r.integer(&mut h, false)? { 0 => 8, value => value }
         };
         if !(8..=16).contains(&depth) {
             return Err(unsupported("unsupported FFV1 sample depth"));

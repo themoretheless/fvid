@@ -216,6 +216,7 @@ fn first_frame(player: &mut Playback) -> Frame {
 fn packed(pixels: Pixels, budget: usize) -> Vec<u8> {
     match pixels {
         Pixels::Rgb(rgb) => rgb,
+        Pixels::Rgba(rgba) => fvid::playback_native::rgba_to_rgb_on_black(&rgba,budget).unwrap(),
         Pixels::Packed(planes, grade) => {
             let mut rgb = Vec::new();
             planes
@@ -512,6 +513,7 @@ fn a_real_hdr10_picture_is_tone_mapped_by_the_thread_that_shows_it() {
         // travels in is whatever route the thread took, packed for the first
         // picture and planes with the grid riding on them after that.
         match &graded.pixels {
+            Pixels::Rgba(_) => panic!("opaque HDR stream acquired alpha"),
             Pixels::Rgb(_) => {}
             Pixels::Planar(_, grade) | Pixels::Packed(_, grade) => assert!(
                 grade.as_ref().is_some_and(|grade| grade.is_gpu_grade()),
@@ -919,4 +921,30 @@ fn a_camera_log_unfolds_in_the_picture_the_thread_shows() {
         checked >= 1_000,
         "only {checked} of {walked} channels met a node of the grid"
     );
+}
+
+#[test]
+fn burst_seek_scrubbing_coalesces_to_final_generation_and_drops_cleanly() {
+    let data = include_bytes!("fixtures/hevc/main-ipb.mp4");
+    let mut reader = NativeReader::without_memory_limit(Cursor::new(data)).unwrap();
+    assert!(reader.read_frame().unwrap());
+    let mut player = Playback::start(reader, None);
+    player.pause();
+    for step in 1..=12 {
+        player.seek(Duration::from_millis(step * 30));
+    }
+    let final_gen = player.generation();
+    assert_eq!(final_gen, 12);
+    let deadline = Instant::now() + Duration::from_secs(5);
+    let preview = loop {
+        assert!(Instant::now() < deadline, "coalesced seek stalled");
+        match player.poll() {
+            Some(Event::Frame(frame)) if frame.generation == final_gen => break frame,
+            Some(Event::Error(error)) => panic!("{error}"),
+            _ => thread::sleep(Duration::from_millis(1)),
+        }
+    };
+    let (start, end, scale) = preview.interval.unwrap();
+    assert!(start * 1000 <= 360 * u128::from(scale));
+    assert!(end * 1000 > 360 * u128::from(scale));
 }

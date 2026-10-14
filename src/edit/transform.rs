@@ -8,8 +8,18 @@ pub struct CropRect {
 }
 
 impl CropRect {
+    /// Require positive dimensions and edges representable in decoded coordinates.
     pub fn new(x: u32, y: u32, width: u32, height: u32) -> Option<Self> {
-        (width > 0 && height > 0).then_some(Self { x, y, width, height })
+        (width > 0
+            && height > 0
+            && x.checked_add(width).is_some()
+            && y.checked_add(height).is_some())
+        .then_some(Self {
+            x,
+            y,
+            width,
+            height,
+        })
     }
 }
 

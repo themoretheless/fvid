@@ -6,7 +6,7 @@ use super::{
     avc_deblock::inter_plane,
     avc_inter::{Partition, Prediction},
     avc_inter_coefficients::InterCoefficients,
-    avc_inter_prediction::predict_macroblock,
+    avc_inter_prediction::predict_macroblock_components,
     avc_inter_slice::{InterCavlcSlice, InterMacroblock},
     avc_macroblock::IntraMacroblock,
     avc_motion_field::MotionField,
@@ -47,7 +47,7 @@ enum Order {
 /// (`y` is 16 rows, `cb`/`cr` 8 rows, all starting at the band's top).
 fn reconstruct_inter_job(
     job: InterJob,
-    depth: u8,
+    depths: [u8;2],
     scaling: &super::avc_scaling::ScalingMatrices,
     refs: &[Vec<&Reference420<'_>>; 2],
     w: usize,
@@ -55,9 +55,9 @@ fn reconstruct_inter_job(
     cb: &mut [u16],
     cr: &mut [u16],
 ) -> Result<()> {
-    let prediction = predict_macroblock(
+    let prediction = predict_macroblock_components(
         job.origin.map(|n| n as i32),
-        depth,
+        depths,
         &job.parts,
         &job.vectors,
         [&refs[0], &refs[1]],
@@ -250,7 +250,6 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         || (!sps.frame_mbs_only && sps.mb_adaptive_frame_field)
         || sps.chroma_format != 1
         || sps.separate_colour_plane
-        || sps.bit_depth_luma != sps.bit_depth_chroma
         || (pps.cabac && !matches!(pps.slice_groups, SliceGroups::Single))
         || header.redundant_pic_cnt != 0
     {
@@ -315,15 +314,15 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                     planes[list].push(Reference420::unavailable(sps.bit_depth_luma)?);
                     continue;
                 };
-                if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma {
+                if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma || r.chroma_bit_depth != sps.bit_depth_chroma {
                     return Err(invalid("inter-picture reference format mismatch"));
                 }
-                planes[list].push(Reference420::from_decoded(
+                planes[list].push(Reference420::from_decoded_components(
                     [&r.y, &r.cb, &r.cr],
                     w,
                     h,
                     [w, w / 2, w / 2],
-                    r.bit_depth,
+                    [r.bit_depth,r.chroma_bit_depth],
                 )?);
             }
         }
@@ -345,6 +344,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         coded_height: h,
         crop: sps.crop.map(|v| v as usize),
         bit_depth: sps.bit_depth_luma,
+        chroma_bit_depth: sps.bit_depth_chroma,
         y: vec![0; pixels],
         cb: vec![0; pixels / 4],
         cr: vec![0; pixels / 4],
@@ -404,7 +404,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
             .map_or(1, |n| n.get())
             .min(row_count)
             .max(1);
-        let depth = sps.bit_depth_luma;
+        let depths = [sps.bit_depth_luma,sps.bit_depth_chroma];
         let refs = &refs;
         let scaling = &scaling;
         let results: Vec<Result<()>> = std::thread::scope(|scope| {
@@ -434,7 +434,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                                 let slice = job.slice;
                                 reconstruct_inter_job(
                                     job,
-                                    depth,
+                                    depths,
                                     scaling,
                                     &refs[slice],
                                     w,
@@ -582,7 +582,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                                 slice_id,
                                 [Neighbour::NoPrediction; 2],
                             )?;
-                            let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+                            let bd = 6 * (i32::from(sps.bit_depth_chroma) - 8);
                             let qps = [
                                 block.qp,
                                 i32::from(chroma_qp(
@@ -809,7 +809,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                             .unwrap_or_else(|e| e.into_inner())[address % width_mbs] =
                             DecodedBlockEdges {
                                 blocks,
-                                qp: qps.map(|q| i32::from(q) - bd),
+                                qp: std::array::from_fn(|i| i32::from(qps[i])-6*(i32::from(if i==0 {sps.bit_depth_luma}else{sps.bit_depth_chroma})-8)),
                                 slice_id,
                                 disable_filter: header.disable_deblocking_filter_idc as u8,
                                 offsets: [header.alpha_offset, header.beta_offset],
@@ -907,7 +907,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         grids[2].extend(cr);
     }
     // The three planes deblock independently; run them on their own threads.
-    let depth = sps.bit_depth_luma;
+    let depths = [sps.bit_depth_luma,sps.bit_depth_chroma];
     let [y, cb, cr] = std::thread::scope(|scope| {
         let planes = [&mut out.y, &mut out.cb, &mut out.cr];
         let handles: Vec<_> = planes
@@ -917,7 +917,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
             .map(|(component, (plane, grid))| {
                 let scale = if component == 0 { 1 } else { 2 };
                 scope.spawn(move || {
-                    inter_plane(plane, w / scale, h / scale, depth, component != 0, grid)
+                    inter_plane(plane, w / scale, h / scale, depths[usize::from(component!=0)], component != 0, grid)
                 })
             })
             .collect();
@@ -967,6 +967,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![20; 256],
             cb: vec![60; 64],
             cr: vec![180; 64],
@@ -976,6 +977,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![100; 256],
             cb: vec![180; 64],
             cr: vec![60; 64],
@@ -1056,6 +1058,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![100; 512],
             cb: vec![90; 128],
             cr: vec![180; 128],
@@ -1082,6 +1085,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![200; 512],
             cb: vec![130; 128],
             cr: vec![50; 128],
@@ -1151,6 +1155,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: vec![100; 512],
             cb: vec![90; 128],
             cr: vec![180; 128],
@@ -1250,6 +1255,7 @@ mod tests {
             coded_height: 16,
             crop: [0; 4],
             bit_depth: 8,
+            chroma_bit_depth: 8,
             y: (0..256).map(|i| i as u16).collect(),
             cb: vec![90; 64],
             cr: vec![180; 64],

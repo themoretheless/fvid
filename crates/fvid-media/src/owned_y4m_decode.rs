@@ -367,9 +367,9 @@ pub(crate) fn requested_geometry(
         )
     }
 }
-fn point_sample(index: usize, input: usize, output: usize) -> usize {
-    let increment = (((input as u128) << 16) + output as u128 / 2) / output as u128;
-    (((index as u128 * increment + increment / 2) >> 16) as usize).min(input - 1)
+pub(crate) fn point_sample(index: usize, input: usize, output: usize) -> usize {
+    let increment = (((input as u64) << 16) + output as u64 / 2) / output as u64;
+    (((index as u64 * increment + increment / 2) >> 16) as usize).min(input - 1)
 }
 /// Transform planar pixels using the same request subset as owned decode.
 pub fn transform_frame_requested(

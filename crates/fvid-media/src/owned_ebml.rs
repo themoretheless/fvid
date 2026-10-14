@@ -43,6 +43,9 @@ impl Element {
     pub fn read_bytes(self, source: &mut (impl Read + Seek), limit: usize) -> Result<Vec<u8>> {
         bytes(source, self, limit)
     }
+    pub fn read_text(self, source: &mut (impl Read + Seek), limit: usize) -> Result<String> {
+        text(source, self, limit)
+    }
     pub fn read_uint(self, source: &mut (impl Read + Seek)) -> Result<u64> {
         uint(source, self)
     }

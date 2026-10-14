@@ -10,12 +10,13 @@ class Writer(CustomRange):
             assert not value,'zero-probability one cannot be encoded'
             return
         super().bit(state,index,value)
-def contexts(p,w,y,bits,q):
+def contexts(p,w,y,bits,q,signed_samples=None):
+    if signed_samples is None:signed_samples=bits==16
     def read(x,yy):
         if yy<0 or x < -1:return 0
         if x==-1:return 0 if yy==0 else read(0,yy-1)
         v=p[yy*w+min(x,w-1)]
-        return signed(v,16) if bits==16 else v
+        return signed(v,16) if signed_samples else v
     threshold=1 if q==0 else 2
     return [0 if q==1 or abs(signed(read(x-1,y)-read(x-1,y-1),8))<threshold else (1 if signed(read(x-1,y)-read(x-1,y-1),8)>0 else -1) for x in range(w)]
 def movie(private,packets,keys,w,h):

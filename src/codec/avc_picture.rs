@@ -14,7 +14,9 @@ pub struct IntraPicture {
     pub coded_width: usize,
     pub coded_height: usize,
     pub crop: [usize; 4],
+    /// Luma precision; chroma may use a different depth.
     pub bit_depth: u8,
+    pub chroma_bit_depth: u8,
     pub y: Vec<u16>,
     pub cb: Vec<u16>,
     pub cr: Vec<u16>,
@@ -26,17 +28,21 @@ impl IntraPicture {
             self.coded_height - self.crop[2] - self.crop[3],
         )
     }
-    /// Visible planar YUV420; samples above 8 bits are little endian u16.
+    /// Per-plane source precision, in Y/Cb/Cr order.
+    pub fn component_depths(&self) -> [u8;3] {
+        [self.bit_depth,self.chroma_bit_depth,self.chroma_bit_depth]
+    }
+    /// Visible planar YUV420; each plane uses bytes at 8 bits, LE words above it.
     pub fn write_planar<W: Write>(&self, writer: &mut W) -> Result<()> {
         let (w, h) = self.dimensions();
-        for (plane, shift) in [(&self.y, 0), (&self.cb, 1), (&self.cr, 1)] {
+        for (plane, shift, depth) in [(&self.y, 0,self.bit_depth), (&self.cb, 1,self.chroma_bit_depth), (&self.cr, 1,self.chroma_bit_depth)] {
             let stride = self.coded_width >> shift;
             let x = self.crop[0] >> shift;
             let y = self.crop[2] >> shift;
             for row in 0..h >> shift {
                 for &sample in &plane[(y + row) * stride + x..(y + row) * stride + x + (w >> shift)]
                 {
-                    if self.bit_depth == 8 {
+                    if depth == 8 {
                         writer.write_all(&[sample as u8])?;
                     } else {
                         writer.write_all(&sample.to_le_bytes())?;
@@ -117,9 +123,6 @@ pub fn decode_intra_slices(
     if sps.mb_adaptive_frame_field && !header.field_pic {
         return super::avc_mbaff_picture::decode_intra_slices(headers, sps, pps, memory_limit);
     }
-    if sps.bit_depth_luma != sps.bit_depth_chroma {
-        return Err(invalid("mixed component bit depths are not yet supported"));
-    }
     let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
     let (w, h) = sps.coded_dimensions();
     let (w, h) = (
@@ -163,6 +166,7 @@ pub fn decode_intra_slices(
             sps.crop[3] as usize / if header.field_pic { 2 } else { 1 },
         ],
         bit_depth: sps.bit_depth_luma,
+        chroma_bit_depth: sps.bit_depth_chroma,
         y: alloc(pixels)?,
         cb: alloc(pixels / 4)?,
         cr: alloc(pixels / 4)?,
@@ -349,6 +353,7 @@ mod tests {
                     coded_height: 32,
                     crop: [0; 4],
                     bit_depth: 8,
+                    chroma_bit_depth: 8,
                     y: vec![64; 1024],
                     cb: vec![64; 256],
                     cr: vec![64; 256],

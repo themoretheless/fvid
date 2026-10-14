@@ -38,8 +38,6 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
     }
     if track.kind != 1
         || !matches!(track.codec.as_str(),"V_FFV1"|"V_VP9"|"V_AV1")
-        || track.crop != [0; 4]
-        || track.rotation != 0
         || input.packets.iter().any(|p| {
             (p.invisible && track.codec=="V_FFV1")
                 || p.pts_ns < 0
@@ -61,9 +59,11 @@ fn aspect(
 ) -> Result<(u32, u32)> {
     let (n, d) = track.pixel_aspect();
     let (mut n, mut d) = (u128::from(n), u128::from(d));
+    let (mut visible_w,mut visible_h)=track.visible();
+    if matches!(track.rotation,90|270) {std::mem::swap(&mut n,&mut d);std::mem::swap(&mut visible_w,&mut visible_h);}
     let (mut w, mut h) = transform
         .crop
-        .map_or((u128::from(track.width), u128::from(track.height)), |c| {
+        .map_or((u128::from(visible_w), u128::from(visible_h)), |c| {
             (c.width as u128, c.height as u128)
         });
     if transform.transpose.is_some() {
@@ -238,12 +238,14 @@ pub(crate) fn export_processed(
                         .checked_mul(view.height as usize)
                         .and_then(|v| v.checked_mul(if view.depth == 8 { 1 } else { 2 }))
                         .ok_or("FFV1 gray size overflow")?;
-                    crate::owned_ffv1_encoder::encode_gray(
-                        view.width as usize,
-                        view.height as usize,
-                        &view.pixels[..samples],
-                        view.depth,
-                    )?
+                    match view.alpha {
+                        Some(alpha) => crate::owned_ffv1_encoder::encode_gray_with_alpha(
+                            view.width as usize, view.height as usize, &view.pixels[..samples], alpha, view.depth,
+                        )?,
+                        None => crate::owned_ffv1_encoder::encode_gray(
+                            view.width as usize, view.height as usize, &view.pixels[..samples], view.depth,
+                        )?,
+                    }
                 } else {
                     let mut data = crate::owned_frame::buffer(view.pixels.len())?;
                     data.copy_from_slice(view.pixels);
@@ -256,7 +258,13 @@ pub(crate) fn export_processed(
                     if let Some(callback) = process.as_deref_mut() {
                         callback(&mut frame, view.depth, view.pts_ns, view.full_range)?;
                     }
-                    crate::owned_ffv1_encoder::encode(&frame, view.depth)?
+                    if view.alpha.is_some() && (frame.width != view.width as usize || frame.height != view.height as usize) {
+                        return Err("processed color geometry disagrees with alpha".into());
+                    }
+                    match view.alpha {
+                        Some(alpha) => crate::owned_ffv1_encoder::encode_with_alpha(&frame, view.depth, alpha)?,
+                        None => crate::owned_ffv1_encoder::encode(&frame, view.depth)?,
+                    }
                 };
                 if packet.len() > options.max_packet_bytes {
                     return Err("encoded FFV1 packet exceeds byte limit".into());

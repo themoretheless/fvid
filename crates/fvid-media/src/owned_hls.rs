@@ -83,8 +83,15 @@ fn attribute<'a>(attrs: &[(&'a str, &'a str)], name: &str) -> Option<&'a str> {
         .iter()
         .find_map(|(key, value)| (*key == name).then_some(*value))
 }
+fn decimal_integer(text: &str) -> Result<u64> {
+    if !(1..=20).contains(&text.len()) || !text.bytes().all(|b| b.is_ascii_digit()) {
+        return Err("invalid HLS decimal integer".into());
+    }
+    text.parse()
+        .map_err(|_| "invalid HLS decimal integer".into())
+}
 fn positive(text: &str) -> Result<u64> {
-    let value: u64 = text.parse().map_err(|_| "invalid HLS positive integer")?;
+    let value = decimal_integer(text).map_err(|_| "invalid HLS positive integer")?;
     if value == 0 {
         return Err("HLS positive integer must not be zero".into());
     }
@@ -96,7 +103,7 @@ fn range(text: &str) -> Result<(u64, Option<u64>)> {
         .map_or((text, None), |(length, offset)| (length, Some(offset)));
     let length = positive(length)?;
     let offset = offset
-        .map(str::parse::<u64>)
+        .map(decimal_integer)
         .transpose()
         .map_err(|_| "invalid HLS range offset")?;
     if offset.is_some_and(|offset| offset.checked_add(length).is_none()) {
@@ -141,6 +148,8 @@ pub fn parse(text: &str) -> Result<Playlist<'_>> {
     let mut target = None;
     let mut version = 1;
     let mut has_external = false;
+    let mut singleton_tags = 1u16; // The required EXTM3U header was already read.
+    let (mut master_tags, mut media_tags) = (false, false);
     for line in lines {
         let line = line.trim();
         if line.is_empty() {
@@ -148,6 +157,51 @@ pub fn parse(text: &str) -> Result<Playlist<'_>> {
         }
         if line.contains('\0') {
             return Err("NUL in HLS playlist".into());
+        }
+        let tag = line.split_once(':').map_or(line, |(tag, _)| tag);
+        let singleton = match tag {
+            "#EXTM3U" => 1,
+            "#EXT-X-VERSION" => 2,
+            "#EXT-X-TARGETDURATION" => 4,
+            "#EXT-X-MEDIA-SEQUENCE" => 8,
+            "#EXT-X-ENDLIST" => 16,
+            "#EXT-X-PLAYLIST-TYPE" => 32,
+            "#EXT-X-DISCONTINUITY-SEQUENCE" => 64,
+            "#EXT-X-I-FRAMES-ONLY" => 128,
+            "#EXT-X-INDEPENDENT-SEGMENTS" => 256,
+            "#EXT-X-START" => 512,
+            _ => 0,
+        };
+        if singleton != 0 && singleton_tags & singleton != 0 {
+            return Err("duplicate HLS singleton tag".into());
+        }
+        singleton_tags |= singleton;
+        master_tags |= matches!(
+            tag,
+            "#EXT-X-MEDIA"
+                | "#EXT-X-STREAM-INF"
+                | "#EXT-X-I-FRAME-STREAM-INF"
+                | "#EXT-X-SESSION-DATA"
+                | "#EXT-X-SESSION-KEY"
+        );
+        media_tags |= matches!(
+            tag,
+            "#EXTINF"
+                | "#EXT-X-BYTERANGE"
+                | "#EXT-X-DISCONTINUITY"
+                | "#EXT-X-KEY"
+                | "#EXT-X-MAP"
+                | "#EXT-X-PROGRAM-DATE-TIME"
+                | "#EXT-X-DATERANGE"
+                | "#EXT-X-TARGETDURATION"
+                | "#EXT-X-MEDIA-SEQUENCE"
+                | "#EXT-X-DISCONTINUITY-SEQUENCE"
+                | "#EXT-X-ENDLIST"
+                | "#EXT-X-PLAYLIST-TYPE"
+                | "#EXT-X-I-FRAMES-ONLY"
+        );
+        if master_tags && media_tags {
+            return Err("mixed HLS master and media playlist".into());
         }
         if let Some(value) = line.strip_prefix("#EXT-X-VERSION:") {
             version = positive(value)?;
@@ -157,7 +211,7 @@ pub fn parse(text: &str) -> Result<Playlist<'_>> {
             if !segments.is_empty() {
                 return Err("HLS media sequence must precede segments".into());
             }
-            media_sequence = value.parse().map_err(|_| "invalid HLS media sequence")?;
+            media_sequence = decimal_integer(value).map_err(|_| "invalid HLS media sequence")?;
         } else if let Some(value) = line.strip_prefix("#EXT-X-STREAM-INF:") {
             if pending_variant.is_some() || pending_duration.is_some() {
                 return Err("missing HLS URI before stream declaration".into());
@@ -177,12 +231,11 @@ pub fn parse(text: &str) -> Result<Playlist<'_>> {
             if pending_duration.is_some() || pending_variant.is_some() {
                 return Err("missing HLS URI before EXTINF".into());
             }
-            let duration: f64 = value
-                .split(',')
-                .next()
-                .unwrap()
-                .parse()
-                .map_err(|_| "invalid HLS segment duration")?;
+            let value = value.split(',').next().unwrap();
+            if !value.bytes().all(|b| b.is_ascii_digit() || b == b'.') {
+                return Err("invalid HLS segment duration".into());
+            }
+            let duration: f64 = value.parse().map_err(|_| "invalid HLS segment duration")?;
             if !duration.is_finite() || duration <= 0.0 {
                 return Err("invalid HLS segment duration".into());
             }
@@ -347,6 +400,9 @@ pub fn assemble_fmp4(
             total += count as u64;
         }
     }
+    if cancel.is_some_and(fvid_control::CancelFlag::is_cancelled) {
+        return Err("HLS assembly cancelled".into());
+    }
     Ok(total)
 }
 
@@ -420,22 +476,26 @@ mod tests {
             assert!(parse(&bad).unwrap_err().contains(reason));
         }
         let bad = good.replace("segment-0.m4s", "#EXT-X-BYTERANGE:10\nsegment-0.m4s");
-        assert!(parse(&bad)
-            .unwrap_err()
-            .contains("preceding ranged segment"));
+        assert!(
+            parse(&bad)
+                .unwrap_err()
+                .contains("preceding ranged segment")
+        );
         let live = good.replace("#EXT-X-ENDLIST", "");
         let Playlist::Media(playlist) = parse(&live).unwrap() else {
             panic!("media")
         };
-        assert!(assemble_fmp4(
-            &playlist,
-            &mut Vec::new(),
-            |_| panic!("must not fetch live"),
-            None,
-            None
-        )
-        .unwrap_err()
-        .contains("live"));
+        assert!(
+            assemble_fmp4(
+                &playlist,
+                &mut Vec::new(),
+                |_| panic!("must not fetch live"),
+                None,
+                None
+            )
+            .unwrap_err()
+            .contains("live")
+        );
     }
     #[test]
     fn assembly_checks_limit_cancellation_and_range_bounds() {
@@ -458,14 +518,16 @@ mod tests {
                 .unwrap_err()
                 .contains("cancelled")
         );
-        assert!(assemble_fmp4(
-            &playlist,
-            &mut Vec::new(),
-            |_| Ok(Box::new(Cursor::new(vec![0u8]))),
-            None,
-            None
-        )
-        .unwrap_err()
-        .contains("outside"));
+        assert!(
+            assemble_fmp4(
+                &playlist,
+                &mut Vec::new(),
+                |_| Ok(Box::new(Cursor::new(vec![0u8]))),
+                None,
+                None
+            )
+            .unwrap_err()
+            .contains("outside")
+        );
     }
 }

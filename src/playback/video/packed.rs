@@ -5,22 +5,54 @@ use crate::{Result, invalid, native_geometry::GeometryFrame};
 #[derive(Debug)]
 pub struct PackedPlanar {
     pub frame: GeometryFrame,
+    /// Unassociated, full-resolution opacity at `depth` (LE words above 8 bit).
+    pub alpha: Option<Vec<u8>>,
     pub depth: u8,
     pub colour: AvcColour,
 }
 impl PackedPlanar {
     /// Validate storage before using it as a decoded planar picture.
     pub fn new(frame: GeometryFrame, depth: u8, colour: AvcColour) -> Result<Self> {
+        Self::with_alpha(frame, depth, colour, None)
+    }
+    pub fn with_alpha(
+        frame: GeometryFrame,
+        depth: u8,
+        colour: AvcColour,
+        alpha: Option<Vec<u8>>,
+    ) -> Result<Self> {
         let picture = Self {
             frame,
+            alpha,
             depth,
             colour,
         };
-        picture.layout()?;
+        picture.validate()?;
         Ok(picture)
     }
     pub(crate) fn validate(&self) -> Result<()> {
-        self.layout().map(|_| ())
+        self.layout()?;
+        if let Some(alpha) = &self.alpha {
+            let bytes = if self.depth == 8 { 1 } else { 2 };
+            if self
+                .frame
+                .width
+                .checked_mul(self.frame.height)
+                .and_then(|n| n.checked_mul(bytes))
+                != Some(alpha.len())
+            {
+                return Err(invalid("invalid packed alpha storage"));
+            }
+            let max = (1u32 << self.depth) - 1;
+            if bytes == 2
+                && alpha
+                    .chunks_exact(2)
+                    .any(|s| u32::from(u16::from_le_bytes([s[0], s[1]])) > max)
+            {
+                return Err(invalid("alpha sample exceeds coded depth"));
+            }
+        }
+        Ok(())
     }
     fn layout(&self) -> Result<(usize, usize, usize, usize, usize)> {
         let f = &self.frame;
@@ -29,7 +61,9 @@ impl PackedPlanar {
             return Err(invalid("invalid planar colour matrix"));
         }
         if f.subsampling.is_none() {
-            let luma = f.width.checked_mul(f.height)
+            let luma = f
+                .width
+                .checked_mul(f.height)
                 .filter(|_| f.width != 0 && f.height != 0 && (8..=16).contains(&self.depth))
                 .ok_or_else(|| invalid("invalid packed RGB layout"))?;
             let bytes = if self.depth == 8 { 1 } else { 2 };
@@ -64,6 +98,11 @@ impl PackedPlanar {
         Ok((sx, sy, luma, chroma, bytes))
     }
     pub fn pixel_format(&self) -> Result<String> {
+        if self.alpha.is_some() {
+            return Err(invalid(
+                "separate alpha storage needs explicit RGBA conversion",
+            ));
+        }
         self.layout()?;
         if self.frame.subsampling.is_none() {
             // Storage uses 8-bit bytes or LE words; `depth` retains coded precision.
@@ -94,6 +133,12 @@ impl PackedPlanar {
     }
     /// Borrow the three encoded planes without narrowing samples or converting colour.
     pub(crate) fn plane_data(&self) -> Result<[&[u8]; 3]> {
+        if self.alpha.is_some() {
+            return Err(invalid("three-plane presentation cannot discard alpha"));
+        }
+        self.colour_plane_data()
+    }
+    fn colour_plane_data(&self) -> Result<[&[u8]; 3]> {
         if self.frame.subsampling.is_none() {
             return Err(invalid("RGB storage is interleaved, not YUV planes"));
         }
@@ -112,6 +157,11 @@ impl PackedPlanar {
         colour: AvcColour,
         budget: usize,
     ) -> Result<Self> {
+        let depth=p.bit_depth.max(p.chroma_bit_depth);
+        if !(8..=16).contains(&p.bit_depth) || !(8..=16).contains(&p.chroma_bit_depth) {
+            return Err(invalid("invalid AVC component depth"));
+        }
+        let bytes=if depth==8 {1}else{2};
         let [left, right, top, bottom] = p.crop;
         if left % 2 != 0
             || top % 2 != 0
@@ -145,16 +195,16 @@ impl PackedPlanar {
                     .and_then(|c| c.checked_mul(2))
                     .and_then(|c| n.checked_add(c))
             })
-            .and_then(|n| n.checked_mul(2))
+            .and_then(|n| n.checked_mul(bytes))
             .filter(|&n| n <= budget)
             .ok_or_else(|| invalid("packed picture exceeds budget"))?;
         let mut data = Vec::new();
         data.try_reserve_exact(length)
             .map_err(|error| invalid(&error.to_string()))?;
-        for (plane, stride, x, y, w, h) in [
-            (&p.y, p.coded_width, left, top, width, height),
-            (&p.cb, p.coded_width / 2, left / 2, top / 2, cw, ch),
-            (&p.cr, p.coded_width / 2, left / 2, top / 2, cw, ch),
+        for (plane, stride, x, y, w, h, source_depth) in [
+            (&p.y, p.coded_width, left, top, width, height,p.bit_depth),
+            (&p.cb, p.coded_width / 2, left / 2, top / 2, cw, ch,p.chroma_bit_depth),
+            (&p.cr, p.coded_width / 2, left / 2, top / 2, cw, ch,p.chroma_bit_depth),
         ] {
             for row in 0..h {
                 let start = (y + row)
@@ -169,7 +219,11 @@ impl PackedPlanar {
                                 .ok_or_else(|| invalid("plane size overflow"))?,
                     )
                     .ok_or_else(|| invalid("truncated coded plane"))?;
-                data.extend(samples.iter().flat_map(|v| v.to_le_bytes()));
+                for &v in samples {
+                    if u32::from(v)>=(1u32<<source_depth) {return Err(invalid("AVC sample exceeds component depth"));}
+                    let normalized=v<<(depth-source_depth);
+                    if bytes==1 {data.push(normalized as u8);} else {data.extend_from_slice(&normalized.to_le_bytes());}
+                }
             }
         }
         Self::new(
@@ -179,26 +233,50 @@ impl PackedPlanar {
                 subsampling: Some([2, 2]),
                 data,
             },
-            p.bit_depth,
+            depth,
             colour,
         )
     }
     /// Rotate source-depth planes by a clockwise quarter turn without narrowing.
     pub fn rotated(&self, rotation: u16) -> Result<Self> {
+        self.validate()?;
         if ![0, 90, 180, 270].contains(&rotation) {
             return Err(invalid("invalid planar rotation"));
         }
         let (sx, sy, _, _, bytes) = self.layout()?;
+        let alpha = self
+            .alpha
+            .as_ref()
+            .map(|a| super::rotate_plane(a, self.frame.width, self.frame.height, rotation, bytes));
         if self.frame.subsampling.is_none() {
             let quarter = matches!(rotation, 90 | 270);
-            return Self::new(GeometryFrame {
-                width: if quarter { self.frame.height } else { self.frame.width },
-                height: if quarter { self.frame.width } else { self.frame.height },
-                subsampling: None,
-                data: super::rotate_plane(&self.frame.data, self.frame.width, self.frame.height, rotation, 3 * bytes),
-            }, self.depth, self.colour);
+            return Self::with_alpha(
+                GeometryFrame {
+                    width: if quarter {
+                        self.frame.height
+                    } else {
+                        self.frame.width
+                    },
+                    height: if quarter {
+                        self.frame.width
+                    } else {
+                        self.frame.height
+                    },
+                    subsampling: None,
+                    data: super::rotate_plane(
+                        &self.frame.data,
+                        self.frame.width,
+                        self.frame.height,
+                        rotation,
+                        3 * bytes,
+                    ),
+                },
+                self.depth,
+                self.colour,
+                alpha,
+            );
         }
-        let data = self.plane_data()?;
+        let data = self.colour_plane_data()?;
         let w = self.frame.width;
         let h = self.frame.height;
         let cw = w.div_ceil(sx);
@@ -208,7 +286,7 @@ impl PackedPlanar {
         for (data, width, height) in [(data[0], w, h), (data[1], cw, ch), (data[2], cw, ch)] {
             output.extend(super::rotate_plane(data, width, height, rotation, bytes));
         }
-        Self::new(
+        Self::with_alpha(
             GeometryFrame {
                 width: if quarter { h } else { w },
                 height: if quarter { w } else { h },
@@ -217,10 +295,14 @@ impl PackedPlanar {
             },
             self.depth,
             self.colour,
+            alpha,
         )
     }
     /// Explicit 8-bit presentation conversion; raw/export callers keep `frame`.
     pub fn to_planar8(&self, budget: usize) -> Result<Planar8> {
+        if self.alpha.is_some() {
+            return Err(invalid("planar8 conversion cannot discard alpha"));
+        }
         if self.frame.subsampling.is_none() {
             return Err(invalid("RGB samples cannot be borrowed as YUV planes"));
         }
@@ -248,6 +330,70 @@ impl PackedPlanar {
     }
     /// Convert at source precision, with the actual chroma axes and matrix.
     pub fn to_rgb(&self, rgb: &mut Vec<u8>, budget: usize) -> Result<()> {
+        if self.alpha.is_some() {
+            return Err(invalid("RGB conversion cannot discard alpha; use RGBA"));
+        }
+        self.colour_to_rgb(rgb, budget)
+    }
+    /// Explicit presentation onto the player's opaque black backdrop.
+    pub fn to_rgb_on_black(&self, rgb: &mut Vec<u8>, budget: usize) -> Result<()> {
+        self.validate()?;
+        self.colour_to_rgb(rgb, budget)?;
+        if let Some(alpha) = &self.alpha {
+            let max = (1u32 << self.depth) - 1;
+            for (i, pixel) in rgb.chunks_exact_mut(3).enumerate() {
+                let a = if self.depth == 8 {
+                    u32::from(alpha[i])
+                } else {
+                    u32::from(u16::from_le_bytes([alpha[2 * i], alpha[2 * i + 1]]))
+                };
+                for channel in pixel {
+                    *channel = ((u32::from(*channel) * a + max / 2) / max) as u8;
+                }
+            }
+        }
+        Ok(())
+    }
+    /// Convert to unassociated 8-bit RGBA. Color beneath zero opacity is retained.
+    /// The budget includes both the output and the intermediate RGB buffer.
+    pub fn to_rgba(&self, rgba: &mut Vec<u8>, budget: usize) -> Result<()> {
+        self.validate()?;
+        let count = self
+            .frame
+            .width
+            .checked_mul(self.frame.height)
+            .ok_or_else(|| invalid("RGBA frame size overflow"))?;
+        let size = count
+            .checked_mul(4)
+            .filter(|_| count.checked_mul(7).is_some_and(|n| n <= budget))
+            .ok_or_else(|| invalid("RGBA frame exceeds playback budget"))?;
+        let mut rgb = Vec::new();
+        self.colour_to_rgb(&mut rgb, budget - size)?;
+        if rgba.len() != size {
+            *rgba = crate::buffer(size)?;
+        }
+        let max = (1u32 << self.depth) - 1;
+        for (i, (rgb, out)) in rgb
+            .chunks_exact(3)
+            .zip(rgba.chunks_exact_mut(4))
+            .enumerate()
+        {
+            out[..3].copy_from_slice(rgb);
+            out[3] = match &self.alpha {
+                None => 255,
+                Some(a) => {
+                    let value = if self.depth == 8 {
+                        u32::from(a[i])
+                    } else {
+                        u32::from(u16::from_le_bytes([a[2 * i], a[2 * i + 1]]))
+                    };
+                    ((value * 255 + max / 2) / max) as u8
+                }
+            };
+        }
+        Ok(())
+    }
+    fn colour_to_rgb(&self, rgb: &mut Vec<u8>, budget: usize) -> Result<()> {
         let (sx, sy, luma, chroma, bytes) = self.layout()?;
         let len = luma
             .checked_mul(3)
@@ -260,7 +406,9 @@ impl PackedPlanar {
             let max = (1u32 << self.depth) - 1;
             for (i, out) in rgb.iter_mut().enumerate() {
                 let value = u32::from(self.sample(i, bytes));
-                if value > max { return Err(invalid("RGB sample exceeds coded depth")); }
+                if value > max {
+                    return Err(invalid("RGB sample exceeds coded depth"));
+                }
                 *out = ((value * 255 + max / 2) / max) as u8;
             }
             return Ok(());
@@ -360,12 +508,23 @@ pub fn hevc_picture(
 }
 
 /// Preserve VP9 plane strides, chroma geometry and full sample depth.
-pub(crate) fn vp9_picture(p: &crate::codec::vp9_picture::Picture, colour: AvcColour, rgb: bool) -> Result<PackedPlanar> {
+pub(crate) fn vp9_picture(
+    p: &crate::codec::vp9_picture::Picture,
+    colour: AvcColour,
+    rgb: bool,
+) -> Result<PackedPlanar> {
     if rgb {
-        if p.subsampling != [false, false] { return Err(invalid("invalid VP9 RGB subsampling")); }
-        let frame = fvid_media::owned_frame::pack_gbr(p.size, p.depth,
-            p.planes.each_ref().map(|plane| (plane.width, plane.height, plane.samples.as_slice())))
-            .map_err(|e| invalid(&e))?;
+        if p.subsampling != [false, false] {
+            return Err(invalid("invalid VP9 RGB subsampling"));
+        }
+        let frame = fvid_media::owned_frame::pack_gbr(
+            p.size,
+            p.depth,
+            p.planes
+                .each_ref()
+                .map(|plane| (plane.width, plane.height, plane.samples.as_slice())),
+        )
+        .map_err(|e| invalid(&e))?;
         return PackedPlanar::new(frame, p.depth, colour);
     }
     let [width, height] = p.size.map(|n| n as usize);
@@ -373,19 +532,40 @@ pub(crate) fn vp9_picture(p: &crate::codec::vp9_picture::Picture, colour: AvcCol
     let bytes = if p.depth == 8 { 1 } else { 2 };
     let mut data = Vec::new();
     for (i, plane) in p.planes.iter().enumerate() {
-        let w = if i == 0 { width } else { width.div_ceil(factors[0]) };
-        let h = if i == 0 { height } else { height.div_ceil(factors[1]) };
-        if w > plane.width || h > plane.height || plane.samples.len() != plane.width * plane.height {
+        let w = if i == 0 {
+            width
+        } else {
+            width.div_ceil(factors[0])
+        };
+        let h = if i == 0 {
+            height
+        } else {
+            height.div_ceil(factors[1])
+        };
+        if w > plane.width || h > plane.height || plane.samples.len() != plane.width * plane.height
+        {
             return Err(invalid("invalid VP9 plane storage"));
         }
         for y in 0..h {
             for &sample in &plane.samples[y * plane.width..y * plane.width + w] {
-                if bytes == 1 { data.push(sample as u8); }
-                else { data.extend_from_slice(&sample.to_le_bytes()); }
+                if bytes == 1 {
+                    data.push(sample as u8);
+                } else {
+                    data.extend_from_slice(&sample.to_le_bytes());
+                }
             }
         }
     }
-    PackedPlanar::new(GeometryFrame { width, height, subsampling: Some(factors), data }, p.depth, colour)
+    PackedPlanar::new(
+        GeometryFrame {
+            width,
+            height,
+            subsampling: Some(factors),
+            data,
+        },
+        p.depth,
+        colour,
+    )
 }
 
 /// Pack visible AV1 rows with their own strides and explicit chroma geometry.
@@ -404,24 +584,48 @@ pub(crate) fn av1_picture(
             return Err(invalid("invalid AV1 identity RGB geometry or range"));
         }
         let bytes = if p.depth == 8 { 1 } else { 2 };
-        let length = width.checked_mul(height).and_then(|n| n.checked_mul(3 * bytes))
+        let length = width
+            .checked_mul(height)
+            .and_then(|n| n.checked_mul(3 * bytes))
             .ok_or_else(|| invalid("AV1 RGB size overflow"))?;
         for plane in &p.planes {
-            if plane.width < width || plane.height < height
-                || plane.width.checked_mul(plane.height) != Some(plane.samples.len()) {
+            if plane.width < width
+                || plane.height < height
+                || plane.width.checked_mul(plane.height) != Some(plane.samples.len())
+            {
                 return Err(invalid("invalid AV1 RGB plane storage"));
             }
         }
         let mut data = Vec::new();
-        data.try_reserve_exact(length).map_err(|_| invalid("AV1 RGB allocation failed"))?;
+        data.try_reserve_exact(length)
+            .map_err(|_| invalid("AV1 RGB allocation failed"))?;
         let max = (1u32 << p.depth) - 1;
-        for y in 0..height { for x in 0..width { for channel in [2, 0, 1] {
-            let plane = &p.planes[channel];
-            let value = plane.samples[y * plane.width + x];
-            if u32::from(value) > max { return Err(invalid("RGB sample exceeds coded depth")); }
-            if bytes == 1 { data.push(value as u8); } else { data.extend_from_slice(&value.to_le_bytes()); }
-        }}}
-        return PackedPlanar::new(GeometryFrame { width, height, subsampling: None, data }, p.depth, colour);
+        for y in 0..height {
+            for x in 0..width {
+                for channel in [2, 0, 1] {
+                    let plane = &p.planes[channel];
+                    let value = plane.samples[y * plane.width + x];
+                    if u32::from(value) > max {
+                        return Err(invalid("RGB sample exceeds coded depth"));
+                    }
+                    if bytes == 1 {
+                        data.push(value as u8);
+                    } else {
+                        data.extend_from_slice(&value.to_le_bytes());
+                    }
+                }
+            }
+        }
+        return PackedPlanar::new(
+            GeometryFrame {
+                width,
+                height,
+                subsampling: None,
+                data,
+            },
+            p.depth,
+            colour,
+        );
     }
     let factors = if signal.monochrome {
         [2, 2]
@@ -487,4 +691,22 @@ pub(crate) fn av1_picture(
         p.depth,
         colour,
     )
+}
+
+/// Composite unassociated display RGBA codes onto opaque black.
+pub fn rgba_to_rgb_on_black(rgba: &[u8], budget: usize) -> Result<Vec<u8>> {
+    if rgba.len() % 4 != 0 {
+        return Err(invalid("invalid RGBA display storage"));
+    }
+    let size = (rgba.len() / 4)
+        .checked_mul(3)
+        .filter(|&n| n <= budget)
+        .ok_or_else(|| invalid("RGB composite exceeds playback budget"))?;
+    let mut rgb = crate::buffer(size)?;
+    for (source, out) in rgba.chunks_exact(4).zip(rgb.chunks_exact_mut(3)) {
+        for (color, out) in source[..3].iter().zip(out) {
+            *out = ((u32::from(*color) * u32::from(source[3]) + 127) / 255) as u8;
+        }
+    }
+    Ok(rgb)
 }

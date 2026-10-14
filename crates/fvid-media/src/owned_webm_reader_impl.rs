@@ -160,7 +160,10 @@ pub struct WebmReader<R> {
     /// of itself the walk has already been.
     tail_ns: i64,
 }
-include!("owned_ebml_impl.rs");
+use self::reader_ebml::{
+    Element, bytes, element, end, fields, float, goto, lenient_text, read_chapters,
+    read_tags_collect, sint, text, uint,
+};
 
 /// An ITU-T H.273 index stored as a `uInt` element.
 ///
@@ -969,7 +972,7 @@ impl<R: Read + Seek> WebmReader<R> {
         self.read_packet_bytes = self.read_packet_bytes.min(maximum);
     }
 
-    pub fn read_packet(&mut self, index: usize) -> Result<Vec<u8>> {
+    pub fn read_packet_into(&mut self, index: usize, out: &mut Vec<u8>) -> Result<()> {
         let p = self
             .packets
             .get(index)
@@ -981,12 +984,22 @@ impl<R: Read + Seek> WebmReader<R> {
         // they sit in the file, so the reader is usually already standing on the
         // packet it is asked for and the bytes stay where they were read to.
         goto(&mut self.reader, p.offset)?;
-        let mut data = vec![0; p.size];
-        self.reader.read_exact(&mut data)?;
+        out.clear();
+        if out.capacity() < p.size {
+            out.try_reserve_exact(p.size - out.len())
+                .map_err(|_| invalid("WebM packet buffer allocation failed"))?;
+        }
+        out.resize(p.size, 0);
+        self.reader.read_exact(out)?;
+        Ok(())
+    }
+
+    pub fn read_packet(&mut self, index: usize) -> Result<Vec<u8>> {
+        let mut data = Vec::new();
+        self.read_packet_into(index, &mut data)?;
         Ok(data)
     }
 }
-include!("owned_matroska_metadata_read_impl.rs");
 // Lace VINTs use every data value, including the all-ones bit pattern.
 fn lace_vint<R: Read + Seek>(r: &mut R, limit: u64) -> Result<(u64, u32)> {
     let mut byte = [0];

@@ -1,11 +1,17 @@
-const MAX_W: i32 = 1920;
-const MAX_H: i32 = 1080;
-const VIDEO_QUEUE: usize = 4;
-const AUDIO_SECONDS: usize = 1;
-const SLACK_US: i64 = 20_000;
-const SWS_BILINEAR: i32 = 2;
-const RATE_MIN_MILLI: u32 = 250;
-const RATE_MAX_MILLI: u32 = 4_000;
+#[allow(dead_code)]
+pub(crate) const MAX_W: i32 = 1920;
+#[allow(dead_code)]
+pub(crate) const MAX_H: i32 = 1080;
+#[allow(dead_code)]
+pub(crate) const VIDEO_QUEUE: usize = 4;
+#[allow(dead_code)]
+pub(crate) const AUDIO_SECONDS: usize = 1;
+#[allow(dead_code)]
+pub(crate) const SLACK_US: i64 = 20_000;
+#[allow(dead_code)]
+pub(crate) const SWS_BILINEAR: i32 = 2;
+pub(crate) const RATE_MIN_MILLI: u32 = 250;
+pub(crate) const RATE_MAX_MILLI: u32 = 4_000;
 /// VLC's Qt slider goes to 200%. 1000 is unity.
 pub const VOLUME_MAX_MILLI: u32 = 2_000;
 
@@ -9460,15 +9466,16 @@ pub(crate) fn take_aligned(
     out
 }
 
-fn playback_seek_ts(origin_us: i64, media_us: i64) -> i64 {
+#[allow(dead_code)]
+pub(crate) fn playback_seek_ts(origin_us: i64, media_us: i64) -> i64 {
     origin_us.saturating_add(media_us.max(0))
 }
 
-fn format_rate(rate_milli: u32) -> String {
+pub(crate) fn format_rate(rate_milli: u32) -> String {
     format!("{:.2}x", rate_milli as f32 / 1000.0)
 }
 
-fn format_clock(us: i64) -> String {
+pub(crate) fn format_clock(us: i64) -> String {
     let total = (us.max(0) / 1_000_000) as u64;
     let hours = total / 3600;
     let minutes = (total % 3600) / 60;

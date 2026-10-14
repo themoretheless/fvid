@@ -1,10 +1,10 @@
 #[derive(Clone, Copy)]
 pub struct Element {
-    id: u32,
-    data: u64,
-    end: Option<u64>,
+    pub(crate) id: u32,
+    pub(crate) data: u64,
+    pub(crate) end: Option<u64>,
 }
-fn vint(r: &mut impl Read, id: bool) -> Result<(u64, bool)> {
+pub(crate) fn vint(r: &mut impl Read, id: bool) -> Result<(u64, bool)> {
     let mut first = [0];
     r.read_exact(&mut first)?;
     if first[0] == 0 {
@@ -33,7 +33,7 @@ fn vint(r: &mut impl Read, id: bool) -> Result<(u64, bool)> {
 /// same bytes back. Only a gap longer than any block the reader steps over, or a
 /// move backwards, is a jump worth the seek.
 const SKIP: u64 = 8 << 20;
-fn goto<R: Read + Seek>(r: &mut R, pos: u64) -> Result<()> {
+pub(crate) fn goto<R: Read + Seek>(r: &mut R, pos: u64) -> Result<()> {
     let here = r.stream_position()?;
     if pos == here {
         return Ok(());
@@ -46,7 +46,10 @@ fn goto<R: Read + Seek>(r: &mut R, pos: u64) -> Result<()> {
             // A short read is the source answering less than asked, not an end:
             // no bytes at all means the item stopped before the element its own
             // size promised.
-            let taken = r.read(&mut buf[..want])?;
+            let taken = match r.read(&mut buf[..want]) {
+                Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                result => result?,
+            };
             if taken == 0 {
                 return Err(invalid("truncated EBML element"));
             }
@@ -57,7 +60,7 @@ fn goto<R: Read + Seek>(r: &mut R, pos: u64) -> Result<()> {
     r.seek(SeekFrom::Start(pos))?;
     Ok(())
 }
-fn element<R: Read + Seek>(
+pub(crate) fn element<R: Read + Seek>(
     r: &mut R,
     limit: u64,
     count: &mut usize,
@@ -88,7 +91,7 @@ fn element<R: Read + Seek>(
         end,
     })
 }
-fn bytes<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<Vec<u8>> {
+pub(crate) fn bytes<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<Vec<u8>> {
     let end = e
         .end
         .ok_or_else(|| invalid("unknown size for EBML value"))?;
@@ -102,25 +105,25 @@ fn bytes<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<Vec<u8>> {
     Ok(out)
 }
 /// A UTF-8 string element, without the trailing NUL byte some muxers write.
-fn text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<String> {
+pub(crate) fn text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<String> {
     Ok(String::from_utf8(bytes(r, e, max)?)
         .map_err(|_| invalid("invalid WebM text"))?
         .trim_end_matches('\0')
         .to_owned())
 }
-fn uint<R: Read + Seek>(r: &mut R, e: Element) -> Result<u64> {
+pub(crate) fn uint<R: Read + Seek>(r: &mut R, e: Element) -> Result<u64> {
     Ok(bytes(r, e, 8)?
         .into_iter()
         .fold(0, |v, b| (v << 8) | u64::from(b)))
 }
-fn sint<R: Read + Seek>(r: &mut R, e: Element) -> Result<i64> {
+pub(crate) fn sint<R: Read + Seek>(r: &mut R, e: Element) -> Result<i64> {
     let value = bytes(r, e, 8)?;
     let mut signed = if value.first().is_some_and(|byte| byte & 0x80 != 0) { -1i64 } else { 0 };
     for byte in value { signed = (signed << 8) | i64::from(byte); }
     Ok(signed)
 }
 /// Timestamps and rates are IEEE-754, written as either four or eight bytes.
-fn float<R: Read + Seek>(r: &mut R, e: Element) -> Result<f64> {
+pub(crate) fn float<R: Read + Seek>(r: &mut R, e: Element) -> Result<f64> {
     let value = bytes(r, e, 8)?;
     Ok(match value.as_slice() {
         [a, b, c, d] => f64::from(f32::from_be_bytes([*a, *b, *c, *d])),
@@ -128,11 +131,11 @@ fn float<R: Read + Seek>(r: &mut R, e: Element) -> Result<f64> {
         _ => return Err(invalid("invalid WebM float size")),
     })
 }
-fn end(e: Element) -> Result<u64> {
+pub(crate) fn end(e: Element) -> Result<u64> {
     e.end
         .ok_or_else(|| invalid("unsupported unknown-sized EBML element"))
 }
-fn fields<R: Read + Seek>(
+pub(crate) fn fields<R: Read + Seek>(
     r: &mut R,
     e: Element,
     count: &mut usize,

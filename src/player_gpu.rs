@@ -86,7 +86,7 @@ fn to_linear(c: vec3<f32>) -> vec3<f32> {
 
 // Interpolate normalized byte texels in float32, preserving precision when
 // an RGB8 source is scaled into a 10-bit encoder surface.
-fn sample_rgb(uv: vec2<f32>) -> vec3<f32> {
+fn sample_rgba(uv: vec2<f32>) -> vec4<f32> {
     let size = vec2<i32>(textureDimensions(plane_y, 0));
     var at = clamp(uv * vec2<f32>(size) - vec2(0.5), vec2(0.0), vec2<f32>(size - vec2(1)));
     if params.encoder_size.x > 0.0 {
@@ -98,11 +98,20 @@ fn sample_rgb(uv: vec2<f32>) -> vec3<f32> {
     let lo = vec2<i32>(floor(at));
     let hi = min(lo + vec2(1), size - vec2(1));
     let fraction = fract(at);
-    let a = textureLoad(plane_y, lo, 0).rgb;
-    let b = textureLoad(plane_y, vec2(hi.x, lo.y), 0).rgb;
-    let c = textureLoad(plane_y, vec2(lo.x, hi.y), 0).rgb;
-    let d = textureLoad(plane_y, hi, 0).rgb;
+    let a_raw = textureLoad(plane_y, lo, 0);
+    let a = vec4(a_raw.rgb * a_raw.a, a_raw.a);
+    let b_raw = textureLoad(plane_y, vec2(hi.x, lo.y), 0);
+    let b = vec4(b_raw.rgb * b_raw.a, b_raw.a);
+    let c_raw = textureLoad(plane_y, vec2(lo.x, hi.y), 0);
+    let c = vec4(c_raw.rgb * c_raw.a, c_raw.a);
+    let d_raw = textureLoad(plane_y, hi, 0);
+    let d = vec4(d_raw.rgb * d_raw.a, d_raw.a);
     return mix(mix(a, b, fraction.x), mix(c, d, fraction.x), fraction.y);
+}
+
+fn sample_rgb(uv: vec2<f32>) -> vec3<f32> {
+    let rgba = sample_rgba(uv);
+    return rgba.rgb / max(rgba.a, 0.0000001);
 }
 
 fn grid_node(grid: texture_3d<f32>, at: vec3<i32>) -> vec3<f32> {
@@ -359,8 +368,11 @@ fn fs(in: VertexOut) -> @location(0) vec4<f32> {
     let b = y + 2.0 * (1.0 - params.kb) * cb;
     let g = (y - params.kr * r - params.kb * b) / (1.0 - params.kr - params.kb);
     var rgb = clamp(vec3(r, g, b), vec3(0.0), vec3(1.0));
+    var opacity = 1.0;
     if params.adjust_b.z == 3.0 {
-        rgb = sample_rgb(in.uv);
+        let rgba = sample_rgba(in.uv);
+        opacity = rgba.a;
+        rgb = rgba.rgb / max(opacity, 0.0000001);
         if params.adjust_b.y > 0.5 {
             rgb = clamp(adjust_codes(rgb), vec3(0.0), vec3(1.0));
         }
@@ -375,6 +387,8 @@ fn fs(in: VertexOut) -> @location(0) vec4<f32> {
             rgb = clamp(adjust_codes(rgb), vec3(0.0), vec3(1.0));
         }
     }
+    // Composite final display codes onto the opaque black video backdrop.
+    rgb *= opacity;
     if params.srgb > 0.5 {
         // The swapchain encodes to sRGB on write; hand it linear light.
         rgb = to_linear(rgb);
@@ -748,8 +762,8 @@ impl ColorShader {
             return Err(crate::invalid("shader source exceeds 64 KiB"));
         }
         let compiled = format!("{}\n{}", SHADER.replace(
-            "    if params.srgb > 0.5 {",
-            "    rgb = clamp(process_color(rgb, in.uv), vec3(0.0), vec3(1.0));\n    if params.srgb > 0.5 {"
+            "    // Composite final display codes onto the opaque black video backdrop.",
+            "    rgb = clamp(process_color(rgb, in.uv), vec3(0.0), vec3(1.0));\n    // Composite final display codes onto the opaque black video backdrop."
         ), source);
         let module = naga::front::wgsl::parse_str(&compiled)
             .map_err(|error| crate::Error::Invalid(error.emit_to_string(&compiled)))?;
@@ -1429,7 +1443,9 @@ impl VideoGpu {
             }
             return Ok(false);
         }
-        self.upload_rgb(device, queue, rgb, size, 0, window, adjust)?;
+        if size[0].checked_mul(size[1]).and_then(|n|n.checked_mul(4))==Some(rgb.len()) {
+            self.upload_rgba(device,queue,rgb,size,0,window,adjust)?;
+        } else {self.upload_rgb(device, queue, rgb, size, 0, window, adjust)?;}
         self.rgb_source = Some(rgb.clone());
         Ok(true)
     }
@@ -1511,7 +1527,21 @@ impl VideoGpu {
         window: [f32; 4],
         adjust: [f32; 5],
     ) -> crate::Result<()> {
-        let len = size[0].checked_mul(size[1]).and_then(|n| n.checked_mul(3));
+        self.upload_codes(device,queue,rgb,size,serial,window,adjust,3)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn upload_rgba(
+        &mut self, device: &wgpu::Device, queue: &wgpu::Queue, rgba: &[u8],
+        size: [usize;2], serial: u64, window: [f32;4], adjust: [f32;5],
+    ) -> crate::Result<()> {
+        self.upload_codes(device,queue,rgba,size,serial,window,adjust,4)
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn upload_codes(
+        &mut self, device: &wgpu::Device, queue: &wgpu::Queue, rgb: &[u8],
+        size: [usize;2], serial: u64, window: [f32;4], adjust: [f32;5], channels: usize,
+    ) -> crate::Result<()> {
+        let len = size[0].checked_mul(size[1]).and_then(|n| n.checked_mul(channels));
         if size.contains(&0)
             || len != Some(rgb.len())
             || size
@@ -1553,11 +1583,9 @@ impl VideoGpu {
             self.rgb_staging.resize(needed, 0);
         }
         let rgba = &mut self.rgb_staging[..needed];
-        for (src, dst) in rgb.chunks_exact(3).zip(rgba.chunks_exact_mut(4)) {
-            dst[0] = src[0];
-            dst[1] = src[1];
-            dst[2] = src[2];
-            dst[3] = 255;
+        for (src, dst) in rgb.chunks_exact(channels).zip(rgba.chunks_exact_mut(4)) {
+            dst[..3].copy_from_slice(&src[..3]);
+            dst[3] = if channels==4 {src[3]} else {255};
         }
         queue.write_texture(
             self.planes.as_ref().unwrap().textures[0].as_image_copy(),
@@ -3738,6 +3766,60 @@ mod tests {
             }
             assert!(frames >= 10);
         }
+    }
+    #[test]
+    fn rgba_shader_templates_validate_without_a_device() {
+        ColorShader::new("fn process_color(rgb: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {return rgb;}").unwrap();
+    }
+    #[test]
+    #[ignore = "requires physical GPU"]
+    fn rgba_frames_composite_after_adjustment_without_transparent_color_bleeding() {
+        let (device,queue)=headless().expect("physical GPU required");
+        assert_ne!(device.adapter_info().device_type,wgpu::DeviceType::Cpu);
+        let mut reader=crate::playback_native::NativeReader::software(std::io::Cursor::new(include_bytes!("../tests/fixtures/playback-errors/ffv1-alpha-rgb-8-coder1-v1.mkv").as_slice()),32<<20).unwrap();
+        reader.read_frame_raw().unwrap().unwrap();
+        let rgba=Arc::new(reader.read_frame_raw().unwrap().unwrap().into_rgba(32<<20).unwrap());
+        assert_eq!(rgba[31],0);assert!(rgba[28..31].iter().any(|&v|v!=0));
+        let mut gpu=build(&device,wgpu::TextureFormat::Rgba8Unorm);
+        let window=[0.,0.,1.,1.];
+        assert!(gpu.upload_shared_rgb(&device,&queue,&rgba,[4,2],window,IDENTITY_ADJUST).unwrap());
+        assert!(!gpu.upload_shared_rgb(&device,&queue,&rgba,[4,2],window,IDENTITY_ADJUST).unwrap());
+        let expected=crate::playback_native::rgba_to_rgb_on_black(&rgba,1024).unwrap();
+        let actual=read_picture(&device,&queue,&gpu,4,2);
+        for (a,b) in actual.chunks_exact(4).zip(expected.chunks_exact(3)) {
+            assert_eq!(a[3],255);for c in 0..3 {assert!(a[c].abs_diff(b[c])<=1);}
+        }
+        let actual=read_picture(&device,&queue,&gpu,8,4);
+        for y in 0..4 {for x in 0..8 {
+            let sx=((x as f64+0.5)*0.5-0.5).clamp(0.,3.);let sy=((y as f64+0.5)*0.5-0.5).clamp(0.,1.);
+            let (lx,ly)=(sx.floor() as usize,sy.floor() as usize);let (hx,hy)=((lx+1).min(3),(ly+1).min(1));
+            let (fx,fy)=(sx.fract(),sy.fract());
+            for c in 0..3 {
+                let mut want=0.;for (xx,yy,weight) in [(lx,ly,(1.-fx)*(1.-fy)),(hx,ly,fx*(1.-fy)),(lx,hy,(1.-fx)*fy),(hx,hy,fx*fy)] {
+                    let p=&rgba[(yy*4+xx)*4..];want+=f64::from(p[c])*f64::from(p[3])/255.*weight;
+                }
+                assert!(actual[(y*8+x)*4+c].abs_diff(want.round() as u8)<=1,"RGBA scaled {x},{y},{c}");
+            }
+        }}
+        let opaque=&rgba[24..28];let hidden=&rgba[28..32];
+        let wrong=(f64::from(opaque[0])*0.25+f64::from(hidden[0])*0.75)*(f64::from(opaque[3])*0.25)/255.;
+        let correct=f64::from(opaque[0])*f64::from(opaque[3])/255.*0.25;
+        assert!((correct-wrong).abs()>2.,"fixture must expose unassociated interpolation bleed");
+        let adjust=[1.2,-12.,0.8,0.7,0.3];
+        assert!(!gpu.upload_shared_rgb(&device,&queue,&rgba,[4,2],window,adjust).unwrap());
+        let rgb=rgba.chunks_exact(4).flat_map(|p|p[..3].iter().copied()).collect::<Vec<_>>();let mut adjusted=Vec::new();
+        crate::player::adjust_rgb(&rgb,&mut adjusted,&adjust);
+        let actual=read_picture(&device,&queue,&gpu,4,2);
+        for ((a,b),p) in actual.chunks_exact(4).zip(adjusted.chunks_exact(3)).zip(rgba.chunks_exact(4)) {
+            for c in 0..3 {let want=((u32::from(b[c])*u32::from(p[3])+127)/255) as u8;assert!(a[c].abs_diff(want)<=1);}
+        }
+        let shader=ColorShader::new("fn process_color(rgb: vec3<f32>, uv: vec2<f32>) -> vec3<f32> {return vec3(0.2,0.4,0.6);}").unwrap();
+        let mut custom=build_with_source(&device,wgpu::TextureFormat::Rgba8Unorm,shader.compiled_source());
+        custom.upload_rgba(&device,&queue,&rgba,[4,2],1,window,IDENTITY_ADJUST).unwrap();
+        let actual=read_picture(&device,&queue,&custom,4,2);
+        for (a,p) in actual.chunks_exact(4).zip(rgba.chunks_exact(4)) {for c in 0..3 {
+            let want=((u32::from([51u8,102,153][c])*u32::from(p[3])+127)/255) as u8;assert!(a[c].abs_diff(want)<=1);
+        }}
     }
     /// A device with no window, so a test can own the texture it paints into.
     /// A machine that reports no adapter has nothing here to measure against.

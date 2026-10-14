@@ -15,7 +15,7 @@ use std::{
 
 #[path = "packed.rs"]
 mod packed;
-pub use packed::PackedPlanar;
+pub use packed::{PackedPlanar, rgba_to_rgb_on_black};
 pub(crate) use packed::{av1_picture, hevc_picture, vp9_picture};
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
@@ -848,7 +848,7 @@ impl<R: BufRead + Seek> NativeReader<R> {
         }
         if let Some(packed) = frame.packed { return Ok(Some(RawFrame::Planar(packed))); }
         Ok(Some(match frame.planes8 {
-            Some(planes) if frame.picture.bit_depth == 8 => RawFrame::Planar8(planes),
+            Some(planes) if frame.picture.bit_depth == 8 && frame.picture.chroma_bit_depth == 8 => RawFrame::Planar8(planes),
             _ => RawFrame::Avc {
                 picture: frame.picture,
                 colour,
@@ -921,7 +921,7 @@ pub struct Planar8 {
 }
 /// Crop the picture and narrow its samples to 8 bits without colour conversion.
 pub fn avc_to_planar8(p: &IntraPicture, colour: AvcColour) -> Planar8 {
-    coded_planes_to_planar8(
+    coded_planes_to_planar8_depths(
         &p.y,
         &p.cb,
         &p.cr,
@@ -929,6 +929,7 @@ pub fn avc_to_planar8(p: &IntraPicture, colour: AvcColour) -> Planar8 {
         p.coded_height,
         p.crop,
         p.bit_depth,
+        p.chroma_bit_depth,
         colour,
     )
 }
@@ -945,14 +946,21 @@ pub fn coded_planes_to_planar8(
     depth: u8,
     colour: AvcColour,
 ) -> Planar8 {
+    coded_planes_to_planar8_depths(y,cb,cr,coded_width,coded_height,crop,depth,depth,colour)
+}
+#[allow(clippy::too_many_arguments)]
+fn coded_planes_to_planar8_depths(
+    y:&[u16],cb:&[u16],cr:&[u16],coded_width:usize,coded_height:usize,
+    crop:[usize;4],depth:u8,chroma_depth:u8,colour:AvcColour,
+) -> Planar8 {
     let w = coded_width - crop[0] - crop[1];
     let h = coded_height - crop[2] - crop[3];
-    let shift = depth.saturating_sub(8);
     let (x0, y0) = (crop[0], crop[2]);
     let (cx0, cy0) = (x0 / 2, y0 / 2);
     let chroma_width = (x0 + w).div_ceil(2) - cx0;
     let chroma_height = (y0 + h).div_ceil(2) - cy0;
-    let narrow = |plane: &[u16], stride: usize, x: usize, y: usize, width: usize, height: usize| {
+    let narrow = |plane: &[u16], stride: usize, x: usize, y: usize, width: usize, height: usize, source_depth:u8| {
+        let shift=source_depth.saturating_sub(8);
         let mut out = Vec::with_capacity(width * height);
         for row in 0..height {
             out.extend(
@@ -968,9 +976,9 @@ pub fn coded_planes_to_planar8(
         height: h,
         chroma_width,
         chroma_height,
-        y: narrow(y, coded_width, x0, y0, w, h),
-        cb: narrow(cb, coded_width / 2, cx0, cy0, chroma_width, chroma_height),
-        cr: narrow(cr, coded_width / 2, cx0, cy0, chroma_width, chroma_height),
+        y: narrow(y, coded_width, x0, y0, w, h,depth),
+        cb: narrow(cb, coded_width / 2, cx0, cy0, chroma_width, chroma_height,chroma_depth),
+        cr: narrow(cr, coded_width / 2, cx0, cy0, chroma_width, chroma_height,chroma_depth),
         colour,
     }
 }
@@ -1060,7 +1068,34 @@ pub enum RawFrame {
     },
 }
 impl RawFrame {
-    /// Packed 8-bit RGB of the visible picture area.
+    /// Unassociated display RGBA; raw source-depth storage remains available in Planar.
+    pub fn into_rgba(self, budget: usize) -> Result<Vec<u8>> {
+        if let Self::Planar(p) = self {
+            let mut rgba=Vec::new();p.to_rgba(&mut rgba,budget)?;return Ok(rgba);
+        }
+        let count=match &self {
+            Self::Rgb(rgb) => {
+                if rgb.len()%3!=0 {return Err(invalid("invalid RGB frame storage"));}
+                rgb.len()/3
+            }
+            Self::Avc {picture,..} => {let (w,h)=picture.dimensions();w.checked_mul(h).ok_or_else(||invalid("RGBA frame size overflow"))?}
+            Self::Planar8(p) => p.width.checked_mul(p.height).ok_or_else(||invalid("RGBA frame size overflow"))?,
+            Self::Yuv {width,height,..} => width.checked_mul(*height).ok_or_else(||invalid("RGBA frame size overflow"))?,
+            #[cfg(all(target_os="macos",feature="videotoolbox"))]
+            Self::Surface {surface,..} => (surface.width() as usize).checked_mul(surface.height() as usize).ok_or_else(||invalid("RGBA frame size overflow"))?,
+            Self::Planar(_) => unreachable!("source-depth RGBA handled above"),
+        };
+        let size=count.checked_mul(4).filter(|_|count.checked_mul(7).is_some_and(|n|n<=budget))
+            .ok_or_else(||invalid("RGBA frame exceeds playback budget"))?;
+        let rgb=self.into_rgb(budget-size)?;
+        if rgb.len()!=count*3 {return Err(invalid("invalid RGB frame storage"));}
+        let mut rgba=crate::buffer(size)?;
+        for (src,dst) in rgb.chunks_exact(3).zip(rgba.chunks_exact_mut(4)) {
+            dst[..3].copy_from_slice(src);dst[3]=255;
+        }
+        Ok(rgba)
+    }
+    /// Packed 8-bit RGB of the visible picture area, composited onto black.
     pub fn into_rgb(self, budget: usize) -> Result<Vec<u8>> {
         let mut rgb = Vec::new();
         match self {
@@ -1071,7 +1106,7 @@ impl RawFrame {
             RawFrame::Rgb(rgb) => return Ok(rgb),
             RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, &mut rgb, budget)?,
             RawFrame::Planar8(planes) => planar8_to_rgb(&planes, &mut rgb, budget)?,
-            RawFrame::Planar(p) => p.to_rgb(&mut rgb, budget)?,
+            RawFrame::Planar(p) => p.to_rgb_on_black(&mut rgb, budget)?,
             RawFrame::Yuv {
                 data,
                 luma_len,
@@ -1131,6 +1166,7 @@ pub fn avc_to_rgb(
         width: w,
         height: h,
         bit_depth: p.bit_depth,
+        chroma_bit_depth: p.chroma_bit_depth,
         colour,
     };
     rgb_from_planes(source, rgb, budget)
@@ -1152,7 +1188,7 @@ fn fill_rgb(
         }
         RawFrame::Avc { picture, colour } => avc_to_rgb(&picture, colour, rgb, budget)?,
         RawFrame::Planar8(planes) => planar8_to_rgb(&planes, rgb, budget)?,
-        RawFrame::Planar(p) => p.to_rgb(rgb, budget)?,
+        RawFrame::Planar(p) => p.to_rgb_on_black(rgb, budget)?,
         RawFrame::Rgb(bytes) => *rgb = bytes,
         RawFrame::Yuv { .. } => unreachable!(),
     }
@@ -1184,6 +1220,7 @@ pub fn planar8_to_rgb(p: &Planar8, rgb: &mut Vec<u8>, budget: usize) -> Result<(
         width: p.width,
         height: p.height,
         bit_depth: 8,
+        chroma_bit_depth: 8,
         colour: p.colour,
     };
     rgb_from_planes(source, rgb, budget)
@@ -1201,6 +1238,7 @@ struct PlaneSource<'a, T> {
     width: usize,
     height: usize,
     bit_depth: u8,
+    chroma_bit_depth: u8,
     colour: AvcColour,
 }
 fn rgb_from_planes<T: Copy + Into<f32> + Sync>(
@@ -1219,14 +1257,15 @@ fn rgb_from_planes<T: Copy + Into<f32> + Sync>(
         *rgb = crate::buffer(len)?;
     }
     let scale = f64::from(1u32 << (p.bit_depth - 8));
+    let chroma_scale=f64::from(1u32<<(p.chroma_bit_depth-8));
     let (y_offset, y_range, c_range) = if full {
         (
             0.0,
             f64::from((1u32 << p.bit_depth) - 1),
-            f64::from((1u32 << p.bit_depth) - 1),
+            f64::from((1u32 << p.chroma_bit_depth) - 1),
         )
     } else {
-        (16.0 * scale, 219.0 * scale, 224.0 * scale)
+        (16.0 * scale, 219.0 * scale, 224.0 * chroma_scale)
     };
     // Fold the range normalisation and the 255 output scale into
     // per-component gains so each pixel is three multiply-adds.
@@ -1237,7 +1276,7 @@ fn rgb_from_planes<T: Copy + Into<f32> + Sync>(
     let b_cb = (2.0 * (1.0 - kb) * c_gain) as f32;
     let g_cr = (kr * 2.0 * (1.0 - kr) / (1.0 - kr - kb) * c_gain) as f32;
     let g_cb = (kb * 2.0 * (1.0 - kb) / (1.0 - kr - kb) * c_gain) as f32;
-    let (y_offset, c_offset) = (y_offset as f32, (128.0 * scale) as f32);
+    let (y_offset, c_offset) = (y_offset as f32, (128.0 * chroma_scale) as f32);
     // Each chroma sample is converted once and applied to its two luma columns.
     // Rows never share a write, so the row loop is cut between workers the way
     // the grade is: this measured 4.5 ms for a 1080p frame and 16.1 ms for a 4K

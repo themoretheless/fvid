@@ -5,6 +5,14 @@ during an audit must get a short synthetic video and an automated regression
 test. Never copy private video, frames, audio or codec parameter sets into the
 repository. Reproduce the relevant metadata and encoding structure instead.
 
+Container I/O regressions use `ebml-interrupted-skip.webm`,
+`y4m-interrupted-header.y4m` and `matroska-interrupted-copy.webm`.
+Their tests inject a temporary read interruption at saved byte offsets, compare
+against valid controls and ensure permanent failures still propagate. Regenerate
+these authored clips with `python3 scripts/generate_container_io_regressions.py`;
+no external encoder or network is needed. See
+[`docs/improvements`](../../../docs/improvements/README.md) for checks and status.
+
 These eleven clips contain only FFmpeg `testsrc2`, 96×64, H.264 High, 12 fps,
 12 pictures, no audio. The original six clips use independently decodable
 pictures and take about 18 KB each; the inter-frame pair includes I/P/B pictures.

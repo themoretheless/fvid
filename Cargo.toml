@@ -1,3 +1,19 @@
+[workspace]
+members = [
+    ".",
+    "crates/fvid-codecs",
+    "crates/fvid-control",
+    "crates/fvid-cpu",
+    "crates/fvid-cuda",
+    "crates/fvid-media",
+    "crates/fvid-media-info",
+    "crates/fvid-opus",
+    "crates/fvid-platform",
+    "crates/fvid-vt",
+]
+exclude = ["crates/fvid-camera-ffi"]
+default-members = ["."]
+
 [package]
 name = "fvid"
 default-run = "fvid"

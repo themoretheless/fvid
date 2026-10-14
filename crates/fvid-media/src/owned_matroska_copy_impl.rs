@@ -112,7 +112,14 @@ pub fn copy_with_packet_limit<R: Read + Seek, W: Write>(
     }
     check(cancel)?;
     let mut tail = [0];
-    if input.read(&mut tail)? != 0 {
+    let tail_bytes = loop {
+        check(cancel)?;
+        match input.read(&mut tail) {
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            result => break result?,
+        }
+    };
+    if tail_bytes != 0 {
         return Err(invalid("Matroska source length changed during copy"));
     }
     Ok(event)

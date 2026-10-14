@@ -25,6 +25,7 @@ pub fn plan(project: &EditProject) -> EditPlan {
     let subtitles = choose(policy.subtitles, false);
     let mode = if matches!(video, StreamPlan::Transcode)
         || matches!(audio, StreamPlan::Transcode)
+        || matches!(subtitles, StreamPlan::Transcode)
     {
         ExecutionMode::DecodeProcessEncode
     } else {

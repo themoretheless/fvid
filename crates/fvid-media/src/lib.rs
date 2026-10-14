@@ -184,6 +184,7 @@ pub use owned_lossless::{
 pub mod owned_file_tags;
 
 pub mod owned_ffv1_decoder;
+pub mod owned_display_geometry;
 
 pub mod owned_ebml;
 

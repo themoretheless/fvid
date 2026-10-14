@@ -51,15 +51,9 @@ impl Synthesis {
         let transform = matrix();
         for slot in slots {
             history.copy_within(0..576, 64);
-            for (n, value) in history[..64].iter_mut().enumerate() {
-                *value = slot
-                    .iter()
-                    .zip(&transform[n])
-                    .map(|(x, m)| x.re * m.re - x.im * m.im)
-                    .sum();
-                if !value.is_finite() {
-                    return Err(invalid("overflowing SBR synthesis transform"));
-                }
+            let hist_head: &mut [f64; 64] = (&mut history[..64]).try_into().unwrap();
+            if !fvid_cpu::sbr_qmf_synthesis32_slot(slot, transform, hist_head) {
+                return Err(invalid("overflowing SBR synthesis transform"));
             }
             for k in 0..32 {
                 let mut sample = 0.0;

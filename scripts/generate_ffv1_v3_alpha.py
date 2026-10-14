@@ -6,7 +6,7 @@ from generate_ffv1_v3_quantizer_switches import Writer,contexts,movie
 from generate_ffv1_rice_fixtures import Rice,coded_line
 def main():
     cases=[]
-    for depth in [8,10,12,16]:
+    for depth in range(8,17):
         maximum=(1<<depth)-1;bias=1<<depth
         for layout in ['gray','420','444','rgb']:
             for coder in [0,1,2]:
@@ -59,7 +59,7 @@ def main():
                         sequence=[(p,y) for y in range(h) for p in range(4)] if rgb else [(p,y) for p in range(len(planes)) for y in range(sizes[p][1])]
                         for p,y in sequence:
                             group=2 if p==len(planes)-1 else int(p!=0);pw,_=sizes[p]
-                            diffs,_=coded_line(planes[p],pw,y,bits,False);ctx=contexts(planes[p],pw,y,bits,selected[group]);diffs=[-v if c<0 else v for v,c in zip(diffs,ctx)]
+                            diffs,_=coded_line(planes[p],pw,y,bits,False,signed_samples=not rgb and depth==16);ctx=contexts(planes[p],pw,y,bits,selected[group],signed_samples=not rgb and depth==16);diffs=[-v if c<0 else v for v,c in zip(diffs,ctx)]
                             if coder==0:run[p]=entropy.line(diffs,ctx,bits,group,run[p])
                             else:
                                 for v,c in zip(diffs,ctx):r.integer(entropy[group][abs(c)],v,True)

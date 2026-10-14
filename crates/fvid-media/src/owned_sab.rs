@@ -55,11 +55,11 @@ fn neighbors(length: usize, side: usize) -> Result<Vec<usize>> {
         .ok_or("sab reflection period overflow")?;
     for position in 0..length {
         for index in 0..side {
-            let coordinate = position as i128 + index as i128 - (side / 2) as i128;
+            let coordinate = position as i64 + index as i64 - (side / 2) as i64;
             let reflected = if period == 0 {
                 0
             } else {
-                let phase = coordinate.rem_euclid(period as i128) as usize;
+                let phase = coordinate.rem_euclid(period as i64) as usize;
                 phase.min(period - phase)
             };
             result.push(reflected);
@@ -306,29 +306,58 @@ fn filter_plane(
     depth: u8,
     weights: &Weights,
 ) {
-    for y in 0..height {
-        for x in 0..width {
-            let center = sample(guidance, y * width + x, depth);
-            let mut numerator = 0u64;
-            let mut denominator = 0u64;
-            for dy in 0..weights.side {
-                let row = weights.y[y * weights.side + dy] * width;
-                for dx in 0..weights.side {
-                    let at = row + weights.x[x * weights.side + dx];
-                    let difference = center.abs_diff(sample(guidance, at, depth)) as usize;
-                    let factor = u64::from(weights.similarity[difference])
-                        * u64::from(weights.spatial[dy * weights.side + dx]);
-                    numerator += u64::from(sample(source, at, depth)) * factor;
-                    denominator += factor;
+    let side = weights.side;
+    if depth == 8 {
+        for y in 0..height {
+            let y_base = y * side;
+            let row_offset = y * width;
+            for x in 0..width {
+                let x_base = x * side;
+                let center = u16::from(guidance[row_offset + x]);
+                let mut numerator = 0u64;
+                let mut denominator = 0u64;
+                for dy in 0..side {
+                    let row = weights.y[y_base + dy] * width;
+                    let spatial_row = &weights.spatial[dy * side..(dy + 1) * side];
+                    let x_neighbors = &weights.x[x_base..x_base + side];
+                    for dx in 0..side {
+                        let at = row + x_neighbors[dx];
+                        let difference = center.abs_diff(u16::from(guidance[at])) as usize;
+                        let factor = u64::from(weights.similarity[difference])
+                            * u64::from(spatial_row[dx]);
+                        numerator += u64::from(source[at]) * factor;
+                        denominator += factor;
+                    }
                 }
+                // The center always has a positive spatial/similarity factor.
+                output[row_offset + x] = ((numerator + denominator / 2) / denominator) as u8;
             }
-            // The center always has a positive spatial/similarity factor.
-            let value = ((numerator + denominator / 2) / denominator) as u16;
-            let at = y * width + x;
-            if depth == 8 {
-                output[at] = value as u8;
-            } else {
-                output[at * 2..at * 2 + 2].copy_from_slice(&value.to_le_bytes());
+        }
+    } else {
+        for y in 0..height {
+            let y_base = y * side;
+            let row_offset = y * width;
+            for x in 0..width {
+                let x_base = x * side;
+                let center = sample(guidance, row_offset + x, depth);
+                let mut numerator = 0u64;
+                let mut denominator = 0u64;
+                for dy in 0..side {
+                    let row = weights.y[y_base + dy] * width;
+                    let spatial_row = &weights.spatial[dy * side..(dy + 1) * side];
+                    let x_neighbors = &weights.x[x_base..x_base + side];
+                    for dx in 0..side {
+                        let at = row + x_neighbors[dx];
+                        let difference = center.abs_diff(sample(guidance, at, depth)) as usize;
+                        let factor = u64::from(weights.similarity[difference])
+                            * u64::from(spatial_row[dx]);
+                        numerator += u64::from(sample(source, at, depth)) * factor;
+                        denominator += factor;
+                    }
+                }
+                let value = ((numerator + denominator / 2) / denominator) as u16;
+                let at = (row_offset + x) * 2;
+                output[at..at + 2].copy_from_slice(&value.to_le_bytes());
             }
         }
     }

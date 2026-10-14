@@ -226,7 +226,10 @@ impl Header {
 pub(crate) fn line<R: BufRead>(reader: &mut R, bytes: &mut Vec<u8>) -> Result<bool> {
     bytes.clear();
     loop {
-        let available = reader.fill_buf().map_err(io_error)?;
+        let available = match reader.fill_buf() {
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            result => result.map_err(io_error)?,
+        };
         if available.is_empty() {
             return if bytes.is_empty() {
                 Ok(false)

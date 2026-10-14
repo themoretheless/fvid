@@ -777,6 +777,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             coded_height: p.dimensions[1] as usize,
                             crop: p.crop.map(|v| v as usize),
                             bit_depth: p.depth[0],
+                            chroma_bit_depth: p.depth[1],
                             y: p.planes[0].samples().to_vec(),
                             cb: p.planes[1].samples().to_vec(),
                             cr: p.planes[2].samples().to_vec(),
@@ -790,7 +791,6 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 }
                 VideoDecoder::Ffv1(d) => {
                     let decoded = d.decode(&packet)?;
-                    if decoded.alpha.is_some() {return Err(crate::unsupported("FFV1 alpha presentation is not implemented"));}
                     let (kr, kb) = match self.colour.matrix {
                         0 | 2 | 5 | 6 => (0.299, 0.114),
                         1 => (0.2126, 0.0722),
@@ -803,7 +803,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         kb,
                         full: self.colour.full_range,
                     };
-                    let p = PackedPlanar::new(decoded.frame, decoded.depth, colour)?;
+                    let p = PackedPlanar::with_alpha(decoded.frame, decoded.depth, colour, decoded.alpha)?;
                     visible = Some(Frame {
                         decoded: Picture::Ffv1(Arc::new(p)),
                         pts,
@@ -919,7 +919,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             }
             Picture::Coded(p, colour) => {
                 let (w, h) = p.dimensions();
-                ([w as u32, h as u32], p.bit_depth, colour.full, 0, false)
+                ([w as u32, h as u32], p.bit_depth.max(p.chroma_bit_depth), colour.full, 0, false)
             }
             Picture::Ffv1(p) => (
                 [p.frame.width as u32, p.frame.height as u32],
@@ -976,7 +976,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     }
     fn convert_to_rgb(&mut self, current: &CurrentFrame) -> Result<bool> {
         if let Picture::Ffv1(p) = &current.decoded {
-            p.to_rgb(&mut self.rgb, self.rgb_budget)?;
+            p.to_rgb_on_black(&mut self.rgb, self.rgb_budget)?;
             return Ok(true);
         }
         if let Picture::Coded(p, colour) = &current.decoded {

@@ -91,29 +91,32 @@ impl Bilateral {
             if self.planes & (1 << plane) != 0 {
                 let mut source = Vec::new();
                 source.try_reserve_exact(area).map_err(|e| e.to_string())?;
-                for i in 0..area {
-                    let offset = base + i * bytes;
-                    source.push(if bytes == 1 {
-                        f64::from(frame.data[offset])
-                    } else {
-                        f64::from(u16::from_le_bytes([
-                            frame.data[offset],
-                            frame.data[offset + 1],
-                        ]))
-                    });
+                if bytes == 1 {
+                    for &b in &frame.data[base..base + area] {
+                        source.push(f64::from(b));
+                    }
+                } else {
+                    for chunk in frame.data[base..base + area * 2].chunks_exact(2) {
+                        source.push(f64::from(u16::from_le_bytes([chunk[0], chunk[1]])));
+                    }
                 }
                 for y in 0..h {
+                    let yy_min = y.saturating_sub(radius);
+                    let yy_max = y.saturating_add(radius).min(h - 1);
                     for x in 0..w {
                         let center = source[y * w + x];
                         let (mut sum, mut weight_sum) = (0.0, 0.0);
-                        for yy in y.saturating_sub(radius)..=y.saturating_add(radius).min(h - 1) {
-                            for xx in x.saturating_sub(radius)..=x.saturating_add(radius).min(w - 1)
-                            {
+                        let xx_min = x.saturating_sub(radius);
+                        let xx_max = x.saturating_add(radius).min(w - 1);
+                        for yy in yy_min..=yy_max {
+                            let dy = y.abs_diff(yy) as f64;
+                            let dy_sq = dy * dy;
+                            let row_slice = &source[yy * w..yy * w + w];
+                            for xx in xx_min..=xx_max {
                                 let dx = x.abs_diff(xx) as f64;
-                                let dy = y.abs_diff(yy) as f64;
-                                let sample = source[yy * w + xx];
+                                let sample = row_slice[xx];
                                 let difference = sample - center;
-                                let weight = (-(dx * dx + dy * dy) / spatial_denominator
+                                let weight = (-(dx * dx + dy_sq) / spatial_denominator
                                     - difference * difference / range_denominator)
                                     .exp();
                                 weight_sum += weight;
