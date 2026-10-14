@@ -157,6 +157,7 @@ pub mod owned_avgblur;
 pub mod owned_gblur;
 pub mod owned_bilateral;
 pub mod owned_rotate;
+mod owned_rgb_transform;
 pub mod owned_boxblur;
 
 pub mod owned_pixelize;

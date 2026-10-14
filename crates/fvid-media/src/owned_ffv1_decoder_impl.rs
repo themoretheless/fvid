@@ -24,7 +24,9 @@ impl<'a> Range<'a> {
     }
     fn bit(&mut self, state: &mut u8) -> Result<bool> {
         if *state == 0 {
-            return Err(invalid("invalid FFV1 probability state"));
+            // A zero-probability one is impossible; this context emits zero
+            // without consuming or renormalizing the range interval.
+            return Ok(false);
         }
         let split = (self.range * u32::from(*state)) >> 8;
         self.range -= split;
@@ -72,17 +74,34 @@ impl<'a> Range<'a> {
     }
 }
 struct State {
+    rice: Option<[Vec<RiceModel>; 3]>,
     rgb: bool,
+    has_alpha: bool,
     depth: u8,
     has_chroma: bool,
     shifts: [u8; 2],
-    tables: [[i32; 256]; 5],
+    tables: Vec<[[i32; 256]; 5]>,
     transitions: [u8; 256],
-    models: [Vec<[u8; 32]>; 2],
+    models: [Vec<[u8; 32]>; 3],
 }
-/// One frame in packed planar Y, Cb, Cr order, preserving sample depth.
+impl State {
+    fn context_bytes(&self) -> usize {
+        self.models.iter().map(|m| m.len() * 32).sum::<usize>()
+            + self.rice.as_ref().map_or(0, |models| {
+                models
+                    .iter()
+                    .map(|m| m.len() * std::mem::size_of::<RiceModel>())
+                    .sum::<usize>()
+            })
+            + self.tables.len() * std::mem::size_of::<[[i32; 256]; 5]>()
+            + std::mem::size_of::<Self>()
+    }
+}
+/// One frame in planar Y/Cb/Cr or interleaved RGB, preserving sample depth.
 pub struct Decoded {
     pub frame: GeometryFrame,
+    /// Full-resolution alpha at `depth`, little-endian u16 above eight bits.
+    pub alpha: Option<Vec<u8>>,
     pub depth: u8,
     pub keyframe: bool,
 }
@@ -93,10 +112,14 @@ pub struct Decoder {
     height: usize,
     budget: usize,
     state: Option<State>,
+    v3: Option<Box<V3>>,
 }
 impl Decoder {
     /// Source chroma presence after a successfully decoded frame.
     pub fn monochrome(&self) -> Option<bool> {
+        if let Some(v3) = self.v3.as_ref() {
+            return v3.live.then_some(!v3.config.chroma);
+        }
         self.state.as_ref().map(|state| !state.has_chroma)
     }
     pub fn new(width: usize, height: usize, budget: usize) -> Result<Self> {
@@ -113,10 +136,15 @@ impl Decoder {
             height,
             budget,
             state: None,
+            v3: None,
         })
     }
     pub fn reset(&mut self) {
         self.state = None;
+        if let Some(v3) = self.v3.as_mut() {
+            v3.history.clear();
+            v3.live = false;
+        }
     }
     fn header(&self, r: &mut Range<'_>) -> Result<State> {
         let mut h = [128; 32];
@@ -125,21 +153,23 @@ impl Decoder {
             return Err(unsupported("FFV1 versions above 1 are not implemented"));
         }
         let coder = r.integer(&mut h, false)?;
-        if !matches!(coder, 1 | 2) {
-            return Err(unsupported("FFV1 Golomb Rice decoding is not implemented"));
+        if !matches!(coder, 0 | 1 | 2) {
+            return Err(unsupported("unsupported FFV1 entropy coder"));
         }
         let mut transitions = TRANSITION;
         if coder == 2 {
             for i in 1..256 {
                 let n = i64::from(TRANSITION[i]) + i64::from(r.integer(&mut h, true)?);
-                if !(1..=255).contains(&n) {
+                if !(0..=255).contains(&n) {
                     return Err(invalid("invalid FFV1 custom transition"));
                 }
                 transitions[i] = n as u8;
             }
         }
         let rgb = match r.integer(&mut h, false)? {
-            0 => false, 1 => true, _ => return Err(unsupported("unsupported FFV1 color space")),
+            0 => false,
+            1 => true,
+            _ => return Err(unsupported("unsupported FFV1 color space")),
         };
         let depth = if version == 0 {
             8
@@ -155,9 +185,7 @@ impl Decoder {
         if sx > 4 || sy > 4 {
             return Err(invalid("invalid FFV1 chroma shift"));
         }
-        if r.bit(&mut h[0])? {
-            return Err(unsupported("FFV1 alpha decoding is not implemented"));
-        }
+        let has_alpha = r.bit(&mut h[0])?;
         if rgb && (!has_chroma || sx != 0 || sy != 0) {
             return Err(invalid("invalid FFV1 RGB chroma configuration"));
         }
@@ -186,168 +214,310 @@ impl Decoder {
                 .ok_or_else(|| invalid("FFV1 context count overflow"))?;
         }
         let count = (scale as usize).div_ceil(2);
-        let bytes = count * 64 + std::mem::size_of::<State>();
+        let groups = if has_alpha { 3 } else { 2 };
+        let bytes = count
+            * groups
+            * if coder == 0 {
+                std::mem::size_of::<RiceModel>()
+            } else {
+                32
+            }
+            + groups * std::mem::size_of::<[[i32; 256]; 5]>()
+            + std::mem::size_of::<State>();
         if bytes > self.budget {
             return Err(invalid("FFV1 contexts exceed memory budget"));
         }
-        let mut models = [Vec::new(), Vec::new()];
-        for model in &mut models {
+        let mut models = [Vec::new(), Vec::new(), Vec::new()];
+        for model in models.iter_mut().take(groups) {
+            if coder == 0 {
+                continue;
+            }
             model
                 .try_reserve_exact(count)
                 .map_err(|_| invalid("cannot allocate FFV1 contexts"))?;
             model.resize(count, [128; 32]);
         }
+        let rice = if coder == 0 {
+            let mut models = [Vec::new(), Vec::new(), Vec::new()];
+            for model in models.iter_mut().take(groups) {
+                model
+                    .try_reserve_exact(count)
+                    .map_err(|_| invalid("cannot allocate FFV1 Rice contexts"))?;
+                model.resize(count, RiceModel::default());
+            }
+            Some(models)
+        } else {
+            None
+        };
+        let mut quantizers = Vec::new();
+        quantizers
+            .try_reserve_exact(groups)
+            .map_err(|_| invalid("cannot allocate FFV1 quantizers"))?;
+        quantizers.resize(groups, tables);
         Ok(State {
+            rice,
+            has_alpha,
             rgb,
             depth: depth as u8,
             has_chroma,
             shifts: [sx as u8, sy as u8],
-            tables,
+            tables: quantizers,
             transitions,
             models,
         })
     }
     pub fn decode(&mut self, packet: &[u8]) -> Result<Decoded> {
+        if let Some(mut v3) = self.v3.take() {
+            let result = v3.decode(packet, self.width, self.height, self.budget);
+            if result.is_err() {
+                v3.history.clear();
+                v3.live = false;
+            }
+            self.v3 = Some(v3);
+            return result;
+        }
         let old = self.state.take();
         let mut r = Range::new(packet)?;
         let keyframe = r.bit(&mut 128)?;
-        let mut state = if keyframe {
+        let state = if keyframe {
             drop(old);
             self.header(&mut r)?
         } else {
             old.ok_or_else(|| invalid("FFV1 frame requires a preceding keyframe"))?
         };
         r.transitions = state.transitions;
-        if state.rgb {
-            let frame = decode_rgb(&mut r, &mut state, self.width, self.height, self.budget)?;
-            let depth = state.depth;
-            self.state = Some(state);
-            return Ok(Decoded { frame, depth, keyframe });
-        }
-        let sx = if state.has_chroma {
-            1usize << state.shifts[0]
-        } else {
-            1
-        };
-        let sy = if state.has_chroma {
-            1usize << state.shifts[1]
-        } else {
-            1
-        };
-        let cw = self.width.div_ceil(sx);
-        let ch = self.height.div_ceil(sy);
-        let samples = self
-            .width
-            .checked_mul(self.height)
-            .and_then(|n| {
-                cw.checked_mul(ch)
-                    .and_then(|c| c.checked_mul(2))
-                    .and_then(|c| n.checked_add(c))
+        let mut rice = if state.rice.is_some() {
+            r.bit(&mut 129)?;
+            let start =
+                r.at.checked_sub(1)
+                    .filter(|&at| at <= packet.len())
+                    .ok_or_else(|| invalid("truncated FFV1 Golomb Rice header"))?;
+            Some(Rice {
+                data: &packet[start..],
+                at: 0,
             })
-            .ok_or_else(|| invalid("FFV1 frame size overflow"))?;
-        let bytes = if state.depth == 8 { 1 } else { 2 };
-        let len = samples
-            .checked_mul(bytes)
-            .ok_or_else(|| invalid("FFV1 frame size overflow"))?;
-        let storage = len
-            .checked_add(state.models[0].len() * 64 + std::mem::size_of::<State>())
-            .ok_or_else(|| invalid("FFV1 storage overflow"))?;
-        if storage > self.budget {
-            return Err(invalid("FFV1 frame exceeds memory budget"));
-        }
-        let mut data = buffer(len)?;
-        let mut offset = 0;
-        for plane in 0..if state.has_chroma { 3 } else { 1 } {
-            let (w, h) = if plane == 0 {
-                (self.width, self.height)
-            } else {
-                (cw, ch)
-            };
-            let model = &mut state.models[usize::from(plane != 0)];
-            let read = |data: &[u8], x: isize, y: isize| -> i32 {
-                if y < 0 || x < -1 {
-                    return 0;
-                }
-                let (x, y) = if x == -1 {
-                    if y == 0 {
-                        return 0;
-                    }
-                    (0, y - 1)
-                } else {
-                    (x.min(w as isize - 1), y)
-                };
-                let at = offset + (y as usize * w + x as usize) * bytes;
-                let v = if bytes == 1 {
-                    u16::from(data[at])
-                } else {
-                    u16::from_le_bytes([data[at], data[at + 1]])
-                };
-                if state.depth == 16 {
-                    i32::from(v as i16)
-                } else {
-                    i32::from(v)
-                }
-            };
-            for y in 0..h {
-                for x in 0..w {
-                    let (xx, yy) = (x as isize, y as isize);
-                    let l = read(&data, xx - 1, yy);
-                    let t = read(&data, xx, yy - 1);
-                    let tl = read(&data, xx - 1, yy - 1);
-                    let tr = read(&data, xx + 1, yy - 1);
-                    let ll = read(&data, xx - 2, yy);
-                    let tt = read(&data, xx, yy - 2);
-                    let mut context = 0i32;
-                    for (table, d) in
-                        state
-                            .tables
-                            .iter()
-                            .zip([l - tl, tl - t, t - tr, ll - l, tt - t])
-                    {
-                        context += table[(d & 255) as usize];
-                    }
-                    let probabilities = model
-                        .get_mut(context.unsigned_abs() as usize)
-                        .ok_or_else(|| invalid("invalid FFV1 context"))?;
-                    let mut residual = r.integer(probabilities, true)?;
-                    if residual.unsigned_abs() > (1u32 << (state.depth - 1)) {
-                        return Err(invalid("FFV1 residual exceeds sample depth"));
-                    }
-                    if context < 0 {
-                        residual = -residual;
-                    }
-                    let prediction = (l + t - tl).clamp(l.min(t), l.max(t));
-                    let v = ((prediction + residual) & ((1i32 << state.depth) - 1)) as u16;
-                    let at = offset + (y * w + x) * bytes;
-                    data[at] = v as u8;
-                    if bytes == 2 {
-                        data[at + 1] = (v >> 8) as u8;
-                    }
-                }
-            }
-            offset += w * h * bytes;
-        }
-        let depth = state.depth;
-        if !state.has_chroma {
-            // Keep the public decoded-frame contract planar Y/Cb/Cr. The gray
-            // luma is unchanged; synthesized full-resolution chroma is neutral.
-            let neutral = (1u16 << (depth - 1)).to_le_bytes();
-            for sample in data[offset..].chunks_exact_mut(bytes) {
-                sample.copy_from_slice(&neutral[..bytes]);
-            }
-        }
-        self.state = Some(state);
-        Ok(Decoded {
-            frame: GeometryFrame {
-                width: self.width,
-                height: self.height,
-                subsampling: Some([sx, sy]),
-                data,
-            },
-            depth,
+        } else {
+            None
+        };
+        let (decoded, state) = decode_content(
+            self.width,
+            self.height,
+            self.budget,
+            &mut r,
+            &mut rice,
+            state,
             keyframe,
-        })
+        )?;
+        self.state = Some(state);
+        Ok(decoded)
     }
 }
 
+fn decode_content(
+    width: usize,
+    height: usize,
+    budget: usize,
+    r: &mut Range<'_>,
+    rice: &mut Option<Rice<'_>>,
+    mut state: State,
+    keyframe: bool,
+) -> Result<(Decoded, State)> {
+    if state.rgb {
+        let (frame, alpha) = decode_rgb(r, rice, &mut state, width, height, budget)?;
+        if let Some(rice) = rice.as_mut() {
+            rice.finish()?;
+        }
+        let depth = state.depth;
+        return Ok((
+            Decoded {
+                frame,
+                alpha,
+                depth,
+                keyframe,
+            },
+            state,
+        ));
+    }
+    let sx = if state.has_chroma {
+        1usize << state.shifts[0]
+    } else {
+        1
+    };
+    let sy = if state.has_chroma {
+        1usize << state.shifts[1]
+    } else {
+        1
+    };
+    let cw = width.div_ceil(sx);
+    let ch = height.div_ceil(sy);
+    let samples = width
+        .checked_mul(height)
+        .and_then(|n| {
+            cw.checked_mul(ch)
+                .and_then(|c| c.checked_mul(2))
+                .and_then(|c| n.checked_add(c))
+        })
+        .ok_or_else(|| invalid("FFV1 frame size overflow"))?;
+    let bytes = if state.depth == 8 { 1 } else { 2 };
+    let len = samples
+        .checked_mul(bytes)
+        .ok_or_else(|| invalid("FFV1 frame size overflow"))?;
+    let alpha_len = if state.has_alpha {
+        width
+            .checked_mul(height)
+            .and_then(|n| n.checked_mul(bytes))
+            .ok_or_else(|| invalid("FFV1 alpha size overflow"))?
+    } else {
+        0
+    };
+    let storage = len
+        .checked_add(alpha_len)
+        .and_then(|n| n.checked_add(state.context_bytes()))
+        .ok_or_else(|| invalid("FFV1 storage overflow"))?;
+    if storage > budget {
+        return Err(invalid("FFV1 frame exceeds memory budget"));
+    }
+    let mut data = buffer(len)?;
+    let mut alpha = if state.has_alpha {
+        Some(buffer(alpha_len)?)
+    } else {
+        None
+    };
+    let mut offset = 0;
+    for plane in 0..if state.has_chroma { 3 } else { 1 } {
+        let (w, h) = if plane == 0 {
+            (width, height)
+        } else {
+            (cw, ch)
+        };
+        let length = w * h * bytes;
+        decode_plane(
+            r,
+            rice,
+            &mut state,
+            &mut data[offset..offset + length],
+            w,
+            h,
+            usize::from(plane != 0),
+        )?;
+        offset += length;
+    }
+    if let Some(alpha) = alpha.as_mut() {
+        decode_plane(r, rice, &mut state, alpha, width, height, 2)?;
+    }
+    let depth = state.depth;
+    if let Some(rice) = rice.as_mut() {
+        rice.finish()?;
+    }
+    if !state.has_chroma {
+        // Keep the public decoded-frame contract planar Y/Cb/Cr. The gray
+        // luma is unchanged; synthesized full-resolution chroma is neutral.
+        let neutral = (1u16 << (depth - 1)).to_le_bytes();
+        for sample in data[offset..].chunks_exact_mut(bytes) {
+            sample.copy_from_slice(&neutral[..bytes]);
+        }
+    }
+    Ok((
+        Decoded {
+            frame: GeometryFrame {
+                width: width,
+                height: height,
+                subsampling: Some([sx, sy]),
+                data,
+            },
+            alpha,
+            depth,
+            keyframe,
+        },
+        state,
+    ))
+}
+
+fn decode_plane(
+    r: &mut Range<'_>,
+    rice: &mut Option<Rice<'_>>,
+    state: &mut State,
+    data: &mut [u8],
+    w: usize,
+    h: usize,
+    group: usize,
+) -> Result<()> {
+    let depth = state.depth;
+    let bytes = if depth == 8 { 1 } else { 2 };
+    let read = |data: &[u8], x: isize, y: isize| -> i32 {
+        if y < 0 || x < -1 {
+            return 0;
+        }
+        let (x, y) = if x == -1 {
+            if y == 0 {
+                return 0;
+            }
+            (0, y - 1)
+        } else {
+            (x.min(w as isize - 1), y)
+        };
+        let at = (y as usize * w + x as usize) * bytes;
+        let value = if bytes == 1 {
+            u16::from(data[at])
+        } else {
+            u16::from_le_bytes([data[at], data[at + 1]])
+        };
+        if depth == 16 {
+            i32::from(value as i16)
+        } else {
+            i32::from(value)
+        }
+    };
+    let mut run = RiceRun::default();
+    for y in 0..h {
+        run.line();
+        for x in 0..w {
+            let (xx, yy) = (x as isize, y as isize);
+            let l = read(data, xx - 1, yy);
+            let t = read(data, xx, yy - 1);
+            let tl = read(data, xx - 1, yy - 1);
+            let tr = read(data, xx + 1, yy - 1);
+            let ll = read(data, xx - 2, yy);
+            let tt = read(data, xx, yy - 2);
+            let context: i32 = state.tables[group]
+                .iter()
+                .zip([l - tl, tl - t, t - tr, ll - l, tt - t])
+                .map(|(table, d)| table[(d & 255) as usize])
+                .sum();
+            let mut residual = if let Some(rice) = rice.as_mut() {
+                rice.sample(
+                    &mut state.rice.as_mut().unwrap()[group],
+                    context,
+                    depth,
+                    &mut run,
+                    x,
+                    w,
+                )?
+            } else {
+                let probabilities = state.models[group]
+                    .get_mut(context.unsigned_abs() as usize)
+                    .ok_or_else(|| invalid("invalid FFV1 context"))?;
+                r.integer(probabilities, true)?
+            };
+            if residual.unsigned_abs() > (1u32 << (depth - 1)) {
+                return Err(invalid("FFV1 residual exceeds sample depth"));
+            }
+            if context < 0 {
+                residual = -residual;
+            }
+            let prediction = (l + t - tl).clamp(l.min(t), l.max(t));
+            let value = ((prediction + residual) & ((1i32 << depth) - 1)) as u16;
+            let at = (y * w + x) * bytes;
+            data[at] = value as u8;
+            if bytes == 2 {
+                data[at + 1] = (value >> 8) as u8;
+            }
+        }
+    }
+    Ok(())
+}
+
 include!("owned_ffv1_rgb_decoder_impl.rs");
+include!("owned_ffv1_rice_decoder_impl.rs");
+include!("owned_ffv1_v3_config_impl.rs");
+include!("owned_ffv1_v3_decoder_impl.rs");

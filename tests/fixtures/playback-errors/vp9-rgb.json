@@ -1,0 +1,99 @@
+{
+  "cases": [
+    {
+      "depth": 8,
+      "width": 64,
+      "height": 64,
+      "frames": 2,
+      "files": {
+        "packet": {
+          "file": "vp9-rgb-depth8.packet",
+          "sha256": "b06028af4ff042653064b3601e8ad4828b14b9c9c3056e10c8cc3569c3ec64a9"
+        },
+        "rgb": {
+          "file": "vp9-rgb-depth8.rgb",
+          "sha256": "a9f195e1141110698a743ad7438758056de62cbfd6787e8297abc8677b43ff65"
+        },
+        "webm": {
+          "file": "vp9-rgb-depth8.webm",
+          "sha256": "899459ae1c57a3c07c7f905999d9980399873b16dbef2b9b0e1a77c539323cc6"
+        },
+        "mp4": {
+          "file": "vp9-rgb-depth8.mp4",
+          "sha256": "cec971cb79499511cafd74223995dc607f4f1cff356cbe12cbccc6d99df02c1c"
+        }
+      }
+    },
+    {
+      "depth": 10,
+      "width": 64,
+      "height": 64,
+      "frames": 2,
+      "files": {
+        "packet": {
+          "file": "vp9-rgb-depth10.packet",
+          "sha256": "261c60a9ee668d70e14ce4cd31003c220239327fbb8a1cde400cc28f41f4ee55"
+        },
+        "rgb": {
+          "file": "vp9-rgb-depth10.rgb",
+          "sha256": "285aa0bae4d71b0acb2ba696f6262fbbc16e6738920b1792960957d75b2b7089"
+        },
+        "webm": {
+          "file": "vp9-rgb-depth10.webm",
+          "sha256": "bc68879d06064f8e0905193d27fc1310462dbb63df742c7822eb20810ecff9e4"
+        },
+        "mp4": {
+          "file": "vp9-rgb-depth10.mp4",
+          "sha256": "2c9d665768f0f855ae812c6675d46fce9242028345e1dba798c97e8b60a007a0"
+        }
+      }
+    },
+    {
+      "depth": 12,
+      "width": 64,
+      "height": 64,
+      "frames": 2,
+      "files": {
+        "packet": {
+          "file": "vp9-rgb-depth12.packet",
+          "sha256": "78162d355c82ee010fe553d0e4910246c5f49800c0cdf197e1036fb7cc28ead6"
+        },
+        "rgb": {
+          "file": "vp9-rgb-depth12.rgb",
+          "sha256": "ee2117c70768c0bf3eba46f941053d375623525abb6e7707844ea9184e360085"
+        },
+        "webm": {
+          "file": "vp9-rgb-depth12.webm",
+          "sha256": "78d7824c6ebc9b1a8540c9e13ba62a17b06fc8bc67541986141bd718a0ff40f1"
+        },
+        "mp4": {
+          "file": "vp9-rgb-depth12.mp4",
+          "sha256": "4360cbf31a6e4a74df2d57093145f6b77df73d54ce74236cc86ecfdb6f008ac7"
+        }
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "file": "vp9-rgb-depth8-config-profile-mismatch.mp4",
+      "sha256": "17aa512d9a23157a798f12c6e3adc71a2c495014ff3b0764b2b8bea76fa582ca",
+      "error": "MP4 VP9 configuration disagrees with picture format"
+    },
+    {
+      "file": "vp9-rgb-depth8-config-depth-mismatch.mp4",
+      "sha256": "d4674fdc909e5d2de07a4d66fb04083288a2e46682353123d6989c9faa3db1a8",
+      "error": "MP4 VP9 configuration disagrees with picture format"
+    },
+    {
+      "file": "vp9-rgb-depth8-config-range-mismatch.mp4",
+      "sha256": "8b613e7009797829bc73fb1393c14f4222c03874aa6351b21c8db2c0804453b4",
+      "error": "MP4 VP9 configuration disagrees with picture format"
+    },
+    {
+      "file": "vp9-rgb-depth8-config-subsampling-mismatch.mp4",
+      "sha256": "0d77d62a25af9687e9e7bfd59f4cdeefb083c952bdb6866f00a5bc6785d2cf87",
+      "error": "MP4 VP9 configuration disagrees with picture format"
+    }
+  ],
+  "provenance": "Authored VP9 profile 1/3 identity headers, owned Python Boolean encoder, independent DC prediction/WHT sample oracle; G/B/R planes interleaved as RGB. No private media, external codec or network."
+}

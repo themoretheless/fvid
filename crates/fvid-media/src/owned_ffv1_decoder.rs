@@ -1,4 +1,4 @@
-//! Owned FFV1 v0/v1 decoding, persistent context models and bounded storage.
+//! Owned FFV1 v0/v1/v3 decoding, persistent slice contexts and bounded storage.
 //! RFC 9043 bitstream core is shared with native frontend playback.
 use crate::owned_ffv1_encoder::TRANSITION;
 use crate::owned_frame::{GeometryFrame, buffer};

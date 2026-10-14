@@ -92,7 +92,9 @@ pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
     if !(8..=16).contains(&depth) || frame.width == 0 || frame.height == 0 {
         return Err(invalid("unsupported FFV1 depth or empty geometry"));
     }
-    let Some(subsampling) = frame.subsampling else { return encode_rgb(frame, depth); };
+    let Some(subsampling) = frame.subsampling else {
+        return encode_rgb(frame, depth);
+    };
     encode_planes(
         frame.width,
         frame.height,
@@ -100,13 +102,50 @@ pub fn encode(frame: &GeometryFrame, depth: u8) -> Result<Vec<u8>> {
         depth,
         subsampling,
         true,
+        None,
     )
 }
 
 /// Encode a self-contained monochrome keyframe without inventing chroma samples.
 /// Samples above eight bits are stored in little-endian u16 words.
 pub fn encode_gray(width: usize, height: usize, samples: &[u8], depth: u8) -> Result<Vec<u8>> {
-    encode_planes(width, height, samples, depth, [1, 1], false)
+    encode_planes(width, height, samples, depth, [1, 1], false, None)
+}
+/// Encode color and an independent full-resolution alpha plane at the same depth.
+pub fn encode_with_alpha(frame: &GeometryFrame, depth: u8, alpha: &[u8]) -> Result<Vec<u8>> {
+    if let Some(subsampling) = frame.subsampling {
+        encode_planes(
+            frame.width,
+            frame.height,
+            &frame.data,
+            depth,
+            subsampling,
+            true,
+            Some(alpha),
+        )
+    } else {
+        encode_rgb_with_alpha(frame, depth, alpha)
+    }
+}
+pub fn encode_gray_with_alpha(
+    width: usize,
+    height: usize,
+    samples: &[u8],
+    alpha: &[u8],
+    depth: u8,
+) -> Result<Vec<u8>> {
+    encode_planes(width, height, samples, depth, [1, 1], false, Some(alpha))
+}
+fn validate_alpha(alpha: &[u8], length: usize, depth: u8) -> Result<()> {
+    if alpha.len() != length
+        || (depth > 8
+            && alpha
+                .chunks_exact(2)
+                .any(|s| u32::from(u16::from_le_bytes([s[0], s[1]])) >= 1u32 << depth))
+    {
+        return Err(invalid("invalid FFV1 alpha sample storage"));
+    }
+    Ok(())
 }
 fn encode_planes(
     width: usize,
@@ -115,6 +154,7 @@ fn encode_planes(
     depth: u8,
     [sx, sy]: [usize; 2],
     has_chroma: bool,
+    alpha: Option<&[u8]>,
 ) -> Result<Vec<u8>> {
     if !(8..=16).contains(&depth) || width == 0 || height == 0 {
         return Err(invalid("unsupported FFV1 depth or empty geometry"));
@@ -147,10 +187,15 @@ fn encode_planes(
     if data.len() != expected
         || (bytes == 2
             && data
-                .as_chunks::<2>().0.iter()
+                .as_chunks::<2>()
+                .0
+                .iter()
                 .any(|b| u32::from(u16::from_le_bytes([b[0], b[1]])) > maximum))
     {
         return Err(invalid("invalid FFV1 sample storage"));
+    }
+    if let Some(alpha) = alpha {
+        validate_alpha(alpha, luma, depth)?;
     }
     let mut coder = RangeWriter::new();
     coder.bit(&mut 128, true)?; // keyframe has its own model
@@ -161,20 +206,24 @@ fn encode_planes(
     coder.bit(&mut header[0], has_chroma)?;
     coder.integer(&mut header, sx.trailing_zeros() as i32, false)?;
     coder.integer(&mut header, sy.trailing_zeros() as i32, false)?;
-    coder.bit(&mut header[0], false)?;
+    coder.bit(&mut header[0], alpha.is_some())?;
     // Five all-zero context quantizers, each represented by one run of 128.
     for _ in 0..5 {
         coder.integer(&mut [128; 32], 127, false)?;
     }
-    let mut states = [[128; 32]; 2];
+    let mut states = [[128; 32]; 3];
     let mut offset = 0;
-    for plane in 0..if has_chroma { 3 } else { 1 } {
-        let (w, h, len) = if plane == 0 {
+    for plane in (0..if has_chroma { 3 } else { 1 }).chain(alpha.is_some().then_some(3)) {
+        let (w, h, len) = if plane == 0 || plane == 3 {
             (width, height, luma)
         } else {
             (cw, ch, chroma)
         };
-        let samples = &data[offset..offset + len];
+        let samples = if plane == 3 {
+            alpha.unwrap()
+        } else {
+            &data[offset..offset + len]
+        };
         let read = |x: usize, y: usize| -> i32 {
             let at = (y * w + x) * bytes;
             let value = if bytes == 1 {
@@ -205,10 +254,20 @@ fn encode_planes(
                 let difference = read(x, y) - prediction;
                 let midpoint = 1i32 << (depth - 1);
                 let residual = ((difference + midpoint) & maximum as i32) - midpoint;
-                coder.integer(&mut states[usize::from(plane != 0)], residual, true)?;
+                coder.integer(
+                    &mut states[if plane == 3 {
+                        2
+                    } else {
+                        usize::from(plane != 0)
+                    }],
+                    residual,
+                    true,
+                )?;
             }
         }
-        offset += len;
+        if plane != 3 {
+            offset += len;
+        }
     }
     coder.finish()
 }

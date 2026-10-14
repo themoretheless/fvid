@@ -29,9 +29,10 @@ pub(crate) struct Decoder {
 impl Decoder {
     pub fn new(codec: &str, private: &[u8], width: usize, height: usize) -> Result<Option<Self>> {
         let kind = match codec {
-            "V_FFV1" if private.is_empty() => Kind::Ffv1(crate::owned_ffv1_decoder::Decoder::new(
+            "V_FFV1" => Kind::Ffv1(crate::owned_ffv1_decoder::Decoder::from_configuration(
                 width,
                 height,
+                private,
                 usize::MAX,
             )?),
             "V_VP9" => Kind::Vp9(vp9_decoder::Decoder::new(usize::MAX)),
@@ -68,6 +69,7 @@ impl Decoder {
         match &mut self.kind {
             Kind::Ffv1(decoder) => {
                 let decoded = decoder.decode(packet)?;
+                if decoded.alpha.is_some() {return Err(format!("{UNSUPPORTED_PREFIX}FFV1 alpha streaming transforms"));}
                 self.mono = decoder.monochrome();
                 return Ok(Some(Decoded {
                     frame: decoded.frame,
@@ -88,7 +90,12 @@ impl Decoder {
                     }
                     let format = decoded.header.picture.format;
                     if format.color_space == 7 {
-                        return Err(format!("{UNSUPPORTED_PREFIX}RGB VP9 streaming transforms"));
+                        self.colour = Some((true, 0, 1, 13));
+                        self.mono = Some(false);
+                        let p = &decoded.picture;
+                        shown = Some(Decoded { frame: crate::owned_frame::pack_gbr(p.size, p.depth,
+                            p.planes.each_ref().map(|plane| (plane.width, plane.height, plane.samples.as_slice())))?, depth: p.depth });
+                        continue;
                     }
                     let matrix = match format.color_space {
                         2 => 1,
@@ -117,9 +124,6 @@ impl Decoder {
                     .decode_container_sample(packet)
                     .map_err(core_error)?
                 {
-                    if decoded.color.matrix == 0 && !decoded.color.monochrome {
-                        return Err(format!("{UNSUPPORTED_PREFIX}RGB AV1 streaming transforms"));
-                    }
                     if decoded.color.monochrome && !decoded.color.full_range {
                         return Err(format!(
                             "{UNSUPPORTED_PREFIX}studio-range monochrome streaming transforms"
@@ -141,6 +145,39 @@ impl Decoder {
 }
 pub(crate) fn pack_av1(decoded: &av1_decoder::Decoded) -> Result<Decoded> {
     let picture = &decoded.picture;
+    if decoded.color.matrix == 0 && !decoded.color.monochrome {
+        let [width, height] = picture.size.map(|v| v as usize);
+        let bytes = if picture.depth == 8 { 1 } else { 2 };
+        let length = width.checked_mul(height).and_then(|n| n.checked_mul(3 * bytes))
+            .ok_or("RGB video frame size overflow")?;
+        let mut data = buffer(length)?;
+        for plane in &picture.planes {
+            if plane.width < width || plane.height < height
+                || plane.width.checked_mul(plane.height) != Some(plane.samples.len()) {
+                return Err("decoded RGB video plane geometry mismatch".into());
+            }
+        }
+        let mut cursor = 0;
+        for y in 0..height {
+            for x in 0..width {
+                // AV1 identity planes carry G, B, R; GeometryFrame carries RGB.
+                for channel in [2, 0, 1] {
+                    let plane = &picture.planes[channel];
+                    let value = plane.samples[y * plane.width + x];
+                    if value as u32 >= 1u32 << picture.depth {
+                        return Err("RGB video sample exceeds coded depth".into());
+                    }
+                    if bytes == 1 {
+                        data[cursor] = value as u8;
+                    } else {
+                        data[cursor..cursor + 2].copy_from_slice(&value.to_le_bytes());
+                    }
+                    cursor += bytes;
+                }
+            }
+        }
+        return Ok(Decoded { frame: GeometryFrame { width, height, subsampling: None, data }, depth: picture.depth });
+    }
     let planes = picture
         .planes
         .each_ref()
@@ -154,7 +191,7 @@ pub(crate) fn pack_av1(decoded: &av1_decoder::Decoded) -> Result<Decoded> {
     )
 }
 
-fn pack(
+pub(crate) fn pack(
     size: [u32; 2],
     depth: u8,
     planes: [(usize, usize, &[u16]); 3],

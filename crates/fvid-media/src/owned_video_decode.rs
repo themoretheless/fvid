@@ -35,7 +35,8 @@ pub(crate) struct FrameView<'a> {
     pub width: u32,
     pub height: u32,
     pub depth: u8,
-    pub subsampling: [usize; 2],
+    /// Planar YUV axes, or interleaved RGB when absent; samples retain `depth`.
+    pub subsampling: Option<[usize; 2]>,
     pub monochrome: bool,
     pub full_range: bool,
     pub matrix: u8,
@@ -226,6 +227,7 @@ pub(crate) fn decode_webm(
         stats.width=u32::try_from(decoded.frame.width).map_err(|_|"video width overflow")?;
         stats.height=u32::try_from(decoded.frame.height).map_err(|_|"video height overflow")?;
         let (full_range,matrix,primaries,transfer)=decoder.colour().unwrap_or((full_range,matrix,0,0));
+        let (full_range, matrix) = if decoded.frame.subsampling.is_none() { (true, 0) } else { (full_range, matrix) };
         let bit_hdr=decoder.hdr().unwrap_or_default();
         let hdr=crate::owned_matroska::HdrMetadata{mastering:bit_hdr.mastering.or(track_hdr.mastering),light:crate::owned_matroska::ContentLight{max_cll:if bit_hdr.light.max_cll!=0.0 {bit_hdr.light.max_cll}else{track_hdr.light.max_cll},max_fall:if bit_hdr.light.max_fall!=0.0 {bit_hdr.light.max_fall}else{track_hdr.light.max_fall}}};
         if crate::owned_deband::Deband::needs_equal_planes(transform.deband.as_deref())
@@ -240,6 +242,7 @@ pub(crate) fn decode_webm(
                 Some([1, 2]) => "yuv440p",
                 Some([4, 1]) => "yuv411p",
                 Some([4, 4]) => "yuv410p",
+                None => "rgb",
                 _ => return Ok(None),
             }
         };
@@ -252,7 +255,9 @@ pub(crate) fn decode_webm(
         }
         let mut transformed = None;
         if frame_transform == DecodeTransform::default() && transform.overlay.is_none() {
-            stats.pixel_format = if decoded.depth == 8 {
+            stats.pixel_format = if base == "rgb" {
+                if decoded.depth == 8 { "rgb24".into() } else { "rgb48le".into() }
+            } else if decoded.depth == 8 {
                 base.into()
             } else {
                 format!("{base}{}le", decoded.depth)
@@ -293,7 +298,7 @@ pub(crate) fn decode_webm(
         }
         if emit {
             let monochrome = stats.pixel_format.starts_with("gray");
-            let subsampling = subsampling(&stats.pixel_format);
+            let subsampling = if stats.pixel_format.starts_with("rgb") { None } else { Some(subsampling(&stats.pixel_format)) };
             let metadata = (
                 stats.width,
                 stats.height,
@@ -441,6 +446,13 @@ fn process_frame_with_overlay(
     history: Option<&crate::owned_pixel_context::PixelContext>,
     source_info: ((u32, u32), u64),
 ) -> Result<Option<(u32, u32, String, Vec<u8>)>> {
+    if frame.subsampling.is_none() {
+        if spec.is_some() { return Ok(None); }
+        return crate::owned_rgb_transform::process(frame, depth, transform, n, Some(pts_ns as f64 / 1_000_000_000.0), history.and_then(|h| h.curves.as_ref())).map(|result| result.map(|frame| (
+            frame.width as u32, frame.height as u32,
+            if depth == 8 { "rgb24".into() } else { "rgb48le".into() }, frame.data,
+        )));
+    }
     use crate::owned_y4m::{Header, PixelFormat};
     if crate::owned_yuv_rgb::Matrix::from_code(matrix).is_err() && (
         transform.curves.is_some() || transform.colorbalance.is_some() || transform.colorlevels.is_some() || transform.colorchannelmixer.is_some() || transform.grayworld.is_some() || transform.vibrance.is_some() || transform.exposure.is_some() || transform.colorcontrast.is_some() || transform.colorhold.is_some()

@@ -184,7 +184,7 @@ fn prepare_selected(
                 let geometry = crate::owned_frame::GeometryFrame {
                     width: frame.size[0] as usize,
                     height: frame.size[1] as usize,
-                    subsampling: Some(frame.sub.map(|v| if v { 2 } else { 1 })),
+                    subsampling: if frame.rgb { None } else { Some(frame.sub.map(|v| if v { 2 } else { 1 })) },
                     data,
                 };
                 crate::owned_ffv1_encoder::encode(&geometry, frame.depth)?

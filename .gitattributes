@@ -4,5 +4,11 @@
 *.rgb binary
 *.rgba binary
 *.pcm binary
+tests/fixtures/playback-errors/*.packet binary
+tests/fixtures/playback-errors/*.keypacket binary
+tests/fixtures/playback-errors/*.config binary
+tests/fixtures/playback-errors/*.samples binary
+tests/fixtures/playback-errors/*.alpha binary
+tests/fixtures/playback-errors/*.color binary
 tests/fixtures/playback-errors/*.expected.txt text eol=lf
 scripts/*.patch whitespace=-blank-at-eol,-blank-at-eof

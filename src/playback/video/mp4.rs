@@ -494,21 +494,21 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                         let colour = crate::playback_native::AvcColour {
                             kr: match decoded.header.picture.format.color_space {
                                 0 | 1 | 3 => 0.299,
-                                2 => 0.2126,
+                                2 | 7 => 0.2126,
                                 4 => 0.212,
                                 5 => 0.2627,
                                 _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
                             },
                             kb: match decoded.header.picture.format.color_space {
                                 0 | 1 | 3 => 0.114,
-                                2 => 0.0722,
+                                2 | 7 => 0.0722,
                                 4 => 0.087,
                                 5 => 0.0593,
                                 _ => return Err(invalid("unsupported VP9 RGB colour configuration")),
                             },
                             full: decoded.header.picture.format.full_range,
                         };
-                        self.decoded_planar = Some(Arc::new(crate::playback_native::vp9_picture(p, colour)?));
+                        self.decoded_planar = Some(Arc::new(crate::playback_native::vp9_picture(p, colour, decoded.header.picture.format.color_space == 7)?));
                         let coded_width = p.size[0] as usize;
                         let coded_height = p.size[1] as usize;
                         let picture = IntraPicture {

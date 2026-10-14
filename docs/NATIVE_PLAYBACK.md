@@ -2218,6 +2218,55 @@ connected to it. Golomb Rice, FFV1 v3+, RGB, alpha and monochrome are still
 unsupported. No claim of aggregate `media` FFmpeg independence follows from
 this addition.
 
+### Current owned FFV1 v3 slice decoding (2026-10-14)
+
+The unsupported lists in the earlier dated entries are historical. The owned
+decoder now accepts v0/v1 and configured v3, default/custom Range and Golomb–Rice,
+YCbCr, monochrome and interleaved RGB at 8/10/12/16 bits. The encoder still emits
+self-contained v1 Range packets. Nonkeyframe quantizer-set changes are decoded:
+equal/shrinking banks retain their adaptation, growing banks are recreated, and
+keyframes restore the configured initial states. Zero Range probabilities,
+including coded initial states, are supported. The codec API also retains alpha in
+`Decoded.alpha` as a separate full-resolution plane at the source depth. V1
+`encode_with_alpha`, `encode_rgb_with_alpha` and `encode_gray_with_alpha` preserve
+color and opacity independently, without premultiplication. Native presentation
+and filtered export still refuse alpha until their sidecar-plane path is wired;
+this does not establish complete FFV1 profile parity.
+
+`Decoder::from_configuration` validates the v3 record CRC, quantizer sets,
+predicted initial states, raster and entropy mode. Each slice has independent
+adaptation selected by raster region rather than packet order. Footer CRCs and
+damage status are checked before sample decoding. Overlap, missing regions,
+invalid coordinates and changed nonkeyframe layout fail without publishing a
+frame; any error invalidates history until a keyframe. The caller's budget covers
+configuration, slice index/history, combined output and slice scratch storage.
+
+Native Matroska playback and owned media export use this decoder. The ordinary
+offline tests `ffv1_v3`, `ffv1_v3_configuration`, `ffv1_rice` and `ffv1_rgb` use
+authored Python coders and saved independent sample arrays. V3 coverage includes
+193 two-frame cases: odd geometry, 420/422/444/440/411/410, mono/RGB, all three
+entropy modes, custom transitions and initial states, reversed slice order in an
+adapted frame, and slices spanning several raster cells. Tests separately verify
+exact raw/export pixels, timing, seek/rewind, malformed-frame refusal/recovery and
+the aggregate budget boundary. Generation is explicit and needs no external codec
+or network; ordinary tests do not regenerate fixtures.
+
+`ffv1_v3_quantizer_switches` adds 25 independent seven-frame sequences with
+different initial-state banks, changes in quantizer shape at equal context count,
+2-to-1-to-2 context counts, reordered slices, and intermediate keyframes. It checks
+exact samples, backward/forward seek intervals, native export and the budget
+boundary across retained and expanded banks. The former quantizer-change refusal
+reproducer now has a passing pixel acceptance test.
+
+`ffv1_alpha` covers 60 v0/v1 and 48 v3 authored cases (312 frames): Range, custom
+Range and Rice, gray/YUV/RGB at 8/10/12/16 bits, separate alpha adaptation, v3
+alpha-bank growth/shrink and keyframe reset. V1 encoder packets must match the
+independent Python keyframe bytes. RGB with alpha uses Green-base RCT even at
+10/12 bits; color under zero-opacity pixels remains intact. Malformed RGB alpha,
+input storage, recovery and the aggregate budget are checked separately. The
+native/filtered-export tests intentionally assert refusal, not alpha playback
+acceptance.
+
 ### Owned FFV1 Matroska playback and raw media path (2026-09-29)
 
 `WebmVideoReader` now selects `V_FFV1` and feeds packets into the owned v0/v1

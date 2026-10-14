@@ -1,4 +1,4 @@
-//! Owned AVC/HEVC/AV1 packet decoding with shared MP4 presentation edits.
+//! Owned AVC/HEVC/AV1/VP9 packet decoding with shared MP4 presentation edits.
 use fvid_codecs::{
     Error,
     codec::{
@@ -50,7 +50,7 @@ pub(crate) fn decode_presented(
     let track = &reader.tracks()[index];
     if !matches!(
         &track.codec,
-        b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"av01"
+        b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"av01" | b"vp09"
     ) || track.rotation != 0
     {
         return Ok(None);
@@ -82,6 +82,7 @@ pub(crate) fn decode_presented(
     let samples = track.samples.len();
     let avc = matches!(&track.codec, b"avc1" | b"avc3");
     let av1 = track.codec == *b"av01";
+    let vp9 = track.codec == *b"vp09";
     let mut stats = DecodeStats {
         backend: "owned MP4 compressed video decode",
         video_frames: 0,
@@ -208,10 +209,6 @@ pub(crate) fn decode_presented(
             let picture = &decoded.picture;
             let rgb = decoded.color.matrix == 0 && !decoded.color.monochrome;
             if let Some(spool) = spool.as_mut() {
-                // The existing FFV1 planar bridge does not carry RGB planes.
-                if rgb {
-                    return Ok(None);
-                }
                 let current = (
                     picture.size,
                     picture.depth,
@@ -263,6 +260,51 @@ pub(crate) fn decode_presented(
             spool_count += 1;
         }
         decoder.finish().map_err(|error| error.to_string())?;
+    } else if vp9 {
+        if configuration.len() < 12 || configuration[..4] != [1, 0, 0, 0]
+            || configuration[4] > 3
+            || !matches!(configuration[6] >> 4, 8 | 10 | 12)
+            || (configuration[6] >> 1) & 7 > 3
+            || usize::from(u16::from_be_bytes([configuration[10], configuration[11]])) != configuration.len() - 12 {
+            return Err("invalid MP4 VP9 configuration".into());
+        }
+        let mut decoder = fvid_codecs::codec::vp9_decoder::Decoder::new(usize::MAX);
+        for sample in 0..samples {
+            check_options(options, sample)?;
+            let timing = reader.tracks()[index].samples.get(sample).ok_or("missing MP4 VP9 sample timing")?;
+            let (pts, duration) = (timing.pts, i64::from(timing.duration));
+            reader.read_packet(index, sample, &mut packet).map_err(|e| e.to_string())?;
+            let mut shown = false;
+            for coded in fvid_codecs::codec::vp9::frames(&packet).map_err(|e| e.to_string())? {
+                let decoded = decoder.decode(coded).map_err(|e| e.to_string())?;
+                if !decoded.header.show_frame { continue; }
+                if shown { return Err("multiple visible VP9 pictures in one MP4 sample need distinct timestamps".into()); }
+                shown = true;
+                let format = decoded.header.picture.format;
+                let sub = match (configuration[6] >> 1) & 7 { 0 | 1 => [true, true], 2 => [true, false], _ => [false, false] };
+                if configuration[4] != format.profile || configuration[6] >> 4 != format.bit_depth
+                    || sub != format.subsampling || (configuration[6] & 1 != 0) != format.full_range {
+                    return Err("MP4 VP9 configuration disagrees with picture format".into());
+                }
+                let p = &decoded.picture;
+                let rgb = format.color_space == 7;
+                if let Some(spool) = spool.as_mut() {
+                    let current = (p.size, p.depth, p.subsampling, false);
+                    if storage_format.is_some_and(|previous| previous != current) { return Ok(None); }
+                    storage_format = Some(current);
+                    let planes = p.planes.each_ref().map(|p| (p.width, p.height, p.samples.as_slice()));
+                    pixels = if rgb { crate::owned_frame::pack_gbr(p.size, p.depth, planes)?.data }
+                        else { crate::owned_webm_codec::pack(p.size, p.depth, planes, p.subsampling, false)?.frame.data };
+                    spool.push(&pixels, 0, 0)?;
+                }
+                let mut colour = container_colour;
+                colour.full_range = format.full_range;
+                if rgb { colour.matrix = 0; colour.primaries = 1; colour.transfer = 13; }
+                frames.push(FrameMetadata { colour, hdr: container_hdr, slot: spool_count, pts, duration,
+                    sample, size: p.size, depth: p.depth, sub: p.subsampling, mono: false, rgb });
+                spool_count += 1;
+            }
+        }
     } else {
         let mut decoder = match HevcDecoder::from_configuration(&configuration, usize::MAX) {
             Ok(value) => value,
@@ -431,7 +473,7 @@ pub(crate) struct FrameMetadata {
     pub depth: u8,
     pub sub: [bool; 2],
     pub mono: bool,
-    rgb: bool,
+    pub(super) rgb: bool,
 }
 impl FrameMetadata {
     fn account(&self, stats: &mut DecodeStats) -> Result<()> {

@@ -360,7 +360,14 @@ pub fn hevc_picture(
 }
 
 /// Preserve VP9 plane strides, chroma geometry and full sample depth.
-pub(crate) fn vp9_picture(p: &crate::codec::vp9_picture::Picture, colour: AvcColour) -> Result<PackedPlanar> {
+pub(crate) fn vp9_picture(p: &crate::codec::vp9_picture::Picture, colour: AvcColour, rgb: bool) -> Result<PackedPlanar> {
+    if rgb {
+        if p.subsampling != [false, false] { return Err(invalid("invalid VP9 RGB subsampling")); }
+        let frame = fvid_media::owned_frame::pack_gbr(p.size, p.depth,
+            p.planes.each_ref().map(|plane| (plane.width, plane.height, plane.samples.as_slice())))
+            .map_err(|e| invalid(&e))?;
+        return PackedPlanar::new(frame, p.depth, colour);
+    }
     let [width, height] = p.size.map(|n| n as usize);
     let factors = p.subsampling.map(|s| 1usize << usize::from(s));
     let bytes = if p.depth == 8 { 1 } else { 2 };

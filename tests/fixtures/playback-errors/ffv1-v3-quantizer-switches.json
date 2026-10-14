@@ -1,0 +1,2330 @@
+{
+  "cases": [
+    {
+      "file": "ffv1-v3-switch-coder0-depth8-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth8-rgb0.config",
+      "configuration_sha256": "8d64d8cf2d564425e7cc7f6bcf031a9ac2b9227b9c2dde7bedb3160d7c9a4c7b",
+      "depth": 8,
+      "rgb": false,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "afe13a1343e6b45090aa1be62cfd8111336ffc11400ed3b06dc53b22a94ec7cc",
+          "reference_sha256": "259fe1cc0caece822775e5704448bf9e0c1c796cb601b25396ee0448a376fca4"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "553190925186eb62297f68c0ce6eebfd863c7251df2f8b009eaeec9a27b150a2",
+          "reference_sha256": "1dfe5d6276ebb67da7ab97dc0b87227b0cdc129ae626ea4bea4c1d211374580f"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "5ba5fff658d74e51e3322e91f4bb71a992e204b52b915fcea49a15a61da05f15",
+          "reference_sha256": "bc420606d2968957440c213668d4061eb14417f642da71c6b41d1db52cc169ba"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "e2ac6a0a89b7aa32d7b36ea13280a8996995e29329717fc8cd7d2d4124cd7099",
+          "reference_sha256": "9069ca1c78de955d16f489e7e3b721a43b2724bdfe5812f0ca3a90c95ff2a213"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "3d47e5f550db6a25b2c1cff16f70b402687d02f18a594568c8f48f6dafdf0a29",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "ac7137252a56c4744c7687d922e8677028a4b5828942cd7cdf72f8d865ff3032",
+          "reference_sha256": "1f429124c3af46f7379af78b55860599b69c763daa8b422d27e3acfd7cec64c6"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "57c4b9e702b4cd54112e44c5da4312a93af83739af60be1126e3c8566ce41a5c",
+          "reference_sha256": "33e96de2f0df1ad843bf3d8e62f93de257b6d9f1ae6d6e13ffe6f8c0ff9231b8"
+        }
+      ],
+      "sha256": "96d55dc96cdce617389becfb4f40b78dddae507602fe74edec84a4cf3e46b3e7"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth8-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth8-rgb1.config",
+      "configuration_sha256": "475e135978c98ee9c0b7c91bccd01b1160c29d56a2cdf84fcf67b7a0e0d28eef",
+      "depth": 8,
+      "rgb": true,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9100708d4b2cd925378f80158f29a1393870c1da3188d60ba4b2aef2670b825a",
+          "reference_sha256": "5a96ae3a3859a6a9951bd1f6738e366c99d6850d5d3575c3faff1f59e00ce845"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "cc9e23480012c6d1585467865f4dc39662ed7422fe1571e052430fe5a2cc256e",
+          "reference_sha256": "11321f3501d80bb9459b44f1c2b50fe2b94ca7686507db8b288f0f5773131f99"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "091ad7ff446503481c8f247c27bc138f5aab55e5c51001030d6ff8159009d0fa",
+          "reference_sha256": "d3e82098a311d7c69c55f6e1c09cf8a0cd018c0c9687f4254c1eedae05b10586"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "756dfe0b5d273c4d76024196381fe60fd352c2a3fb9387f538c5502471b7dc68",
+          "reference_sha256": "6bf286f96fa0a90853b9ca577426ffd64e82ef06085066c159465be3f61b1c8a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "d4d6257019e194c514ad2f1039b9fdb0fd6c59a8293bc8459937ab4e9a72a532",
+          "reference_sha256": "0ea5d3b7e815efa779d73763f243c5a05c1106fccc8b4969700a702eb95b9d7c"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "cb2a04bd6e834984e8979457f13ef3eeaa7cddca4d4d969476e3364d6642a359",
+          "reference_sha256": "4808fa04ea751c5dff6436484b50adb967961b040aec0d4e09f50748efb068d1"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth8-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth8-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "d9cee27af75e28e4bfe64c2378dc5208406e9a08e501802e0050c00872ec27f2",
+          "reference_sha256": "aba60b45956e5a89da68f3d921404ac9a497d92ba9e448197a499a6e06e7475b"
+        }
+      ],
+      "sha256": "481fd09b7aaef92bc3e407944bcb077a5d573e3a18b31797155d283ef7e2c50a"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth10-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth10-rgb0.config",
+      "configuration_sha256": "02a379a35447ffcc0bdf07d4c2c5c6165f4706c309d069e2fcc290f299098233",
+      "depth": 10,
+      "rgb": false,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "de7d633ec5933f3517e884cf2f0678724019ae263c63aa187b47d9275d3b5c93",
+          "reference_sha256": "d9cbcaa133a41e5ad16fea64fd8d4f57bf2fe3a646283901c496ef18c0b64084"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "97dd55a69d77638ff6726b8472900cd47ec16c21f8ad2168c42b12d81aae6dcc",
+          "reference_sha256": "66d932f548a1c2fafc8e068e17eb6af41f554cf97838aea736dc12807d36df07"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "1591ad7ae00f31086f8b9ec9a9095b3d9b02571c5206d7ff386887a82d2fb5d8",
+          "reference_sha256": "b01768b814e5951593bb229b63bf96d153fc2ff4f567f40caf29444f638447b7"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "f1b35da4bac48949c4a28e2d00cec89c91d3cb14aa220ebcf25424ac8cc0d3f1",
+          "reference_sha256": "e99cf2818cdeb8b6412c5169d146aabb3e3d060c9bb50b8cd75393c9230de274"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "61d754bdb436b3b325c78ef93bee39a2c06fdab533f87d61130348001402a97a",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "035ccc043c92cbc3bf5fa791ab1c1ac5186ef0ca5e7f6695adbd5a7eb50740fb",
+          "reference_sha256": "2f117302c9bffa484c5a8d80357788d710d95b4c5bfa9b0c4d74d50439409521"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "08dc2e43adefbad16e6432895f615b34504b31e877f01da6a47dc7e475827ff9",
+          "reference_sha256": "b5aee1d7545abde706ac471a5491c1594cb97a766796cc5f4a75a29b646749d6"
+        }
+      ],
+      "sha256": "8e06e09a3d65647f5f792dc413194021a476900d8dc5d9202d49d4c6ab046ce1"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth10-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth10-rgb1.config",
+      "configuration_sha256": "72c0be85da02a8023daa6d13815f54eb6d6b1ffacac6933e7c398f853aaf5c69",
+      "depth": 10,
+      "rgb": true,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "0c86909bae6d20cdcb6085781e4c039274cd08afb6b68c4e44a99aee7b02c1d7",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "ce4c96575fc96a531cbdf65ee91e1ed7143b292b0bded4540267f357a5ae4e42",
+          "reference_sha256": "72566ffe59bce82fffdc9ab780134fa68eec915dd8a311b9abe8667ca898cc97"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "05c835a9970207d5e59bf07bd5fb4e9301ea9cbe6cc8bb5059e023c5e192ea86",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "6b1aed5b003f774f6e7a4fdba16f575b23d4b99a155d4580fb46d7494166a301",
+          "reference_sha256": "7bf141f3f2144f82db958b994b2c53adae574aeb1d3ee032a9b823828369cd58"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "e9704e5698164ad89cf88e89035b374317900eff937a75ef47f4a1536a2f6bc3",
+          "reference_sha256": "7b9f659d947b5cae658704882879b249eabc7982787e9b290c12cc112d567eda"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "36f08014ce186982b5386513f80890f6ad2ff3894e7dc9b23afcd9c3ec26b3bf",
+          "reference_sha256": "d1d455ffe5766b8a04aac2d28c9fe967b71f7e29c93f3a01cf8a0607cde8e72d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth10-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth10-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "bf1b4165b5180cc1c688ae9fac9c69ad083a05265e85164ef2a0fc4bba7d5f7d",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "25827ec99e4e27b91612074a7db5849f67e1d45805c649c8bbead87d8ba53319"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth12-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth12-rgb0.config",
+      "configuration_sha256": "3b76514e38601df316fcb86fd11f1b5983135d5063fb6e0ef5fc34005ee48d68",
+      "depth": 12,
+      "rgb": false,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "de7d633ec5933f3517e884cf2f0678724019ae263c63aa187b47d9275d3b5c93",
+          "reference_sha256": "5b38433ba10941d8f7d0a9bbfd00c98b33bf57b3300d3502b95de0e0ad7b0eac"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "97dd55a69d77638ff6726b8472900cd47ec16c21f8ad2168c42b12d81aae6dcc",
+          "reference_sha256": "7073f039ddbde304411e219c103f938bdeaeae7327084574a61e271e34b6eb86"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "1041bc1d531a7724fbd6b65a2c008625912d2c58df153f7716eab43113b79ed4",
+          "reference_sha256": "df47750bf24ce434ea2c4ffee2b94cba016dec7e3b57945005b99b055d4d5137"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "04afd3d29766d16085c54fadde10cd59293acc8b678a02ec5d8c75b42e29864c",
+          "reference_sha256": "6feb0238bff47a46ab22a2a774d2fdc4c58af6f129997598805786bb42f3b2c8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "61d754bdb436b3b325c78ef93bee39a2c06fdab533f87d61130348001402a97a",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "035ccc043c92cbc3bf5fa791ab1c1ac5186ef0ca5e7f6695adbd5a7eb50740fb",
+          "reference_sha256": "655dce973d8ccd92c7119da38c3bddd0b949e50781430628ebf78b9e8f10b437"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "3ffdffdcc96ade04535ebaed77ddcbdc059856d4059e2198e3367e20b5876d41",
+          "reference_sha256": "1608490099d9b873ff31e0704acf0135511c10acbc656653d4568f61300c2d88"
+        }
+      ],
+      "sha256": "06074be8922887e2a0448c5f416962f473145f1e156fa6c3f983989fb81851fd"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth12-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth12-rgb1.config",
+      "configuration_sha256": "9568e0112b380e4af6d7f6a15e3b46aaf54f4de50702a706ccfa29f180fc643d",
+      "depth": 12,
+      "rgb": true,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "ab424160b8f747b19d0936d4d0f3d3d407f72ff2cf34a73fbf72035c1911a7f1",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "c7d2d6966c4ab141c24ce30b011f614bf69a7d7c277b2389f8d4eda57acfc219",
+          "reference_sha256": "72566ffe59bce82fffdc9ab780134fa68eec915dd8a311b9abe8667ca898cc97"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "ced1e91884e6f7eacdcd0685ea6ec0c6a4211b6f284ad6b8200f277ca2c98f96",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "a0a66918423be47e0345d85226183ba30d574c5ac19c29ed9736b110996da654",
+          "reference_sha256": "7bf141f3f2144f82db958b994b2c53adae574aeb1d3ee032a9b823828369cd58"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "5d141b5da04d3f4098a4db60f07fd73d587e927dec75e8817db7f9680bb885f1",
+          "reference_sha256": "7b9f659d947b5cae658704882879b249eabc7982787e9b290c12cc112d567eda"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "1490015b24dd30cd10518fd746a5f64b49a749c4c0cd2b4527e047bf72d0f6b7",
+          "reference_sha256": "d1d455ffe5766b8a04aac2d28c9fe967b71f7e29c93f3a01cf8a0607cde8e72d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth12-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth12-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "1a734fcabab9a3ab95ccc4605b5dfb3d1ba6d42e0d5652fa5693d0917a3e891e",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "202faa1ab807d940502a7ea4f520a5f1e9b23a56de0068cde5f4a00988b5e14d"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth16-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth16-rgb0.config",
+      "configuration_sha256": "7a3ea53dc6b8b8f3c52a889b1e25a36189f74dff87bb948178d73a00bdd84ac8",
+      "depth": 16,
+      "rgb": false,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "de7d633ec5933f3517e884cf2f0678724019ae263c63aa187b47d9275d3b5c93",
+          "reference_sha256": "bde7406d343b16d5feb737ff0cdcb0729635ac509bea6c121b1cf3644c6e86cd"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "97dd55a69d77638ff6726b8472900cd47ec16c21f8ad2168c42b12d81aae6dcc",
+          "reference_sha256": "31eba8d3cf873e9228f502d4455925382e7245c316c91f8305c527f301f23dbf"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "788dd5285ea00b14493d30799d50dc415f6ec5526429396f1bd8621a774f2834",
+          "reference_sha256": "cb6c8031f28e0a70739fc9f4524013472b1e55477063f843e2680cf44e8385d9"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "ccf5aeacff97773bce3928bfd5aaaf203e1db1c0a301ed652acf427752a89c86",
+          "reference_sha256": "4560218cdad3e281e3adbcde345931bad529555393218f0ca7f4931ca1c4c6d1"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "61d754bdb436b3b325c78ef93bee39a2c06fdab533f87d61130348001402a97a",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "035ccc043c92cbc3bf5fa791ab1c1ac5186ef0ca5e7f6695adbd5a7eb50740fb",
+          "reference_sha256": "bcff5b1878fa6dc3be2452de8f405f807294d1189dccc0a1ffa75b150b1c6a47"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "8bf8fe062a9890fbc32a5bb92993409fa0c7a9c4f77862a162b52ef34fd60846",
+          "reference_sha256": "79c67fc6ccff8df045584d4c1416ba0919fef3a59447d69df559fb55a47c183f"
+        }
+      ],
+      "sha256": "ceb7642108b9657fb071d8dc55b123713d25c85cf317a43dd332ef7322aff8b2"
+    },
+    {
+      "file": "ffv1-v3-switch-coder0-depth16-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder0-depth16-rgb1.config",
+      "configuration_sha256": "d1650ad8109e7440d228dc7bcee22f9f5640c804bbbcdbc2060d3efd7d6b39cf",
+      "depth": 16,
+      "rgb": true,
+      "coder": 0,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "b073d4f7f1af745117531122fdb81b5f7309e86ff081a7f0b7290796bb3e50cf",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "751706bcf71903480ccb672d87f1680e0c67259dda28b8e613ee4f2685a873d8",
+          "reference_sha256": "72566ffe59bce82fffdc9ab780134fa68eec915dd8a311b9abe8667ca898cc97"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "fe71b582bfb99464232bb0210a62a5d0407a18d44a90aaf274ac5c44bbdd0f7e",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "81b084834a7e94122f0af0ad95463f4a88a3ac12fdba2d86e4eec91bf958b183",
+          "reference_sha256": "7bf141f3f2144f82db958b994b2c53adae574aeb1d3ee032a9b823828369cd58"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "743a96bf1efa9b7cf018f270d788b1d6e933c35e10d310900c21fdb75dd92729",
+          "reference_sha256": "58f733b7b0fcf4ab846234acaadf39ffb45ea9cf4d87c0b6e516bb2c9561e02e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "0d1d094256e7ab6decfc002a9d9b4ab2716c65dabc86e997064c25d3c1e8e70f",
+          "reference_sha256": "d1d455ffe5766b8a04aac2d28c9fe967b71f7e29c93f3a01cf8a0607cde8e72d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder0-depth16-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder0-depth16-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "0944e0531394376398c0c74c66775c3a58784f971d16294e3f41359b2f3f95d2",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "93b564214e4642df08519b51c927b1daf0a8908325528c9ca55121d6da6da8be"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth8-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth8-rgb0.config",
+      "configuration_sha256": "4e5ae81befc0c9a063990ab3042d5d04be54dd42fc8e1c09e4a41007de2f4d47",
+      "depth": 8,
+      "rgb": false,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "f5b4c77943ad94645a2e6d78986217ffcf80d3b68c0a63008abff8e76deeb904",
+          "reference_sha256": "259fe1cc0caece822775e5704448bf9e0c1c796cb601b25396ee0448a376fca4"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "e4157ed7a3f093938ab2f64de16ada1b2118292acade7c3603639b309cd5f189",
+          "reference_sha256": "1dfe5d6276ebb67da7ab97dc0b87227b0cdc129ae626ea4bea4c1d211374580f"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "f3a8189cc386a13367e10ee6a8264bb9347f5d5599e88859a0d92391cf2721e8",
+          "reference_sha256": "bc420606d2968957440c213668d4061eb14417f642da71c6b41d1db52cc169ba"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "e86c6988c074b59db9fdbd754130823acafa4160ca57e10f9978fc3b379d8d0b",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "11e083efa43ce152b5a04de2934cd313b6e829b7bcddca5aae77da203042ecf5",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "e815fb07675d33217e1ff3b1936439187e50085eff0b00cd22bf613f97172dbd",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "3b19d875e75abf0ba05a8927165d274a2095fc751be35bbb089534beaf0e3c6a",
+          "reference_sha256": "33e96de2f0df1ad843bf3d8e62f93de257b6d9f1ae6d6e13ffe6f8c0ff9231b8"
+        }
+      ],
+      "sha256": "a688341330bf0d536839c2747fb1b141ceb9ce88d9b73934ad5aab2e3bcd2697"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth8-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth8-rgb1.config",
+      "configuration_sha256": "f2bf9d12924e6a1f34e3f2f85d946a7f1da33d0133a5d0b3c70a986f611d7636",
+      "depth": 8,
+      "rgb": true,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9693d5539859f08af850796ccb4efd93717ad1237f80ee5ab81eb8a04b15784c",
+          "reference_sha256": "5a96ae3a3859a6a9951bd1f6738e366c99d6850d5d3575c3faff1f59e00ce845"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "2f3a65f66da650022e7a0465a3a03f258e94a941d3bf8ad8ec739ef098aa4457",
+          "reference_sha256": "9e22f09dca20a5f2b21d6da8d826e7bd79687bc3db360b5d73308be1cadf8a7b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "4e1eeb830fc727293e3f2a79841d2206aadf0c778dfb7e3146d407455081cc7d",
+          "reference_sha256": "d3e82098a311d7c69c55f6e1c09cf8a0cd018c0c9687f4254c1eedae05b10586"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "122ff4fc2995d3cc253815bc937f56c34388548e7c55f71232ff65e8698aaa85",
+          "reference_sha256": "87690615adcf5b4b6a3bff61a86510645f2930d2b1803d757ad056032cb8465e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "8868829149310458f87aa1478eda36348e29e55e8f05f52cf3dbca3560f2336f",
+          "reference_sha256": "0ea5d3b7e815efa779d73763f243c5a05c1106fccc8b4969700a702eb95b9d7c"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "2096d646346789fbfadd0dd92b75658f62b8ecc860caeaeeb399e9de4f80fdb6",
+          "reference_sha256": "87690615adcf5b4b6a3bff61a86510645f2930d2b1803d757ad056032cb8465e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "9ca86aa474d077b313fbfbf0661701caac0b14208927a0fbaa7469d95c3bb1c5",
+          "reference_sha256": "aba60b45956e5a89da68f3d921404ac9a497d92ba9e448197a499a6e06e7475b"
+        }
+      ],
+      "sha256": "46040fe340c540564f9f0bb403b81e608d8cd4ca562e242bb2ebe9c90e62cde3"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth10-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth10-rgb0.config",
+      "configuration_sha256": "2bc8aaceb504ea5b8d39ba9511db3a4867a2dbaa95cb834685848f446df040fa",
+      "depth": 10,
+      "rgb": false,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "93bc69536da69fe731b2706619d6b462c65c90761cf0339d9537804174fc6bc0",
+          "reference_sha256": "d9cbcaa133a41e5ad16fea64fd8d4f57bf2fe3a646283901c496ef18c0b64084"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8d85019d4f5202009ac996d997c9775d155f9b23686e05ffcc30222fb24faeaf",
+          "reference_sha256": "66d932f548a1c2fafc8e068e17eb6af41f554cf97838aea736dc12807d36df07"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "7cb517408eb6fa90c2978ad0323c1f8be82b00eb4974363ec739583ef924c966",
+          "reference_sha256": "b01768b814e5951593bb229b63bf96d153fc2ff4f567f40caf29444f638447b7"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "e86c6988c074b59db9fdbd754130823acafa4160ca57e10f9978fc3b379d8d0b",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "11e083efa43ce152b5a04de2934cd313b6e829b7bcddca5aae77da203042ecf5",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "e815fb07675d33217e1ff3b1936439187e50085eff0b00cd22bf613f97172dbd",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "0756dac047e3c47d63f64248647cefd2647bc48aa4b308d17aeb19c4eb131f8e",
+          "reference_sha256": "b5aee1d7545abde706ac471a5491c1594cb97a766796cc5f4a75a29b646749d6"
+        }
+      ],
+      "sha256": "4093aa513dc73c4bf46b3eeae9b1c9d8da394ba5c09ef52c3baebbcdee347a2f"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth10-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth10-rgb1.config",
+      "configuration_sha256": "2cf5cb82dcea974ba19c1ee78d460e509eeb9f6bdd5a9a32cb6526f5c2dd5f5d",
+      "depth": 10,
+      "rgb": true,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9c6de8d5d7d3c91c29b2d34dc6815e1cbcc8d72b6adc5b49a1fe039e9ef08c31",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "73be9320153fc5e677a0b00603b2ce5d297e30cd8925c1e61ad2b1665f7e84bd",
+          "reference_sha256": "3a215286ea5e490a7ae1319611c0835199f3ac120b225d32ad09206b5b40af41"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "5c1c7184dd17382f7eb66e2f6540e896216b010e7769b885687a2705ad61b0c9",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "844ae858f109d6dabe23b9376e5e374464176dc937bd903cd0d3d0beb8a551d9",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "35d8ebb60d665ad6d859e3aab25d25fdd8dd21beab089c194d1fba48ee3a1b29",
+          "reference_sha256": "7b9f659d947b5cae658704882879b249eabc7982787e9b290c12cc112d567eda"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "88ae9cffde7b1c0895a680f82aae866775cad62502ef07b6339cfe8bb963d168",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth10-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth10-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "b80ad8d000ee06632f8a7cbe31b43bbcf94e8a92a9ac3513b6a1dca8da079074",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "8798ebb72f76679d4d622c1e36c290acb54c31c77769932a4eb9e93724c91f43"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth12-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth12-rgb0.config",
+      "configuration_sha256": "8672f93ff56cf781d3e45bb7d617f6419ce7db7ab1b16985d56305297c30ea5b",
+      "depth": 12,
+      "rgb": false,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "93bc69536da69fe731b2706619d6b462c65c90761cf0339d9537804174fc6bc0",
+          "reference_sha256": "5b38433ba10941d8f7d0a9bbfd00c98b33bf57b3300d3502b95de0e0ad7b0eac"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8d85019d4f5202009ac996d997c9775d155f9b23686e05ffcc30222fb24faeaf",
+          "reference_sha256": "7073f039ddbde304411e219c103f938bdeaeae7327084574a61e271e34b6eb86"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "7cb517408eb6fa90c2978ad0323c1f8be82b00eb4974363ec739583ef924c966",
+          "reference_sha256": "df47750bf24ce434ea2c4ffee2b94cba016dec7e3b57945005b99b055d4d5137"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "e86c6988c074b59db9fdbd754130823acafa4160ca57e10f9978fc3b379d8d0b",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "11e083efa43ce152b5a04de2934cd313b6e829b7bcddca5aae77da203042ecf5",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "e815fb07675d33217e1ff3b1936439187e50085eff0b00cd22bf613f97172dbd",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "0756dac047e3c47d63f64248647cefd2647bc48aa4b308d17aeb19c4eb131f8e",
+          "reference_sha256": "1608490099d9b873ff31e0704acf0135511c10acbc656653d4568f61300c2d88"
+        }
+      ],
+      "sha256": "984994158b7639605be6eeb46e9ae2f90e08fc29bd28c75f7c25bb87b602ffe3"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth12-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth12-rgb1.config",
+      "configuration_sha256": "32eb25a13f5c9fcea2164788a60f586520bec392e4040f6bdb5fa1566c60985e",
+      "depth": 12,
+      "rgb": true,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "2b46d5cb614f1cf1f2530417c704ee9048f8a6686ddfe596b2f203a1a9151599",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "388ce47c055688d49c7b5787bbed82f0f47eb54844d7f19046c3de09f675e0b8",
+          "reference_sha256": "b383dfdedbf775eed52c4606f9592153fc951656c9ee33957e2f35264c6ecba5"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "708acfedf2fb3499d26a7d6f49af5c4d8a2c681bdc50eeb56296a92f30b3d036",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "d66aac1ea020890d58169f43318bb298b92315991aca1e43e592a325a30e216c",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "1a7bfe7cccf88ee2d51f969e7f8adebeff8be431bd2b58e43154d6ec420e7006",
+          "reference_sha256": "7b9f659d947b5cae658704882879b249eabc7982787e9b290c12cc112d567eda"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "a5dbab56150ff643446f59565f2c74d4fd09d0f93fbfe3b622c2eb71e5bcb4b2",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth12-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth12-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "773c3f873baadcc64932a0ab487a63ae05039c2797e5dc8f1c551feb01a1fbf6",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "5bc422b0e3ca8166b67d6726ca475bc52be3a8c83f93359085da9a92bd0e941d"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth16-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth16-rgb0.config",
+      "configuration_sha256": "4d7e5bcd0d87f582fe417b61bf7927f961f94b06c93b832b391a998247970a80",
+      "depth": 16,
+      "rgb": false,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "93bc69536da69fe731b2706619d6b462c65c90761cf0339d9537804174fc6bc0",
+          "reference_sha256": "bde7406d343b16d5feb737ff0cdcb0729635ac509bea6c121b1cf3644c6e86cd"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8d85019d4f5202009ac996d997c9775d155f9b23686e05ffcc30222fb24faeaf",
+          "reference_sha256": "31eba8d3cf873e9228f502d4455925382e7245c316c91f8305c527f301f23dbf"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "7cb517408eb6fa90c2978ad0323c1f8be82b00eb4974363ec739583ef924c966",
+          "reference_sha256": "cb6c8031f28e0a70739fc9f4524013472b1e55477063f843e2680cf44e8385d9"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "e86c6988c074b59db9fdbd754130823acafa4160ca57e10f9978fc3b379d8d0b",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "11e083efa43ce152b5a04de2934cd313b6e829b7bcddca5aae77da203042ecf5",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "e815fb07675d33217e1ff3b1936439187e50085eff0b00cd22bf613f97172dbd",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "0756dac047e3c47d63f64248647cefd2647bc48aa4b308d17aeb19c4eb131f8e",
+          "reference_sha256": "79c67fc6ccff8df045584d4c1416ba0919fef3a59447d69df559fb55a47c183f"
+        }
+      ],
+      "sha256": "f6cd7e461e8c5a6dbc0abaa9a3d197d2357443a595e63a27c1a5020ca91383fb"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth16-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth16-rgb1.config",
+      "configuration_sha256": "5da776d51b25306f23eb73e4549997884f9011246010ad8cffebceec570450dd",
+      "depth": 16,
+      "rgb": true,
+      "coder": 1,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "0ec9a6961520e050d0f20393f44190a4bd937e8e7d5c124f2266a948ccd902d1",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "758f4be840b9ebb9872e4abf5106fc415aee9bcacb039fe58db6cafacf900997",
+          "reference_sha256": "895b73302e5e6b342af913b25e379108d36463a0beef1c204c6b32204c80a17b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "0d5696a1eb3a3e0c3a24f5cff6098e5dcf47bd56b453755db6f879384b7fab0f",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "a793bc2c523ff40c7ffaf0efd14426cc472488a161b7373e981040d4445efc6c",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "5ecca685ea19d2b0b655c8438634092f03c5ec74f0499b20f305429ea95a293f",
+          "reference_sha256": "58f733b7b0fcf4ab846234acaadf39ffb45ea9cf4d87c0b6e516bb2c9561e02e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "d2c8ef494634dca72aacee912ea624c1dcfc2f7aed810ba1e88b2c07cec53537",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth16-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth16-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "c6516c53d6b18fad056679ac8b0d16bf0995212422ecca4352e78fe58d97d926",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "50c4b91b7030c02edd1c433d57581ecf011a86a95607a46a36ffc15e447b24a1"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth8-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth8-rgb0.config",
+      "configuration_sha256": "3cfa1b477e54df94083d0b953811887ee25ae6d0aec82629d2aab25d420506ee",
+      "depth": 8,
+      "rgb": false,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "4ca0dbd64ec944a3585e0f152529a6e0a75a01051ee93793367716d8a433d2fa",
+          "reference_sha256": "259fe1cc0caece822775e5704448bf9e0c1c796cb601b25396ee0448a376fca4"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "ff34daff71a52c548fe8e165ea09f5301e22e0604cfa7dbd6f63c2d0775c1601",
+          "reference_sha256": "1dfe5d6276ebb67da7ab97dc0b87227b0cdc129ae626ea4bea4c1d211374580f"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "e491b59d070e74aab61f6381b96e689e715cbe96fc0d2d58f13d8795c1fdb51b",
+          "reference_sha256": "bc420606d2968957440c213668d4061eb14417f642da71c6b41d1db52cc169ba"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "dace594e777920f063df4f9e3611e8d3233f08d4a200b6e25dcad23b2f69d869",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "1043844749889449adadd0f9d626c4386298da125d8f8d073ae1c18ca3955329",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "36300819127be3850f17f49490a97f9abd327daad25f391be2b7a1a4d8283566",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "5eedfa7b1b9719a2efacf971a6189a74c670ced395798a26c438dbdf7e53b9e9",
+          "reference_sha256": "33e96de2f0df1ad843bf3d8e62f93de257b6d9f1ae6d6e13ffe6f8c0ff9231b8"
+        }
+      ],
+      "sha256": "f5548fa434fa5178b3f6084da03b303d6b8fdfbbb54133af5230c984386cde40"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth8-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth8-rgb1.config",
+      "configuration_sha256": "ce5987c5964532c969c37181f0e00508e491cab5ad2282f6d8f8ac1bfbee42d9",
+      "depth": 8,
+      "rgb": true,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "002c8a1a38b5d5e256147783f7fb00c919565af732c93bb51efeb910090999c2",
+          "reference_sha256": "5a96ae3a3859a6a9951bd1f6738e366c99d6850d5d3575c3faff1f59e00ce845"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "e7a1093e129e20f4ba4c3b96702c9114808d110085a9c8cf2fc4fcabe40a2ae8",
+          "reference_sha256": "9e22f09dca20a5f2b21d6da8d826e7bd79687bc3db360b5d73308be1cadf8a7b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "0152b361eb9623ab4ff6430ea27974dc26a2b0cbf8e58c2c78c83d79e44ad408",
+          "reference_sha256": "d3e82098a311d7c69c55f6e1c09cf8a0cd018c0c9687f4254c1eedae05b10586"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "ccdeb708a68698c577d4fc17182ebf6c3a3e50358c92aa4b9d3c8c0fa2935b1e",
+          "reference_sha256": "87690615adcf5b4b6a3bff61a86510645f2930d2b1803d757ad056032cb8465e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "df50e8fa8685c432e0240946b7547a534b3efc0e4f8f548b30494bf76902b41f",
+          "reference_sha256": "0ea5d3b7e815efa779d73763f243c5a05c1106fccc8b4969700a702eb95b9d7c"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "c76cdabe5c5c1ec4f0cf253dd4a1e32f10e562c18f1f7f9049d2e71b868c3837",
+          "reference_sha256": "87690615adcf5b4b6a3bff61a86510645f2930d2b1803d757ad056032cb8465e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth8-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth8-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "7fc530fce9102fbbc08276b2ddfde01b6142ec70e02e6668c7d09bebe71202f2",
+          "reference_sha256": "aba60b45956e5a89da68f3d921404ac9a497d92ba9e448197a499a6e06e7475b"
+        }
+      ],
+      "sha256": "7de239305b3e81e4b2d5fa50984e0e1cf92b0bf4ae3c65e5559fcd422c9db086"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth10-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth10-rgb0.config",
+      "configuration_sha256": "a1bef309509cd35bee0943fbb6a329431cb2124399299abde411d39f0ff9eb53",
+      "depth": 10,
+      "rgb": false,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9d76073c9135729a64e1997a390cd28ab012281e0128240be66a07c565cedf22",
+          "reference_sha256": "d9cbcaa133a41e5ad16fea64fd8d4f57bf2fe3a646283901c496ef18c0b64084"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "3d2f2de2c450394fa08ad3947167fe8f3b09be0688e3ddcfd54b43c658e66c62",
+          "reference_sha256": "66d932f548a1c2fafc8e068e17eb6af41f554cf97838aea736dc12807d36df07"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8e2d948089f64743e108c7c7e2b32b566a5df05348b90c28a7965b7fe3b2254f",
+          "reference_sha256": "b01768b814e5951593bb229b63bf96d153fc2ff4f567f40caf29444f638447b7"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "dace594e777920f063df4f9e3611e8d3233f08d4a200b6e25dcad23b2f69d869",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "1043844749889449adadd0f9d626c4386298da125d8f8d073ae1c18ca3955329",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "36300819127be3850f17f49490a97f9abd327daad25f391be2b7a1a4d8283566",
+          "reference_sha256": "4a95320ec5412c73bd0cb79e5f8df7452fd2d59753568c98c6d834cf39120f3b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "1271212bfdaf842a30f83bcf11f12fb93a042f370bd01c8c4e3ff226e14f1113",
+          "reference_sha256": "b5aee1d7545abde706ac471a5491c1594cb97a766796cc5f4a75a29b646749d6"
+        }
+      ],
+      "sha256": "984ee6ab013a633d5a0f804b803fdcf54288b9a377b7d458ff71a0fea6f7b9cd"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth10-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth10-rgb1.config",
+      "configuration_sha256": "b6f0e876c96dd9b3154411f48bbc76fc6b33ef0ef9a3c4801f5c4becb18a5827",
+      "depth": 10,
+      "rgb": true,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9cc2f58e2967c38b012be3792a99997ecb05b0240d81688ba0b10244de0a8004",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8bda80773d44a400c2feaa9a14bfa0a47a222e17c64b62ff31c0cbe1b71a67fb",
+          "reference_sha256": "3a215286ea5e490a7ae1319611c0835199f3ac120b225d32ad09206b5b40af41"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "9ab4ec52c5bd9d07e96076710a3e0d2b4ac66f384d4a764d94ae2837603d2d69",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "88e7a334672185479a00b6fe2b4f30fa82e5293655c305b720afe60fa3241bab",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "9850d32590b3aa01940a91bf4a76e2ae6bf49dc3685af242a830be83a18908f1",
+          "reference_sha256": "7b9f659d947b5cae658704882879b249eabc7982787e9b290c12cc112d567eda"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "acc2f2ddd67579b66094489523dd045d8691fab13974d41251988e132817335b",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth10-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth10-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "dd3fa0c95a986a2e27c083822e686d29330c7c53a303fb4e138cf44619dbd935",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "1c8338fa536a0e5ab0c643b6a3335dfc850ea6df1814e9d46b567e73245de451"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth12-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth12-rgb0.config",
+      "configuration_sha256": "95ece0939608f96b734c662f9293dba66c4de949aa85af7a07d5d2e176caf7f9",
+      "depth": 12,
+      "rgb": false,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9d76073c9135729a64e1997a390cd28ab012281e0128240be66a07c565cedf22",
+          "reference_sha256": "5b38433ba10941d8f7d0a9bbfd00c98b33bf57b3300d3502b95de0e0ad7b0eac"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "3d2f2de2c450394fa08ad3947167fe8f3b09be0688e3ddcfd54b43c658e66c62",
+          "reference_sha256": "7073f039ddbde304411e219c103f938bdeaeae7327084574a61e271e34b6eb86"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8e2d948089f64743e108c7c7e2b32b566a5df05348b90c28a7965b7fe3b2254f",
+          "reference_sha256": "df47750bf24ce434ea2c4ffee2b94cba016dec7e3b57945005b99b055d4d5137"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "dace594e777920f063df4f9e3611e8d3233f08d4a200b6e25dcad23b2f69d869",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "1043844749889449adadd0f9d626c4386298da125d8f8d073ae1c18ca3955329",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "36300819127be3850f17f49490a97f9abd327daad25f391be2b7a1a4d8283566",
+          "reference_sha256": "133e56ea59148c655f476b35e1c778703b89403a5b1fcab0598969cce43ec4bb"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "1271212bfdaf842a30f83bcf11f12fb93a042f370bd01c8c4e3ff226e14f1113",
+          "reference_sha256": "1608490099d9b873ff31e0704acf0135511c10acbc656653d4568f61300c2d88"
+        }
+      ],
+      "sha256": "edc83822eac4cd150bb1d80eef5c72a66450c4f483da84e0e4f9114116e1b7f6"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth12-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth12-rgb1.config",
+      "configuration_sha256": "0290b026c89b7e1f55cf8326a1b0a75a6be614c7375e8710a4c41a4a05093019",
+      "depth": 12,
+      "rgb": true,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "df9362236a71c43a2d849c3a4ad956c3da01644b5317984ac994f4fda805f222",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "dd7b5c3bceef1262c235a285e40f20e49dc35b55e9f29b0bfe58749a19c89f18",
+          "reference_sha256": "b383dfdedbf775eed52c4606f9592153fc951656c9ee33957e2f35264c6ecba5"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "3af6632113b3ba5c58c9723203236424f0239c54e1025132e9959dc683987bc1",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "a7390b324ffef1262f3d6dbea2da9376c8599bd8988fc54fc7cb33e347e8ad74",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "38d3243ec8c5fe02f80f1e35a9200f9e006a289eeae7a43ba7429b2b67b46d83",
+          "reference_sha256": "7b9f659d947b5cae658704882879b249eabc7982787e9b290c12cc112d567eda"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "24070cf33d6696aa859d490f75c287f1dcbd59915ecd489b07cb4ba9f5e98557",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth12-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth12-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "4d36cb0f604092f72b2b9d2b6905e1f9d25db5fc2342a64f6271432463bfc297",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "f306a49ddf2328543cc63259ce79ae7b4a95836d7d9dd8fd74bd761b08acc7f5"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth16-rgb0.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth16-rgb0.config",
+      "configuration_sha256": "afc7e956d7f1cd78d01cc8093d1c7c9f786f6a69eaa1b9cc93a34d9fecf80da4",
+      "depth": 16,
+      "rgb": false,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "9d76073c9135729a64e1997a390cd28ab012281e0128240be66a07c565cedf22",
+          "reference_sha256": "bde7406d343b16d5feb737ff0cdcb0729635ac509bea6c121b1cf3644c6e86cd"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "3d2f2de2c450394fa08ad3947167fe8f3b09be0688e3ddcfd54b43c658e66c62",
+          "reference_sha256": "31eba8d3cf873e9228f502d4455925382e7245c316c91f8305c527f301f23dbf"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "8e2d948089f64743e108c7c7e2b32b566a5df05348b90c28a7965b7fe3b2254f",
+          "reference_sha256": "cb6c8031f28e0a70739fc9f4524013472b1e55477063f843e2680cf44e8385d9"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "dace594e777920f063df4f9e3611e8d3233f08d4a200b6e25dcad23b2f69d869",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "1043844749889449adadd0f9d626c4386298da125d8f8d073ae1c18ca3955329",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "36300819127be3850f17f49490a97f9abd327daad25f391be2b7a1a4d8283566",
+          "reference_sha256": "7389a4348955f9449bea62a96525e4896e9ac00b11f056b3cec78cdbfe02ba1d"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb0-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "1271212bfdaf842a30f83bcf11f12fb93a042f370bd01c8c4e3ff226e14f1113",
+          "reference_sha256": "79c67fc6ccff8df045584d4c1416ba0919fef3a59447d69df559fb55a47c183f"
+        }
+      ],
+      "sha256": "ae85a82a00869effc9d1465b7683cf16801656d4fa9ee2f457a6df1296548b02"
+    },
+    {
+      "file": "ffv1-v3-switch-coder2-depth16-rgb1.mkv",
+      "configuration": "ffv1-v3-switch-coder2-depth16-rgb1.config",
+      "configuration_sha256": "68930177c04434faa8375e2eea749c9dee911db3c2f3d83a3b85f6faa8de63a1",
+      "depth": 16,
+      "rgb": true,
+      "coder": 2,
+      "zero_initial": false,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-0.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "a3e53558c2085770f243f93db6501f04cbdfe6b97359ce3715a143b89ddd3a06",
+          "reference_sha256": "6eef4975d22974c1b7816e915856ab72f6aa0c54aa847c5f12194360ef943f4a"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-1.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "a06d405de67480130e944cd362fbc75da8c5d5a9ffba8531a1c4d42ebea3e228",
+          "reference_sha256": "895b73302e5e6b342af913b25e379108d36463a0beef1c204c6b32204c80a17b"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-2.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "f6fc15eb9f30827aa16d1e2951d7de951d6029c68388b2c035d6f9781b79e57f",
+          "reference_sha256": "add1da35de10286e3f5506c6515ee38e5dbb33ad24c1c11ebe0e1988f3ddacbe"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-3.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "da367a3998ffc0307355326c5a55e6d46c441e3c67035a5d64f4f2b64227cf18",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-4.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "21dd3d85d118de88b4bc36d1c1ca7f703f032814123d231c8006431edd0d64e3",
+          "reference_sha256": "58f733b7b0fcf4ab846234acaadf39ffb45ea9cf4d87c0b6e516bb2c9561e02e"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-5.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "44a3845d671a56b4b3a1efbb36360dbf0dcafa8f69dd6992ea8fe69e6b66bbcf",
+          "reference_sha256": "26ac80bb1d007f5e3b48977a015c36348140a8a678ca7f12ddba0081ead4a7a8"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder2-depth16-rgb1-6.packet",
+          "reference": "ffv1-v3-switch-coder2-depth16-rgb1-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "87af2de0e51acbfaddba30516533af9fc99b0a06e847c178a400a433e75073a2",
+          "reference_sha256": "dd34a096e4616fc76960d4a0e33989a1636154dfd0d55a49ac88ab21e3da1324"
+        }
+      ],
+      "sha256": "afe6c18af5cd00bea59d1d686fda8e18a74037705382abfaf3b48e2281520050"
+    },
+    {
+      "file": "ffv1-v3-switch-coder1-depth8-rgb0-initial0.mkv",
+      "configuration": "ffv1-v3-switch-coder1-depth8-rgb0-initial0.config",
+      "configuration_sha256": "dd746ca6a85772517721657320e1680f84dad4f9bf80d4730a951c2ab98c841c",
+      "depth": 8,
+      "rgb": false,
+      "coder": 1,
+      "zero_initial": true,
+      "size": [
+        12,
+        6
+      ],
+      "frames": [
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-0.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-0.samples",
+          "keyframe": true,
+          "quantizers": [
+            0,
+            1
+          ],
+          "sha256": "f3be54270077d592defd229c3d62b7887772773823aecfecb896151d0e4d3141",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-1.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-1.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "38c748f2b1e51192f57fb6d5ac3689c65602a1805b12742567f480de209c2723",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-2.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-2.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            0
+          ],
+          "sha256": "f3a8189cc386a13367e10ee6a8264bb9347f5d5599e88859a0d92391cf2721e8",
+          "reference_sha256": "bc420606d2968957440c213668d4061eb14417f642da71c6b41d1db52cc169ba"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-3.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-3.samples",
+          "keyframe": false,
+          "quantizers": [
+            2,
+            0
+          ],
+          "sha256": "e86c6988c074b59db9fdbd754130823acafa4160ca57e10f9978fc3b379d8d0b",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-4.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-4.samples",
+          "keyframe": false,
+          "quantizers": [
+            0,
+            2
+          ],
+          "sha256": "11e083efa43ce152b5a04de2934cd313b6e829b7bcddca5aae77da203042ecf5",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-5.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-5.samples",
+          "keyframe": false,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "e815fb07675d33217e1ff3b1936439187e50085eff0b00cd22bf613f97172dbd",
+          "reference_sha256": "fcd2127a3b36bc6c39dd6d78acf7d63151132f412e601da157bda1f0b1a51155"
+        },
+        {
+          "packet": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-6.packet",
+          "reference": "ffv1-v3-switch-coder1-depth8-rgb0-initial0-6.samples",
+          "keyframe": true,
+          "quantizers": [
+            1,
+            1
+          ],
+          "sha256": "3b19d875e75abf0ba05a8927165d274a2095fc751be35bbb089534beaf0e3c6a",
+          "reference_sha256": "33e96de2f0df1ad843bf3d8e62f93de257b6d9f1ae6d6e13ffe6f8c0ff9231b8"
+        }
+      ],
+      "sha256": "841decb8509396f98a086da210da3e60041bc2512dc6935d4d7ec094b432bcef"
+    }
+  ],
+  "provenance": "Original seven-frame sample/RCT arrays and independent Python entropy coding. Quantizers change context count 2->1->2 and shape at equal count; shrinking/equal banks retain adaptation, growing banks are recreated (zero Range probabilities, default Rice models), keyframes restore configured initial states. No external codec, private media or network."
+}

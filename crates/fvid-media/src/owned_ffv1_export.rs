@@ -250,7 +250,7 @@ pub(crate) fn export_processed(
                     let mut frame = crate::owned_frame::GeometryFrame {
                         width: view.width as usize,
                         height: view.height as usize,
-                        subsampling: Some(view.subsampling),
+                        subsampling: view.subsampling,
                         data,
                     };
                     if let Some(callback) = process.as_deref_mut() {

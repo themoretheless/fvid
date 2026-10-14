@@ -1,10 +1,11 @@
 fn decode_rgb(
     r: &mut Range<'_>,
+    rice: &mut Option<Rice<'_>>,
     state: &mut State,
     width: usize,
     height: usize,
     budget: usize,
-) -> Result<GeometryFrame> {
+) -> Result<(GeometryFrame, Option<Vec<u8>>)> {
     let count = width
         .checked_mul(height)
         .ok_or_else(|| invalid("FFV1 RGB size overflow"))?;
@@ -12,16 +13,19 @@ fn decode_rgb(
     let length = count
         .checked_mul(3 * bytes)
         .ok_or_else(|| invalid("FFV1 RGB size overflow"))?;
+    let components = if state.has_alpha { 4 } else { 3 };
+    let alpha_length = if state.has_alpha { count * bytes } else { 0 };
     let storage = count
-        .checked_mul(12)
+        .checked_mul(components * 4)
         .and_then(|n| n.checked_add(length))
-        .and_then(|n| n.checked_add(state.models[0].len() * 64 + std::mem::size_of::<State>()))
+        .and_then(|n| n.checked_add(alpha_length))
+        .and_then(|n| n.checked_add(state.context_bytes()))
         .ok_or_else(|| invalid("FFV1 RGB storage overflow"))?;
     if storage > budget {
         return Err(invalid("FFV1 RGB frame exceeds memory budget"));
     }
-    let mut planes: [Vec<i32>; 3] = std::array::from_fn(|_| Vec::new());
-    for p in &mut planes {
+    let mut planes: [Vec<i32>; 4] = std::array::from_fn(|_| Vec::new());
+    for p in planes.iter_mut().take(components) {
         p.try_reserve_exact(count)
             .map_err(|_| invalid("FFV1 RGB allocation failed"))?;
         p.resize(count, 0);
@@ -42,8 +46,15 @@ fn decode_rgb(
     };
     let bias = 1i32 << state.depth;
     let mask = (bias << 1) - 1;
+    let mut runs = [RiceRun::default(); 4];
     for y in 0..height {
-        for (component, p) in planes.iter_mut().enumerate() {
+        for (component, p) in planes.iter_mut().take(components).enumerate() {
+            let group = if component == 3 {
+                2
+            } else {
+                usize::from(component != 0)
+            };
+            runs[component].line();
             for x in 0..width {
                 let (xx, yy) = (x as isize, y as isize);
                 let l = read(p, xx - 1, yy);
@@ -52,16 +63,26 @@ fn decode_rgb(
                 let tr = read(p, xx + 1, yy - 1);
                 let ll = read(p, xx - 2, yy);
                 let tt = read(p, xx, yy - 2);
-                let context: i32 = state
-                    .tables
+                let context: i32 = state.tables[group]
                     .iter()
                     .zip([l - tl, tl - t, t - tr, ll - l, tt - t])
                     .map(|(table, d)| table[(d & 255) as usize])
                     .sum();
-                let probabilities = state.models[usize::from(component != 0)]
-                    .get_mut(context.unsigned_abs() as usize)
-                    .ok_or_else(|| invalid("invalid FFV1 RGB context"))?;
-                let mut residual = r.integer(probabilities, true)?;
+                let mut residual = if let Some(rice) = rice.as_mut() {
+                    rice.sample(
+                        &mut state.rice.as_mut().unwrap()[group],
+                        context,
+                        state.depth + 1,
+                        &mut runs[component],
+                        x,
+                        width,
+                    )?
+                } else {
+                    let probabilities = state.models[group]
+                        .get_mut(context.unsigned_abs() as usize)
+                        .ok_or_else(|| invalid("invalid FFV1 RGB context"))?;
+                    r.integer(probabilities, true)?
+                };
                 if residual.unsigned_abs() > bias as u32 {
                     return Err(invalid("FFV1 RGB residual exceeds sample depth"));
                 }
@@ -74,11 +95,16 @@ fn decode_rgb(
         }
     }
     let mut data = buffer(length)?;
+    let mut alpha = if state.has_alpha {
+        Some(buffer(alpha_length)?)
+    } else {
+        None
+    };
     for i in 0..count {
         let cb = planes[1][i] - bias;
         let cr = planes[2][i] - bias;
         let base = planes[0][i] - ((cb + cr) >> 2);
-        let rgb = if (9..=15).contains(&state.depth) {
+        let rgb = if (9..=15).contains(&state.depth) && !state.has_alpha {
             [cr + base, cb + base, base]
         } else {
             [cr + base, base, cb + base]
@@ -93,11 +119,25 @@ fn decode_rgb(
                 data[at + 1] = (value >> 8) as u8;
             }
         }
+        if let Some(alpha) = alpha.as_mut() {
+            let value = planes[3][i];
+            if !(0..bias).contains(&value) {
+                return Err(invalid("FFV1 alpha reconstruction exceeds sample depth"));
+            }
+            let at = i * bytes;
+            alpha[at] = value as u8;
+            if bytes == 2 {
+                alpha[at + 1] = (value >> 8) as u8;
+            }
+        }
     }
-    Ok(GeometryFrame {
-        width,
-        height,
-        subsampling: None,
-        data,
-    })
+    Ok((
+        GeometryFrame {
+            width,
+            height,
+            subsampling: None,
+            data,
+        },
+        alpha,
+    ))
 }

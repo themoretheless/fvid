@@ -129,11 +129,6 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             (track.default_duration_ns > 0).then_some(track.default_duration_ns);
         let ffv1 = track.codec == "V_FFV1";
         let ffv1_size = if ffv1 {
-            if !track.codec_private.is_empty() {
-                return Err(crate::unsupported(
-                    "FFV1 configuration-record versions are not implemented",
-                ));
-            }
             Some((
                 u32::try_from(track.width).map_err(|_| invalid("FFV1 width overflow"))? as usize,
                 u32::try_from(track.height).map_err(|_| invalid("FFV1 height overflow"))? as usize,
@@ -248,9 +243,10 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             None
         };
         let decoder = if let Some((w, h)) = ffv1_size {
-            VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::new(
+            VideoDecoder::Ffv1(Box::new(crate::codec::ffv1_decoder::Decoder::from_configuration(
                 w,
                 h,
+                &private,
                 queue_budget,
             )?))
         } else if avc {
@@ -794,6 +790,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 }
                 VideoDecoder::Ffv1(d) => {
                     let decoded = d.decode(&packet)?;
+                    if decoded.alpha.is_some() {return Err(crate::unsupported("FFV1 alpha presentation is not implemented"));}
                     let (kr, kb) = match self.colour.matrix {
                         0 | 2 | 5 | 6 => (0.299, 0.114),
                         1 => (0.2126, 0.0722),
@@ -1002,6 +999,14 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             }
             return Ok(true);
         }
+        if let Picture::Vp9(decoded) = &current.decoded {
+            if decoded.header.picture.format.color_space == 7 {
+                let packed = crate::playback_native::vp9_picture(&decoded.picture,
+                    AvcColour { kr: 0.2126, kb: 0.0722, full: true }, true)?;
+                packed.to_rgb(&mut self.rgb, self.rgb_budget)?;
+                return Ok(true);
+            }
+        }
         if let Picture::Av1(decoded) = &current.decoded {
             if decoded.color.matrix == 0 && !decoded.color.monochrome {
                 let packed = crate::playback_native::av1_picture(&decoded.picture, &decoded.color,
@@ -1121,6 +1126,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     picture: picture.clone(),
                     colour: *colour,
                 },
+                Picture::Vp9(decoded) if decoded.header.picture.format.color_space == 7 => {
+                    crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::vp9_picture(
+                        &decoded.picture, AvcColour { kr: 0.2126, kb: 0.0722, full: true }, true,
+                    )?))
+                }
                 Picture::Av1(decoded) if decoded.color.matrix == 0 && !decoded.color.monochrome => {
                     crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::av1_picture(
                         &decoded.picture, &decoded.color, AvcColour { kr: 0.2126, kb: 0.0722, full: true },

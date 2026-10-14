@@ -171,33 +171,223 @@ fn rgb_mp4_and_webm_preserve_source_depth_pixels_rewind_and_seek() {
     }
 }
 #[test]
-fn rgb_lossless_export_remains_an_explicit_refusal_until_ffv1_rgb_is_enabled() {
-    for extension in ["mp4", "webm"] {
-        let source = root().join(format!("av1-rgb-depth8.{extension}"));
-        let target = std::env::temp_dir().join(format!(
-            "fvid-av1-rgb-refusal-{}-{extension}.mkv",
-            std::process::id()
-        ));
-        let _ = std::fs::remove_file(&target);
-        let error = fvid_media::transcode_lossless(
-            &source,
-            &target,
-            Default::default(),
-            &Default::default(),
-        )
-        .unwrap_err();
-        assert_eq!(
-            error,
-            format!(
-                "owned {} lossless export does not yet support this codec, format or transform",
-                if extension == "mp4" {
-                    "MP4"
-                } else {
-                    "Matroska"
-                }
+fn rgb_lossless_export_preserves_all_coded_samples() {
+    for case in manifest()["cases"].as_array().unwrap() {
+        let depth = case["depth"].as_u64().unwrap() as u8;
+        for extension in ["mp4", "webm"] {
+            let source = root().join(case["files"][extension]["file"].as_str().unwrap());
+            let target = std::env::temp_dir().join(format!(
+                "fvid-av1-rgb-export-{}-{depth}-{extension}.mkv",
+                std::process::id()
+            ));
+            let _ = std::fs::remove_file(&target);
+            fvid_media::transcode_lossless(
+                &source,
+                &target,
+                Default::default(),
+                &Default::default(),
             )
+            .unwrap();
+            let mut reader = fvid::playback_native::NativeReader::software(
+                Cursor::new(std::fs::read(&target).unwrap()),
+                32 << 20,
+            )
+            .unwrap();
+            let mut actual = Vec::new();
+            while let Some(raw) = reader.read_frame_raw().unwrap() {
+                let fvid::playback_native::RawFrame::Planar(p) = raw else {
+                    panic!("RGB export narrowed samples")
+                };
+                assert_eq!(p.depth, depth);
+                assert_eq!(p.frame.subsampling, None);
+                actual.extend_from_slice(&p.frame.data);
+            }
+            assert_eq!(
+                actual,
+                std::fs::read(root().join(case["reference"].as_str().unwrap())).unwrap()
+            );
+            std::fs::remove_file(target).unwrap();
+        }
+    }
+}
+#[test]
+fn rgb_export_geometry_and_negate_preserve_independent_channel_oracles() {
+    use fvid::media_info::{
+        CropRect, LosslessTransform, PadRect, RotateAngle, ScaleSize, TransposeMode,
+    };
+    for case in manifest()["cases"].as_array().unwrap() {
+        let depth = case["depth"].as_u64().unwrap() as u8;
+        let (w, h) = (
+            case["width"].as_u64().unwrap() as usize,
+            case["height"].as_u64().unwrap() as usize,
         );
-        assert!(!target.exists());
+        let pixel = if depth == 8 { 3 } else { 6 };
+        let reference = std::fs::read(root().join(case["reference"].as_str().unwrap())).unwrap();
+        for extension in ["mp4", "webm"] {
+            for mode in 0..7 {
+                let transform = match mode {
+                    0 => LosslessTransform {
+                        horizontal_flip: true,
+                        vertical_flip: true,
+                        negate: Some(String::new()),
+                        ..Default::default()
+                    },
+                    1 => LosslessTransform {
+                        rotate: Some(RotateAngle { degrees: 90.0 }),
+                        ..Default::default()
+                    },
+                    2 => LosslessTransform {
+                        crop: Some(CropRect {
+                            x: 1,
+                            y: 1,
+                            width: 4,
+                            height: 2,
+                        }),
+                        horizontal_flip: true,
+                        transpose: Some(TransposeMode::Clock),
+                        pad: Some(PadRect {
+                            width: 6,
+                            height: 6,
+                            x: 2,
+                            y: 2,
+                        }),
+                        scale: Some(ScaleSize {
+                            width: 12,
+                            height: 12,
+                        }),
+                        ..Default::default()
+                    },
+                    3 => LosslessTransform {
+                        colorchannelmixer: Some("rr=0:rb=1:bb=0:br=1".into()),
+                        ..Default::default()
+                    },
+                    4 => LosslessTransform {
+                        curves: Some("all=0/1 1/1:enable=eq(n,0)".into()),
+                        ..Default::default()
+                    },
+                    5 => LosslessTransform {
+                        colorlevels: Some("romax=0:gomax=0:bomax=0".into()),
+                        ..Default::default()
+                    },
+                    _ => LosslessTransform {
+                        curves: Some("all=0/0 1/0".into()),
+                        colorbalance: Some("rs=1".into()),
+                        ..Default::default()
+                    },
+                };
+                let (ow, oh) = match mode {
+                    0 => (w, h),
+                    1 => (h, w),
+                    2 => (12, 12),
+                    _ => (w, h),
+                };
+                let target = std::env::temp_dir().join(format!(
+                    "fvid-rgb-geometry-{}-{depth}-{extension}-{mode}.mkv",
+                    std::process::id()
+                ));
+                let _ = std::fs::remove_file(&target);
+                fvid_media::transcode_lossless(
+                    &root().join(case["files"][extension]["file"].as_str().unwrap()),
+                    &target,
+                    transform,
+                    &Default::default(),
+                )
+                .unwrap();
+                let mut reader = fvid::playback_native::NativeReader::software(
+                    Cursor::new(std::fs::read(&target).unwrap()),
+                    32 << 20,
+                )
+                .unwrap();
+                let mut count = 0;
+                for source in reference.chunks_exact(w * h * pixel) {
+                    let mut expected = vec![0; ow * oh * pixel];
+                    for y in 0..oh {
+                        for x in 0..ow {
+                            let position = match mode {
+                                0 => Some((w - 1 - x, h - 1 - y)),
+                                1 => Some((y, h - 1 - x)),
+                                2 => {
+                                    let (px, py) = (x / 2, y / 2);
+                                    if (2..4).contains(&px) && (2..6).contains(&py) {
+                                        Some((4 - (py - 2), 2 - (px - 2)))
+                                    } else {
+                                        None
+                                    }
+                                }
+                                _ => Some((x, y)),
+                            };
+                            if let Some((sx, sy)) = position {
+                                let from = (sy * w + sx) * pixel;
+                                let to = (y * ow + x) * pixel;
+                                expected[to..to + pixel]
+                                    .copy_from_slice(&source[from..from + pixel]);
+                            }
+                        }
+                    }
+                    if mode == 0 {
+                        if depth == 8 {
+                            for v in &mut expected {
+                                *v = 255 - *v;
+                            }
+                        } else {
+                            for v in expected.chunks_exact_mut(2) {
+                                let value =
+                                    ((1u16 << depth) - 1) - u16::from_le_bytes([v[0], v[1]]);
+                                v.copy_from_slice(&value.to_le_bytes());
+                            }
+                        }
+                    }
+                    if mode == 4 && count == 0 {
+                        if depth == 8 {
+                            expected.fill(255);
+                        } else {
+                            for sample in expected.chunks_exact_mut(2) {
+                                sample.copy_from_slice(&((1u16 << depth) - 1).to_le_bytes());
+                            }
+                        }
+                    }
+                    if mode == 3 {
+                        let bytes = pixel / 3;
+                        for p in expected.chunks_exact_mut(pixel) {
+                            for b in 0..bytes {
+                                p.swap(b, 2 * bytes + b);
+                            }
+                        }
+                    }
+                    if mode == 5 || mode == 6 {
+                        expected.fill(0);
+                        if mode == 6 {
+                            let red =
+                                (0.7f32 * ((1u32 << depth) - 1) as f32).round_ties_even() as u16;
+                            for p in expected.chunks_exact_mut(pixel) {
+                                if depth == 8 {
+                                    p[0] = red as u8;
+                                } else {
+                                    p[..2].copy_from_slice(&red.to_le_bytes());
+                                }
+                            }
+                        }
+                    }
+                    let fvid::playback_native::RawFrame::Planar(p) =
+                        reader.read_frame_raw().unwrap().unwrap()
+                    else {
+                        panic!("RGB geometry narrowed samples")
+                    };
+                    assert_eq!(
+                        (p.frame.width, p.frame.height, p.depth, p.frame.subsampling),
+                        (ow, oh, depth, None)
+                    );
+                    assert_eq!(
+                        p.frame.data, expected,
+                        "depth {depth}, {extension}, mode {mode}, frame {count}"
+                    );
+                    count += 1;
+                }
+                assert_eq!(count, case["frames"].as_u64().unwrap());
+                assert!(reader.read_frame_raw().unwrap().is_none());
+                std::fs::remove_file(target).unwrap();
+            }
+        }
     }
 }
 #[test]
