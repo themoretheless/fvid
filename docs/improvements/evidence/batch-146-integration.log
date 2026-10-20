@@ -1,0 +1,77 @@
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-codecs)
+warning: associated function `new` is never used
+  --> crates/fvid-cuda/src/nvenc_session.rs:63:19
+   |
+62 | impl FunctionTable {
+   | ------------------ associated function in this implementation
+63 |     pub(crate) fn new() -> Self {
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `validate_surface` is never used
+   --> crates/fvid-cuda/src/nvenc_session.rs:950:4
+    |
+950 | fn validate_surface(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: associated function `unpack` is never used
+ --> crates/fvid-cuda/src/nvenc.rs:9:8
+  |
+8 | impl NvencVersion {
+  | ----------------- associated function in this implementation
+9 |     fn unpack(value: u32) -> Result<Self, String> {
+  |        ^^^^^^
+
+warning: function `query_result` is never used
+   --> crates/fvid-cuda/src/nvenc.rs:116:4
+    |
+116 | fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
+    |    ^^^^^^^^^^^^
+
+warning: field `sample_bytes` is never read
+  --> crates/fvid-cuda/src/nv12_buffer.rs:36:5
+   |
+31 | pub struct Nv12Buffer {
+   |            ---------- field in this struct
+...
+36 |     sample_bytes: u32,
+   |     ^^^^^^^^^^^^
+
+warning: function `layout` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:299:4
+    |
+299 | fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
+    |    ^^^^^^
+
+warning: function `make_view` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:323:4
+    |
+323 | fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
+    |    ^^^^^^^^^
+
+warning: function `make_view_format` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:326:4
+    |
+326 | fn make_view_format(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: `fvid-cuda` (lib) generated 8 warnings
+error[E0433]: cannot find `hevc_depth_tables` in `super`
+  --> crates/fvid-codecs/src/../../../src/codec/hevc_parameters.rs:45:57
+   |
+45 |         n = n.saturating_add(std::mem::size_of::<super::hevc_depth_tables::Tables>())
+   |                                                         ^^^^^^^^^^^^^^^^^ could not find `hevc_depth_tables` in `super`
+   |
+help: consider importing this module
+   |
+ 2 + use crate::codec::hevc_depth_tables;
+   |
+help: if you import `hevc_depth_tables`, refer to it directly
+   |
+45 -         n = n.saturating_add(std::mem::size_of::<super::hevc_depth_tables::Tables>())
+45 +         n = n.saturating_add(std::mem::size_of::<hevc_depth_tables::Tables>())
+   |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `fvid-codecs` (lib) due to 1 previous error

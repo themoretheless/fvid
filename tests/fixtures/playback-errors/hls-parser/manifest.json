@@ -1,0 +1,23 @@
+{
+  "provenance": "Committed synthetic fragmented/video.mp4: 25 pictures, one second. Metadata-only HLS mutations. No private input, external tool or network.",
+  "files": {
+    "control.m3u8": "f82b8c6287227d8062033c099c395d9d345a1e03ac05b3e5c88c1b7427afce5e",
+    "control.mp4": "6f9246a6066acabbe71be5419ee390b1767b978c2de80e4434b6f4afbbbf0a05",
+    "duplicate-endlist.m3u8": "152bdd4b6dac4c656b465133f373d1036d35c1414257ffc1691d392e26e61c31",
+    "duplicate-independent-segments.m3u8": "520b289a3f9d8f0932299562b758d9db8232d39fc9f97b4bd960a987042db016",
+    "duplicate-media-sequence.m3u8": "e158a3f355a9fe2cd498526b4f8268fa844cbaa503c99d0c8c104d9927442310",
+    "duplicate-target-duration.m3u8": "96b645a7bc3496c2fcd8714ca6607afc180b9f02df4f7b7f5f4967af4b54985c",
+    "duplicate-version.m3u8": "3616f7bcdca696c4d4c16b38e2a7fc1a2eee8022f1012058c8469ddd8dc8be70",
+    "exponent-duration.m3u8": "d71189a94b9ae63dae2e5a114ae74c38f1cd40a3480de3ca25aa49ab6f94786a",
+    "init.mp4": "0e0fb612cbffcecca80236632a230fa11d4ca883b28dbf45e1a0f576ef676414",
+    "mixed-master-sequence.m3u8": "934accb31bf1cbc33a1d1145db4680f8f863a2e9412750cb4a5c674ad438bd8d",
+    "mixed-media-rendition.m3u8": "7fcc8672d4ef7c8edc522430e1b42bfd1b49bf35ed3574844a089e67f6b903dc",
+    "segment.m4s": "ad838bb4932468b6893e1bfb79898e1d7400b4b601c79620bd16cd4018bf98f8",
+    "signed-bandwidth.m3u8": "a45aefe4525f241f27edb2d59f0be0c1e170c71c1e96a9320b18919b9529fd53",
+    "signed-duration.m3u8": "2f2fbc64c95039669cfa3fcd5daf7477098c2c1d33f40e515374608e561e3763",
+    "signed-range-length.m3u8": "3ef757d0bd62f3f5300d82b70b53cfaa291445b357c4b6cce6a7cc562e7cd98b",
+    "signed-range-offset.m3u8": "e1784a76b91e9333385dd0e002e0d9eac0416a42fe2a1e84964d92756af1e221",
+    "signed-sequence.m3u8": "d1ab5bb25c20d1f6a38994f31030489e66d7dbe31ce0ef3efac314ecf6c8f8c5",
+    "signed-target.m3u8": "1f455ba15a7cb8ac9b8dd6a84f3ccf538da7f285191e273a139b0e2401c06f38"
+  }
+}

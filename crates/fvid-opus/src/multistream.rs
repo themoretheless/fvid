@@ -17,6 +17,33 @@ use crate::repacketizer::{Repacketizer, take_self_delimited_into};
 use crate::soft_clip::{float_to_i16, i16_to_float};
 use crate::{Application, Bandwidth, OpusDecoder, OpusEncoder};
 
+/// Validate concatenated elementary packets and return their common duration
+/// in samples at the mandatory 48 kHz Opus clock. No entropy decoding or copies.
+pub fn multistream_packet_samples(mut data: &[u8], streams: usize) -> Result<usize> {
+    if streams == 0 || streams > 255 || data.len() > i32::MAX as usize {
+        return Err(Error::InvalidPacket("invalid multistream packet geometry"));
+    }
+    let mut duration = None;
+    for stream in 0..streams {
+        let (toc, frames, consumed) =
+            crate::repacketizer::parse_packet(data, stream + 1 < streams)?;
+        let samples = crate::repacketizer::samples_per_frame(toc, 48000) as usize * frames.len();
+        if duration.is_some_and(|previous| previous != samples) {
+            return Err(Error::InvalidPacket(
+                "multistream packet durations disagree",
+            ));
+        }
+        duration = Some(samples);
+        data = data
+            .get(consumed..)
+            .ok_or(Error::InvalidPacket("truncated multistream packet"))?;
+    }
+    if !data.is_empty() {
+        return Err(Error::InvalidPacket("trailing multistream packet data"));
+    }
+    Ok(duration.unwrap())
+}
+
 /// Vorbis channel layout for mapping family 1, channels 1..=8:
 /// (nb_streams, nb_coupled_streams, channel_mapping).
 const VORBIS_MAPPINGS: [(usize, usize, &[u8]); 8] = [
@@ -46,7 +73,7 @@ const VORBIS_MAPPINGS: [(usize, usize, &[u8]); 8] = [
 #[derive(Debug, Clone)]
 pub struct ChannelLayout {
     /// The mapping family this layout came from: 0 for mono/stereo, 1 for the
-    /// Vorbis surround orders. Kept so the layout can describe itself to an
+    /// Vorbis surround orders, or 255 for discrete channels. Kept so the layout can describe itself to an
     /// [`OpusHead`](crate::OpusHead) without being asked twice.
     pub mapping_family: u8,
     /// Output channels this layout produces, which is what a caller interleaves.
@@ -66,8 +93,25 @@ pub struct ChannelLayout {
 }
 
 impl ChannelLayout {
+    /// Validate stream geometry independently of decoder allocation.
+    pub fn validate(&self) -> Result<()> {
+        if !(1..=255).contains(&self.nb_channels)
+            || !(1..=255).contains(&self.nb_streams)
+            || self.nb_coupled_streams > self.nb_streams
+            || self.nb_streams + self.nb_coupled_streams > 255
+            || self.mapping.len() != self.nb_channels
+            || self
+                .mapping
+                .iter()
+                .any(|&v| v != 255 && usize::from(v) >= self.nb_streams + self.nb_coupled_streams)
+        {
+            return Err(Error::InvalidArgument("invalid multistream channel layout"));
+        }
+        Ok(())
+    }
+
     /// Standard layout for a channel count + mapping family (0 = mono/stereo,
-    /// 1 = Vorbis surround for 1..=8 channels).
+    /// 1 = Vorbis surround for 1..=8 channels, 255 = independent discrete channels).
     pub fn surround(channels: usize, mapping_family: u8) -> Result<Self> {
         match mapping_family {
             0 => {
@@ -104,6 +148,18 @@ impl ChannelLayout {
                     nb_streams: ns,
                     nb_coupled_streams: nc,
                     mapping: m.to_vec(),
+                })
+            }
+            255 => {
+                if !(1..=255).contains(&channels) {
+                    return Err(Error::InvalidArgument("family 255 supports 1-255 channels"));
+                }
+                Ok(ChannelLayout {
+                    mapping_family: 255,
+                    nb_channels: channels,
+                    nb_streams: channels,
+                    nb_coupled_streams: 0,
+                    mapping: (0..channels).map(|c| c as u8).collect(),
                 })
             }
             _ => Err(Error::InvalidArgument("unsupported mapping family")),
@@ -179,9 +235,9 @@ impl OpusMSEncoder {
     ///
     /// `mapping_family` selects the layout: 0 for mono or stereo, 1 for the
     /// Vorbis surround orders (quad, 5.0, 5.1, 6.1, 7.1) up to 8 channels.
-    /// These are the families RFC 7845 defines for an `.opus` file, and the
-    /// same value belongs in the [`OpusHead`](crate::OpusHead) written
-    /// alongside. Any other value, or more than 8 channels, is
+    /// Family 255 codes 1..255 discrete channels as independent mono streams.
+    /// The same value belongs in the [`OpusHead`](crate::OpusHead) written
+    /// alongside. Other families or channel counts outside their bounds are
     /// [`Error::InvalidArgument`];
     /// [`ChannelLayout::surround`] is where that decision is made.
     pub fn new(
@@ -452,7 +508,16 @@ impl OpusMSDecoder {
     /// [`OpusMSEncoder::new`]; for a stream read from a file it is the one
     /// [`OpusHead::mapping_family`](crate::OpusHead::mapping_family) carries.
     pub fn new(sample_rate: i32, channels: usize, mapping_family: u8) -> Result<Self> {
-        let layout = ChannelLayout::surround(channels, mapping_family)?;
+        Self::with_layout(
+            sample_rate,
+            ChannelLayout::surround(channels, mapping_family)?,
+        )
+    }
+
+    /// Decode an explicit channel map, including duplicate and silent outputs.
+    /// Speaker semantics belong to the container's mapping family.
+    pub fn with_layout(sample_rate: i32, layout: ChannelLayout) -> Result<Self> {
+        layout.validate()?;
         let mut decoders = Vec::with_capacity(layout.nb_streams);
         for s in 0..layout.nb_streams {
             let ch = if s < layout.nb_coupled_streams { 2 } else { 1 };
@@ -554,7 +619,11 @@ impl OpusMSDecoder {
                     &mut buf,
                     soft_clip,
                 )?;
-                if s > 0 && n != produced { return Err(Error::InvalidPacket("multistream packet durations disagree")); }
+                if s > 0 && n != produced {
+                    return Err(Error::InvalidPacket(
+                        "multistream packet durations disagree",
+                    ));
+                }
                 produced = n;
                 // Remux this stream's channel(s) to the output.
                 if coupled {
@@ -667,6 +736,201 @@ impl OpusMSEncoder {
     pub fn set_max_bandwidth(&mut self, bw: Bandwidth) {
         for e in &mut self.encoders {
             e.max_bandwidth = bw;
+        }
+    }
+}
+
+#[cfg(test)]
+mod packet_duration_tests {
+    use super::*;
+    #[test]
+    fn stream_duration_validation_obeys_boundaries_and_rejects_disagreement() {
+        assert_eq!(
+            multistream_packet_samples(&[0xf8, 1, 0, 0xf8, 0], 2).unwrap(),
+            960
+        );
+        assert!(multistream_packet_samples(&[0xf8, 1, 0, 0xf0, 0], 2).is_err());
+        assert!(multistream_packet_samples(&[0xf8, 255], 2).is_err());
+        assert!(multistream_packet_samples(&[], 0).is_err());
+        let mut padded = vec![0xfb, 65, 7, 1, 0];
+        padded.extend([0; 7]);
+        padded.extend([0xf8, 0]);
+        assert_eq!(multistream_packet_samples(&padded, 2).unwrap(), 960);
+    }
+}
+
+#[cfg(test)]
+mod explicit_layout_acceptance {
+    use super::*;
+
+    #[test]
+    fn synthetic_surround_packets_remap_duplicate_and_silent_channels() {
+        let packets = include_bytes!(
+            "../../../tests/fixtures/playback-errors/opus-surround-native-packets.bin"
+        );
+        let standard = ChannelLayout::surround(6, 1).unwrap();
+        let mut reference = OpusMSDecoder::new(48000, 6, 1).unwrap();
+        let mapping = vec![5, 0, 0, 255, 2, 1];
+        let mut decoder = OpusMSDecoder::with_layout(
+            48000,
+            ChannelLayout {
+                mapping_family: 255,
+                nb_channels: 6,
+                nb_streams: standard.nb_streams,
+                nb_coupled_streams: standard.nb_coupled_streams,
+                mapping: mapping.clone(),
+            },
+        )
+        .unwrap();
+        let mut cursor = packets.as_slice();
+        let mut count = 0;
+        while !cursor.is_empty() {
+            let length = u32::from_le_bytes(cursor[..4].try_into().unwrap()) as usize;
+            let packet = &cursor[4..4 + length];
+            let mut expected = vec![0.0; 5760 * 6];
+            let mut actual = vec![123.0; 5760 * 6];
+            let n = reference.decode(packet, 5760, &mut expected).unwrap();
+            assert_eq!(decoder.decode(packet, 5760, &mut actual).unwrap(), n);
+            for (a, b) in actual[..n * 6]
+                .chunks_exact(6)
+                .zip(expected[..n * 6].chunks_exact(6))
+            {
+                for (channel, &target) in mapping.iter().enumerate() {
+                    let value = if target == 255 {
+                        0.0
+                    } else {
+                        b[standard.mapping.iter().position(|&v| v == target).unwrap()]
+                    };
+                    assert_eq!(a[channel], value, "packet={count} channel={channel}");
+                }
+            }
+            cursor = &cursor[4 + length..];
+            count += 1;
+        }
+        assert_eq!(count, 6);
+    }
+
+    #[test]
+    fn explicit_layout_rejects_invalid_geometry_before_decoder_creation() {
+        let base = ChannelLayout::surround(6, 1).unwrap();
+        for case in 0..7 {
+            let mut layout = base.clone();
+            match case {
+                0 => layout.nb_channels = 0,
+                1 => layout.nb_channels = 256,
+                2 => layout.nb_streams = 0,
+                3 => layout.nb_streams = 256,
+                4 => layout.nb_coupled_streams = layout.nb_streams + 1,
+                5 => {
+                    layout.mapping.pop();
+                }
+                _ => layout.mapping[0] = 6,
+            }
+            assert!(
+                OpusMSDecoder::with_layout(48000, layout).is_err(),
+                "case={case}"
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+mod discrete_encoding_acceptance {
+    use super::*;
+    #[test]
+    fn discrete_encoder_keeps_every_stream_independent_and_self_delimited() {
+        let raw = include_bytes!(
+            "../../../tests/fixtures/playback-errors/opus-discrete-encoder-source.f32"
+        );
+        let source: Vec<f32> = raw
+            .chunks_exact(4)
+            .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+            .collect();
+        for channels in [1usize, 9, 255] {
+            let mut encoder = OpusMSEncoder::new(48000, channels, 255, Application::Audio).unwrap();
+            let mut references: Vec<_> = (0..3)
+                .map(|_| OpusEncoder::new(48000, 1, Application::Audio).unwrap())
+                .collect();
+            let mut reference_decoders: Vec<_> = (0..3)
+                .map(|_| OpusDecoder::new(48000, 1).unwrap())
+                .collect();
+            let mut decoder = OpusMSDecoder::new(48000, channels, 255).unwrap();
+            assert_eq!(encoder.nb_streams(), channels);
+            let head = crate::OpusHead::for_ms_encoder(&encoder, 48000);
+            assert_eq!(head.mapping_family, 255);
+            assert_eq!(
+                head.channel_mapping,
+                (0..channels).map(|c| c as u8).collect::<Vec<_>>()
+            );
+            let mut mux = crate::OggOpusWriter::new(Vec::new(), head.clone()).unwrap();
+            let mut saved_packets = Vec::new();
+            for frame in source.chunks_exact(960) {
+                let input: Vec<_> = frame
+                    .iter()
+                    .flat_map(|v| (0..channels).map(move |c| *v * (c % 3 + 1) as f32 / 3.0))
+                    .collect();
+                let mut packet = vec![0; channels * 1500];
+                let n = encoder.encode(&input, 960, &mut packet).unwrap();
+                packet.truncate(n);
+                let mut expected_packets = Vec::new();
+                let mut expected_pcm = Vec::new();
+                for group in 0..3 {
+                    let samples: Vec<_> = frame
+                        .iter()
+                        .map(|v| *v * (group + 1) as f32 / 3.0)
+                        .collect();
+                    let mut expected = vec![0; 1500];
+                    let count = references[group]
+                        .encode(&samples, 960, &mut expected)
+                        .unwrap();
+                    expected.truncate(count);
+                    let mut pcm = vec![0.0; 960];
+                    assert_eq!(
+                        reference_decoders[group]
+                            .decode(&expected, 960, &mut pcm)
+                            .unwrap(),
+                        960
+                    );
+                    expected_packets.push(expected);
+                    expected_pcm.push(pcm);
+                }
+                let mut cursor = packet.as_slice();
+                let mut rebuilt = Vec::new();
+                for stream in 0..channels {
+                    let expected = &expected_packets[stream % 3];
+                    if stream + 1 == channels {
+                        assert_eq!(cursor, expected);
+                    } else {
+                        let used = take_self_delimited_into(cursor, &mut rebuilt).unwrap();
+                        assert_eq!(&rebuilt, expected);
+                        cursor = &cursor[used..];
+                    }
+                }
+                mux.write_packet(&packet).unwrap();
+                saved_packets.push(packet.clone());
+                assert_eq!(multistream_packet_samples(&packet, channels).unwrap(), 960);
+                let mut pcm = vec![0.0; 960 * channels];
+                assert_eq!(decoder.decode(&packet, 960, &mut pcm).unwrap(), 960);
+                for (sample, row) in pcm.chunks_exact(channels).enumerate() {
+                    for (channel, value) in row.iter().enumerate() {
+                        assert_eq!(*value, expected_pcm[channel % 3][sample]);
+                    }
+                }
+            }
+            assert_eq!(mux.granule(), 2880);
+            let encoded = mux.finish().unwrap();
+            let mut reader = crate::OggOpusReader::new(std::io::Cursor::new(encoded)).unwrap();
+            assert_eq!(reader.head().channel_mapping, head.channel_mapping);
+            assert_eq!(reader.head().stream_count, head.stream_count);
+            for (index, expected) in saved_packets.iter().enumerate() {
+                let packet = reader.read_packet().unwrap().unwrap();
+                assert_eq!(&packet.data, expected);
+                if index == 2 {
+                    assert_eq!(packet.page_granule, 2880);
+                    assert!(packet.end_of_stream);
+                }
+            }
+            assert!(reader.read_packet().unwrap().is_none());
         }
     }
 }

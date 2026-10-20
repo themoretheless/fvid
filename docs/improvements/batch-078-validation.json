@@ -1,0 +1,55 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0101"
+  ],
+  "checked_at": "2026-10-16T02:21:52.387260+00:00",
+  "before": [
+    "evidence/batch-078-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-078-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-078-final-grouping.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-078-ac3-decoder.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-078-ac3-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-078-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-078-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Three isolated bits in CRC1/CRC2/payload of an authored32ms frame invalidate the full-frame checksum, but the native decoder ignores them and produces nonsilent PCM. The payload bit changes PCM from the clean tone, proving an actual unnoticed corruption.",
+    "The full protected frame after its syncword must have zero CRC remainder using polynomial0x8005. Failed complete frames now take the existing silence-concealment branch before frame synthesis. Partial frame and syntax concealment policy remains separate.",
+    "This is concealment acceptance: the damaged frame is intentionally silent with preserved decoded geometry/PTS, not a correct-playback acceptance for corrupted sound and not an EOF/parser refusal. CRC does not claim perfect integrity or validate every bitstream constraint.",
+    "Native actual workers verify clean sound and three silent corruptions on play/rewind/EOF seek. A combined valid-plus-bad packet preserves the good frame and conceals only the second, identical to separate source packets. Short native video control decodes.",
+    "10 AC3 decoder/6 reader units, related EOF/read-budget integrations, grouping regression, fixture reproduction and player build pass. No private inputs, encoder/network, physical DAC or measured performance claim.",
+    "A/52:2018 section7.10 leaves error response to applications and permits whole-frame CRC2 checking. The change uses the existing fvid silence policy; this is not a claim that the standard mandates rejection or silence."
+  ],
+  "sources": [
+    "https://www.atsc.org/wp-content/uploads/2015/03/A52-2018.pdf"
+  ],
+  "compatibility": "CRC-damaged AC3 frames previously decoded unchecked; they now receive existing full-frame silence concealment. Correct CRC-protected frames and public signatures remain unchanged.",
+  "counting": "One missing AC3 integrity gate. CRC words, payload bit, packet grouping and playback controls add no IDs."
+}

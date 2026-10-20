@@ -1,0 +1,168 @@
+{
+  "provenance": "Authored ECx inputs versus independent volume-column zero at split tick rows. Immediate EC0,delayed ticks,out-of-row no-op and restoration without retrigger. Signed16loop,no envelopes/fadeouts,authored VP9/PCM companion. No external encoder/network/private media.",
+  "cases": [
+    {
+      "name": "note-cut-0",
+      "file": "note-cut-0.xm",
+      "control": "note-cut-0-control.xm",
+      "tick": 0,
+      "active": true,
+      "restore": false
+    },
+    {
+      "name": "note-cut-0-restore",
+      "file": "note-cut-0-restore.xm",
+      "control": "note-cut-0-restore-control.xm",
+      "tick": 0,
+      "active": true,
+      "restore": true
+    },
+    {
+      "name": "note-cut-1",
+      "file": "note-cut-1.xm",
+      "control": "note-cut-1-control.xm",
+      "tick": 1,
+      "active": true,
+      "restore": false
+    },
+    {
+      "name": "note-cut-1-restore",
+      "file": "note-cut-1-restore.xm",
+      "control": "note-cut-1-restore-control.xm",
+      "tick": 1,
+      "active": true,
+      "restore": true
+    },
+    {
+      "name": "note-cut-2",
+      "file": "note-cut-2.xm",
+      "control": "note-cut-2-control.xm",
+      "tick": 2,
+      "active": true,
+      "restore": false
+    },
+    {
+      "name": "note-cut-2-restore",
+      "file": "note-cut-2-restore.xm",
+      "control": "note-cut-2-restore-control.xm",
+      "tick": 2,
+      "active": true,
+      "restore": true
+    },
+    {
+      "name": "note-cut-3",
+      "file": "note-cut-3.xm",
+      "control": "note-cut-3-control.xm",
+      "tick": 3,
+      "active": true,
+      "restore": false
+    },
+    {
+      "name": "note-cut-3-restore",
+      "file": "note-cut-3-restore.xm",
+      "control": "note-cut-3-restore-control.xm",
+      "tick": 3,
+      "active": true,
+      "restore": true
+    },
+    {
+      "name": "note-cut-5",
+      "file": "note-cut-5.xm",
+      "control": "note-cut-5-control.xm",
+      "tick": 5,
+      "active": true,
+      "restore": false
+    },
+    {
+      "name": "note-cut-5-restore",
+      "file": "note-cut-5-restore.xm",
+      "control": "note-cut-5-restore-control.xm",
+      "tick": 5,
+      "active": true,
+      "restore": true
+    },
+    {
+      "name": "note-cut-6",
+      "file": "note-cut-6.xm",
+      "control": "note-cut-6-control.xm",
+      "tick": 6,
+      "active": false,
+      "restore": false
+    },
+    {
+      "name": "note-cut-6-restore",
+      "file": "note-cut-6-restore.xm",
+      "control": "note-cut-6-restore-control.xm",
+      "tick": 6,
+      "active": false,
+      "restore": true
+    },
+    {
+      "name": "note-cut-8",
+      "file": "note-cut-8.xm",
+      "control": "note-cut-8-control.xm",
+      "tick": 8,
+      "active": false,
+      "restore": false
+    },
+    {
+      "name": "note-cut-8-restore",
+      "file": "note-cut-8-restore.xm",
+      "control": "note-cut-8-restore-control.xm",
+      "tick": 8,
+      "active": false,
+      "restore": true
+    },
+    {
+      "name": "note-cut-f",
+      "file": "note-cut-f.xm",
+      "control": "note-cut-f-control.xm",
+      "tick": 15,
+      "active": false,
+      "restore": false
+    },
+    {
+      "name": "note-cut-f-restore",
+      "file": "note-cut-f-restore.xm",
+      "control": "note-cut-f-restore-control.xm",
+      "tick": 15,
+      "active": false,
+      "restore": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "note-cut-0.xm": "e419299f7309a2b0fb6ca1c8ed004198d8c24b1a0deae8723e7867275e29e09f",
+    "note-cut-0-control.xm": "4dff54604d29e326c7fa145292c692c7412dc642577c157022ab41caec7c0bf5",
+    "note-cut-0-restore.xm": "4238da8dbe6b261dbad075b4ea3efc0fed3ee21720dd27ff6f604112c5930f56",
+    "note-cut-0-restore-control.xm": "8c01f3e99203e83faf96cbcf2a2f3a6846f815eb5a26928f4c287bd2004c9643",
+    "note-cut-1.xm": "28f887b484606f202196a3599867ca6a3076d9be94215b9c7e9d3bebf1efb7b2",
+    "note-cut-1-control.xm": "57fd1c032f42c8f29d7da7b0589c0109fa9ec30e75f6200778701f55aa88790f",
+    "note-cut-1-restore.xm": "0cf143bb5164c7dd67bc94d75e730930f86ded0ff28a1ab195cddbb8e53251ed",
+    "note-cut-1-restore-control.xm": "31f45c03df8d4916ca8c176c1e6df4103ea3127bb79f23585e115f1745711266",
+    "note-cut-2.xm": "155fb0c36613f6413248a2349c4b1d3c9e3728c655fc9269ad9a9b10ea7706fa",
+    "note-cut-2-control.xm": "4d10842558ecd47e431069294a6fbff9656465b74ae9df910177e1685924ccdf",
+    "note-cut-2-restore.xm": "32bffe3b9127916f330fae7d0fc06531255bd1b7b29c0815681890db206ff9a8",
+    "note-cut-2-restore-control.xm": "a0f667327785a0ba409af0e8a9e0d4efc790d8bc5f949f0e07323f8c2ae65fef",
+    "note-cut-3.xm": "082b3546e44716cc40ba5bd22321b0c14c24f608b81f17aa51674f8c2a946e0c",
+    "note-cut-3-control.xm": "05500a7cd92fd124adcf461c0930c8a47be82e1512689a552cd37e1144a9e359",
+    "note-cut-3-restore.xm": "d3114121adb1ff12a0dffce10bd6820492cdab154ebb00efbbb16a0e245341e4",
+    "note-cut-3-restore-control.xm": "8c7a5d04045a0b45b880cb30a8c1fa0d41c63043d0e8c951bbc9bed1a9101ac4",
+    "note-cut-5.xm": "60f46cb0dcb4cb1343e2506e60bfe1c8e3c508244e5168c7691631391b431182",
+    "note-cut-5-control.xm": "505e581a03e276d5079b9d24b928a0fa5b72d3b6081d2510500100537b1ec42c",
+    "note-cut-5-restore.xm": "11a1d9440dfca8db0c31cac5f177d62a95e74fd51cb013e3b192e4234fde029e",
+    "note-cut-5-restore-control.xm": "14330bc5d94259e92d4e42bee4c26f13dd1d2344f5ae4aa049457ab17bbd0b6e",
+    "note-cut-6.xm": "7e9312b0c1ecd4373e0c1156e9072b01544811477e27cdfc2aa3af40d4dc9722",
+    "note-cut-6-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "note-cut-6-restore.xm": "8811ad6561bfbddf7d206fe6a8ad93577f9cba21d6762029b17306712296d15f",
+    "note-cut-6-restore-control.xm": "677662e85a6a6f385b276bbc14ca2f5e5f7dcab812cb2adab1b7b25fc75ceb6e",
+    "note-cut-8.xm": "53318e2517dc2eeec2b56d2ec9e9d04dafd48806aa3919223a1171623b71fa1f",
+    "note-cut-8-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "note-cut-8-restore.xm": "a1ee32149c4d263576f0812dc5eca09136d5ad90cee75d1b47de118307d14a2a",
+    "note-cut-8-restore-control.xm": "677662e85a6a6f385b276bbc14ca2f5e5f7dcab812cb2adab1b7b25fc75ceb6e",
+    "note-cut-f.xm": "80e36d174cd8deee572707b6b79c5a716a1fb241d679bdcc5df6cad5ea1db6ab",
+    "note-cut-f-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "note-cut-f-restore.xm": "a1af028e78ec1355da753b386a0971a9cc73ece3de8c559c8072fd89fe6ea8c5",
+    "note-cut-f-restore-control.xm": "677662e85a6a6f385b276bbc14ca2f5e5f7dcab812cb2adab1b7b25fc75ceb6e"
+  }
+}

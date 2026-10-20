@@ -1,0 +1,8 @@
+
+running 3 tests
+test note_cut_is_supported_and_matches_active_or_no_op_control ... ok
+test note_cut_matches_independent_volume_zero_at_tick_boundaries ... ok
+test note_cut_actual_worker_preserves_independent_pcm_through_rewind_seek_and_eof ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+

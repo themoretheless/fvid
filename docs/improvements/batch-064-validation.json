@@ -1,0 +1,62 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0088"
+  ],
+  "checked_at": "2026-10-16T01:34:09.748701+00:00",
+  "before": [
+    "evidence/batch-064-truncated-before.log",
+    "evidence/batch-064-aiff-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-064-final-integration.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-064-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-064-au.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-064-final-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-064-final-player-route.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-064-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-064-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-064-final-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "WAV/AU declare320audio bytes but contain160bytes. AIFF declares160fixed PCM frames but contains80. Separate pre-fix runs confirm correct native prefixes followed by false successful EOF in raw readers and actual workers.",
+    "Known missing payload now fails validate_eof. Prefix decoding remains usable and may already have queued80frames before the completion error. This is a precise incomplete-EOF refusal, not successful playback of a truncated file.",
+    "Thirteen authored cases include ten full/explicitly-short/unknown-size controls and three known-truncated sources. Native PCM remains bit exact. Actual worker play, rewind, seek0, seek actual end and seek nominal end refuse known truncation; Player removes the failed handle while healthy EOF stays replayable.",
+    "WAV UINT32_MAX and AU UINT32_MAX/zero unknown-size behavior is preserved. AIFF fixed-frame PCM/float/G711 compares declared COMM frames; compressed MACE semantics are unchanged. AIFF zero claim tolerance remains. Short matching VP9/PCM video is decoded natively. No FFmpeg/network/private input needed.",
+    "33 WAV,9 AU,14 AIFF,31 worker tests, Player routing, five related integration tests, fixture reproducibility and current player build pass. No physical DAC, complete truncated playback or performance claim."
+  ],
+  "compatibility": "Usable incomplete prefixes remain readable, but known truncated sources now end with a reported error instead of successful completion. Public signatures are unchanged.",
+  "counting": "One known audio payload completeness problem across three whole-file readers; formats, controls and navigation variants add no IDs."
+}

@@ -1,0 +1,1730 @@
+[
+  {
+    "name": "separate-mbaff-8-e0-t0-i16-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t0-i16-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t0-i4-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t0-i4-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t0-i4-ac-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t0-i4-ac-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t1-i16-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t1-i16-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t1-i4-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t1-i4-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t1-i4-ac-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t1-i4-ac-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t2-i16-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t2-i16-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t2-i4-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t2-i4-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t2-i4-ac-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t2-i4-ac-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t3-i16-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t3-i16-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t3-i4-dc-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t3-i4-dc-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e0-t3-i4-ac-w0",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e0-t3-i4-ac-w1",
+    "depth": 8,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t0-i16-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t0-i16-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t0-i4-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t0-i4-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t0-i4-ac-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t0-i4-ac-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t1-i16-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t1-i16-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t1-i4-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t1-i4-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t1-i4-ac-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t1-i4-ac-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t2-i16-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t2-i16-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t2-i4-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t2-i4-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t2-i4-ac-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t2-i4-ac-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t3-i16-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t3-i16-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t3-i4-dc-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t3-i4-dc-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-8-e1-t3-i4-ac-w0",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-8-e1-t3-i4-ac-w1",
+    "depth": 8,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t0-i16-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t0-i16-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t0-i4-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t0-i4-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t0-i4-ac-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t0-i4-ac-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t1-i16-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t1-i16-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t1-i4-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t1-i4-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t1-i4-ac-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t1-i4-ac-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t2-i16-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t2-i16-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t2-i4-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t2-i4-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t2-i4-ac-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t2-i4-ac-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t3-i16-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t3-i16-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t3-i4-dc-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t3-i4-dc-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e0-t3-i4-ac-w0",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e0-t3-i4-ac-w1",
+    "depth": 10,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t0-i16-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t0-i16-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t0-i4-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t0-i4-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t0-i4-ac-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t0-i4-ac-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t1-i16-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t1-i16-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t1-i4-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t1-i4-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t1-i4-ac-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t1-i4-ac-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t2-i16-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t2-i16-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t2-i4-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t2-i4-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t2-i4-ac-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t2-i4-ac-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t3-i16-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t3-i16-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t3-i4-dc-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t3-i4-dc-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-10-e1-t3-i4-ac-w0",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-10-e1-t3-i4-ac-w1",
+    "depth": 10,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t0-i16-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t0-i16-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t0-i4-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t0-i4-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t0-i4-ac-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t0-i4-ac-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t1-i16-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t1-i16-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t1-i4-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t1-i4-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t1-i4-ac-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t1-i4-ac-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t2-i16-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t2-i16-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t2-i4-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t2-i4-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t2-i4-ac-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t2-i4-ac-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t3-i16-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t3-i16-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t3-i4-dc-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t3-i4-dc-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e0-t3-i4-ac-w0",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e0-t3-i4-ac-w1",
+    "depth": 14,
+    "cabac": false,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t0-i16-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t0-i16-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t0-i4-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t0-i4-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t0-i4-ac-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t0-i4-ac-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t1-i16-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t1-i16-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t1-i4-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t1-i4-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t1-i4-ac-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t1-i4-ac-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t2-i16-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t2-i16-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t2-i4-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t2-i4-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t2-i4-ac-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t2-i4-ac-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t3-i16-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t3-i16-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i16-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t3-i4-dc-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t3-i4-dc-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-dc",
+    "scaled": true
+  },
+  {
+    "name": "separate-mbaff-14-e1-t3-i4-ac-w0",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": false
+  },
+  {
+    "name": "separate-mbaff-14-e1-t3-i4-ac-w1",
+    "depth": 14,
+    "cabac": true,
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "kind": "i4-ac",
+    "scaled": true
+  }
+]

@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'header_stripping_restores_every_original_codec_packet_and_clock' (17290558) panicked at crates/fvid-media/tests/matroska_header_stripping_regressions.rs:81:64:
+called `Result::unwrap()` on an `Err` value: Error { message: "encoded/encrypted WebM tracks not supported", unsupported: true }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test header_stripping_restores_every_original_codec_packet_and_clock ... FAILED
+
+failures:
+
+failures:
+    header_stripping_restores_every_original_codec_packet_and_clock
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.01s
+

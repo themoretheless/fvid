@@ -150,7 +150,7 @@ pub fn estimate_float_wave_export_bytes(
         matches!(info.bits_per_sample, 32 | 64)
     } else {
         matches!(info.bits_per_sample, 8 | 16 | 24 | 32)
-    }) || !(1..=64).contains(&info.channels)
+    }) || !(1..=255).contains(&info.channels)
         || info.sample_rate == 0
     {
         return Err("invalid WAVE memory geometry".into());
@@ -162,7 +162,7 @@ pub fn estimate_float_wave_export_bytes(
     }
     let rate = transform.sample_rate.unwrap_or(info.sample_rate as i32);
     let channels = transform.channels.unwrap_or(i32::from(info.channels));
-    if rate <= 0 || !(1..=64).contains(&channels) {
+    if rate <= 0 || !(1..=255).contains(&channels) {
         return Err("invalid output memory geometry".into());
     }
     let frames = input_bytes as u128 / frame_bytes;
@@ -184,24 +184,14 @@ pub fn estimate_float_wave_export_bytes(
             .checked_next_power_of_two()
             .ok_or("sinc history estimate overflow")?
             .max(4);
-        2 * slots * 64 * dsp_width
+        2 * slots * 255 * dsp_width
     };
-    let retains_metadata = !info.float
-        || info.bits_per_sample == 64
-        || !options.metadata_set.is_empty()
-        || !options.metadata_delete.is_empty();
-    let metadata = if retains_metadata {
-        let assignments = options
-            .metadata_set
-            .iter()
-            .try_fold(0u128, |sum, (_, value)| {
-                sum.checked_add(value.len() as u128 + 10)
-                    .ok_or("metadata estimate overflow")
-            })?;
-        8 * (metadata_bytes as u128 + assignments + 12)
-    } else {
-        0
-    };
+    let assignments = options.metadata_set.iter().try_fold(0u128, |sum, (_, value)| {
+        sum.checked_add(value.len() as u128 + 10)
+            .ok_or("metadata estimate overflow")
+    })?;
+    // Every WAVE representation preserves INFO, including float32/discrete PCM.
+    let metadata = 8 * (metadata_bytes as u128 + assignments + 12);
     let normalization_scratch = if info.float {
         0
     } else {
@@ -232,6 +222,7 @@ mod wave_estimate_tests {
                 let width = usize::from(bits / 8);
                 let frames = 257;
                 let info = crate::owned_wave_inspect::WaveInfo {
+                    channel_mask_explicit:false,
                     sample_rate: rate,
                     channels: 2,
                     bits_per_sample: bits,

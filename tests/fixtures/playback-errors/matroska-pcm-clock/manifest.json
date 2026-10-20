@@ -1,0 +1,36 @@
+{
+  "provenance": "Authored60ms16-square VP9 and8kHz mono PCM in little/big16bit or float32. Three160-sample packets at0/20/40ms; negative companion shifts audio by-10ms. No private media, encoder or network.",
+  "cases": [
+    {
+      "file": "clock.mkv",
+      "oracle": "clock.f32le",
+      "offset_ms": 0
+    },
+    {
+      "file": "big.mkv",
+      "oracle": "big.f32le",
+      "offset_ms": 0
+    },
+    {
+      "file": "float.mkv",
+      "oracle": "float.f32le",
+      "offset_ms": 0
+    },
+    {
+      "file": "negative.mkv",
+      "oracle": "negative.f32le",
+      "offset_ms": -10
+    }
+  ],
+  "sha256": {
+    "clock.mkv": "1e4c81a628529064dfd81fd1c510a5dd6ef3a60f84ad52c5fac373c0b9d66f19",
+    "clock.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "big.mkv": "4b5f97935f71321f56b299feb8069fb8a3b78a603760014f543c9efcb6b85060",
+    "big.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "float.mkv": "8de3e4bfb12b8cec6fffd08e74b1056e5323cc87f34e1551a278e7501e440276",
+    "float.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "negative.mkv": "4df1bc1da251e94a7e637f8ecf0cfc30bc99cac2fb9d9a63841aec473c80ce4a",
+    "negative.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "expected-audio.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

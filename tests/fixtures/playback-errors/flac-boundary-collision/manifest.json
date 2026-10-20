@@ -1,0 +1,44 @@
+{
+  "provenance": "Three valid authored16bitFLACverbatim/constanttracks. PCMcontains a prefixCRC16matching apparentmetadata orcompleteFLACframe header;these are ordinarysamplebytes,notcontainerboundaries. LiteralPCMoracle andindependentwholepacketdecode. VP9/PCMcompanion,no private media/encoder/network.",
+  "cases": [
+    {
+      "file": "clean.flac",
+      "packets": [
+        "clean-0.frame",
+        "clean-1.frame"
+      ],
+      "pcm": "clean.f32le"
+    },
+    {
+      "file": "metadata-marker.flac",
+      "packets": [
+        "metadata-marker-0.frame",
+        "metadata-marker-1.frame"
+      ],
+      "pcm": "metadata-marker.f32le"
+    },
+    {
+      "file": "frame-marker.flac",
+      "packets": [
+        "frame-marker-0.frame",
+        "frame-marker-1.frame"
+      ],
+      "pcm": "frame-marker.f32le"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "clean.flac": "962f7c946beea2659911417c68a992636c79a305f0a595b30c36dc7181ebf1f0",
+    "clean-0.frame": "3640c554c555562d328506ffcbd3653115bc0eb3ceb572701f8ae1ab86772247",
+    "clean-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "clean.f32le": "bb3f63ba4855be35f1f5642093ad9a454adf7198276f1298d9596a98a0b5567f",
+    "metadata-marker.flac": "c56c334e67f3185d3782e94f46ff67354eabdf1ff2adb1d2b7b3e5d1ca3aa302",
+    "metadata-marker-0.frame": "f948b059791780250471d0e9099ed7e2b27383e629e3ae90c3d2efee1135e411",
+    "metadata-marker-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "metadata-marker.f32le": "b9d4513b084348096d44df93074a0946f32b2fdfc8259472e894dfef423a4c95",
+    "frame-marker.flac": "7c1fa3091c55255dd9e6de80c86c412443eb983309521cbcc3c1147712defb6c",
+    "frame-marker-0.frame": "872176ec4cf0b15be1bbd5b761fd1ca6d4db949147753d3fc6ee60efe8622648",
+    "frame-marker-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "frame-marker.f32le": "fa1e2d99de8441ba96656af23a1e7eac91daeaf5c0782d0f2229b8ceb9fc541c"
+  }
+}

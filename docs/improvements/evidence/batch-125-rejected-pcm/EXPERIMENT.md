@@ -1,0 +1,1 @@
+Rejected reproducer: AVI PCM is unsupported by this record-oriented reader. The initial test fails admission before reaching duration/EOF behavior, so it proves no duration defect and counts zero. Replacement uses authored supported MS ADPCM blocks; independent constant PCM expectations remain literal. This archive is not part of the ordinary fixture manifest.

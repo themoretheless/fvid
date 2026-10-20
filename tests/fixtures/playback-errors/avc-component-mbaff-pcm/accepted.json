@@ -1,0 +1,58 @@
+[
+  {
+    "name": "compressed-mbaff-pcm-f0-y8-c8-e0-frame-a0-crop0",
+    "format": 0,
+    "cabac": false,
+    "field": false,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f0-y8-c8-e0-field-a0-crop0",
+    "format": 0,
+    "cabac": false,
+    "field": true,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f0-y8-c8-e1-frame-a0-crop0",
+    "format": 0,
+    "cabac": true,
+    "field": false,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f0-y8-c8-e1-field-a0-crop0",
+    "format": 0,
+    "cabac": true,
+    "field": true,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f2-y8-c8-e0-frame-a0-crop0",
+    "format": 2,
+    "cabac": false,
+    "field": false,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f2-y8-c8-e0-field-a0-crop0",
+    "format": 2,
+    "cabac": false,
+    "field": true,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f2-y8-c8-e1-frame-a0-crop0",
+    "format": 2,
+    "cabac": true,
+    "field": false,
+    "expect": "accepted component compressed MBAFF"
+  },
+  {
+    "name": "compressed-mbaff-pcm-f2-y8-c8-e1-field-a0-crop0",
+    "format": 2,
+    "cabac": true,
+    "field": true,
+    "expect": "accepted component compressed MBAFF"
+  }
+]

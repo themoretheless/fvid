@@ -41,6 +41,10 @@ fn sps_heap(s: &LayeredSps) -> usize {
 }
 fn pps_heap(p: &LayeredPps) -> usize {
     let mut n = bytes(&p.reference_locations);
+    if let Some(table) = &p.pps.depth_tables {
+        n = n.saturating_add(std::mem::size_of::<crate::codec::hevc_depth_tables::Tables>())
+            .saturating_add(2*size_of::<usize>()).saturating_add(table.heap_bytes());
+    }
     if let Some(t) = &p.pps.tiles {
         n = n
             .saturating_add(bytes(&t.column_widths))

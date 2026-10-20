@@ -1,0 +1,267 @@
+{
+  "provenance": "Authored VP9 keyframes. RFC 9559 section 5.1.4.1.31.6 ContentCompAlgo=3 strips only an original synthetic common prefix from each frame. No private media or codec parameters.",
+  "cases": [
+    {
+      "file": "one-byte.mkv",
+      "control": "control.mkv",
+      "prefix_length": 1,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "file": "implicit-defaults.mkv",
+      "control": "control.mkv",
+      "prefix_length": 4,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "file": "empty-prefix.mkv",
+      "control": "control.mkv",
+      "prefix_length": 0,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "file": "laced.mkv",
+      "control": "laced-control.mkv",
+      "prefix_length": 4,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "file": "whole-frame.mkv",
+      "control": "identical-control.mkv",
+      "prefix_length": 4142,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          16,
+          16
+        ],
+        [
+          16,
+          16
+        ]
+      ]
+    },
+    {
+      "file": "whole-laced.mkv",
+      "control": "identical-laced-control.mkv",
+      "prefix_length": 4142,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          16,
+          16
+        ],
+        [
+          16,
+          16
+        ]
+      ]
+    },
+    {
+      "file": "whole-late-track.mkv",
+      "control": "identical-control.mkv",
+      "prefix_length": 4142,
+      "packet_count": 3,
+      "probe_packet": 0,
+      "pts_ns": [
+        0,
+        10000000,
+        50000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          16,
+          16
+        ],
+        [
+          16,
+          16
+        ]
+      ]
+    },
+    {
+      "file": "opus-laced.mkv",
+      "control": "opus-control.mkv",
+      "prefix_length": 1,
+      "packet_count": 6,
+      "probe_packet": 3,
+      "pts_ns": [
+        0,
+        20000000,
+        40000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "file": "opus-whole.mkv",
+      "control": "opus-control.mkv",
+      "prefix_length": 3,
+      "packet_count": 6,
+      "probe_packet": 3,
+      "pts_ns": [
+        0,
+        20000000,
+        40000000
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    }
+  ],
+  "unsupported": [
+    "unsupported-bzip2.mkv"
+  ],
+  "formerly_unsupported_now_accepted": [
+    "unsupported-zlib.mkv"
+  ],
+  "malformed": {
+    "missing-lace-count.mkv": "truncated Matroska lace header"
+  },
+  "files": {
+    "control.mkv": "da16b35b8e8a0944116129678973b7b30c1449e084937a415baaf3d5d28ec5d4",
+    "empty-prefix.mkv": "d0bee2a6ec0905383ab6a88c57edadafe938f6b7a24a56d22e8a51e306b4f69c",
+    "identical-control.mkv": "5dc491f67a8360bf1f9075ab0213b391284417820e7c0c93cc47c953d35aee06",
+    "identical-laced-control.mkv": "c9cb9c858afaafe5e9c17883cd33adc72fa46a68e319fceab92447a3e47724d9",
+    "implicit-defaults.mkv": "1711158383cf768c4624fc73768dd5697d48c24df72f185da1be2ff66b6c6bf1",
+    "laced-control.mkv": "af0cf8f9054749bf1ae145dcf614034bf82a0d2ec061241d9c45eb65496cfe91",
+    "laced.mkv": "6d76a65d521d1f44750742870910ba0ceefe2da090b9c37de785e15d586dbca4",
+    "missing-lace-count.mkv": "d15684ee2a8f57cbbfc79de31618bebb0e43dedefc8b78f9a8d1541709b53e34",
+    "one-byte.mkv": "c457d863206f975bf0b2ab4946977a236beeff250024ab4c21695cf3cbd39b64",
+    "opus-control.mkv": "bbe9c4f151ff022d70f97d4c60f463b8a42d5cbe95a9004822ee2d2154614ed0",
+    "opus-laced.mkv": "9a25544882ee7df8bd7f87373e4ba94334fa15ca7e24a8c8d1a7d568ab0dbc88",
+    "opus-whole.mkv": "689a4cb3a0072b123456292d217cfbd5eaefec07c9819e5d4f583d64ee75821c",
+    "unsupported-bzip2.mkv": "1fc60d7c185283584702074675d7d903647e495cdf8ce15b25598a1003c4ec5c",
+    "unsupported-zlib.mkv": "324a43a3a2df648b4833cde342b1ea9be752e15906fc5200c31980a45155e297",
+    "whole-frame.mkv": "60afba0828076ca1952e56d81997d2115eed9892476f77f661baa475875226fb",
+    "whole-laced.mkv": "d7d1a7054687bfb33b33d9905e9d44d58f1529582aa84e3ab34f819627130253",
+    "whole-late-track.mkv": "5ea7c7ef6007fa6b57ec06a23cb1f7a23912135d3bd0e064a2eb1d9dc12586eb"
+  }
+}

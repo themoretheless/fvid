@@ -1,0 +1,317 @@
+{
+  "provenance": "Ten authored40ms32x32 MBAFF videos. IDR PCM reference; next AU uses a left intra DC slice and right zero-motion P slice. Independent placed samples and midpoint DC oracle. No external codec/private media/network.",
+  "cases": [
+    {
+      "file": "y8-c8-frame.mp4",
+      "configuration": "y8-c8-frame.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "field": false,
+      "frames": [
+        {
+          "packet": "y8-c8-frame-0.packet",
+          "y": "y8-c8-frame-0.y",
+          "cb": "y8-c8-frame-0.cb",
+          "cr": "y8-c8-frame-0.cr"
+        },
+        {
+          "packet": "y8-c8-frame-1.packet",
+          "y": "y8-c8-frame-1.y",
+          "cb": "y8-c8-frame-1.cb",
+          "cr": "y8-c8-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y8-c8-field.mp4",
+      "configuration": "y8-c8-field.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "field": true,
+      "frames": [
+        {
+          "packet": "y8-c8-field-0.packet",
+          "y": "y8-c8-field-0.y",
+          "cb": "y8-c8-field-0.cb",
+          "cr": "y8-c8-field-0.cr"
+        },
+        {
+          "packet": "y8-c8-field-1.packet",
+          "y": "y8-c8-field-1.y",
+          "cb": "y8-c8-field-1.cb",
+          "cr": "y8-c8-field-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y8-c10-frame.mp4",
+      "configuration": "y8-c10-frame.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 10,
+      "field": false,
+      "frames": [
+        {
+          "packet": "y8-c10-frame-0.packet",
+          "y": "y8-c10-frame-0.y",
+          "cb": "y8-c10-frame-0.cb",
+          "cr": "y8-c10-frame-0.cr"
+        },
+        {
+          "packet": "y8-c10-frame-1.packet",
+          "y": "y8-c10-frame-1.y",
+          "cb": "y8-c10-frame-1.cb",
+          "cr": "y8-c10-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y8-c10-field.mp4",
+      "configuration": "y8-c10-field.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 10,
+      "field": true,
+      "frames": [
+        {
+          "packet": "y8-c10-field-0.packet",
+          "y": "y8-c10-field-0.y",
+          "cb": "y8-c10-field-0.cb",
+          "cr": "y8-c10-field-0.cr"
+        },
+        {
+          "packet": "y8-c10-field-1.packet",
+          "y": "y8-c10-field-1.y",
+          "cb": "y8-c10-field-1.cb",
+          "cr": "y8-c10-field-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y10-c8-frame.mp4",
+      "configuration": "y10-c8-frame.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 8,
+      "field": false,
+      "frames": [
+        {
+          "packet": "y10-c8-frame-0.packet",
+          "y": "y10-c8-frame-0.y",
+          "cb": "y10-c8-frame-0.cb",
+          "cr": "y10-c8-frame-0.cr"
+        },
+        {
+          "packet": "y10-c8-frame-1.packet",
+          "y": "y10-c8-frame-1.y",
+          "cb": "y10-c8-frame-1.cb",
+          "cr": "y10-c8-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y10-c8-field.mp4",
+      "configuration": "y10-c8-field.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 8,
+      "field": true,
+      "frames": [
+        {
+          "packet": "y10-c8-field-0.packet",
+          "y": "y10-c8-field-0.y",
+          "cb": "y10-c8-field-0.cb",
+          "cr": "y10-c8-field-0.cr"
+        },
+        {
+          "packet": "y10-c8-field-1.packet",
+          "y": "y10-c8-field-1.y",
+          "cb": "y10-c8-field-1.cb",
+          "cr": "y10-c8-field-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y8-c14-frame.mp4",
+      "configuration": "y8-c14-frame.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "field": false,
+      "frames": [
+        {
+          "packet": "y8-c14-frame-0.packet",
+          "y": "y8-c14-frame-0.y",
+          "cb": "y8-c14-frame-0.cb",
+          "cr": "y8-c14-frame-0.cr"
+        },
+        {
+          "packet": "y8-c14-frame-1.packet",
+          "y": "y8-c14-frame-1.y",
+          "cb": "y8-c14-frame-1.cb",
+          "cr": "y8-c14-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y8-c14-field.mp4",
+      "configuration": "y8-c14-field.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "field": true,
+      "frames": [
+        {
+          "packet": "y8-c14-field-0.packet",
+          "y": "y8-c14-field-0.y",
+          "cb": "y8-c14-field-0.cb",
+          "cr": "y8-c14-field-0.cr"
+        },
+        {
+          "packet": "y8-c14-field-1.packet",
+          "y": "y8-c14-field-1.y",
+          "cb": "y8-c14-field-1.cb",
+          "cr": "y8-c14-field-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y14-c8-frame.mp4",
+      "configuration": "y14-c8-frame.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "field": false,
+      "frames": [
+        {
+          "packet": "y14-c8-frame-0.packet",
+          "y": "y14-c8-frame-0.y",
+          "cb": "y14-c8-frame-0.cb",
+          "cr": "y14-c8-frame-0.cr"
+        },
+        {
+          "packet": "y14-c8-frame-1.packet",
+          "y": "y14-c8-frame-1.y",
+          "cb": "y14-c8-frame-1.cb",
+          "cr": "y14-c8-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "y14-c8-field.mp4",
+      "configuration": "y14-c8-field.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "field": true,
+      "frames": [
+        {
+          "packet": "y14-c8-field-0.packet",
+          "y": "y14-c8-field-0.y",
+          "cb": "y14-c8-field-0.cb",
+          "cr": "y14-c8-field-0.cr"
+        },
+        {
+          "packet": "y14-c8-field-1.packet",
+          "y": "y14-c8-field-1.y",
+          "cb": "y14-c8-field-1.cb",
+          "cr": "y14-c8-field-1.cr"
+        }
+      ]
+    }
+  ],
+  "files": {
+    "y8-c8-frame.avcc": "145252f600f62180cce0ae7ad14ab1d7cd139cde9786940acce0245f1b8aaf47",
+    "y8-c8-frame-0.packet": "2d79e4749dcac757572ffec477a24aa5a7774a9b5c4d6b5ee485f6d4ec137bcc",
+    "y8-c8-frame-0.y": "0257e78f60a741e3222178916eea1d9d7d6787605efbd199afafc782df572624",
+    "y8-c8-frame-0.cb": "b21fb8fa6d3fb79db24c851e33fd2c13e7cbf9697116b41e19bd9edcc201552e",
+    "y8-c8-frame-0.cr": "6122fb80bf9e962bcb32c0b8a66f670e7e061568693c12e59624b14e81492124",
+    "y8-c8-frame-1.packet": "bdd11b259e46c5259d074b25e6ec452ba65da41bc3db085ec2fec65c73235148",
+    "y8-c8-frame-1.y": "dae78ae4434c52832b847de4d72829ddd4198b54f8fc20415307b6d31037b679",
+    "y8-c8-frame-1.cb": "1dba1a233b9bb23c8bce674a81e2774b612decdbaa2b982d2fc3c67f46d4387a",
+    "y8-c8-frame-1.cr": "02dc4082ed0e9a2a4e0ff0f8e781f11a34615f57cd3fda2d93772c2d78f062d1",
+    "y8-c8-frame.mp4": "79096aa6df8b882e5b70ee94b70d69469943f223fe0617c91d012f2e795c999d",
+    "y8-c8-field.avcc": "145252f600f62180cce0ae7ad14ab1d7cd139cde9786940acce0245f1b8aaf47",
+    "y8-c8-field-0.packet": "9ab8e57cdd6c5200dea4168bb51bacb1effc320c5a12422d4d748d7047e3389b",
+    "y8-c8-field-0.y": "a091c21fded99cace1be0146315c6021b4cc0ff5f7c019b5fb2ca45cb9645a0d",
+    "y8-c8-field-0.cb": "4987f4242b2d0983379f31aa141e9e1043721950d05c60f54f324565412c458b",
+    "y8-c8-field-0.cr": "d9d0ce2c38d8662192ecf1838e4ba9c90f6eaf19ce69ab825e938bf18df1d56a",
+    "y8-c8-field-1.packet": "9c7c04e6fa46ce6984578df5b9278ca964fa54b470f93b600db675326411d712",
+    "y8-c8-field-1.y": "ce6cf1f65ef412df56c37f9bfe6a414ac8395e76b4aa48d675bdd96c388949f0",
+    "y8-c8-field-1.cb": "930ec160e51683fcec7473efd14793868dd9cefa65bd748f07975deaeef1dce8",
+    "y8-c8-field-1.cr": "9261d3d07d18d2087cacac5b20aa5c8fe1373e40f71995dac81babef025836ee",
+    "y8-c8-field.mp4": "6ca160435c17622f9bb14cc27c01bd7b78a0ca0ded344d18ad5f822980388fd7",
+    "y8-c10-frame.avcc": "36bb0ecc0ea2a634b9d5f188d2bb96efd985502ea6b364ecb5edaaca171c7e52",
+    "y8-c10-frame-0.packet": "77ea239c05e35498d1dcd2b27bb76f83f02ad80777202982b3f77585225cd8bb",
+    "y8-c10-frame-0.y": "0257e78f60a741e3222178916eea1d9d7d6787605efbd199afafc782df572624",
+    "y8-c10-frame-0.cb": "3b788152b98fd81b95dea893839c8377cb1d243728d5f5b61448ebf601a5f647",
+    "y8-c10-frame-0.cr": "8d0ed9770a7a6b937a297a6485c5fcccab78d46caebef8b4f738ca86e08e8d54",
+    "y8-c10-frame-1.packet": "bdd11b259e46c5259d074b25e6ec452ba65da41bc3db085ec2fec65c73235148",
+    "y8-c10-frame-1.y": "dae78ae4434c52832b847de4d72829ddd4198b54f8fc20415307b6d31037b679",
+    "y8-c10-frame-1.cb": "e27984daf6a982e268cbbda327377f7f0ea0ed97a3116c1f67abe3c86d389e0b",
+    "y8-c10-frame-1.cr": "81bcbbc47d9178d9b54e7ca7a5580503700d6f3f6b32e8bf99398e08ac252619",
+    "y8-c10-frame.mp4": "9e7166f405fe9c0ab30c69d0923ef8f68abf8f59ad0226f1cbcd8fe57081f1d4",
+    "y8-c10-field.avcc": "36bb0ecc0ea2a634b9d5f188d2bb96efd985502ea6b364ecb5edaaca171c7e52",
+    "y8-c10-field-0.packet": "5de2e233070cd0ad207cf0004486471f343a93d5fccc6985b5cf021cbe566945",
+    "y8-c10-field-0.y": "a091c21fded99cace1be0146315c6021b4cc0ff5f7c019b5fb2ca45cb9645a0d",
+    "y8-c10-field-0.cb": "1aa68c28801345ec3d6d440b5a3080a9b3b49197e6913581d2dcfd11137972de",
+    "y8-c10-field-0.cr": "7519fb373eb6d71eb07e70f5676396c3d6eaef37b93ef2ed422ecb4317b2f5a2",
+    "y8-c10-field-1.packet": "9c7c04e6fa46ce6984578df5b9278ca964fa54b470f93b600db675326411d712",
+    "y8-c10-field-1.y": "ce6cf1f65ef412df56c37f9bfe6a414ac8395e76b4aa48d675bdd96c388949f0",
+    "y8-c10-field-1.cb": "9b8afb51c2a72554ec4ea7934e68fefa8238dfed2b1fed63fab5312445cddcc7",
+    "y8-c10-field-1.cr": "56c300a888ffee3cd57c5c03b455d8bb52b113e307120838dfc7a34e663288c0",
+    "y8-c10-field.mp4": "3b4db1c23e9bdf635441297bdf8d61c1ded4d788d1c3daa18a665bfd4d834a9f",
+    "y10-c8-frame.avcc": "e0749ca590ed77c69e6c0e93394d6573c77d545c977bacb341d2ddf103c9c253",
+    "y10-c8-frame-0.packet": "b9985ba44df610878541f9336bd4b29fe9a730e371dea41b6350ec8dded37102",
+    "y10-c8-frame-0.y": "12ef6d815235639385104d529310190379c2a7c73816eb0c9bd0e6f0674064f9",
+    "y10-c8-frame-0.cb": "b21fb8fa6d3fb79db24c851e33fd2c13e7cbf9697116b41e19bd9edcc201552e",
+    "y10-c8-frame-0.cr": "6122fb80bf9e962bcb32c0b8a66f670e7e061568693c12e59624b14e81492124",
+    "y10-c8-frame-1.packet": "bdd11b259e46c5259d074b25e6ec452ba65da41bc3db085ec2fec65c73235148",
+    "y10-c8-frame-1.y": "ddce9868336967bc601784e73011d175a4360f66b5a14510f34faec552d0a23c",
+    "y10-c8-frame-1.cb": "1dba1a233b9bb23c8bce674a81e2774b612decdbaa2b982d2fc3c67f46d4387a",
+    "y10-c8-frame-1.cr": "02dc4082ed0e9a2a4e0ff0f8e781f11a34615f57cd3fda2d93772c2d78f062d1",
+    "y10-c8-frame.mp4": "95935d81dc9cf634d2c765b2ed6323417f926cdc57f9a4f40030fd168090a026",
+    "y10-c8-field.avcc": "e0749ca590ed77c69e6c0e93394d6573c77d545c977bacb341d2ddf103c9c253",
+    "y10-c8-field-0.packet": "0a0a03d2d1c6913af2001d1275ad1f231474380844fdc9bd1832afb593ac917b",
+    "y10-c8-field-0.y": "ee923daffca0b3aa69a2d663004880666a256f5741d6a9a86c4a86a5ec02a1ab",
+    "y10-c8-field-0.cb": "4987f4242b2d0983379f31aa141e9e1043721950d05c60f54f324565412c458b",
+    "y10-c8-field-0.cr": "d9d0ce2c38d8662192ecf1838e4ba9c90f6eaf19ce69ab825e938bf18df1d56a",
+    "y10-c8-field-1.packet": "9c7c04e6fa46ce6984578df5b9278ca964fa54b470f93b600db675326411d712",
+    "y10-c8-field-1.y": "5af6f3540b4e2726113e1f0537906a5f6fcb08532d2fad813d3347414069414d",
+    "y10-c8-field-1.cb": "930ec160e51683fcec7473efd14793868dd9cefa65bd748f07975deaeef1dce8",
+    "y10-c8-field-1.cr": "9261d3d07d18d2087cacac5b20aa5c8fe1373e40f71995dac81babef025836ee",
+    "y10-c8-field.mp4": "366bc23c9669e238b5e639ea88142b36a17cde4694e6f51a71b8759034d13814",
+    "y8-c14-frame.avcc": "93162d278b8fa118d05989d9e6e6082cde47c57682934008fed064da7addf9d9",
+    "y8-c14-frame-0.packet": "50a2242594f64893203602e40dedd10b29d6038e5da9d1dd50d6d1fe556e487f",
+    "y8-c14-frame-0.y": "0257e78f60a741e3222178916eea1d9d7d6787605efbd199afafc782df572624",
+    "y8-c14-frame-0.cb": "7adb46e60efad61d092f43d23d45950fd0eeff59d83441bb6e548d91d45da314",
+    "y8-c14-frame-0.cr": "aff6856a235d3f221ef41723c47dd93ce731bbf805431123271da08463b8922c",
+    "y8-c14-frame-1.packet": "bdd11b259e46c5259d074b25e6ec452ba65da41bc3db085ec2fec65c73235148",
+    "y8-c14-frame-1.y": "dae78ae4434c52832b847de4d72829ddd4198b54f8fc20415307b6d31037b679",
+    "y8-c14-frame-1.cb": "12fcd456a19aba1786d3f9f497f2bad5fe03ba8b6ea90a5339ec267724065748",
+    "y8-c14-frame-1.cr": "15771784e8c922ed31bb8bae65d685bf5206a388edc71a93140f72abbdab57c2",
+    "y8-c14-frame.mp4": "5e2fa10caa608fb07f1c370a4a92b59627b781446724b60f3a04239dbe148d71",
+    "y8-c14-field.avcc": "93162d278b8fa118d05989d9e6e6082cde47c57682934008fed064da7addf9d9",
+    "y8-c14-field-0.packet": "3e91ccc064b2d8ac44a2d26680379c4c3d76910cf945516714b9a6c477617a28",
+    "y8-c14-field-0.y": "a091c21fded99cace1be0146315c6021b4cc0ff5f7c019b5fb2ca45cb9645a0d",
+    "y8-c14-field-0.cb": "c77b602d4ae58388827253ae9f6d51fd7f0cbf440ccf2b75f15bc573d2fb8d2b",
+    "y8-c14-field-0.cr": "ea3491a600b72a539b5fa3ea3f45e8febae75de67377deebc6615228aca0a877",
+    "y8-c14-field-1.packet": "9c7c04e6fa46ce6984578df5b9278ca964fa54b470f93b600db675326411d712",
+    "y8-c14-field-1.y": "ce6cf1f65ef412df56c37f9bfe6a414ac8395e76b4aa48d675bdd96c388949f0",
+    "y8-c14-field-1.cb": "c2ca540d31962ebc82290c2d4aa2c586b5fd042e4f0226fb3702a5c745ae46b5",
+    "y8-c14-field-1.cr": "df5c87b1bfb12e14c44faf57b291aed3c72107cd28cceccba8e34d1986b54ceb",
+    "y8-c14-field.mp4": "14afb2b5a015327cac94effd84c1bf84e9161379dc46661660e6f84a6bf86720",
+    "y14-c8-frame.avcc": "55cc5231af9a41a36c41cf57748795dc18f0d6534be50f9f45bb7dc2245c2386",
+    "y14-c8-frame-0.packet": "6e083eaba1ab9e2e10e9dcc984a152c9fe6ae6181a7fbf3b7ebc86fc5fdfdde6",
+    "y14-c8-frame-0.y": "954f159e595bcd63f18f75f64cb6ebe07777e239d762ff38f41cf48df5a4a621",
+    "y14-c8-frame-0.cb": "b21fb8fa6d3fb79db24c851e33fd2c13e7cbf9697116b41e19bd9edcc201552e",
+    "y14-c8-frame-0.cr": "6122fb80bf9e962bcb32c0b8a66f670e7e061568693c12e59624b14e81492124",
+    "y14-c8-frame-1.packet": "bdd11b259e46c5259d074b25e6ec452ba65da41bc3db085ec2fec65c73235148",
+    "y14-c8-frame-1.y": "2bcf9236a013cabe81baa937ae0b6e72dbe1050931c20642c256e1cd6ad4faba",
+    "y14-c8-frame-1.cb": "1dba1a233b9bb23c8bce674a81e2774b612decdbaa2b982d2fc3c67f46d4387a",
+    "y14-c8-frame-1.cr": "02dc4082ed0e9a2a4e0ff0f8e781f11a34615f57cd3fda2d93772c2d78f062d1",
+    "y14-c8-frame.mp4": "cdcbc1d3242e16d24e837e000ea1d752460700110e9d785bb3cf5e397bbe32b7",
+    "y14-c8-field.avcc": "55cc5231af9a41a36c41cf57748795dc18f0d6534be50f9f45bb7dc2245c2386",
+    "y14-c8-field-0.packet": "d936798c28c60d4e1079a156b99fd937a7147781a00a6029abe39c58d13beb63",
+    "y14-c8-field-0.y": "61f6f19e3bf05273653604e6ad95b22dca251f6ad0ffc99d66b4b03943e70ac1",
+    "y14-c8-field-0.cb": "4987f4242b2d0983379f31aa141e9e1043721950d05c60f54f324565412c458b",
+    "y14-c8-field-0.cr": "d9d0ce2c38d8662192ecf1838e4ba9c90f6eaf19ce69ab825e938bf18df1d56a",
+    "y14-c8-field-1.packet": "9c7c04e6fa46ce6984578df5b9278ca964fa54b470f93b600db675326411d712",
+    "y14-c8-field-1.y": "adf5228975456b773d7f147f897a18713413f6b24af77681112e48cdd68eb200",
+    "y14-c8-field-1.cb": "930ec160e51683fcec7473efd14793868dd9cefa65bd748f07975deaeef1dce8",
+    "y14-c8-field-1.cr": "9261d3d07d18d2087cacac5b20aa5c8fe1373e40f71995dac81babef025836ee",
+    "y14-c8-field.mp4": "c720e0c69924609029f055e39ab31b5972b2723c2474d0790f04396a5b2f1985"
+  }
+}

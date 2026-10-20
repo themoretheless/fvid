@@ -1,0 +1,56 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0082"
+  ],
+  "checked_at": "2026-10-15T23:52:53.183479+00:00",
+  "before": [
+    "evidence/batch-058-wave8-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-058-wave8-navigation.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-058-integration.log",
+      "kind": "rust",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-058-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-058-player-factory.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-058-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-058-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-058-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four authored20ms Wave8 clips, mono/stereo/three-channel/extensible at8k/44.1k/48k, refuse at header admission before correction. Signed16 and matching native VP9/PCM controls pass. Encoded values include0/1/127/128/129/254/255 so the unsigned midpoint and extrema are numerically verified.",
+    "WAV PCM8 now admits the already-existing Unsigned8 decoder format; byte-frame stateless seeks trim exactly. The pre-existing unsigned core and tag dispatch are not counted as new work. No encoded samples or parameters are rewritten/copied from private media.",
+    "Full numeric PCM and geometry match the signed16 control. Direct seek7 returns exact suffix and PTS; actual capture workers verify playback, rewind, seek0 and EOF with no repeated PCM.33 WAV/31 worker tests, all15 EOF PCM cases and AVI EOF integration pass.",
+    "The actual Player audio factory admits all four tracks with correct rate/channels/duration. This verifies factory routing, not physical DAC playback; native decoded data is independently qualified by capture workers. Player builds.",
+    "Old WAV8 header/EOF refusal expectations are enabled as acceptance. Unsupported IEEE float8 retains its exact width refusal. The earlier81 refusal was accurate at that stage and is explicitly superseded by this new capability. No public signatures, resampling or performance claim."
+  ],
+  "compatibility": "Valid unsigned8 PCM WAV, including tested extensible headers, is now accepted with correct unsigned normalization. Float8 remains unsupported. Existing accepted PCM formats are unchanged.",
+  "counting": "One WAV8 format admission capability. Existing decoder work, channel/rate/header variants, seek and old-oracle updates add no IDs."
+}

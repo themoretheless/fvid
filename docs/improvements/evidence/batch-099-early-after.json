@@ -1,0 +1,17 @@
+{
+  "source_sha256": "00081ce61806052efa6dfd7a78f3d0e19f533987a17a2f6d345eeee57cf5967d",
+  "pcm_sha256": "c1fb7d4e85753a3de9e3566eb3ffbaa360b215d5c239c7474b7afe3947602ada",
+  "pcm_bytes": 381024,
+  "metadata": {
+    "channels": 2,
+    "frames": 47628,
+    "packet_start_ns": [
+      0,
+      80000000,
+      330000000,
+      580000000,
+      830000000
+    ],
+    "sample_rate": 44100
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "candidates": [
+    {
+      "name": "TrackOffset",
+      "decision": "not selected",
+      "counted_improvements": 0,
+      "reason": "RFC 9559 Appendix A describes this as a historic non-normative element. No concrete compatible-media requirement was established; adding it would not yet demonstrate useful behavior.",
+      "source": "https://www.rfc-editor.org/rfc/rfc9559.html#appendix-A.18"
+    },
+    {
+      "name": "MP4 cached read position after a failing seek",
+      "decision": "confirmed and accepted as FVID-0033",
+      "counted_improvements": 1,
+      "source": [
+        "src/container/mp4.rs",
+        "crates/fvid-media/src/owned_mp4_impl.rs"
+      ],
+      "reason": "Both read_packet implementations invalidate cached position on read_exact failure, but not on seek failure. Need a synthetic MP4 and a Seek adapter that moves before returning an error to confirm whether a subsequent packet read can use the stale cursor."
+    },
+    {
+      "name": "Build-script default package-wide change watches",
+      "decision": "confirmed by two alternating measured pairs and accepted as FVID-0034",
+      "counted_improvements": 1,
+      "source": [
+        "build.rs",
+        "crates/fvid-media/build.rs"
+      ],
+      "reason": "Root build script reads only target OS, default media build script reads no files; neither narrows Cargo file watches. New fixtures/reports/tests appear to trigger expensive rebuilds. Confirm with real alternating Cargo checks after a documentation-only marker change; preserve Windows stack and optional legacy benchmark environment outputs."
+    },
+    {
+      "name": "Private corpus follow-up",
+      "decision": "unavailable in current environment; continue other audits",
+      "counted_improvements": 0,
+      "reason": "Read-only directory check of the previously authorized in-place corpus returned Permission denied. No private media was read or copied, and the old sampled 369-file report is not current qualification."
+    },
+    {
+      "name": "Exposure integer/float reference gap",
+      "decision": "not selected without a concrete compatibility requirement",
+      "counted_improvements": 0,
+      "reason": "Existing ignored compatibility acceptance compares with a conversion pipeline that changes even identity 16-bit samples by up to 65. Inspect the intended precision contract before changing native identity-preserving behavior merely to match that pipeline. Existing gap reproduction tests pass."
+    },
+    {
+      "name": "Empty Matroska compression scope",
+      "decision": "already handled; no source change or new ID",
+      "counted_improvements": 0,
+      "reason": "Current parser explicitly uses schema default1 for empty ContentEncodingScope; existing zlib empty-scope synthetic acceptance already covers it."
+    }
+  ]
+}

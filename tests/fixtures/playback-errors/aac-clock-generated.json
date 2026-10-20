@@ -1,0 +1,104 @@
+{
+  "cases": {
+    "aac-clock-coarse.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-jumps.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-gap.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-tick-gap.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-long.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 72
+    },
+    "aac-clock-tail.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-invalid-tail.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-ps-immediate-tail.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 2048,
+      "output_channels": 2,
+      "packets": 12
+    },
+    "aac-clock-ps-late-tail.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 2048,
+      "output_channels": 2,
+      "packets": 12
+    },
+    "aac-clock-head.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-middle-head.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-head-gap.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-offset-head.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    },
+    "aac-clock-full-head.mkv": {
+      "sample_rate": 48000,
+      "frame_samples": 1024,
+      "output_channels": 10,
+      "packets": 6
+    }
+  },
+  "files": {
+    "aac-clock-coarse.mkv": "707f83f8209cc715fa26f35ba07fa270c7ccb1c6ce735638700ec1a365aa0c00",
+    "aac-clock-jumps.mkv": "5acacb54b06ad26d42e1c372c8b395a82b7337e24545bb49dbb7aeda0d2391b4",
+    "aac-clock-gap.mkv": "110397ffc1f836d6595545c758610dc22836a1272892bfd6ba36fd4ed1f1fe50",
+    "aac-clock-tick-gap.mkv": "1d9e6ce37766719c1ddfd305923575860f4068da1ce8d7d81aa8440d112e9e85",
+    "aac-clock-long.mkv": "d13654c4ebd8c7023ccaa105b2b9dbed913069aa402c40e43f2af2169b95795b",
+    "aac-clock-tail.mkv": "de7ed70ed5d9f8415a697b50314b77521f1fa3482d890eb448c1995089d72cbf",
+    "aac-clock-invalid-tail.mkv": "119305a5bd2776935ede00c2df4888642f9f1da960eafb4758342ae1ad0c065c",
+    "aac-clock-ps-immediate-tail.mkv": "bf54720db6e6ee0e306fd4b0ba3c580a71b8f1bb48c511f20cedf04a9e6238f4",
+    "aac-clock-ps-late-tail.mkv": "ea7ef006b993dddb73f2cd6c40fc95639bc46d69e220139d816f5cd651c782af",
+    "aac-clock-head.mkv": "729ac1f805888d1c09020d34d83e48cd65840d28fda9a36c0492a621f2dcf9f4",
+    "aac-clock-middle-head.mkv": "187f1389f65d3a7476bdf6296c054d2a1afd6a4fee4f9a9034d131e7fec6b5c4",
+    "aac-clock-head-gap.mkv": "96f057163108bcddeaebc00bb24460d62a808c483fc0bafab472cd53ea834903",
+    "aac-clock-offset-head.mkv": "5613c800ce2c9d27259a3d23550859e35ab277d1b7d3f2cba638343ededc2927",
+    "aac-clock-full-head.mkv": "d36e32ad8e4f9c859b10978c794cb3baf1238d82bccd22a4f3cf0487ad954660"
+  }
+}

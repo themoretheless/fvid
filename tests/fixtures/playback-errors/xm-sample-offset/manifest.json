@@ -1,0 +1,184 @@
+{
+  "provenance": "Twenty-two authored8/16bit XM9xx controls, independent physicallytrimmed instruments,quantized ramps including explicit loop-end refusal of playback beyond active loop. Offset memory,plain retrigger,no-note/instrument-only,zero andout-of-range positions. FT2position counts sampleframes atbothwidths. Separate nativevideo companion;no encoder/network/private media.",
+  "cases": [
+    {
+      "name": "8-offset-one",
+      "file": "8-offset-one.xm",
+      "control": "8-offset-one-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-offset-two",
+      "file": "8-offset-two.xm",
+      "control": "8-offset-two-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-zero-memory",
+      "file": "8-zero-memory.xm",
+      "control": "8-zero-memory-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-at-end",
+      "file": "8-at-end.xm",
+      "control": "8-at-end-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-beyond-end",
+      "file": "8-beyond-end.xm",
+      "control": "8-beyond-end-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-loop-end",
+      "file": "8-loop-end.xm",
+      "control": "8-loop-end-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-remember",
+      "file": "8-remember.xm",
+      "control": "8-remember-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-plain-retrigger",
+      "file": "8-plain-retrigger.xm",
+      "control": "8-plain-retrigger-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-memory-after-plain",
+      "file": "8-memory-after-plain.xm",
+      "control": "8-memory-after-plain-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-no-note-no-memory",
+      "file": "8-no-note-no-memory.xm",
+      "control": "8-no-note-no-memory-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "8-instrument-only-no-memory",
+      "file": "8-instrument-only-no-memory.xm",
+      "control": "8-instrument-only-no-memory-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-offset-one",
+      "file": "16-offset-one.xm",
+      "control": "16-offset-one-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-offset-two",
+      "file": "16-offset-two.xm",
+      "control": "16-offset-two-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-zero-memory",
+      "file": "16-zero-memory.xm",
+      "control": "16-zero-memory-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-at-end",
+      "file": "16-at-end.xm",
+      "control": "16-at-end-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-beyond-end",
+      "file": "16-beyond-end.xm",
+      "control": "16-beyond-end-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-loop-end",
+      "file": "16-loop-end.xm",
+      "control": "16-loop-end-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-remember",
+      "file": "16-remember.xm",
+      "control": "16-remember-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-plain-retrigger",
+      "file": "16-plain-retrigger.xm",
+      "control": "16-plain-retrigger-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-memory-after-plain",
+      "file": "16-memory-after-plain.xm",
+      "control": "16-memory-after-plain-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-no-note-no-memory",
+      "file": "16-no-note-no-memory.xm",
+      "control": "16-no-note-no-memory-trimmed.xm",
+      "seek": 1
+    },
+    {
+      "name": "16-instrument-only-no-memory",
+      "file": "16-instrument-only-no-memory.xm",
+      "control": "16-instrument-only-no-memory-trimmed.xm",
+      "seek": 1
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "8-offset-one.xm": "27bd08bbae1aa9c1575ddd247850a562d67b4e1b2a7aa91f75ee8376cd894ee7",
+    "8-offset-one-trimmed.xm": "aaf64d99a9a5ba3dd3a01b12589332650abeb63b3f1a9078f1cbfb6b4a67f44f",
+    "8-offset-two.xm": "f6c613dc75c56e4b93283564887ce4f746c66bf9606d64cc26858e2f997a69bb",
+    "8-offset-two-trimmed.xm": "9e62ba3ae212e5e5e60c1e6a2ad79e4117d364bf0b5b27a111f259017b0c973e",
+    "8-zero-memory.xm": "d45b10980d9b6f0a5bba0a071a9cc04bbb39689cdf46487f947e244d24d52e0c",
+    "8-zero-memory-trimmed.xm": "37f44f04d01657b111053e87a6c32f5db0c1885c1179ab0f9c1c059ee22abc80",
+    "8-at-end.xm": "af9fdba99d7bd3cfa4841fbd2cb26e9bbc436ad0ff4dcd1f5de3eca5b9d4a980",
+    "8-at-end-trimmed.xm": "2fb8dd5d172b8a49f62536ccd3f897037ec1a74e21163be44b6a278fe159daef",
+    "8-beyond-end.xm": "3f48226156fbe65570d2418e279f1676849e0f9a92c7dbcdeb39e1bf1a4e7e09",
+    "8-beyond-end-trimmed.xm": "2fb8dd5d172b8a49f62536ccd3f897037ec1a74e21163be44b6a278fe159daef",
+    "8-loop-end.xm": "b136dc326a0cab9a8166f924dbd6acc856c83642eb6351e4d4bed5ed60ee5def",
+    "8-loop-end-trimmed.xm": "2fb8dd5d172b8a49f62536ccd3f897037ec1a74e21163be44b6a278fe159daef",
+    "8-remember.xm": "a0b6d03e5838dc6ccb2d2929bd9df5f3e7431f0c711e39c134582efb3d4406bf",
+    "8-remember-trimmed.xm": "b99df0ea87bc3e7b8706f4e46a9094500eb5884e8a3e1eddb6f76edb88d38fd1",
+    "8-plain-retrigger.xm": "37374abf084e9459ca01afbdbd5029e9c19caca9bd7c4707c947d7265aa001a5",
+    "8-plain-retrigger-trimmed.xm": "358497adfc34404860467960dc16019a3f03e2a66aeb7bece15d4217c22d0611",
+    "8-memory-after-plain.xm": "35fa136f4fe215efecca1e5e3819bffca6f048cdb38ab499be526d856f6c68a2",
+    "8-memory-after-plain-trimmed.xm": "1ee5f89616d6cdd8409e1ef5e8e97cae17c5cfe37441b26754af08542cc55af0",
+    "8-no-note-no-memory.xm": "f9b3471b8f884e7652206fb34b44dc22f6d458a405c2829c32f90de611f9ecb3",
+    "8-no-note-no-memory-trimmed.xm": "d825790a81dd91de53986d3f29adb2c655b033ada18b999b6cffc5dce011956c",
+    "8-instrument-only-no-memory.xm": "4d711fd2f8dc881106bc71365b2f68b1c3b2ee7e3158d45e2ef25621e062ce5e",
+    "8-instrument-only-no-memory-trimmed.xm": "93ebca00a1ccbe87c7d4881d5dfc463a00b1a08ceab4d687d4a325adc6e3a534",
+    "16-offset-one.xm": "3a9ab54fff8abff4cc47f9196a1c026d39dba259c102ada6bcd5bb5ae279501e",
+    "16-offset-one-trimmed.xm": "c4832dbfdd04f7e902bbd1f12a9cfdc634995cd4a983221b6cb94d5342218c29",
+    "16-offset-two.xm": "f42272af3ae1686a0784a370ba524179838319563a4e655fd514c432bf7d2a57",
+    "16-offset-two-trimmed.xm": "0e86df3103d6357146d56eabf32368fb88e2ad3801d7f779c192b4541f31b5f1",
+    "16-zero-memory.xm": "303692a2bce766df79ad5b2d10a6e38870d32a92c14568b3238d6d0889f0a3ec",
+    "16-zero-memory-trimmed.xm": "c8b82b839cd57661a5c2a172b112492648c8e85942d70e1db315f294a0582781",
+    "16-at-end.xm": "053543714a215268781ef7d15c375b5722ecbdceda15fa9f57a09c79b85769e5",
+    "16-at-end-trimmed.xm": "130b7ba7e72dd988a9ab49bbe1e2ffc6041804f4918559f572e29fb5ccb05ccf",
+    "16-beyond-end.xm": "10133a22d4d052f79fe6a8a8f40fb87f25d971591e9e08c2289cc9494e79df0e",
+    "16-beyond-end-trimmed.xm": "130b7ba7e72dd988a9ab49bbe1e2ffc6041804f4918559f572e29fb5ccb05ccf",
+    "16-loop-end.xm": "84abd31e54ef86c4e7155a2b0bb83beced91ed1b6955a4dc7aff52f438517ace",
+    "16-loop-end-trimmed.xm": "130b7ba7e72dd988a9ab49bbe1e2ffc6041804f4918559f572e29fb5ccb05ccf",
+    "16-remember.xm": "2546b4c5911a8b69127c43c86e7bc7cb610dc2b2965617b3c5acb73d765c4b34",
+    "16-remember-trimmed.xm": "5916eacb9e378671c011f7c764b9f02469b06bebda4f287263ed80f3599f99c8",
+    "16-plain-retrigger.xm": "655763a5dc4842439555cd6c10a59cf09fe9991344e91e2391e221680a1b0105",
+    "16-plain-retrigger-trimmed.xm": "89ac99794de35a1885e7fb884d4b92c837af035041225ea65a5efe753783a879",
+    "16-memory-after-plain.xm": "e2aeb1697932d10aa9af026ff1aa4769db4ef4f6efc62d9f0cce9682ba609f8c",
+    "16-memory-after-plain-trimmed.xm": "1a00702a663b09bb6370677d34ee2d71ef3ebb10fd8857bb80c255686d04ab35",
+    "16-no-note-no-memory.xm": "2a34e7f8bb41228d2e3034e1e2d04c1045a01fb6ca251d7485b273696a50ae89",
+    "16-no-note-no-memory-trimmed.xm": "dd6248495c049deeb1d4497676f9061efad05d118d89837f49a5fb9348673d5b",
+    "16-instrument-only-no-memory.xm": "2d53ba1f8e73c35f366f02b137e8e279c87deb091f1481b1c57cf4421e8c6162",
+    "16-instrument-only-no-memory-trimmed.xm": "f89f02890960825fae5f5c1cd8b224456b1e0591db487ba64e604108390fc82c"
+  }
+}

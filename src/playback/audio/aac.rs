@@ -21,7 +21,7 @@ impl AacAudioReader {
     pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         let aac = Aac::parse(&bytes, &limits)?;
         let extra_data = aac.extra_data();
         let mut output_rate = aac.sample_rate;
@@ -83,6 +83,10 @@ impl AacAudioReader {
 }
 
 impl AudioStream for AacAudioReader {
+    fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
+        fvid_media::owned_aac::speaker_routing::stereo_router(&self.aac.configuration,self.output_rate,self.channels(),self.in_band_ps).map(Some).map_err(|e|crate::invalid(&e))
+    }
+
     #[cfg(feature = "player")]
     fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
         if self.in_band_ps {
@@ -105,17 +109,17 @@ impl AudioStream for AacAudioReader {
     }
 
     fn preroll_target(&self) -> Option<i64> {
-        i64::try_from(self.presentation_floor * self.clock_ratio()).ok()
+        i64::try_from(self.presentation_floor).ok()
     }
     fn resume_preroll(&mut self, pts: i64) -> bool {
         let ratio = self.clock_ratio();
         if pts < 0 || pts as u64 % ratio != 0 {
             return false;
         }
-        let pts = pts as u64 / ratio;
-        if pts > self.presentation_floor {
+        if pts as u64 > self.presentation_floor {
             return false;
         }
+        let pts = pts as u64 / ratio;
         let index = self.aac.frames.partition_point(|f| f.pts < pts);
         if self.aac.frames.get(index).is_none_or(|f| f.pts != pts) {
             return false;
@@ -146,8 +150,8 @@ impl AudioStream for AacAudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        Some(Duration::from_secs_f64(
-            self.aac.samples() as f64 / f64::from(self.aac.sample_rate),
+        Some(crate::audio::sample_duration(
+            self.aac.samples(), self.aac.sample_rate,
         ))
     }
 
@@ -184,32 +188,34 @@ impl AudioStream for AacAudioReader {
 
     fn present_decoded(
         &self,
-        packet: crate::audio::AudioPacket,
+        mut packet: crate::audio::AudioPacket,
         source_pts: i64,
     ) -> Result<Option<crate::audio::AudioPacket>> {
-        if source_pts < 0 || (source_pts as u64) < self.presentation_floor * self.clock_ratio() {
-            Ok(None)
-        } else {
-            Ok(Some(packet))
+        let stride=usize::from(self.channels())*4;
+        if stride==0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(crate::invalid("invalid raw AAC decoded geometry"));
         }
+        let frames=packet.data.len()/stride;
+        let skip=(i128::from(self.presentation_floor)-i128::from(source_pts)).max(0).min(frames as i128) as usize;
+        if skip==frames {return Ok(None);}
+        if skip!=0 {packet.data.copy_within(skip*stride..,0);packet.data.truncate((frames-skip)*stride);}
+        packet.pts=u64::try_from(i128::from(source_pts)+skip as i128).map_err(|_|crate::invalid("negative raw AAC presentation time"))?;
+        packet.timebase_num=1;packet.timebase_den=self.output_rate;
+        Ok(Some(packet))
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let target = pts.max(0) as u64 / self.clock_ratio();
-        if target >= self.aac.samples() {
-            self.presentation_floor = self.aac.samples();
-            self.packet = self.aac.frames.len();
-            return (self.presentation_floor * self.clock_ratio()) as i64;
+        let end=self.aac.samples().saturating_mul(self.clock_ratio());
+        let target=(pts.max(0) as u64).min(end);
+        self.presentation_floor=target;
+        if target>=end {
+            self.packet=self.aac.frames.len();
+            return target as i64;
         }
-        let index = self
-            .aac
-            .frames
-            .partition_point(|at| at.pts <= target)
-            .saturating_sub(1);
-        self.presentation_floor = self.aac.frames[index].pts;
-        self.packet = 0;
-        (self.presentation_floor * self.clock_ratio()) as i64
+        self.packet=0;
+        target as i64
     }
+
 }
 
 #[cfg(test)]
@@ -463,9 +469,9 @@ mod tests {
     }
 
     #[test]
-    fn a_seek_lands_on_the_frame_at_or_before_the_sample_asked_for() {
+    fn a_seek_restores_history_before_the_exact_output_sample() {
         let mut reader = AacAudioReader::open(STEREO, Limits::default()).expect("opens");
-        assert_eq!(reader.seek_to(3000), 2048, "the third frame starts at 2048");
+        assert_eq!(reader.seek_to(3000), 3000, "exact requested output sample");
         assert_eq!(reader.seek_to(2048), 2048, "a frame start stays there");
         assert_eq!(reader.seek_to(0), 0);
         assert_eq!(
@@ -474,7 +480,7 @@ mod tests {
             "past the end lands at EOF"
         );
         assert!(reader.next_packet().unwrap().is_none());
-        assert_eq!(reader.seek_to(3000), 2048);
+        assert_eq!(reader.seek_to(3000), 3000);
         let packet = reader.next_packet().expect("packet").expect("frame");
         assert_eq!(packet.pts, 0, "seek consumes decoder preroll first");
         assert_eq!(packet.data, reader.aac.packet(0));

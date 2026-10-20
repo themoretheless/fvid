@@ -1,0 +1,42 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0039"
+  ],
+  "checked_at": "2026-10-15T08:54:27.395689+00:00",
+  "before": "Every RGB mask8 call allocates and copies its full RGB buffer while applying zero plane kernels. The actual-source allocation probe observes one allocation per call.",
+  "result": "After validating dimensions, storage and coded precision, return when none of the available plane masks is selected. Applies to RGB alpha-only passes and separate-alpha color-only passes.",
+  "measurements": "cas-unselected-measurements.json",
+  "replay": "benchmark-cas-unselected.py",
+  "qualification": [
+    "Six alternating paired optimized actual-source runs, initialized and warmed outside timing; all output samples verified unchanged.",
+    "1080p8-bit median161750ns\u21927.65ns;4K8-bit606205ns\u21927.81ns. Avoids one6.22MB/24.88MB allocation per call.",
+    "1080p16-bit median3.39ms\u21922.23ms; avoids12.44MB allocation while preserving sample-range validation. These are kernel-only mask-miss timings, not video throughput or RSS.",
+    "Qualified kernel/reference tests, twenty short authored export cases with masks, opacity semantics, precision, clocks, resource refusal, native playback/seek/rewind/EOF and player build pass.",
+    "Replay compiles before/after source copies in a temporary directory and never rewrites the working tree; its Python syntax was checked."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-017-cas-unselected-kernel.log",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-017-cas-unselected-owner-final.log",
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-017-cas-unselected-root-final.log",
+      "passed": 17,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-017-cas-unselected-player-check.log",
+      "status": "passed"
+    }
+  ],
+  "distinct_rust_tests_passed": 32,
+  "remaining": [],
+  "counting": "One measured omitted-plane allocation/copy optimization. Resolution/depth variants and benchmark infrastructure add no IDs."
+}

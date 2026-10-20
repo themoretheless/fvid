@@ -1,0 +1,13 @@
+{
+  "provenance": "Existing authored synthetic stereo AC3 tone repeated into16frames, then final frame truncated by1byte or half.15frame genuine-prefix and nonaudio zero-tail controls. Native prefixes remain usable; known incomplete last frame must fail EOF. Short authored VP9/PCM companion. No private source/network/encoder.",
+  "source_sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb",
+  "frame_bytes": 768,
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "full.ac3": "1db0522d8bc579fe0c77daff1d4ccb19e8b24a40729df0259f6861645fb3700e",
+    "prefix.ac3": "c6ebe1ca668d024241a493080d981bdf5e7017e6fa10eabe1f6e2696b890eccf",
+    "padded.ac3": "08a6a9c7b3f958807afcd2cecbcae43ad6ede4d0a6898d9fe19446fb5670497d",
+    "truncated-one.ac3": "ca2b75e5a2d7ea45fd465e24016c82e6fbf37b015028c5340055b543488fd0ea",
+    "truncated-half.ac3": "15e565d939446596a4245f6ff7045c442cfb1fc78ddaa30826d4d4cc1aa2d516"
+  }
+}

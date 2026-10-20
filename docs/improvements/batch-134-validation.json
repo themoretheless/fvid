@@ -1,0 +1,63 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0146"
+  ],
+  "checked_at": "2026-10-16T11:47:17.467307+00:00",
+  "before": [
+    "evidence/batch-134-before-pcm.json",
+    "evidence/batch-134-baseline-build.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-134-integration.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-134-decoder.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-133-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-134-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-134-candidate-build.log",
+      "kind": "release-benchmark-build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-134-pcm-comparison.json",
+      "kind": "byte-identity",
+      "passed": 3
+    }
+  ],
+  "qualification": [
+    "Cache normalizedvolume/expressiongain andlinearstereo balance ineachchannel,recomputing onlyonCC7/10/11,CC121anddecoderreset. Borrowimmutablecachedchannelstate whilevoicesadvance. Floatoperationorder andexistingnativepanlaw arepreserved. Standaloneborrow-onlyexperiment133showednogain andwasreverted;itcounts zero.",
+    "All529200releasePCMbytes acrossauthored1/8/32voice scores withdynamiccontrollers matchbaselineexactly. Every timingrun agreesonPCMchecksums/counts.18relatedintegrations coveractualplay/rewind/midpoint/EOF,gain/pan,reset,sustain,fine/coarse/bendsensitivity,operand/windowrefusals andlong-window compatibility.19decoderunits andplayerbuildpass.",
+    "Two15pairrelease aggregate runs,300then1000iterations,givewhole-processCPUmedianratios0.950536and0.954948. Confirmation95bootstrapmedianinterval0.949280..0.959212. Confirmationrender-wallmedian0.954417,interval0.931266..0.959449;firstwallintervalcrosses1becauseoflargeoutliers. Hostloadnotisolated;allrawoutliersretained;noowncompilationduringmeasurements.",
+    "Sevenpairedrunsperprofile giveCPUmedian1voice0.770837(interval0.762987..0.837543),8voice0.950826(interval0.924478..0.968862),32voice0.978936(interval0.927431..1.044561).32voice standalonegain isnotqualified. Acceptedclaim isconfirmedaggregate CPUreduction and1/8voice benefits,not universalworkload/device/tail-latency speedup.",
+    "CPUmetricsincludeuntimedfile/container setup,PCMchecksums andfivewarmup renders;renderwall excludes them. BenchmarkmeasuresnativeMIDI CPUonly,noDAC/GPU/playerUIlatency. Immutablecontrols/binaryhashes,Rustversion,inputhashes,allrawpairs andpointwisePCMcomparisons aresaved.",
+    "On this64bitreleasebuild inlineMidiDecoderobject grows296to488bytes(+192);heapvoices/PCMbuffers areexcludedfromsizeof. Extra fixedcachedstorage isexplicittradeoff. Public APIs,defaultPCM andunsupportedfeature profile areunchanged. Generation/ordinarytests require noFFmpeg/network/private media;authoredvideo companionpasses."
+  ],
+  "performance_artifacts": [
+    "evidence/batch-134-timing-summary.json",
+    "evidence/batch-134-cpu-summary.json",
+    "evidence/batch-134-pairs.jsonl",
+    "evidence/batch-134-confirmation-summary.json",
+    "evidence/batch-134-confirmation-pairs.jsonl",
+    "evidence/batch-134-profile-summary.json",
+    "evidence/batch-134-profile-pairs.jsonl",
+    "evidence/batch-134-pcm-comparison.json"
+  ],
+  "compatibility": "Private channelmix cache,publicsignatures/PCMunchanged. Fixedinlineobjectstorage increases192bytes onmeasuredplatform. No codec/device/32voice-specificperformance guarantee.",
+  "counting": "One measured channel-coefficient caching opportunity. Threeprofiles,reusableprobe,borrowedaccess support,memorymeasurement andregressions add zeroextra IDs."
+}

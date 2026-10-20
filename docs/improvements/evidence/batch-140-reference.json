@@ -1,0 +1,10 @@
+{
+  "source": "https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c",
+  "retrieved_source_sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "scope": "Primary player implementation; semantic inspection only,no code copied into fvid.",
+  "observations": [
+    "noteCut0 handles EC0 on tick zero after note/instrument triggering, setting real and output volume to zero with a quick volume ramp.",
+    "noteCut handles ECx on nonzero ticks when elapsed tick equals the low-nibble argument.",
+    "Unlike keyOff, noteCut does not set the key-off flag; a later volume setter can restore the existing sample voice."
+  ]
+}

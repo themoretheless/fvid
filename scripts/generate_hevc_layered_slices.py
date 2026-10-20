@@ -12,10 +12,10 @@ D=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors'
 ue=g.ue
 ENTROPY=b'\xa5\x5a\x80'
 def nal(kind,layer,tid,bits):return ((kind<<9)|(layer<<3)|(tid+1)).to_bytes(2,'big')+g.escape(g.packed(bits))
-def header_pps(layer,extra,weighted,reset=False):
-    b=ue(0)+ue(0)+'11'+f'{extra:03b}'+'01'+ue(0)+ue(0)+se(0)+'000'+se(0)+se(0)
-    b+='0'+str(int(weighted))*2+'000'+'0'+'101'+'0'+'1'+ue(0)+'1'
-    b+='1'+'01000000'+str(int(reset))+'0'+ue(0)+'0'+'1'
+def header_pps(layer,extra,weighted,reset=False,depth_tables=None,constrained=False,parallel_merge=2,deblock=False):
+    b=ue(0)+ue(0)+'11'+f'{extra:03b}'+'01'+ue(0)+ue(0)+se(0)+str(int(constrained))+'00'+se(0)+se(0)
+    b+='0'+str(int(weighted))*2+'000'+'0'+('100'+se(0)+se(0)if deblock else'101')+'0'+'1'+ue(parallel_merge-2)+'1'
+    b+='1'+('01100000'if depth_tables is not None else'01000000')+str(int(reset))+'0'+ue(0)+'0'+(depth_tables or '')+'1'
     return nal(34,layer,0,b)
 def main():
     configs={

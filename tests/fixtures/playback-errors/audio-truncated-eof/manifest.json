@@ -1,0 +1,114 @@
+{
+  "provenance": "Authored20ms8k PCM and matching VP9/PCM video. Known-truncated WAV/AU retain320byte audio claims and AIFF retains160frame COMM claims, but each contains only160bytes/80completeframes. Explicitly shorter and unknown-size sentinel controls remain successful. Prefix decoding is preserved; known truncation must not become successful playback EOF. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "wav-full",
+      "kind": "wav",
+      "file": "wav-full.wav",
+      "expected": "full.f32le",
+      "truncated": false
+    },
+    {
+      "name": "wav-prefix",
+      "kind": "wav",
+      "file": "wav-prefix.wav",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "wav-unknown",
+      "kind": "wav",
+      "file": "wav-unknown.wav",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "wav-truncated",
+      "kind": "wav",
+      "file": "wav-truncated.wav",
+      "expected": "prefix.f32le",
+      "truncated": true
+    },
+    {
+      "name": "au-full",
+      "kind": "au",
+      "file": "au-full.au",
+      "expected": "full.f32le",
+      "truncated": false
+    },
+    {
+      "name": "au-prefix",
+      "kind": "au",
+      "file": "au-prefix.au",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "au-unknown",
+      "kind": "au",
+      "file": "au-unknown.au",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "au-truncated",
+      "kind": "au",
+      "file": "au-truncated.au",
+      "expected": "prefix.f32le",
+      "truncated": true
+    },
+    {
+      "name": "au-unknown-zero",
+      "kind": "au",
+      "file": "au-unknown-zero.au",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "aiff-full",
+      "kind": "aiff",
+      "file": "aiff-full.aiff",
+      "expected": "full.f32le",
+      "truncated": false
+    },
+    {
+      "name": "aiff-prefix",
+      "kind": "aiff",
+      "file": "aiff-prefix.aiff",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "aiff-zero-claim",
+      "kind": "aiff",
+      "file": "aiff-zero-claim.aiff",
+      "expected": "prefix.f32le",
+      "truncated": false
+    },
+    {
+      "name": "aiff-truncated",
+      "kind": "aiff",
+      "file": "aiff-truncated.aiff",
+      "expected": "prefix.f32le",
+      "truncated": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "full.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "prefix.f32le": "98500918f59ca55390c3f73ad7e36c469328ce07a4e32dcc0b6efe315a0cf384",
+    "wav-full.wav": "e1da04013618993e28a8984936226dd12b826d9ba7a79394a299088f5730ef92",
+    "wav-prefix.wav": "f5969f4a5653f5763f90e267b9ce1ff0b51e6a97b1ca4e81b19c34556a764821",
+    "wav-unknown.wav": "24d10f46349f4f5fbbb1520d220ca7618d278113d08507e7e36744444313d225",
+    "wav-truncated.wav": "f2be825c24de490c27fcf4c840141b7505997a9af09c3f071770cea57b91656b",
+    "au-full.au": "d6bd5abf33c284544cc0cb48c5fe459133102b5eba125e2c81b34086059699ab",
+    "au-prefix.au": "0a5ec04b23dad4834edcb1e84dbaff41e26e4bd11a980a3ba779f04f700b44a6",
+    "au-unknown.au": "8c692db3c6b56f785ff6024c49b3be96276e3b23dbd471fada9f0e4911977d88",
+    "au-truncated.au": "6db9a6b7e9c6d9ee72664a933f59a2ce05393a6c77d46085adc17a7d3ee9e488",
+    "au-unknown-zero.au": "5e7eb19c35fcb375a54b41d7cae522c791a152236364094f0d600a8b171432b8",
+    "aiff-full.aiff": "a4b94873ed1633b566c249cfa71bff9cfb087c61ea297ebc3b3ce9f0af87f37b",
+    "aiff-prefix.aiff": "c62fb41ef2247d638d3fafeea4b20d50b77536780fdb59d1448cb2c56e4070e1",
+    "aiff-zero-claim.aiff": "86e6c005f1073a9c3ff72a4041979d2e430095dc9147ec29f356d786dda0f46d",
+    "aiff-truncated.aiff": "c251a0096bc352a6320f3105bc0ab651fa695930774bf1eb874055efe75d08bf"
+  }
+}

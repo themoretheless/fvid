@@ -1,0 +1,38 @@
+{
+  "checked_at": "2026-10-14T16:19:32.914812+00:00",
+  "accepted_ids": [
+    "FVID-0008",
+    "FVID-0009",
+    "FVID-0010",
+    "FVID-0011",
+    "FVID-0012",
+    "FVID-0013"
+  ],
+  "checks": [
+    {
+      "command": "cargo test --locked --offline --no-default-features --test hls_parser_regressions",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --lib owned_hls::tests",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --lib owned_http::tests",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 1,
+      "note": "Explicit loopback test remains ignored; no network used."
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_stream_input_regressions.py",
+      "passed": 2,
+      "failed": 0
+    }
+  ],
+  "standard": "https://www.rfc-editor.org/rfc/rfc8216.html",
+  "counting": "Tag/numeric variants are grouped by root cause; no test/fixture or baseline integration counts.",
+  "performance_experiment": "Adaptive HashSet thresholds were tested only in temporary source copies. Mixed small-playlist results: rejected, no production optimization and no count."
+}

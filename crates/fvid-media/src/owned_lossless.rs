@@ -297,14 +297,21 @@ pub fn transcode_lossless(
         crate::owned_y4m::line(&mut reader, &mut line)?;
         let header = crate::owned_y4m::Header::parse(&line)?;
         let [n, d] = header.frame_rate()?;
-        let denominator = d as u128 * 1_000_000;
+        let mut a = n as u64;
+        let mut b = d as u64 * 1_000_000;
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        let n_red = n as u64 / a;
+        let den_red = (d as u64 * 1_000_000) / a;
         for time in [from, to] {
-            if time as u128 * n as u128 % denominator != 0 {
+            if ((time as u64) % den_red) * (n_red % den_red) % den_red != 0 {
                 return Err("interval boundary is not exact in video time base".into());
             }
         }
-        u64::try_from(from as u128 * n as u128 / denominator)
-            .map_err(|_| "interval timestamp overflow")?;
+        ((from as u64) / den_red)
+            .checked_mul(n_red)
+            .ok_or("interval timestamp overflow")?;
     }
     let (stats, event, consumed) = crate::owned_matroska::export_y4m_ffv1_policy(
         source,

@@ -72,7 +72,7 @@ impl<R: Read + Seek> WebmSubtitleReader<R> {
             .tracks
             .iter()
             .filter(|track| {
-                track.kind == SUBTITLE_KIND && TEXT_CODECS.contains(&track.codec.as_str())
+                track.kind == SUBTITLE_KIND && self.demuxer.track_enabled(track.number) && TEXT_CODECS.contains(&track.codec.as_str())
             })
             .map(|track| track.number)
             .collect()

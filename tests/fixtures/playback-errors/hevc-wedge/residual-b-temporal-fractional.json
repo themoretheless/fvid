@@ -1,0 +1,2310 @@
+{
+  "provenance": "Owned PCM/CABAC/MP4 and scalar bilinear/POC-sign oracle. Offline, no external codecs.",
+  "scaling_witnesses": 450242,
+  "cases": [
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-1-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 0,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-1-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 6144,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-1-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 12288,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-1-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 18432,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-1-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 24576,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-1-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 30720,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-2-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 36864,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-2-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 43008,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-2-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 49152,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-2-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 55296,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-2-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 61440,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-temporal-2-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 67584,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-1-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 73728,
+      "scaling_witnesses": 3531
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-1-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 79872,
+      "scaling_witnesses": 3296
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-1-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 86016,
+      "scaling_witnesses": 3285
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-1-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 92160,
+      "scaling_witnesses": 1897
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-1-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 98304,
+      "scaling_witnesses": 2363
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-1-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 104448,
+      "scaling_witnesses": 2325
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-2-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 110592,
+      "scaling_witnesses": 4535
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-2-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 116736,
+      "scaling_witnesses": 4551
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-2-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 122880,
+      "scaling_witnesses": 4462
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-2-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 129024,
+      "scaling_witnesses": 2968
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-2-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 135168,
+      "scaling_witnesses": 2501
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-0-future-past-2-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 141312,
+      "scaling_witnesses": 2075
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-1-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 147456,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-1-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 153600,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-1-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 159744,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-1-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 165888,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-1-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 172032,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-1-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 178176,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-2-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 184320,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-2-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 190464,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-2-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 196608,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-2-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 202752,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-2-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 208896,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-temporal-2-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 215040,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-1-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 221184,
+      "scaling_witnesses": 3531
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-1-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 227328,
+      "scaling_witnesses": 3296
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-1-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 233472,
+      "scaling_witnesses": 3285
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-1-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 239616,
+      "scaling_witnesses": 1897
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-1-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 245760,
+      "scaling_witnesses": 2363
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-1-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 251904,
+      "scaling_witnesses": 2325
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-2-0-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 258048,
+      "scaling_witnesses": 4535
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-2-0--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 264192,
+      "scaling_witnesses": 4551
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-2-0-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 270336,
+      "scaling_witnesses": 4462
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-2-1-1-3--3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 276480,
+      "scaling_witnesses": 2968
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-2-1--7-5-5--7.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 282624,
+      "scaling_witnesses": 2501
+    },
+    {
+      "file": "residual-b-temporal-fractional-64-1-future-past-2-1-2--3--1-6.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 288768,
+      "scaling_witnesses": 2075
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-1-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 294912,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-1-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 319488,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-1-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 344064,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-1-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 368640,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-1-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 393216,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-1-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 417792,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-2-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 442368,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-2-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 466944,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-2-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 491520,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-2-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 516096,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-2-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 540672,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-temporal-2-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 565248,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-1-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 589824,
+      "scaling_witnesses": 17835
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-1-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 614400,
+      "scaling_witnesses": 16585
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-1-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 638976,
+      "scaling_witnesses": 16517
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-1-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 663552,
+      "scaling_witnesses": 9143
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-1-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 688128,
+      "scaling_witnesses": 11336
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-1-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 712704,
+      "scaling_witnesses": 11159
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-2-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 737280,
+      "scaling_witnesses": 22831
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-2-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 761856,
+      "scaling_witnesses": 22834
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-2-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 786432,
+      "scaling_witnesses": 22267
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-2-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 811008,
+      "scaling_witnesses": 14674
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-2-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 835584,
+      "scaling_witnesses": 12214
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-0-future-past-2-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 860160,
+      "scaling_witnesses": 9937
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-1-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 884736,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-1-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 909312,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-1-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 933888,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-1-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 958464,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-1-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 983040,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-1-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1007616,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-2-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1032192,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-2-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1056768,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-2-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1081344,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-2-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1105920,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-2-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1130496,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-temporal-2-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1155072,
+      "scaling_witnesses": 0
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-1-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1179648,
+      "scaling_witnesses": 17835
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-1-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1204224,
+      "scaling_witnesses": 16585
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-1-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1228800,
+      "scaling_witnesses": 16517
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-1-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1253376,
+      "scaling_witnesses": 9143
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-1-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1277952,
+      "scaling_witnesses": 11336
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-1-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1302528,
+      "scaling_witnesses": 11159
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-2-0-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1327104,
+      "scaling_witnesses": 22831
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-2-0--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1351680,
+      "scaling_witnesses": 22834
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-2-0-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1376256,
+      "scaling_witnesses": 22267
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-2-1-1-3--3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -3,
+          -1
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1400832,
+      "scaling_witnesses": 14674
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-2-1--7-5-5--7.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          -7,
+          5
+        ],
+        [
+          5,
+          -7
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1425408,
+      "scaling_witnesses": 12214
+    },
+    {
+      "file": "residual-b-temporal-fractional-128-1-future-past-2-1-2--3--1-6.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          2,
+          -3
+        ],
+        [
+          -1,
+          6
+        ]
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1449984,
+      "scaling_witnesses": 9937
+    }
+  ]
+}

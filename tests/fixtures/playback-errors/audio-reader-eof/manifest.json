@@ -1,0 +1,129 @@
+{
+  "provenance": "Authored160PCM frames at8k mono in WAV/AIFF/AU integer8/16/24/32 and float32. Matching16bit PCM accompanies a short native VP9 video. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "wav-int8",
+      "format": "wav",
+      "file": "wav-int8.wav",
+      "bits": 8,
+      "float": false
+    },
+    {
+      "name": "wav-int16",
+      "format": "wav",
+      "file": "wav-int16.wav",
+      "bits": 16,
+      "float": false
+    },
+    {
+      "name": "wav-int24",
+      "format": "wav",
+      "file": "wav-int24.wav",
+      "bits": 24,
+      "float": false
+    },
+    {
+      "name": "wav-int32",
+      "format": "wav",
+      "file": "wav-int32.wav",
+      "bits": 32,
+      "float": false
+    },
+    {
+      "name": "wav-float32",
+      "format": "wav",
+      "file": "wav-float32.wav",
+      "bits": 32,
+      "float": true
+    },
+    {
+      "name": "aiff-int8",
+      "format": "aiff",
+      "file": "aiff-int8.aiff",
+      "bits": 8,
+      "float": false
+    },
+    {
+      "name": "aiff-int16",
+      "format": "aiff",
+      "file": "aiff-int16.aiff",
+      "bits": 16,
+      "float": false
+    },
+    {
+      "name": "aiff-int24",
+      "format": "aiff",
+      "file": "aiff-int24.aiff",
+      "bits": 24,
+      "float": false
+    },
+    {
+      "name": "aiff-int32",
+      "format": "aiff",
+      "file": "aiff-int32.aiff",
+      "bits": 32,
+      "float": false
+    },
+    {
+      "name": "aiff-float32",
+      "format": "aiff",
+      "file": "aiff-float32.aiff",
+      "bits": 32,
+      "float": true
+    },
+    {
+      "name": "au-int8",
+      "format": "au",
+      "file": "au-int8.au",
+      "bits": 8,
+      "float": false
+    },
+    {
+      "name": "au-int16",
+      "format": "au",
+      "file": "au-int16.au",
+      "bits": 16,
+      "float": false
+    },
+    {
+      "name": "au-int24",
+      "format": "au",
+      "file": "au-int24.au",
+      "bits": 24,
+      "float": false
+    },
+    {
+      "name": "au-int32",
+      "format": "au",
+      "file": "au-int32.au",
+      "bits": 32,
+      "float": false
+    },
+    {
+      "name": "au-float32",
+      "format": "au",
+      "file": "au-float32.au",
+      "bits": 32,
+      "float": true
+    }
+  ],
+  "sha256": {
+    "expected.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "wav-int8.wav": "1c63f59f95fd2ab020704136bc6deabf0746d89a831fcd4b607cf9d7275b4d0e",
+    "wav-int16.wav": "e1da04013618993e28a8984936226dd12b826d9ba7a79394a299088f5730ef92",
+    "wav-int24.wav": "2b6d4bfb6b968d80dd9333252fbfa4351aa532b6a7e4ae56e2767b229c00fb29",
+    "wav-int32.wav": "daa4035cb0ceb42a859b76c69a89145df75be23d296e6e693e63c78dfa360e63",
+    "wav-float32.wav": "f90499e9a13524fc4f139ce262a241de7772fe03f390472b1b7939f00fe9ab9c",
+    "aiff-int8.aiff": "fdf9f95edb059f2f596930249c40ce4f241e65c69c033a98d2cd5d417190830e",
+    "aiff-int16.aiff": "a4b94873ed1633b566c249cfa71bff9cfb087c61ea297ebc3b3ce9f0af87f37b",
+    "aiff-int24.aiff": "7f3f18d8e263e9dd36c45ccbe4269e3b81a6d522c986f0674561a5e8750bb2e9",
+    "aiff-int32.aiff": "331f594c4cf480828468c1655c05dfbb181a77d57314fba076fe1c4944d0d90b",
+    "aiff-float32.aiff": "68cae794f380b2ea2d6df300f8244c95bb98add7bf4729be0132af95a76b6f03",
+    "au-int8.au": "c3a44097d96676934968f6d9b958cd45758d13aee2f5da77529fa5cb9745a74b",
+    "au-int16.au": "d6bd5abf33c284544cc0cb48c5fe459133102b5eba125e2c81b34086059699ab",
+    "au-int24.au": "770ce73ceaf7722e15f528f0b5252e2c8b505b63f710dae499277c57106e1d4c",
+    "au-int32.au": "2b3096d78023406ff912dbf7685331a0adeea5d9313f96b96af623a81665bc71",
+    "au-float32.au": "3667a5dcfeda7ec3e86c5ef8e1e8c40ac5ab3f7f3e0134659c1f3401da57eade"
+  }
+}

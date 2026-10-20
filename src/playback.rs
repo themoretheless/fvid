@@ -267,7 +267,7 @@ pub mod audio {
     pub use crate::{
         playback_aac as aac, playback_ac3 as ac3, playback_aiff as aiff, playback_au as au,
         playback_avi_audio as avi, playback_flac as flac, playback_mp3 as mp3,
-        playback_mp4_audio as mp4, playback_ogg_audio as ogg, playback_smf as smf,
+        playback_mp4_audio as mp4, playback_ogg_audio as ogg, playback_ogg_opus as ogg_opus, playback_smf as smf,
         playback_wav as wav, playback_webm_audio as webm, playback_xm as xm,
     };
 }

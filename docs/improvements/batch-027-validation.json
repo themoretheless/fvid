@@ -1,0 +1,62 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0049"
+  ],
+  "checked_at": "2026-10-15T12:53:27.358484+00:00",
+  "before": "Equal-priority/legacy controls match. Copying dual AVC drops a disabled-track flag, causing native playback to select a different video and decoded pixels.",
+  "result": "Transport effective usability privately through shared Matroska constructors, selected stream reorder and copy/filtered-video export. Preserve indexed disabled payloads and legacy group fallback.",
+  "qualification": [
+    "Four authored60ms dual AVC B-picture clips plus64ms AVC/two AAC-LC silence companion. Both root/owned remux paths produce identical bytes with source-index-aware usability across output reorder.",
+    "Every selected compressed packet and presentation clock matches its MP4 source. Copy/default video retains exact RGB,14/8 component precision, intervals, duration, seek/rewind/EOF. A copied disabled-only track remains an explicit automatic-playback refusal, not an acceptance claim.",
+    "Filtered FFV1 video plus two copied AAC tracks preserves disabled audio status and exact AAC bytes. Numeric silence is exactly3072 samples; signed IEEE zero is allowed. Flipped decoded RGB matches source within1 code with identical video intervals.",
+    "Atomic file remux, cancellation/byte refusal and private constructor count validation publish no partial output/header.13 related FFV1 exports and reordered-cadence root control pass.",
+    "Existing public writer constructors and TrackOptions shape remain unchanged. Empty private usability selects historical enabled defaults, so existing all-enabled output remains identical.",
+    "For a handler group with no enabled MP4 candidates, retain existing effective legacy fallback during conversion; original zero/disabled flags are not presented as strict raw-flag preservation."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-before.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-final.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-admission.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-ffv1.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-root-unit.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-027-mp4-matroska-usability-player.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 23,
+  "distinct_python_tests_passed": 1,
+  "remaining": [
+    "Movie/preview preference is not yet translated into Matroska default-track selection.",
+    "No hardware decoder or physical audio device output claim.",
+    "Playback/payload/clock preservation is qualified; comprehensive Matroska conformance is not asserted."
+  ],
+  "counting": "One lost effective usability attribute in cross-container transport. Five videos, reorder/selection variants, private constructor and tests add no separate IDs."
+}

@@ -19,8 +19,9 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
         Default::default(),
     )
     .map_err(|e| e.to_string())?;
+    let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
     Ok(reader.tracks.iter().enumerate().any(|(index, t)| {
-        (options.streams.is_empty() || options.streams.contains(&index))
+        ((options.streams.is_empty() && preferred.contains(&t.number)) || options.streams.contains(&index))
             && t.kind == 2
             && matches!(
                 t.codec.as_str(),
@@ -108,11 +109,12 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let index = match options.streams.as_slice() {
         [index] => *index,
         [] => {
+            let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
             let indices: Vec<_> = reader
                 .tracks
                 .iter()
                 .enumerate()
-                .filter_map(|(i, t)| (t.kind == 2).then_some(i))
+                .filter_map(|(i, t)| (t.kind == 2 && preferred.contains(&t.number)).then_some(i))
                 .collect();
             if indices.len() != 1 {
                 return Err("select exactly one audio stream".into());

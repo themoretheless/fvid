@@ -211,7 +211,7 @@ pub const TONE_UNITY_MILLI: i32 = 1_000;
 pub const TONE_STEP_MILLI: i32 = 100;
 
 pub fn tone_gain_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_adjust_milli(current + delta)
+    clamp_adjust_milli(current.saturating_add(delta))
 }
 
 pub fn reset_tone_gains() -> (i32, i32, i32) {
@@ -495,7 +495,7 @@ pub fn clamp_balance_milli(value: i32) -> i32 {
 }
 
 pub fn balance_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_balance_milli(current + delta)
+    clamp_balance_milli(current.saturating_add(delta))
 }
 
 /// Scale L/R gains for stereo balance. No-op when `frame.len() < 2`.
@@ -540,7 +540,7 @@ pub fn clamp_width_milli(value: i32) -> i32 {
 }
 
 pub fn width_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_width_milli(current + delta)
+    clamp_width_milli(current.saturating_add(delta))
 }
 
 /// Mid/side stereo width. No-op when `frame.len() < 2` or width is unity.
@@ -609,7 +609,7 @@ pub fn clamp_crossfeed_milli(value: i32) -> i32 {
 }
 
 pub fn crossfeed_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_crossfeed_milli(current + delta)
+    clamp_crossfeed_milli(current.saturating_add(delta))
 }
 
 /// Blend L↔R for headphone listening. No-op when strength is 0 or mono.
@@ -658,7 +658,7 @@ pub fn clamp_subtitle_scale_milli(value: i32) -> i32 {
 }
 
 pub fn subtitle_scale_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_subtitle_scale_milli(current + delta)
+    clamp_subtitle_scale_milli(current.saturating_add(delta))
 }
 
 /// Scaled font size in pixels for on-screen subtitles.
@@ -677,7 +677,7 @@ pub fn clamp_subtitle_opacity_milli(value: i32) -> i32 {
 }
 
 pub fn subtitle_opacity_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_subtitle_opacity_milli(current + delta)
+    clamp_subtitle_opacity_milli(current.saturating_add(delta))
 }
 
 pub fn format_subtitle_opacity_osd(opacity_milli: i32) -> String {
@@ -1322,12 +1322,12 @@ pub const VOLUME_STEP_MILLI: i32 = 50;
 pub const RATE_STEP_MILLI: i32 = 100;
 
 pub fn volume_step_milli(current: u32, delta: i32) -> u32 {
-    clamp_volume_milli(current as i32 + delta)
+    (i64::from(current) + i64::from(delta)).clamp(0, i64::from(VOLUME_MAX_MILLI)) as u32
 }
 
 pub fn rate_step_milli(current: u32, delta: i32) -> u32 {
-    let next = current as i32 + delta;
-    next.clamp(RATE_MIN_MILLI as i32, RATE_MAX_MILLI as i32) as u32
+    let next = i64::from(current) + i64::from(delta);
+    next.clamp(i64::from(RATE_MIN_MILLI), i64::from(RATE_MAX_MILLI)) as u32
 }
 
 /// Human clock for OSD (`mm:ss` or `h:mm:ss`).
@@ -1438,7 +1438,7 @@ pub fn position_us_from_digit(digit: u8, duration_us: i64) -> Option<i64> {
     } else {
         i64::from(digit) * 10
     };
-    Some(duration_us.saturating_mul(percent) / 100)
+    Some((i128::from(duration_us) * i128::from(percent) / 100) as i64)
 }
 
 pub fn media_fraction(now_us: i64, duration_us: i64) -> f32 {
@@ -2107,7 +2107,7 @@ pub fn format_media_fingerprint_osd(fingerprint: &str) -> String {
     } else if trimmed.len() <= 12 {
         format!("Fingerprint {trimmed}")
     } else {
-        format!("Fingerprint {}…", &trimmed[..12])
+        format!("Fingerprint {}…", &trimmed[..trimmed.floor_char_boundary(12)])
     }
 }
 
@@ -3088,14 +3088,14 @@ pub fn cycle_video_track(count: u32, current: u32) -> u32 {
     if count == 0 {
         return 0;
     }
-    (current + 1) % count
+    ((u64::from(current) + 1) % u64::from(count)) as u32
 }
 
 pub fn format_video_track_osd(index: u32, count: u32) -> String {
     if count == 0 {
         "Video none".into()
     } else {
-        format!("Video {}/{}", index + 1, count)
+        format!("Video {}/{}", u64::from(index) + 1, count)
     }
 }
 
@@ -3402,35 +3402,8 @@ pub fn format_ambisonic_osd(mode: AmbisonicMode) -> String {
 
 /// Parse a WebVTT timestamp (`HH:MM:SS.mmm` or `MM:SS.mmm`) into media microseconds.
 pub fn parse_webvtt_timestamp(spec: &str) -> Option<i64> {
-    let spec = spec.trim();
-    let (hms, frac) = spec.split_once('.').unwrap_or((spec, "0"));
-    let parts: Vec<&str> = hms.split(':').collect();
-    let (hours, minutes, seconds) = match parts.as_slice() {
-        [m, s] => (0i64, m.parse::<i64>().ok()?, s.parse::<i64>().ok()?),
-        [h, m, s] => (
-            h.parse::<i64>().ok()?,
-            m.parse::<i64>().ok()?,
-            s.parse::<i64>().ok()?,
-        ),
-        _ => return None,
-    };
-    let mut millis = frac.as_bytes().iter().take(3).fold(0i64, |acc, b| {
-        if b.is_ascii_digit() {
-            acc * 10 + i64::from(*b - b'0')
-        } else {
-            acc
-        }
-    });
-    for _ in frac.len()..3 {
-        millis *= 10;
-    }
-    Some(
-        hours
-            .saturating_mul(3_600_000_000)
-            .saturating_add(minutes.saturating_mul(60_000_000))
-            .saturating_add(seconds.saturating_mul(1_000_000))
-            .saturating_add(millis.saturating_mul(1_000)),
-    )
+    if spec.contains(',') { return None; }
+    parse_subtitle_clock(spec)
 }
 
 pub fn format_webvtt_timestamp(us: i64) -> String {
@@ -3517,7 +3490,7 @@ pub fn format_media_library_osd(count: usize) -> String {
 pub fn format_chapter_art_osd(url: Option<&str>) -> String {
     match url.map(str::trim).filter(|u| !u.is_empty()) {
         Some(url) if url.len() <= 48 => format!("Chapter art {url}"),
-        Some(url) => format!("Chapter art {}…", &url[..48]),
+        Some(url) => format!("Chapter art {}…", &url[..url.floor_char_boundary(48)]),
         None => "Chapter art none".into(),
     }
 }
@@ -3529,31 +3502,61 @@ pub struct SmilClip {
     pub begin_us: i64,
 }
 
+fn clip_time_us(value: &str) -> Option<i64> {
+    let seconds: f64 = value.trim().parse().ok()?;
+    let micros = (seconds * 1_000_000.0).round();
+    if !micros.is_finite() || micros < i64::MIN as f64 || micros >= -(i64::MIN as f64) {
+        return None;
+    }
+    Some(micros as i64)
+}
+
+/// Keep quoted path values together without interpreting path backslashes.
+fn clip_line_words(line: &str) -> Option<Vec<String>> {
+    let mut words = Vec::new();
+    let mut word = String::new();
+    let mut quoted = false;
+    for ch in line.chars() {
+        if ch == '"' && (quoted || word.is_empty() || word.ends_with('=')) {
+            quoted = !quoted;
+        } else if ch.is_whitespace() && !quoted {
+            if !word.is_empty() { words.push(std::mem::take(&mut word)); }
+        } else {
+            word.push(ch);
+        }
+    }
+    if quoted { return None; }
+    if !word.is_empty() { words.push(word); }
+    Some(words)
+}
+
 pub fn parse_smil_clip_line(line: &str) -> Option<SmilClip> {
     let line = line.trim();
     if line.is_empty() || line.starts_with('#') {
         return None;
     }
     // Minimal: `src=foo.mp4 begin=12.5` or `clip.mp4@12.5`
-    if let Some((src, begin)) = line.split_once('@') {
-        let secs: f64 = begin.trim().parse().ok()?;
+    let parts = clip_line_words(line)?;
+    if !parts.iter().any(|part| part.starts_with("src="))
+        && let Some((src, begin)) = line.rsplit_once('@') {
+        let src = src.trim();
+        if src.is_empty() { return None; }
         return Some(SmilClip {
-            src: src.trim().to_string(),
-            begin_us: (secs * 1_000_000.0).round() as i64,
+            src: src.to_string(),
+            begin_us: clip_time_us(begin)?,
         });
     }
     let mut src = None;
     let mut begin_us = 0i64;
-    for part in line.split_whitespace() {
+    for part in &parts {
         if let Some(value) = part.strip_prefix("src=") {
             src = Some(value.trim_matches('"').to_string());
         } else if let Some(value) = part.strip_prefix("begin=") {
-            let secs: f64 = value.parse().ok()?;
-            begin_us = (secs * 1_000_000.0).round() as i64;
+            begin_us = clip_time_us(value)?;
         }
     }
     Some(SmilClip {
-        src: src?,
+        src: src.filter(|src| !src.is_empty())?,
         begin_us,
     })
 }
@@ -3785,10 +3788,10 @@ pub fn parse_edl_line(line: &str) -> Option<EdlClip> {
         return None;
     }
     // `title.mp4 10.0 25.5` or `title.mp4 in=10 out=25.5`
-    let parts: Vec<&str> = line.split_whitespace().collect();
+    let parts = clip_line_words(line)?;
     if parts.len() >= 3 && !parts[1].contains('=') {
-        let in_us = (parts[1].parse::<f64>().ok()? * 1_000_000.0).round() as i64;
-        let out_us = (parts[2].parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+        let in_us = clip_time_us(&parts[1])?.max(0);
+        let out_us = clip_time_us(&parts[2])?.max(0);
         if out_us > in_us {
             return Some(EdlClip {
                 src: parts[0].to_string(),
@@ -3803,9 +3806,9 @@ pub fn parse_edl_line(line: &str) -> Option<EdlClip> {
     let mut out_us = 0i64;
     for part in parts {
         if let Some(v) = part.strip_prefix("in=") {
-            in_us = (v.parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+            in_us = clip_time_us(v)?.max(0);
         } else if let Some(v) = part.strip_prefix("out=") {
-            out_us = (v.parse::<f64>().ok()? * 1_000_000.0).round() as i64;
+            out_us = clip_time_us(v)?.max(0);
         } else if !part.contains('=') {
             src = Some(part.to_string());
         }
@@ -3865,9 +3868,9 @@ pub fn thumbnail_seek_us(index: usize, count: usize, duration_us: i64) -> i64 {
     if count == 0 || duration_us <= 0 {
         return 0;
     }
-    let count = count as i64;
-    let index = (index as i64).clamp(0, count - 1);
-    (duration_us.saturating_mul(index) / count).clamp(0, duration_us)
+    let index = index.min(count - 1);
+    // The quotient stays within duration; only the intermediate product is wide.
+    (duration_us as u128 * index as u128 / count as u128) as i64
 }
 
 pub fn format_thumbnail_seek_osd(us: i64) -> String {
@@ -3882,7 +3885,7 @@ pub fn seek_from_drag_px(dx_px: i32, px_per_second: i32) -> i64 {
 
 pub fn format_drag_seek_osd(delta_us: i64) -> String {
     let sign = if delta_us < 0 { "-" } else { "+" };
-    format!("Drag {sign}{}", format_play_clock(delta_us.abs()))
+    format!("Drag {sign}{}", format_play_clock(delta_us.saturating_abs()))
 }
 
 /// Interactive crop box from drag corners (normalized 0..=1000).
@@ -4912,7 +4915,8 @@ pub fn format_network_bandwidth_osd(bps: u64) -> String {
 pub fn multi_room_sync_target_us(local_us: i64, peer_us: i64, offset_us: i64) -> i64 {
     let peer = peer_us.saturating_add(offset_us);
     // Nudge local halfway toward peer for gentle lock.
-    local_us + (peer - local_us) / 2
+    let local = i128::from(local_us);
+    (local + (i128::from(peer) - local) / 2) as i64
 }
 
 pub fn format_watch_party_osd(enabled: bool, offset_us: i64) -> String {
@@ -4922,7 +4926,7 @@ pub fn format_watch_party_osd(enabled: bool, offset_us: i64) -> String {
         let sign = if offset_us < 0 { "-" } else { "+" };
         format!(
             "Watch party sync {sign}{}",
-            format_play_clock(offset_us.abs())
+            format_play_clock(offset_us.saturating_abs())
         )
     }
 }
@@ -6656,19 +6660,19 @@ pub fn clamp_roll_milli(value: i32) -> i32 {
 }
 
 pub fn yaw_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_yaw_milli(current + delta)
+    (i64::from(current) + i64::from(delta)).rem_euclid(360_000) as i32
 }
 
 pub fn pitch_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_pitch_milli(current + delta)
+    clamp_pitch_milli(current.saturating_add(delta))
 }
 
 pub fn fov_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_fov_milli(current + delta)
+    clamp_fov_milli(current.saturating_add(delta))
 }
 
 pub fn roll_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_roll_milli(current + delta)
+    (i64::from(current) + i64::from(delta)).rem_euclid(360_000) as i32
 }
 
 pub fn format_spherical_osd(
@@ -7094,7 +7098,7 @@ pub fn reset_video_adjust() -> (i32, i32, i32, i32, i32) {
 }
 
 pub fn adjust_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_adjust_milli(current + delta)
+    clamp_adjust_milli(current.saturating_add(delta))
 }
 
 pub fn reset_zoom_pan() -> (u32, i32, i32) {
@@ -7135,7 +7139,7 @@ pub fn format_deinterlace_osd(mode: DeinterlaceMode) -> String {
 }
 
 pub fn eq_band_step_milli(current: i32, delta: i32) -> i32 {
-    clamp_eq_milli(current + delta)
+    clamp_eq_milli(current.saturating_add(delta))
 }
 
 pub fn set_eq_gains_from_preset(preset: EqPreset) -> [i32; EQ_BAND_COUNT] {
@@ -7805,29 +7809,32 @@ pub fn step_audio_skew(
     if queued_frames == 0 {
         return (skew_frames, false, 0);
     }
-    let step = i64::from(media_frames)
-        .min(-skew_frames)
-        .min(queued_frames as i64);
-    (skew_frames + step, false, step as u64)
+    let step = u64::from(media_frames)
+        .min(skew_frames.unsigned_abs())
+        .min(queued_frames);
+    // step is bounded by a u32 block and by the outstanding negative skew.
+    (skew_frames + step as i64, false, step)
 }
 
 /// Cycle a track ordinal. Subtitles include `-1` for off.
+/// Unrepresentable track counts return `-1`, as an empty list does.
 pub fn cycle_track(len: usize, current: i32, delta: i32, include_off: bool) -> i32 {
-    if len == 0 {
+    if len == 0 || len as u128 > i32::MAX as u128 + 1 {
         return -1;
     }
+    let len = len as i64;
     let span = if include_off {
-        len as i32 + 1
+        len + 1
     } else {
-        len as i32
+        len
     };
     let base = if include_off {
-        current.clamp(-1, len as i32 - 1) + 1
+        i64::from(current).clamp(-1, len - 1) + 1
     } else {
-        current.clamp(0, len as i32 - 1)
+        i64::from(current).clamp(0, len - 1)
     };
-    let next = (base + delta).rem_euclid(span);
-    if include_off { next - 1 } else { next }
+    let next = (base + i64::from(delta)).rem_euclid(span);
+    (if include_off { next - 1 } else { next }) as i32
 }
 
 /// OSD for audio/subtitle track selection (`Audio 2/3`, `Subtitles off`).
@@ -8055,30 +8062,35 @@ pub fn parse_subtitle_clock(token: &str) -> Option<i64> {
         .split_once(',')
         .or_else(|| token.split_once('.'))
         .unwrap_or((token, "0"));
-    let parts: Vec<&str> = hms.split(':').collect();
-    let (hours, minutes, seconds) = match *parts.as_slice() {
-        [hours, minutes, seconds] => (hours, minutes, seconds),
-        [minutes, seconds] => ("0", minutes, seconds),
-        _ => return None,
+    let mut fields = hms.split(':');
+    let first = fields.next()?;
+    let second = fields.next()?;
+    let third = fields.next();
+    if fields.next().is_some() { return None; }
+    let (hours, minutes, seconds, bounded_minutes) = match third {
+        Some(seconds) => (first, second, seconds, true),
+        None => ("0", first, second, false),
     };
-    let hours: i64 = hours.parse().ok()?;
-    let minutes: i64 = minutes.parse().ok()?;
-    let seconds: i64 = seconds.parse().ok()?;
-    let digits: String = frac
-        .chars()
-        .take_while(|ch| ch.is_ascii_digit())
-        .take(3)
-        .collect();
-    if digits.is_empty() {
+    let component = |value: &str| -> Option<i64> {
+        if value.is_empty() || !value.bytes().all(|b| b.is_ascii_digit()) { return None; }
+        value.parse().ok()
+    };
+    let hours = component(hours)?;
+    let minutes = component(minutes)?;
+    let seconds = component(seconds)?;
+    if seconds >= 60 || (bounded_minutes && minutes >= 60)
+        || frac.is_empty() || !frac.bytes().all(|b| b.is_ascii_digit()) {
         return None;
     }
-    let mut millis: i64 = digits.parse().ok()?;
-    if digits.len() == 1 {
-        millis *= 100;
-    } else if digits.len() == 2 {
-        millis *= 10;
-    }
-    Some(((hours * 3600 + minutes * 60 + seconds) * 1000 + millis) * 1000)
+    let digits = frac.len().min(3);
+    let millis = frac.bytes().take(3).fold(0i64, |n, b| n * 10 + i64::from(b - b'0'))
+        * 10i64.pow(3 - digits as u32);
+    hours.checked_mul(3600)?
+        .checked_add(minutes.checked_mul(60)?)?
+        .checked_add(seconds)?
+        .checked_mul(1000)?
+        .checked_add(millis)?
+        .checked_mul(1000)
 }
 
 /// Parse a jump-to-time string: `HH:MM:SS[.ms]`, `MM:SS[.ms]`, or whole/decimal seconds.
@@ -8221,9 +8233,9 @@ pub fn cycle_output_device<'a>(names: &'a [String], current: &str, delta: i32) -
     let cur = names
         .iter()
         .position(|name| name.eq_ignore_ascii_case(current.trim()))
-        .unwrap_or(0) as i32;
-    let len = names.len() as i32;
-    let next = (cur + delta).rem_euclid(len) as usize;
+        .unwrap_or(0) as i128;
+    let len = names.len() as i128;
+    let next = (cur + i128::from(delta)).rem_euclid(len) as usize;
     Some(names[next].as_str())
 }
 
@@ -8595,7 +8607,7 @@ pub fn clamp_pan_px(value: i32, viewport: u32, content: u32) -> i32 {
 }
 
 pub fn pan_step_px(current: i32, delta: i32, viewport: u32, content: u32) -> i32 {
-    clamp_pan_px(current + delta, viewport, content)
+    clamp_pan_px(current.saturating_add(delta), viewport, content)
 }
 
 /// Apply pan offsets to a centered image rect inside the viewport.

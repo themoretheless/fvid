@@ -6,6 +6,7 @@ use super::{
 };
 use crate::{Result, invalid};
 use std::sync::Arc;
+#[derive(Clone)]
 pub struct Decoder {
     headers: HeaderState,
     contexts: [Probabilities; 4],
@@ -32,6 +33,17 @@ impl Decoder {
             budget,
             failed: false,
         }
+    }
+    /// Reference storage retained by a checkpoint; shared pictures count once.
+    pub fn retained_storage(&self) -> Vec<(usize, usize)> {
+        let mut out = Vec::new();
+        for picture in self.references.iter().chain(std::iter::once(&self.previous)).flatten() {
+            let key = Arc::as_ptr(picture) as usize;
+            if !out.iter().any(|(at, _)| *at == key) {
+                out.push((key, picture.storage_bytes()));
+            }
+        }
+        out
     }
     pub fn reset(&mut self) {
         *self = Self::new(self.budget);

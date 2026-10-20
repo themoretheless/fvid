@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0061"
+  ],
+  "checked_at": "2026-10-15T20:11:34.696863+00:00",
+  "before": [
+    "evidence/batch-037-frontier-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-037-cpal-after.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-037-audio-thread.log",
+      "kind": "rust",
+      "passed": 27
+    },
+    {
+      "log": "evidence/batch-037-reader-integration.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-037-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-037-audio-fixtures.log",
+      "kind": "python",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-037-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native70-frame VP9 and all32768 PCM samples match authored controls. With device at0, before queue grows65536 instead of32768; after first682ms packet correctly retains pacing until source lead is consumed.",
+    "All codecs now use the presented decoded PCM timestamp and sample count, which already reflect container clock retiming, CodecDelay, signed padding, negative preroll and edits.",
+    "Five reader integration targets pass31 tests: Matroska PCM/sample clocks/padding/delay and MP4 clocks. Prior accelerated-refill test now checks first-to-second packet refill because the speculative extra packet is removed; it still proves refill at24000 consumed source frames.",
+    "No physical DAC, throughput or hard RSS claim. Ordinary tests use stored authored assets with generators separate."
+  ],
+  "counting": "One incorrect frontier defect; sample controls, variants and test adjustments add no IDs."
+}

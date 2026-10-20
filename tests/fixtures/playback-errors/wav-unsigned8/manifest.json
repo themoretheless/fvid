@@ -1,0 +1,48 @@
+{
+  "provenance": "Authored20ms unsigned8 PCM Wave mono/stereo/three-channel/extensible with explicit0/1/127/128/129/254/255 boundaries. Signed16 controls and matching VP9/PCM clips. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "mono",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 160
+    },
+    {
+      "name": "stereo",
+      "rate": 44100,
+      "channels": 2,
+      "frames": 882
+    },
+    {
+      "name": "three-channel",
+      "rate": 48000,
+      "channels": 3,
+      "frames": 960
+    },
+    {
+      "name": "extensible",
+      "rate": 8000,
+      "channels": 2,
+      "frames": 160
+    }
+  ],
+  "sha256": {
+    "mono.wav": "6b48b4434952eb4d0d6e29f0fc2470e1b2556ac381c9b7f8ef1222b83be25d87",
+    "mono-control.wav": "686a3157a44d8ad0a344eadd8759e828159974a26e4c57344ca7514d4ff826d9",
+    "mono.f32le": "d5bb68fe1063df6f507953c79f6fbc57691abe4e43069cd802d1567f55a1d125",
+    "mono-video.mkv": "11535ec4b7edd08c370f83d293d74b177830fbc2aaf26ab7245b37837fd5d413",
+    "stereo.wav": "32fa775f79655e3886cf700462aa0c367be43945dc189c6eac61791fd9b9bd40",
+    "stereo-control.wav": "9b0456eb78f1464a0221a8d81dd63e084fd2d9e69d1bd769958720e8093c687b",
+    "stereo.f32le": "13ad7ecc3da4027b3c498b588501fcfbb6f428e080e7367634bb41c821a5bbb6",
+    "stereo-video.mkv": "107cbfe24cad982bb0025b46f4cab4be62328f84f6d2fda1a36f8574e5a005c7",
+    "three-channel.wav": "81c4c9775e919c23415966867c845341472b11131cfafc4804c1fc23e4fef265",
+    "three-channel-control.wav": "b5a5147e8992d45c52b4b5394a97306e825a0ddfd5f9436e58dcad57ef6250c3",
+    "three-channel.f32le": "2efe18c2fd52a03ae77398ac586e9645fe21bdf9aff2bc347c2796f25916d8df",
+    "three-channel-video.mkv": "459d9d3968d4eccd1403a6c4be1158078b00b39b6dd5e310b4118200733d9b3a",
+    "extensible.wav": "44c0674caa3891e604040909276a87060481b7f8bfa5b8cc39471daf2c99df18",
+    "extensible-control.wav": "aff8073cf482194bd3bc38363ec4ec177cf7c5bcb69f921ec5bd1eb306e53d1a",
+    "extensible.f32le": "d4c6fc7001da7be1d251411f4aa868b633f6f96625a661f200e0cb8cd694ddab",
+    "extensible-video.mkv": "d43251eb9bd669f15a095ecc4120b8352ec628e1a930930a56e53a4a315649ac",
+    "unsupported-float8.wav": "bae13be0247f2526e499e05a2fe4aea7d34f0ed112ff7fcab6a90638702bafa4"
+  }
+}

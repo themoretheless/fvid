@@ -1,0 +1,7 @@
+{
+  "file": "http-interrupted-body.y4m",
+  "sha256": "92310cf1092232e84ef7da27bae5eadda9b3c7a9826a3dc90d28b5e8bff63f88",
+  "interrupt_at": 42,
+  "frames": 3,
+  "provenance": "Three authored progressive YUV420 frames; reader interruption is injected after a partial body download. No private media, network or external tools."
+}

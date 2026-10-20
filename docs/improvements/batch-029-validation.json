@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0052"
+  ],
+  "checked_at": "2026-10-15T17:16:38.348144+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-029-integrations-final.log",
+      "kind": "rust",
+      "passed": 28
+    },
+    {
+      "log": "evidence/batch-029-mp4-audio-worker.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-029-mp4-audio-unit.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-029-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-029-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 40,
+  "distinct_python_tests_passed": 1,
+  "before": [
+    "evidence/batch-029-mp4-audio-clock-before.log",
+    "evidence/batch-029-mp4-audio-negative-before.log"
+  ],
+  "qualification": [
+    "Matching8kHz clock control succeeds; four different media clocks independently reproduce incorrect presentation.",
+    "Twelve authored60ms VP9/PCM or raw ALAC clips cover5 media clocks and signed-ctts negative starts. Exact PCM, source clocks, rewind, seek and EOF pass.",
+    "Actual application audio-worker factory verifies exact captured PCM, clock, replay and seek for every new clip, with prior Matroska/MP4 preference controls preserved.",
+    "Partial decoded frames refuse explicitly; empty/entirely negative packets drop; fractional negative preroll uses exact rational sample clipping.",
+    "AAC priming/edit scheduling remains specialized. Ten related MP4 audio tests and21 container-selection regressions pass.",
+    "Normal tests load saved bytes without encoder/network. No public interface changed."
+  ],
+  "remaining": [
+    "No physical output-device, GUI/hardware or runtime speed claim.",
+    "Comprehensive non-AAC edit-list scheduling is outside this source-media clock correction."
+  ],
+  "counting": "One MP4 media/codec clock mismatch; codec and clock/negative variants add no IDs."
+}

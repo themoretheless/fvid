@@ -1,0 +1,14 @@
+{
+  "provenance": "Authored120ms neutral VP9 with two20ms8kHz PCM packets at0ms and100ms. Expected80ms silence preserves the declared gap. No encoder/private media/network.",
+  "sha256": {
+    "gap.mkv": "dfab843cc5a0e3f4e5be719b616502d48ed4d4fcb5c3f8a028027bc2c5263a99",
+    "expected-packet.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "expected-output.f32le": "9cfa33e376f1f5497a7c2808f447e4ca0c2331068a99f1e7193f10d4367457e4",
+    "overlap.mkv": "06900bd1fee6b1018b6f82ce2e4fec5a85def3b5063ae4b213e9c72f3dce069c",
+    "overlap-expected.f32le": "b190309469c5bcab057d863676bbe4a0a53dd62859756a0c8aaf4fd47c422362",
+    "duplicate.mkv": "5344b3d4ed7cd7507c83f30f1e2938f584e528ef2e914b225f21f712b1da2a9a",
+    "duplicate-expected.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "leading.mkv": "8c5a251b1a189e06b8ad291c4b219f62a78408ac96cf2e8b88d4281adecc9beb",
+    "leading-expected.f32le": "4ec786a4ca84df9d2b33d6e1784a237fd17b7431768a363b2ea519753f4c66bc"
+  }
+}

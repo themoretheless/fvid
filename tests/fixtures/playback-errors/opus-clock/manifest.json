@@ -1,0 +1,12 @@
+{
+  "provenance": "Authored Opus DTX packets and neutral VP9; no private data or external encoder/network.",
+  "files": {
+    "gap.mkv": "a780e72e7f71b2d5ed275e46b05e89d6cf0d972db16fb10135dab263dbd9e830",
+    "offset.mkv": "c81766a49d278478d89c732f05fb52cfd690fce52434b98d654d01b5f4350395",
+    "short-third.mkv": "8d6458789533dc26cf030b5cd7e66b4e8fc6ec31c411c30687336857a64ed9ea",
+    "short-shift-third.mkv": "01330dd803df1f3a38e7913e4702513ce6cb0b70e08ea59a97ff68507323e194",
+    "short-lace-third.mkv": "1e9fc7c8d3fa556ec68f832d20f1b4ccc46838e32ebfdc76f86fe7ee2ad2f04f",
+    "short-delay-tail.mkv": "8e7d8ede5c99b49cb955fdec197b0f8e1bc5f3f3222f056ee412a3d8bc8b6072",
+    "short-delay-head-tail.mkv": "b914e0e868ebae8286673371b5d548df60fe34fd9063ae657f9a1f777b493a2e"
+  }
+}

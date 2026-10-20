@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0064"
+  ],
+  "checked_at": "2026-10-15T20:25:16.981815+00:00",
+  "before": [
+    "evidence/batch-040-gap-qualified-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-040-cpal-final.log",
+      "kind": "rust",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-040-audio-thread.log",
+      "kind": "rust",
+      "passed": 28
+    },
+    {
+      "log": "evidence/batch-040-reader-integration.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-040-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-040-audio-fixtures.log",
+      "kind": "python",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-040-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Qualified native6-frame VP9 and two exact160-frame PCM packets have PTS0/100ms. Before callback concatenates40ms and loses80ms gap. After960 rendered frames contain exact160signal+640silence+160signal, clock120ms.",
+    "Additional authored overlap/duplicate/leading-gap fixtures prove queued samples are not replayed; seek90/110ms preserves the correct silence/payload suffix. Stereo gap wraps over the ring boundary without exposing old samples.",
+    "Huge timestamp gap and zero denominator refuse before publishing silence/payload; subsequent valid push and drain succeed. Complete gap plus payload reserves within existing32MiB queue cap.",
+    "Legacy ring-growth tests used dummy0 PTS for successive packets and now publish their actual queued ends. A48kHz fixture rounds its second start to683ms; its real16-frame gap is now retained, so accelerated-refill cursor expectation65552 replaces65536. These test corrections add no ID.",
+    "No physical-DAC or performance claim. Explicit generation stays separate from stored-asset tests."
+  ],
+  "compatibility": "Public signatures unchanged. CPAL now honors the documented presentation-time scheduling contract. Custom PCM producers that used repeated dummy0 timestamps for append semantics must send actual monotonic packet timestamps; backward overlaps are trimmed rather than appended.",
+  "counting": "One packet-timeline scheduling defect; gap/overlap/navigation/resource variants count0."
+}

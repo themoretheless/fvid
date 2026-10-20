@@ -13,6 +13,9 @@ use super::{
 };
 use crate::{Result, invalid};
 use std::sync::Arc;
+#[path = "avc_decoder_separate.rs"]
+mod separate;
+pub(super) use separate::project_parameters as project_separate_parameters;
 
 /// One DPB entry owns image and motion metadata together. Intra-only pictures
 /// have no motion field; co-located lookup treats them as intra at every cell.
@@ -42,6 +45,8 @@ struct Parameters {
     pairs: Vec<(Sps, Pps)>,
 }
 pub struct AvcDecoder {
+    colour_plane: Option<u8>,
+    separate_decoders: Option<Box<[AvcDecoder; 3]>>,
     length_size: u8,
     params: Parameters,
     initial_params: Parameters,
@@ -68,10 +73,7 @@ impl AvcDecoder {
         h: u32,
         motion_bytes: usize,
     ) -> Result<Arc<DecodedReferencePicture>> {
-        let full = (w as usize)
-            .checked_mul(h as usize)
-            .and_then(|n| n.checked_mul(3))
-            .ok_or_else(|| invalid("AVC frame view geometry overflow"))?;
+        let full = super::avc_field_picture::picture_bytes(&top.field.picture)?.checked_mul(2).ok_or_else(||invalid("AVC frame view storage overflow"))?;
         let motion = if top.motion_is_frame && bottom.motion_is_frame {
             match (&top.motion, &bottom.motion) {
                 (Some(a), Some(b)) if Arc::ptr_eq(a, b) => Some(Arc::clone(a)),
@@ -136,8 +138,13 @@ impl AvcDecoder {
             pps_nals,
             pairs,
         };
-        Ok(Self {
-            length_size: config.length_size,
+        Ok(Self::from_parameters(config.length_size, params, budget, None))
+    }
+    fn from_parameters(length_size: u8, params: Parameters, budget: usize, colour_plane: Option<u8>) -> Self {
+        Self {
+            colour_plane,
+            separate_decoders: None,
+            length_size,
             initial_params: params.clone(),
             params,
             decoded_sps: None,
@@ -153,7 +160,7 @@ impl AvcDecoder {
             last_poc: None,
             next_id: 0,
             failed: false,
-        })
+        }
     }
     pub fn active_vui(&self) -> Option<&super::avc::Vui> {
         self.params
@@ -172,6 +179,7 @@ impl AvcDecoder {
     }
     /// Drops reference pictures and requires the next coded picture to be IDR.
     pub fn reset(&mut self) {
+        self.separate_decoders = None;
         self.params.clone_from(&self.initial_params);
         self.decoded_sps = None;
         self.poc = PocDecoder::new();
@@ -214,7 +222,7 @@ impl AvcDecoder {
         self.field_pair_output
     }
     pub fn has_pending_field(&self) -> bool {
-        self.pending_field.is_some()
+        self.separate_decoders.as_ref().map_or(self.pending_field.is_some(), |planes| planes[0].has_pending_field())
     }
     fn decode_fields(
         &mut self,
@@ -236,10 +244,7 @@ impl AvcDecoder {
             return Err(crate::unsupported("unpaired AVC field before IDR"));
         }
         let (w, h) = sps.coded_dimensions();
-        let full = (w as usize)
-            .checked_mul(h as usize)
-            .and_then(|n| n.checked_mul(3))
-            .ok_or_else(|| invalid("AVC field storage overflow"))?;
+        let full = super::avc_picture::decoded_storage(sps,w as usize,h as usize)?;
         let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize / 2)?;
         // Migrated full-frame maps retain MBAFF pair flags. A full map can
         // exceed two compact field maps by those flags; reserve the larger
@@ -635,12 +640,31 @@ impl AvcDecoder {
             .iter()
             .find(|(_, p)| p.id == id)
             .ok_or_else(|| invalid("unknown AVC PPS"))?;
-        let slices =
-            super::avc_access_unit::prepare(packet, self.length_size, sps, pps, self.budget)?;
+        // A plane child receives a packet already bounded and validated by its
+        // owner. Its smaller reconstruction budget must not reject the full
+        // three-plane packet before selecting its own slices.
+        let packet_limit = if self.colour_plane.is_some() { packet.len() } else { self.budget };
+        let mut slices =
+            super::avc_access_unit::prepare(packet, self.length_size, sps, pps, packet_limit)?;
+        if sps.separate_colour_plane && self.colour_plane.is_none() {
+            let source = sps.clone();
+            return self.decode_separate(packet, allow_reordering, &source, &slices[0].header, pps.clone());
+        }
+        let projected = if let Some(plane) = self.colour_plane {
+            slices.retain(|slice| slice.header.colour_plane_id == plane);
+            Some(separate::project_parameters(sps, pps, plane)?)
+        } else { None };
+        let (sps, pps) = projected.as_ref().map_or((sps, pps), |(sps, pps)| (sps, pps));
         let header = &slices
             .first()
             .ok_or_else(|| invalid("missing AVC slice"))?
             .header;
+        if self.colour_plane.is_none() && self.separate_decoders.is_some() {
+            if !header.idr || self.has_pending_field() {
+                return Err(invalid("AVC separate-plane configuration change requires a complete IDR boundary"));
+            }
+            self.separate_decoders = None;
+        }
         if !matches!(
             header.slice_type,
             SliceType::I | SliceType::P | SliceType::Sp | SliceType::Si | SliceType::B
@@ -697,10 +721,7 @@ impl AvcDecoder {
             }
             if !header.idr {
                 let (w, h) = sps.coded_dimensions();
-                let full = (w as usize)
-                    .checked_mul(h as usize)
-                    .and_then(|n| n.checked_mul(3))
-                    .ok_or_else(|| invalid("AVC migrated frame geometry overflow"))?;
+                let full = super::avc_picture::decoded_storage(sps,w as usize,h as usize)?;
                 let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize)?;
                 let reserved = full
                     .checked_add(motion_bytes)
@@ -757,10 +778,8 @@ impl AvcDecoder {
         }
         let (w, h) = sps.coded_dimensions();
         let motion_bytes = ReferenceMotionField::storage_bytes(w as usize, h as usize)?;
-        let reference_bytes = (w as usize)
-            .checked_mul(h as usize)
-            .and_then(|n| n.checked_mul(3))
-            .and_then(|n| n.checked_add(motion_bytes))
+        let reference_bytes = super::avc_picture::decoded_storage(sps,w as usize,h as usize)?
+            .checked_add(motion_bytes)
             .and_then(|n| n.checked_mul(sps.max_num_ref_frames.max(1) as usize))
             .ok_or_else(|| invalid("AVC reference memory overflow"))?;
         let reference_bytes = if self.frame_field_dpb.is_some() {
@@ -999,10 +1018,7 @@ impl AvcDecoder {
                 } else {
                     header.frame_num
                 };
-                let full = (w as usize)
-                    .checked_mul(h as usize)
-                    .and_then(|n| n.checked_mul(3))
-                    .ok_or_else(|| invalid("canonical AVC frame geometry overflow"))?;
+                let full = super::avc_picture::decoded_storage(sps,w as usize,h as usize)?;
                 Some(
                     [false, true]
                         .map(|bottom| {

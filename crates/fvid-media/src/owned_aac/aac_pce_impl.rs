@@ -216,9 +216,15 @@ impl ProgramConfig {
             .iter()
             .position(|r| *r == self.sample_rate)
             .ok_or_else(|| invalid("PCE sample rate has no index"))?;
-        if !matches!(self.object_type, 1 | 2 | 3 | 4) {
-            return Err(invalid("PCE initialization requires AAC Main, LC, SSR or LTP"));
+        if !matches!(self.object_type, 1 | 2 | 3 | 4 | 17 | 19 | 23) {
+            return Err(invalid("PCE initialization requires AAC Main, LC, SSR, LTP, ER-LC, ER-LTP or ER-LD"));
         }
+        let pce_profile = match self.object_type {
+            1..=4 => u32::from(self.object_type - 1),
+            17 | 23 => 1,
+            19 => 3,
+            _ => unreachable!(),
+        };
         let mut fields = Vec::<bool>::new();
         let put = |fields: &mut Vec<bool>, value: u32, count: u8| {
             for shift in (0..count).rev() {
@@ -230,7 +236,7 @@ impl ProgramConfig {
         put(&mut fields, 0, 4);
         put(&mut fields, 0, 3);
         put(&mut fields, u32::from(self.tag), 4);
-        put(&mut fields, u32::from(self.object_type - 1), 2);
+        put(&mut fields, pce_profile, 2);
         put(&mut fields, index as u32, 4);
         for (position, width) in [
             (Position::Front, 4),
@@ -279,6 +285,9 @@ impl ProgramConfig {
         put(&mut fields, self.comment.len() as u32, 8);
         for b in &self.comment {
             put(&mut fields, u32::from(*b), 8);
+        }
+        if matches!(self.object_type, 17 | 19 | 23) {
+            put(&mut fields, 0, 2);
         }
         let output: Vec<u8> = fields
             .chunks(8)
@@ -333,7 +342,7 @@ impl ProgramConfig {
         } else {
             None
         };
-        let mut elements = Vec::new();
+        let mut elements = Vec::with_capacity((front + side + back + lfe) as usize);
         let mut tags = std::collections::HashSet::new();
         for (position, count) in [
             (Position::Front, front),
@@ -359,11 +368,11 @@ impl ProgramConfig {
                 });
             }
         }
-        let mut associated_data = Vec::new();
+        let mut associated_data = Vec::with_capacity(associated as usize);
         for _ in 0..associated {
             associated_data.push(input.read(4)? as u8);
         }
-        let mut coupling = Vec::new();
+        let mut coupling = Vec::with_capacity(coupled as usize);
         for _ in 0..coupled {
             coupling.push((input.bit()?, input.read(4)? as u8));
         }

@@ -16,6 +16,11 @@ fn track_entry(
     number: u64,
     options: Option<&TrackOptions>,
 ) -> Result<Vec<u8>> {
+    track_entry_with_usability(spec, number, options, true, true)
+}
+fn track_entry_with_usability(
+    spec: &TrackSpec<'_>, number: u64, options: Option<&TrackOptions>, enabled: bool, default_track: bool,
+) -> Result<Vec<u8>> {
     let metadata = options.and_then(|o| o.video.as_ref());
     let rotation = options.map_or(0, |o| o.rotation);
     let delay = options.map_or(0, |o| o.codec_delay_ns);
@@ -126,6 +131,8 @@ fn track_entry(
         geometry,
     ]
     .concat();
+    if !enabled { data.extend(uint(0xb9,0)?); }
+    if !default_track { data.extend(uint(0x88,0)?); }
     if delay != 0 {
         data.extend(uint(0x56aa, delay)?);
     }

@@ -1,0 +1,57 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0035"
+  ],
+  "checked_at": "2026-10-15T08:25:00.444330+00:00",
+  "before": {
+    "acceptance_failed": 2,
+    "cause": "Native RGB and YUVA exposure export both refuse the transform; exact authored decoding and RGB geometry export controls pass.",
+    "evidence": "evidence/batch-013-rgb-color-before-two-acceptances.log"
+  },
+  "qualification": [
+    "Ten authored three-keyframe 60ms FFV1 clips cover RGB8/10/12/16, RGBA8/16 and YUV444A8/10/12/16. Generation uses no external encoder or private media.",
+    "Independent doubled-channel exposure oracle and neutral identity check; exact alpha, clocks and precision.",
+    "Five operators and their noncommuting chain match qualified kernels; grayworld timeline selects frame 1.",
+    "Native software playback verifies exact exported RGB pixels, seek, rewind and EOF. Invalid options and unsupported RGB colorhold10/12 refuse without publication."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-013-rgb-color-owner-final.log",
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "log": "evidence/batch-013-rgb-color-owner-subsystem.log",
+      "passed": 493,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "log": "evidence/batch-013-rgb-color-root-alpha.log",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "log": "evidence/batch-013-rgb-color-root-playback-final.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "log": "evidence/batch-013-rgb-color-player-check.log",
+      "status": "passed"
+    },
+    {
+      "log": "evidence/batch-013-rgb-color-fixtures.log",
+      "python_passed": 1
+    }
+  ],
+  "remaining": [],
+  "limitations": [
+    "Colorhold RGB remains explicitly unsupported at coded depths10/12. Existing ignored external float-conversion compatibility test remains ignored; native precision is not degraded."
+  ],
+  "counting": "Five color operator wiring variants and alpha admission share one native color-pipeline integration capability; counted once."
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "file": "lc-44100-3.aac",
+    "exit_code": 0,
+    "bytes": 12288,
+    "expected_bytes": 12288,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "lc-44100-1.aac",
+    "exit_code": 0,
+    "bytes": 4096,
+    "expected_bytes": 4096,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "lc-48000-2.aac",
+    "exit_code": 0,
+    "bytes": 8192,
+    "expected_bytes": 8192,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "lc-48000-1.aac",
+    "exit_code": 0,
+    "bytes": 4096,
+    "expected_bytes": 4096,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "lc-96000-1.aac",
+    "exit_code": 0,
+    "bytes": 4096,
+    "expected_bytes": 4096,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "lc-8000-3.aac",
+    "exit_code": 0,
+    "bytes": 12288,
+    "expected_bytes": 12288,
+    "exact": true,
+    "stderr": ""
+  }
+]

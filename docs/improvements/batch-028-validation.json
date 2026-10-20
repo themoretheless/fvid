@@ -1,0 +1,70 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0050",
+    "FVID-0051"
+  ],
+  "checked_at": "2026-10-15T17:07:58.465514+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-028-related-integrations-final.log",
+      "kind": "rust",
+      "passed": 41
+    },
+    {
+      "log": "evidence/batch-028-all-audio-worker-qualified.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-028-audio-worker-accepted.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-028-webm-audio-accepted.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-028-writer-admission-final.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-028-player-build-final.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-028-fixtures-final.log",
+      "kind": "python",
+      "passed": 12
+    }
+  ],
+  "distinct_rust_tests_passed": 73,
+  "distinct_python_tests_passed": 12,
+  "before": [
+    "evidence/batch-028-matroska-default-tracks-before.log",
+    "evidence/batch-028-matroska-default-tracks-app-before.log",
+    "evidence/batch-028-matroska-default-tracks-transport-before.log",
+    "evidence/batch-028-pcm-clock-before.log",
+    "evidence/batch-028-pcm-clock-variants-before.log",
+    "evidence/batch-028-other-audio-clocks-before.log",
+    "evidence/batch-028-mp2-clock-valid-before.log"
+  ],
+  "qualification": [
+    "Default usable/decodable selection preserves exact video, clocks, seek and EOF. Empty flags default1; invalid/duplicate flags refuse specifically. Manual tracks and legacy no-default fallback remain available.",
+    "MP4 movie/preview preference is transported through private Matroska writer defaults, with source/output reorder preserved. Private count mismatch writes no header.",
+    "Actual player opening now uses preferred container selection; explicit number and invalid-index fallback remain compatible. Capture backend verifies exact PCM, rewind, seek and EOF for preferred Matroska/MP4 audio.",
+    "Four authored PCM videos cover little/big integers, float32 and negative presentation. Exact independent sample oracles, max/min signed timestamps and malformed decoded stride pass.",
+    "Six240ms synthetic compressed-audio videos reproduce/check original source clock propagation. FLAC/ALAC/MP3/MP2/AC3 now retime through generic decoded-audio presentation; specialized concurrent Vorbis scheduling is retained and tested as a control, excluded from new-change credit. Actual worker output equals decoded samples and source-derived clocks on playback/rewind.",
+    "Generation stays separate: authored samples use no encoder; compressed witnesses use FFmpeg only in their explicit generator. All normal tests load saved media without FFmpeg/network."
+  ],
+  "remaining": [
+    "Software/capture-backend qualification; no physical audio device, GUI rendering or hardware decoder claim.",
+    "No performance improvement claimed.",
+    "MP4 media clocks differing from codec sample rates are a separate audit candidate."
+  ],
+  "counting": "Two independent problems: default-track preference integration; generic Matroska decoded-audio ns/sample unit mismatch. Codec/fixture/test variants and concurrent Vorbis work add no IDs."
+}

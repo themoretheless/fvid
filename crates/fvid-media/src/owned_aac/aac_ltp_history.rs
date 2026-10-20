@@ -106,6 +106,50 @@ impl LtpHistory {
         }
         Ok(())
     }
+    /// Prepare a `2 * (N / 8)` input for short-window (`EightShort`) LTP analysis
+    /// of subwindow `window` (`0..8`), applying `ltp_short_lag` (`lag_offset - 8`).
+    pub fn estimate_short(&self, data: &LtpData, window: usize, output: &mut [f64]) -> Result<()> {
+        let n = self.frame_samples;
+        let small = n / 8;
+        let Usage::Windows(windows) = &data.usage else {
+            return Err(invalid("invalid AAC short LTP estimate usage"));
+        };
+        if window >= 8 || usize::from(data.lag) > 2 * n || output.len() != 2 * small {
+            return Err(invalid("invalid AAC LTP estimate geometry"));
+        }
+        let gain = GAINS
+            .get(usize::from(data.coefficient_index))
+            .ok_or_else(|| invalid("invalid AAC LTP coefficient index"))?;
+        let Some(short_pred) = &windows[window] else {
+            output.fill(0.0);
+            return Ok(());
+        };
+        if short_pred.lag_offset.is_some_and(|v| v > 15) {
+            return Err(invalid("invalid AAC LTP short lag offset"));
+        }
+        let delta = short_pred.lag_offset.map_or(0isize, |v| isize::from(v) - 8);
+        let lag = isize::from(data.lag as i16) + delta;
+        if lag < 0 || lag as usize + 2 * small > 4 * n {
+            return Err(invalid("invalid AAC LTP short lag range"));
+        }
+        let start = (2 * n as isize - lag) as usize;
+        if let Some(samples) = &self.floating {
+            if samples[start..start + 2 * small]
+                .iter()
+                .any(|value| !(value * gain).is_finite())
+            {
+                return Err(invalid("AAC LTP floating estimate overflow"));
+            }
+            for (out, value) in output.iter_mut().zip(&samples[start..start + 2 * small]) {
+                *out = value * gain;
+            }
+            return Ok(());
+        }
+        for (out, value) in output.iter_mut().zip(&self.samples[start..start + 2 * small]) {
+            *out = f64::from(*value) * gain;
+        }
+        Ok(())
+    }
     pub fn reset(&mut self) {
         self.samples.fill(0);
         if let Some(samples) = &mut self.floating {

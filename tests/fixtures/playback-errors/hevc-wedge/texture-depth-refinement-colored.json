@@ -1,0 +1,278 @@
+{
+  "provenance": "Owned PCM/CABAC and distinct source/target chroma; independent four-tap oracle in tests.",
+  "cases": [
+    {
+      "file": "texture-depth-refinement-colored-0-0-0.mp4",
+      "precision": 0,
+      "scale": 0,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-0-1-0.mp4",
+      "precision": 0,
+      "scale": 1,
+      "offset": 0,
+      "disparity": 2
+    },
+    {
+      "file": "texture-depth-refinement-colored-0--1-0.mp4",
+      "precision": 0,
+      "scale": -1,
+      "offset": 0,
+      "disparity": -2
+    },
+    {
+      "file": "texture-depth-refinement-colored-0-2-0.mp4",
+      "precision": 0,
+      "scale": 2,
+      "offset": 0,
+      "disparity": 4
+    },
+    {
+      "file": "texture-depth-refinement-colored-0--2-0.mp4",
+      "precision": 0,
+      "scale": -2,
+      "offset": 0,
+      "disparity": -4
+    },
+    {
+      "file": "texture-depth-refinement-colored-0-4-0.mp4",
+      "precision": 0,
+      "scale": 4,
+      "offset": 0,
+      "disparity": 8
+    },
+    {
+      "file": "texture-depth-refinement-colored-0--4-0.mp4",
+      "precision": 0,
+      "scale": -4,
+      "offset": 0,
+      "disparity": -8
+    },
+    {
+      "file": "texture-depth-refinement-colored-0-6-0.mp4",
+      "precision": 0,
+      "scale": 6,
+      "offset": 0,
+      "disparity": 12
+    },
+    {
+      "file": "texture-depth-refinement-colored-0--6-0.mp4",
+      "precision": 0,
+      "scale": -6,
+      "offset": 0,
+      "disparity": -12
+    },
+    {
+      "file": "texture-depth-refinement-colored-0-128-0.mp4",
+      "precision": 0,
+      "scale": 128,
+      "offset": 0,
+      "disparity": 254
+    },
+    {
+      "file": "texture-depth-refinement-colored-0--128-0.mp4",
+      "precision": 0,
+      "scale": -128,
+      "offset": 0,
+      "disparity": -254
+    },
+    {
+      "file": "texture-depth-refinement-colored-0-3--2.mp4",
+      "precision": 0,
+      "scale": 3,
+      "offset": -2,
+      "disparity": 2
+    },
+    {
+      "file": "texture-depth-refinement-colored-0--3-2.mp4",
+      "precision": 0,
+      "scale": -3,
+      "offset": 2,
+      "disparity": -2
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-0-0.mp4",
+      "precision": 2,
+      "scale": 0,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-1-0.mp4",
+      "precision": 2,
+      "scale": 1,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-2--1-0.mp4",
+      "precision": 2,
+      "scale": -1,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-2-0.mp4",
+      "precision": 2,
+      "scale": 2,
+      "offset": 0,
+      "disparity": 1
+    },
+    {
+      "file": "texture-depth-refinement-colored-2--2-0.mp4",
+      "precision": 2,
+      "scale": -2,
+      "offset": 0,
+      "disparity": -1
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-4-0.mp4",
+      "precision": 2,
+      "scale": 4,
+      "offset": 0,
+      "disparity": 2
+    },
+    {
+      "file": "texture-depth-refinement-colored-2--4-0.mp4",
+      "precision": 2,
+      "scale": -4,
+      "offset": 0,
+      "disparity": -2
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-6-0.mp4",
+      "precision": 2,
+      "scale": 6,
+      "offset": 0,
+      "disparity": 3
+    },
+    {
+      "file": "texture-depth-refinement-colored-2--6-0.mp4",
+      "precision": 2,
+      "scale": -6,
+      "offset": 0,
+      "disparity": -3
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-128-0.mp4",
+      "precision": 2,
+      "scale": 128,
+      "offset": 0,
+      "disparity": 64
+    },
+    {
+      "file": "texture-depth-refinement-colored-2--128-0.mp4",
+      "precision": 2,
+      "scale": -128,
+      "offset": 0,
+      "disparity": -63
+    },
+    {
+      "file": "texture-depth-refinement-colored-2-3--2.mp4",
+      "precision": 2,
+      "scale": 3,
+      "offset": -2,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-2--3-2.mp4",
+      "precision": 2,
+      "scale": -3,
+      "offset": 2,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-0-0.mp4",
+      "precision": 5,
+      "scale": 0,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-1-0.mp4",
+      "precision": 5,
+      "scale": 1,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5--1-0.mp4",
+      "precision": 5,
+      "scale": -1,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-2-0.mp4",
+      "precision": 5,
+      "scale": 2,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5--2-0.mp4",
+      "precision": 5,
+      "scale": -2,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-4-0.mp4",
+      "precision": 5,
+      "scale": 4,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5--4-0.mp4",
+      "precision": 5,
+      "scale": -4,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-6-0.mp4",
+      "precision": 5,
+      "scale": 6,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5--6-0.mp4",
+      "precision": 5,
+      "scale": -6,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-128-0.mp4",
+      "precision": 5,
+      "scale": 128,
+      "offset": 0,
+      "disparity": 8
+    },
+    {
+      "file": "texture-depth-refinement-colored-5--128-0.mp4",
+      "precision": 5,
+      "scale": -128,
+      "offset": 0,
+      "disparity": -8
+    },
+    {
+      "file": "texture-depth-refinement-colored-5-3--2.mp4",
+      "precision": 5,
+      "scale": 3,
+      "offset": -2,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-colored-5--3-2.mp4",
+      "precision": 5,
+      "scale": -3,
+      "offset": 2,
+      "disparity": 0
+    }
+  ]
+}

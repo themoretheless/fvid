@@ -138,3 +138,125 @@ fn switching_field_mp4_software_seek_and_rewind_emit_complete_pairs() {
         }
     }
 }
+
+#[test]
+fn mbaff_sp_si_public_inter_reconstruction_matches_oracle_and_refuses_non_extended() {
+    use fvid::codec::{
+        avc::{Pps, Sps},
+        avc_decoder::AvcDecoder,
+        avc_inter_picture::{
+            decode_inter_picture_with_motion, decode_inter_resolved_slices_with_motion,
+            decode_inter_slices_with_motion,
+        },
+        avc_slice::{SliceHeader, SliceType},
+        config::{AvcConfig, NalUnits},
+    };
+    let repro: Value =
+        serde_json::from_slice(&fixture("avc-mbaff-mixed-si-inter-reproducer.json")).unwrap();
+    for c in repro["cases"].as_array().unwrap() {
+        let cfg_bytes = hex(c["configuration"].as_str().unwrap());
+        let cfg = AvcConfig::parse(&cfg_bytes).unwrap();
+        let sps = Sps::parse(cfg.sps[0]).unwrap();
+        let pps = Pps::parse(cfg.pps[0], &sps).unwrap();
+        let expected = fixture(c["reference"].as_str().unwrap());
+        let frame_bytes = 32 * 64 * 3 / 2;
+        let packets = c["packets"].as_array().unwrap();
+        let mut dec = AvcDecoder::new(&cfg_bytes, 4 << 20).unwrap();
+        let mut previous = dec
+            .decode(&hex(packets[0].as_str().unwrap()))
+            .unwrap()
+            .unwrap();
+        for (idx, pkt_hex) in packets.iter().enumerate().skip(1) {
+            let pkt = hex(pkt_hex.as_str().unwrap());
+            let mut headers = Vec::new();
+            for nal in NalUnits::new(&pkt, cfg.length_size).unwrap() {
+                headers.push(SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap());
+            }
+            headers.sort_by_key(|h| h.first_mb);
+            let header_refs: Vec<&SliceHeader> = headers.iter().collect();
+            let prev_list = [previous.as_ref()];
+            let refs: Vec<[&[&fvid::codec::avc_picture::IntraPicture]; 2]> = header_refs
+                .iter()
+                .map(|h| {
+                    if matches!(h.slice_type, SliceType::I | SliceType::Si) {
+                        [&[][..], &[][..]]
+                    } else {
+                        [&prev_list[..], &[][..]]
+                    }
+                })
+                .collect();
+            let direct = vec![None; header_refs.len()];
+            let (picture, _) = decode_inter_resolved_slices_with_motion(
+                &header_refs,
+                &sps,
+                &pps,
+                &refs,
+                &direct,
+                4 << 20,
+            )
+            .unwrap();
+            let mut planar = Vec::new();
+            picture.write_planar(&mut planar).unwrap();
+            assert_eq!(
+                planar.as_slice(),
+                &expected[idx * frame_bytes..(idx + 1) * frame_bytes],
+                "{} frame {idx}",
+                c["file"]
+            );
+            if idx == 1 {
+                let mut bad_sps = sps.clone();
+                bad_sps.profile = 100;
+                let err = decode_inter_resolved_slices_with_motion(
+                    &header_refs,
+                    &bad_sps,
+                    &pps,
+                    &refs,
+                    &direct,
+                    4 << 20,
+                )
+                .err()
+                .unwrap();
+                assert_eq!(
+                    err.to_string(),
+                    "AVC SP/SI requires eight-bit Extended-profile 4:2:0 CAVLC"
+                );
+            }
+            previous = std::sync::Arc::new(picture);
+        }
+    }
+    let sp_manifest: Value = serde_json::from_slice(&fixture("avc-switching-mbaff.json")).unwrap();
+    let sp_case = &sp_manifest["cases"].as_array().unwrap()[0];
+    let cfg_bytes = hex(sp_case["configuration"].as_str().unwrap());
+    let cfg = AvcConfig::parse(&cfg_bytes).unwrap();
+    let sps = Sps::parse(cfg.sps[0]).unwrap();
+    let pps = Pps::parse(cfg.pps[0], &sps).unwrap();
+    let expected = fixture(sp_case["reference"].as_str().unwrap());
+    let packets = sp_case["packets"].as_array().unwrap();
+    let mut dec = AvcDecoder::new(&cfg_bytes, 4 << 20).unwrap();
+    let anchor = dec
+        .decode(&hex(packets[0].as_str().unwrap()))
+        .unwrap()
+        .unwrap();
+    let pkt1 = hex(packets[1].as_str().unwrap());
+    let mut headers = Vec::new();
+    for nal in NalUnits::new(&pkt1, cfg.length_size).unwrap() {
+        headers.push(SliceHeader::parse(nal.unwrap(), &sps, &pps).unwrap());
+    }
+    headers.sort_by_key(|h| h.first_mb);
+    let header_refs: Vec<&SliceHeader> = headers.iter().collect();
+    let anchor_list = [anchor.as_ref()];
+    let (pic, _) = decode_inter_slices_with_motion(
+        &header_refs,
+        &sps,
+        &pps,
+        [&anchor_list[..], &[][..]],
+        None,
+        4 << 20,
+    )
+    .unwrap();
+    let mut planar = Vec::new();
+    pic.write_planar(&mut planar).unwrap();
+    assert_eq!(planar.as_slice(), &expected[1536..3072]);
+    let _ = decode_inter_picture_with_motion;
+}
+

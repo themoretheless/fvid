@@ -6,6 +6,8 @@ pub struct PcmGain<'a, W> {
     gain: f32,
     input_channels: u16,
     output_channels: u16,
+    coefficients: [[f32; 8]; 8],
+    mono_stereo: [[f32; 2]; 8],
     frame: [f32; 8],
     filled: usize,
 }
@@ -39,55 +41,24 @@ impl<W: Write> Write for PcmGain<'_, W> {
             }
             let frame = &self.frame;
             let mut mixed = [0.0; 8];
-            // Standard speaker order follows owned_pcm_channels::standard_mask.
-            // LFE is omitted. Centre/surround contributions use -3 dB.
-            let k = std::f32::consts::FRAC_1_SQRT_2;
-            let (mut left, mut right) = if self.input_channels == 1 {
-                (frame[0], frame[0])
+            if self.output_channels == 1 {
+                // Mono is the average of the speaker-aware stereo fold. Keep
+                // that evaluation order identical to stereo then mono export.
+                let mut stereo = [0.0; 2];
+                for (i, &sample) in frame[..usize::from(self.input_channels)].iter().enumerate() {
+                    stereo[0] += sample * self.mono_stereo[i][0];
+                    stereo[1] += sample * self.mono_stereo[i][1];
+                }
+                mixed[0] = (stereo[0] + stereo[1]) * 0.5;
             } else {
-                (frame[0], frame[1])
-            };
-            if self.input_channels >= 3 {
-                left += k * frame[2];
-                right += k * frame[2];
-            }
-            match self.input_channels {
-                4 => {
-                    left += k * frame[3];
-                    right += k * frame[3];
+                for (i, &sample) in frame[..usize::from(self.input_channels)].iter().enumerate() {
+                    for (j, destination) in mixed[..usize::from(self.output_channels)]
+                        .iter_mut()
+                        .enumerate()
+                    {
+                        *destination += sample * self.coefficients[i][j];
+                    }
                 }
-                5 => {
-                    left += k * frame[3];
-                    right += k * frame[4];
-                }
-                6 => {
-                    left += k * frame[4];
-                    right += k * frame[5];
-                }
-                7 => {
-                    left += k * frame[4] + k * frame[5];
-                    right += k * frame[4] + k * frame[6];
-                }
-                8 => {
-                    left += k * frame[4] + k * frame[6];
-                    right += k * frame[5] + k * frame[7];
-                }
-                _ => {}
-            }
-            if self.output_channels > 2 {
-                // Mono occupies FC; stereo retains FL/FR. Additional speakers
-                // receive silence rather than synthetic surround or bass.
-                if self.input_channels == 1 {
-                    mixed[2] = frame[0];
-                } else {
-                    mixed[0] = frame[0];
-                    mixed[1] = frame[1];
-                }
-            } else if self.output_channels == 1 {
-                mixed[0] = (left + right) * 0.5;
-            } else {
-                mixed[0] = left;
-                mixed[1] = right;
             }
             for sample in &mixed[..usize::from(self.output_channels)] {
                 let value = sample * self.gain;
@@ -115,6 +86,23 @@ impl<'a, W: Write> PcmGain<'a, W> {
         input_channels: u16,
         output_channels: u16,
     ) -> Result<Self, String> {
+        let mask = crate::owned_pcm_channels::standard_mask(input_channels).unwrap_or(0) as u32;
+        Self::with_mask(output, gain, input_channels, output_channels, mask)
+    }
+    /// Gain/rematrix with an explicit source speaker mask; preserves identity
+    /// geometry and folds explicit speaker masks for mono/stereo output.
+    pub fn with_mask(
+        output: &'a mut W,
+        gain: f64,
+        input_channels: u16,
+        output_channels: u16,
+        input_mask: u32,
+    ) -> Result<Self, String> {
+        if input_channels != output_channels
+            && !crate::owned_pcm_channels::rematrix_layout_supported(input_channels, input_mask)
+        {
+            return Err("unsupported PCM source speaker layout".into());
+        }
         if !gain.is_finite() || !(0.0..=64.0).contains(&gain) {
             return Err("volume must be a finite linear gain within 0..=64".into());
         }
@@ -131,6 +119,18 @@ impl<'a, W: Write> PcmGain<'a, W> {
             gain: gain as f32,
             input_channels,
             output_channels,
+            coefficients: crate::owned_pcm_channels::rematrix_coefficients(
+                input_channels,
+                output_channels,
+                input_mask,
+            )?
+            .map(|row| row.map(|v| v as f32)),
+            mono_stereo: if output_channels == 1 && input_channels != 1 {
+                crate::owned_pcm_channels::stereo_coefficients(input_channels, input_mask)?
+                    .map(|row| row.map(|v| v as f32))
+            } else {
+                [[0.0; 2]; 8]
+            },
             frame: [0.0; 8],
             filled: 0,
         })
@@ -264,5 +264,42 @@ mod upmix_tests {
                 assert_eq!(actual, expected);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod quad_speaker_acceptance {
+    use super::*;
+    #[test]
+    fn quad_impulses_route_rear_pairs_independently_across_partial_frames() {
+        let input: [f32; 16] = [
+            1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
+        ];
+        let raw: Vec<u8> = input.iter().flat_map(|v| v.to_le_bytes()).collect();
+        let k = std::f32::consts::FRAC_1_SQRT_2;
+        for channels in [1u16, 2] {
+            let expected = if channels == 2 {
+                vec![1., 0., 0., 1., k, 0., 0., k]
+            } else {
+                vec![0.5, 0.5, k * 0.5, k * 0.5]
+            };
+            for chunk in [1usize, 3, 7, 16] {
+                let mut bytes = Vec::new();
+                let mut matrix = PcmGain::with_mask(&mut bytes, 1., 4, channels, 0x33).unwrap();
+                for block in raw.chunks(chunk * 4) {
+                    matrix.write_all(block).unwrap();
+                }
+                assert!(matrix.frame_complete());
+                drop(matrix);
+                let samples: Vec<f32> = bytes
+                    .chunks_exact(4)
+                    .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+                    .collect();
+                assert_eq!(samples, expected);
+            }
+        }
+        let mut sink = Vec::new();
+        assert!(PcmGain::with_mask(&mut sink, 1., 4, 2, 0xf).is_ok());
+        assert!(PcmGain::with_mask(&mut sink, 1., 4, 2, 0).is_ok());
     }
 }

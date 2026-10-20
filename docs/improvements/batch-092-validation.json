@@ -1,0 +1,40 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0112"
+  ],
+  "checked_at": "2026-10-16T04:35:02.296511+00:00",
+  "before": [
+    "evidence/batch-092-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-092-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-092-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-092-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-092-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "93specific direct wrong-row selections and15actual worker suffix mismatches occur at floor-millisecond published packet starts. This reproduces independently of111PCM rounding: reader row lookup incorrectly compares the floor target to the unrounded microsecond timeline.",
+    "Seek uses bounded binary search over the same pts_of values that next_packet publishes. Negative targets, release rows, interior targets and explicit EOF clamping retain existing behavior; native module microsecond APIs remain unchanged.",
+    "Four authored31row modules cover125integer/127/199/255fractional tempos.128direct published boundaries,24actual worker exact-boundary suffixes and fourEOF controls pass with native PCM,play andrewind.6reader units,seven integration tests,pure fixture reproduction and current player build pass.",
+    "Regression reads authored audio references in place and authors a separate short native VP9/PCM companion. No encoder/network/private media,physical output,sub-millisecond row timing upgrade or performance claim."
+  ],
+  "compatibility": "Seeking a published XM millisecond packet start now lands on that packet instead of its predecessor. Source timebase,signatures,PCM reconstruction and raw module microsecond lookup remain unchanged.",
+  "counting": "One reader clock-domain row-selection problem, independent of111decoder sample-count rounding.93boundaries,15worker mismatches and variants add noIDs."
+}

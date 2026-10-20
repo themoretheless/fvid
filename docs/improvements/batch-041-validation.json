@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0065"
+  ],
+  "checked_at": "2026-10-15T20:29:54.267900+00:00",
+  "before": [
+    "evidence/batch-041-pause-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-041-audio-thread-final.log",
+      "kind": "rust",
+      "passed": 29
+    },
+    {
+      "log": "evidence/batch-041-cpal.log",
+      "kind": "rust",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-041-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-041-audio-fixtures.log",
+      "kind": "python",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-041-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native60ms VP9 decodes3 frames and the real AudioPlayback decoder delivers all480 expected PCM samples before fault injection. Before pause error is ignored and no Error or stop attempt occurs.",
+    "After worker attempts stop and terminates with the original pause error. If stop also fails, both errors reach the caller. No false Ended is sent.",
+    "Successful pause remains a separate acceptance/control case; backend failure injection qualifies transport error handling and is not a physical-device failure reproduction. Existing worker/CPAL navigation and EOF regressions pass.",
+    "No API signature or normal pause behavior changes. Stored media is authored; ordinary tests use neither encoder nor network."
+  ],
+  "counting": "One silently discarded pause failure; stop-error diagnostic and successful control add no IDs."
+}

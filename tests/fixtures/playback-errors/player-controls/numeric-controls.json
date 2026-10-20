@@ -1,0 +1,7 @@
+{
+  "display_delta_us": -9223372036854775808,
+  "sync_local_us": 9223372036854775807,
+  "sync_peer_us": -9223372036854775808,
+  "duration_us": 1000000000000000000,
+  "provenance": "Boundary inputs for public playback-control APIs, alongside an authored decodable control clip. These qualify control arithmetic, not a GUI session or a claimed long-duration video."
+}

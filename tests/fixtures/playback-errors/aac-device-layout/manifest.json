@@ -1,0 +1,858 @@
+{
+  "cases": [
+    {
+      "name": "mono-top",
+      "channels": 1,
+      "samples": 6144,
+      "order": [
+        0
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "mono-bottom",
+      "channels": 1,
+      "samples": 6144,
+      "order": [
+        0
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          2
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "layered-front",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        2,
+        0,
+        1
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ],
+        [
+          "front",
+          false,
+          1,
+          2
+        ],
+        [
+          "front",
+          false,
+          2,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "layered-front-swap",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        2,
+        1,
+        0
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          2
+        ],
+        [
+          "front",
+          false,
+          1,
+          1
+        ],
+        [
+          "front",
+          false,
+          2,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "top-front-pair",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "front",
+          true,
+          0,
+          1
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "top-front-three",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        1,
+        0,
+        2
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ],
+        [
+          "front",
+          true,
+          0,
+          1
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "top-back-three",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        1,
+        0,
+        2
+      ],
+      "elements": [
+        [
+          "back",
+          false,
+          0,
+          1
+        ],
+        [
+          "back",
+          true,
+          0,
+          1
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "top-side",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "side",
+          true,
+          0,
+          1
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "bottom-surround",
+      "channels": 6,
+      "samples": 6144,
+      "order": [
+        5,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          2
+        ],
+        [
+          "side",
+          true,
+          0,
+          2
+        ],
+        [
+          "back",
+          true,
+          1,
+          2
+        ],
+        [
+          "lfe",
+          false,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "top-wide",
+      "channels": 5,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          1
+        ],
+        [
+          "front",
+          true,
+          0,
+          1
+        ],
+        [
+          "front",
+          true,
+          1,
+          1
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "top-with-lfe",
+      "channels": 4,
+      "samples": 6144,
+      "order": [
+        0,
+        3,
+        1,
+        2
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "front",
+          false,
+          1,
+          1
+        ],
+        [
+          "back",
+          false,
+          2,
+          1
+        ],
+        [
+          "lfe",
+          false,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ]
+      ]
+    },
+    {
+      "name": "normal-four",
+      "channels": 4,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "elements": [
+        [
+          "front",
+          true,
+          0,
+          0
+        ],
+        [
+          "front",
+          true,
+          1,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "multiple-lfe",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "lfe",
+          false,
+          0,
+          0
+        ],
+        [
+          "lfe",
+          false,
+          1,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "name": "normal-three-sce",
+      "channels": 3,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ],
+        [
+          "front",
+          false,
+          1,
+          0
+        ],
+        [
+          "front",
+          false,
+          2,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.7071067811865476
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "normal-crc",
+      "channels": 1,
+      "samples": 6144,
+      "order": [
+        0
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          1.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "short-comment",
+      "channels": 1,
+      "samples": 6144,
+      "order": [
+        0
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          1.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "short-comment-two",
+      "channels": 1,
+      "samples": 6144,
+      "order": [
+        0
+      ],
+      "elements": [
+        [
+          "front",
+          false,
+          0,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          1.0,
+          1.0
+        ]
+      ]
+    },
+    {
+      "name": "normal-ten",
+      "channels": 10,
+      "samples": 6144,
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "elements": [
+        [
+          "front",
+          true,
+          0,
+          0
+        ],
+        [
+          "front",
+          true,
+          1,
+          0
+        ],
+        [
+          "front",
+          true,
+          2,
+          0
+        ],
+        [
+          "front",
+          true,
+          3,
+          0
+        ],
+        [
+          "front",
+          true,
+          4,
+          0
+        ]
+      ],
+      "weights": [
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.7071067811865476
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  ],
+  "edits": [
+    {
+      "file": "layered-front-priming.mp4",
+      "base": "layered-front",
+      "head": 48,
+      "samples": 6096
+    },
+    {
+      "file": "normal-ten-priming.mp4",
+      "base": "normal-ten",
+      "head": 48,
+      "samples": 6096
+    }
+  ],
+  "delays": [
+    {
+      "file": "normal-ten-delay-floor.mkv",
+      "base": "normal-ten",
+      "head": 17,
+      "delay_ns": 354166,
+      "samples": 6127
+    },
+    {
+      "file": "normal-ten-delay-ceil.mkv",
+      "base": "normal-ten",
+      "head": 17,
+      "delay_ns": 354167,
+      "samples": 6127
+    }
+  ],
+  "files": {
+    "mono-top.asc": "99914bcaf2dd6a718f424e788550001db84e314196dab37f81482058727ca098",
+    "mono-top.mkv": "95b4f67d2d6d6898c7853d5628a538d94833a557952dfd9ccc87c8f7973568cf",
+    "mono-top.stereo.f32le": "91dfd733f8b35eaa1f79f8cf1366f2cca812c674dad5f1e9d73e8cfd6bd4947a",
+    "mono-top.mp4": "3572a462dff741815069bd6571ca7a9b6c826f7ae1806d7c7c3c0c9864e55013",
+    "mono-bottom.asc": "cf37d58fa860d3761629437984f5c8d5553e8bc86b2c2179c9dc933ec3bef40b",
+    "mono-bottom.mkv": "cfa3d78adf438746cf72f52d0cdfb751b931d68ebd33444276949ddf1188d13c",
+    "mono-bottom.stereo.f32le": "91dfd733f8b35eaa1f79f8cf1366f2cca812c674dad5f1e9d73e8cfd6bd4947a",
+    "mono-bottom.mp4": "f3228cee2656e10084623fffd0f6020d661bcd74138fd075b4c5edb7330c551d",
+    "layered-front.asc": "992b7fae83d6112c309c5385703928accf7c23f44ff9a85c35de7b0418801d9a",
+    "layered-front.mkv": "9f4c708507f9ac425310348167d21b41e642e98a80fa200fdaad3fd7c6d70228",
+    "layered-front.stereo.f32le": "02ba16678c07f0825c8b7065f61314cef3297c5f928667457fae276488f6e5c4",
+    "layered-front.mp4": "d5796aeef6e2c8d8feac454008baf4ce8be4b9322de7bd50ce26c61c8b93c18b",
+    "layered-front-swap.asc": "f8844d7c74365f618e62676b6778857d68185816d5f219d8b8ed80ecac9dee00",
+    "layered-front-swap.mkv": "b80809bd2fd0b4ce31ac4faa9b07a2228525e680dfdafdd16dd61306d3462165",
+    "layered-front-swap.stereo.f32le": "02ba16678c07f0825c8b7065f61314cef3297c5f928667457fae276488f6e5c4",
+    "layered-front-swap.mp4": "c54285996d593b456b1114f8194593ea2511b808d91587eb20da644a65158129",
+    "top-front-pair.asc": "ba84c1407ac8c5e5055eeabe2a257bb48abbdc0be365eee7e69446d8c962907b",
+    "top-front-pair.mkv": "5b79d8c797b24acff9a16164aa25ec31a623b082454e4b3d7911ab9196e74056",
+    "top-front-pair.stereo.f32le": "434c34d8ef1dfa9fca234080299e1994ebfbe90961e540af4e6616bd70a05068",
+    "top-front-pair.mp4": "63663da3c135aff4ec86a3f63bd8fdfd59a6361f7f7ae6ca69ec815302be5176",
+    "top-front-three.asc": "c936680069e1729940b536fb2b1e92b27246752f40a19fea9ba1867c39fad8c3",
+    "top-front-three.mkv": "2dfcb9ce660465f2bce83af377e9edbf0da8dd01e7fd2cc0c4d5399f9b50e932",
+    "top-front-three.stereo.f32le": "434c34d8ef1dfa9fca234080299e1994ebfbe90961e540af4e6616bd70a05068",
+    "top-front-three.mp4": "2c94d56917c278247e8544f1786d9cc7c638856e1e89e4997d5f3c2350f67f7f",
+    "top-back-three.asc": "6c827b25817bd657e53027c9e8b5809c7f783f0c0540a362f2edb2a883a9c2c9",
+    "top-back-three.mkv": "894f2c47c3f5313ef6fbdebf21fcb7cb7fd44a67d2b7ebb61ec148c6b97c048b",
+    "top-back-three.stereo.f32le": "434c34d8ef1dfa9fca234080299e1994ebfbe90961e540af4e6616bd70a05068",
+    "top-back-three.mp4": "095e446ad4dcf9e5ff2a9836184883951229d91d4bbddc28eb45de03b5267e3f",
+    "top-side.asc": "f05d642f6cc5fa63302096216839d7c2b895ca6e43f5f5fbc4332203a109b13e",
+    "top-side.mkv": "188f721a46dd80a1a27b9493019404f551029aa26bd48c0549f4e824e895bf30",
+    "top-side.stereo.f32le": "434c34d8ef1dfa9fca234080299e1994ebfbe90961e540af4e6616bd70a05068",
+    "top-side.mp4": "ef2d44d30254c9aed01931f86ddf34cad6725cf2a4266b7391ec75a62cd1ec03",
+    "bottom-surround.asc": "8635dd9a282250b345075b5be29be1814a88b77a41cded5bd7c772b55aa895d3",
+    "bottom-surround.mkv": "2a6d78412daaf4ef19ff05dbcf7d74e2e9e8f623adb9ae239abbca1182417c28",
+    "bottom-surround.stereo.f32le": "0b4ef0e2e7b354e6221fcfa009c946c8f269551ebbcc48f072c347a9a69124ac",
+    "bottom-surround.mp4": "fc9f71b3be44928749d45fd116942900f65b0d1ec22dad5c0d33fde5fb6cfb10",
+    "top-wide.asc": "a65cc9f4bf937cdc36bb1cfd9b34418cd0e3453d347679657adbcbd4cdf638c9",
+    "top-wide.mkv": "6e067e0f600c724f16d94c0ac79d19c552fec08341b1619030cce91d0a766322",
+    "top-wide.stereo.f32le": "0b4ef0e2e7b354e6221fcfa009c946c8f269551ebbcc48f072c347a9a69124ac",
+    "top-wide.mp4": "43f4c8912746e66f95e8d83a7dabe8f70f35f7955031921a90688ed124f69083",
+    "top-with-lfe.asc": "9a9d92a7f7f2933ec147c5926a1c8fc4b9b14e0479f34058e6dcd540b74f9dc7",
+    "top-with-lfe.mkv": "be216bdc305a1b1a3b6d551eb1fd5d9a6e9c6680dffebd49df53951f29c10c74",
+    "top-with-lfe.stereo.f32le": "02ba16678c07f0825c8b7065f61314cef3297c5f928667457fae276488f6e5c4",
+    "top-with-lfe.mp4": "f57ec47a4007c11d4a5daff631cceb6067a98e3f60646485391ed3bc86aa9f83",
+    "normal-four.asc": "890466d878335f919dbdd372915fd35dd189a1cb4eb380b186d42f7c55f2f320",
+    "normal-four.mkv": "327c4d5685871fca2cb71b1bdf19033a59853e6b671b81da95ca2dfa9575481a",
+    "normal-four.stereo.f32le": "518ad0b442c130d1e137dfc0ce87a3c6626336d4e57036c05da28b48f304e288",
+    "normal-four.mp4": "4a42f61a2af0ae959dd9ea16ed932731406e6bcfbef0ed03e9e14022894bebbe",
+    "multiple-lfe.asc": "7d0fd167b132663c072f617eee2f898558092c5914367ddeec1289c086dda94b",
+    "multiple-lfe.mkv": "f26d235031cb00dfa5a92b1ebbc80989269a8fc355db5dcdf43aeb0ca2baa5de",
+    "multiple-lfe.stereo.f32le": "91dfd733f8b35eaa1f79f8cf1366f2cca812c674dad5f1e9d73e8cfd6bd4947a",
+    "multiple-lfe.mp4": "97feee73d231bbcb4f1e37e82f408f453d67e3fcb7f0396302e4ad93f18babe2",
+    "normal-three-sce.asc": "ba07645262fd66db9954ad65e974492973974fa76d7bb06d029015974d9f3d0f",
+    "normal-three-sce.mkv": "cc526b49c37bd696c529382d881e4f9c99321098a97e5057bb412b997ffa449f",
+    "normal-three-sce.stereo.f32le": "4ddc305b6695b5a0981e3d00d7d8c521ea4de9c2619cd74af97f0f81a598c317",
+    "normal-three-sce.mp4": "6cb063f688b8d78a0922fea9225d3230745982528b31efd03375ae2a3df56c6f",
+    "normal-crc.asc": "3617dc25aec39f92261ee87b1572876fb4cd6793a305e67fb8b43b83d4025fe7",
+    "normal-crc.mkv": "946aa873347059f883442eb27f957ffa39c1ef99cb51dc3cd6aaaf0aecc7d370",
+    "normal-crc.stereo.f32le": "107ff23e693ea56f23b071b6dc780f858a8f5c03f29cc8339fecbf95364f047f",
+    "normal-crc.mp4": "e35e625299529949665e9ed65763ea3ac8da38b69e30d1326fbd0d8c9362d0bc",
+    "short-comment.asc": "f416dea0ed40ab2c6014cd4456a57fab0873c7f065aafde15c676f4cb9e8b445",
+    "short-comment.mkv": "7c9f19cc85ba8af8605079c4e8edd7ef18c8830837a531e394f324f7c1e3d455",
+    "short-comment.stereo.f32le": "107ff23e693ea56f23b071b6dc780f858a8f5c03f29cc8339fecbf95364f047f",
+    "short-comment.mp4": "e4468ba6616e3353f4a68b48d52b6406b09d7c83e204ddb4cb8cb0819d9c720d",
+    "short-comment-two.asc": "6f95194e7b9cd4ca08cf03dd84fe0d48376a08a979ef8c2b25f91dee819fff2a",
+    "short-comment-two.mkv": "beaeaf6fc66766988e6143cfbc5dc61b7ae54574a942df6ee6a4be4cab4d81b3",
+    "short-comment-two.stereo.f32le": "107ff23e693ea56f23b071b6dc780f858a8f5c03f29cc8339fecbf95364f047f",
+    "short-comment-two.mp4": "e9cbc091b71f665018528ffc60087f836b3fcc1c947fbf21c2b207f8a13ded0b",
+    "normal-ten.asc": "c968609594d1188ee56522595f65368b85d1383afc928192c3d8c35ffe7d68bc",
+    "normal-ten.mkv": "9af0660dc923e0d542b10a9fc323858830a25f64d808fbe22d25a9b38133df2d",
+    "normal-ten-delay-floor.mkv": "550caf0aaf20c3a79af867056bc05704aa3057659a64b233aa4392fa545324e6",
+    "normal-ten-delay-ceil.mkv": "39c08b63db7d8478ddafd2532e4ffd253b5b3e0243fc4788448d063e3924a85b",
+    "normal-ten.stereo.f32le": "d5db77907f8e807a91c63b4a655b0b1edb2b8960b42283d565f051b1d9e8bf6a",
+    "normal-ten.mp4": "6cd05559c85328b93d2200bca021a8ce446b15ea30226da5bcc1130707684cd5",
+    "layered-front-priming.mp4": "db8ed46fded544d6812da3730807126e0c861d39bb9a6cfd09b95836e5e8fe40",
+    "normal-ten-priming.mp4": "43a127d84bcc00f0a0e93965e6daa576d749fa0249a01e911abc1055b38f98c3"
+  }
+}

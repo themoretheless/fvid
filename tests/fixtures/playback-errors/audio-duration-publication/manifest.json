@@ -1,0 +1,15 @@
+{
+  "synthetic": true,
+  "video": "authored VP9",
+  "audio": "authored Opus DTX",
+  "initial_ns": {
+    "control": 60000000,
+    "tail": 60000000,
+    "empty": 0
+  },
+  "end_ns": {
+    "control": 60000000,
+    "tail": 20000000,
+    "empty": 0
+  }
+}

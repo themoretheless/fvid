@@ -1,0 +1,32 @@
+{
+  "provenance": "Authored sparse MIDI VLQ/tempo arithmetic probes. Long claims are parser-only; no huge timeline is rendered. Normal100ms note and short native VP9/PCM companion provide playback controls. No private source/encoder/network.",
+  "cases": [
+    {
+      "name": "wide-product",
+      "file": "wide-product.mid",
+      "microseconds": 563104541301327
+    },
+    {
+      "name": "wide-segment",
+      "file": "wide-segment.mid",
+      "microseconds": 563104541302792
+    },
+    {
+      "name": "out-of-range",
+      "file": "out-of-range.mid",
+      "microseconds": null
+    },
+    {
+      "name": "control",
+      "file": "control.mid",
+      "microseconds": 100000
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "wide-product.mid": "3ee43d71b351920fa543d4a8d41728cb038b97fd4b17ce13bd3e869f7c6e49be",
+    "wide-segment.mid": "ac2e89035d024dbe26f5c90d48d95d4dd6f0b1943cbeba573fc50c8ed073e657",
+    "out-of-range.mid": "636f69be4e412c250de8a6d5a0af352e7d379d6ec8c80ee043368f59755e4b1f",
+    "control.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3"
+  }
+}

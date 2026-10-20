@@ -1,0 +1,9 @@
+{
+  "provenance": "Twelve saved authored AVC pictures from control.mp4. Long synthetic clock only; no private media, encoder or network.",
+  "timescale": 7,
+  "sample_delta": 2000000001,
+  "declared_duration_ticks": 140000000007,
+  "sha256": {
+    "clock.mp4": "24733054b819aaa2e991c2975687b18e424817702258d9c9141592aa689fd723"
+  }
+}

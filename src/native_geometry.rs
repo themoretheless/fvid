@@ -89,7 +89,7 @@ impl VideoGeometry {
             for (pixel,sample) in output.data.chunks_exact(3*bytes).zip(data.chunks_exact_mut(bytes)) {sample.copy_from_slice(&pixel[..bytes]);}
             Some(data)
         } else {None};
-        crate::playback_native::PackedPlanar::with_alpha(color,frame.depth,frame.colour,alpha)
+        crate::playback_native::PackedPlanar::with_alpha(color,frame.depth,frame.colour,alpha)?.with_rgb_limited(frame.rgb_limited)
     }
     /// Container orientation and crop precede user geometry for both color and alpha.
     /// Insets are left, top, right, bottom in display coordinates.
@@ -115,7 +115,7 @@ impl VideoGeometry {
         let (color,alpha)=fvid_media::owned_display_geometry::apply(
             &frame.frame,frame.alpha.as_deref(),frame.depth,coded.map(u64::from),rotation,
         ).map_err(|e|invalid(&e))?;
-        let normalized=crate::playback_native::PackedPlanar::with_alpha(color,frame.depth,frame.colour,alpha)?;
+        let normalized=crate::playback_native::PackedPlanar::with_alpha(color,frame.depth,frame.colour,alpha)?.with_rgb_limited(frame.rgb_limited)?;
         self.apply_packed_sampling(&normalized,media)
     }
 

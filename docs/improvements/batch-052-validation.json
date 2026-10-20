@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0076"
+  ],
+  "checked_at": "2026-10-15T23:09:10.921797+00:00",
+  "before": [
+    "evidence/batch-052-controls-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-052-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-052-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-052-player-timeline.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-052-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-052-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "The authored60ms VP9/PCM fixture decodes exactly before device faults. Six running-worker cases separate successful resume/volume/rate controls from their injected refusals. Before correction each terminal Error left output active and a later seek queued3200totalbytes vs1920initialbytes.",
+    "resume_clock now propagates success to command processing and publishes playing only after successful device resume. Failed resume, gain or rate routes through the same stop-and-terminate transition handler. Follow-up seek/play cannot queue PCM after refusal.",
+    "Successful control commands remain usable and a subsequent seek delivers the exact320-frame suffix.31 worker tests, Player duration timeline, native navigation/Opus integrations, deterministic fixtures and player build pass. Formatting-only test edits are included in final integration reruns and count zero.",
+    "This qualifies the AudioBackend custom error contract with synthetic native media; it does not assert a physical device failure or changed successful resampling/volume DSP. No public signatures or performance claim."
+  ],
+  "compatibility": "AudioEvent::Error from a device control remains terminal for callers and is now also terminal for the worker/device. A failed handle must be reopened.",
+  "counting": "One inconsistent terminal device-command error state. Resume, gain and rate are command variants, not separate IDs."
+}

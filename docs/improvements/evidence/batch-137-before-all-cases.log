@@ -1,0 +1,17 @@
+
+thread 'main' (11026859) panicked at /private/tmp/fvid-native-subtitles-before137.rs:73:25:
+attempt to multiply with overflow
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+case=0 panic=true
+
+thread 'main' (11026859) panicked at /private/tmp/fvid-native-subtitles-before137.rs:73:41:
+attempt to multiply with overflow
+case=1 panic=true
+
+thread 'main' (11026859) panicked at /private/tmp/fvid-native-subtitles-before137.rs:73:25:
+attempt to add with overflow
+case=2 panic=true
+
+thread 'main' (11026859) panicked at /private/tmp/fvid-native-subtitles-before137.rs:64:18:
+attempt to multiply with overflow
+case=3 panic=true

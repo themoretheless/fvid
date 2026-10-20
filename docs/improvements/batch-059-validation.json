@@ -1,0 +1,60 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0083"
+  ],
+  "checked_at": "2026-10-16T00:03:03.702598+00:00",
+  "before": [
+    "evidence/batch-059-valid-bits-before.log"
+  ],
+  "sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/mmreg/ns-mmreg-waveformatextensible",
+    "https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ksmedia/ns-ksmedia-waveformatextensible"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-059-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-059-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-059-player-factory.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-059-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-059-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-059-shared-generator.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-059-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six authored20ms PCM cases specify12-in16,20-in24,24-in32,16-in32,8-in16 and7-in8 precision/storage, with signed/unsigned extrema and mono/stereo. Plain-Wave and matching native VP9/PCM controls decode exactly; independent owned WaveInfo already identifies correct storage/valid bits, stride and160frames. Root playback refuses all six before correction.",
+    "Before correction the same field overwrite also admits an illegal12-bit storage container with8valid bits. The fix retains byte-aligned stored width for PCM stride/decoder normalization, checks valid precision separately, and rejects unequal float precision. Microsoft primary documentation confirms separate precision/storage and left-aligned canonical zero padding.",
+    "Root metadata/normalization and real worker playback/rewind/EOF now match all controls exactly. Four corrupt header variants refuse for their precise container/precision error; full-width extensible float32 remains accepted. Zero precision retains the existing owned-reader convention of refusal.",
+    "33 WAV/31 worker tests, Wave8/PCM/AVI EOF integrations, six actual Player factory routes, deterministic fixture/shared-generator checks and player build pass. Factory checks do not assert physical DAC output.",
+    "Only PCM/float handling changes; compressed extensible union admission retains its prior behavior. Samples use canonical zero padding; per-sample nonzero-padding-bit validation and speaker-layout routing are not claimed. No public signatures or performance change."
+  ],
+  "compatibility": "Valid WAVE extensible PCM precision smaller than storage width now plays with correct frame stride and amplitude. bits_per_sample denotes stored decoder width, matching owned inspection. Malformed non-byte storage and invalid PCM/float precision remain/refuse precisely.",
+  "counting": "One precision-versus-storage field confusion. Six valid layouts, malformed controls, metadata, factory routing and generator reuse add no IDs."
+}

@@ -1,0 +1,188 @@
+{
+  "provenance": "Authored three-order XM navigation, literal expected order/row traces and independent flattened-score controls. Includes both channel orders,multiple breaks,large target,isolated B/D. Signed16loop and authored VP9/PCM companion. No external encoder,network or private media.",
+  "cases": [
+    {
+      "name": "jump-then-break",
+      "file": "jump-then-break.xm",
+      "control": "jump-then-break-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "break-then-jump",
+      "file": "break-then-jump.xm",
+      "control": "break-then-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "jump-two-breaks",
+      "file": "jump-two-breaks.xm",
+      "control": "jump-two-breaks-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "jump-large-break",
+      "file": "jump-large-break.xm",
+      "control": "jump-large-break-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "jump-only",
+      "file": "jump-only.xm",
+      "control": "jump-only-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "break-only",
+      "file": "break-only.xm",
+      "control": "break-only-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "before_failure": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "jump-then-break.xm": "2e989c148346b3ac1664a733c876a0aa3f07e32472ce00c90e8e3228a39bc010",
+    "jump-then-break-control.xm": "acaa32e9fe692be182eea457baec9be8f49c6c006c5038883955e6c6725a3cac",
+    "break-then-jump.xm": "119423f3c9cbc54217f52c17e0a506d0cbc51f785c56c4c142b64ccf5fb946b7",
+    "break-then-jump-control.xm": "9876feca03a05602ef9474e9c0634154de545865129e548218e18c4b8fb099e3",
+    "jump-two-breaks.xm": "187ef9b1cfc6441419539b689f42adfb552f6a00869a118cb882dc921eeb782b",
+    "jump-two-breaks-control.xm": "acaa32e9fe692be182eea457baec9be8f49c6c006c5038883955e6c6725a3cac",
+    "jump-large-break.xm": "0f7f92c855e3b35e65f1368eef3d7c6e1a8832521e25a35a90f5efc3890c05ef",
+    "jump-large-break-control.xm": "9876feca03a05602ef9474e9c0634154de545865129e548218e18c4b8fb099e3",
+    "jump-only.xm": "081e7faf5972c4c1fb9acffe0400294fdb2f5eac5dfe0325fcaad6a6583fb80c",
+    "jump-only-control.xm": "9876feca03a05602ef9474e9c0634154de545865129e548218e18c4b8fb099e3",
+    "break-only.xm": "35622fcaa1e1ee24d43100b5471fd11430eb26a5bd2001ae075b1996e1e3bf2b",
+    "break-only-control.xm": "5fceeb80415f233bf510baf1a6b8449a29090fc49b8fdff46671c53171eeb9d9"
+  }
+}

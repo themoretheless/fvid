@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0090"
+  ],
+  "checked_at": "2026-10-16T01:40:35.438105+00:00",
+  "before": [
+    "evidence/batch-066-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-066-integration.log",
+      "kind": "rust",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-066-smf.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-066-xm.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-066-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-066-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "MIDI complete packet endpoint2200ms and XM480ms include their release windows. Previously exact/beyond endpoints return the last release packet and XM i64MAX seek overflows its millisecond-to-microsecond multiplication. Six precise failures reproduce on existing authored synthetic controls.",
+    "MIDI clamps to packet_count rather than packet_count-1 with checked usize conversion. XM checks complete release endpoint before converting time and uses saturating multiplication for the remaining search. At/beyond complete end returns the exhausted cursor; score-end and release-window seeks remain available.",
+    "In-range targets0,1,lastmillisecond preserve encoded packet bytes and landing. Native full synthesis is the consistency baseline for actual worker play/rewind and empty complete-EOF seek; this is not a reference-quality synthesizer claim.",
+    "Existing authored MIDI/XM references are hashed and read in place. A short authored VP9/PCM companion decodes natively; these regressions concern timeline audio readers, not embedding MIDI/XM in a video container. Five SMF/six XM units, related integrations, fixture reproducibility and player build pass.",
+    "Score duration metadata is unchanged in this item and can differ from the complete release timeline. Release windows intentionally remain present. No32bit runtime, physical DAC, performance or codec-accuracy claim."
+  ],
+  "compatibility": "Seek beyond the whole rendered/release timeline now reaches EOF rather than revisiting the release packet. In-range and score-end release behavior remain; no public signatures change.",
+  "counting": "One bounded timeline seek cursor issue including XM overflow at an extreme beyond-end target; no extra IDs for variants or units."
+}

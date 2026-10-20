@@ -1,0 +1,20 @@
+{
+  "provenance": "Existing authored synthetic audio references read in place; separate20ms native VP9/PCM video control. This regression targets raw elementary audio EOF seek, not Matroska demux or physical output.",
+  "cases": [
+    {
+      "kind": "flac",
+      "source": "playback-errors/flac-native/16-0-verbatim-0.flac",
+      "sha256": "8a96cf68dddef40c201f74df2d2c23ec4628134459d2b5593413e22d99a07530"
+    },
+    {
+      "kind": "ac3",
+      "source": "audio/ac3-stereo.ac3",
+      "sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb"
+    },
+    {
+      "kind": "mp2",
+      "source": "mp3/layer-ii.mp2",
+      "sha256": "7bc6816a45de16b3eb67e996ce78bac76069e6d46c2e4181fd40783b90ee10c8"
+    }
+  ]
+}

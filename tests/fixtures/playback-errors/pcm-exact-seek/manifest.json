@@ -1,0 +1,164 @@
+{
+  "provenance": "Authored mono8k PCM integer8/16/24/32 and float32/64 WAV/AIFF/AU. Existing20ms authored references read in place;6147frame numeric ramps cross three2048frame packet boundaries. Short native VP9/PCM companions. No private input/encoder/network.",
+  "cases": [
+    {
+      "name": "wav-int8",
+      "kind": "wav",
+      "source": "playback-errors/audio-reader-eof/wav-int8.wav",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "wav-int16",
+      "kind": "wav",
+      "source": "playback-errors/audio-reader-eof/wav-int16.wav",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "wav-int24",
+      "kind": "wav",
+      "source": "playback-errors/audio-reader-eof/wav-int24.wav",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "wav-int32",
+      "kind": "wav",
+      "source": "playback-errors/audio-reader-eof/wav-int32.wav",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "wav-float32",
+      "kind": "wav",
+      "source": "playback-errors/audio-reader-eof/wav-float32.wav",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "aiff-int8",
+      "kind": "aiff",
+      "source": "playback-errors/audio-reader-eof/aiff-int8.aiff",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "aiff-int16",
+      "kind": "aiff",
+      "source": "playback-errors/audio-reader-eof/aiff-int16.aiff",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "aiff-int24",
+      "kind": "aiff",
+      "source": "playback-errors/audio-reader-eof/aiff-int24.aiff",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "aiff-int32",
+      "kind": "aiff",
+      "source": "playback-errors/audio-reader-eof/aiff-int32.aiff",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "aiff-float32",
+      "kind": "aiff",
+      "source": "playback-errors/audio-reader-eof/aiff-float32.aiff",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "au-int8",
+      "kind": "au",
+      "source": "playback-errors/audio-reader-eof/au-int8.au",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "au-int16",
+      "kind": "au",
+      "source": "playback-errors/audio-reader-eof/au-int16.au",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "au-int24",
+      "kind": "au",
+      "source": "playback-errors/audio-reader-eof/au-int24.au",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "au-int32",
+      "kind": "au",
+      "source": "playback-errors/audio-reader-eof/au-int32.au",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "au-float32",
+      "kind": "au",
+      "source": "playback-errors/audio-reader-eof/au-float32.au",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "wav-float64",
+      "kind": "wav",
+      "file": "wav-float64.wav",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "aiff-float64",
+      "kind": "aiff",
+      "file": "aiff-float64.aiff",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "au-float64",
+      "kind": "au",
+      "file": "au-float64.au",
+      "expected": "short.f32le",
+      "frames": 160
+    },
+    {
+      "name": "wav-long-int16",
+      "kind": "wav",
+      "file": "wav-long-int16.wav",
+      "expected": "long.f32le",
+      "frames": 6147
+    },
+    {
+      "name": "aiff-long-int16",
+      "kind": "aiff",
+      "file": "aiff-long-int16.aiff",
+      "expected": "long.f32le",
+      "frames": 6147
+    },
+    {
+      "name": "au-long-int16",
+      "kind": "au",
+      "file": "au-long-int16.au",
+      "expected": "long.f32le",
+      "frames": 6147
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "short.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "wav-float64.wav": "bd50e403cfe6aba75c9359873f1213a24a2afac07a861b6b24b79870712a60c2",
+    "aiff-float64.aiff": "99d21239c92886dec8a2a3482bf5fb157c792dd4f8b95508a66f703dbad17b29",
+    "au-float64.au": "d059cb01015e4d9a3161e93557f5b9e08de0039ea03b705dd310430a550655c5",
+    "long.f32le": "d25222de34ac9bf75b561588630e8db0559611d9bef76710c561d9b3771dca87",
+    "wav-long-int16.wav": "0aa31dc02cff430f44a05148e84d0b5dea2a3d569fbfa010555cbf8a6a7c50f3",
+    "aiff-long-int16.aiff": "662ab5b1017e644fe7c9c75a48b5030bc9b3dd8fd704b0115561491cbf742c4e",
+    "au-long-int16.au": "5a1c44beade81615737bdf0dc5a725b6acd2810c918223270b0c1498d5cb9a0f",
+    "long-video.mkv": "ab20ef971f1cfa8ff28f1be39b26cecad7fddf50c639f85a13c1dee578e65688"
+  }
+}

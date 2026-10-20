@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0066"
+  ],
+  "checked_at": "2026-10-15T20:35:16.060013+00:00",
+  "before": [
+    "evidence/batch-042-flush-qualified-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-042-audio-thread-final.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-042-cpal.log",
+      "kind": "rust",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-042-navigation-integration.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-042-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-042-audio-fixtures.log",
+      "kind": "python",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-042-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native60ms VP9 and three20ms PCM packets yield480 exact samples before injection. Before ignored seek flush queues800 total frames, rewind queues960, mixing new decoding into old480-frame output. Both failures are recorded in the qualified baseline.",
+    "After failed navigation calls stop, sends terminal Error, exits worker, and leaves total delivered PCM at480 frames. Successful seek/rewind controls retain their exact320/480-sample tails.",
+    "Pause failure uses the same internal error helper and its previous success/failure/stop-error tests still pass. No public signatures change.",
+    "This is an injected custom AudioBackend failure contract test. Current CPAL flush is infallible; no claim of reproducing a physical CPAL flush failure. Generation is separate from offline stored-asset regressions."
+  ],
+  "counting": "One ignored navigation flush defect; seek/rewind variants and shared error helper count0."
+}

@@ -1,0 +1,53 @@
+{
+  "provenance": "Five authored200ms MIDI notes compare ResetAllControllers121 with explicit expression127 and centered pitch bend while preserving channel volume/program. Up/down bends,channel15,nondefault volume/program,mixed channel isolation and unchanged-state control. Separate authored native VP9/PCM video. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "bend-up",
+      "file": "bend-up.mid",
+      "control": "bend-up-explicit.mid",
+      "channel": 0,
+      "program": 0
+    },
+    {
+      "name": "bend-down",
+      "file": "bend-down.mid",
+      "control": "bend-down-explicit.mid",
+      "channel": 15,
+      "program": 0
+    },
+    {
+      "name": "volume-program",
+      "file": "volume-program.mid",
+      "control": "volume-program-explicit.mid",
+      "channel": 0,
+      "program": 43
+    },
+    {
+      "name": "mixed-channels",
+      "file": "mixed-channels.mid",
+      "control": "mixed-channels-explicit.mid",
+      "channel": 0,
+      "program": 17
+    },
+    {
+      "name": "already-default",
+      "file": "already-default.mid",
+      "control": "already-default-explicit.mid",
+      "channel": 0,
+      "program": 23
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "bend-up.mid": "8d595ce80f7adfc0c4a24d496c17556e844212d590e37ff0157119ef7c0c3d26",
+    "bend-up-explicit.mid": "73a4d8f9a845faee1ed37ee741c06885c3f947bf914e046412d2f8fcb5571f5e",
+    "bend-down.mid": "ae9d2d51fb49ae6946335a353663eccdac510bd88fa11d22f1d0c7eac30f975b",
+    "bend-down-explicit.mid": "3e1a17cd68ea523896f1e4a511414d955c273a91ac3320b9a702d224e0f93ac6",
+    "volume-program.mid": "66db392a9aec8141caa9f501e76f3055e9ea7b7c2732dab015ea805a25e97146",
+    "volume-program-explicit.mid": "ce8857b34a846575afe0a059907d445bc265b5fc10ad65999b575c07c7ea2f8f",
+    "mixed-channels.mid": "710f551917d2b097865b6db2b9d5deb159e996518d4273873e7a55e9685769e4",
+    "mixed-channels-explicit.mid": "733b5dbafd453d206edcbae3cc34d34439a2e3d090447c020b3124cca8002b53",
+    "already-default.mid": "d7ee84a9f486d146964299aedc36af2584907e66c817a044928f2dc9ec4023f4",
+    "already-default-explicit.mid": "ccb7e8157a053d06d4f5f4c237502fd754a2460e67024ac6907afa18e74a1b86"
+  }
+}

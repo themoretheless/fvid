@@ -1,5 +1,7 @@
 //! Owned Matroska AAC/ALAC/PCM presentation timeline to caller-owned float32 PCM.
 use crate::owned_aac::aac_ps_native::InBandPsProbe;
+use crate::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
+use crate::owned_matroska_grid_clock::grid_sample_matches as aac_quantized_grid_matches;
 pub use crate::owned_aac::stream::AudioDecodeStats;
 use crate::owned_webm::WebmReader as MatroskaTimelineReader;
 use fvid_control::{CopyOptions, ProgressEvent};
@@ -50,6 +52,55 @@ pub(crate) enum MatroskaTimelineDecoder {
     Aac(crate::owned_aac::NativeAacDecoder),
     Ps(Box<crate::owned_aac::aac_ps_native::NativePsAacDecoder>),
     Opus(crate::owned_opus::OpusDecoder),
+    Mp3(Box<Mp3TimelineDecoder>),
+    Mpeg12(Box<Mpeg12TimelineDecoder>),
+    Flac(crate::owned_flac_decoder::FlacDecoder),
+}
+enum Mpeg12Core { One(fvid_codecs::mp1::Decoder), Two(fvid_codecs::mp2::Decoder) }
+pub(crate) struct Mpeg12TimelineDecoder { core:Mpeg12Core, rate:u32, channels:u16 }
+impl Mpeg12TimelineDecoder {
+    fn new(track:&crate::owned_webm::Track)->Result<Self>{
+        let rate=u32::try_from(track.sample_rate).map_err(|_|invalid("MPEG sample rate overflow"))?;
+        let channels=u16::try_from(track.channels).map_err(|_|invalid("MPEG channel count overflow"))?;
+        let core=if track.codec=="A_MPEG/L1" { Mpeg12Core::One(fvid_codecs::mp1::Decoder::new(rate,channels).map_err(|e|invalid(&e.to_string()))?) }
+        else { Mpeg12Core::Two(fvid_codecs::mp2::Decoder::new(rate,channels).map_err(|e|invalid(&e.to_string()))?) };
+        Ok(Self{core,rate,channels})
+    }
+    fn decode(&mut self,data:&[u8])->Result<Vec<f32>>{match &mut self.core {
+        Mpeg12Core::One(d)=>d.decode(data).map_err(|e|invalid(&e.to_string())),
+        Mpeg12Core::Two(d)=>d.decode(data).map_err(|e|invalid(&e.to_string()))
+    }}
+}
+pub(crate) struct Mp3TimelineDecoder {
+    core: fvid_codecs::mp3::Decoder,
+    rate: u32,
+    channels: u16,
+    started: bool,
+}
+impl Mp3TimelineDecoder {
+    fn new(track: &crate::owned_webm::Track) -> Result<Self> {
+        let rate = u32::try_from(track.sample_rate).map_err(|_| invalid("MP3 sample rate overflow"))?;
+        let channels = u16::try_from(track.channels).map_err(|_| invalid("MP3 channel count overflow"))?;
+        fvid_codecs::mp3_spectral::Bands::for_rate(rate).map_err(|e| invalid(&e.to_string()))?;
+        if !(1..=2).contains(&channels) { return Err(invalid("invalid MP3 channel count")); }
+        Ok(Self { core: Default::default(), rate, channels, started: false })
+    }
+    fn decode(&mut self, data: &[u8]) -> Result<Vec<f32>> {
+        let header = fvid_codecs::mp3_frame::Header::parse(data).map_err(|e| invalid(&e.to_string()))?;
+        if header.sample_rate != self.rate || header.channels != self.channels {
+            return Err(invalid("MP3 frame geometry differs from Matroska track"));
+        }
+        if !self.started && fvid_codecs::mp3::is_info_frame(data).map_err(|e| invalid(&e.to_string()))? {
+            self.core.prime_info(data).map_err(|e| invalid(&e.to_string()))?;
+            self.started = true;
+            // The container counts this priming packet in CodecDelay. Preserve
+            // its timeline without advancing zero synthesis history.
+            return Ok(vec![0.; header.samples() * usize::from(self.channels)]);
+        }
+        let pcm = self.core.decode(data).map_err(|e| invalid(&e.to_string()))?;
+        self.started = true;
+        Ok(pcm.samples)
+    }
 }
 impl MatroskaTimelineDecoder {
     const SAMPLE_BYTES: usize = 4;
@@ -61,9 +112,12 @@ impl MatroskaTimelineDecoder {
 
     pub(crate) fn from_matroska(track: &crate::owned_webm::Track) -> Result<Self> {
         match track.codec.as_str() {
+            "A_FLAC" => Ok(Self::Flac(crate::owned_flac_decoder::FlacDecoder::from_matroska(track)?)),
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" => Ok(Self::Pcm(
                 crate::owned_pcm_decoder::PcmDecoder::from_matroska(track)?,
             )),
+            "A_MPEG/L1" | "A_MPEG/L2" => Ok(Self::Mpeg12(Box::new(Mpeg12TimelineDecoder::new(track)?))),
+            "A_MPEG/L3" => Ok(Self::Mp3(Box::new(Mp3TimelineDecoder::new(track)?))),
             "A_OPUS" => {
                 let decoder = crate::owned_opus::OpusDecoder::new(
                     &track.codec_private,
@@ -104,20 +158,26 @@ impl MatroskaTimelineDecoder {
     }
     pub(crate) fn sample_rate(&self) -> u32 {
         match self {
+            Self::Flac(d) => d.sample_rate(),
             Self::Pcm(d) => d.sample_rate(),
             Self::Alac(d) => d.sample_rate(),
             Self::Aac(d) => d.sample_rate(),
             Self::Ps(d) => d.sample_rate(),
             Self::Opus(d) => d.sample_rate(),
+            Self::Mp3(d) => d.rate,
+            Self::Mpeg12(d) => d.rate,
         }
     }
     pub(crate) fn channels(&self) -> u16 {
         match self {
+            Self::Flac(d) => d.channels(),
             Self::Pcm(d) => d.channels(),
             Self::Alac(d) => d.channels(),
             Self::Aac(d) => u16::from(d.channels()),
             Self::Ps(d) => u16::from(d.channels()),
             Self::Opus(d) => d.channels(),
+            Self::Mp3(d) => d.channels,
+            Self::Mpeg12(d) => d.channels,
         }
     }
     pub(crate) fn aac_channel_mask(&self) -> Result<u32> {
@@ -133,6 +193,9 @@ impl MatroskaTimelineDecoder {
     fn decode(&mut self, data: &[u8]) -> Result<Option<Vec<f32>>> {
         let samples = match self {
             Self::Ps(d) => return Ok(d.decode(data)?.map(|f| f.pcm)),
+            Self::Mp3(d) => d.decode(data)?,
+            Self::Mpeg12(d) => d.decode(data)?,
+            Self::Flac(d) => d.decode(data)?,
             Self::Pcm(d) => d.decode_pcm(data)?,
             Self::Alac(d) => d.decode_pcm(data)?,
             Self::Aac(d) => return Ok(d.decode_timed(data,0,u64::from(d.core_frame_samples()))?.map(|f|f.samples)),
@@ -190,11 +253,12 @@ pub(crate) fn matroska_audio_index<R: Read + Seek>(
     reader: &MatroskaTimelineReader<R>,
     selected: Option<usize>,
 ) -> Result<usize> {
+    let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
     let indices: Vec<_> = reader
         .tracks
         .iter()
         .enumerate()
-        .filter_map(|(i, t)| (t.kind == 2).then_some(i))
+        .filter_map(|(i, t)| (t.kind == 2 && (selected.is_some() || preferred.contains(&t.number))).then_some(i))
         .collect();
     let index = match selected {
         Some(index) if indices.contains(&index) => index,
@@ -256,6 +320,11 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
         .get(index)
         .ok_or_else(|| invalid("selected audio stream is absent"))?;
     let decoder = match track.codec.as_str() {
+        "A_FLAC" => {
+            crate::owned_flac_decoder::FlacDecoder::from_matroska(track)?;
+            crate::owned_flac_decoder::FlacDecoder::DECODE_ADMISSION_BYTES
+        }
+        "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3" => fvid_codecs::mp3::Decoder::decode_admission_bytes(),
         "A_AAC" => crate::owned_aac::stream::decode_config_admission_bytes(
             &track.codec_private,
             u32::try_from(track.sample_rate).map_err(|_| invalid("AAC output clock overflow"))?,
@@ -293,6 +362,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     let opus = track.codec == "A_OPUS";
     let mut visited_packets = 0;
     let mut largest_packet = 0;
+    let mut largest_read_overhead = 0;
     reader
         .scan_all_with_admission(|reader| {
             if options.cancel.as_ref().is_some_and(|c| c.is_cancelled()) {
@@ -302,9 +372,10 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             let track = reader.tracks.get(index).ok_or_else(|| {
                 crate::owned_ebml::Error("selected audio stream is absent".into())
             })?;
-            for packet in &reader.packets[visited_packets..] {
+            for (packet_index, packet) in reader.packets.iter().enumerate().skip(visited_packets) {
                 if packet.track == track.number {
-                    largest_packet = largest_packet.max(packet.size);
+                    largest_packet = largest_packet.max(reader.packet_payload_size(packet_index)?);
+                    largest_read_overhead = largest_read_overhead.max(reader.packet_read_overhead(packet_index)?);
                 }
             }
             visited_packets = reader.packets.len();
@@ -320,6 +391,7 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
                 } else {
                     1
                 })
+                .and_then(|bytes| bytes.checked_add(largest_read_overhead))
                 .ok_or_else(|| {
                     crate::owned_ebml::Error("Matroska memory estimate overflow".into())
                 })?;
@@ -404,7 +476,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
     control.check()?;
     let mut reader = if codec == "A_AAC" {
         open_aac_reader(source, options, options.max_packet_bytes)?
-    } else if matches!(codec, "A_ALAC" | "A_OPUS" | "PCM") {
+    } else if matches!(codec, "A_FLAC" | "A_ALAC" | "A_OPUS" | "A_MPEG/L3" | "MPEG" | "PCM") {
         open_audio_reader(source, options, options.max_packet_bytes)?
     } else {
         MatroskaTimelineReader::open(
@@ -421,6 +493,8 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
             reader.tracks[index].codec.as_str(),
             "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE"
         )
+    } else if codec == "MPEG" {
+        !matches!(reader.tracks[index].codec.as_str(), "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3")
     } else {
         reader.tracks[index].codec != codec
     } {
@@ -428,7 +502,7 @@ pub(crate) fn decode_matroska_audio_pcm<R: Read + Seek>(
             "selected Matroska audio stream has a different codec",
         ));
     }
-    if matches!(codec, "A_AAC" | "A_ALAC" | "A_OPUS" | "PCM") {
+    if matches!(codec, "A_AAC" | "A_FLAC" | "A_ALAC" | "A_OPUS" | "A_MPEG/L3" | "MPEG" | "PCM") {
         admit_audio_reader(&mut reader, index, options)?;
     }
     decode_matroska_audio_reader_controlled(reader, output, interval, selected, &mut control)

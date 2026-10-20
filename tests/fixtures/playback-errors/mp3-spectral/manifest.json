@@ -1,0 +1,5 @@
+{
+  "records": 393,
+  "sha256": "4e04ec442a20abb1b4a0fe92ec2053ad5cb1371f900bb2a663984f07e8ebb019",
+  "scope": "Requantization and reorder stage only; no compressed PCM playback claim"
+}

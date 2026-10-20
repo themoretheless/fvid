@@ -1,0 +1,30 @@
+{
+  "provenance": "One existing authored32ms synthetic stereo tone AC3 frame, valid full-frame CRC, with isolated CRC1/CRC2/payload bit flips. Invalid frames must use existing silence-concealment policy, not decoded corrupt PCM. Short authored VP9/PCM companion. No private input/encoder/network.",
+  "source_sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb",
+  "standard": "https://www.atsc.org/wp-content/uploads/2015/03/A52-2018.pdf section7.10.1",
+  "cases": [
+    {
+      "name": "crc1",
+      "file": "crc1.ac3",
+      "offset": 2
+    },
+    {
+      "name": "crc2",
+      "file": "crc2.ac3",
+      "offset": 767
+    },
+    {
+      "name": "payload",
+      "file": "payload.ac3",
+      "offset": 512
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "control.ac3": "19387cc1ba91af773c2e6846e31ad4e8a52d5cc568598ce40cb204d064c3e6b7",
+    "crc1.ac3": "428c1e80fe0c101050c552140e28d02bd2d7c199b25fdbd30ca4af69dc020564",
+    "crc2.ac3": "2e1d42571603d93f37601b729d3a737f1b286831d1bce5eca6340fd9265702fd",
+    "payload.ac3": "4f4b7585fe63eece8180595a850f5af2fdb31b21890caca9565ccd2ca6e9665e",
+    "valid-then-bad.ac3": "662abe9553ea9ca159573eb71052f4523c0b6e15841a6d40888f0d71c290a00d"
+  }
+}

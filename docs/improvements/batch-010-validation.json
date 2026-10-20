@@ -1,0 +1,107 @@
+{
+  "status": "accepted",
+  "candidate_ids": [
+    "FVID-0032"
+  ],
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.31.6",
+    "https://www.rfc-editor.org/rfc/rfc1950.html"
+  ],
+  "before": {
+    "passed": 1,
+    "failed": 1,
+    "evidence": "evidence/batch-010-zlib-before.log"
+  },
+  "completed": [
+    "Final owner: 9 zlib, 8 header-stripping and 6 text tests passed.",
+    "Final native playback/export, identity copy, packet limits and audio timeline checks passed.",
+    "Root WebM unit suite: 36 passed on final scope-default source.",
+    "11 paired accepted synthetic cases include dynamic/fixed/stored DEFLATE, empty/default scope, implicit algorithm, lacing, late tracks, Opus and constant-resolution export."
+  ],
+  "remaining": [],
+  "additional_before": {
+    "empty_scope": {
+      "passed": 0,
+      "failed": 1,
+      "evidence": "evidence/batch-010-zlib-empty-scope-before.log",
+      "counted_separately": false
+    }
+  },
+  "accepted_ids": [
+    "FVID-0032"
+  ],
+  "checked_at": "2026-10-15T05:58:37.009005+00:00",
+  "distinct_rust_tests_passed": 80,
+  "qualification": [
+    "Eleven paired synthetic cases restore original codec bytes and clocks: dynamic/fixed/stored DEFLATE, implicit algorithm/encoding, empty scope default, lacing, late tracks, Opus and constant-resolution export.",
+    "Native software VP9 playback matches control pixels, dimensions, timestamps, seek, rewind and EOF. Constant-resolution video transcodes to FFV1 with exact pixels and intervals; identity copies retain every encoded byte. Variable-resolution playback is qualified independently of the constant-resolution transcode case.",
+    "Opus TOCs and PCM match the uncompressed control exactly. Cancellation emits no PCM. Controlled audio admission includes fixed inflater state and compressed-input scratch.",
+    "Checksum failures, truncation, invalid headers, trailing stream data, empty decoded frames and decoded-output limit violations have separate refusal assertions before codec decoding.",
+    "Encoded and decoded lengths are independently bounded. Known restored-size admission precedes packet I/O and caller-buffer mutation; initial indexing uses the configured packet limit.",
+    "Scope is one frame-only zlib or header-stripping transform. Codec-private transforms, chains, nonempty zlib settings, bzip2/lzo and encryption remain explicitly unsupported. The former unsupported-zlib fixture now has enabled successful acceptance checks; a valid bzip2 fixture remains a declared refusal.",
+    "Software runtime qualification only; player configuration checks successfully. No hardware runtime or speed claim."
+  ],
+  "counting": "One useful container compatibility capability. All DEFLATE/default/lace/audio variants, damaged-input refusals, resource accounting and supporting API additions count together.",
+  "memory_admission_measurement": {
+    "kind": "Binary search of estimated controlled-memory admission; not peak RSS",
+    "control_bytes": 1791788,
+    "zlib_bytes": 1802384,
+    "additional_bytes": 10596,
+    "inflater_state_bytes": 10504,
+    "evidence": "evidence/batch-010-matroska-zlib-audio-admission.log"
+  },
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --test matroska_zlib_regressions --test matroska_header_stripping_regressions --test matroska_text_termination_regressions",
+      "passed": 23,
+      "failed": 0,
+      "log": "evidence/batch-010-matroska-zlib-owner-final-scope.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_zlib_playback --test native_matroska_audio_timeline --test matroska_lacing --test matroska_header_stripping_playback --test ffv1_reordered_trim",
+      "passed": 21,
+      "failed": 0,
+      "log": "evidence/batch-010-matroska-zlib-root-final.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_zlib_playback --test matroska_header_stripping_playback --test native_matroska_audio_timeline",
+      "passed": 10,
+      "failed": 0,
+      "overlap_previous": 10,
+      "log": "evidence/batch-010-matroska-zlib-root-final-scope.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib webm",
+      "passed": 36,
+      "failed": 0,
+      "log": "evidence/batch-010-matroska-zlib-root-unit-final-scope.log"
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed",
+      "log": "evidence/batch-010-matroska-zlib-player-final-scope.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p 'test_matroska*regressions.py'",
+      "passed": 6,
+      "failed": 0,
+      "log": "evidence/batch-010-matroska-zlib-python-final.log"
+    }
+  ],
+  "source_hashes": {
+    "Cargo.lock": "3b94d8b9e0f61b1c54952c089cf32aa4481329a035f670a867dd13b785d1e758",
+    "crates/fvid-media/Cargo.toml": "01df0923cab67d0248323c55726a5c27be2195dc684d6cda24cba84df3d88c06",
+    "crates/fvid-media/src/lib.rs": "656c56b5c87446a3433cea1bae3ea6e463d0a1daf6b7843d5eb94b3d8d827496",
+    "crates/fvid-media/src/owned_matroska_zlib.rs": "2bac5fe4665f59474df414098f2f0940cf5de595cc169fe32bd0296750735128",
+    "crates/fvid-media/src/owned_webm.rs": "b5024fac633db731d4886d993fb4d960aad8d944f13c3fe7f57c1a7ecb01419a",
+    "src/container/webm.rs": "4877951b8dd1d7fb5d23908dbdc6ee0003b532b14afa1626d11c0fc879f22022",
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "b2a70c6540fa01800bd2a8e6a86a9a50c8aeb4b252dacd802f5269158a84b46a",
+    "crates/fvid-media/src/owned_matroska_audio.rs": "447cdbcba7a5d6d21fdabf79ee25c078425aea7dd33dc208fcef140114cd3d83",
+    "crates/fvid-media/src/owned_video_decode.rs": "14e7dd467869fc098334e9f9b13ad1126277aa78dc59e877ad406c8d8e3c25c1",
+    "crates/fvid-media/tests/matroska_zlib_regressions.rs": "7b3e942cb1215cc5511e7d805cce983ff8cfa7056cb6c74417cad060e42e7618",
+    "crates/fvid-media/tests/matroska_header_stripping_regressions.rs": "4bacde48c6bf4037e07586ba6f0fd1fe7f94fc02147ad3a33c588a8c26518f89",
+    "tests/matroska_zlib_playback.rs": "2385a7a1cb2326993af19e46f538fa008c9348bde1d8fcb3a09184585b2c8925",
+    "scripts/generate_matroska_zlib_regressions.py": "264563b58a38527771d31c36f19f6b3053cffeca145ddf4792cbb1233d1090ad",
+    "scripts/generate_matroska_header_stripping_regressions.py": "3a75c37f58f0474c5ce48c5abb0a2c104cda50e5e631410dd34cedf2c9e04f88"
+  }
+}

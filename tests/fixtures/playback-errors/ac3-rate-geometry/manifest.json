@@ -1,0 +1,13 @@
+{
+  "provenance": "Existing authored120ms VP9/AC3 source containers; MP4 control edit begins at0so both rates stay sample aligned. Only SamplingFrequency/sample-entry rate changes48000to32000, coded CRC-protected AC3 remains identical. Clean32k/48k first-frame decoder controls read from authored tone fixtures. No private input/network/encoder.",
+  "sha256": {
+    "control.mkv": "3cdf760668e6560d5634eee0c326c2b76b7262d167d8d98d881b2883eb0ebbb7",
+    "control.mp4": "1196f0a4d9dc6e207b012ebdbe386e239c1d5d751feca9f0da8ec4873e44132f",
+    "mismatch.mkv": "30cd95bba6016c466e5c8a7c5b4b01fbea38b4215e0594a0fe1394239837c4b3",
+    "mismatch.mp4": "375b87c4b11058eb8761ad2073219e4d12f32a7445044970d531e52d487e1afb",
+    "48k.ac3": "19387cc1ba91af773c2e6846e31ad4e8a52d5cc568598ce40cb204d064c3e6b7",
+    "32k.ac3": "bbde608029d326566a3b6914f8e3cc89a7f3f582d3bcc94c52231844e8405cca",
+    "damaged-rate.ac3": "2cd8a6a4dbf2591c13126bf4ba78dd420a77241843b862fe319dfa0674e39d5c",
+    "rate-change.ac3": "75779dc5b7e6d8e88f84c847d033904c97ce60fbef51c55c9ba940becbd399cb"
+  }
+}

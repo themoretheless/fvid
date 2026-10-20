@@ -60,33 +60,27 @@ pub(crate) fn supports(
         let config = reader.configuration();
         crate::owned_aac::stream::check_adts_decode_admission(reader.audio_specific_config(), options)
             .map_err(|e| e.to_string())?;
-        let mask = crate::owned_aac::NativeAacDecoder::new(reader.audio_specific_config())
-            .map_err(|e| e.to_string())?
-            .channel_mask();
-        let channels = transform.channels.unwrap_or(i32::from(config.channels));
-        if channels != i32::from(config.channels) {
-            if !((config.channels <= 8 && matches!(channels, 1 | 2))
-                || (config.channels <= 2 && (1..=8).contains(&channels)))
-            {
-                return Err("unsupported channel conversion".into());
-            }
-            if !crate::owned_pcm_channels::standard_mask(config.channels)
-                .is_some_and(|standard| standard == u64::from(mask))
-            {
-                return Err("unsupported speaker layout".into());
-            }
-        }
+        let asc=reader.audio_specific_config().to_vec();
         drop(reader);
         let mut probe = pcm_decode_options(options);
         probe.progress = None;
         let prefix = decoded_prefix(transform, config.sample_rate);
-        crate::owned_aac::decode_adts_pcm(
+        let stats=crate::owned_aac::decode_adts_pcm(
             BufReader::new(File::open(source).map_err(|e| e.to_string())?),
             &mut std::io::sink(),
             prefix,
             &probe,
         )
         .map_err(|e| e.to_string())?;
+        let output=transform.channels.unwrap_or(i32::from(stats.channels));
+        if output!=i32::from(stats.channels){
+            if matches!(output,1|2){
+                if crate::owned_aac_export_routing::router(source,stats.sample_rate,stats.channels,options)?.is_none(){return Err("AAC speaker routing is absent".into());}
+            }else{
+                let mask=if config.channels==1&&stats.channels==2{3}else{crate::owned_aac::NativeAacDecoder::new(&asc).map_err(|e|e.to_string())?.channel_mask()};
+                if stats.channels>2||!(1..=8).contains(&output)||!crate::owned_pcm_channels::standard_mask(stats.channels).is_some_and(|m|m==u64::from(mask)){return Err("unsupported channel conversion".into());}
+            }
+        }
         Ok(())
     };
     match qualify() {
@@ -199,7 +193,7 @@ pub(crate) fn apply(
         )
     });
     let spool = decode_to_wave_with_rate(source, prefix, transform.sample_rate, options)?;
-    export_spool(spool, destination, transform, options)
+    crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
 }
 
 pub(crate) fn export_spool(
@@ -333,11 +327,13 @@ pub(crate) fn spool_decoded_with_precision(
     }));
     let decoded = decode(&mut writer, &decode_options)?;
     writer.flush().map_err(|e| e.to_string())?;
+    if writer.bytes!=decoded.sample_frames.checked_mul(u64::from(decoded.channels)).and_then(|n|n.checked_mul(u64::from(bits/8))).ok_or("decoded WAVE size overflow")? {return Err("decoded WAVE geometry disagrees with PCM bytes".into());}
+    let decoded_mask=if decoded.channels==channels{mask}else if channels==1&&decoded.channels==2{3}else{return Err("unexpected decoded WAVE channel negotiation".into());};
     let header = crate::owned_wav::float_wav_header_with_precision(
         decoded.sample_rate,
-        channels,
+        decoded.channels,
         decoded.sample_frames,
-        mask,
+        decoded_mask,
         bits,
     )?;
     writer

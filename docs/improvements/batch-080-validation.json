@@ -1,0 +1,47 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0103"
+  ],
+  "checked_at": "2026-10-16T02:36:50.938865+00:00",
+  "before": [
+    "evidence/batch-080-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-080-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-080-ac3-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-080-worker.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-080-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-080-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Two unchanged authored clean AC3 frames produce identical native PCM when grouped or decoded separately. The raw source/worker incorrectly stamps the second packet32ms rather than26.666666ms and advertises64ms rather than the native58.666666ms endpoint after existing256sample leading trim. Actual recording worker confirms the gap.",
+    "Raw adapter tracks removed leading samples since navigation and shifts subsequent presentation PTS. Encoded Ac3.frames/sample counts remain coded and unchanged. Playback duration and EOF seek use the audible count; rewind/seek reset presentation-trim accounting.",
+    "Grouped/per-frame PCM/PTS and actual worker play/rewind/EOF now agree. Sample-boundary inverse fix102 preserves exact EOF command. Existing89EOF/88AC3truncation/101CRC controls now compare the source presentation hook and audible endpoints rather than decoder-internal coded stamps; no extra IDs.",
+    "6 AC3 reader/32 worker units, six related integration targets, fixture reproduction and player build pass. Known-truncated prefixes still error, CRC damage still uses silence concealment and normal data remains bit-identical.",
+    "This qualification is for the raw AC3 adapter. Container-specific priming/edit/CodecDelay mapping remains a separate audit scope and will not be automatically claimed from this raw proof. In-range seek codec-history fidelity, physical output and performance improvements are not claimed.",
+    "Saved bytes derive from an existing authored synthetic tone and separate native VP9/PCM companion; ordinary tests need no encoder/network/private input."
+  ],
+  "compatibility": "Raw AC3 AudioStream duration and EOF now describe native audible PCM after the already-existing leading trim. Callers needing coded counts retain Ac3.samples()/frames. Public signatures and encoded packet selection stay unchanged except audible EOF exhaustion.",
+  "counting": "One raw leading-trim presentation timeline mismatch. Gap, duration, EOF and updated dependent test oracles add no extra IDs; future container variants must not inflate this issue."
+}

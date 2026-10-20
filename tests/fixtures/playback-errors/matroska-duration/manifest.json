@@ -1,0 +1,27 @@
+{
+  "provenance": "Authored three VP9 keyframes. Only Info Duration and TimestampScale differ. Exact Fraction oracles; no private media or external encoder.",
+  "qualification": "Upper-bound cases exercise declared metadata, not playback of a year-long clip.",
+  "cases": [
+    {
+      "file": "double-rounding.mkv",
+      "ticks": 55.0000005,
+      "scale": 1000000,
+      "expected_ns": 55000000,
+      "sha256": "e5b594aa768549bc84a370ba3f0742f802bf3113d77a169ccb0822446e735c69"
+    },
+    {
+      "file": "integer-product.mkv",
+      "ticks": 9007199254740991.0,
+      "scale": 3,
+      "expected_ns": 27021597764222973,
+      "sha256": "4802f0368297b346a72e929e1facb8d76b442cd93ab37711c0d93139c7b484ff"
+    },
+    {
+      "file": "representable-upper-bound.mkv",
+      "ticks": 18446744073709.55,
+      "scale": 1000000,
+      "expected_ns": 18446744073709550781,
+      "sha256": "486229b9c3d6e80519718cf0114c9c732c474f633eea526477c4bdb684f8dbb3"
+    }
+  ]
+}

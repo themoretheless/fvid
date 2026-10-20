@@ -1,0 +1,290 @@
+{
+  "tests/fixtures/playback-errors/synth-tail-release/xm-held.xm": {
+    "source_sha256": "26e2793aa1aec3d0b87d56dd661b6f9748c5226cdb134745380d8cd80dcb3068",
+    "pcm_sha256": "774197aac9eacd7c6d62e27a77aeac32c6a8843807f3bd67e17131ae4aa2f134",
+    "pcm_bytes": 127008,
+    "metadata": {
+      "channels": 2,
+      "frames": 15876,
+      "packet_start_ns": [
+        0,
+        120000000,
+        240000000
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/synth-tail-release/xm-released.xm": {
+    "source_sha256": "099c43f8808e2ee96690d6fdc83199d615cefad0996741f86b75dea2a1abf06d",
+    "pcm_sha256": "347d30057f12d4329bb155f48b26a434ba5e4ce796e44fc9f78203c139a384d9",
+    "pcm_bytes": 169344,
+    "metadata": {
+      "channels": 2,
+      "frames": 21168,
+      "packet_start_ns": [
+        0,
+        120000000,
+        240000000,
+        360000000
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/timeline-audio-duration/xm-tempo-127.xm": {
+    "source_sha256": "49a9396844241051f817c6839ab6f02c2d12a18deae6c0b25455502f5a63dc54",
+    "pcm_sha256": "093edd621c24937ad872efaad9b8ee410a9230f5a85ad3b2084de15929e40ea7",
+    "pcm_bytes": 166520,
+    "metadata": {
+      "channels": 2,
+      "frames": 20815,
+      "packet_start_ns": [
+        0,
+        117981859,
+        235986394,
+        353990929
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/timeline-audio-duration/xm-tempo-199.xm": {
+    "source_sha256": "0399ef60e838ca5ae43a691e779b9962aeecd8e13b2b414e6cc47f60b73917b7",
+    "pcm_sha256": "dfa877e8843f6e3836ad36dbe95e7c9b626b57421f9fb97f545b1bc7592a0dfe",
+    "pcm_bytes": 106192,
+    "metadata": {
+      "channels": 2,
+      "frames": 13274,
+      "packet_start_ns": [
+        0,
+        74988662,
+        150000000,
+        225986394
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/timeline-audio-duration/xm-tempo-255.xm": {
+    "source_sha256": "0d2b6bb98c58861b7fa5fcbb3111e46c82030c40cd48ec137113a28857fcddc6",
+    "pcm_sha256": "6bc4dd8b83aaa146cca9c80ef9be8104cbdfda9a33d7de46221d71b89cfa91d3",
+    "pcm_bytes": 82552,
+    "metadata": {
+      "channels": 2,
+      "frames": 10319,
+      "packet_start_ns": [
+        0,
+        57981859,
+        116984126,
+        175986394
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/xm-sample-grid/held-125.xm": {
+    "source_sha256": "030e383934c2cb6e210e09dcda6a9b73f9a924646399d10267e9c7ab44eeed65",
+    "pcm_sha256": "25f9c7ccc4506393781a5acf14571175cd8f860e23eefefa5fbc76218d60e9d6",
+    "pcm_bytes": 1354752,
+    "metadata": {
+      "channels": 2,
+      "frames": 169344,
+      "packet_start_ns": [
+        0,
+        120000000,
+        240000000,
+        360000000,
+        480000000,
+        600000000,
+        720000000,
+        840000000,
+        960000000,
+        1080000000,
+        1200000000,
+        1320000000,
+        1440000000,
+        1560000000,
+        1680000000,
+        1800000000,
+        1920000000,
+        2040000000,
+        2160000000,
+        2280000000,
+        2400000000,
+        2520000000,
+        2640000000,
+        2760000000,
+        2880000000,
+        3000000000,
+        3120000000,
+        3240000000,
+        3360000000,
+        3480000000,
+        3600000000,
+        3720000000
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/xm-sample-grid/held-127.xm": {
+    "source_sha256": "5ff1c5f0af1e8416d63df79e84ed3633afe51931615f590a616016fe3aa44285",
+    "pcm_sha256": "30431298fe0c471c86378a976ac06ca5419af8be45e4a13c512e46e953c65863",
+    "pcm_bytes": 1333224,
+    "metadata": {
+      "channels": 2,
+      "frames": 166653,
+      "packet_start_ns": [
+        0,
+        117981859,
+        235986394,
+        353990929,
+        471995464,
+        590000000,
+        707981859,
+        825986394,
+        943990929,
+        1061995464,
+        1180997732,
+        1298979591,
+        1416984126,
+        1534988662,
+        1652993197,
+        1770997732,
+        1888979591,
+        2006984126,
+        2124988662,
+        2243990929,
+        2361995464,
+        2480000000,
+        2597981859,
+        2715986394,
+        2833990929,
+        2951995464,
+        3070000000,
+        3187981859,
+        3306984126,
+        3424988662,
+        3542993197,
+        3660997732
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/xm-sample-grid/held-199.xm": {
+    "source_sha256": "3142af020b969367cccd77846165ee4a2abc69487e7abd083428bdce2d38db63",
+    "pcm_sha256": "d5803b433004c789d1753033d5e56c92513568ef647f7b7997e85c24de1e3ac3",
+    "pcm_bytes": 850600,
+    "metadata": {
+      "channels": 2,
+      "frames": 106325,
+      "packet_start_ns": [
+        0,
+        74988662,
+        150000000,
+        225986394,
+        300997732,
+        375986394,
+        451995464,
+        526984126,
+        601995464,
+        677981859,
+        752993197,
+        828979591,
+        903990929,
+        978979591,
+        1054988662,
+        1130000000,
+        1204988662,
+        1280997732,
+        1355986394,
+        1431995464,
+        1506984126,
+        1581995464,
+        1657981859,
+        1732993197,
+        1807981859,
+        1883990929,
+        1958979591,
+        2034988662,
+        2110000000,
+        2184988662,
+        2260997732,
+        2335986394
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/playback-errors/xm-sample-grid/held-255.xm": {
+    "source_sha256": "d67814c23ea08db87222ed3606f179ff85d2249bd1b4882c401309c93ea8e8df",
+    "pcm_sha256": "ac4f00c2e860eaaa1afb2b61850b0d5e9a878dcb9d4995aacb077d721031f044",
+    "pcm_bytes": 663616,
+    "metadata": {
+      "channels": 2,
+      "frames": 82952,
+      "packet_start_ns": [
+        0,
+        57981859,
+        116984126,
+        175986394,
+        234988662,
+        293990929,
+        351995464,
+        410997732,
+        470000000,
+        528979591,
+        587981859,
+        645986394,
+        704988662,
+        763990929,
+        822993197,
+        881995464,
+        940997732,
+        998979591,
+        1057981859,
+        1116984126,
+        1175986394,
+        1234988662,
+        1292993197,
+        1351995464,
+        1410997732,
+        1470000000,
+        1528979591,
+        1587981859,
+        1645986394,
+        1704988662,
+        1763990929,
+        1822993197
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/xm/early-format.xm": {
+    "source_sha256": "c2f87a6f8815cc886c74060df02c62db041410eee7e12bca0f213a0a13483a80",
+    "pcm_sha256": "97eed14c3b6549f1fb03b73c7e20c00bd4bb4e2792fd696fa733890381cc31c6",
+    "pcm_bytes": 381024,
+    "metadata": {
+      "channels": 2,
+      "frames": 47628,
+      "packet_start_ns": [
+        0,
+        80000000,
+        330000000,
+        580000000,
+        830000000
+      ],
+      "sample_rate": 44100
+    }
+  },
+  "tests/fixtures/xm/two-notes.xm": {
+    "source_sha256": "e37153032d0c8d9cb29cef522bb60218c6361e51842e3d52775ac01bd25c5771",
+    "pcm_sha256": "ac8f3326292fe4ddaffd8abc8d2317f870b97aaab337a9d61aa590d79e0698df",
+    "pcm_bytes": 169344,
+    "metadata": {
+      "channels": 2,
+      "frames": 21168,
+      "packet_start_ns": [
+        0,
+        120000000,
+        240000000,
+        360000000
+      ],
+      "sample_rate": 44100
+    }
+  }
+}

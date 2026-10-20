@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0094"
+  ],
+  "checked_at": "2026-10-16T01:53:49.457362+00:00",
+  "before": [
+    "evidence/batch-070-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-070-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-070-smf-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-070-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-070-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-070-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Three compact authored sparse MIDI probes panic in u64 multiplication before clock division. Two PPQ32767 clocks are representable after division; PPQ1 exceeds u64 microseconds. Both within-segment and tempo-map accumulation paths reproduce.",
+    "Shared u128 advancement divides before checked narrowing to u64 and adds the segment start safely. Parser maps/segment construction propagate precise errors. Valid divided times preserve exact existing per-segment rounding; unrepresentable times refuse instead of panic or wrapping.",
+    "Long probes are parsed only and are not rendered or claimed as short/real playback acceptance. A normal100ms authored note plus release is natively decoded and played/rewound/EOF-seeked; a separate short authored VP9/PCM companion decodes natively. No FFmpeg/network/private media needed.",
+    "17 MIDI parser/5 MIDI reader tests, related synthesis-clock/seek/duration integrations, fixture reproducibility and player build pass. No release/32bit runtime, physical output, performance or unlimited-duration playback claim."
+  ],
+  "compatibility": "Valid long clocks whose divided result fits the existing representation parse correctly; unrepresentable MIDI timelines now return an explicit range error. Public interfaces and ordinary clocks remain unchanged.",
+  "counting": "One MIDI clock product overflow problem in two arithmetic paths; representability cases and controls add no IDs."
+}

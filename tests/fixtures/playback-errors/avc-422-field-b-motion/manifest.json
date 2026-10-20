@@ -1,0 +1,12098 @@
+[
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w0-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w1-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r0-w2-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w0-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w1-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e0-r1-w2-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w0-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w1-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r0-w2-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w0-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w1-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-l0-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-l0-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-l1-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-l1-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-bi-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-bi-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-spatial-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-spatial-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-temporal-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-temporal-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-skip-mv8--4",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y8-c8-e1-r1-w2-skip-mv-7-5",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w0-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w1-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r0-w2-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w0-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w1-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e0-r1-w2-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w0-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w1-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r0-w2-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w0-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w1-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-l0-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-l0-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-l1-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-l1-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-bi-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-bi-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-spatial-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-spatial-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-temporal-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-temporal-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-skip-mv8--4",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y10-c12-e1-r1-w2-skip-mv-7-5",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w0-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w1-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r0-w2-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w0-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w1-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e0-r1-w2-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w0-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w1-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r0-w2-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w0-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w1-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-l0-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-l0-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l0",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-l1-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-l1-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "l1",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-bi-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-bi-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-spatial-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-spatial-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-temporal-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-temporal-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-skip-mv8--4",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      8,
+      -4
+    ],
+    "list_motion": [
+      [
+        3,
+        -1
+      ],
+      [
+        -5,
+        3
+      ]
+    ]
+  },
+  {
+    "name": "422-field-b-y14-c8-e1-r1-w2-skip-mv-7-5",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1
+    ],
+    "colocated_motion": [
+      -7,
+      5
+    ],
+    "list_motion": [
+      [
+        -2,
+        2
+      ],
+      [
+        5,
+        -3
+      ]
+    ]
+  }
+]

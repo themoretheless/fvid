@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0093"
+  ],
+  "checked_at": "2026-10-16T01:50:21.622535+00:00",
+  "before": [
+    "evidence/batch-069-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-069-integration.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-069-smf.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-069-xm.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-069-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-069-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-069-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Actual native MIDI/XM workers pass full playback and rewind, then first resumed packets differ after nonzero seek despite identical timestamps/lengths. MIDI500ms loses held-note phase/state; XM120ms loses active-sample/tracker history. Both independently reproduce before the fix.",
+    "Reader reset hooks reset the synth then decode preceding windows without presenting their PCM, restoring phase/voices/controllers/tracker state before the already selected raw packet. Raw seek landing and next-packet semantics stay unchanged. EOF skips reconstruction; rewind starts from fresh state.",
+    "Six recording-worker target checks compare PCM bytes and PTS with continuous native synthesis: MIDI500/1500/2100ms and XM120/240/360ms, including release windows. Play and rewind are repeated controls. No extra preroll audio is queued.",
+    "5 MIDI/6 XM reader units,31 worker units, related clock/duration/EOF integrations, fixture reproduction and player build pass. Existing short authored audio is read in place and hashes checked; separate native video control is authored. Ordinary tests need no encoder/network.",
+    "History reconstruction is linear in prior rendered timeline and can make long seeks slower; no performance improvement, checkpoints or physical-device claim. It fixes correctness without claiming reference-quality synthesis.",
+    "Shared capture assertions now compare packet count/timestamps/PCM with concise diagnostics rather than dumping entire synthetic sample arrays; infrastructure changes count zero."
+  ],
+  "compatibility": "Stateful seek output now matches continuous synthesis while retaining public cursor/PTS and interface signatures. Reset errors propagate through the existing terminal worker path.",
+  "counting": "One missing synth-state restoration problem across MIDI/XM. Notes, phases, controllers, targets, sample variants and diagnostic changes add no IDs."
+}

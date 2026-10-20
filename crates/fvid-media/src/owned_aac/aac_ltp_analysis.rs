@@ -3,7 +3,7 @@ use super::{
     Result,
     aac_imdct::Imdct,
     aac_synthesis::{WindowSequence, WindowShape, kbd_window},
-    invalid, unsupported,
+    invalid,
 };
 use std::{f64::consts::PI, sync::Arc};
 #[derive(Clone)]
@@ -12,6 +12,7 @@ pub struct LtpAnalysis {
     long: Arc<[Vec<f64>; 2]>,
     short: Arc<[Vec<f64>; 2]>,
     transform: Imdct,
+    short_transform: Imdct,
     windowed: Vec<f64>,
     scratch: Vec<[f64; 2]>,
 }
@@ -28,6 +29,7 @@ impl LtpAnalysis {
             }
         }
         self.transform.visit_retained(footprint)?;
+        self.short_transform.visit_retained(footprint)?;
         footprint.vector(&self.windowed)?;
         footprint.vector(&self.scratch)?;
         Ok(())
@@ -43,12 +45,14 @@ impl LtpAnalysis {
                 .collect()
         };
         let transform = Imdct::new(n)?;
+        let short_transform = Imdct::new(n / 8)?;
         let scratch = vec![[0.0; 2]; transform.scratch_len()];
         Ok(Self {
             n,
             long: Arc::new([sine(n), kbd_window(n, 4.0)]),
             short: Arc::new([sine(n / 8), kbd_window(n / 8, 6.0)]),
             transform,
+            short_transform,
             windowed: vec![0.0; 2 * n],
             scratch,
         })
@@ -66,15 +70,32 @@ impl LtpAnalysis {
         if input.len() != 2 * n || output.len() != n || input.iter().any(|x| !x.is_finite()) {
             return Err(invalid("invalid AAC LTP analysis samples"));
         }
-        if sequence == WindowSequence::EightShort {
-            return Err(unsupported(
-                "AAC short-window LTP analysis is not integrated",
-            ));
-        }
         let shape = |s| usize::from(s == WindowShape::Kbd);
         let (before, after) = (shape(previous), shape(current));
         let small = n / 8;
         let flat = (n - small) / 2;
+        if sequence == WindowSequence::EightShort {
+            let short_scratch_len = self.short_transform.scratch_len();
+            let mut staged = vec![0.0; n];
+            for w in 0..8 {
+                let start = flat + w * small;
+                for i in 0..2 * small {
+                    let weight = if w == 0 && i < small {
+                        self.short[before][i]
+                    } else {
+                        self.short[after][i]
+                    };
+                    self.windowed[i] = input[start + i] * weight;
+                }
+                self.short_transform.forward_with_scratch(
+                    &self.windowed[..2 * small],
+                    &mut staged[w * small..(w + 1) * small],
+                    &mut self.scratch[..short_scratch_len],
+                )?;
+            }
+            output.copy_from_slice(&staged);
+            return Ok(());
+        }
         for (i, value) in input.iter().enumerate() {
             let weight = match sequence {
                 WindowSequence::LongStart if i >= n => {
@@ -108,6 +129,40 @@ impl LtpAnalysis {
         }
         self.transform
             .forward_with_scratch(&self.windowed, output, &mut self.scratch)
+    }
+    /// Short-window (`EightShort`) subwindow MDCT analysis (`2 * (N / 8)` -> `N / 8`).
+    pub fn analyze_short_window(
+        &mut self,
+        input: &[f64],
+        window: usize,
+        previous: WindowShape,
+        current: WindowShape,
+        output: &mut [f64],
+    ) -> Result<()> {
+        let small = self.n / 8;
+        if window >= 8
+            || input.len() != 2 * small
+            || output.len() != small
+            || input.iter().any(|x| !x.is_finite())
+        {
+            return Err(invalid("invalid AAC LTP short analysis samples"));
+        }
+        let shape = |s| usize::from(s == WindowShape::Kbd);
+        let (before, after) = (shape(previous), shape(current));
+        for (i, value) in input.iter().enumerate() {
+            let weight = if window == 0 && i < small {
+                self.short[before][i]
+            } else {
+                self.short[after][i]
+            };
+            self.windowed[i] = value * weight;
+        }
+        let short_scratch_len = self.short_transform.scratch_len();
+        self.short_transform.forward_with_scratch(
+            &self.windowed[..2 * small],
+            output,
+            &mut self.scratch[..short_scratch_len],
+        )
     }
 }
 
@@ -170,22 +225,72 @@ impl LtpAnalysis {
         tns: Option<&super::aac_tns::TnsData>,
         residual: &mut [f32],
     ) -> Result<()> {
-        let super::aac_ltp_syntax::Usage::Bands(used) = &data.usage else {
-            return Err(unsupported(
-                "AAC short-window LTP analysis is not integrated",
-            ));
-        };
-        if residual.len() != self.n {
+        if residual.len() != self.n || residual.iter().any(|x| !x.is_finite()) {
             return Err(invalid("invalid AAC LTP residual geometry"));
         }
-        let mut estimate = vec![0.; 2 * self.n];
-        let mut spectrum = vec![0.; self.n];
-        history.estimate_long(data, &mut estimate)?;
-        self.analyze(&estimate, sequence, previous, current, &mut spectrum)?;
-        if let Some(tns) = tns {
-            spectrum = tns.analyze_owned(spectrum, offsets, tns_max_band)?;
+        match (&data.usage, sequence == WindowSequence::EightShort) {
+            (super::aac_ltp_syntax::Usage::Bands(used), false) => {
+                let mut estimate = vec![0.; 2 * self.n];
+                let mut spectrum = vec![0.; self.n];
+                history.estimate_long(data, &mut estimate)?;
+                self.analyze(&estimate, sequence, previous, current, &mut spectrum)?;
+                if let Some(tns) = tns {
+                    spectrum = tns.analyze_owned(spectrum, offsets, tns_max_band)?;
+                }
+                apply_long_prediction(residual, &spectrum, offsets, used)
+            }
+            (super::aac_ltp_syntax::Usage::Windows(windows), true) => {
+                let small = self.n / 8;
+                if offsets.first() != Some(&0)
+                    || offsets.last() != Some(&small)
+                    || offsets.windows(2).any(|p| p[0] >= p[1])
+                {
+                    return Err(invalid("invalid AAC LTP spectral bands"));
+                }
+                let mut estimate = vec![0.; 2 * small];
+                let mut spectrum = vec![0.; self.n];
+                for (w, pred) in windows.iter().enumerate() {
+                    if pred.is_none() {
+                        continue;
+                    }
+                    history.estimate_short(data, w, &mut estimate)?;
+                    self.analyze_short_window(
+                        &estimate,
+                        w,
+                        previous,
+                        current,
+                        &mut spectrum[w * small..(w + 1) * small],
+                    )?;
+                }
+                if let Some(tns) = tns {
+                    spectrum = tns.analyze_owned(spectrum, offsets, tns_max_band)?;
+                }
+                // ISO/IEC 14496-3 4.6.7.4.2: for EIGHT_SHORT_SEQUENCE, LTP is applied
+                // across all spectral coefficients up to MAX_SHORT_LTP_SFB (all short SFBs
+                // in enabled subwindows).
+                for (w, pred) in windows.iter().enumerate() {
+                    if pred.is_none() {
+                        continue;
+                    }
+                    for bin in w * small..(w + 1) * small {
+                        let sum = residual[bin] as f64 + spectrum[bin];
+                        if !sum.is_finite() || sum.abs() > f32::MAX as f64 {
+                            return Err(invalid("AAC LTP spectral addition overflow"));
+                        }
+                    }
+                }
+                for (w, pred) in windows.iter().enumerate() {
+                    if pred.is_none() {
+                        continue;
+                    }
+                    for bin in w * small..(w + 1) * small {
+                        residual[bin] = (residual[bin] as f64 + spectrum[bin]) as f32;
+                    }
+                }
+                Ok(())
+            }
+            _ => Err(invalid("AAC LTP usage and window sequence mismatch")),
         }
-        apply_long_prediction(residual, &spectrum, offsets, used)
     }
 }
 

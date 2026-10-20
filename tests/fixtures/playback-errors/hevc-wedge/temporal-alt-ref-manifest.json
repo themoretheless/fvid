@@ -1,0 +1,34 @@
+{
+  "provenance": "Owned PCM/CABAC and MP4, no private media, FFmpeg, network or test-time generation.",
+  "specification": "H.265 v8 I.8.3.4 and I.8.5.3.2.6; alternate current target reference classification in merge only.",
+  "source_motion": [
+    1,
+    -2
+  ],
+  "target_motion": [
+    2,
+    -2
+  ],
+  "target_reference_on": [
+    1,
+    1
+  ],
+  "target_reference_off": [
+    0,
+    0
+  ],
+  "files": [
+    "temporal-alt-ref-32-off.mp4",
+    "temporal-alt-ref-32-off-explicit.mp4",
+    "temporal-alt-ref-32-on.mp4",
+    "temporal-alt-ref-32-on-explicit.mp4",
+    "temporal-alt-ref-128-off.mp4",
+    "temporal-alt-ref-128-off-explicit.mp4",
+    "temporal-alt-ref-128-on.mp4",
+    "temporal-alt-ref-128-on-explicit.mp4",
+    "temporal-alt-ref-128-off-direct.mp4",
+    "temporal-alt-ref-128-off-direct-explicit.mp4",
+    "temporal-alt-ref-128-on-direct.mp4",
+    "temporal-alt-ref-128-on-direct-explicit.mp4"
+  ]
+}

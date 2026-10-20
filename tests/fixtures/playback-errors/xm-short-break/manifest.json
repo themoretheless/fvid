@@ -1,0 +1,264 @@
+{
+  "provenance": "Authored short2rowdestination withD00/D01controls,D02/D03/D63out-of-pattern targets andD64global-bound control. Both natural-next and earlier B02destinations. Literal traces and independent flattened notes;VP9/PCM companion. No external encoder,network or private media.",
+  "cases": [
+    {
+      "name": "short-break-00",
+      "file": "short-break-00.xm",
+      "control": "short-break-00-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "short-break-00-jump",
+      "file": "short-break-00-jump.xm",
+      "control": "short-break-00-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "short-break-01",
+      "file": "short-break-01.xm",
+      "control": "short-break-01-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "short-break-01-jump",
+      "file": "short-break-01-jump.xm",
+      "control": "short-break-01-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "short-break-02",
+      "file": "short-break-02.xm",
+      "control": "short-break-02-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "short-break-02-jump",
+      "file": "short-break-02-jump.xm",
+      "control": "short-break-02-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "short-break-03",
+      "file": "short-break-03.xm",
+      "control": "short-break-03-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "short-break-03-jump",
+      "file": "short-break-03-jump.xm",
+      "control": "short-break-03-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "short-break-63",
+      "file": "short-break-63.xm",
+      "control": "short-break-63-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "short-break-63-jump",
+      "file": "short-break-63-jump.xm",
+      "control": "short-break-63-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": true
+    },
+    {
+      "name": "short-break-64",
+      "file": "short-break-64.xm",
+      "control": "short-break-64-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": false
+    },
+    {
+      "name": "short-break-64-jump",
+      "file": "short-break-64-jump.xm",
+      "control": "short-break-64-jump-control.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "short-break-00.xm": "17a96048091f4106b9442906c98e5644598068b5ea90f0d33b32525c9ba145a2",
+    "short-break-00-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-00-jump.xm": "84eba0b3340331ffac19e0cb8fd719a130a4a757190d192266d3162e76cd27e2",
+    "short-break-00-jump-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-01.xm": "07ffb9dcba935e29196e1c24588abf15858b4c7015288b49b50ccfd8d4484670",
+    "short-break-01-control.xm": "dcc13906a892ead346993405517d4d0768b4aa64c58487bdb09a0916c8e8d6e5",
+    "short-break-01-jump.xm": "55b0529ced2ecd244f0b4d98ccf4b3d783d9264df19f563038bf6c22518843ca",
+    "short-break-01-jump-control.xm": "dcc13906a892ead346993405517d4d0768b4aa64c58487bdb09a0916c8e8d6e5",
+    "short-break-02.xm": "ec38cfa4abe013d34e89c7d27ac497e6cd4fc9a00b1ce5f47530ce8a7269eeb7",
+    "short-break-02-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-02-jump.xm": "f5f3ad1c13bcd1c5c60824e81224e2cad96e63a3b6e9441727f015eaa86e158e",
+    "short-break-02-jump-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-03.xm": "1bbfb8ee1e30d9ee360c84587c642dcc86aed995efb0688d1ebd4f37dd1a939f",
+    "short-break-03-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-03-jump.xm": "9848d018f87206879534cadfcc93f72f8b8a1b6b22a700b445e82aa82d81f261",
+    "short-break-03-jump-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-63.xm": "42e505f47595984ec9b49ae3ee46b82e4b5869ef38cc6b338e35b19e23f0a4f4",
+    "short-break-63-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-63-jump.xm": "8b83f635766c99a3a1b1d20e42ff3797c13451cf2f01694721a94a889e8a84ba",
+    "short-break-63-jump-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-64.xm": "fca6e40d7f59952e1dba74e1c8f7f30d0401cf5b91b2fb0d0caa15f5ae29db85",
+    "short-break-64-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad",
+    "short-break-64-jump.xm": "2c4474bcdc514ed6df704e409a1509f42421096f965f83e23427780fadf8ca6d",
+    "short-break-64-jump-control.xm": "93337c896c4602659b46d0b06587b544393ae5369f3d49e7d4e8d8e2eaa9b5ad"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0056",
+    "FVID-0057"
+  ],
+  "checked_at": "2026-10-15T19:35:32.252583+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-033-cpal-drain-qualified.log",
+      "kind": "rust",
+      "passed": 26,
+      "configuration": "player"
+    },
+    {
+      "log": "evidence/batch-033-audio-thread-final.log",
+      "kind": "rust",
+      "passed": 27,
+      "configuration": "player"
+    },
+    {
+      "log": "evidence/batch-033-audio-core-final.log",
+      "kind": "rust",
+      "passed": 65,
+      "configuration": "player"
+    },
+    {
+      "log": "evidence/batch-033-audio-minimal.log",
+      "kind": "rust",
+      "passed": 15,
+      "configuration": "minimal"
+    },
+    {
+      "log": "evidence/batch-033-audio-fixtures.log",
+      "kind": "python",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-033-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 118,
+  "distinct_python_tests_passed": 3,
+  "before": [
+    "evidence/batch-033-audio-eof-before.log",
+    "evidence/batch-033-finite-stretch-qualified-before.log"
+  ],
+  "qualification": [
+    "Native60ms video/PCM input queues480 valid device frames. Before56, AudioPlayback emits Ended while all480 remain unread; this can advance an audio-only queue before its final samples play.",
+    "Backend completion is now an additive begin_drain/drain_status handshake. The worker validates decoder EOF once, waits for pending output, updates the final position and remains responsive to Pause/Seek/Stop. Synchronous defaults preserve existing backend implementations.",
+    "CPAL accounts for ring/DSP data, in-flight callback conversion, rendered buffer duration and CPAL-reported playback latency. Pause preserves remaining device tail; navigation epochs reject obsolete callbacks. Empty callbacks cannot keep extending a completed tail.",
+    "Current device errors terminate drain as Error rather than false Ended/infinite wait. Failure survives seek; obsolete stream errors cannot poison a restarted stream. These are refusal/failure tests, separate from valid playback.",
+    "Before57, the fully decoded480-frame source produces0 frames at1.25rate, rather than384, because it is below the512-frame processing segment. Finite processing now pads only the search window, emits the exact nominal remaining duration and retires its final search history.",
+    "Finite wave samples match a contiguous native-stretch reference at0.5,0.875,1,1.001,1.234,1.25,1.75,2rates, fractional carry, stereo, preconsumed prefixes and callback sizes1/63/64/513. A32768-frame access unit finishes its partial tail. Zero-rate suspend/resume and return to normal rate retain the in-flight segment.",
+    "Actual AudioPlayback plus production CPAL render code verifies finite output and device EOF across seven rates. Existing27 decoder/seek/edit/Opus/Vorbis worker regressions and65 audio/core/reader tests pass; minimal15 tests repeat shared-core coverage and add no distinct test count.",
+    "Explicit fixture generation stays outside tests. Normal checks require neither FFmpeg nor network. A transient unrelated Ogg stats type mismatch was already repaired in the shared checkout before the qualified reproduction; it adds no improvement ID."
+  ],
+  "compatibility": "AudioBackend gains default begin_drain and drain_status methods, preserving existing implementations. Custom asynchronous backends should override them to expose pending output and failure. No existing public method is removed.",
+  "remaining": [
+    "No physical DAC/device-initialization qualification; production callbacks are exercised with a controlled virtual device and reported-latency model.",
+    "No throughput/latency/RSS improvement claimed.",
+    "Fine-grained A/V-sync clock accuracy remains a separate audit candidate: buffer search retirement and rendered progress need independent scrutiny."
+  ],
+  "counting": "Two independent defects: premature playback EOF with unread device PCM; finite time stretch cannot finish below its processing lookahead. Backend lifecycle/error states, rate/sample variants, constructor integration and test infrastructure add no IDs."
+}

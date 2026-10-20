@@ -1,0 +1,178 @@
+{
+  "provenance": "Authored mono integer PCM, independent Rice encoder and neutral VP9, covering zero history, masked run divisors, 65535 run modifier reset, and coded-vs-folded history clamp. No private media/foreign encoder/network.",
+  "cases": [
+    {
+      "name": "zero-initial-history",
+      "samples": 32,
+      "depth": 16,
+      "initial_history": 0,
+      "history_mult": 40,
+      "rice_limit": 14,
+      "stats": {
+        "zero_history_runs": 1,
+        "masked_run_parameters": 0,
+        "max_runs": 0,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "zero-history-after-run",
+      "samples": 32,
+      "depth": 16,
+      "initial_history": 10,
+      "history_mult": 0,
+      "rice_limit": 14,
+      "stats": {
+        "zero_history_runs": 1,
+        "masked_run_parameters": 0,
+        "max_runs": 0,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "small-limit-1",
+      "samples": 16,
+      "depth": 16,
+      "initial_history": 10,
+      "history_mult": 40,
+      "rice_limit": 1,
+      "stats": {
+        "zero_history_runs": 0,
+        "masked_run_parameters": 1,
+        "max_runs": 0,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "small-limit-2",
+      "samples": 16,
+      "depth": 16,
+      "initial_history": 10,
+      "history_mult": 40,
+      "rice_limit": 2,
+      "stats": {
+        "zero_history_runs": 0,
+        "masked_run_parameters": 1,
+        "max_runs": 0,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "small-limit-4",
+      "samples": 32,
+      "depth": 16,
+      "initial_history": 0,
+      "history_mult": 40,
+      "rice_limit": 4,
+      "stats": {
+        "zero_history_runs": 1,
+        "masked_run_parameters": 1,
+        "max_runs": 0,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "long-run-resume",
+      "samples": 65537,
+      "depth": 16,
+      "initial_history": 10,
+      "history_mult": 40,
+      "rice_limit": 14,
+      "stats": {
+        "zero_history_runs": 0,
+        "masked_run_parameters": 0,
+        "max_runs": 1,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "terminal-run-65535",
+      "samples": 65536,
+      "depth": 16,
+      "initial_history": 10,
+      "history_mult": 40,
+      "rice_limit": 14,
+      "stats": {
+        "zero_history_runs": 0,
+        "masked_run_parameters": 0,
+        "max_runs": 1,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "long-multiple-runs",
+      "samples": 65570,
+      "depth": 16,
+      "initial_history": 10,
+      "history_mult": 40,
+      "rice_limit": 14,
+      "stats": {
+        "zero_history_runs": 1,
+        "masked_run_parameters": 0,
+        "max_runs": 1,
+        "modifier_history_edges": 0
+      }
+    },
+    {
+      "name": "modifier-history-edge",
+      "samples": 16,
+      "depth": 24,
+      "initial_history": 10,
+      "history_mult": 40,
+      "rice_limit": 14,
+      "stats": {
+        "zero_history_runs": 0,
+        "masked_run_parameters": 0,
+        "max_runs": 0,
+        "modifier_history_edges": 1
+      }
+    }
+  ],
+  "files": {
+    "zero-initial-history.mkv": "3d087596ebdaeab98dfd02031e653ac2622086154610d5c313ba1e83b019fd54",
+    "zero-initial-history.m4a": "f42d3eea75c4e99fee813b63c61eecaf04e773ee138f093207ff259169b80c72",
+    "zero-initial-history.cookie": "3733e27606651006e35e0266785f1c1150e45f238062ffdb9956bc559db6b8db",
+    "zero-initial-history.packet": "0193ba253b3586849c90205f4344dc060d5ce77ac7c24020c49621b4cbe16b77",
+    "zero-initial-history.i32le": "38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca",
+    "zero-history-after-run.mkv": "cd4766844c2ce2df9b43b3eb120be7e7d8b3db17a9cae4418aa5d546ba0f6c6c",
+    "zero-history-after-run.m4a": "c6f1e08acf22532d9c8d43891fde43a0ad009591110cdedc3f392cd8b1d1f634",
+    "zero-history-after-run.cookie": "7383a6e1b828c0818a5ec951c70d86afdb483c8d7e40c4a93711012da0a88908",
+    "zero-history-after-run.packet": "60fdcc459b2959c70446bf69197c5f4039717a2bfd6525ebde3a1b8aeb329e56",
+    "zero-history-after-run.i32le": "6acd7f922aa546adef4c129d928ebe6e8120e4a73060d21c2e6a04fd1d26f3ae",
+    "small-limit-1.mkv": "43f945c02e4e6f3ba741919b645822e2ffec56d8f87de4c968300c14fa5eba8d",
+    "small-limit-1.m4a": "48818bd3b90aa04954aa9d665c8498d92d2f6d83461e7e54fbdbfb2ba04522e1",
+    "small-limit-1.cookie": "0f6f606337a1543b69b7ca8595b0ab66ac6d2079e0437d2900b9adeb2b0241f2",
+    "small-limit-1.packet": "b8edae98f835c6d8b082db491480485a78400006bba8bee0b1e447a6ecc9914b",
+    "small-limit-1.i32le": "407b6d90e766a266416b9ceeb725d26840b5cca62d39f63400096eeb6d8765c1",
+    "small-limit-2.mkv": "fa2c64d80d226507eca825a45d7d084db313ae9dcd4a775ba93d3e43b8727589",
+    "small-limit-2.m4a": "97d09249a4969bd76d55fd58d2d834878376e47188fc21012eba43b6301ab4a1",
+    "small-limit-2.cookie": "fb9bf734c94ff2fc190a0a9c711aa5ae4d1e2c92d98bebafa270583183f3956b",
+    "small-limit-2.packet": "7b7d34f427a8aeea840eb5e056e6e8a2ac178bc53994f9f181fb521edad1ea04",
+    "small-limit-2.i32le": "407b6d90e766a266416b9ceeb725d26840b5cca62d39f63400096eeb6d8765c1",
+    "small-limit-4.mkv": "6e56d5eae8ed3c207edd003a4dc678fec2ecea11718c06fb6539b22338b862e9",
+    "small-limit-4.m4a": "b1badbdbe729861ace6b5e0827ccf76143e0459a19c585e0843b7d21a48d856f",
+    "small-limit-4.cookie": "8dbe70b832aa2fc6682e55457d4d30966d04300375927857048b09a29fb55899",
+    "small-limit-4.packet": "38e905ebf5cabdf3303d243daeecd9bbafb329ebd3f41bcc73c91f80b18b0e11",
+    "small-limit-4.i32le": "2ef41052369a5828d69cf16fccf9835c07dcf27ec7231a27c9e908cb6cc259d8",
+    "long-run-resume.mkv": "fe44eb2e07dd4d8920c1f29b1e0370df46a0eb69a0c66fa130222c5bbfa42343",
+    "long-run-resume.m4a": "682c0885056bc1c659b76a045aa7a9f96f31d840f7ecf181d73462d417968363",
+    "long-run-resume.cookie": "3b8537a8bba9ea63d9e3c4187a78a94680ad985eb05beb811fc47f6bfd127ae3",
+    "long-run-resume.packet": "6ff68ac02d823d2e2a848a8d50b32be9371c763a0c4457c114b94b1a9772f9a2",
+    "long-run-resume.i32le": "4a05dec1bdc6b6bb691b522de395a5cb169bcd06178d9c58b1e145c7f4065de2",
+    "terminal-run-65535.mkv": "99b52b6591e07ea2edbc1f1ba232fe4f0813c102f715364285d141e212f7149a",
+    "terminal-run-65535.m4a": "caa3188efefc3f79be96c023ec5158bb5fb18cabde039bb19cec6f12afcb79a3",
+    "terminal-run-65535.cookie": "02d48dd2146aea05a310c8d59cd07d4b79c97e24f9edd1729fc95aaa9e814160",
+    "terminal-run-65535.packet": "687d74d4b9e64e4f47705afc557ca67a46e0a440a38eb474202773ffca32238f",
+    "terminal-run-65535.i32le": "8a39d2abd3999ab73c34db2476849cddf303ce389b35826850f9a700589b4a90",
+    "long-multiple-runs.mkv": "196a5044f2938a54f11e699a61037ab974e8f2800736c71c00bd232a0c8f8510",
+    "long-multiple-runs.m4a": "795145d457e070dc4f4d56b7544fa65f6fe09668e4d90fdd35b0caf003010017",
+    "long-multiple-runs.cookie": "68eab0882a3b37c4cb4e6774a3b3e372796599e5e660a2bc3167f9276e680761",
+    "long-multiple-runs.packet": "d94852d5687ff80bcb162eaa704fe8430cdc129dc1eee3eba84604b35b4995db",
+    "long-multiple-runs.i32le": "d19e3ebdc7594f4808adcca1a839682d74f815f1ad635cd9e6e728f4d38c10e4",
+    "modifier-history-edge.mkv": "69e25f774cabb01476f1b35a68915a81e80b8089d8be19834f318a35dd440426",
+    "modifier-history-edge.m4a": "cd7784f88dae4c4952c81617bcd1659d5066f24f4429841e57a14129c7c9b5ee",
+    "modifier-history-edge.cookie": "86e27d7e86ac26ea17808c15634d9da997a48e3f4f82873ed1b81ee5d6de5708",
+    "modifier-history-edge.packet": "dc0e01e5bdbd6b2234c4f2acd207407955b703116f78eab2787af8d3207ef3ad",
+    "modifier-history-edge.i32le": "3b9e12bb38e6c484d00d7257249c0d5d3f3cc552820ae8a606d7966520b123e3"
+  }
+}

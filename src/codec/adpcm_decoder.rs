@@ -5,23 +5,15 @@
 //! in the stream - which is what lets a packet of several blocks be handed over
 //! one block at a time.
 //!
-//! The arithmetic belongs to symphonia; what this file settles is the geometry
-//! the container has to state and symphonia has to be told. A block's frame
-//! count follows from its byte length with the header bytes taken off, and only
-//! Microsoft's two tags state a block length at all (in the `WAVEFORMATEX` the
-//! container stores as this codec's setup data). Apple's block is fixed by its
-//! own format, so it needs no setup data and a track that carries some is read
-//! just the same.
+//! Reconstruction is shared with the owned fvid-media decoders. This adapter
+//! preserves packet duration trimming and block scheduling for the player.
 
 use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
 use crate::{Result, invalid};
-use symphonia::core::audio::{Channels, Position};
+use symphonia::core::codecs::audio::AudioCodecId;
 use symphonia::core::codecs::audio::well_known::{
     CODEC_ID_ADPCM_IMA_QT, CODEC_ID_ADPCM_IMA_WAV, CODEC_ID_ADPCM_MS,
 };
-use symphonia::core::codecs::audio::{AudioCodecId, AudioCodecParameters, AudioDecoderOptions};
-use symphonia::core::packet::Packet;
-use symphonia::default::get_codecs;
 
 /// Bytes one channel's block header takes, and how many of the block's frames
 /// those bytes already hold as whole samples: Microsoft's preamble stores two
@@ -100,11 +92,24 @@ fn frames_to_keep(declared: u64, held: u64) -> u64 {
     }
 }
 
-/// ADPCM decoder: hands symphonia one whole block at a time and concatenates the
-/// f32 frames, which is the interleaved form the pipeline carries.
+enum OwnedDecoder {
+    Ms(fvid_media::owned_ms_adpcm::MsAdpcmDecoder),
+    ImaWav(fvid_media::owned_ima_wav::ImaWavDecoder),
+    Ima4(fvid_media::owned_ima4::Ima4Decoder),
+}
+impl OwnedDecoder {
+    fn decode(&self, block: &[u8]) -> std::result::Result<Vec<f32>, fvid_media::owned_ima4::Error> {
+        match self {
+            Self::Ms(decoder) => decoder.decode_pcm(block),
+            Self::ImaWav(decoder) => decoder.decode_pcm(block),
+            Self::Ima4(decoder) => decoder.decode_pcm(block),
+        }
+    }
+}
+/// Owned block reconstruction and duration-trimmed interleaved float output.
 pub struct AdpcmDecoder {
     label: &'static str,
-    decoder: Box<dyn symphonia::core::codecs::audio::AudioDecoder>,
+    decoder: OwnedDecoder,
     sample_rate: u32,
     channels: u16,
     block_bytes: usize,
@@ -139,24 +144,18 @@ impl AdpcmDecoder {
             ))
         })?;
 
-        let mut codec_params = AudioCodecParameters::new();
-        codec_params
-            .for_codec(codec)
-            .with_sample_rate(sample_rate)
-            .with_max_frames_per_packet(frames)
-            .with_frames_per_block(frames)
-            .with_channels(match channels {
-                2 => Channels::Positioned(Position::FRONT_LEFT | Position::FRONT_RIGHT),
-                count => Channels::Discrete(count),
-            });
-        if !configuration.is_empty() {
-            codec_params.with_extra_data(configuration.to_vec().into_boxed_slice());
+        let decoder = if codec == CODEC_ID_ADPCM_MS {
+            fvid_media::owned_ms_adpcm::MsAdpcmDecoder::new(configuration, sample_rate, channels)
+                .map(OwnedDecoder::Ms)
+        } else if codec == CODEC_ID_ADPCM_IMA_WAV {
+            fvid_media::owned_ima_wav::ImaWavDecoder::new(configuration, sample_rate, channels)
+                .map(OwnedDecoder::ImaWav)
+        } else if codec == CODEC_ID_ADPCM_IMA_QT {
+            fvid_media::owned_ima4::Ima4Decoder::new(sample_rate, channels).map(OwnedDecoder::Ima4)
+        } else {
+            return Err(invalid("unknown owned ADPCM coding"));
         }
-        let info = get_codecs()
-            .get_audio_decoder(codec)
-            .ok_or_else(|| invalid(&format!("{label} decoder not available")))?;
-        let decoder = (info.factory)(&codec_params, &AudioDecoderOptions::default())
-            .map_err(|error| invalid(&format!("{label} decoder init: {error}")))?;
+        .map_err(|error| invalid(&format!("{label} decoder init: {error}")))?;
         Ok(Self {
             label,
             decoder,
@@ -203,23 +202,11 @@ impl AudioDecode for AdpcmDecoder {
         for index in 0..blocks {
             let start = index * self.block_bytes;
             let block = &data[start..start + self.block_bytes];
-            let packet = Packet::new(
-                0,
-                (pts as i64).into(),
-                self.block_frames.into(),
-                block.to_vec(),
-            );
-            let audio = match self.decoder.decode(&packet) {
-                Ok(buffer) => buffer,
-                Err(symphonia::core::errors::Error::DecodeError(error)) => {
-                    eprintln!("{} decode error: {error}", self.label);
-                    return Ok(None);
-                }
-                Err(error) => {
-                    return Err(invalid(&format!("{} decode: {error}", self.label)));
-                }
-            };
-            audio.copy_to_vec_interleaved(&mut samples);
+            let decoded = self
+                .decoder
+                .decode(block)
+                .map_err(|error| invalid(&format!("{} decode: {error}", self.label)))?;
+            samples.extend(decoded);
         }
         samples.truncate(keep as usize * usize::from(self.channels));
         let bytes: Vec<u8> = samples

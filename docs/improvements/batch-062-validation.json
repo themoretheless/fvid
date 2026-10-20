@@ -1,0 +1,62 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0086"
+  ],
+  "checked_at": "2026-10-16T01:04:59.703290+00:00",
+  "production_sources": [
+    "src/playback/audio/wav.rs",
+    "src/playback/audio/au.rs"
+  ],
+  "before": [
+    "evidence/batch-062-alignment-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-062-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-062-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-062-au.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-062-worker-final.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-062-player-factory-final.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-062-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-062-player-build-final.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twenty-four authored WAV/AU fixed-frame runs explicitly contain1..7orphan sample/channel bytes. Packet rounding removes them before native PCM decoding; all report successful160-frame playback/rewind/EOF and equal the valid prefix. This is distinct from68: the already-strict decoder never receives malformed bytes because the container hides them.",
+    "Whole fixed-frame PCM/float/G711 runs now validate present audio-byte alignment before packetization. Eighteen numeric native controls cover integer8/16/24/32, float32/64 and both companding laws, mono/stereo, with matching short VP9/PCM video. All malformed runs refuse specifically at source admission.",
+    "Odd mono8 RIFF data with external word padding and AU annotation/declared-run footer remain accepted, verifying the check applies only to actual audio bytes. Actual capture workers verify all complete controls through playback/rewind/EOF; the Player factory rejects malformed prefixes and preserves padding controls.",
+    "33 WAV/9 AU/31 worker tests, related topology/budget/EOF/precision integrations, deterministic fixtures and player build pass. Coded-block partial-tail behavior is unchanged; this qualification covers fixed-frame WAV/AU only. No physical DAC, public signature, AIFF padding-policy or performance claim."
+  ],
+  "baseline_repairs": [
+    "Initial Player factory/worker/build checks caught a concurrent owned_raw_mp3.rs AudioDecodeStats import/type mismatch. The current file had already been corrected outside this work; no edits or improvement ID were taken for that repair. Final reruns pass, and the initial failure logs remain separate."
+  ],
+  "compatibility": "Present orphan bytes in fixed-frame WAV/AU audio no longer disappear silently. Producers must provide complete sample/channel frames; outside-run word padding, annotations and footers retain existing behavior.",
+  "counting": "One container-level fixed-frame run admission problem. Formats, widths, laws, orphan lengths, boundary controls and concurrent baseline repair add no IDs."
+}

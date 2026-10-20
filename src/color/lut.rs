@@ -192,7 +192,15 @@ impl Lut3d {
                 // tetrahedron: origin, +biggest, +middle, +all.
                 let d = [dr, dg, db];
                 let mut order = [0usize, 1, 2];
-                order.sort_by(|x, y| d[*y].total_cmp(&d[*x]));
+                if d[order[1]].total_cmp(&d[order[0]]).is_gt() {
+                    order.swap(0, 1);
+                }
+                if d[order[2]].total_cmp(&d[order[1]]).is_gt() {
+                    order.swap(1, 2);
+                    if d[order[1]].total_cmp(&d[order[0]]).is_gt() {
+                        order.swap(0, 1);
+                    }
+                }
                 let node = |mask: usize| -> [f32; 3] {
                     self.at(
                         (r0 + (mask & 1)).min(n),

@@ -10,6 +10,20 @@ pub fn eligible<R: Read + Seek>(input: &Mp4Reader<R>) -> bool {
             ) && (t.edits.is_empty() || (t.edits.len() == 1 && t.edits[0].media_time >= 0))
         })
 }
+/// Preserve effective usability without disabling historical all-disabled groups
+/// that the MP4 reader admits through its legacy automatic-selection fallback.
+pub(crate) fn effective_track_enabled<R: Read + Seek>(input: &Mp4Reader<R>, index: usize) -> bool {
+    let Some(track) = input.tracks().get(index) else { return false; };
+    input.track_header_flags(index).unwrap_or(0)&1!=0
+        || !input.tracks().iter().enumerate().any(|(i,t)|t.handler==track.handler && input.track_header_flags(i).unwrap_or(0)&1!=0)
+}
+/// Prefer enabled in-movie tracks when the source states that distinction;
+/// otherwise retain the MP4 reader's enabled/legacy file-order fallback.
+pub(crate) fn effective_track_default<R: Read+Seek>(input:&Mp4Reader<R>,index:usize)->bool {
+    let Some(track)=input.tracks().get(index) else {return false;};
+    input.track_header_flags(index).unwrap_or(0)&3==3
+        || !input.tracks().iter().enumerate().any(|(i,t)|t.handler==track.handler && input.track_header_flags(i).unwrap_or(0)&3==3)
+}
 fn check(cancel: Option<&CancelFlag>) -> Result<()> {
     if cancel.is_some_and(|c| c.is_cancelled()) {
         Err(invalid("media operation cancelled"))
@@ -337,8 +351,10 @@ pub fn write_selected_with_metadata_overrides<R: Read + Seek, W: Write + Seek>(
         .collect::<Result<_>>()?;
     let specs: Vec<_> = tracks.iter().map(spec).collect::<Result<_>>()?;
     let options: Vec<_> = plans.iter().map(|p| p.options).collect();
-    let mut writer =
-        PacketWriter::new_with_metadata(output, &specs, &options, metadata.file)?;
+    let enabled: Vec<_> = selected.iter().map(|&index|effective_track_enabled(input,index)).collect();
+    let defaults: Vec<_> = selected.iter().map(|&index|effective_track_default(input,index)).collect();
+    let mut writer = PacketWriter::new_with_track_preferences(
+        output,&specs,&options,metadata.file,&Default::default(),&Default::default(),&enabled,&defaults)?;
     if let Some(hook) = progress {
         hook.emit(writer.event());
     }

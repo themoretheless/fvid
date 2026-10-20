@@ -1,0 +1,419 @@
+{
+  "provenance": "Owned High 4:4:4 Predictive profile SPS/PPS/CAVLC PCM, no separate colour planes. Monochrome/422/444 per-plane integer samples, offline, no external codec or private media.",
+  "cases": [
+    {
+      "file": "avc-pcm-format0-y8-c8-0.mp4",
+      "configuration": "avc-pcm-format0-y8-c8-0.avcc",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format0-y8-c8-0-0.packet",
+          "offset": 0
+        },
+        {
+          "packet": "avc-pcm-format0-y8-c8-0-1.packet",
+          "offset": 512
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format0-y8-c8-1.mp4",
+      "configuration": "avc-pcm-format0-y8-c8-1.avcc",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format0-y8-c8-1-0.packet",
+          "offset": 1024
+        },
+        {
+          "packet": "avc-pcm-format0-y8-c8-1-1.packet",
+          "offset": 1536
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format0-y10-c12-0.mp4",
+      "configuration": "avc-pcm-format0-y10-c12-0.avcc",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format0-y10-c12-0-0.packet",
+          "offset": 2048
+        },
+        {
+          "packet": "avc-pcm-format0-y10-c12-0-1.packet",
+          "offset": 2560
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format0-y10-c12-1.mp4",
+      "configuration": "avc-pcm-format0-y10-c12-1.avcc",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format0-y10-c12-1-0.packet",
+          "offset": 3072
+        },
+        {
+          "packet": "avc-pcm-format0-y10-c12-1-1.packet",
+          "offset": 3584
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format0-y14-c8-0.mp4",
+      "configuration": "avc-pcm-format0-y14-c8-0.avcc",
+      "format": 0,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format0-y14-c8-0-0.packet",
+          "offset": 4096
+        },
+        {
+          "packet": "avc-pcm-format0-y14-c8-0-1.packet",
+          "offset": 4608
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format0-y14-c8-1.mp4",
+      "configuration": "avc-pcm-format0-y14-c8-1.avcc",
+      "format": 0,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format0-y14-c8-1-0.packet",
+          "offset": 5120
+        },
+        {
+          "packet": "avc-pcm-format0-y14-c8-1-1.packet",
+          "offset": 5632
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format2-y8-c8-0.mp4",
+      "configuration": "avc-pcm-format2-y8-c8-0.avcc",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format2-y8-c8-0-0.packet",
+          "offset": 6144
+        },
+        {
+          "packet": "avc-pcm-format2-y8-c8-0-1.packet",
+          "offset": 7168
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format2-y8-c8-1.mp4",
+      "configuration": "avc-pcm-format2-y8-c8-1.avcc",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "crop": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format2-y8-c8-1-0.packet",
+          "offset": 8192
+        },
+        {
+          "packet": "avc-pcm-format2-y8-c8-1-1.packet",
+          "offset": 9216
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format2-y10-c12-0.mp4",
+      "configuration": "avc-pcm-format2-y10-c12-0.avcc",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format2-y10-c12-0-0.packet",
+          "offset": 10240
+        },
+        {
+          "packet": "avc-pcm-format2-y10-c12-0-1.packet",
+          "offset": 11264
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format2-y10-c12-1.mp4",
+      "configuration": "avc-pcm-format2-y10-c12-1.avcc",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "crop": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format2-y10-c12-1-0.packet",
+          "offset": 12288
+        },
+        {
+          "packet": "avc-pcm-format2-y10-c12-1-1.packet",
+          "offset": 13312
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format2-y14-c8-0.mp4",
+      "configuration": "avc-pcm-format2-y14-c8-0.avcc",
+      "format": 2,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format2-y14-c8-0-0.packet",
+          "offset": 14336
+        },
+        {
+          "packet": "avc-pcm-format2-y14-c8-0-1.packet",
+          "offset": 15360
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format2-y14-c8-1.mp4",
+      "configuration": "avc-pcm-format2-y14-c8-1.avcc",
+      "format": 2,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "crop": [
+        2,
+        2,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format2-y14-c8-1-0.packet",
+          "offset": 16384
+        },
+        {
+          "packet": "avc-pcm-format2-y14-c8-1-1.packet",
+          "offset": 17408
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format3-y8-c8-0.mp4",
+      "configuration": "avc-pcm-format3-y8-c8-0.avcc",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format3-y8-c8-0-0.packet",
+          "offset": 18432
+        },
+        {
+          "packet": "avc-pcm-format3-y8-c8-0-1.packet",
+          "offset": 19968
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format3-y8-c8-1.mp4",
+      "configuration": "avc-pcm-format3-y8-c8-1.avcc",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format3-y8-c8-1-0.packet",
+          "offset": 21504
+        },
+        {
+          "packet": "avc-pcm-format3-y8-c8-1-1.packet",
+          "offset": 23040
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format3-y10-c12-0.mp4",
+      "configuration": "avc-pcm-format3-y10-c12-0.avcc",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format3-y10-c12-0-0.packet",
+          "offset": 24576
+        },
+        {
+          "packet": "avc-pcm-format3-y10-c12-0-1.packet",
+          "offset": 26112
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format3-y10-c12-1.mp4",
+      "configuration": "avc-pcm-format3-y10-c12-1.avcc",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format3-y10-c12-1-0.packet",
+          "offset": 27648
+        },
+        {
+          "packet": "avc-pcm-format3-y10-c12-1-1.packet",
+          "offset": 29184
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format3-y14-c8-0.mp4",
+      "configuration": "avc-pcm-format3-y14-c8-0.avcc",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format3-y14-c8-0-0.packet",
+          "offset": 30720
+        },
+        {
+          "packet": "avc-pcm-format3-y14-c8-0-1.packet",
+          "offset": 32256
+        }
+      ]
+    },
+    {
+      "file": "avc-pcm-format3-y14-c8-1.mp4",
+      "configuration": "avc-pcm-format3-y14-c8-1.avcc",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "avc-pcm-format3-y14-c8-1-0.packet",
+          "offset": 33792
+        },
+        {
+          "packet": "avc-pcm-format3-y14-c8-1-1.packet",
+          "offset": 35328
+        }
+      ]
+    }
+  ]
+}

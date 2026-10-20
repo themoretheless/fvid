@@ -1,0 +1,98 @@
+{
+  "pairs": 15,
+  "iterations": 100,
+  "first": "after",
+  "scope": "Native MIDI CPU render only. Whole-process CPU includes untimed preparation/checksums/warmup. Host load not isolated; all outliers retained; no device or tail-latency claim.",
+  "executables": {
+    "before": "/private/tmp/fvid-midi-render-batch135-before",
+    "after": "/private/tmp/fvid-midi-render-batch135-specialized"
+  },
+  "inputs": {
+    "tests/fixtures/playback-errors/midi-muted-render/volume-muted-1.mid": "5832d75a9156ce882eaf57957e287050cd5d19f5cff08f23eb04f9a4eda9daef",
+    "tests/fixtures/playback-errors/midi-muted-render/volume-muted-8.mid": "4ec29859333647898562c6039f0e6937400f321ceeb9e29d8a2c793683d37669",
+    "tests/fixtures/playback-errors/midi-muted-render/volume-muted-32.mid": "c2cd848833f3a5af78c0d7ff962c549c3a018ff20e46daf6f92ccc2550c9a0ef",
+    "tests/fixtures/playback-errors/midi-muted-render/volume-unmute-1.mid": "aaf1414c9f5e11c5ed2297625952dfeef51b29b5753bff2a9c1408fc9d0c738e",
+    "tests/fixtures/playback-errors/midi-muted-render/volume-unmute-8.mid": "6268081f8aa093dbc7fb001512f6f131db5f9156290911e7b6d954947ba8636a",
+    "tests/fixtures/playback-errors/midi-muted-render/volume-unmute-32.mid": "31bac6ecd585ae4ee1e8e7ed25b3b201727e95ab154f25108ad95114a9e89ae0",
+    "tests/fixtures/playback-errors/midi-muted-render/expression-unmute-8.mid": "4c922bf03316270d51d075e2f0dfee75cc15ca82ada0f70164ac7af5d42b7ca9",
+    "tests/fixtures/playback-errors/midi-muted-render/released-before-unmute-8.mid": "202c1159c9e70de2e3a6b3efbd29faa95b8d7acfe7038bd89617c5f480abd20f",
+    "tests/fixtures/playback-errors/midi-muted-render/partial-muted-32.mid": "68c95b5dfd0edbf44d415265d0f8c76d0102fe45c0efd772f7830431aa9db533",
+    "tests/fixtures/playback-errors/midi-muted-render/fractional-unmute-8.mid": "4ee7c8ae47d76f61ee4b5297200400fbdb7b2a8c6aa19a450dae345586ace97c"
+  },
+  "binary_sha256": {
+    "before": "69ee30a0dc70759e1ac8a24fab724ec0f12957aadc233e70d6736412cd496911",
+    "after": "68000b540089cbf003b9f334f85107f7919efcada7b23c3515718767ceae3f5e"
+  },
+  "elapsed_ns": {
+    "median_ratio": 0.4225347522681594,
+    "bootstrap_median95": [
+      0.4204016207286815,
+      0.4244128900317517
+    ],
+    "ratios": [
+      0.30226943261359385,
+      0.42256739417040784,
+      0.5701111658488469,
+      0.4264327995177571,
+      0.4232333080223442,
+      0.4204016207286815,
+      0.42296050799355167,
+      0.42216740573621026,
+      0.4225347522681594,
+      0.4244128900317517,
+      0.4208993405854332,
+      0.41672016121271155,
+      0.40415585907259083,
+      0.4250489629341983,
+      0.42208350617991247
+    ]
+  },
+  "process_user_seconds": {
+    "median_ratio": 0.42386162047538317,
+    "bootstrap_median95": [
+      0.4223158308084306,
+      0.4243011114853493
+    ],
+    "ratios": [
+      0.3964258325277218,
+      0.4241678808973313,
+      0.449891342500168,
+      0.4233282567591937,
+      0.4243388874030968,
+      0.4223158308084306,
+      0.42409831590159397,
+      0.4228097005598539,
+      0.42386162047538317,
+      0.42475829237557317,
+      0.4229219983823303,
+      0.4195317917439085,
+      0.41472719902432414,
+      0.42577082845382075,
+      0.4243011114853493
+    ]
+  },
+  "process_cpu_seconds": {
+    "median_ratio": 0.4247348278524723,
+    "bootstrap_median95": [
+      0.42319405530515186,
+      0.42564026557586854
+    ],
+    "ratios": [
+      0.3912413163301915,
+      0.42564026557586854,
+      0.45661280165056206,
+      0.4247348278524723,
+      0.42567126662411736,
+      0.42319405530515186,
+      0.42522610726351906,
+      0.42409708006660435,
+      0.42445084691084856,
+      0.42610751753489007,
+      0.42364413335986967,
+      0.42071394661210204,
+      0.41530924806252495,
+      0.42683181966923184,
+      0.4251393642900903
+    ]
+  }
+}

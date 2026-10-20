@@ -1,0 +1,53 @@
+{
+  "provenance": "Five authored constant signed8bit sample loops and equivalent signed16bit value*256 controls, standard zero-based XM keymap. Negative fullscale,negativeLSB,zero,positiveLSB,positivefullscale. Separate authored native VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "value": -128,
+      "files": {
+        "8": "constant--128-8.xm",
+        "16": "constant--128-16.xm"
+      }
+    },
+    {
+      "value": -1,
+      "files": {
+        "8": "constant--1-8.xm",
+        "16": "constant--1-16.xm"
+      }
+    },
+    {
+      "value": 0,
+      "files": {
+        "8": "constant-0-8.xm",
+        "16": "constant-0-16.xm"
+      }
+    },
+    {
+      "value": 1,
+      "files": {
+        "8": "constant-1-8.xm",
+        "16": "constant-1-16.xm"
+      }
+    },
+    {
+      "value": 127,
+      "files": {
+        "8": "constant-127-8.xm",
+        "16": "constant-127-16.xm"
+      }
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "constant--128-8.xm": "e664f16efda01cf1120f13d422314c41da3e8978a62b06a186b680fb8b283c6a",
+    "constant--128-16.xm": "f94946b520df6ba385cc59f849dfd6e4c67fbbcb8907c617f2b3af4e1c047695",
+    "constant--1-8.xm": "35dfe80f386c52d555e08a3349222ed8a8bf3073fd939f6943062da6c64d7074",
+    "constant--1-16.xm": "1cada885cae8a966bee34e38bbac33ed8147bf36ee3ec86a3c7cc9b48e14d12d",
+    "constant-0-8.xm": "d7ece6a1c02be02184cb61e43357ff2b3a5803990abee69b247adfa486ba02d3",
+    "constant-0-16.xm": "9706dd4990e2f858fac9be5af14484ff0f6aaea73c8f34898ef3e13f45c60e8c",
+    "constant-1-8.xm": "634c3f02b76fe6ae599613edced2760e268caf8ea76abeabad2b9b8a1d0e02bf",
+    "constant-1-16.xm": "3a40d8c97a1bb199065c2e651f665364c9c4e966139e935221edfabc52533463",
+    "constant-127-8.xm": "1410a2710326284cc88c7db8a9e03c64d963782f67bccbada084e8abafeb6381",
+    "constant-127-16.xm": "4689e09c5e5bc218c4741e86518b53ac1a9d4e3c2920a0d8aafeea7c59add286"
+  }
+}

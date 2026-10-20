@@ -11,7 +11,7 @@
 //! other readers use: a packet is 100 ms of the timeline, its timestamps are in
 //! milliseconds, and the events inside it are offset from that packet's start.
 
-use crate::{Result, invalid};
+use crate::{Result, invalid, unsupported};
 use std::time::Duration;
 
 /// What a file plays at until a track says otherwise: 120 quarters a minute.
@@ -102,6 +102,31 @@ pub struct WindowEvent {
     pub event: Event,
 }
 
+/// Clock stated by the SMF division word.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TimeDivision {
+    QuarterNote { ticks_per_quarter: u16 },
+    /// Exact frame rate: drop-frame code -29 uses 30000/1001 frames/second.
+    Smpte { frames_per_second_num: u32, frames_per_second_den: u32, ticks_per_frame: u8 },
+}
+
+impl TimeDivision {
+    fn parse(word: u16) -> Result<Self> {
+        if word & 0x8000 == 0 {
+            if word == 0 { return Err(invalid("SMF says a quarter note takes no ticks")); }
+            return Ok(Self::QuarterNote { ticks_per_quarter: word });
+        }
+        let code = (word >> 8) as u8 as i8;
+        let (num, den) = match code {
+            -24 => (24, 1), -25 => (25, 1), -29 => (30000, 1001), -30 => (30, 1),
+            _ => return Err(invalid("SMF SMPTE frame-rate code is not -24/-25/-29/-30")),
+        };
+        let ticks_per_frame = word as u8;
+        if ticks_per_frame == 0 { return Err(invalid("SMF SMPTE frame has zero ticks")); }
+        Ok(Self::Smpte { frames_per_second_num: num, frames_per_second_den: den, ticks_per_frame })
+    }
+}
+
 /// A parsed file: what it says about its own shape, plus every event of the
 /// performance in the order a synthesiser has to see them.
 #[derive(Clone, Debug)]
@@ -109,7 +134,9 @@ pub struct SmfFile {
     /// 0 plays one track, 1 plays them together with track 0 as the conductor,
     /// 2 plays independent tracks a listener selects between.
     pub format: u8,
+    /// Metrical resolution; zero for SMPTE. Use time_division to inspect either clock.
     pub ticks_per_quarter: u16,
+    pub time_division: TimeDivision,
     pub track_count: usize,
     /// What the performance called itself, which is the first name stated for the
     /// whole file or, failing that, the first stated for a track. Empty when the
@@ -154,54 +181,67 @@ impl SmfFile {
                 limits.tracks
             )));
         }
-        // The top bit of the division picks the clock: clear means ticks per
-        // quarter note, set means SMPTE frames and subframes per second, which
-        // would need the tempo map replaced by a frame rate to place at all.
-        let division = read_be_u16(bytes, 12)?;
-        if division & 0x8000 != 0 {
-            return Err(invalid(
-                "SMF timed in SMPTE frames is not supported; only quarter-note divisions",
-            ));
+        if format == 0 && track_count != 1 {
+            return Err(invalid("SMF format0 must contain exactly one track"));
         }
-        let ppq = u64::from(division);
-        if ppq == 0 {
-            return Err(invalid("SMF says a quarter note takes no ticks"));
+        if format == 2 && track_count > 1 {
+            return Err(unsupported("SMF format2 independent tracks are not supported"));
         }
+        let time_division = TimeDivision::parse(read_be_u16(bytes, 12)?)?;
+        let ppq = match time_division {
+            TimeDivision::QuarterNote { ticks_per_quarter } => u64::from(ticks_per_quarter),
+            TimeDivision::Smpte { .. } => 0,
+        };
         let mut raw: Vec<RawEvent> = Vec::new();
         let mut tempos: Vec<(u64, u32)> = Vec::new();
         let mut ends: Vec<u64> = Vec::with_capacity(track_count);
         let mut names: Vec<(u8, String)> = Vec::new();
         let mut at = 8 + header_length;
-        for _ in 0..track_count {
+        while ends.len() < track_count {
             let header = read_track_header(bytes, at)?;
             let payload = at + 8;
             let end = payload
                 .checked_add(header.length)
                 .filter(|end| *end <= bytes.len())
-                .ok_or_else(|| invalid("SMF track runs past the end of the file"))?;
-            ends.push(parse_track(
-                &bytes[payload..end],
-                header.kind,
-                limits,
-                &mut raw,
-                &mut tempos,
-                &mut names,
-            )?);
+                .ok_or_else(|| invalid("SMF chunk runs past the end of the file"))?;
+            // Unknown extension chunks are bounded by their own length and do
+            // not consume one of the header's declared musical tracks.
+            if header.kind == *b"MTrk" {
+                ends.push(parse_track(
+                    &bytes[payload..end],
+                    header.kind,
+                    limits,
+                    &mut raw,
+                    &mut tempos,
+                    &mut names,
+                )?);
+            }
             at = end;
         }
         // A file that never states a tempo plays at the default throughout.
         if tempos.is_empty() {
             tempos.push((0, DEFAULT_TEMPO_MICROSECONDS));
         }
-        let segments = tempo_segments(&tempos, ppq);
-        let place = |tick: u64| tick_to_microsecond(&segments, ppq, tick);
+        let segments = if ppq != 0 { tempo_segments(&tempos, ppq)? } else { Vec::new() };
+        let place = |tick: u64| -> Result<u64> {
+            match time_division {
+                TimeDivision::QuarterNote { .. } => tick_to_microsecond(&segments, ppq, tick),
+                TimeDivision::Smpte { frames_per_second_num, frames_per_second_den, ticks_per_frame } => {
+                    // Ignore tempo changes for timecode timing. Retain fractional
+                    // ticks until each absolute event is published, including 29.97.
+                    let numerator = u128::from(tick) * 1_000_000 * u128::from(frames_per_second_den);
+                    let denominator = u128::from(frames_per_second_num) * u128::from(ticks_per_frame);
+                    u64::try_from(numerator / denominator).map_err(|_| invalid("SMF SMPTE timeline exceeds the microsecond clock"))
+                }
+            }
+        };
         let mut events = raw
             .iter()
-            .map(|event| TimedEvent {
-                microseconds: place(event.tick),
+            .map(|event| Ok(TimedEvent {
+                microseconds: place(event.tick)?,
                 event: event.event,
-            })
-            .collect::<Vec<_>>();
+            }))
+            .collect::<Result<Vec<_>>>()?;
         events.sort_by_key(|event| event.microseconds);
         // The timeline runs to where the longest track stopped, which is not the
         // same as where its last note was: a track that ends in a bar of rest
@@ -209,17 +249,19 @@ impl SmfFile {
         let last_microsecond = ends
             .iter()
             .map(|tick| place(*tick))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
             .chain(events.last().map(|event| event.microseconds))
             .max()
             .unwrap_or(0);
         Ok(Self {
             format: format as u8,
-            ticks_per_quarter: division,
+            ticks_per_quarter: ppq as u16,
+            time_division,
             track_count,
             name: names
                 .iter()
-                .find(|(kind, _)| *kind == 0x00)
-                .or_else(|| names.iter().find(|(kind, _)| *kind == 0x03))
+                .find(|(kind, _)| *kind == 0x03)
                 .map(|(_, name)| name.clone())
                 .unwrap_or_default(),
             events,
@@ -323,6 +365,9 @@ fn parse_track(
             at += 1;
             if status < 0xF0 {
                 running = Some(status);
+            } else if matches!(status, 0xF0 | 0xF7 | 0xFF) {
+                // SMF meta and SysEx events cancel channel running status.
+                running = None;
             }
         }
         let channel = status & 0x0f;
@@ -348,10 +393,10 @@ fn parse_track(
                 read_byte(data, &mut at)?;
                 read_byte(data, &mut at)?;
             }
-            0xF1 | 0xF3 | 0xF4 | 0xF5 | 0xF6 | 0xF9 | 0xFB | 0xFC | 0xFD => {
+            0xF1 | 0xF3 | 0xF4 | 0xF5 | 0xF9 | 0xFD => {
                 read_byte(data, &mut at)?;
             }
-            0xF8 | 0xFA | 0xFE => {}
+            0xF6 | 0xF8 | 0xFA | 0xFB | 0xFC | 0xFE => {}
             _ => {
                 let operands = if matches!(status & 0xf0, 0xC0 | 0xD0) {
                     1
@@ -361,6 +406,9 @@ fn parse_track(
                 let mut operands_bytes = [0u8; 2];
                 for slot in operands_bytes.iter_mut().take(operands) {
                     *slot = read_byte(data, &mut at)?;
+                    if *slot & 0x80 != 0 {
+                        return Err(invalid("SMF channel message data byte has its status bit set"));
+                    }
                 }
                 let Some(event) = channel_event(status, channel, &operands_bytes) else {
                     continue;
@@ -396,9 +444,13 @@ fn parse_meta(
     *at = end;
     match kind {
         0x51 => {
+            // Known meta events may carry future extension bytes. Read the
+            // defined tempo prefix and skip the rest using the declared length.
             let bytes: [u8; 3] = payload
+                .get(..3)
+                .ok_or_else(|| invalid("SMF tempo change is shorter than three bytes"))?
                 .try_into()
-                .map_err(|_| invalid("SMF tempo change is not three bytes long"))?;
+                .expect("three-byte prefix");
             let microsecond =
                 (u32::from(bytes[0]) << 16) | (u32::from(bytes[1]) << 8) | u32::from(bytes[2]);
             if microsecond == 0 {
@@ -409,8 +461,9 @@ fn parse_meta(
             tempos.push((tick, microsecond));
         }
         0x2F => return Ok(Meta::End),
-        // The two names a file can give: the whole performance's, and one track's.
-        0x00 | 0x03 => {
+        // FF03 names the sequence/track. FF00 is a binary sequence number,
+        // which must never be interpreted as a text label.
+        0x03 => {
             let text: String = payload.iter().map(|byte| char::from(*byte)).collect();
             if !text.is_empty() {
                 names.push((kind, text));
@@ -472,37 +525,46 @@ fn push_event(raw: &mut Vec<RawEvent>, tick: u64, event: Event, limits: &Limits)
 
 /// The timeline as a piecewise-linear map from ticks, one piece per tempo the
 /// file stated, each carrying the tick it starts at, the time that tick is
-/// already at, and the tempo held from there.
-fn tempo_segments(tempos: &[(u64, u32)], ppq: u64) -> Vec<(u64, u64, u32)> {
+/// already at scaled by PPQ, and the tempo held from there. Retaining that
+/// numerator avoids losing a fractional microsecond at each change.
+fn tempo_segments(tempos: &[(u64, u32)], ppq: u64) -> Result<Vec<(u64, u128, u32)>> {
     let mut sorted = tempos.to_vec();
     sorted.sort_by_key(|change| change.0);
     let mut segments = Vec::with_capacity(sorted.len() + 1);
     let mut tick = 0u64;
-    let mut microsecond = 0u64;
+    let mut scaled_microseconds = 0u128;
     let mut tempo = DEFAULT_TEMPO_MICROSECONDS;
     for (at, next) in sorted {
         if at < tick {
             continue;
         }
-        microsecond += (at - tick) * u64::from(tempo) / ppq;
+        scaled_microseconds += u128::from(at - tick) * u128::from(tempo);
+        checked_microseconds(scaled_microseconds, ppq)?;
         tick = at;
         tempo = next;
-        segments.push((at, microsecond, next));
+        segments.push((at, scaled_microseconds, next));
     }
     if segments.first().is_none_or(|segment| segment.0 != 0) {
         segments.insert(0, (0, 0, DEFAULT_TEMPO_MICROSECONDS));
     }
-    segments
+    Ok(segments)
 }
 
-fn tick_to_microsecond(segments: &[(u64, u64, u32)], ppq: u64, tick: u64) -> u64 {
+fn checked_microseconds(scaled: u128, ppq: u64) -> Result<u64> {
+    u64::try_from(scaled / u128::from(ppq))
+        .map_err(|_| invalid("SMF timeline exceeds the microsecond range"))
+}
+
+fn tick_to_microsecond(segments: &[(u64, u128, u32)], ppq: u64, tick: u64) -> Result<u64> {
     let index = segments
         .partition_point(|segment| segment.0 <= tick)
         .saturating_sub(1);
-    let (start_tick, start_us, tempo) = segments[index];
-    // A segment's start is already in microseconds; what lies inside it is still
-    // counted in ticks, and a tick is `tempo / ppq` of a microsecond.
-    start_us + tick.saturating_sub(start_tick) * u64::from(tempo) / ppq
+    let (start_tick, start_scaled, tempo) = segments[index];
+    // Keep fractional microseconds across tempo boundaries and divide only at lookup.
+    checked_microseconds(
+        start_scaled + u128::from(tick.saturating_sub(start_tick)) * u128::from(tempo),
+        ppq,
+    )
 }
 
 fn read_be_u16(bytes: &[u8], at: usize) -> Result<u16> {
@@ -589,6 +651,15 @@ pub fn read_window(data: &[u8]) -> Result<Vec<WindowEvent>> {
             ));
         }
         let wide = u16::from_le_bytes(record[8..10].try_into().unwrap());
+        let invalid_operand = match record[0] {
+            TAG_NOTE_ON | TAG_CONTROL => record[6] > 127 || record[7] > 127,
+            TAG_NOTE_OFF | TAG_PROGRAM => record[6] > 127,
+            TAG_PITCH_BEND => wide > 16_383,
+            _ => false,
+        };
+        if invalid_operand {
+            return Err(invalid("MIDI packet operand exceeds its 7-bit or 14-bit range"));
+        }
         let event = match record[0] {
             TAG_NOTE_ON => Event::NoteOn {
                 channel,
@@ -787,7 +858,7 @@ mod tests {
         events.extend_from_slice(&[0, 0xE4, 0x00, 0x40]); // no bend on channel 4
         events.extend_from_slice(&[0, 0xD5, 64]); // channel aftertouch, dropped
         events.extend_from_slice(&[0, 0xA6, 64, 70]); // poly aftertouch, dropped
-        events.extend_from_slice(&[0, 0xF2, 1, 2, 3]); // song position, stepped over
+        events.extend_from_slice(&[0, 0xF2, 1, 2]); // song position, stepped over
         events.extend_from_slice(&[0, 0xF3, 9]); // song select
         events.extend_from_slice(&[0, 0xF6]); // tune request, no operands
         events.extend_from_slice(&[0, 0xF0, 3, 1, 2, 3]); // a dump
@@ -993,7 +1064,7 @@ mod tests {
 
     #[test]
     fn refuses_a_timeline_it_cannot_place() {
-        // The top bit of the division states SMPTE frames rather than quarters.
+        // SMPTE code -32 is outside the four defined frame rates.
         let bytes = [header(0, 1, 0xE02D), track(&end_of_track(0))].concat();
         let error = SmfFile::parse(&bytes, &Limits::default()).unwrap_err();
         assert!(error.to_string().contains("SMPTE"), "{error}");
@@ -1007,12 +1078,12 @@ mod tests {
     }
 
     #[test]
-    fn refuses_a_track_that_is_not_one() {
+    fn extension_chunks_do_not_replace_missing_declared_tracks() {
         let mut bytes = header(0, 1, 480);
         bytes.extend_from_slice(b"XXXX");
         bytes.extend_from_slice(&0u32.to_be_bytes());
         let error = SmfFile::parse(&bytes, &Limits::default()).unwrap_err();
-        assert!(error.to_string().contains("not a track"), "{error}");
+        assert!(error.to_string().contains("track header should start"), "{error}");
         // The header the spec gives every file, but no track at all.
         assert!(SmfFile::parse(&header(0, 0, 480), &Limits::default()).is_err());
     }

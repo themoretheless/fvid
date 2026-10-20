@@ -1,0 +1,1034 @@
+{
+  "cases": [
+    {
+      "file": "avc-component-depth-y8-c8.mp4",
+      "configuration": "avc-component-depth-y8-c8.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c8-0.packet",
+          "y": "avc-component-depth-y8-c8-0.y",
+          "cb": "avc-component-depth-y8-c8-0.cb",
+          "cr": "avc-component-depth-y8-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c8-1.packet",
+          "y": "avc-component-depth-y8-c8-1.y",
+          "cb": "avc-component-depth-y8-c8-1.cb",
+          "cr": "avc-component-depth-y8-c8-1.cr"
+        }
+      ],
+      "sha256": "63b49e2f821238e46de408500689f7f574a32bb219c71e93d21448c097920aa4"
+    },
+    {
+      "file": "avc-component-depth-y8-c9.mp4",
+      "configuration": "avc-component-depth-y8-c9.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c9-0.packet",
+          "y": "avc-component-depth-y8-c9-0.y",
+          "cb": "avc-component-depth-y8-c9-0.cb",
+          "cr": "avc-component-depth-y8-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c9-1.packet",
+          "y": "avc-component-depth-y8-c9-1.y",
+          "cb": "avc-component-depth-y8-c9-1.cb",
+          "cr": "avc-component-depth-y8-c9-1.cr"
+        }
+      ],
+      "sha256": "87e8f73793211cb484e8d8c098cc2ea04e3013f7f91ef38dcdcac3b2af46297a"
+    },
+    {
+      "file": "avc-component-depth-y8-c10.mp4",
+      "configuration": "avc-component-depth-y8-c10.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c10-0.packet",
+          "y": "avc-component-depth-y8-c10-0.y",
+          "cb": "avc-component-depth-y8-c10-0.cb",
+          "cr": "avc-component-depth-y8-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c10-1.packet",
+          "y": "avc-component-depth-y8-c10-1.y",
+          "cb": "avc-component-depth-y8-c10-1.cb",
+          "cr": "avc-component-depth-y8-c10-1.cr"
+        }
+      ],
+      "sha256": "7f33f6830daafbf77a82f0d3d09f24a29316ab2e764019c362469a3aa439208c"
+    },
+    {
+      "file": "avc-component-depth-y8-c11.mp4",
+      "configuration": "avc-component-depth-y8-c11.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c11-0.packet",
+          "y": "avc-component-depth-y8-c11-0.y",
+          "cb": "avc-component-depth-y8-c11-0.cb",
+          "cr": "avc-component-depth-y8-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c11-1.packet",
+          "y": "avc-component-depth-y8-c11-1.y",
+          "cb": "avc-component-depth-y8-c11-1.cb",
+          "cr": "avc-component-depth-y8-c11-1.cr"
+        }
+      ],
+      "sha256": "29dba0f0ab00b56d65484f862ec10412f4c3e063c426e6de5d96f4ceae02160e"
+    },
+    {
+      "file": "avc-component-depth-y8-c12.mp4",
+      "configuration": "avc-component-depth-y8-c12.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c12-0.packet",
+          "y": "avc-component-depth-y8-c12-0.y",
+          "cb": "avc-component-depth-y8-c12-0.cb",
+          "cr": "avc-component-depth-y8-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c12-1.packet",
+          "y": "avc-component-depth-y8-c12-1.y",
+          "cb": "avc-component-depth-y8-c12-1.cb",
+          "cr": "avc-component-depth-y8-c12-1.cr"
+        }
+      ],
+      "sha256": "a5466f10332ea9e52d505d2dd09f5b1344acc6f6be7b0819498a973f234a5466"
+    },
+    {
+      "file": "avc-component-depth-y8-c13.mp4",
+      "configuration": "avc-component-depth-y8-c13.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c13-0.packet",
+          "y": "avc-component-depth-y8-c13-0.y",
+          "cb": "avc-component-depth-y8-c13-0.cb",
+          "cr": "avc-component-depth-y8-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c13-1.packet",
+          "y": "avc-component-depth-y8-c13-1.y",
+          "cb": "avc-component-depth-y8-c13-1.cb",
+          "cr": "avc-component-depth-y8-c13-1.cr"
+        }
+      ],
+      "sha256": "ef6788829f33315651f26675f8b306be3f1bd65b9ee0c51ce15512ac29d556cd"
+    },
+    {
+      "file": "avc-component-depth-y8-c14.mp4",
+      "configuration": "avc-component-depth-y8-c14.avcc",
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y8-c14-0.packet",
+          "y": "avc-component-depth-y8-c14-0.y",
+          "cb": "avc-component-depth-y8-c14-0.cb",
+          "cr": "avc-component-depth-y8-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y8-c14-1.packet",
+          "y": "avc-component-depth-y8-c14-1.y",
+          "cb": "avc-component-depth-y8-c14-1.cb",
+          "cr": "avc-component-depth-y8-c14-1.cr"
+        }
+      ],
+      "sha256": "d59b23f2feec3eae681b94e89a82f8f4b68e38de9183cb3cbc0bcc35843536c5"
+    },
+    {
+      "file": "avc-component-depth-y9-c8.mp4",
+      "configuration": "avc-component-depth-y9-c8.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c8-0.packet",
+          "y": "avc-component-depth-y9-c8-0.y",
+          "cb": "avc-component-depth-y9-c8-0.cb",
+          "cr": "avc-component-depth-y9-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c8-1.packet",
+          "y": "avc-component-depth-y9-c8-1.y",
+          "cb": "avc-component-depth-y9-c8-1.cb",
+          "cr": "avc-component-depth-y9-c8-1.cr"
+        }
+      ],
+      "sha256": "e889b8ff0f2a3379d323f4add02f98164112f715a56db08fb9d32ba1e8132e81"
+    },
+    {
+      "file": "avc-component-depth-y9-c9.mp4",
+      "configuration": "avc-component-depth-y9-c9.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c9-0.packet",
+          "y": "avc-component-depth-y9-c9-0.y",
+          "cb": "avc-component-depth-y9-c9-0.cb",
+          "cr": "avc-component-depth-y9-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c9-1.packet",
+          "y": "avc-component-depth-y9-c9-1.y",
+          "cb": "avc-component-depth-y9-c9-1.cb",
+          "cr": "avc-component-depth-y9-c9-1.cr"
+        }
+      ],
+      "sha256": "5671461bd605b654adc93eca3ae1d580f853dc1ba6e00e05e1ce5f2fd17be6ca"
+    },
+    {
+      "file": "avc-component-depth-y9-c10.mp4",
+      "configuration": "avc-component-depth-y9-c10.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c10-0.packet",
+          "y": "avc-component-depth-y9-c10-0.y",
+          "cb": "avc-component-depth-y9-c10-0.cb",
+          "cr": "avc-component-depth-y9-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c10-1.packet",
+          "y": "avc-component-depth-y9-c10-1.y",
+          "cb": "avc-component-depth-y9-c10-1.cb",
+          "cr": "avc-component-depth-y9-c10-1.cr"
+        }
+      ],
+      "sha256": "d538273571f9a565c83e81aec5df52e9ce4eccb25f010c40b1295e8d8a2eed35"
+    },
+    {
+      "file": "avc-component-depth-y9-c11.mp4",
+      "configuration": "avc-component-depth-y9-c11.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c11-0.packet",
+          "y": "avc-component-depth-y9-c11-0.y",
+          "cb": "avc-component-depth-y9-c11-0.cb",
+          "cr": "avc-component-depth-y9-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c11-1.packet",
+          "y": "avc-component-depth-y9-c11-1.y",
+          "cb": "avc-component-depth-y9-c11-1.cb",
+          "cr": "avc-component-depth-y9-c11-1.cr"
+        }
+      ],
+      "sha256": "c7b2f19e58dca54ddc2352b0e178a7f1126ab0768f7e7e0beb4065797da12b3d"
+    },
+    {
+      "file": "avc-component-depth-y9-c12.mp4",
+      "configuration": "avc-component-depth-y9-c12.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c12-0.packet",
+          "y": "avc-component-depth-y9-c12-0.y",
+          "cb": "avc-component-depth-y9-c12-0.cb",
+          "cr": "avc-component-depth-y9-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c12-1.packet",
+          "y": "avc-component-depth-y9-c12-1.y",
+          "cb": "avc-component-depth-y9-c12-1.cb",
+          "cr": "avc-component-depth-y9-c12-1.cr"
+        }
+      ],
+      "sha256": "0e7125948ee591e58cb34dd7096fe925323ed093f8f71b0a34f0ad85671ded06"
+    },
+    {
+      "file": "avc-component-depth-y9-c13.mp4",
+      "configuration": "avc-component-depth-y9-c13.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c13-0.packet",
+          "y": "avc-component-depth-y9-c13-0.y",
+          "cb": "avc-component-depth-y9-c13-0.cb",
+          "cr": "avc-component-depth-y9-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c13-1.packet",
+          "y": "avc-component-depth-y9-c13-1.y",
+          "cb": "avc-component-depth-y9-c13-1.cb",
+          "cr": "avc-component-depth-y9-c13-1.cr"
+        }
+      ],
+      "sha256": "d20c988c41d735ee1466fd17dc9b2fbef3764de11bef74db35602b9884798efb"
+    },
+    {
+      "file": "avc-component-depth-y9-c14.mp4",
+      "configuration": "avc-component-depth-y9-c14.avcc",
+      "luma_depth": 9,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y9-c14-0.packet",
+          "y": "avc-component-depth-y9-c14-0.y",
+          "cb": "avc-component-depth-y9-c14-0.cb",
+          "cr": "avc-component-depth-y9-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y9-c14-1.packet",
+          "y": "avc-component-depth-y9-c14-1.y",
+          "cb": "avc-component-depth-y9-c14-1.cb",
+          "cr": "avc-component-depth-y9-c14-1.cr"
+        }
+      ],
+      "sha256": "5d1e6bd5ed72631c45d1a6039c2119e6ea5ca09bf7135815bac67292e0ecf476"
+    },
+    {
+      "file": "avc-component-depth-y10-c8.mp4",
+      "configuration": "avc-component-depth-y10-c8.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c8-0.packet",
+          "y": "avc-component-depth-y10-c8-0.y",
+          "cb": "avc-component-depth-y10-c8-0.cb",
+          "cr": "avc-component-depth-y10-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c8-1.packet",
+          "y": "avc-component-depth-y10-c8-1.y",
+          "cb": "avc-component-depth-y10-c8-1.cb",
+          "cr": "avc-component-depth-y10-c8-1.cr"
+        }
+      ],
+      "sha256": "ae90acac86c26ea3460a6eb569b7af1f1f385ed8b3b6136e3df6e02db04cdae4"
+    },
+    {
+      "file": "avc-component-depth-y10-c9.mp4",
+      "configuration": "avc-component-depth-y10-c9.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c9-0.packet",
+          "y": "avc-component-depth-y10-c9-0.y",
+          "cb": "avc-component-depth-y10-c9-0.cb",
+          "cr": "avc-component-depth-y10-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c9-1.packet",
+          "y": "avc-component-depth-y10-c9-1.y",
+          "cb": "avc-component-depth-y10-c9-1.cb",
+          "cr": "avc-component-depth-y10-c9-1.cr"
+        }
+      ],
+      "sha256": "5ffbb327f343cd3aca9218066d446ac29d3e20563335ec6fd92eb7ba28a00b2f"
+    },
+    {
+      "file": "avc-component-depth-y10-c10.mp4",
+      "configuration": "avc-component-depth-y10-c10.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c10-0.packet",
+          "y": "avc-component-depth-y10-c10-0.y",
+          "cb": "avc-component-depth-y10-c10-0.cb",
+          "cr": "avc-component-depth-y10-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c10-1.packet",
+          "y": "avc-component-depth-y10-c10-1.y",
+          "cb": "avc-component-depth-y10-c10-1.cb",
+          "cr": "avc-component-depth-y10-c10-1.cr"
+        }
+      ],
+      "sha256": "fee70e1f3825126134c4dffecc6cd0af5bf64b068967666bff38e0bfe36b69a8"
+    },
+    {
+      "file": "avc-component-depth-y10-c11.mp4",
+      "configuration": "avc-component-depth-y10-c11.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c11-0.packet",
+          "y": "avc-component-depth-y10-c11-0.y",
+          "cb": "avc-component-depth-y10-c11-0.cb",
+          "cr": "avc-component-depth-y10-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c11-1.packet",
+          "y": "avc-component-depth-y10-c11-1.y",
+          "cb": "avc-component-depth-y10-c11-1.cb",
+          "cr": "avc-component-depth-y10-c11-1.cr"
+        }
+      ],
+      "sha256": "3f39f79fecb802985e256f1fa24d22bb04e397966fb63b81a121e411b799c1b2"
+    },
+    {
+      "file": "avc-component-depth-y10-c12.mp4",
+      "configuration": "avc-component-depth-y10-c12.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c12-0.packet",
+          "y": "avc-component-depth-y10-c12-0.y",
+          "cb": "avc-component-depth-y10-c12-0.cb",
+          "cr": "avc-component-depth-y10-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c12-1.packet",
+          "y": "avc-component-depth-y10-c12-1.y",
+          "cb": "avc-component-depth-y10-c12-1.cb",
+          "cr": "avc-component-depth-y10-c12-1.cr"
+        }
+      ],
+      "sha256": "c78fd41763022cedabad2d0a714bb4d10312a9fa1b6fa7af801daac0782e77c3"
+    },
+    {
+      "file": "avc-component-depth-y10-c13.mp4",
+      "configuration": "avc-component-depth-y10-c13.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c13-0.packet",
+          "y": "avc-component-depth-y10-c13-0.y",
+          "cb": "avc-component-depth-y10-c13-0.cb",
+          "cr": "avc-component-depth-y10-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c13-1.packet",
+          "y": "avc-component-depth-y10-c13-1.y",
+          "cb": "avc-component-depth-y10-c13-1.cb",
+          "cr": "avc-component-depth-y10-c13-1.cr"
+        }
+      ],
+      "sha256": "870520b78f77ced0f332a221cf6e576c0ff78b2b6b14627392bc16e9f1289e55"
+    },
+    {
+      "file": "avc-component-depth-y10-c14.mp4",
+      "configuration": "avc-component-depth-y10-c14.avcc",
+      "luma_depth": 10,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y10-c14-0.packet",
+          "y": "avc-component-depth-y10-c14-0.y",
+          "cb": "avc-component-depth-y10-c14-0.cb",
+          "cr": "avc-component-depth-y10-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y10-c14-1.packet",
+          "y": "avc-component-depth-y10-c14-1.y",
+          "cb": "avc-component-depth-y10-c14-1.cb",
+          "cr": "avc-component-depth-y10-c14-1.cr"
+        }
+      ],
+      "sha256": "06400fc781a254a41c6524943fe755b34595bb5816e603f0a0e036d9e47ceaaf"
+    },
+    {
+      "file": "avc-component-depth-y11-c8.mp4",
+      "configuration": "avc-component-depth-y11-c8.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c8-0.packet",
+          "y": "avc-component-depth-y11-c8-0.y",
+          "cb": "avc-component-depth-y11-c8-0.cb",
+          "cr": "avc-component-depth-y11-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c8-1.packet",
+          "y": "avc-component-depth-y11-c8-1.y",
+          "cb": "avc-component-depth-y11-c8-1.cb",
+          "cr": "avc-component-depth-y11-c8-1.cr"
+        }
+      ],
+      "sha256": "76f11562984ed467096adc94344746bcad832aaecdb00a9af9d273c31fecd71a"
+    },
+    {
+      "file": "avc-component-depth-y11-c9.mp4",
+      "configuration": "avc-component-depth-y11-c9.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c9-0.packet",
+          "y": "avc-component-depth-y11-c9-0.y",
+          "cb": "avc-component-depth-y11-c9-0.cb",
+          "cr": "avc-component-depth-y11-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c9-1.packet",
+          "y": "avc-component-depth-y11-c9-1.y",
+          "cb": "avc-component-depth-y11-c9-1.cb",
+          "cr": "avc-component-depth-y11-c9-1.cr"
+        }
+      ],
+      "sha256": "c8ca251f1ab101d6bd89b3e5a2fdcef632bf5f620e81a08f4203301e74a3b2b3"
+    },
+    {
+      "file": "avc-component-depth-y11-c10.mp4",
+      "configuration": "avc-component-depth-y11-c10.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c10-0.packet",
+          "y": "avc-component-depth-y11-c10-0.y",
+          "cb": "avc-component-depth-y11-c10-0.cb",
+          "cr": "avc-component-depth-y11-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c10-1.packet",
+          "y": "avc-component-depth-y11-c10-1.y",
+          "cb": "avc-component-depth-y11-c10-1.cb",
+          "cr": "avc-component-depth-y11-c10-1.cr"
+        }
+      ],
+      "sha256": "0dbaaf489c09af4c3937f82154aea2f3f31523630f507fe1cd1e7259f18d5905"
+    },
+    {
+      "file": "avc-component-depth-y11-c11.mp4",
+      "configuration": "avc-component-depth-y11-c11.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c11-0.packet",
+          "y": "avc-component-depth-y11-c11-0.y",
+          "cb": "avc-component-depth-y11-c11-0.cb",
+          "cr": "avc-component-depth-y11-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c11-1.packet",
+          "y": "avc-component-depth-y11-c11-1.y",
+          "cb": "avc-component-depth-y11-c11-1.cb",
+          "cr": "avc-component-depth-y11-c11-1.cr"
+        }
+      ],
+      "sha256": "54b578698aecffe77e1901f2ecebb9c92d89602e74e6c3cd83dd7e33693e904e"
+    },
+    {
+      "file": "avc-component-depth-y11-c12.mp4",
+      "configuration": "avc-component-depth-y11-c12.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c12-0.packet",
+          "y": "avc-component-depth-y11-c12-0.y",
+          "cb": "avc-component-depth-y11-c12-0.cb",
+          "cr": "avc-component-depth-y11-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c12-1.packet",
+          "y": "avc-component-depth-y11-c12-1.y",
+          "cb": "avc-component-depth-y11-c12-1.cb",
+          "cr": "avc-component-depth-y11-c12-1.cr"
+        }
+      ],
+      "sha256": "16afd06f7545c771d74e557998e16885506f264f468aa5baaa377802700c2c31"
+    },
+    {
+      "file": "avc-component-depth-y11-c13.mp4",
+      "configuration": "avc-component-depth-y11-c13.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c13-0.packet",
+          "y": "avc-component-depth-y11-c13-0.y",
+          "cb": "avc-component-depth-y11-c13-0.cb",
+          "cr": "avc-component-depth-y11-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c13-1.packet",
+          "y": "avc-component-depth-y11-c13-1.y",
+          "cb": "avc-component-depth-y11-c13-1.cb",
+          "cr": "avc-component-depth-y11-c13-1.cr"
+        }
+      ],
+      "sha256": "3201dd11478cb5cb27757b447bb64efe344e4090d245e27fa0142b18fa61d852"
+    },
+    {
+      "file": "avc-component-depth-y11-c14.mp4",
+      "configuration": "avc-component-depth-y11-c14.avcc",
+      "luma_depth": 11,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y11-c14-0.packet",
+          "y": "avc-component-depth-y11-c14-0.y",
+          "cb": "avc-component-depth-y11-c14-0.cb",
+          "cr": "avc-component-depth-y11-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y11-c14-1.packet",
+          "y": "avc-component-depth-y11-c14-1.y",
+          "cb": "avc-component-depth-y11-c14-1.cb",
+          "cr": "avc-component-depth-y11-c14-1.cr"
+        }
+      ],
+      "sha256": "ac4eb2780523bb61cf55b3d9c6f4e2cbadcd401a937b0d515ba9799033b038aa"
+    },
+    {
+      "file": "avc-component-depth-y12-c8.mp4",
+      "configuration": "avc-component-depth-y12-c8.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c8-0.packet",
+          "y": "avc-component-depth-y12-c8-0.y",
+          "cb": "avc-component-depth-y12-c8-0.cb",
+          "cr": "avc-component-depth-y12-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c8-1.packet",
+          "y": "avc-component-depth-y12-c8-1.y",
+          "cb": "avc-component-depth-y12-c8-1.cb",
+          "cr": "avc-component-depth-y12-c8-1.cr"
+        }
+      ],
+      "sha256": "32cac11844901d7baa9a0b9f5b50665c4a55dcae2645588781daf0a6e172f01f"
+    },
+    {
+      "file": "avc-component-depth-y12-c9.mp4",
+      "configuration": "avc-component-depth-y12-c9.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c9-0.packet",
+          "y": "avc-component-depth-y12-c9-0.y",
+          "cb": "avc-component-depth-y12-c9-0.cb",
+          "cr": "avc-component-depth-y12-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c9-1.packet",
+          "y": "avc-component-depth-y12-c9-1.y",
+          "cb": "avc-component-depth-y12-c9-1.cb",
+          "cr": "avc-component-depth-y12-c9-1.cr"
+        }
+      ],
+      "sha256": "b2161c2e86a78995d7115b7bd143b8d67116260fe6ff3ae41121455071ff6ec4"
+    },
+    {
+      "file": "avc-component-depth-y12-c10.mp4",
+      "configuration": "avc-component-depth-y12-c10.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c10-0.packet",
+          "y": "avc-component-depth-y12-c10-0.y",
+          "cb": "avc-component-depth-y12-c10-0.cb",
+          "cr": "avc-component-depth-y12-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c10-1.packet",
+          "y": "avc-component-depth-y12-c10-1.y",
+          "cb": "avc-component-depth-y12-c10-1.cb",
+          "cr": "avc-component-depth-y12-c10-1.cr"
+        }
+      ],
+      "sha256": "64fc0c950211fe9ad01dfefa5ae3fc27c7b35c2ada66544939252d0e63c676b1"
+    },
+    {
+      "file": "avc-component-depth-y12-c11.mp4",
+      "configuration": "avc-component-depth-y12-c11.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c11-0.packet",
+          "y": "avc-component-depth-y12-c11-0.y",
+          "cb": "avc-component-depth-y12-c11-0.cb",
+          "cr": "avc-component-depth-y12-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c11-1.packet",
+          "y": "avc-component-depth-y12-c11-1.y",
+          "cb": "avc-component-depth-y12-c11-1.cb",
+          "cr": "avc-component-depth-y12-c11-1.cr"
+        }
+      ],
+      "sha256": "26a5b43c85420f7ef4b6346b71cfb7bfed65e48478d615c2dac6652c1010826f"
+    },
+    {
+      "file": "avc-component-depth-y12-c12.mp4",
+      "configuration": "avc-component-depth-y12-c12.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c12-0.packet",
+          "y": "avc-component-depth-y12-c12-0.y",
+          "cb": "avc-component-depth-y12-c12-0.cb",
+          "cr": "avc-component-depth-y12-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c12-1.packet",
+          "y": "avc-component-depth-y12-c12-1.y",
+          "cb": "avc-component-depth-y12-c12-1.cb",
+          "cr": "avc-component-depth-y12-c12-1.cr"
+        }
+      ],
+      "sha256": "a317073b974cd225c76b606edcfba8fb6f6ebec00739ef9e0235d35062bcb9f9"
+    },
+    {
+      "file": "avc-component-depth-y12-c13.mp4",
+      "configuration": "avc-component-depth-y12-c13.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c13-0.packet",
+          "y": "avc-component-depth-y12-c13-0.y",
+          "cb": "avc-component-depth-y12-c13-0.cb",
+          "cr": "avc-component-depth-y12-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c13-1.packet",
+          "y": "avc-component-depth-y12-c13-1.y",
+          "cb": "avc-component-depth-y12-c13-1.cb",
+          "cr": "avc-component-depth-y12-c13-1.cr"
+        }
+      ],
+      "sha256": "8634c807671ff82fe25c01705e44ca0ee50bd7de2f03e581d8ec5f468ed90ea5"
+    },
+    {
+      "file": "avc-component-depth-y12-c14.mp4",
+      "configuration": "avc-component-depth-y12-c14.avcc",
+      "luma_depth": 12,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y12-c14-0.packet",
+          "y": "avc-component-depth-y12-c14-0.y",
+          "cb": "avc-component-depth-y12-c14-0.cb",
+          "cr": "avc-component-depth-y12-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y12-c14-1.packet",
+          "y": "avc-component-depth-y12-c14-1.y",
+          "cb": "avc-component-depth-y12-c14-1.cb",
+          "cr": "avc-component-depth-y12-c14-1.cr"
+        }
+      ],
+      "sha256": "2772a745c74c82c670f8c313cb47fb4fdf146a479c65ad66560ae1be186ed0fc"
+    },
+    {
+      "file": "avc-component-depth-y13-c8.mp4",
+      "configuration": "avc-component-depth-y13-c8.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c8-0.packet",
+          "y": "avc-component-depth-y13-c8-0.y",
+          "cb": "avc-component-depth-y13-c8-0.cb",
+          "cr": "avc-component-depth-y13-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c8-1.packet",
+          "y": "avc-component-depth-y13-c8-1.y",
+          "cb": "avc-component-depth-y13-c8-1.cb",
+          "cr": "avc-component-depth-y13-c8-1.cr"
+        }
+      ],
+      "sha256": "a0bb25aa26de226b725cc2f68cb9c115d78777fa84caa2c89c42665c64413916"
+    },
+    {
+      "file": "avc-component-depth-y13-c9.mp4",
+      "configuration": "avc-component-depth-y13-c9.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c9-0.packet",
+          "y": "avc-component-depth-y13-c9-0.y",
+          "cb": "avc-component-depth-y13-c9-0.cb",
+          "cr": "avc-component-depth-y13-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c9-1.packet",
+          "y": "avc-component-depth-y13-c9-1.y",
+          "cb": "avc-component-depth-y13-c9-1.cb",
+          "cr": "avc-component-depth-y13-c9-1.cr"
+        }
+      ],
+      "sha256": "ddef290f172fc8dd76b9bb8a51a8ff3ba2db1b3219958e40337c72811fadba21"
+    },
+    {
+      "file": "avc-component-depth-y13-c10.mp4",
+      "configuration": "avc-component-depth-y13-c10.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c10-0.packet",
+          "y": "avc-component-depth-y13-c10-0.y",
+          "cb": "avc-component-depth-y13-c10-0.cb",
+          "cr": "avc-component-depth-y13-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c10-1.packet",
+          "y": "avc-component-depth-y13-c10-1.y",
+          "cb": "avc-component-depth-y13-c10-1.cb",
+          "cr": "avc-component-depth-y13-c10-1.cr"
+        }
+      ],
+      "sha256": "7fbd79e8659601ebff689b5c9c2bcc78e064e04a6c432b527558247ccc8e7f10"
+    },
+    {
+      "file": "avc-component-depth-y13-c11.mp4",
+      "configuration": "avc-component-depth-y13-c11.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c11-0.packet",
+          "y": "avc-component-depth-y13-c11-0.y",
+          "cb": "avc-component-depth-y13-c11-0.cb",
+          "cr": "avc-component-depth-y13-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c11-1.packet",
+          "y": "avc-component-depth-y13-c11-1.y",
+          "cb": "avc-component-depth-y13-c11-1.cb",
+          "cr": "avc-component-depth-y13-c11-1.cr"
+        }
+      ],
+      "sha256": "53a82cdc718eea4f67ddff966dbe6b616e632cc49b76bbd9a4c0381d57c9985a"
+    },
+    {
+      "file": "avc-component-depth-y13-c12.mp4",
+      "configuration": "avc-component-depth-y13-c12.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c12-0.packet",
+          "y": "avc-component-depth-y13-c12-0.y",
+          "cb": "avc-component-depth-y13-c12-0.cb",
+          "cr": "avc-component-depth-y13-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c12-1.packet",
+          "y": "avc-component-depth-y13-c12-1.y",
+          "cb": "avc-component-depth-y13-c12-1.cb",
+          "cr": "avc-component-depth-y13-c12-1.cr"
+        }
+      ],
+      "sha256": "f26190b92d0df05c2e3673973e3d12b247e02daf6fc9dd2c95e50274f6aac21f"
+    },
+    {
+      "file": "avc-component-depth-y13-c13.mp4",
+      "configuration": "avc-component-depth-y13-c13.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c13-0.packet",
+          "y": "avc-component-depth-y13-c13-0.y",
+          "cb": "avc-component-depth-y13-c13-0.cb",
+          "cr": "avc-component-depth-y13-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c13-1.packet",
+          "y": "avc-component-depth-y13-c13-1.y",
+          "cb": "avc-component-depth-y13-c13-1.cb",
+          "cr": "avc-component-depth-y13-c13-1.cr"
+        }
+      ],
+      "sha256": "c610ca2668c88625f94d1be4eae5dbc2568df7e3d2d01915cb264c0e56077a4f"
+    },
+    {
+      "file": "avc-component-depth-y13-c14.mp4",
+      "configuration": "avc-component-depth-y13-c14.avcc",
+      "luma_depth": 13,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y13-c14-0.packet",
+          "y": "avc-component-depth-y13-c14-0.y",
+          "cb": "avc-component-depth-y13-c14-0.cb",
+          "cr": "avc-component-depth-y13-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y13-c14-1.packet",
+          "y": "avc-component-depth-y13-c14-1.y",
+          "cb": "avc-component-depth-y13-c14-1.cb",
+          "cr": "avc-component-depth-y13-c14-1.cr"
+        }
+      ],
+      "sha256": "2f68593609a220e57bb4808cbd688e8d8400f2ff48427279d7a14093b1d9de4d"
+    },
+    {
+      "file": "avc-component-depth-y14-c8.mp4",
+      "configuration": "avc-component-depth-y14-c8.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c8-0.packet",
+          "y": "avc-component-depth-y14-c8-0.y",
+          "cb": "avc-component-depth-y14-c8-0.cb",
+          "cr": "avc-component-depth-y14-c8-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c8-1.packet",
+          "y": "avc-component-depth-y14-c8-1.y",
+          "cb": "avc-component-depth-y14-c8-1.cb",
+          "cr": "avc-component-depth-y14-c8-1.cr"
+        }
+      ],
+      "sha256": "9b6b544873f92501f2471b04b2c2f84f12d602e044b21bf3749dcd1ddb01102c"
+    },
+    {
+      "file": "avc-component-depth-y14-c9.mp4",
+      "configuration": "avc-component-depth-y14-c9.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 9,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c9-0.packet",
+          "y": "avc-component-depth-y14-c9-0.y",
+          "cb": "avc-component-depth-y14-c9-0.cb",
+          "cr": "avc-component-depth-y14-c9-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c9-1.packet",
+          "y": "avc-component-depth-y14-c9-1.y",
+          "cb": "avc-component-depth-y14-c9-1.cb",
+          "cr": "avc-component-depth-y14-c9-1.cr"
+        }
+      ],
+      "sha256": "642accb82b846c549ae2f84c9177791831beaa4092c4d81b48cda186bab0c494"
+    },
+    {
+      "file": "avc-component-depth-y14-c10.mp4",
+      "configuration": "avc-component-depth-y14-c10.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 10,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c10-0.packet",
+          "y": "avc-component-depth-y14-c10-0.y",
+          "cb": "avc-component-depth-y14-c10-0.cb",
+          "cr": "avc-component-depth-y14-c10-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c10-1.packet",
+          "y": "avc-component-depth-y14-c10-1.y",
+          "cb": "avc-component-depth-y14-c10-1.cb",
+          "cr": "avc-component-depth-y14-c10-1.cr"
+        }
+      ],
+      "sha256": "f8311b650b73dbaee645768204ce942b439adc5ed4609a5d7d8715e9827b4b7c"
+    },
+    {
+      "file": "avc-component-depth-y14-c11.mp4",
+      "configuration": "avc-component-depth-y14-c11.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 11,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c11-0.packet",
+          "y": "avc-component-depth-y14-c11-0.y",
+          "cb": "avc-component-depth-y14-c11-0.cb",
+          "cr": "avc-component-depth-y14-c11-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c11-1.packet",
+          "y": "avc-component-depth-y14-c11-1.y",
+          "cb": "avc-component-depth-y14-c11-1.cb",
+          "cr": "avc-component-depth-y14-c11-1.cr"
+        }
+      ],
+      "sha256": "6d578a044b3b51b8ec928a1066114970f55a9c81433e6a432355a466275de23b"
+    },
+    {
+      "file": "avc-component-depth-y14-c12.mp4",
+      "configuration": "avc-component-depth-y14-c12.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 12,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c12-0.packet",
+          "y": "avc-component-depth-y14-c12-0.y",
+          "cb": "avc-component-depth-y14-c12-0.cb",
+          "cr": "avc-component-depth-y14-c12-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c12-1.packet",
+          "y": "avc-component-depth-y14-c12-1.y",
+          "cb": "avc-component-depth-y14-c12-1.cb",
+          "cr": "avc-component-depth-y14-c12-1.cr"
+        }
+      ],
+      "sha256": "2f6ded6114401555fe7aab30c78028778c273d709039be98d3d3ba89c5a47312"
+    },
+    {
+      "file": "avc-component-depth-y14-c13.mp4",
+      "configuration": "avc-component-depth-y14-c13.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 13,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c13-0.packet",
+          "y": "avc-component-depth-y14-c13-0.y",
+          "cb": "avc-component-depth-y14-c13-0.cb",
+          "cr": "avc-component-depth-y14-c13-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c13-1.packet",
+          "y": "avc-component-depth-y14-c13-1.y",
+          "cb": "avc-component-depth-y14-c13-1.cb",
+          "cr": "avc-component-depth-y14-c13-1.cr"
+        }
+      ],
+      "sha256": "ca2c282537737acf7cfcd3e3bbb2a93099c1fb5c4a317d20fd7c0edcd93b80c1"
+    },
+    {
+      "file": "avc-component-depth-y14-c14.mp4",
+      "configuration": "avc-component-depth-y14-c14.avcc",
+      "luma_depth": 14,
+      "chroma_depth": 14,
+      "frames": [
+        {
+          "packet": "avc-component-depth-y14-c14-0.packet",
+          "y": "avc-component-depth-y14-c14-0.y",
+          "cb": "avc-component-depth-y14-c14-0.cb",
+          "cr": "avc-component-depth-y14-c14-0.cr"
+        },
+        {
+          "packet": "avc-component-depth-y14-c14-1.packet",
+          "y": "avc-component-depth-y14-c14-1.y",
+          "cb": "avc-component-depth-y14-c14-1.cb",
+          "cr": "avc-component-depth-y14-c14-1.cr"
+        }
+      ],
+      "sha256": "19d5520feb4f20200b60b3b3708d8827a36a5e948194e59329b12e7967607872"
+    }
+  ],
+  "provenance": "Authored high-444 profile, progressive 4:2:0 I_PCM, no source media, external codec or network. Independent per-component integer samples."
+}

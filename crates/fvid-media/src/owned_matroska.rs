@@ -715,3 +715,29 @@ mod reverse_cancel_tests {
         assert!(output.into_inner().is_empty());
     }
 }
+
+#[cfg(test)]
+mod usability_admission_tests {
+    use super::*;
+    #[test]
+    fn default_count_mismatch_is_atomic_before_header_publication() {
+        let mut output=std::io::Cursor::new(Vec::new());
+        let tracks=[TrackSpec{encoding:Encoding::Ffv1V1{width:16,height:16},name:"",language:""}];
+        let error=match PacketWriter::new_with_track_preferences(&mut output,&tracks,&[],&FileMetadata::default(),&Default::default(),&Default::default(),&[],&[false,true]) {
+            Err(error)=>error,Ok(_)=>panic!("mismatched defaults admitted"),
+        };
+        assert_eq!(error.to_string(),"Matroska default track count mismatch");
+        assert_eq!(output.position(),0);assert!(output.into_inner().is_empty());
+    }
+
+    #[test]
+    fn usability_count_mismatch_is_atomic_before_header_publication() {
+        let mut output=std::io::Cursor::new(Vec::new());
+        let tracks=[TrackSpec{encoding:Encoding::Ffv1V1{width:16,height:16},name:"",language:""}];
+        let error=match PacketWriter::new_with_track_usability(&mut output,&tracks,&[],&FileMetadata::default(),&Default::default(),&Default::default(),&[false,true]) {
+            Err(error)=>error,Ok(_)=>panic!("mismatched usability admitted"),
+        };
+        assert_eq!(error.to_string(),"Matroska usability track count mismatch");
+        assert_eq!(output.position(),0);assert!(output.into_inner().is_empty());
+    }
+}

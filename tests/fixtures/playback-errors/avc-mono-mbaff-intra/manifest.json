@@ -1,0 +1,4610 @@
+[
+  {
+    "name": "mono-mbaff-y8-e0-frame-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-frame-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-field-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-columns-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e0-checker-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-frame-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-field-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-columns-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y8-e1-checker-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-frame-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-field-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-columns-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e0-checker-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-frame-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-field-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-columns-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y10-e1-checker-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-frame-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-field-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-columns-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e0-checker-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-frame-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-field-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-columns-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a0-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a0-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a0-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a0-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a0-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a0-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a1-crop0-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a1-crop0-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a1-crop0-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a1-crop1-i16-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i16-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a1-crop1-i4-dc",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-dc",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mono-mbaff-y14-e1-checker-a1-crop1-i4-ac",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "kind": "i4-ac",
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  }
+]

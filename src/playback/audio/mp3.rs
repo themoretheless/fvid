@@ -1,418 +1,14 @@
-//! Audio playback of MPEG layer II and layer III out of the bare file the
-//! format ships in.
-//!
-//! Unlike the PCM containers, which state a geometry and then hold samples, a
-//! `.mp3` file states nothing up front: every frame carries its own header, and
-//! a stream is a run of frames with tags bolted on either end. What the player
-//! asks a container for - a codec tag, a rate, a channel count, packets with
-//! timestamps - is therefore read out of the frames themselves, and the packets
-//! handed to [`crate::codec::make_audio_decoder`] are whole frames, header
-//! included, exactly as ffprobe reports them.
-//!
-//! Three measured facts shape this reader. A file usually begins with an ID3v2
-//! tag whose length is a synchsafe number, and the audio starts after all of it.
-//! The first frame of a stream written by LAME is an `Info` frame whose side
-//! info carries a tag rather than audio, and the reference demuxer consumes it
-//! without emitting a packet for it, so neither does this one - its placeholder
-//! bitrate and channel mode are also the wrong geometry to trust. And a frame's
-//! length is not stored anywhere: it is computed from the bitrate, rate and
-//! padding bit of the header it starts with. Every constant below was checked
-//! against the packet list ffprobe prints for the files under
-//! `tests/fixtures/mp3`.
-//!
-//! Layer I is read and refused. Its frame length is the one number here that no
-//! file on this machine states: the archive sample the coverage matrix pins for
-//! K-Lite's "MPEG Layer I" row carries layer III headers and ffprobe names its
-//! descriptor `mp3`, and this FFmpeg writes no layer I encoder, so the formula
-//! would be a claim with nothing to check it against.
-
+//! Player adapter for the canonical owned bare MPEG audio parser.
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::{Result, invalid};
-use std::io::Read;
-use std::time::Duration;
-
-/// What a limit guards: how much the reader may take in, and how many frames it
-/// may agree to list.
-#[derive(Clone, Copy, Debug)]
-pub struct Limits {
-    /// Largest file accepted.
-    pub file_bytes: usize,
-    /// Most frames one stream may hold.
-    pub packets: usize,
-}
-
-impl Default for Limits {
-    fn default() -> Self {
-        Self {
-            file_bytes: 128 << 20,
-            packets: 1 << 20,
-        }
-    }
-}
-
-/// The tag [`crate::codec::make_audio_decoder`] answers for layer II, as
-/// Matroska names it.
-pub const LAYER_II: &str = "A_MPEG/L2";
-/// The same for layer III: the tag the Matroska and MP4 readers already used for
-/// this codec, before a bare `.mp3` file could be opened at all.
-pub const LAYER_III: &str = "A_MPEG/L3";
-
-/// A frame header's MPEG audio layer. The two-bit field counts downwards from
-/// one, so a value of 1 names layer III.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Layer {
-    One,
-    Two,
-    Three,
-}
-
-/// A frame header: what the frame is, how long it is, and what it costs to size
-/// one.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct Header {
-    layer: Layer,
-    /// MPEG-1, or one of the two back extensions.
-    mpeg1: bool,
-    sample_rate: u32,
-    /// Mono, dual-channel, intensity or joint stereo.
-    mode: u8,
-    bit_rate: u32,
-    samples: u32,
-    size: usize,
-}
-
-impl Header {
-    fn channels(&self) -> u16 {
-        u16::from(self.mode != 3) + 1
-    }
-
-    /// The tag a stream of this layer plays under, and none for the layer whose
-    /// frames this reader does not size.
-    fn tag(&self) -> Option<&'static str> {
-        match self.layer {
-            Layer::Two => Some(LAYER_II),
-            Layer::Three => Some(LAYER_III),
-            Layer::One => None,
-        }
-    }
-}
-
-/// Which row of the bitrate tables a layer's header points at.
-fn table_row(layer: Layer) -> usize {
-    match layer {
-        Layer::One => 0,
-        Layer::Two => 1,
-        Layer::Three => 2,
-    }
-}
-
-/// Kilobits per second per bitrate index, one row per layer for the two version
-/// families. A layer III stream at index 7 is 96 kbps, which is what the coverage
-/// fixture is encoded at and what ffprobe reports for it. Index 15 names no
-/// bitrate and index 0 only a free-format stream, so neither is ever taken.
-const BITRATES: [[[u32; 16]; 3]; 2] = [
-    // MPEG-1.
-    [
-        [
-            0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0,
-        ],
-        [
-            0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0,
-        ],
-        [
-            0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0,
-        ],
-    ],
-    // MPEG-2 and MPEG-2.5 share these two rows.
-    [
-        [
-            0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, 0,
-        ],
-        [
-            0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0,
-        ],
-        [
-            0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0,
-        ],
-    ],
-];
-
-/// Sample rates by version family and by the header's two-bit index.
-const SAMPLE_RATES: [[u32; 3]; 3] = [
-    [44100, 48000, 32000], // MPEG-1
-    [22050, 24000, 16000], // MPEG-2
-    [11025, 12000, 8000],  // MPEG-2.5
-];
-
-/// Read one frame header, or none when these four bytes are not a header at all.
-/// Layer I comes back as a header so that a stream built from it is refused by
-/// name rather than quietly lost to the resync scan.
-fn header(bytes: &[u8]) -> Option<Header> {
-    let word = u32::from_be_bytes(bytes.get(..4)?.try_into().ok()?);
-    if word >> 21 != 0x7ff {
-        return None;
-    }
-    // The version field leaves one of its four values unused, as does the layer.
-    let version = match (word >> 19) & 3 {
-        3 => 0,
-        2 => 1,
-        0 => 2,
-        _ => return None,
-    };
-    let layer = match (word >> 17) & 3 {
-        3 => Layer::One,
-        2 => Layer::Two,
-        1 => Layer::Three,
-        _ => return None,
-    };
-    let mpeg1 = version == 0;
-    let rate_index = ((word >> 10) & 3) as usize;
-    let bit_rate =
-        BITRATES[usize::from(!mpeg1)][table_row(layer)][((word >> 12) & 0xf) as usize] * 1000;
-    if bit_rate == 0 || rate_index == 3 {
-        return None;
-    }
-    let sample_rate = SAMPLE_RATES[version][rate_index];
-    let pad = ((word >> 9) & 1) as usize;
-    // 144 samples per byte of bitrate in MPEG-1, half that in the extensions,
-    // where a layer III frame carries 576 samples instead of 1152. Layer I counts
-    // its length in slots of four bytes - and is refused before it is played.
-    let (samples, size) = match layer {
-        Layer::One => (
-            384,
-            12 * bit_rate as usize / sample_rate as usize * 4 + pad * 4,
-        ),
-        Layer::Two => (1152, 144 * bit_rate as usize / sample_rate as usize + pad),
-        Layer::Three if mpeg1 => (1152, 144 * bit_rate as usize / sample_rate as usize + pad),
-        Layer::Three => (576, 72 * bit_rate as usize / sample_rate as usize + pad),
-    };
-    Some(Header {
-        layer,
-        mpeg1,
-        sample_rate,
-        mode: ((word >> 6) & 3) as u8,
-        bit_rate,
-        samples,
-        size,
-    })
-}
-
-/// Where an `Info`/`Xing` frame keeps its tag: past the four header bytes and
-/// past the side info, whose length the version family and the channel mode fix.
-/// The three cases this machine's LAME writes were each checked at this offset -
-/// 21 for MPEG-1 mono and for MPEG-2 stereo, 36 for MPEG-1 stereo.
-fn info_tag_at(at: &Header) -> usize {
-    4 + match (at.mpeg1, at.mode) {
-        (true, 3) => 17,
-        (true, _) => 32,
-        (false, 3) => 9,
-        (false, _) => 17,
-    }
-}
-
-/// One frame of the stream: where it sits in the file, how long it is, and the
-/// sample it starts on once the info frame ahead of it is out of the count.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Frame {
-    pub start: usize,
-    pub size: usize,
-    pub pts: u64,
-    pub samples: u32,
-    pub bit_rate: u32,
-}
-
-/// A `.mp3` file: its geometry, the frames that play, and what was read around
-/// them to get there.
-#[derive(Clone, Debug)]
-pub struct Mp3 {
-    pub tag: &'static str,
-    pub sample_rate: u32,
-    pub channels: u16,
-    pub frames: Vec<Frame>,
-    /// Bytes of ID3v2 left in front of the audio, whether one tag or several.
-    pub tag_bytes: usize,
-    /// Whether the file ended in the 128-byte `TAG` record.
-    pub id3v1: bool,
-    /// Whether the first frame was an `Info`/`Xing` header rather than audio, and
-    /// so is not one of `frames`.
-    pub info_frame: bool,
-    data: Vec<u8>,
-}
-
-impl Mp3 {
-    /// Read a whole file: the tags, then the run of frames between them.
-    pub fn parse(bytes: &[u8], limits: &Limits) -> Result<Self> {
-        if bytes.len() > limits.file_bytes {
-            return Err(invalid(&format!(
-                "file is over the {} byte limit",
-                limits.file_bytes
-            )));
-        }
-        let tag_bytes = id3v2_bytes(bytes);
-        let mut end = bytes.len();
-        let id3v1 = tag_bytes + 128 <= end && bytes[end - 128..][..3] == *b"TAG";
-        if id3v1 {
-            end -= 128;
-        }
-        // The first header may sit anywhere ahead of it, since a file whose head was
-        // chopped off still names its frames from there on. After that first header
-        // the run must be contiguous: every frame starts where the last one ended,
-        // with no gap to scan across. That is what a real MPEG audio stream looks
-        // like end to end, and what a video file that happens to hold four bytes
-        // resembling a header does not.
-        let mut found: Vec<Header> = Vec::new();
-        let mut starts: Vec<usize> = Vec::new();
-        let mut pos = tag_bytes;
-        while pos + 4 <= end && header(&bytes[pos..]).is_none() {
-            pos += 1;
-        }
-        let first_start = pos;
-        while pos + 4 <= end {
-            let Some(at) = header(&bytes[pos..]) else {
-                break;
-            };
-            if at.tag().is_none() {
-                return Err(invalid(
-                    "MPEG audio layer I is not a layer this reader sizes frames for",
-                ));
-            }
-            if pos + at.size > end {
-                // A frame reaching past what the file holds is a truncated tail.
-                break;
-            }
-            if found.len() >= limits.packets {
-                return Err(invalid(&format!(
-                    "stream is over the {} packet limit",
-                    limits.packets
-                )));
-            }
-            found.push(at);
-            starts.push(pos);
-            pos += at.size;
-        }
-        if found.is_empty() {
-            return Err(invalid("no MPEG audio frames in the file"));
-        }
-        // A run that stops well short of the end of the file was never the file: a
-        // stream of frames fills it, and anything else is another container whose
-        // bytes this reader happened to make a header out of.
-        if (pos - first_start) * 10 < (end - first_start) * 9 {
-            return Err(invalid(&format!(
-                "the frames run to byte {pos} of a stream ending at {}",
-                end
-            )));
-        }
-        // The info frame states a placeholder bitrate where a variable-bitrate
-        // stream has no bitrate to state, so it sets no geometry and plays nothing.
-        let info_frame = found.len() > 1 && carries_info(bytes, &found[0], starts[0]);
-        let skip = usize::from(info_frame);
-        let first = found
-            .get(skip)
-            .ok_or_else(|| invalid("a stream that is nothing but an info frame"))?;
-        let mut frames = Vec::with_capacity(found.len() - skip);
-        let mut pts = 0u64;
-        for (at, start) in found[skip..].iter().zip(&starts[skip..]) {
-            if at.sample_rate != first.sample_rate
-                || at.channels() != first.channels()
-                || at.layer != first.layer
-            {
-                return Err(invalid(&format!(
-                    "stream changes geometry at frame {}: {} Hz {} ch after {} Hz {} ch",
-                    frames.len(),
-                    at.sample_rate,
-                    at.channels(),
-                    first.sample_rate,
-                    first.channels()
-                )));
-            }
-            frames.push(Frame {
-                start: *start,
-                size: at.size,
-                pts,
-                samples: at.samples,
-                bit_rate: at.bit_rate,
-            });
-            pts += u64::from(at.samples);
-        }
-        Ok(Self {
-            // Safe to unwrap: a header is only kept once it names a played layer.
-            tag: first.tag().unwrap_or(LAYER_III),
-            sample_rate: first.sample_rate,
-            channels: first.channels(),
-            frames,
-            tag_bytes,
-            id3v1,
-            info_frame,
-            data: bytes.to_vec(),
-        })
-    }
-
-    /// Frames the stream hands over as packets.
-    pub fn packets(&self) -> usize {
-        self.frames.len()
-    }
-
-    /// One frame's bytes, header included, as the decoder expects them.
-    pub fn packet(&self, index: usize) -> &[u8] {
-        let at = self.frames[index.min(self.frames.len() - 1)];
-        &self.data[at.start..at.start + at.size]
-    }
-
-    /// Samples the stream runs to, which is its length for a file that states no
-    /// duration of its own.
-    pub fn samples(&self) -> u64 {
-        self.frames
-            .last()
-            .map(|at| at.pts + u64::from(at.samples))
-            .unwrap_or(0)
-    }
-}
-
-/// Whether the frame at `start` is an `Info`/`Xing` header: its tag sits at a
-/// fixed distance into the side info.
-fn carries_info(bytes: &[u8], at: &Header, start: usize) -> bool {
-    if at.layer != Layer::Three {
-        return false;
-    }
-    let offset = start + info_tag_at(at);
-    bytes
-        .get(offset..offset + 4)
-        .is_some_and(|word| word == *b"Xing" || word == *b"Info")
-}
-
-/// How many bytes of ID3v2 stand in front of the audio, counting a second tag
-/// that follows the first. A header that does not hold its own length is treated
-/// as no header at all, leaving its bytes to the frame scan.
-fn id3v2_bytes(bytes: &[u8]) -> usize {
-    let mut total = 0;
-    while bytes
-        .get(total..total + 10)
-        .is_some_and(|head| head[..3] == *b"ID3" && head[3] != 0xff && head[5] & 0x0f == 0)
-    {
-        // The length is synchsafe: seven bits per byte, most significant first.
-        let [a, b, c, d]: [u8; 4] = bytes[total + 6..total + 10]
-            .try_into()
-            .expect("four length bytes");
-        if (a | b | c | d) & 0x80 != 0 {
-            return total;
-        }
-        let next = 10
-            + ((usize::from(a) << 21)
-                | (usize::from(b) << 14)
-                | (usize::from(c) << 7)
-                | usize::from(d));
-        if total + next > bytes.len() {
-            return total;
-        }
-        total += next;
-    }
-    total
-}
+use std::{io::Read, time::Duration};
+pub use fvid_media::owned_mpeg_audio::{Frame, Layer, Limits, Mp3, LAYER_I, LAYER_II, LAYER_III};
 
 /// A `.mp3` file read as an audio track.
 pub struct Mp3AudioReader {
     mp3: Mp3,
     packet: usize,
+    presentation_floor: Option<u64>,
 }
 
 impl Mp3AudioReader {
@@ -421,10 +17,11 @@ impl Mp3AudioReader {
     pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         Ok(Self {
-            mp3: Mp3::parse(&bytes, &limits)?,
+            mp3: Mp3::parse_owned(bytes, &limits)?,
             packet: 0,
+            presentation_floor: None,
         })
     }
 
@@ -435,6 +32,53 @@ impl Mp3AudioReader {
 }
 
 impl AudioStream for Mp3AudioReader {
+    fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.mp3.tag == LAYER_III {
+            let mut decoder = crate::codec::mp3_decoder::Mp3Decoder::new(self.sample_rate(), self.channels())?;
+            if let Some(packet) = self.mp3.info_packet() { decoder.prime_info(packet)?; }
+            Ok(Box::new(decoder))
+        } else {
+            crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())
+        }
+    }
+    fn preroll_target(&self) -> Option<i64> {
+        matches!(self.mp3.tag, LAYER_I | LAYER_II | LAYER_III).then(|| (self.mp3.presentation_window().start
+            + self.presentation_floor.unwrap_or(0)) as i64)
+    }
+
+    fn resume_preroll(&mut self, pts: i64) -> bool {
+        if pts < 0 || self.preroll_target().is_none_or(|target| pts > target) {
+            return false;
+        }
+        let Ok(index) = self.mp3.frames.binary_search_by_key(&(pts as u64), |frame| frame.pts) else {
+            return false;
+        };
+        self.packet = index;
+        true
+    }
+
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64)
+        -> Result<Option<crate::audio::AudioPacket>> {
+        if self.presentation_floor.is_none() && self.mp3.gapless.is_none() { return Ok(Some(packet)); }
+        let window = self.mp3.presentation_window();
+        let floor = window.start + self.presentation_floor.unwrap_or(0);
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid MP3 preroll PCM geometry"));
+        }
+        let frames = packet.data.len() / stride;
+        let skip = (i128::from(floor) - i128::from(source_pts)).max(0)
+            .min(frames as i128) as usize;
+        let last = (i128::from(window.end)-i128::from(source_pts)).max(0).min(frames as i128) as usize;
+        if skip >= last { return Ok(None); }
+        packet.data.copy_within(skip * stride..last * stride, 0);
+        packet.data.truncate((last - skip) * stride);
+        packet.pts = u64::try_from(i128::from(source_pts) + skip as i128 - i128::from(window.start))
+            .map_err(|_| invalid("negative MP3 presentation timestamp"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        Ok(Some(packet))
+    }
     fn codec(&self) -> &str {
         self.mp3.tag
     }
@@ -453,9 +97,9 @@ impl AudioStream for Mp3AudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        Some(Duration::from_secs_f64(
-            self.mp3.samples() as f64 / f64::from(self.mp3.sample_rate),
-        ))
+        let samples = self.mp3.presentation_samples();
+        let rate = u64::from(self.mp3.sample_rate);
+        Some(Duration::new(samples / rate, ((samples % rate) * 1_000_000_000 / rate) as u32))
     }
 
     /// A frame describes itself: this container stores no setup block.
@@ -487,10 +131,23 @@ impl AudioStream for Mp3AudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
+        self.presentation_floor = None;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
         let target = pts.max(0) as u64;
+        if matches!(self.mp3.tag, LAYER_I | LAYER_II | LAYER_III) {
+            // Reservoir bytes and synthesis overlap both precede the target.
+            // Decode from the beginning, then discard exact sample preroll.
+            let target = target.min(self.mp3.presentation_samples());
+            self.packet = 0;
+            self.presentation_floor = Some(target);
+            return target as i64;
+        }
+        if target >= self.mp3.samples() {
+            self.packet = self.mp3.frames.len();
+            return self.mp3.samples() as i64;
+        }
         let index = self
             .mp3
             .frames
@@ -616,17 +273,18 @@ mod tests {
     }
 
     #[test]
-    fn a_timestamp_lands_on_the_frame_at_or_before_it() {
+    fn layer3_seek_rebuilds_history_and_preserves_exact_sample_target() {
         let mut reader = open(TONE);
-        // The frames step by 1152 samples, so the middle of one is still reached
-        // from its own start, and past the end lands on the last frame.
         assert_eq!(reader.seek_to(2_304), 2_304);
-        assert_eq!(reader.seek_to(2_400), 2_304);
+        assert_eq!(reader.seek_to(2_400), 2_400);
+        assert_eq!(reader.preroll_target(), Some(3_505));
+        assert_eq!(reader.next_packet().unwrap().unwrap().pts, 0);
         assert_eq!(reader.seek_to(-1), 0);
-        assert_eq!(reader.seek_to(1 << 30), 10_368);
-        let packet = reader.next_packet().expect("packet").expect("last");
-        assert_eq!(packet.pts, 10_368);
-        assert!(reader.next_packet().expect("no more").is_none());
+        assert_eq!(reader.seek_to(1 << 30), 9_600);
+        assert_eq!(reader.preroll_target(), Some(10_705));
+        assert_eq!(reader.next_packet().unwrap().unwrap().pts, 0);
+        reader.rewind();
+        assert_eq!(reader.preroll_target(), Some(1_105));
     }
 
     #[test]
@@ -685,19 +343,9 @@ mod tests {
     }
 
     #[test]
-    fn a_layer_the_reader_does_not_size_is_refused_by_name() {
-        // A layer I header: sync, MPEG-1, the layer field that counts down to one,
-        // 224 kbps at 44.1 kHz. Nothing on this machine writes a file like it, which
-        // is the whole reason it is refused rather than guessed at.
-        let error = Mp3::parse(&0xffff_74c4u32.to_be_bytes(), &Limits::default())
-            .err()
-            .expect("layer I is refused");
-        assert!(
-            error
-                .to_string()
-                .contains("MPEG audio layer I is not a layer"),
-            "{error}"
-        );
+    fn a_layer_one_header_without_a_complete_frame_is_not_audio() {
+        let error = Mp3::parse(&0xffff_74c4u32.to_be_bytes(), &Limits::default()).err().unwrap();
+        assert!(error.to_string().contains("no MPEG audio frames"), "{error}");
     }
 
     #[test]

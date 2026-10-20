@@ -136,7 +136,7 @@ impl<R: Read + Seek> SingleView<R> {
     }
 }
 impl<R: Read + Seek> Mp4VideoReader<R> {
-    /// Select the first supported video track.
+    /// Prefer an enabled movie track; retain file order within each preference.
     pub fn open(reader: R, limits: Limits, budget: usize) -> Result<Self> {
         Self::open_inner(reader, limits, budget, true)
     }
@@ -146,16 +146,9 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     }
     fn open_inner(reader: R, limits: Limits, budget: usize, hardware: bool) -> Result<Self> {
         let demuxer = Mp4Reader::open(reader, limits)?;
-        let index = demuxer
-            .tracks()
-            .iter()
-            .position(|t| {
-                t.handler == *b"vide"
-                    && matches!(
-                        &t.codec,
-                        b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
-                    )
-            })
+        let index = demuxer.automatic_track_indices(&[*b"vide"]).into_iter()
+            .find(|&index| matches!(&demuxer.tracks()[index].codec,
+                b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"))
             .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
         Self::from_inner(demuxer, index, budget, hardware)
     }

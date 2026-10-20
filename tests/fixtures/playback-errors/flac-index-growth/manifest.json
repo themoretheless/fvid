@@ -1,0 +1,26 @@
+{
+  "provenance": "Authored constant16bitFLAC with129/1024/8192short64sampleframes.129frame input is187ms;larger inputs are explicit index measurements,notnew playback-failure claims. Deterministic public PCM andnativeVP9/PCMcompanion,no private data/encoder/network.",
+  "cases": [
+    {
+      "file": "frames-129.flac",
+      "frames": 129,
+      "samples": 8256
+    },
+    {
+      "file": "frames-1024.flac",
+      "frames": 1024,
+      "samples": 65536
+    },
+    {
+      "file": "frames-8192.flac",
+      "frames": 8192,
+      "samples": 524288
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "frames-129.flac": "0db3dfb88ebbbbfab04de00fc54e264bacc25108629de3da767cab9ba476aa64",
+    "frames-1024.flac": "b4ed0667e5195fed47d366ffb772a87af67b69f4f33530fd7f2bc4ddd8274467",
+    "frames-8192.flac": "747b7161534ddf814733da12b15bbc304c058510fb089d97455938d03495cf1b"
+  }
+}

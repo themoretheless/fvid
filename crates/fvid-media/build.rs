@@ -1,6 +1,7 @@
 //! Optional search directory for the benchmark that links libavutil directly.
 //! The library never links FFmpeg and needs no FFmpeg headers or bindgen.
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
     #[cfg(feature = "legacy-ffmpeg")]
     {
         println!("cargo:rerun-if-env-changed=FVID_FFMPEG_PREFIX");

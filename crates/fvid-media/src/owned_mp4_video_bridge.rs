@@ -97,9 +97,10 @@ fn prepare_selected(
     if !video_only && (reader.tracks().len() != 1 || !reader.refused().is_empty()) {
         return Ok(None);
     }
-    let Some(track) = reader.tracks().iter().find(|t| t.handler == *b"vide") else {
+    let Some(index) = reader.automatic_track_indices(&[*b"vide"]).first().copied() else {
         return Ok(None);
     };
+    let track = &reader.tracks()[index];
     if track.rotation != 0 {
         return Ok(None);
     }
@@ -137,6 +138,7 @@ fn prepare_selected(
                 frame.depth,
                 frame.sub,
                 frame.mono,
+                frame.rgb,
                 frame.colour,
                 frame.hdr,
             );

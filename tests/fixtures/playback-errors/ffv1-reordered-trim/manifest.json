@@ -1,0 +1,16 @@
+{
+  "provenance": "Independent Python RFC 9043 range coding of three authored neutral RGB frames. No private media or external encoder.",
+  "qualification": "Deliberately nonconforming timestamp ordering for independent FFV1 keyframes (RFC 9559 section 10). Full export already accepts and sorts these frames. Regression qualifies consistent recovery during trimming, not format conformance.",
+  "trim_us": [
+    0,
+    30000
+  ],
+  "expected_pts_ns": [
+    0,
+    20000000
+  ],
+  "files": {
+    "control.mkv": "57a75a4bc98965ab45c41c8b26a2d7fe2f68ee309a69cde58d8b279f79a4561e",
+    "reordered.mkv": "9742709f161ce2df2846bf7485d155b33237f465c8c82b87b4ce686e82a0e9eb"
+  }
+}

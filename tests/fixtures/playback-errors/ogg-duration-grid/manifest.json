@@ -1,0 +1,73 @@
+{
+  "provenance": "Eight authored silent Vorbis /linkedVorbis+Opus Ogg programs with independent zero PCM,EOSsample totals andinteger endpoints. Vorbis sparse single-codebook,uniform64sample blocks,no activefloor;OpusDTXzero preskip. NativeVP9/PCMcompanion;no encoder/network/private data.",
+  "cases": [
+    {
+      "file": "vorbis-48000-448.ogg",
+      "kind": "vorbis",
+      "rate": 48000,
+      "samples": 448,
+      "end_ns": 9333333
+    },
+    {
+      "file": "vorbis-48000-446.ogg",
+      "kind": "vorbis",
+      "rate": 48000,
+      "samples": 446,
+      "end_ns": 9291666
+    },
+    {
+      "file": "vorbis-44100-448.ogg",
+      "kind": "vorbis",
+      "rate": 44100,
+      "samples": 448,
+      "end_ns": 10158730
+    },
+    {
+      "file": "vorbis-44100-447.ogg",
+      "kind": "vorbis",
+      "rate": 44100,
+      "samples": 447,
+      "end_ns": 10136054
+    },
+    {
+      "file": "vorbis-96000-448.ogg",
+      "kind": "vorbis",
+      "rate": 96000,
+      "samples": 448,
+      "end_ns": 4666666
+    },
+    {
+      "file": "vorbis-8000-448.ogg",
+      "kind": "vorbis",
+      "rate": 8000,
+      "samples": 448,
+      "end_ns": 56000000
+    },
+    {
+      "file": "joint-448.ogg",
+      "kind": "joint",
+      "rate": 48000,
+      "samples": 1408,
+      "end_ns": 29333333
+    },
+    {
+      "file": "joint-446.ogg",
+      "kind": "joint",
+      "rate": 48000,
+      "samples": 1406,
+      "end_ns": 29291666
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "opus-control.ogg": "b6a3c28204dc6dc730b3ec6dec1cd185d75431a5d8ea46dabc2b05e115733e48",
+    "vorbis-48000-448.ogg": "19ac5451c25fb155a62c41f0013528266048b8e45d8743ef6796b72b9f8d3b6e",
+    "vorbis-48000-446.ogg": "c2d0c028fe7ac716d3e74918f48e56d946d31b6a29111096a76580ec671fffad",
+    "vorbis-44100-448.ogg": "fd20633d2535c492d59bf5b1cd723849a55569b6848c696bd2a533e71b07af41",
+    "vorbis-44100-447.ogg": "b4d38f09551e55d173fe93d66f6028cd6d29628c352ea3efe39aa1023d41f94c",
+    "vorbis-96000-448.ogg": "bd2909358bca4caed0e60dc3d625b64fefc74a0323df23c98cda1a951034b030",
+    "vorbis-8000-448.ogg": "abff3ae37f38227a9ae48ef9fa79edffc6d14ac96829684159d828acb9239bcf",
+    "joint-448.ogg": "417a7d3143a482087612ad7adc2f85de0febf3d56448be866f64058f1a92b72b",
+    "joint-446.ogg": "210a33dbac421c13bb9c0bc3097f99aa527e5a06a446585dc41d29335eedcfc3"
+  }
+}

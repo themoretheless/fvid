@@ -1,0 +1,145 @@
+{
+  "provenance": "Owned vertical AMP source and target IV skip; independent 8x8 lookup oracle in tests.",
+  "cases": [
+    {
+      "file": "texture-depth-refinement-iv-8-0-0.mp4",
+      "cut": 8,
+      "enabled": false,
+      "scale": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-0-8.mp4",
+      "cut": 8,
+      "enabled": false,
+      "scale": 8,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-0--8.mp4",
+      "cut": 8,
+      "enabled": false,
+      "scale": -8,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-0-128.mp4",
+      "cut": 8,
+      "enabled": false,
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-0--128.mp4",
+      "cut": 8,
+      "enabled": false,
+      "scale": -128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-1-0.mp4",
+      "cut": 8,
+      "enabled": true,
+      "scale": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-1-8.mp4",
+      "cut": 8,
+      "enabled": true,
+      "scale": 8,
+      "disparity": 16
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-1--8.mp4",
+      "cut": 8,
+      "enabled": true,
+      "scale": -8,
+      "disparity": -16
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-1-128.mp4",
+      "cut": 8,
+      "enabled": true,
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-depth-refinement-iv-8-1--128.mp4",
+      "cut": 8,
+      "enabled": true,
+      "scale": -128,
+      "disparity": -254
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-0-0.mp4",
+      "cut": 24,
+      "enabled": false,
+      "scale": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-0-8.mp4",
+      "cut": 24,
+      "enabled": false,
+      "scale": 8,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-0--8.mp4",
+      "cut": 24,
+      "enabled": false,
+      "scale": -8,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-0-128.mp4",
+      "cut": 24,
+      "enabled": false,
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-0--128.mp4",
+      "cut": 24,
+      "enabled": false,
+      "scale": -128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-1-0.mp4",
+      "cut": 24,
+      "enabled": true,
+      "scale": 0,
+      "disparity": 0
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-1-8.mp4",
+      "cut": 24,
+      "enabled": true,
+      "scale": 8,
+      "disparity": 16
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-1--8.mp4",
+      "cut": 24,
+      "enabled": true,
+      "scale": -8,
+      "disparity": -16
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-1-128.mp4",
+      "cut": 24,
+      "enabled": true,
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-depth-refinement-iv-24-1--128.mp4",
+      "cut": 24,
+      "enabled": true,
+      "scale": -128,
+      "disparity": -254
+    }
+  ]
+}

@@ -1005,8 +1005,8 @@ fn decode_reader_frames(
     };
     header.full_range()?;
     let (n, d) = header.pixel_aspect()?;
-    let (mut n, mut d) = (u128::from(n), u128::from(d));
-    let (mut w, mut h) = (crop.width as u128, crop.height as u128);
+    let (mut n, mut d) = (u64::from(n), u64::from(d));
+    let (mut w, mut h) = (crop.width as u64, crop.height as u64);
     if transform.transpose.is_some() {
         std::mem::swap(&mut n, &mut d);
         std::mem::swap(&mut w, &mut h);
@@ -1014,26 +1014,43 @@ fn decode_reader_frames(
     if let Some(angle) = transform.rotate {
         let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?,
         );
-        (w, h) = (u128::from(rw), u128::from(rh));
+        (w, h) = (u64::from(rw), u64::from(rh));
     }
     if let Some(pad) = transform.pad {
-        w = u128::from(pad.width);
-        h = u128::from(pad.height);
+        w = u64::from(pad.width);
+        h = u64::from(pad.height);
     }
+    let gcd = |mut a: u64, mut b: u64| -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    };
+    let g0 = gcd(n, d);
+    n /= g0;
+    d /= g0;
     if transform.scale.is_some() {
+        let g1 = gcd(w, h);
+        let (w, h) = (w / g1, h / g1);
+        let (mut oh, mut ow) = (oh as u64, ow as u64);
+        let g2 = gcd(oh, ow);
+        oh /= g2;
+        ow /= g2;
         n = n
             .checked_mul(w)
-            .and_then(|v| v.checked_mul(oh as u128))
             .ok_or("pixel aspect overflow")?;
         d = d
             .checked_mul(h)
-            .and_then(|v| v.checked_mul(ow as u128))
+            .ok_or("pixel aspect overflow")?;
+        let g3 = gcd(n, d);
+        n = (n / g3)
+            .checked_mul(oh)
+            .ok_or("pixel aspect overflow")?;
+        d = (d / g3)
+            .checked_mul(ow)
             .ok_or("pixel aspect overflow")?;
     }
-    let (mut a, mut b) = (n, d);
-    while b != 0 {
-        (a, b) = (b, a % b);
-    }
+    let a = gcd(n, d);
     let aspect = (
         u32::try_from(n / a).map_err(|_| "pixel aspect overflow")?,
         u32::try_from(d / a).map_err(|_| "pixel aspect overflow")?,

@@ -1,0 +1,33 @@
+{
+  "scope": "Paired CPU-only FLAC index timing over four existing public synthetic clips; correctness fix, not a performance improvement claim. Concurrent workspace load is not isolated.",
+  "iterations_per_run": 10000,
+  "pairs": 15,
+  "before_median_ns": 707863166,
+  "after_median_ns": 711780708,
+  "paired_median_ratio": 1.0019519486977337,
+  "median_ratio_bootstrap95": [
+    0.9932817224536274,
+    1.007850049732301
+  ],
+  "ratio_range": [
+    0.978904613314629,
+    1.938149348550044
+  ],
+  "executables": {
+    "before": {
+      "path": "/private/tmp/fvid-flac-index-batch123-before",
+      "sha256": "a2bf19dae1ac129f4aed0b293bfa4afeae8cda6e0604e05a43e0998d5687860a"
+    },
+    "after": {
+      "path": "/private/tmp/fvid-flac-index-batch123-after-v2",
+      "sha256": "9f95824c225121699166d8bbac97b0859ef182efcc5d374d3bd8532ee58b97fb"
+    }
+  },
+  "inputs": {
+    "tests/fixtures/flac/tone.flac": "7d70db4387b94a2563fbe73c34dba88bdcdfe14969d578944bbf7ef19cced734",
+    "tests/fixtures/flac/stereo.flac": "f14c33c045c98c1b613bc1c003451cbb21b8efe6c9753343c7b9c8463401d203",
+    "tests/fixtures/flac/twenty-four.flac": "904b6d5ce33a5d5e06bf7ed72c701e29b817d03e598257fdbf4e4ba015223710",
+    "tests/fixtures/flac/small-block.flac": "25386cfcacc7a6d1733d26f7ff94747b7c032554a2030dadfdffa197559640f6"
+  },
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+}

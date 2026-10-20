@@ -166,6 +166,18 @@ pub fn predict_macroblock_mbaff(
     references: [&[&Reference420<'_>]; 2],
     weights: Option<&[[[ComponentWeight; 3]; 2]]>,
 ) -> Result<Prediction420> {
+    predict_macroblock_mbaff_components(address, geometry, field, [depth; 2], partitions, motion, references, weights)
+}
+pub(crate) fn predict_macroblock_mbaff_components(
+    address: usize,
+    geometry: [usize; 2],
+    field: bool,
+    depths: [u8; 2],
+    partitions: &[Partition],
+    motion: &[[Neighbour; 2]],
+    references: [&[&Reference420<'_>]; 2],
+    weights: Option<&[[[ComponentWeight; 3]; 2]]>,
+) -> Result<Prediction420> {
     if references.iter().any(|list| list.len() > 32)
         || motion.iter().flatten().any(|n| matches!(n, Neighbour::Inter { reference, .. } if *reference > if field {63} else {31})) {
         return Err(invalid("invalid MBAFF prediction reference list"));
@@ -181,7 +193,7 @@ pub fn predict_macroblock_mbaff(
     ];
     predict_macroblock_impl(
         origin,
-        [depth;2],
+        depths,
         partitions,
         motion,
         references,
@@ -254,11 +266,13 @@ fn predict_macroblock_impl(
                     let view = picture.field_view(reference_bottom)?;
                     let luma_motion = vector.map(i32::from);
                     let mut chroma_motion = luma_motion;
-                    chroma_motion[1] += match (reference_bottom, bottom) {
-                        (false, true) => 2,
-                        (true, false) => -2,
-                        _ => 0,
-                    };
+                    if picture.chroma_subsampling()==[2,2] {
+                        chroma_motion[1] += match (reference_bottom, bottom) {
+                            (false, true) => 2,
+                            (true, false) => -2,
+                            _ => 0,
+                        };
+                    }
                     view.predict_into_motion(
                         [x, y],
                         luma_motion,

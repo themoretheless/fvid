@@ -1,0 +1,413 @@
+{
+  "cases": [
+    {
+      "file": "ffv1-v1-zero-depth-gray-coder0-alpha0.mkv",
+      "layout": "gray",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder0-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder0-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder0-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder0-alpha0-1.color"
+        }
+      ],
+      "sha256": "d7b47398dba49cb3f7ded4959c5106921663e5afd39ee86694d254c7ce757e45"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-gray-coder0-alpha1.mkv",
+      "layout": "gray",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder0-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder0-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-gray-coder0-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder0-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder0-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-gray-coder0-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "6349b0803e2c239ef09334467ad4d8be954b2f888c98b1be5a9761258d52c5e0"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-420-coder0-alpha0.mkv",
+      "layout": "420",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder0-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-420-coder0-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder0-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-420-coder0-alpha0-1.color"
+        }
+      ],
+      "sha256": "06e6266d3da0da2fe0df861a508b90521e1f645beb2346d52e5f8b4a74bddefb"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-420-coder0-alpha1.mkv",
+      "layout": "420",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder0-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-420-coder0-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-420-coder0-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder0-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-420-coder0-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-420-coder0-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "a4bc0fb0b943794fc77988533e05b470800178fca980ec397e6006808f45fd56"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-444-coder0-alpha0.mkv",
+      "layout": "444",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder0-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-444-coder0-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder0-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-444-coder0-alpha0-1.color"
+        }
+      ],
+      "sha256": "6c397e41841d9da0dd59d027624616ff0abfd96ce042c130bc141608d7cd64c2"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-444-coder0-alpha1.mkv",
+      "layout": "444",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder0-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-444-coder0-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-444-coder0-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder0-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-444-coder0-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-444-coder0-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "983f7599b8fe8f31cd2d4c981341de9b7bb533c70403b0786ec289a45289d8a4"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-rgb-coder0-alpha0.mkv",
+      "layout": "rgb",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder0-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder0-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder0-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder0-alpha0-1.color"
+        }
+      ],
+      "sha256": "edd046d8135bc3bd2812075f2c588d64e837c1e4655db2963d094778e404f9c7"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-rgb-coder0-alpha1.mkv",
+      "layout": "rgb",
+      "coder": 0,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder0-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder0-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-rgb-coder0-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder0-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder0-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-rgb-coder0-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "a477f932204129b54c2461444747da6d032eaa179b10490307cf4929e526c113"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-gray-coder1-alpha0.mkv",
+      "layout": "gray",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder1-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder1-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder1-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder1-alpha0-1.color"
+        }
+      ],
+      "sha256": "4f324393b7e5f2f44bba1495e27072870895ffb6577faca9f3753d7594d72263"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-gray-coder1-alpha1.mkv",
+      "layout": "gray",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder1-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder1-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-gray-coder1-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder1-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder1-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-gray-coder1-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "7b97dba16954aac99460521d2bad3ff93c7a4da2999ea3298a3f84ddc44068d3"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-420-coder1-alpha0.mkv",
+      "layout": "420",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder1-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-420-coder1-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder1-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-420-coder1-alpha0-1.color"
+        }
+      ],
+      "sha256": "53d2361e076bd4e0cdc7fa0bcc7fda12f8ca4cc9b55ff8def64898d39d05f1ae"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-420-coder1-alpha1.mkv",
+      "layout": "420",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder1-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-420-coder1-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-420-coder1-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder1-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-420-coder1-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-420-coder1-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "6f310c195f7128a774d208001020b77d8797c35ec73a9b152f6577f6ca71a16e"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-444-coder1-alpha0.mkv",
+      "layout": "444",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder1-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-444-coder1-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder1-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-444-coder1-alpha0-1.color"
+        }
+      ],
+      "sha256": "582321080f217bfd07cadbaaf8caa76dfda0c82876e8e5c4550c97f6667a812b"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-444-coder1-alpha1.mkv",
+      "layout": "444",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder1-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-444-coder1-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-444-coder1-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder1-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-444-coder1-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-444-coder1-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "49619a076a707b29027440a4671230e9d618009a394bfecd5d55512a5b601d1b"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-rgb-coder1-alpha0.mkv",
+      "layout": "rgb",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder1-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder1-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder1-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder1-alpha0-1.color"
+        }
+      ],
+      "sha256": "af472493a46356e5fb579d80a0258fa527d2b116c7af4feaaeb84e635d1d3222"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-rgb-coder1-alpha1.mkv",
+      "layout": "rgb",
+      "coder": 1,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder1-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder1-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-rgb-coder1-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder1-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder1-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-rgb-coder1-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "bd52013f7fe477da67eba2a9db5ed9b406f49388ff7e2506e6fdba6cb85fab58"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-gray-coder2-alpha0.mkv",
+      "layout": "gray",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder2-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder2-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder2-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder2-alpha0-1.color"
+        }
+      ],
+      "sha256": "87c431bc67ab6b0acfbf836822cb2840341fca625e3bcab3a5fd7ecd811ec944"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-gray-coder2-alpha1.mkv",
+      "layout": "gray",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder2-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder2-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-gray-coder2-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-gray-coder2-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-gray-coder2-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-gray-coder2-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "5c6506679e8bdda2f638c1ef2533aae5fdfc7175404a0b92b6365eeed587fa78"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-420-coder2-alpha0.mkv",
+      "layout": "420",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder2-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-420-coder2-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder2-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-420-coder2-alpha0-1.color"
+        }
+      ],
+      "sha256": "d20ee77d6eb80618d55c6f9162147401dfebfd170747ed6dd88ed607951d0e09"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-420-coder2-alpha1.mkv",
+      "layout": "420",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder2-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-420-coder2-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-420-coder2-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-420-coder2-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-420-coder2-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-420-coder2-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "8b3584b37cf0ea5b52b7e4c460746efba1707d0cd384df863f5c50084ad31078"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-444-coder2-alpha0.mkv",
+      "layout": "444",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder2-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-444-coder2-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder2-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-444-coder2-alpha0-1.color"
+        }
+      ],
+      "sha256": "2dae94e8ebc0e3d2a6d14386332b2c1939d4d7f8debbedbd9a486f5420116797"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-444-coder2-alpha1.mkv",
+      "layout": "444",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder2-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-444-coder2-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-444-coder2-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-444-coder2-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-444-coder2-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-444-coder2-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "7b83179fe3f648176f55e3905c7387ba8a0b4d12f6c76f1b56a3a11b5b977008"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-rgb-coder2-alpha0.mkv",
+      "layout": "rgb",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder2-alpha0-0.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder2-alpha0-0.color"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder2-alpha0-1.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder2-alpha0-1.color"
+        }
+      ],
+      "sha256": "78cad33f06730b258566497eb670d12a7bb2cbe16c25ec240687f76e6df0d878"
+    },
+    {
+      "file": "ffv1-v1-zero-depth-rgb-coder2-alpha1.mkv",
+      "layout": "rgb",
+      "coder": 2,
+      "frames": [
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder2-alpha1-0.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder2-alpha1-0.color",
+          "alpha": "ffv1-v1-zero-depth-rgb-coder2-alpha1-0.alpha"
+        },
+        {
+          "packet": "ffv1-v1-zero-depth-rgb-coder2-alpha1-1.packet",
+          "color": "ffv1-v1-zero-depth-rgb-coder2-alpha1-1.color",
+          "alpha": "ffv1-v1-zero-depth-rgb-coder2-alpha1-1.alpha"
+        }
+      ],
+      "sha256": "685b1e346e7544eef6bfe3adaacea66834fd9e006acc7bbf680840efd2f85246"
+    }
+  ],
+  "provenance": "Authored Python packets, explicit zero depth header. No private media, external codec or network."
+}

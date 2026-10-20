@@ -1,0 +1,309 @@
+{
+  "provenance": "Owned PCM/CABAC, parameters, MP4 and scalar pixel oracle. No private media, FFmpeg, network or test-time generation.",
+  "layers": [
+    0,
+    3,
+    5
+  ],
+  "views": [
+    0,
+    1,
+    2
+  ],
+  "source_amp_rows": [
+    [
+      8,
+      24
+    ],
+    [
+      24,
+      8
+    ]
+  ],
+  "source_mv_quarters": [
+    4,
+    -4
+  ],
+  "target_lists": [
+    "own POC0",
+    "layer3 POC1"
+  ],
+  "default_reference_view": 1,
+  "disparity": [
+    0,
+    0
+  ],
+  "limitations": "Native 8-bit 420 texture IV/DI P-slice acceptance and disabled/intra controls. Neutral chroma, 32x32 single-CU witnesses; not full Annex I conformance.",
+  "cases": [
+    {
+      "file": "texture-iv-off-0.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 8,
+      "index": 0,
+      "label": "past",
+      "offset": 0
+    },
+    {
+      "file": "texture-iv-off-1.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 8,
+      "index": 1,
+      "label": "source",
+      "offset": 1024
+    },
+    {
+      "file": "texture-iv-off-2.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 8,
+      "index": 2,
+      "label": "past",
+      "offset": 2048
+    },
+    {
+      "file": "texture-iv-off-3.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 8,
+      "index": 3,
+      "label": "past",
+      "offset": 3072
+    },
+    {
+      "file": "texture-iv-off-4.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 8,
+      "index": 4,
+      "label": "past",
+      "offset": 4096
+    },
+    {
+      "file": "texture-iv-off-bottom8-0.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 24,
+      "index": 0,
+      "label": "past",
+      "offset": 5120
+    },
+    {
+      "file": "texture-iv-off-bottom8-1.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 24,
+      "index": 1,
+      "label": "source",
+      "offset": 6144
+    },
+    {
+      "file": "texture-iv-off-bottom8-2.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 24,
+      "index": 2,
+      "label": "past",
+      "offset": 7168
+    },
+    {
+      "file": "texture-iv-off-bottom8-3.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 24,
+      "index": 3,
+      "label": "past",
+      "offset": 8192
+    },
+    {
+      "file": "texture-iv-off-bottom8-4.mp4",
+      "enabled": false,
+      "intra": false,
+      "top": 24,
+      "index": 4,
+      "label": "past",
+      "offset": 9216
+    },
+    {
+      "file": "texture-iv-off-intra-0.mp4",
+      "enabled": false,
+      "intra": true,
+      "top": 8,
+      "index": 0,
+      "label": "past",
+      "offset": 10240
+    },
+    {
+      "file": "texture-iv-off-intra-1.mp4",
+      "enabled": false,
+      "intra": true,
+      "top": 8,
+      "index": 1,
+      "label": "source",
+      "offset": 11264
+    },
+    {
+      "file": "texture-iv-off-intra-2.mp4",
+      "enabled": false,
+      "intra": true,
+      "top": 8,
+      "index": 2,
+      "label": "past",
+      "offset": 12288
+    },
+    {
+      "file": "texture-iv-off-intra-3.mp4",
+      "enabled": false,
+      "intra": true,
+      "top": 8,
+      "index": 3,
+      "label": "past",
+      "offset": 13312
+    },
+    {
+      "file": "texture-iv-off-intra-4.mp4",
+      "enabled": false,
+      "intra": true,
+      "top": 8,
+      "index": 4,
+      "label": "past",
+      "offset": 14336
+    },
+    {
+      "file": "texture-iv-on-0.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 8,
+      "index": 0,
+      "label": "IV",
+      "offset": 15360
+    },
+    {
+      "file": "texture-iv-on-1.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 8,
+      "index": 1,
+      "label": "DI",
+      "offset": 16384
+    },
+    {
+      "file": "texture-iv-on-2.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 8,
+      "index": 2,
+      "label": "past",
+      "offset": 17408
+    },
+    {
+      "file": "texture-iv-on-3.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 8,
+      "index": 3,
+      "label": "source",
+      "offset": 18432
+    },
+    {
+      "file": "texture-iv-on-4.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 8,
+      "index": 4,
+      "label": "past",
+      "offset": 19456
+    },
+    {
+      "file": "texture-iv-on-bottom8-0.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 24,
+      "index": 0,
+      "label": "IV",
+      "offset": 20480
+    },
+    {
+      "file": "texture-iv-on-bottom8-1.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 24,
+      "index": 1,
+      "label": "DI",
+      "offset": 21504
+    },
+    {
+      "file": "texture-iv-on-bottom8-2.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 24,
+      "index": 2,
+      "label": "IVShift",
+      "offset": 22528
+    },
+    {
+      "file": "texture-iv-on-bottom8-3.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 24,
+      "index": 3,
+      "label": "past",
+      "offset": 23552
+    },
+    {
+      "file": "texture-iv-on-bottom8-4.mp4",
+      "enabled": true,
+      "intra": false,
+      "top": 24,
+      "index": 4,
+      "label": "source",
+      "offset": 24576
+    },
+    {
+      "file": "texture-iv-on-intra-0.mp4",
+      "enabled": true,
+      "intra": true,
+      "top": 8,
+      "index": 0,
+      "label": "DI",
+      "offset": 25600
+    },
+    {
+      "file": "texture-iv-on-intra-1.mp4",
+      "enabled": true,
+      "intra": true,
+      "top": 8,
+      "index": 1,
+      "label": "DIShift",
+      "offset": 26624
+    },
+    {
+      "file": "texture-iv-on-intra-2.mp4",
+      "enabled": true,
+      "intra": true,
+      "top": 8,
+      "index": 2,
+      "label": "past",
+      "offset": 27648
+    },
+    {
+      "file": "texture-iv-on-intra-3.mp4",
+      "enabled": true,
+      "intra": true,
+      "top": 8,
+      "index": 3,
+      "label": "source",
+      "offset": 28672
+    },
+    {
+      "file": "texture-iv-on-intra-4.mp4",
+      "enabled": true,
+      "intra": true,
+      "top": 8,
+      "index": 4,
+      "label": "past",
+      "offset": 29696
+    }
+  ]
+}

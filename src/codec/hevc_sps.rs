@@ -77,6 +77,10 @@ pub struct Sps {
     /// Annex F: inter-layer vertical motion is limited to 56 luma samples.
     /// This imposes no additional operation on base-layer reconstruction.
     pub inter_view_mv_vert_constraint: bool,
+    pub three_d: Option<super::hevc_3d_syntax::SpsExtension>,
+    /// Effective VPS depth role of the layer for which this SPS was resolved.
+    /// Base Annex A parsing is always texture, including unused depth flags.
+    pub depth_layer: bool,
     /// SCC SPS syntax is present.
     pub scc_extension: bool,
     pub palette: Option<Palette>,
@@ -86,6 +90,26 @@ pub struct Sps {
     pub vui: Option<Vui>,
 }
 impl Sps {
+    /// Base-layer reconstruction equivalence, not parameter-NAL identity.
+    /// Admitted unused depth flags and inactive sub-block sizes do not affect
+    /// base prediction, references or transform state. Other fields stay exact.
+    pub(crate) fn same_base_decoding_parameters(&self, other: &Self) -> bool {
+        if self.three_d == other.three_d {return self == other;}
+        // I-19: base layer has NumRefListLayers=0, so its IV/DI flag
+        // is metadata even when its raw SPS bit is set.
+        let active_base=|extension:&super::hevc_3d_syntax::SpsExtension| {
+            let mut tools=extension.clone();tools.inter_view_disparity[0]=false;tools.active_for_depth(false)
+        };
+        if self.three_d.as_ref().is_some_and(active_base)
+            || other.three_d.as_ref().is_some_and(active_base) {
+            return false;
+        }
+        // Only an actual metadata transition takes this path. Normal pictures
+        // compare directly without allocating or cloning SPS vector ownership.
+        let mut normalized = self.clone();
+        normalized.three_d = other.three_d.clone();
+        normalized == *other
+    }
     /// SCC disables DC and angular boundary correction. RDPCM's bypass
     /// exclusion is angular-only; DC keeps its separate normative rule.
     pub(crate) fn filter_intra_boundary(&self, mode: u8, bypass: bool) -> bool {
@@ -312,6 +336,12 @@ impl Sps {
         let mut extended_precision = false;
         let mut cabac_bypass_alignment = false;
         let mut inter_view_mv_vert_constraint = false;
+        let mut three_d_extension = None;
+        let depth_layer = if let Some(c) = context {
+            if let Some(e) = &c.vps.extension {
+                e.graph.depth_layer_ids()?.any(|id|id == c.layer_id)
+            } else {false}
+        } else {false};
         let mut scc_extension = false;
         let mut future_extension = false;
         let mut palette = None;
@@ -341,9 +371,34 @@ impl Sps {
                 inter_view_mv_vert_constraint = b.bit()?;
             }
             if three_d {
-                return Err(crate::unsupported(
-                    "HEVC 3D SPS extension is not implemented",
-                ));
+                let extension = super::hevc_3d_syntax::SpsExtension::read(
+                    b, super::hevc_3d_syntax::payload_end(&rbsp.bytes)?, [min_cb, max_cb])?;
+                let mut remaining=extension.clone();
+                // Monochrome depth admits skip/DIM, CQT, inter DC-only
+                // and native current-AU texture motion tools.
+                // Other active Annex I tools remain parameter refusals.
+                if depth_layer && chroma_format==0 {
+                    remaining.skip_intra=false;remaining.intra_dc_wedge=false;
+                    remaining.intra_contour=false;remaining.inter_dc_only=false;
+                    remaining.coding_tree_partition=false;remaining.texture_motion=false;
+                    remaining.inter_view_disparity[1]=false;
+                }
+                let no_reference_layers=context.is_none_or(|c|c.vps.extension.as_ref().is_none_or(|e|
+                    e.graph.reference_list_layers(c.layer_id).is_ok_and(|n|n==0)));
+                if !depth_layer && (no_reference_layers || chroma_format==1 && depth==[8,8] && !separate_colour_plane) {
+                    remaining.inter_view_disparity[0]=false;
+                    remaining.view_synthesis_prediction=false;
+                    remaining.inter_view_residual_prediction=false;
+                    remaining.depth_based_partition=false;
+                    if chroma_format==1 && depth==[8,8] && !separate_colour_plane { remaining.depth_reference=false; }
+                }
+                // Native temporal merge scales inter-view vectors using VPS
+                // view identifiers (I-125..I-134); explicit AMVP uses base rules.
+                remaining.inter_view_mv_scaling[usize::from(depth_layer)]=false;
+                if remaining.active_for_depth(depth_layer) {
+                    return Err(crate::unsupported("HEVC active 3D SPS tools are not implemented"));
+                }
+                three_d_extension = Some(extension);
             }
             if scc_extension {
                 current_picture_reference = b.bit()?;
@@ -431,6 +486,8 @@ impl Sps {
             extended_precision,
             cabac_bypass_alignment,
             inter_view_mv_vert_constraint,
+            three_d: three_d_extension,
+            depth_layer,
             scc_extension,
             palette,
             current_picture_reference,

@@ -1,0 +1,35 @@
+{
+  "provenance": "Existing authored ADTS LC/SBR/PS sources read in place. Odd decoded output-sample targets verify precision across core/output-rate ratios and warmed checkpoints. Full continuous native PCM is the seek consistency control. Separate short native VP9/PCM video. No private input/encoder/network.",
+  "cases": [
+    {
+      "name": "lc-stereo",
+      "source": "audio/aac-stereo.aac",
+      "sha256": "a7820d4dbd8a1e4d619246a986aa48efcf94856640215db6a5648509bfeb8314"
+    },
+    {
+      "name": "lc-mono44",
+      "source": "audio/aac-mono-44k.aac",
+      "sha256": "e9108704ac04107647d9e27cb98832dae9f38ef21c9d387530159d669e6c169f"
+    },
+    {
+      "name": "sbr",
+      "source": "playback-errors/adts-multi-sbr-74-3-crc-synthetic.aac",
+      "sha256": "5b5e575fba13b6fa6eb58ae7b512946e459772ac5f2e856b8194504208573692"
+    },
+    {
+      "name": "ps",
+      "source": "playback-errors/adts-implicit-ps-3-crc-synthetic.aac",
+      "sha256": "57205f660974bc0e9ffd740144a3ae4a5db9a3b8648d39370e282edd3947584b"
+    },
+    {
+      "name": "sbr-warm",
+      "file": "sbr-warm.aac",
+      "sha256": "df66c71e642a73a187691cfe660b27ceef14cbd4a125cdd02f5e33eff044dd08"
+    },
+    {
+      "name": "ps-warm",
+      "file": "ps-warm.aac",
+      "sha256": "c192c93e5136491acda375a87c2b9df0439cf2a449adef901e891d77a151aa9d"
+    }
+  ]
+}

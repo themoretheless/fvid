@@ -1,0 +1,62 @@
+[
+  {
+    "file": "partial-muted-32.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "7cd5ebf3a97bc78d14ce6d8074f0cc44fbc05c0112bb7d2ba6ead2624456bfc1"
+  },
+  {
+    "file": "volume-unmute-8.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "2e067a836f4ec9ee1a843f25a82c51bf3bea50909d321d568ce0281d3af9ca8b"
+  },
+  {
+    "file": "expression-unmute-8.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "2e067a836f4ec9ee1a843f25a82c51bf3bea50909d321d568ce0281d3af9ca8b"
+  },
+  {
+    "file": "released-before-unmute-8.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "fd6f479534cdd14635e88dfedf25c3859c01062b645f2a85570f20451b4a95bc"
+  },
+  {
+    "file": "volume-muted-1.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "fd6f479534cdd14635e88dfedf25c3859c01062b645f2a85570f20451b4a95bc"
+  },
+  {
+    "file": "volume-muted-32.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "fd6f479534cdd14635e88dfedf25c3859c01062b645f2a85570f20451b4a95bc"
+  },
+  {
+    "file": "volume-unmute-1.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "5f4058dc681532108caacc90cef7a648ae3ff905394bde8c241fce7319f5c369"
+  },
+  {
+    "file": "volume-unmute-32.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "ec70abee35910d930e7d1c0506296743b7c380ae475545c62118a8fd4ac65c0a"
+  },
+  {
+    "file": "fractional-unmute-8.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "56ae012e4e9aefb889ac20356160033cadc862c526213c5703be59fa4791ceba"
+  },
+  {
+    "file": "volume-muted-8.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "fd6f479534cdd14635e88dfedf25c3859c01062b645f2a85570f20451b4a95bc"
+  }
+]

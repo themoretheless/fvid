@@ -1,0 +1,3 @@
+{"width":1920,"height":1080,"depth":8,"calls":128,"elapsed_ns":29846500,"allocations":128,"allocated_bytes":796262400}
+{"width":3840,"height":2160,"depth":8,"calls":32,"elapsed_ns":45462709,"allocations":32,"allocated_bytes":796262400}
+{"width":1920,"height":1080,"depth":16,"calls":64,"elapsed_ns":898429166,"allocations":64,"allocated_bytes":796262400}

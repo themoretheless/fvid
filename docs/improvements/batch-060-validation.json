@@ -1,0 +1,91 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0084"
+  ],
+  "checked_at": "2026-10-16T00:17:23.496044+00:00",
+  "before": [
+    "evidence/batch-060-budget-specific-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-060-budget-final.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-060-integration.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-060-unit-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-060-unit-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-060-unit-au.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-060-unit-avi_audio.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-060-unit-aac.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-060-unit-ac3.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-060-unit-mp3.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-060-unit-flac.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-060-unit-smf.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-060-unit-xm.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-060-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-060-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Ten valid whole-file audio source controls pass ordinary1MiB, exact file size and usizeMAX-1 budgets. All ten usizeMAX openings panic specifically at cap+1 before parsing on this64bit debug host: WAV/AIFF/AU/AVI/AAC/AC3/MP3/FLAC/SMF/XM. The first test compilation used incorrect type-module paths and is excluded.",
+    "The extra-byte sentinel now saturates at u64MAX. Finite-budget overrun detection is unchanged. All valid inputs preserve encoded packet bytes/PTS/duration and sample rate/channels/timescale/declared duration at both maximum limits. Too-small budgets retain resource refusals. Empty/one-byte inputs at maximum budget remain format refusals without panic.",
+    "Authored short VP9/PCM and tiny VP9/AVI controls accompany this failure. Four new PCM/ADPCM cases verify exact native decode and actual maximum-budget worker playback/rewind/seek0. Existing synthetic AAC/AC3/MP3/FLAC tone and MIDI/XM note fixtures are referenced in place and never copied; their packet/metadata acceptance adds no new compressed-decoding claim.",
+    "All ten affected reader unit suites, native EOF/WAV precision integrations, deterministic new-fixture/reference-hash checks and player build pass. No FFmpeg/network/private media or codec-parameter copying. No performance or physical device claim.",
+    "Reproduction/acceptance is on the available64bit debug/test configuration. Release and32bit runtime were not separately run; no release benchmark or32bit reproduction is claimed. Adapters are player-feature code, and that build is verified."
+  ],
+  "compatibility": "Maximum representable file-byte budgets no longer overflow the read sentinel. Ordinary/exact/small budget behavior and public signatures remain unchanged.",
+  "counting": "One shared extra-byte budget-probe arithmetic bug. Ten reader call sites, near-maximum values, controls and corrupt refusals add no IDs."
+}

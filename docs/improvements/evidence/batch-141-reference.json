@@ -1,0 +1,10 @@
+{
+  "source": "https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c",
+  "retrieved_source_sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "scope": "Primary player implementation; semantic inspection only,no code copied into fvid.",
+  "observations": [
+    "positionJump stores destination order minus one, resets break row to zero and sets position-jump flag.",
+    "patternBreak updates only break row and jump flag; it preserves the previously selected song position.",
+    "At row transition, selected order increments and break row is applied. Thus Bxx followed by Dxx retains the B destination; Dxx followed by Bxx resets row zero."
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "provenance": "Six authored K00 immediate key-off inputs compared with independent note97controls. Sustained loop,silence,retrigger,instrument,volume column andsame-row newnote precedence. Signed16ramp,no envelopes/fadeouts orother unsupported features. Delayed Kxxnot qualified. Authored VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "key-off",
+      "file": "key-off.xm",
+      "control": "key-off-note-off.xm",
+      "without": "key-off-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "silent-key-off",
+      "file": "silent-key-off.xm",
+      "control": "silent-key-off-note-off.xm",
+      "without": "silent-key-off-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "retrigger-after",
+      "file": "retrigger-after.xm",
+      "control": "retrigger-after-note-off.xm",
+      "without": "retrigger-after-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "instrument",
+      "file": "instrument.xm",
+      "control": "instrument-note-off.xm",
+      "without": "instrument-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-column",
+      "file": "volume-column.xm",
+      "control": "volume-column-note-off.xm",
+      "without": "volume-column-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "ignore-new-note",
+      "file": "ignore-new-note.xm",
+      "control": "ignore-new-note-note-off.xm",
+      "without": "ignore-new-note-without.xm",
+      "seek": 1
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "key-off.xm": "5d6e9b3457a3db74e7acd7971d7928669d7efbcaa3fa44ed31a50a7f554acb9c",
+    "key-off-note-off.xm": "a304a9976655ad9e2faf3e63ac327c8ffe4e65dc805680688d369a8bc0fbd3a5",
+    "key-off-without.xm": "e8c067a4877adf8759d6ede7e50c28ed3af3675b5828ac40207fbe857288295d",
+    "silent-key-off.xm": "75efc384afecdcbd8061aa91fb17f29b39fdeb55800f13bcbe48e66a64a52d44",
+    "silent-key-off-note-off.xm": "d508e834cd95abd9269ece8fd02bab2d233f6694bb80b4118c5656a44efb4a2a",
+    "silent-key-off-without.xm": "85b0d9c72d74d85af0e714378fdba9e7d4ed6f3367fccbc77006c6888523f2a4",
+    "retrigger-after.xm": "fd30135caebe9e3d0b0cc1c1ad57f51ac1a1201068fb8945b76beb3ebb526330",
+    "retrigger-after-note-off.xm": "fbaa00dba9008b08a0e863d5fb76eee6de8f2a355194305fd17f63156a7b1232",
+    "retrigger-after-without.xm": "45a025d39d4edb6edc73fb8f17a28930ef44c50551bab60e046d0129ee00db16",
+    "instrument.xm": "0e89c2ff639e244ef28d371f93826a09b9d64cf0c5d3783f5294fb39a57d7e2c",
+    "instrument-note-off.xm": "02cc90b9757ef9e245a6f51015a2d4c596ae20a5300c331c3cffa496055c39a8",
+    "instrument-without.xm": "f00f820a7a0e3a39992ae85a825a042b6d653fe9856e97e3560bd352d5fdd33e",
+    "volume-column.xm": "c6c4ddb48d344a1662e9272612571bc26ff0812b14ba342db8b318eabc54ed92",
+    "volume-column-note-off.xm": "8d01fc0923bb61383b19caf097e4dcc4d10cc72cebb6fab9bc0484159fdd079d",
+    "volume-column-without.xm": "534372b0a37b7f34eea552b3074dc0b5d94312c3e3ac54e4ca193a8f0f959c7f",
+    "ignore-new-note.xm": "ec205cb297e690e6008f02388e68267e6ea4d57ddb418fdd1fb37f22d6703a4f",
+    "ignore-new-note-note-off.xm": "02cc90b9757ef9e245a6f51015a2d4c596ae20a5300c331c3cffa496055c39a8",
+    "ignore-new-note-without.xm": "e23b818b0e455353e5991d53e3cf5c789dacc7d1a5e8434bb1cdb1941f9c4e9f"
+  }
+}

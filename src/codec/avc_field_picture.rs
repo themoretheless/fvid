@@ -1,4 +1,4 @@
-//! Compact CAVLC fields with intra/inter prediction and complementary weaving.
+//! Compact AVC fields with intra/inter prediction and complementary weaving.
 use super::{
     avc::{Pps, SliceGroups, Sps},
     avc_picture::IntraPicture,
@@ -21,8 +21,9 @@ fn samples(count: usize) -> Result<Vec<u16>> {
     Ok(v)
 }
 /// Decode compact field planes. The budget covers output samples and coverage;
-/// caller-owned headers/RBSP and other pictures are excluded. Only PCM is admitted.
-/// CAVLC I fields, including FMO, reconstructed in compact coordinates.
+/// caller-owned headers/RBSP and other pictures are excluded. Separate colour
+/// planes use independent monochrome reconstruction. Nonseparate 444 fields
+/// currently use PCM; the other component formats also admit compressed intra.
 pub fn decode_intra_slices(
     headers: &[&SliceHeader],
     sps: &Sps,
@@ -33,9 +34,8 @@ pub fn decode_intra_slices(
         .first()
         .ok_or_else(|| invalid("missing AVC I field"))?;
     if sps.frame_mbs_only
-        || sps.chroma_format != 1
-        || sps.separate_colour_plane
-        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || sps.chroma_format > 3
+        || !(8..=14).contains(&sps.bit_depth_chroma)
         || !(8..=14).contains(&sps.bit_depth_luma)
     {
         return Err(unsupported("AVC I field configuration is not connected"));
@@ -58,22 +58,58 @@ pub fn decode_intra_slices(
             return Err(invalid("AVC I field slice identity mismatch"));
         }
     }
+    if sps.separate_colour_plane {
+        return Ok(PcmField {
+            picture: super::avc_picture::decode_intra_slices(headers, sps, pps, budget)?,
+            bottom: first.bottom_field,
+            frame_num: first.frame_num,
+            pps_id: first.pps_id,
+        });
+    }
     let mut ordered = headers.to_vec();
     ordered.sort_by_key(|h| h.first_mb);
-    if ordered.iter().all(|h| h.slice_type == SliceType::I && h.disable_deblocking_filter_idc == 1) {
+    if ordered.iter().all(|h| {
+        h.slice_type == SliceType::I
+            && (h.disable_deblocking_filter_idc == 1
+                || (sps.chroma_format == 3 && h.disable_deblocking_filter_idc <= 2))
+    }) {
         match decode_pcm_slices(&ordered, sps, pps, budget) {
             Ok(field) => return Ok(field),
             Err(crate::Error::Unsupported(_)) => {}
             Err(error) => return Err(error),
         }
     }
-    let picture = super::avc_picture::decode_intra_slices(&ordered, sps, pps, budget)?;
+    if sps.chroma_format == 3 {
+        return Err(unsupported("AVC 444 compressed I fields are not connected"));
+    }
+    let picture = if sps.chroma_format==1 {
+        super::avc_picture::decode_intra_slices(&ordered, sps, pps, budget)?
+    } else {
+        super::avc_picture::decode_component_intra_slices(&ordered,sps,pps,budget)?
+    };
     Ok(PcmField {
         picture,
         bottom: first.bottom_field,
         frame_num: first.frame_num,
         pps_id: first.pps_id,
     })
+}
+
+fn copy_cabac_pcm<const C: usize>(
+    reader: &mut super::avc_cabac::AvcCabac<'_>,
+    picture: &mut IntraPicture, sps: &Sps, address: usize, sub: [usize; 2],
+) -> Result<()> {
+    let (y, chroma) = reader.pcm_raw::<C>(sps.bit_depth_luma, sps.bit_depth_chroma, sps.chroma_format != 0)?;
+    let w = picture.coded_width;
+    for ((dst, src), factors) in [&mut picture.y, &mut picture.cb, &mut picture.cr]
+        .into_iter().zip([y.as_slice(), chroma[0].as_slice(), chroma[1].as_slice()])
+        .zip([[1,1],sub,sub]) {
+        if dst.is_empty() {continue;}
+        let [sx,sy]=factors;let bw=16/sx;let bh=16/sy;let stride=w/sx;
+        let x=address%(w/16)*bw;let y=address/(w/16)*bh;
+        for row in 0..bh {dst[(y+row)*stride+x..(y+row)*stride+x+bw].copy_from_slice(&src[row*bw..(row+1)*bw]);}
+    }
+    Ok(())
 }
 
 pub fn decode_pcm_slices(
@@ -89,15 +125,15 @@ pub fn decode_pcm_slices(
         || sps.frame_mbs_only
         || !first.field_pic
         || first.first_mb != 0
-        || sps.chroma_format != 1
+        || sps.chroma_format > 3
         || sps.separate_colour_plane
-        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || !(8..=14).contains(&sps.bit_depth_chroma)
     {
         return Err(invalid("invalid AVC PCM field configuration"));
     }
-    if pps.cabac || !matches!(pps.slice_groups, SliceGroups::Single) {
+    if !matches!(pps.slice_groups, SliceGroups::Single) {
         return Err(unsupported(
-            "PCM field foundation requires single-group CAVLC",
+            "PCM field foundation requires a single slice group",
         ));
     }
     let (w, h) = sps.coded_dimensions();
@@ -109,9 +145,10 @@ pub fn decode_pcm_slices(
     if count == 0 || count > 65536 {
         return Err(invalid("invalid AVC PCM field size"));
     }
-    if pixels
-        .checked_mul(3)
-        .and_then(|n| n.checked_add(count))
+    let chroma = match sps.chroma_format {0=>0,1=>pixels/4,2=>pixels/2,3=>pixels,_=>unreachable!()};
+    let sub = if sps.chroma_format==1 {[2,2]}else if sps.chroma_format==2 {[2,1]}else{[1,1]};
+    if super::avc_picture::decoded_storage(sps,w,h)?
+        .checked_add(count)
         .is_none_or(|n| n > budget)
     {
         return Err(invalid("AVC PCM field exceeds memory budget"));
@@ -129,8 +166,8 @@ pub fn decode_pcm_slices(
         bit_depth: sps.bit_depth_luma,
         chroma_bit_depth: sps.bit_depth_chroma,
         y: samples(pixels)?,
-        cb: samples(pixels / 4)?,
-        cr: samples(pixels / 4)?,
+        cb: samples(chroma)?,
+        cr: samples(chroma)?,
     };
     let mut seen = 0;
     for header in headers {
@@ -150,6 +187,29 @@ pub fn decode_pcm_slices(
         {
             return Err(invalid("AVC field slice identity or coverage mismatch"));
         }
+        if pps.cabac {
+            let start=seen;let mw=w/16;
+            let mut reader=super::avc_cabac::AvcCabac::new(&header.rbsp,header.entropy_bit_offset,SliceType::I,0,header.slice_qp)?;
+            loop {
+                if seen>=count {return Err(invalid("AVC CABAC PCM field macroblock exceeds picture"));}
+                // Every preceding macroblock of this probe slice is PCM.
+                // Neighbours in other slices are unavailable for mb_type.
+                let left=seen%mw!=0 && seen>start;
+                let top=seen>=mw && seen-mw>=start;
+                if !reader.decision(3+usize::from(left)+usize::from(top))? || !reader.terminate()? {
+                    return Err(unsupported("non-PCM AVC CABAC field reconstruction is not connected"));
+                }
+                match sps.chroma_format {
+                    0|1=>copy_cabac_pcm::<64>(&mut reader,&mut picture,sps,seen,sub)?,
+                    2=>copy_cabac_pcm::<128>(&mut reader,&mut picture,sps,seen,sub)?,
+                    3=>copy_cabac_pcm::<256>(&mut reader,&mut picture,sps,seen,sub)?,
+                    _=>unreachable!(),
+                }
+                covered[seen]=1;seen+=1;
+                if reader.terminate()? {reader.finish_slice()?;break;}
+            }
+            continue;
+        }
         let mut bits = BitReader::new(&header.rbsp);
         bits.skip(header.entropy_bit_offset)?;
         while bits.more_rbsp_data() {
@@ -166,16 +226,17 @@ pub fn decode_pcm_slices(
                     return Err(invalid("nonzero AVC PCM alignment bit"));
                 }
             }
-            for (plane, size, width) in [
-                (&mut picture.y, 16, w),
-                (&mut picture.cb, 8, w / 2),
-                (&mut picture.cr, 8, w / 2),
+            for (plane, bw, bh, width, depth) in [
+                (&mut picture.y, 16, 16, w, sps.bit_depth_luma),
+                (&mut picture.cb, 16/sub[0], 16/sub[1], w/sub[0], sps.bit_depth_chroma),
+                (&mut picture.cr, 16/sub[0], 16/sub[1], w/sub[0], sps.bit_depth_chroma),
             ] {
-                let bx = seen % (w / 16) * size;
-                let by = seen / (w / 16) * size;
-                for y in 0..size {
-                    for x in 0..size {
-                        plane[(by + y) * width + bx + x] = bits.read(sps.bit_depth_luma)? as u16;
+                if plane.is_empty() {continue;}
+                let bx = seen % (w / 16) * bw;
+                let by = seen / (w / 16) * bh;
+                for y in 0..bh {
+                    for x in 0..bw {
+                        plane[(by + y) * width + bx + x] = bits.read(depth)? as u16;
                     }
                 }
             }
@@ -193,6 +254,10 @@ pub fn decode_pcm_slices(
         frame_num: first.frame_num,
         pps_id: first.pps_id,
     })
+}
+pub(super) fn picture_bytes(p: &IntraPicture) -> Result<usize> {
+    p.chroma_format()?;
+    p.y.len().checked_add(p.cb.len()).and_then(|n|n.checked_add(p.cr.len())).and_then(|n|n.checked_mul(2)).ok_or_else(||invalid("AVC field component storage overflow"))
 }
 /// Compact one parity of a validated full-frame reference. Samples remain in
 /// field coordinates; chroma is separated by its own plane row parity.
@@ -214,11 +279,9 @@ pub(super) fn split_frame(
     {
         return Err(invalid("invalid AVC frame-to-field geometry"));
     }
-    let bytes = w
-        .checked_mul(h)
-        .and_then(|n| n.checked_mul(3))
-        .ok_or_else(|| invalid("AVC frame split storage overflow"))?
-        / 2;
+    let format=picture.chroma_format()?;
+    let [sx,sy]=match format {1=>[2,2],2=>[2,1],_=>[1,1]};
+    let bytes = picture_bytes(picture)?/2;
     if bytes > budget {
         return Err(invalid("AVC frame split exceeds budget"));
     }
@@ -250,8 +313,8 @@ pub(super) fn split_frame(
             bit_depth: picture.bit_depth,
             chroma_bit_depth: picture.chroma_bit_depth,
             y: split(&picture.y, w, h)?,
-            cb: split(&picture.cb, w / 2, h / 2)?,
-            cr: split(&picture.cr, w / 2, h / 2)?,
+            cb: if format==0 {Vec::new()}else{split(&picture.cb, w/sx, h/sy)?},
+            cr: if format==0 {Vec::new()}else{split(&picture.cr, w/sx, h/sy)?},
         },
         bottom,
         frame_num,
@@ -299,7 +362,11 @@ pub fn weave_pair(first: &PcmField, second: &PcmField, budget: usize) -> Result<
     let pixels = w
         .checked_mul(h)
         .ok_or_else(|| invalid("AVC woven dimensions overflow"))?;
-    if pixels.checked_mul(3).is_none_or(|n| n > budget) {
+    let format=a.chroma_format()?;
+    if format!=b.chroma_format()? {return Err(invalid("AVC field component formats differ"));}
+    let [sx,sy]=match format {1=>[2,2],2=>[2,1],_=>[1,1]};
+    let chroma=if format==0 {0}else{pixels/sx/sy};
+    if picture_bytes(a)?.checked_mul(2).is_none_or(|n| n > budget) {
         return Err(invalid("AVC woven frame exceeds memory budget"));
     }
     let mut result = IntraPicture {
@@ -309,14 +376,15 @@ pub fn weave_pair(first: &PcmField, second: &PcmField, budget: usize) -> Result<
         bit_depth: a.bit_depth,
         chroma_bit_depth: a.chroma_bit_depth,
         y: samples(pixels)?,
-        cb: samples(pixels / 4)?,
-        cr: samples(pixels / 4)?,
+        cb: samples(chroma)?,
+        cr: samples(chroma)?,
     };
     for (dst, top, bottom, width, height) in [
         (&mut result.y, &a.y, &b.y, w, h / 2),
-        (&mut result.cb, &a.cb, &b.cb, w / 2, h / 4),
-        (&mut result.cr, &a.cr, &b.cr, w / 2, h / 4),
+        (&mut result.cb, &a.cb, &b.cb, w/sx, h/sy/2),
+        (&mut result.cr, &a.cr, &b.cr, w/sx, h/sy/2),
     ] {
+        if dst.is_empty() && top.is_empty() && bottom.is_empty() {continue;}
         if top.len() != width * height || bottom.len() != width * height {
             return Err(invalid("invalid AVC compact field planes"));
         }
@@ -342,6 +410,95 @@ pub fn decode_skip_field(
     let h = *headers
         .first()
         .ok_or_else(|| invalid("missing AVC P field"))?;
+    let (w, height) = sps.coded_dimensions();
+    let pixels = (w as usize)
+        .checked_mul(height as usize / 2)
+        .ok_or_else(|| invalid("AVC P field size overflow"))?;
+    if sps.separate_colour_plane {
+        if headers.len() != 3
+            || pps.cabac
+            || !matches!(pps.slice_groups, SliceGroups::Single)
+            || headers
+                .iter()
+                .any(|slice| slice.slice_type != SliceType::P || slice.weights.is_some())
+        {
+            return Err(unsupported(
+                "general AVC P field reconstruction is not connected",
+            ));
+        }
+        let mut seen = [false; 3];
+        if !h.field_pic
+            || h.pps_id != pps.id
+            || pps.sps_id != sps.id
+            || sps.chroma_format != 3
+            || !(8..=14).contains(&sps.bit_depth_luma)
+            || reference.picture.coded_width != w as usize
+            || reference.picture.coded_height != height as usize / 2
+            || reference.picture.bit_depth != sps.bit_depth_luma
+            || reference.picture.chroma_bit_depth != sps.bit_depth_luma
+            || reference.picture.chroma_format()? != 3
+        {
+            return Err(invalid("invalid AVC P field configuration"));
+        }
+        if reference.bottom != h.bottom_field {
+            return Err(unsupported(
+                "opposite-parity AVC P field interpolation is not connected",
+            ));
+        }
+        if super::avc_picture::decoded_storage(sps, w as usize, height as usize / 2)? > budget {
+            return Err(invalid("AVC P field exceeds memory budget"));
+        }
+        for slice in headers {
+            let c = usize::from(slice.colour_plane_id);
+            if c >= 3
+                || seen[c]
+                || !slice.field_pic
+                || slice.first_mb != 0
+                || slice.redundant_pic_cnt != 0
+                || slice.pps_id != h.pps_id
+                || slice.frame_num != h.frame_num
+                || slice.bottom_field != h.bottom_field
+                || slice.idr != h.idr
+                || slice.idr_pic_id != h.idr_pic_id
+                || slice.poc_lsb != h.poc_lsb
+                || slice.delta_poc != h.delta_poc
+                || (slice.nal_ref_idc == 0) != (h.nal_ref_idc == 0)
+                || slice.memory_operations != h.memory_operations
+            {
+                return Err(invalid("invalid AVC P field configuration"));
+            }
+            seen[c] = true;
+            let mut bits = BitReader::new(&slice.rbsp);
+            bits.skip(slice.entropy_bit_offset)?;
+            if bits.unsigned_golomb()? as usize != pixels / 256 {
+                return Err(unsupported(
+                    "coded AVC P field macroblocks are not connected",
+                ));
+            }
+            bits.finish_rbsp()?;
+        }
+        let mut y = samples(pixels)?;
+        let mut cb = samples(pixels)?;
+        let mut cr = samples(pixels)?;
+        y.copy_from_slice(&reference.picture.y);
+        cb.copy_from_slice(&reference.picture.cb);
+        cr.copy_from_slice(&reference.picture.cr);
+        return Ok(PcmField {
+            picture: IntraPicture {
+                coded_width: w as usize,
+                coded_height: height as usize / 2,
+                crop: reference.picture.crop,
+                bit_depth: sps.bit_depth_luma,
+                chroma_bit_depth: sps.bit_depth_luma,
+                y,
+                cb,
+                cr,
+            },
+            bottom: h.bottom_field,
+            frame_num: h.frame_num,
+            pps_id: h.pps_id,
+        });
+    }
     if headers.len() != 1
         || pps.cabac
         || !matches!(pps.slice_groups, SliceGroups::Single)
@@ -352,10 +509,6 @@ pub fn decode_skip_field(
             "general AVC P field reconstruction is not connected",
         ));
     }
-    let (w, height) = sps.coded_dimensions();
-    let pixels = (w as usize)
-        .checked_mul(height as usize / 2)
-        .ok_or_else(|| invalid("AVC P field size overflow"))?;
     if !h.field_pic
         || h.first_mb != 0
         || h.redundant_pic_cnt != 0
@@ -364,9 +517,10 @@ pub fn decode_skip_field(
         || reference.picture.coded_width != w as usize
         || reference.picture.coded_height != height as usize / 2
         || reference.picture.bit_depth != sps.bit_depth_luma || reference.picture.chroma_bit_depth != sps.bit_depth_chroma
-        || sps.chroma_format != 1
-        || sps.separate_colour_plane
-        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || sps.chroma_format > 2
+        || reference.picture.chroma_format()? != sps.chroma_format as u8
+        || !(8..=14).contains(&sps.bit_depth_luma)
+        || !(8..=14).contains(&sps.bit_depth_chroma)
     {
         return Err(invalid("invalid AVC P field configuration"));
     }
@@ -375,7 +529,7 @@ pub fn decode_skip_field(
             "opposite-parity AVC P field interpolation is not connected",
         ));
     }
-    if pixels.checked_mul(3).is_none_or(|n| n > budget) {
+    if super::avc_picture::decoded_storage(sps,w as usize,height as usize/2)? > budget {
         return Err(invalid("AVC P field exceeds memory budget"));
     }
     let mut bits = BitReader::new(&h.rbsp);
@@ -388,8 +542,8 @@ pub fn decode_skip_field(
     }
     bits.finish_rbsp()?;
     let mut y = samples(pixels)?;
-    let mut cb = samples(pixels / 4)?;
-    let mut cr = samples(pixels / 4)?;
+    let mut cb = samples(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?;
+    let mut cr = samples(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?;
     if reference.picture.y.len() != y.len()
         || reference.picture.cb.len() != cb.len()
         || reference.picture.cr.len() != cr.len()
@@ -551,6 +705,7 @@ pub(super) fn decode_inter_field_impl(
     let (w, height) = sps.coded_dimensions();
     let count = w as usize / 16 * (height as usize / 32);
     if !pps.cabac
+        && matches!(pps.slice_groups, SliceGroups::Single)
         && h.slice_type == SliceType::P
         && headers.len() == 1
         && h.weights.is_none()
@@ -599,14 +754,19 @@ pub(super) fn decode_inter_field_impl(
         || !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
         || h.slice_type == SliceType::Si && pps.cabac
         || h.redundant_pic_cnt != 0
-        || !matches!(pps.slice_groups, SliceGroups::Single)
+        || ((pps.cabac || sps.separate_colour_plane) && !matches!(pps.slice_groups, SliceGroups::Single))
         || h.disable_deblocking_filter_idc > 2
     {
         return Err(unsupported(
             "general AVC P field reconstruction is not connected",
         ));
     }
-    if count == 0 || count > 65536 || headers.len() > count {
+    let slice_limit = if sps.separate_colour_plane {
+        count.saturating_mul(3)
+    } else {
+        count
+    };
+    if count == 0 || count > 65536 || headers.len() > slice_limit {
         return Err(invalid("invalid AVC P field slice count"));
     }
     for current in headers {
@@ -671,12 +831,185 @@ pub(super) fn decode_inter_field_impl(
         .coded_width
         .checked_mul(reference.picture.coded_height)
         .ok_or_else(|| invalid("AVC P field size overflow"))?;
+    if sps.separate_colour_plane {
+        if reference.picture.coded_width != w as usize
+            || reference.picture.coded_height != height as usize / 2
+            || reference.picture.bit_depth != sps.bit_depth_luma
+            || reference.picture.chroma_bit_depth != sps.bit_depth_luma
+            || sps.chroma_format != 3
+            || reference.picture.chroma_format()? != 3
+            || !(8..=14).contains(&sps.bit_depth_luma)
+            || h.pps_id != pps.id
+            || pps.sps_id != sps.id
+        {
+            return Err(unsupported(
+                "AVC P field reference configuration is not connected",
+            ));
+        }
+        for (candidate, _) in references
+            .iter()
+            .flat_map(|lists| lists.iter())
+            .flat_map(|list| list.iter())
+        {
+            if candidate.picture.coded_width != reference.picture.coded_width
+                || candidate.picture.coded_height != reference.picture.coded_height
+                || candidate.picture.crop != reference.picture.crop
+                || candidate.picture.chroma_format()? != 3
+                || candidate.picture.bit_depth != reference.picture.bit_depth
+                || candidate.picture.chroma_bit_depth != reference.picture.chroma_bit_depth
+            {
+                return Err(unsupported("AVC field reference geometry differs"));
+            }
+        }
+        if super::avc_picture::decoded_storage(sps, w as usize, height as usize / 2)? > budget {
+            return Err(invalid("AVC P field exceeds memory budget"));
+        }
+        let mut planes: [Vec<u16>; 3] = std::array::from_fn(|_| Vec::new());
+        let mut retained_motion = None;
+        let mut retained = 0usize;
+        for (component, output) in planes.iter_mut().enumerate() {
+            let mut indices_and_headers: Vec<(usize, &SliceHeader)> = headers
+                .iter()
+                .copied()
+                .enumerate()
+                .filter(|(_, slice)| usize::from(slice.colour_plane_id) == component)
+                .collect();
+            if indices_and_headers.is_empty() || indices_and_headers.len() > count {
+                return Err(invalid("invalid AVC P field slice count"));
+            }
+            indices_and_headers.sort_by_key(|(_, slice)| slice.first_mb);
+            let plane_headers: Vec<&SliceHeader> =
+                indices_and_headers.iter().map(|&(_, slice)| slice).collect();
+            let (mono_sps, mono_pps) =
+                super::avc_decoder::project_separate_parameters(sps, pps, component as u8)?;
+            let mut mono_fields: Vec<[Vec<(PcmField, u64)>; 2]> =
+                Vec::with_capacity(indices_and_headers.len());
+            for &(idx, _) in &indices_and_headers {
+                let mut slice_lists: [Vec<(PcmField, u64)>; 2] = [Vec::new(), Vec::new()];
+                for list in 0..2 {
+                    for &(cand, id) in references[idx][list] {
+                        let src = match component {
+                            0 => &cand.picture.y,
+                            1 => &cand.picture.cb,
+                            _ => &cand.picture.cr,
+                        };
+                        let mut y = samples(pixels)?;
+                        y.copy_from_slice(src);
+                        slice_lists[list].push((
+                            PcmField {
+                                picture: IntraPicture {
+                                    coded_width: cand.picture.coded_width,
+                                    coded_height: cand.picture.coded_height,
+                                    crop: cand.picture.crop,
+                                    bit_depth: sps.bit_depth_luma,
+                                    chroma_bit_depth: sps.bit_depth_luma,
+                                    y,
+                                    cb: Vec::new(),
+                                    cr: Vec::new(),
+                                },
+                                bottom: cand.bottom,
+                                frame_num: cand.frame_num,
+                                pps_id: cand.pps_id,
+                            },
+                            id,
+                        ));
+                    }
+                }
+                mono_fields.push(slice_lists);
+            }
+            let mono_ref_lists: Vec<[Vec<(&PcmField, u64)>; 2]> = mono_fields
+                .iter()
+                .map(|lists| {
+                    [
+                        lists[0].iter().map(|(f, id)| (f, *id)).collect(),
+                        lists[1].iter().map(|(f, id)| (f, *id)).collect(),
+                    ]
+                })
+                .collect();
+            let mono_ref_views: Vec<[&[(&PcmField, u64)]; 2]> = mono_ref_lists
+                .iter()
+                .map(|lists| [lists[0].as_slice(), lists[1].as_slice()])
+                .collect();
+            let plane_implicit_refs: Vec<[&[(i32, bool)]; 2]> = if let Some(ctx) = implicit {
+                indices_and_headers
+                    .iter()
+                    .map(|&(idx, _)| ctx.references[idx])
+                    .collect()
+            } else {
+                Vec::new()
+            };
+            let plane_implicit = implicit.map(|ctx| ImplicitFieldWeights {
+                poc: ctx.poc,
+                references: &plane_implicit_refs,
+            });
+            let plane_direct: Option<Vec<super::avc_direct::FieldDirectPrediction<'_>>> =
+                direct.map(|contexts| {
+                    indices_and_headers
+                        .iter()
+                        .map(|&(idx, _)| super::avc_direct::FieldDirectPrediction {
+                            spatial: contexts[idx].spatial,
+                            inference8: contexts[idx].inference8,
+                            current_poc: contexts[idx].current_poc,
+                            current_bottom: contexts[idx].current_bottom,
+                            lists: contexts[idx].lists,
+                            colocated_is_frame: contexts[idx].colocated_is_frame,
+                            colocated: contexts[idx].colocated,
+                        })
+                        .collect()
+                });
+            let available = budget
+                .checked_sub(retained)
+                .ok_or_else(|| invalid("AVC P field exceeds memory budget"))?;
+            let (plane_field, motion) = decode_inter_field_impl(
+                &plane_headers,
+                &mono_sps,
+                &mono_pps,
+                &mono_ref_views,
+                plane_implicit.as_ref(),
+                plane_direct.as_deref(),
+                available,
+                retain_motion && component == 0,
+            )?;
+            if component == 0 {
+                retained_motion = motion;
+            }
+            retained = plane_field
+                .picture
+                .y
+                .capacity()
+                .checked_mul(2)
+                .and_then(|n| retained.checked_add(n))
+                .filter(|&n| n <= budget)
+                .ok_or_else(|| invalid("AVC P field exceeds memory budget"))?;
+            *output = plane_field.picture.y;
+        }
+        let [y, cb, cr] = planes;
+        return Ok((
+            PcmField {
+                picture: IntraPicture {
+                    coded_width: w as usize,
+                    coded_height: height as usize / 2,
+                    crop: reference.picture.crop,
+                    bit_depth: sps.bit_depth_luma,
+                    chroma_bit_depth: sps.bit_depth_luma,
+                    y,
+                    cb,
+                    cr,
+                },
+                bottom: h.bottom_field,
+                frame_num: h.frame_num,
+                pps_id: h.pps_id,
+            },
+            retained_motion,
+        ));
+    }
     if reference.picture.coded_width != w as usize
         || reference.picture.coded_height != height as usize / 2
         || reference.picture.bit_depth != sps.bit_depth_luma || reference.picture.chroma_bit_depth != sps.bit_depth_chroma
-        || sps.chroma_format != 1
-        || sps.separate_colour_plane
-        || sps.bit_depth_luma != sps.bit_depth_chroma
+        || sps.chroma_format > 2
+        || reference.picture.chroma_format()? != sps.chroma_format as u8
+        || !(8..=14).contains(&sps.bit_depth_luma)
+        || !(8..=14).contains(&sps.bit_depth_chroma)
         || h.pps_id != pps.id
         || pps.sps_id != sps.id
     {
@@ -692,6 +1025,7 @@ pub(super) fn decode_inter_field_impl(
         if candidate.picture.coded_width != reference.picture.coded_width
             || candidate.picture.coded_height != reference.picture.coded_height
             || candidate.picture.crop != reference.picture.crop
+            || candidate.picture.chroma_format()? != sps.chroma_format as u8
             || candidate.picture.bit_depth != reference.picture.bit_depth || candidate.picture.chroma_bit_depth != reference.picture.chroma_bit_depth
         {
             return Err(unsupported("AVC field reference geometry differs"));
@@ -703,8 +1037,8 @@ pub(super) fn decode_inter_field_impl(
             n.checked_add((lists[0].len().saturating_sub(1) + lists[1].len()) * 32)
         })
         .ok_or_else(|| invalid("AVC field reference list storage overflow"))?;
-    let required = pixels
-        .checked_mul(3)
+    let required = super::avc_picture::decoded_storage(sps,w as usize,height as usize/2)?
+        .checked_add(0)
         .and_then(|n| {
             count
                 .checked_mul(if pps.cabac {
@@ -719,6 +1053,7 @@ pub(super) fn decode_inter_field_impl(
         .and_then(|n| n.checked_add(16384))
         .and_then(|n| n.checked_add(list_storage))
         .ok_or_else(|| invalid("AVC P field storage overflow"))?;
+    let required=required.checked_add(if sps.chroma_format==2 {count.checked_mul(std::mem::size_of::<super::avc_inter_coefficients::InterChroma422>()+128).ok_or_else(||invalid("422 field scratch overflow"))?}else{0}).ok_or_else(||invalid("422 field budget overflow"))?;
     if required > budget {
         return Err(invalid("AVC P field exceeds memory budget"));
     }
@@ -730,8 +1065,8 @@ pub(super) fn decode_inter_field_impl(
             bit_depth: sps.bit_depth_luma,
             chroma_bit_depth: sps.bit_depth_chroma,
             y: samples(pixels)?,
-            cb: samples(pixels / 4)?,
-            cr: samples(pixels / 4)?,
+            cb: samples(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?,
+            cr: samples(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?,
         },
         bottom: h.bottom_field,
         frame_num: h.frame_num,
@@ -742,18 +1077,30 @@ pub(super) fn decode_inter_field_impl(
         height as usize / 2,
         count * 960,
     )?;
-    let mut coefficients = super::avc_coefficient_field::CoefficientField::new(
-        w as usize / 16,
-        height as usize / 32,
-        count * 64,
-    )?;
+    let mut coefficients = if sps.chroma_format==2 {
+        super::avc_coefficient_field::CoefficientField::new_422(w as usize/16,height as usize/32,count*128)?
+    } else {super::avc_coefficient_field::CoefficientField::new(w as usize/16,height as usize/32,count*64)?};
     let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
+    let fmo = !matches!(pps.slice_groups, SliceGroups::Single);
 
     let mut edges = Vec::new();
     if filtered {
         edges
             .try_reserve_exact(count)
             .map_err(|_| invalid("cannot allocate AVC field edges"))?;
+        edges.resize_with(count, || super::avc_boundary::DecodedBlockEdges {
+            blocks: [super::avc_boundary::BlockEdge {
+                intra: false,
+                switching_slice: false,
+                nonzero_luma: false,
+                motion: [None; 2],
+            }; 16],
+            qp: [0; 3],
+            offsets: [0; 2],
+            transform8: false,
+            slice_id: 0,
+            disable_filter: 1,
+        });
     }
 
     let mut ordered = headers
@@ -772,6 +1119,8 @@ pub(super) fn decode_inter_field_impl(
     {
         return Err(invalid("invalid AVC P field slice coverage"));
     }
+    let mut covered = vec![false; count];
+    let mut seen = 0usize;
     for (slice_index, (reference_index, h)) in ordered.iter().enumerate() {
         let lists = references[*reference_index];
         let direct_context = direct.map(|contexts| &contexts[*reference_index]);
@@ -779,9 +1128,32 @@ pub(super) fn decode_inter_field_impl(
         let end = ordered
             .get(slice_index + 1)
             .map_or(count, |(_, h)| h.first_mb as usize);
+        let mb_map = if fmo {
+            let map = super::avc_slice_group_map::map_units(
+                &pps.slice_groups,
+                w as usize / 16,
+                height as usize / 32,
+                h.slice_group_change_cycle,
+                count,
+            )?;
+            Some(super::avc_slice_group_map::macroblocks(
+                &map,
+                w as usize / 16,
+                false,
+                true,
+                false,
+                count,
+            )?)
+        } else {
+            None
+        };
         let mut qp = h.slice_qp;
         let mut intra = if pps.cabac {
             None
+        } else if fmo {
+            Some(super::avc_macroblock::IntraCavlcReader::new_context_fmo(
+                h, sps, pps, count,
+            )?)
         } else {
             Some(super::avc_macroblock::IntraCavlcReader::new_context(
                 h, sps, pps, count,
@@ -801,7 +1173,9 @@ pub(super) fn decode_inter_field_impl(
         let mut bits = BitReader::new(&h.rbsp);
         bits.skip(h.entropy_bit_offset)?;
         let mut address = h.first_mb as usize;
-        while address < end && (pps.cabac || bits.more_rbsp_data()) {
+        while (if fmo { address < count } else { address < end })
+            && (pps.cabac || bits.more_rbsp_data())
+        {
             let mut cabac_block = if let Some(reader) = &mut cabac {
                 match reader.read_macroblock()? {
                     Some(block) => Some(block),
@@ -825,11 +1199,26 @@ pub(super) fn decode_inter_field_impl(
             } else {
                 bits.unsigned_golomb()? as usize
             };
-            if skipped > end - address {
+            if let Some(map) = &mb_map {
+                let group = map[address];
+                let remaining = (address..count)
+                    .filter(|&a| map[a] == group && !covered[a])
+                    .count();
+                if skipped > remaining {
+                    return Err(invalid("AVC P field skip exceeds picture"));
+                }
+            } else if skipped > end - address {
                 return Err(invalid("AVC P field skip exceeds picture"));
             }
             for step in 0..if pps.cabac { 1 } else { skipped + 1 } {
-                if address == end {
+                if fmo {
+                    if step == skipped && (address >= count || (skipped > 0 && !bits.more_rbsp_data())) {
+                        break;
+                    }
+                    if address >= count || covered[address] {
+                        return Err(invalid("invalid AVC P field slice coverage"));
+                    }
+                } else if address == end {
                     break;
                 }
                 let origin = [
@@ -871,8 +1260,8 @@ pub(super) fn decode_inter_field_impl(
                         return Err(invalid("CABAC intra field address mismatch"));
                     }
                     if let Some(reader) = &intra {
-                        let (luma, chroma) = reader.counts(address)?;
-                        coefficients.store(address, slice_id, luma, chroma)?;
+                        if sps.chroma_format==2 {let (luma,chroma)=reader.counts_422(address)?;coefficients.store_422(address,slice_id,luma,chroma)?;}
+                        else {let (luma,chroma)=reader.counts(address)?;coefficients.store(address,slice_id,luma,chroma)?;}
                     }
                     motion.store(
                         origin,
@@ -894,7 +1283,7 @@ pub(super) fn decode_inter_field_impl(
                     }
                     if filtered {
                         let bd = 6 * (i32::from(sps.bit_depth_chroma) - 8);
-                        edges.push(super::avc_boundary::DecodedBlockEdges {
+                        edges[address] = super::avc_boundary::DecodedBlockEdges {
                             blocks: [super::avc_boundary::BlockEdge {
                                 intra: true,
                                 switching_slice: matches!(h.slice_type, SliceType::Sp | SliceType::Si),
@@ -925,17 +1314,21 @@ pub(super) fn decode_inter_field_impl(
                             ),
                             slice_id,
                             disable_filter: h.disable_deblocking_filter_idc as u8,
-                        });
+                        };
                     }
-                    address += 1;
+                    covered[address] = true;
+                    seen += 1;
+                    address = if let Some(map) = &mb_map {
+                        super::avc_slice_group_map::next_address(map, address)?
+                    } else {
+                        address + 1
+                    };
                     continue;
                 }
                 let mut residual = None;
                 let predictions = if step < skipped {
-                    coefficients.store(address, slice_id, [0; 16], [[0; 4]; 2])?;
-                    if let Some(reader) = &mut intra {
-                        reader.record_inter(address, [0; 16], [[0; 4]; 2])?;
-                    }
+                    if sps.chroma_format==2 {coefficients.store_422(address,slice_id,[0;16],[[0;8];2])?;}else{coefficients.store(address,slice_id,[0;16],[[0;4];2])?;}
+                    if let Some(reader)=&mut intra {if sps.chroma_format==2 {reader.record_inter_422(address,[0;16],[[0;8];2])?;}else{reader.record_inter(address,[0;16],[[0;4];2])?;}}
                     if h.slice_type == SliceType::B {
                         if direct_context.is_none() {
                             return Err(unsupported(
@@ -1004,25 +1397,22 @@ pub(super) fn decode_inter_field_impl(
                             ],
                             previous_qp: qp,
                             bit_depth: sps.bit_depth_luma,
-                            chroma_array_type: 1,
+                            chroma_array_type: sps.chroma_format as u8,
                             transform8_enabled: pps.transform_8x8,
                             direct8_inference: sps.direct_8x8_inference,
                         };
                         let header =
                             super::avc_inter::read_inter_header_field(&mut bits, &syntax, true)?;
-                        let c = super::avc_inter_coefficients::read_inter_coefficients_field(
-                            &mut bits,
-                            header.residual.pattern,
-                            header.residual.transform8,
-                            coefficients.neighbours(address, slice_id)?,
-                            true,
-                        )?;
+                        let c=if sps.chroma_format==2 {
+                            super::avc_inter_coefficients::read_inter_coefficients_422_field(&mut bits,header.residual.pattern,header.residual.transform8,coefficients.neighbours(address,slice_id)?,coefficients.neighbours_422(address,slice_id)?,true)?
+                        }else{super::avc_inter_coefficients::read_inter_coefficients_field(&mut bits,header.residual.pattern,header.residual.transform8,coefficients.neighbours(address,slice_id)?,true)?};
                         (header, c)
                     };
-                    coefficients.store(address, slice_id, c.luma_counts, c.chroma_counts)?;
-                    if let Some(reader) = &mut intra {
-                        reader.record_inter(address, c.luma_counts, c.chroma_counts)?;
-                    }
+                    if sps.chroma_format==2 {
+                        let counts=c.chroma422.as_ref().map_or([[0;8];2],|wide|wide.counts);
+                        coefficients.store_422(address,slice_id,c.luma_counts,counts)?;
+                        if let Some(reader)=&mut intra {reader.record_inter_422(address,c.luma_counts,counts)?;}
+                    }else{coefficients.store(address,slice_id,c.luma_counts,c.chroma_counts)?;if let Some(reader)=&mut intra {reader.record_inter(address,c.luma_counts,c.chroma_counts)?;}}
                     qp = header.residual.qp;
                     if header.residual.pattern != 0 {
                         residual = Some((c, header.residual.transform8));
@@ -1106,14 +1496,16 @@ pub(super) fn decode_inter_field_impl(
                         None
                     };
                     for component in 0..3 {
-                        let divisor = if component == 0 { 1 } else { 2 };
-                        let [bw, bh] = dimensions.map(|v| v / divisor);
+                        if component!=0 && sps.chroma_format==0 {continue;}
+                        let depth = if component == 0 { sps.bit_depth_luma } else { sps.bit_depth_chroma };
+                        let sub=if component==0 {[1,1]}else if sps.chroma_format==2 {[2,1]}else{[2,2]};
+                        let [bw,bh]=[dimensions[0]/sub[0],dimensions[1]/sub[1]];
                         let xy = [
-                            (origin[0] + offset[0]) / divisor,
-                            (origin[1] + offset[1]) / divisor,
+                            (origin[0] + offset[0]) / sub[0],
+                            (origin[1] + offset[1]) / sub[1],
                         ];
-                        let pw = w as usize / divisor;
-                        let ph = height as usize / 2 / divisor;
+                        let pw = w as usize / sub[0];
+                        let ph = height as usize / 2 / sub[1];
                         let mut prediction = [[0u16; 256]; 2];
                         let mut weights = [(1i16, 0i16); 2];
                         let denominator = h.weights.as_ref().map_or(0, |weights| {
@@ -1135,16 +1527,17 @@ pub(super) fn decode_inter_field_impl(
                                     pw,
                                     ph,
                                     pw,
-                                    sps.bit_depth_luma,
+                                    depth,
                                 )?;
                                 let mut mv = vector.map(i32::from);
-                                if component != 0 {
+                                if component != 0 && sps.chroma_format==1 {
                                     mv[1] += match (picture.bottom, h.bottom_field) {
                                         (false, true) => 2,
                                         (true, false) => -2,
                                         _ => 0,
                                     };
                                 }
+                                if component!=0 && sps.chroma_format==2 {mv[1]*=2;}
                                 if component == 0 {
                                     reference.luma(
                                         xy.map(|v| v as i32),
@@ -1190,7 +1583,7 @@ pub(super) fn decode_inter_field_impl(
                                 weights.map(|w| w.0),
                                 weights.map(|w| w.1),
                                 denominator,
-                                sps.bit_depth_luma,
+                                depth,
                             )?;
                         } else if h.weights.is_some() {
                             super::avc_motion::weight_block(
@@ -1198,7 +1591,7 @@ pub(super) fn decode_inter_field_impl(
                                 weights[used].0,
                                 weights[used].1,
                                 denominator,
-                                sps.bit_depth_luma,
+                                depth,
                             )?;
                         }
                         let dst = match component {
@@ -1227,7 +1620,7 @@ pub(super) fn decode_inter_field_impl(
                         }
                     }
                     let bd = 6 * (i32::from(sps.bit_depth_chroma) - 8);
-                    edges.push(super::avc_boundary::DecodedBlockEdges {
+                    edges[address] = super::avc_boundary::DecodedBlockEdges {
                         blocks,
                         qp: [
                             qp,
@@ -1246,47 +1639,23 @@ pub(super) fn decode_inter_field_impl(
                         transform8: eight,
                         slice_id,
                         disable_filter: h.disable_deblocking_filter_idc as u8,
-                    });
+                    };
                 }
                 // SP skips and coded zero-CBP blocks still quantize prediction.
                 if h.slice_type == SliceType::Sp && residual.is_none() {
                     residual = Some((super::avc_inter_coefficients::InterCoefficients {
+            chroma422:None,
                         luma4: [[0;16];16], luma8: [[0;64];4],
                         chroma_dc: [[0;4];2], chroma_ac: [[[0;16];4];2],
                         luma_counts: [0;16], chroma_counts: [[0;4];2],
                     }, false));
                 }
                 if let Some((c, eight)) = residual {
-                    let mut prediction =
-                        super::avc_compensation::Prediction420::empty(sps.bit_depth_luma);
-                    for (dst, src, width, size, xy) in [
-                        (
-                            &mut prediction.y[..],
-                            &output.picture.y[..],
-                            w as usize,
-                            16,
-                            origin,
-                        ),
-                        (
-                            &mut prediction.cb[..],
-                            &output.picture.cb[..],
-                            w as usize / 2,
-                            8,
-                            origin.map(|v| v / 2),
-                        ),
-                        (
-                            &mut prediction.cr[..],
-                            &output.picture.cr[..],
-                            w as usize / 2,
-                            8,
-                            origin.map(|v| v / 2),
-                        ),
-                    ] {
-                        for row in 0..size {
-                            let start = (xy[1] + row) * width + xy[0];
-                            dst[row * size..(row + 1) * size]
-                                .copy_from_slice(&src[start..start + size]);
-                        }
+                    let mut prediction=if sps.chroma_format==2 {super::avc_compensation::Prediction420::empty_components_422([sps.bit_depth_luma,sps.bit_depth_chroma])}else{super::avc_compensation::Prediction420::empty_components([sps.bit_depth_luma,sps.bit_depth_chroma])};
+                    let sub=prediction.chroma_subsampling();
+                    for (component,(dst,src)) in prediction.planar_planes_mut().into_iter().zip([&output.picture.y[..],&output.picture.cb[..],&output.picture.cr[..]]).enumerate() {
+                        if src.is_empty(){continue;}let [sx,sy]=if component==0 {[1,1]}else{sub};let bw=16/sx;let bh=16/sy;let stride=w as usize/sx;
+                        for row in 0..bh {let at=(origin[1]/sy+row)*stride+origin[0]/sx;dst[row*bw..(row+1)*bw].copy_from_slice(&src[at..at+bw]);}
                     }
                     let luma = if eight {
                         super::avc_compensation::InterLumaResidual::Blocks8(&c.luma8)
@@ -1322,34 +1691,11 @@ pub(super) fn decode_inter_field_impl(
                             &scaling.eight[1],
                         )?
                     };
-                    for (dst, src, width, size, xy) in [
-                        (
-                            &mut output.picture.y[..],
-                            &reconstructed.y[..],
-                            w as usize,
-                            16,
-                            origin,
-                        ),
-                        (
-                            &mut output.picture.cb[..],
-                            &reconstructed.cb[..],
-                            w as usize / 2,
-                            8,
-                            origin.map(|v| v / 2),
-                        ),
-                        (
-                            &mut output.picture.cr[..],
-                            &reconstructed.cr[..],
-                            w as usize / 2,
-                            8,
-                            origin.map(|v| v / 2),
-                        ),
-                    ] {
-                        for row in 0..size {
-                            let start = (xy[1] + row) * width + xy[0];
-                            dst[start..start + size]
-                                .copy_from_slice(&src[row * size..(row + 1) * size]);
-                        }
+                    let reconstructed=if let Some(wide)=&c.chroma422 {reconstructed.reconstruct_chroma422(wide,qps,&[scaling.four[3],scaling.four[4],scaling.four[5]],sps.transform_bypass&&qps[0]==0)?}else{reconstructed};
+                    let sub=reconstructed.chroma_subsampling();let [cb,cr]=reconstructed.chroma_planes();
+                    for (component,(dst,src)) in [&mut output.picture.y,&mut output.picture.cb,&mut output.picture.cr].into_iter().zip([&reconstructed.y[..],cb,cr]).enumerate() {
+                        if dst.is_empty(){continue;}let [sx,sy]=if component==0 {[1,1]}else{sub};let bw=16/sx;let bh=16/sy;let stride=w as usize/sx;
+                        for row in 0..bh {let at=(origin[1]/sy+row)*stride+origin[0]/sx;dst[at..at+bw].copy_from_slice(&src[row*bw..(row+1)*bw]);}
                     }
                 }
                 if !pps.constrained_intra_pred {
@@ -1359,10 +1705,16 @@ pub(super) fn decode_inter_field_impl(
                         }
                     }
                 }
-                address += 1;
+                covered[address] = true;
+                seen += 1;
+                address = if let Some(map) = &mb_map {
+                    super::avc_slice_group_map::next_address(map, address)?
+                } else {
+                    address + 1
+                };
             }
         }
-        if address != end {
+        if !fmo && address != end {
             return Err(invalid("incomplete AVC P field slice"));
         }
         if !pps.cabac {
@@ -1370,6 +1722,9 @@ pub(super) fn decode_inter_field_impl(
         } else if cabac.as_mut().unwrap().read_macroblock()?.is_some() {
             return Err(invalid("CABAC field slice exceeds coverage"));
         }
+    }
+    if seen != count {
+        return Err(invalid("incomplete AVC P field slice"));
     }
     if filtered {
         let mut grids: [Vec<super::avc_deblock::MacroblockEdges>; 3] =
@@ -1398,16 +1753,57 @@ pub(super) fn decode_inter_field_impl(
         .zip(grids.iter())
         .enumerate()
         {
+            if plane.is_empty() {continue;}
+            if i!=0 && sps.chroma_format==2 {
+                super::avc_deblock::inter_plane_subsampled(plane,w as usize/2,height as usize/2,sps.bit_depth_chroma,[2,1],grid)?;continue;
+            }
             let divisor = if i == 0 { 1 } else { 2 };
             super::avc_deblock::inter_plane(
                 plane,
                 w as usize / divisor,
                 height as usize / 2 / divisor,
-                sps.bit_depth_luma,
+                if i == 0 { sps.bit_depth_luma } else { sps.bit_depth_chroma },
                 i != 0,
                 grid,
             )?;
         }
     }
     Ok((output, if retain_motion { Some(motion) } else { None }))
+}
+
+#[cfg(test)]
+mod component_geometry_tests {
+    use super::*;
+
+    #[test]
+    fn split_weave_preserves_all_component_formats_and_exact_storage_boundaries() {
+        for format in 0..=3 {
+            for (yd, cd) in [(8, 8), (10, 12), (14, 8)] {
+                let chroma = match format {0 => 0, 1 => 256, 2 => 512, _ => 1024};
+                let plane = |n: usize, depth: u8, bias: usize| -> Vec<u16> {
+                    (0..n).map(|i| ((i * 179 + i / 7 * 31 + bias) & ((1usize << depth) - 1)) as u16).collect()
+                };
+                let source = IntraPicture {
+                    coded_width: 32, coded_height: 32, crop: [0, 0, 2, 2],
+                    bit_depth: yd, chroma_bit_depth: cd,
+                    y: plane(1024, yd, 0), cb: plane(chroma, cd, 43), cr: plane(chroma, cd, 91),
+                };
+                let bytes = (1024 + 2 * chroma) * 2;
+                assert_eq!(picture_bytes(&source).unwrap(), bytes);
+                assert!(split_frame(&source, false, 0, 0, bytes / 2 - 1).is_err());
+                let top = split_frame(&source, false, 0, 0, bytes / 2).unwrap();
+                let bottom = split_frame(&source, true, 0, 0, bytes / 2).unwrap();
+                assert_eq!(top.picture.chroma_format().unwrap(), format);
+                assert!(weave_pair(&top, &bottom, bytes - 1).is_err());
+                for (first, second) in [(&top, &bottom), (&bottom, &top)] {
+                    let woven = weave_pair(first, second, bytes).unwrap();
+                    assert_eq!(woven.y, source.y);
+                    assert_eq!(woven.cb, source.cb);
+                    assert_eq!(woven.cr, source.cr);
+                    assert_eq!(woven.crop, source.crop);
+                    assert_eq!(woven.component_depths(), source.component_depths());
+                }
+            }
+        }
+    }
 }

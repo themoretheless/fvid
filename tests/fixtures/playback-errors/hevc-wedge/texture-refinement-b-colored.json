@@ -1,0 +1,4759 @@
+{
+  "provenance": "Owned mixed-role PCM/CABAC and MP4; separate scalar 8-/4-tap interpolation and bi-weight oracle. No external codec, private media or test-time generation.",
+  "precision": 2,
+  "rounding_witnesses": 48831,
+  "cases": [
+    {
+      "file": "texture-refinement-b-colored-0-none-intra-0.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        0,
+        1536
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra-2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        3072,
+        4608
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra--2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        6144,
+        7680
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra-4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        9216,
+        10752
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra--4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        12288,
+        13824
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra-6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        15360,
+        16896
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra--6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        18432,
+        19968
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra-8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        21504,
+        23040
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra--8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        24576,
+        26112
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra-128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        27648,
+        29184
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-intra--128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        30720,
+        32256
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi-0.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        33792,
+        35328
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi-2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        36864,
+        38400
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi--2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        39936,
+        41472
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi-4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        43008,
+        44544
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi--4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        46080,
+        47616
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi-6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        49152,
+        50688
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi--6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        52224,
+        53760
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi-8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        55296,
+        56832
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi--8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        58368,
+        59904
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi-128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        61440,
+        62976
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-bi--128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        64512,
+        66048
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0-0.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        67584,
+        69120
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0-2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        70656,
+        72192
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0--2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        73728,
+        75264
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0-4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        76800,
+        78336
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0--4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        79872,
+        81408
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0-6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        82944,
+        84480
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0--6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        86016,
+        87552
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0-8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        89088,
+        90624
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0--8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        92160,
+        93696
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0-128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        95232,
+        96768
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l0--128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        98304,
+        99840
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1-0.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        101376,
+        102912
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1-2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        104448,
+        105984
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1--2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        107520,
+        109056
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1-4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        110592,
+        112128
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1--4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        113664,
+        115200
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1-6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        116736,
+        118272
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1--6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        119808,
+        121344
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1-8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        122880,
+        124416
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1--8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        125952,
+        127488
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1-128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        129024,
+        130560
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-l1--128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        132096,
+        133632
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8-0.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        135168,
+        136704
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8-2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        138240,
+        139776
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8--2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        141312,
+        142848
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8-4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        144384,
+        145920
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8--4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        147456,
+        148992
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8-6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        150528,
+        152064
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8--6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        153600,
+        155136
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8-8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        156672,
+        158208
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8--8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        159744,
+        161280
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8-128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        162816,
+        164352
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp8--128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        165888,
+        167424
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24-0.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        168960,
+        170496
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24-2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        172032,
+        173568
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24--2.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        175104,
+        176640
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24-4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        178176,
+        179712
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24--4.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        181248,
+        182784
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24-6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        184320,
+        185856
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24--6.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        187392,
+        188928
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24-8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        190464,
+        192000
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24--8.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        193536,
+        195072
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24-128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        196608,
+        198144
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-none-amp24--128.mp4",
+      "enabled": false,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        199680,
+        201216
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra-0.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        202752,
+        204288
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra-2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        205824,
+        207360
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra--2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        208896,
+        210432
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra-4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        211968,
+        213504
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra--4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        215040,
+        216576
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra-6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        218112,
+        219648
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra--6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        221184,
+        222720
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra-8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        224256,
+        225792
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra--8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        227328,
+        228864
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra-128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        230400,
+        231936
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-intra--128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        233472,
+        235008
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi-0.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        236544,
+        238080
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi-2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        239616,
+        241152
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi--2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        242688,
+        244224
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi-4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        245760,
+        247296
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi--4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        248832,
+        250368
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi-6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        251904,
+        253440
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi--6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        254976,
+        256512
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi-8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        258048,
+        259584
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi--8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        261120,
+        262656
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi-128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        264192,
+        265728
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-bi--128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        267264,
+        268800
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0-0.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        270336,
+        271872
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0-2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        273408,
+        274944
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0--2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        276480,
+        278016
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0-4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        279552,
+        281088
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0--4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        282624,
+        284160
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0-6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        285696,
+        287232
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0--6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        288768,
+        290304
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0-8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        291840,
+        293376
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0--8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        294912,
+        296448
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0-128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        297984,
+        299520
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l0--128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        301056,
+        302592
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1-0.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        304128,
+        305664
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1-2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        307200,
+        308736
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1--2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        310272,
+        311808
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1-4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        313344,
+        314880
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1--4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        316416,
+        317952
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1-6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        319488,
+        321024
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1--6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        322560,
+        324096
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1-8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        325632,
+        327168
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1--8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        328704,
+        330240
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1-128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        331776,
+        333312
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-l1--128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        334848,
+        336384
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8-0.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        337920,
+        339456
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8-2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        340992,
+        342528
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8--2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        344064,
+        345600
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8-4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        347136,
+        348672
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8--4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        350208,
+        351744
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8-6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        353280,
+        354816
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8--6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        356352,
+        357888
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8-8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        359424,
+        360960
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8--8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        362496,
+        364032
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8-128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        365568,
+        367104
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp8--128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        368640,
+        370176
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24-0.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        371712,
+        373248
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24-2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        374784,
+        376320
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24--2.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        377856,
+        379392
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24-4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        380928,
+        382464
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24--4.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        384000,
+        385536
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24-6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        387072,
+        388608
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24--6.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        390144,
+        391680
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24-8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        393216,
+        394752
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24--8.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        396288,
+        397824
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24-128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        399360,
+        400896
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-luma-amp24--128.mp4",
+      "enabled": false,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        402432,
+        403968
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra-0.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        405504,
+        407040
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra-2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        408576,
+        410112
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra--2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        411648,
+        413184
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra-4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        414720,
+        416256
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra--4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        417792,
+        419328
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra-6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        420864,
+        422400
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra--6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        423936,
+        425472
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra-8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        427008,
+        428544
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra--8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        430080,
+        431616
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra-128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        433152,
+        434688
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-intra--128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        436224,
+        437760
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi-0.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        439296,
+        440832
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi-2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        442368,
+        443904
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi--2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        445440,
+        446976
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi-4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        448512,
+        450048
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi--4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        451584,
+        453120
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi-6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        454656,
+        456192
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi--6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        457728,
+        459264
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi-8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        460800,
+        462336
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi--8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        463872,
+        465408
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi-128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        466944,
+        468480
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-bi--128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        470016,
+        471552
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0-0.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        473088,
+        474624
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0-2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        476160,
+        477696
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0--2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        479232,
+        480768
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0-4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        482304,
+        483840
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0--4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        485376,
+        486912
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0-6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        488448,
+        489984
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0--6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        491520,
+        493056
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0-8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        494592,
+        496128
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0--8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        497664,
+        499200
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0-128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        500736,
+        502272
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l0--128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        503808,
+        505344
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1-0.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        506880,
+        508416
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1-2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        509952,
+        511488
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1--2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        513024,
+        514560
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1-4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        516096,
+        517632
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1--4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        519168,
+        520704
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1-6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        522240,
+        523776
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1--6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        525312,
+        526848
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1-8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        528384,
+        529920
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1--8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        531456,
+        532992
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1-128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        534528,
+        536064
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-l1--128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        537600,
+        539136
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8-0.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        540672,
+        542208
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8-2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        543744,
+        545280
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8--2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        546816,
+        548352
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8-4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        549888,
+        551424
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8--4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        552960,
+        554496
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8-6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        556032,
+        557568
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8--6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        559104,
+        560640
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8-8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        562176,
+        563712
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8--8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        565248,
+        566784
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8-128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        568320,
+        569856
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp8--128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        571392,
+        572928
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24-0.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        574464,
+        576000
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24-2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 2,
+      "disparity": 0,
+      "offsets": [
+        577536,
+        579072
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24--2.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -2,
+      "disparity": 0,
+      "offsets": [
+        580608,
+        582144
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24-4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 0,
+      "offsets": [
+        583680,
+        585216
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24--4.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": 0,
+      "offsets": [
+        586752,
+        588288
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24-6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 6,
+      "disparity": 0,
+      "offsets": [
+        589824,
+        591360
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24--6.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -6,
+      "disparity": 0,
+      "offsets": [
+        592896,
+        594432
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24-8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 8,
+      "disparity": 0,
+      "offsets": [
+        595968,
+        597504
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24--8.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -8,
+      "disparity": 0,
+      "offsets": [
+        599040,
+        600576
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24-128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 0,
+      "offsets": [
+        602112,
+        603648
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-0-color-amp24--128.mp4",
+      "enabled": false,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -128,
+      "disparity": 0,
+      "offsets": [
+        605184,
+        606720
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra-0.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        608256,
+        609792
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra-2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        611328,
+        612864
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra--2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        614400,
+        615936
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra-4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        617472,
+        619008
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra--4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        620544,
+        622080
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra-6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        623616,
+        625152
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra--6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        626688,
+        628224
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra-8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        629760,
+        631296
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra--8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        632832,
+        634368
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra-128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        635904,
+        637440
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-intra--128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        638976,
+        640512
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi-0.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        642048,
+        643584
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi-2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        645120,
+        646656
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi--2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        648192,
+        649728
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi-4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        651264,
+        652800
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi--4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        654336,
+        655872
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi-6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        657408,
+        658944
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi--6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        660480,
+        662016
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi-8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        663552,
+        665088
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi--8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        666624,
+        668160
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi-128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        669696,
+        671232
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-bi--128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        672768,
+        674304
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0-0.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        675840,
+        677376
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0-2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        678912,
+        680448
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0--2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        681984,
+        683520
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0-4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        685056,
+        686592
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0--4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        688128,
+        689664
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0-6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        691200,
+        692736
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0--6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        694272,
+        695808
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0-8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        697344,
+        698880
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0--8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        700416,
+        701952
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0-128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        703488,
+        705024
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l0--128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        706560,
+        708096
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1-0.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        709632,
+        711168
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1-2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        712704,
+        714240
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1--2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        715776,
+        717312
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1-4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        718848,
+        720384
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1--4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        721920,
+        723456
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1-6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        724992,
+        726528
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1--6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        728064,
+        729600
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1-8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        731136,
+        732672
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1--8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        734208,
+        735744
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1-128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        737280,
+        738816
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-l1--128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        740352,
+        741888
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8-0.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        743424,
+        744960
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8-2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        746496,
+        748032
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8--2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        749568,
+        751104
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8-4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        752640,
+        754176
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8--4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        755712,
+        757248
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8-6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        758784,
+        760320
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8--6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        761856,
+        763392
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8-8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        764928,
+        766464
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8--8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        768000,
+        769536
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8-128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        771072,
+        772608
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp8--128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        774144,
+        775680
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24-0.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        777216,
+        778752
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24-2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        780288,
+        781824
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24--2.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        783360,
+        784896
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24-4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        786432,
+        787968
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24--4.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        789504,
+        791040
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24-6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        792576,
+        794112
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24--6.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        795648,
+        797184
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24-8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        798720,
+        800256
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24--8.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        801792,
+        803328
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24-128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        804864,
+        806400
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-none-amp24--128.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        807936,
+        809472
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra-0.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        811008,
+        812544
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra-2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        814080,
+        815616
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra--2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        817152,
+        818688
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra-4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        820224,
+        821760
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra--4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        823296,
+        824832
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra-6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        826368,
+        827904
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra--6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        829440,
+        830976
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra-8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        832512,
+        834048
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra--8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        835584,
+        837120
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra-128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        838656,
+        840192
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-intra--128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        841728,
+        843264
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi-0.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        844800,
+        846336
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi-2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        847872,
+        849408
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi--2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        850944,
+        852480
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi-4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        854016,
+        855552
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi--4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        857088,
+        858624
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi-6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        860160,
+        861696
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi--6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        863232,
+        864768
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi-8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        866304,
+        867840
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi--8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        869376,
+        870912
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi-128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        872448,
+        873984
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-bi--128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        875520,
+        877056
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0-0.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        878592,
+        880128
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0-2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        881664,
+        883200
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0--2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        884736,
+        886272
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0-4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        887808,
+        889344
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0--4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        890880,
+        892416
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0-6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        893952,
+        895488
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0--6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        897024,
+        898560
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0-8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        900096,
+        901632
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0--8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        903168,
+        904704
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0-128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        906240,
+        907776
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l0--128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        909312,
+        910848
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1-0.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        912384,
+        913920
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1-2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        915456,
+        916992
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1--2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        918528,
+        920064
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1-4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        921600,
+        923136
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1--4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        924672,
+        926208
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1-6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        927744,
+        929280
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1--6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        930816,
+        932352
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1-8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        933888,
+        935424
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1--8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        936960,
+        938496
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1-128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        940032,
+        941568
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-l1--128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        943104,
+        944640
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8-0.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        946176,
+        947712
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8-2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        949248,
+        950784
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8--2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        952320,
+        953856
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8-4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        955392,
+        956928
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8--4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        958464,
+        960000
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8-6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        961536,
+        963072
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8--6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        964608,
+        966144
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8-8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        967680,
+        969216
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8--8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        970752,
+        972288
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8-128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        973824,
+        975360
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp8--128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        976896,
+        978432
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24-0.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        979968,
+        981504
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24-2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        983040,
+        984576
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24--2.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        986112,
+        987648
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24-4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        989184,
+        990720
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24--4.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        992256,
+        993792
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24-6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        995328,
+        996864
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24--6.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        998400,
+        999936
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24-8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1001472,
+        1003008
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24--8.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1004544,
+        1006080
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24-128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1007616,
+        1009152
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-luma-amp24--128.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1010688,
+        1012224
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra-0.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        1013760,
+        1015296
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra-2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        1016832,
+        1018368
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra--2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        1019904,
+        1021440
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra-4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        1022976,
+        1024512
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra--4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        1026048,
+        1027584
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra-6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        1029120,
+        1030656
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra--6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        1032192,
+        1033728
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra-8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1035264,
+        1036800
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra--8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1038336,
+        1039872
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra-128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1041408,
+        1042944
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-intra--128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1044480,
+        1046016
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi-0.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        1047552,
+        1049088
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi-2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        1050624,
+        1052160
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi--2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        1053696,
+        1055232
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi-4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        1056768,
+        1058304
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi--4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        1059840,
+        1061376
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi-6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        1062912,
+        1064448
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi--6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        1065984,
+        1067520
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi-8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1069056,
+        1070592
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi--8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1072128,
+        1073664
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi-128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1075200,
+        1076736
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-bi--128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1078272,
+        1079808
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0-0.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        1081344,
+        1082880
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0-2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        1084416,
+        1085952
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0--2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        1087488,
+        1089024
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0-4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        1090560,
+        1092096
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0--4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        1093632,
+        1095168
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0-6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        1096704,
+        1098240
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0--6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        1099776,
+        1101312
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0-8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1102848,
+        1104384
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0--8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1105920,
+        1107456
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0-128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1108992,
+        1110528
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l0--128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1112064,
+        1113600
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1-0.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        1115136,
+        1116672
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1-2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        1118208,
+        1119744
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1--2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        1121280,
+        1122816
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1-4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        1124352,
+        1125888
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1--4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        1127424,
+        1128960
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1-6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        1130496,
+        1132032
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1--6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        1133568,
+        1135104
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1-8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1136640,
+        1138176
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1--8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1139712,
+        1141248
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1-128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1142784,
+        1144320
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-l1--128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1145856,
+        1147392
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8-0.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        1148928,
+        1150464
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8-2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        1152000,
+        1153536
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8--2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        1155072,
+        1156608
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8-4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        1158144,
+        1159680
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8--4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        1161216,
+        1162752
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8-6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        1164288,
+        1165824
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8--6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        1167360,
+        1168896
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8-8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1170432,
+        1171968
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8--8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1173504,
+        1175040
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8-128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1176576,
+        1178112
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp8--128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1179648,
+        1181184
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24-0.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 0,
+      "disparity": 0,
+      "offsets": [
+        1182720,
+        1184256
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24-2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 2,
+      "disparity": 1,
+      "offsets": [
+        1185792,
+        1187328
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24--2.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -2,
+      "disparity": -1,
+      "offsets": [
+        1188864,
+        1190400
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24-4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 2,
+      "offsets": [
+        1191936,
+        1193472
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24--4.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": -2,
+      "offsets": [
+        1195008,
+        1196544
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24-6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 6,
+      "disparity": 3,
+      "offsets": [
+        1198080,
+        1199616
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24--6.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -6,
+      "disparity": -3,
+      "offsets": [
+        1201152,
+        1202688
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24-8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 8,
+      "disparity": 4,
+      "offsets": [
+        1204224,
+        1205760
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24--8.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -8,
+      "disparity": -4,
+      "offsets": [
+        1207296,
+        1208832
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24-128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 64,
+      "offsets": [
+        1210368,
+        1211904
+      ]
+    },
+    {
+      "file": "texture-refinement-b-colored-1-color-amp24--128.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -128,
+      "disparity": -63,
+      "offsets": [
+        1213440,
+        1214976
+      ]
+    }
+  ]
+}

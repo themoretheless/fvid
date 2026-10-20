@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0085"
+  ],
+  "checked_at": "2026-10-16T00:45:54.383325+00:00",
+  "production_sources": [
+    "src/playback/audio/wav.rs",
+    "src/playback/audio/aiff.rs"
+  ],
+  "before": [
+    "evidence/batch-061-duplicates-before.log",
+    "evidence/batch-061-wavl-before.log"
+  ],
+  "sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/xaudio2/resource-interchange-file-format--riff-"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-061-integration-final.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-061-wav-final.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-061-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-061-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-061-player-factory.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-061-fixtures-qualified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-061-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored20ms WAV/AIFF and matching VP9/PCM control reproduce seven silent ambiguities. Four split/repeated data/SSND cases return only80of160frames and10ms; contradictory fmt/fact/COMM declarations silently choose the first. After direct duplicate correction, a top-level data prefix plus LIST/wavl still loses80frames, separately reproduced.",
+    "Unsupported multiple data/SSND or LIST/wavl audio payloads now refuse explicitly; contradictory layout/count metadata gives precise conflict errors. Raw metadata ranges avoid extra header copies. This is refusal of unsupported topology, not acceptance or concatenation of multipart audio.",
+    "Nine normal controls preserve exact native PCM and actual worker playback/rewind/EOF: single payload, byte-identical metadata, identical/empty unstated fact, reordered layout/data, unknown chunks and INFO containing wavl text. Nine unsupported/conflicting cases refuse for their specific topology/header error.",
+    "The actual Player factory refuses split WAV/AIFF and nested wavl prefixes without an audio handle, while normal/INFO controls retain20ms duration.33 WAV/14 AIFF/31 worker tests, related input-limit/EOF/precision integrations, deterministic fixtures and player build pass.",
+    "The primary RIFF description supports chunk roles and word-padding handling; no claim that all multipart layouts are forbidden by the standard is made. Native multipart/list audio decoding remains unimplemented. No private media, FFmpeg/network, physical DAC, public signature or performance claim."
+  ],
+  "compatibility": "Previously accepted ambiguous or unsupported audio topologies now fail instead of playing an arbitrary prefix. Producers must consolidate into one supported data/SSND run and consistent layout/count declarations. Identical metadata and ordinary metadata/order tolerance are retained.",
+  "counting": "One silent audio-chunk topology arbitration problem in analogous WAV/AIFF readers. Payload/header/list variants and migration controls add no IDs."
+}

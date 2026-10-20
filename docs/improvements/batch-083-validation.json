@@ -1,0 +1,47 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0105"
+  ],
+  "checked_at": "2026-10-16T03:12:46.506323+00:00",
+  "before": [
+    "evidence/batch-083-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-083-integration.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-083-ac3-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-083-worker.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-083-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-083-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Existing raw AC3 seek is frame-granular:20ms target returns0ms and restarts earlier PCM.15non-EOF actual worker checks over stereo tone/coupled pink noise/32k mono fail continuous-suffix PCM/PTS expectations; ordinary play/rewind and three existing EOF targets remain healthy. This is a sample-accurate seek improvement over the documented coarse behavior.",
+    "Positive raw seeks now replay native decoder history from the beginning and hide PCM before the exact requested audible sample. Codec leading-trim accounting remains separate from user preroll, preserving timestamps and sample counts. EOF still exhausts without replaying encoded input; rewind clears the floor.",
+    "Three authored synthetic repository sources, read in place and hashed, each verify sample targets1/20ms/1536/4000/end-1/end. All18actual seek outcomes match exact continuous native PCM suffixes and canonical sample clocks. Full playback and rewind repeat for each target.",
+    "6 raw reader/32 worker units, seven related integration targets including container priming/CRC/truncation/EOF/inverse sample clock, fixture reproduction and player build pass. Separate short native video companion decodes. No encoder/network/private input or physical DAC claim.",
+    "Cold nonzero seek reconstructs linear prior history; this is not a latency improvement or reference-codec-quality claim. It restores overlap/dither state and exact native consistency.",
+    "Encoded packets after an in-range seek can precede the target as preroll, consistent with other stateful AudioStream readers. The dependent89test now validates AC3 presented suffix/EOF instead of demanding nearest raw packet selection; no extra ID."
+  ],
+  "compatibility": "AudioStream.seek_to now returns an exact clamped audible sample. Manual consumers must pass decoded output through present_decoded to hide encoded preroll. Ac3.frames/packet() retain direct coded-frame access. Public method signatures and normal PCM are unchanged.",
+  "counting": "One sample-accurate raw AC3 navigation opportunity. Rates, noise/tone, target samples, existing history/reset behavior and oracle changes add no extra IDs."
+}

@@ -1,0 +1,60 @@
+running 9 tests
+
+thread 'inferred_cache_keeps_a_single_frame_before_playback' (16823484) panicked at tests/matroska_tail_playback.rs:43:5:
+assertion `left == right` failed: "single-default-inferred.mkv"
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'missing_duration_uses_default_tail' (16823486) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "default-tail-inferred.mkv"
+  left: Some(60ms)
+ right: Some(50ms)
+
+thread 'missing_duration_uses_explicit_tail' (16823487) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "explicit-tail-inferred.mkv"
+  left: Some(60ms)
+ right: Some(240ms)
+
+thread 'single_frame_uses_its_default_duration' (16823489) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "single-default-inferred.mkv"
+  left: Some(33.333333ms)
+ right: Some(100ms)
+
+thread 'declared_cache_keeps_a_single_frame_before_playback' (16823481) panicked at tests/matroska_tail_playback.rs:43:5:
+assertion `left == right` failed: "single-default-declared.mkv"
+  left: 0
+ right: 1
+test inferred_cache_keeps_a_single_frame_before_playback ... FAILED
+test missing_duration_uses_default_tail ... FAILED
+test missing_duration_uses_explicit_tail ... FAILED
+test single_frame_uses_its_default_duration ... FAILED
+test declared_cache_keeps_a_single_frame_before_playback ... FAILED
+
+thread 'declared_cache_keeps_the_default_tail_before_playback' (16823482) panicked at tests/matroska_tail_playback.rs:50:5:
+assertion `left == right` failed: "default-tail-declared.mkv"
+  left: [(169, 4311, 0ns, 20ms), (4320, 8462, 20ms, 40ms), (8471, 12613, 40ms, 40ms)]
+ right: [(169, 4311, 0ns, 20ms), (4320, 8462, 20ms, 40ms), (8471, 12613, 40ms, 50ms)]
+test declared_cache_keeps_the_default_tail_before_playback ... FAILED
+test explicit_cache_tail_stays_stable_during_playback ... ok
+
+thread 'inferred_cache_keeps_the_default_tail_before_playback' (16823485) panicked at tests/matroska_tail_playback.rs:50:5:
+assertion `left == right` failed: "default-tail-inferred.mkv"
+  left: [(155, 4297, 0ns, 20ms), (4306, 8448, 20ms, 40ms), (8457, 12599, 40ms, 40ms)]
+ right: [(155, 4297, 0ns, 20ms), (4306, 8448, 20ms, 40ms), (8457, 12599, 40ms, 50ms)]
+test inferred_cache_keeps_the_default_tail_before_playback ... FAILED
+test paired_controls_decode_the_same_frames_with_exact_intervals_seek_and_eof ... ok
+
+failures:
+
+failures:
+    declared_cache_keeps_a_single_frame_before_playback
+    declared_cache_keeps_the_default_tail_before_playback
+    inferred_cache_keeps_a_single_frame_before_playback
+    inferred_cache_keeps_the_default_tail_before_playback
+    missing_duration_uses_default_tail
+    missing_duration_uses_explicit_tail
+    single_frame_uses_its_default_duration
+
+test result: FAILED. 2 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

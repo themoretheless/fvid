@@ -1,0 +1,46 @@
+{
+  "provenance": "Authored three-row XM with one/two distinct signed8bit constant loops, standard sample-map indices0/1 and one-based pattern instrument1. Header/instrument envelope derived only from repository-authored synthetic fixture; sample bytes and keymaps newly authored. Separate short native VP9/PCM video. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "zero-one",
+      "file": "zero-one.xm",
+      "mapping": [
+        0,
+        1
+      ],
+      "values": [
+        32,
+        -64
+      ]
+    },
+    {
+      "name": "one-zero",
+      "file": "one-zero.xm",
+      "mapping": [
+        1,
+        0
+      ],
+      "values": [
+        32,
+        -64
+      ]
+    },
+    {
+      "name": "single-zero",
+      "file": "single-zero.xm",
+      "mapping": [
+        0,
+        0
+      ],
+      "values": [
+        32
+      ]
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "zero-one.xm": "d27a4c55351e7fbc5397d507c498d7d4b811e7fe5e41ec9eeac525807ada27fb",
+    "one-zero.xm": "3aea45da273f31838ddfdde543d832bfe558b0736b0525d61e025050794ddfd4",
+    "single-zero.xm": "cc075467b8b7061cf1f8d106fcea73bf11a6108a9ea6fdc2453483e1a98daf0f"
+  }
+}

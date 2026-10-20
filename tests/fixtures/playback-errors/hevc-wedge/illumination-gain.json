@@ -1,0 +1,462 @@
+{
+  "provenance": "Owned synthetic PCM/CABAC IC P movies and independent boundary regression/saturation oracle. No external codecs or private data.",
+  "nonunity_gains": 108,
+  "cases": [
+    {
+      "file": "illumination-gain-64-0-0-2-1--40.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 0,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-64-0-0-1-2-30.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 6144,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-64-0-0-0-1-200.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 12288,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-64-0-1-2-1--40.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 18432,
+      "changed_samples": 4589,
+      "gains": [
+        29,
+        35,
+        27
+      ]
+    },
+    {
+      "file": "illumination-gain-64-0-1-1-2-30.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 24576,
+      "changed_samples": 4577,
+      "gains": [
+        17,
+        17,
+        17
+      ]
+    },
+    {
+      "file": "illumination-gain-64-0-1-0-1-200.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 30720,
+      "changed_samples": 4589,
+      "gains": [
+        2,
+        1,
+        2
+      ]
+    },
+    {
+      "file": "illumination-gain-64-1-0-2-1--40.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 36864,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-64-1-0-1-2-30.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 43008,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-64-1-0-0-1-200.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 49152,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-64-1-1-2-1--40.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 55296,
+      "changed_samples": 4589,
+      "gains": [
+        29,
+        35,
+        27
+      ]
+    },
+    {
+      "file": "illumination-gain-64-1-1-1-2-30.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 61440,
+      "changed_samples": 4577,
+      "gains": [
+        17,
+        17,
+        17
+      ]
+    },
+    {
+      "file": "illumination-gain-64-1-1-0-1-200.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 67584,
+      "changed_samples": 4589,
+      "gains": [
+        2,
+        1,
+        2
+      ]
+    },
+    {
+      "file": "illumination-gain-128-0-0-2-1--40.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 73728,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-128-0-0-1-2-30.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 98304,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-128-0-0-0-1-200.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 122880,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-128-0-1-2-1--40.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 147456,
+      "changed_samples": 22944,
+      "gains": [
+        29,
+        25,
+        25,
+        35,
+        27,
+        25,
+        24,
+        34,
+        30,
+        25,
+        24,
+        30,
+        28,
+        27,
+        23
+      ]
+    },
+    {
+      "file": "illumination-gain-128-0-1-1-2-30.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 172032,
+      "changed_samples": 22866,
+      "gains": [
+        17,
+        17,
+        17,
+        17,
+        17,
+        18,
+        17,
+        19,
+        18,
+        18,
+        19,
+        19,
+        20,
+        19,
+        19
+      ]
+    },
+    {
+      "file": "illumination-gain-128-0-1-0-1-200.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 196608,
+      "changed_samples": 22937,
+      "gains": [
+        2,
+        2,
+        3,
+        1,
+        2,
+        4,
+        4,
+        5,
+        4,
+        5,
+        7,
+        5,
+        7,
+        7,
+        8
+      ]
+    },
+    {
+      "file": "illumination-gain-128-1-0-2-1--40.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 221184,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-128-1-0-1-2-30.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 245760,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-128-1-0-0-1-200.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 270336,
+      "changed_samples": 0,
+      "gains": []
+    },
+    {
+      "file": "illumination-gain-128-1-1-2-1--40.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "oracle_offset": 294912,
+      "changed_samples": 22944,
+      "gains": [
+        29,
+        25,
+        25,
+        35,
+        27,
+        25,
+        24,
+        34,
+        30,
+        25,
+        24,
+        30,
+        28,
+        27,
+        23
+      ]
+    },
+    {
+      "file": "illumination-gain-128-1-1-1-2-30.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        1,
+        2,
+        30
+      ],
+      "oracle_offset": 319488,
+      "changed_samples": 22866,
+      "gains": [
+        17,
+        17,
+        17,
+        17,
+        17,
+        18,
+        17,
+        19,
+        18,
+        18,
+        19,
+        19,
+        20,
+        19,
+        19
+      ]
+    },
+    {
+      "file": "illumination-gain-128-1-1-0-1-200.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        0,
+        1,
+        200
+      ],
+      "oracle_offset": 344064,
+      "changed_samples": 22937,
+      "gains": [
+        2,
+        2,
+        3,
+        1,
+        2,
+        4,
+        4,
+        5,
+        4,
+        5,
+        7,
+        5,
+        7,
+        7,
+        8
+      ]
+    }
+  ]
+}

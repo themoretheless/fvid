@@ -2,7 +2,20 @@
 //! Framing: RFC 6716 section 3; identification: RFC 7845 section 5.1.
 use crate::{Result, invalid};
 
-include!("../../crates/fvid-media/src/owned_opus_packet_impl.rs");
+// Keep transport validation owned by the media layer, whose native Opus
+// dependency is available even when the frontend player feature is disabled.
+pub fn header_channels(header: &[u8]) -> Result<u8> {
+    fvid_media::owned_opus_packet::header_channels(header)
+        .map_err(|error| invalid(&error.to_string()))
+}
+pub fn pre_skip_ns(header: &[u8]) -> Result<u64> {
+    fvid_media::owned_opus_packet::pre_skip_ns(header)
+        .map_err(|error| invalid(&error.to_string()))
+}
+pub fn duration_ns(packet: &[u8]) -> Result<u64> {
+    fvid_media::owned_opus_packet::duration_ns(packet)
+        .map_err(|error| invalid(&error.to_string()))
+}
 
 #[cfg(test)]
 mod tests {

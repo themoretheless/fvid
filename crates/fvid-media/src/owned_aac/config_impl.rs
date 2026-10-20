@@ -50,9 +50,6 @@ impl AacConfig {
                 "only AAC Main, LC, SSR, LTP, ER-LC, ER-LTP and ER-LD core configurations are implemented",
             ));
         }
-        if matches!(object_type,17|19|23) && config == 0 {
-            return Err(invalid(if object_type == 23 {"ER AAC LD PCE layout is not yet implemented"} else if object_type == 19 {"ER AAC LTP PCE layout is not yet implemented"} else {"ER AAC LC PCE layout is not yet implemented"}));
-        }
         let mut channels = match config {
             0 => 0,
             1..=6 => config as u8,
@@ -75,10 +72,17 @@ impl AacConfig {
         };
         let extension_flag = b.bit()?;
         let program = if config == 0 {
-            let program = super::aac_pce::ProgramConfig::read(b, 0)?;
-            if u32::from(program.object_type) != object_type || program.sample_rate != sample_rate {
+            let mut program = super::aac_pce::ProgramConfig::read(b, 0)?;
+            let matches_profile = match object_type {
+                1..=4 => u32::from(program.object_type) == object_type,
+                17 | 23 => program.object_type == 2,
+                19 => matches!(program.object_type, 2 | 4),
+                _ => false,
+            };
+            if !matches_profile || program.sample_rate != sample_rate {
                 return Err(invalid("AAC PCE disagrees with AudioSpecificConfig"));
             }
+            program.object_type = object_type as u8;
             channels = program.channels() as u8;
             Some(program)
         } else {

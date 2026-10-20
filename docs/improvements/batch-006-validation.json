@@ -1,0 +1,74 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0028"
+  ],
+  "checked_at": "2026-10-14T21:28:24.136006+00:00",
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.31.6"
+  ],
+  "before": {
+    "refusal_and_controls": {
+      "passed": 4,
+      "failed": 0,
+      "ignored_acceptance": 1,
+      "evidence": "evidence/batch-006-matroska-header-before-refusal.log"
+    },
+    "explicit_acceptance": {
+      "passed": 0,
+      "failed": 1,
+      "cause": "encoded/encrypted WebM tracks not supported",
+      "evidence": "evidence/batch-006-matroska-header-before-acceptance.log"
+    }
+  },
+  "qualification": [
+    "Nine valid paired synthetic cases: ordinary prefixes, implicit defaults, empty prefix, lacing, whole-frame stripping, late tracks and two Opus-lace variants.",
+    "Decoder packet bytes/clocks, native VP9 pixels, seek, rewind, EOF and all Opus PCM match original controls.",
+    "Wholly stripped video transcodes to FFV1 with correct pixels; identity copies preserve every original byte and all packets.",
+    "Restored packet limits reject before changing caller buffers. Retained prefix capacity is included in index admission; audio and subtitle aggregate limits use restored sizes.",
+    "Packet offsets/sizes retain stored-file span semantics; the additive packet_payload_size method reports the restored codec input length.",
+    "Malformed lace count refusal and unsupported zlib refusal are distinct from successful header-stripping playback.",
+    "Scope is one frame-only header-stripping transform. Other compression, transform chains, codec-private compression and encryption remain unsupported. Prefix settings are bounded to 256 KiB and the packet limit.",
+    "Software runtime qualification only; the player configuration also type-checks. No hardware runtime or performance claim."
+  ],
+  "counting": "One independently useful container capability. Fixtures, lacing/audio variants, resource checks and public-size accounting do not create additional improvement IDs.",
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --test matroska_header_stripping_regressions --test matroska_clock_regressions --test matroska_duration_regressions",
+      "passed": 18,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-header-owner-accounted.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_header_stripping_playback --test matroska_lacing --test native_matroska_audio_timeline --test matroska_copy_io_regressions",
+      "passed": 15,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-header-root-accounted.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib webm",
+      "passed": 36,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-header-root-unit.log"
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed",
+      "log": "/private/tmp/fvid-improvement-logs/matroska-header-player-check.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_matroska_header_stripping_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 69,
+  "source_hashes": {
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "ced5e64e9c89f5767253a5447ca26cf42a61dfca0ed768239a87cb62e98cd373",
+    "crates/fvid-media/src/owned_matroska_audio.rs": "0ec38b0c3b219748d82c62bb89739d2fdf17497d3fd5c51f4613f9027f0fe2c3",
+    "crates/fvid-media/src/owned_subtitle_impl.rs": "5bc349966a6bf486734ab3fd0ba26c9a54ba3de4e75538dfec1b69aa6047cf71",
+    "crates/fvid-media/tests/matroska_header_stripping_regressions.rs": "7a7085f2adad9f0f8bc6c4a63b28eb36e9d6ecda9b006fbd19058f550875e311",
+    "tests/matroska_header_stripping_playback.rs": "a0360da0e56ee18fc0fcab32056bded1b8047664797172f82925318fefda1698",
+    "scripts/generate_matroska_header_stripping_regressions.py": "c4bbb7ca7aaef2dd81d49e529c75dd4a2ebbfc7ba6102690218366a7a0c79cec"
+  }
+}

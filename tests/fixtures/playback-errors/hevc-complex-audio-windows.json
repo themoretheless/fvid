@@ -1,0 +1,203 @@
+{
+  "cases": [
+    {
+      "file": "hevc-complex-audio-8-long.mkv",
+      "depth": 8,
+      "variant": "long",
+      "interval_us": [
+        1700123,
+        1917789
+      ],
+      "frames": [
+        "hevc-matroska-ipb-8-0.yuv",
+        "hevc-matroska-ipb-8-1.yuv",
+        "hevc-matroska-ipb-8-2.yuv",
+        "hevc-matroska-ipb-8-3.yuv",
+        "hevc-matroska-ipb-8-4.yuv",
+        "hevc-matroska-ipb-8-5.yuv",
+        "hevc-matroska-ipb-8-6.yuv",
+        "hevc-matroska-ipb-8-7.yuv",
+        "hevc-matroska-ipb-8-8.yuv",
+        "hevc-matroska-ipb-8-9.yuv",
+        "hevc-matroska-ipb-8-10.yuv",
+        "hevc-matroska-ipb-8-11.yuv",
+        "hevc-matroska-ipb-8-12.yuv",
+        "hevc-matroska-ipb-8-13.yuv",
+        "hevc-matroska-ipb-8-14.yuv",
+        "hevc-matroska-ipb-8-15.yuv",
+        "hevc-matroska-ipb-8-16.yuv"
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "80319b55964c232178c18d848c1a4a577f8375108625ae96afdff5eb2bcc0a24"
+    },
+    {
+      "file": "hevc-complex-audio-8-gap.mkv",
+      "depth": 8,
+      "variant": "gap",
+      "interval_us": [
+        67123,
+        199789
+      ],
+      "frames": [
+        "hevc-matroska-ipb-8-0.yuv",
+        "hevc-matroska-ipb-8-1.yuv",
+        "hevc-matroska-ipb-8-2.yuv",
+        "hevc-matroska-ipb-8-3.yuv",
+        "hevc-matroska-ipb-8-4.yuv",
+        "hevc-matroska-ipb-8-5.yuv",
+        "hevc-matroska-ipb-8-6.yuv",
+        "hevc-matroska-ipb-8-7.yuv",
+        "hevc-matroska-ipb-8-8.yuv",
+        "hevc-matroska-ipb-8-9.yuv",
+        "hevc-matroska-ipb-8-10.yuv",
+        "hevc-matroska-ipb-8-11.yuv",
+        "hevc-matroska-ipb-8-12.yuv",
+        "hevc-matroska-ipb-8-13.yuv",
+        "hevc-matroska-ipb-8-14.yuv",
+        "hevc-matroska-ipb-8-15.yuv",
+        "hevc-matroska-ipb-8-16.yuv"
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "786d2094c3f430fb8a1c92e66d96be2cc5ab4600b055b985b9f7e701db988bd5"
+    },
+    {
+      "file": "hevc-complex-audio-8-padding.mkv",
+      "depth": 8,
+      "variant": "padding",
+      "interval_us": [
+        67123,
+        199789
+      ],
+      "frames": [
+        "hevc-matroska-ipb-8-0.yuv",
+        "hevc-matroska-ipb-8-1.yuv",
+        "hevc-matroska-ipb-8-2.yuv",
+        "hevc-matroska-ipb-8-3.yuv",
+        "hevc-matroska-ipb-8-4.yuv",
+        "hevc-matroska-ipb-8-5.yuv",
+        "hevc-matroska-ipb-8-6.yuv",
+        "hevc-matroska-ipb-8-7.yuv",
+        "hevc-matroska-ipb-8-8.yuv",
+        "hevc-matroska-ipb-8-9.yuv",
+        "hevc-matroska-ipb-8-10.yuv",
+        "hevc-matroska-ipb-8-11.yuv",
+        "hevc-matroska-ipb-8-12.yuv",
+        "hevc-matroska-ipb-8-13.yuv",
+        "hevc-matroska-ipb-8-14.yuv",
+        "hevc-matroska-ipb-8-15.yuv",
+        "hevc-matroska-ipb-8-16.yuv"
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "48faf17af11f096b36500b2d0fde62162b3ab711755124b40d4a7b66481907ca"
+    },
+    {
+      "file": "hevc-complex-audio-10-long.mkv",
+      "depth": 10,
+      "variant": "long",
+      "interval_us": [
+        1700123,
+        1917789
+      ],
+      "frames": [
+        "hevc-matroska-ipb-10-0.yuv",
+        "hevc-matroska-ipb-10-1.yuv",
+        "hevc-matroska-ipb-10-2.yuv",
+        "hevc-matroska-ipb-10-3.yuv",
+        "hevc-matroska-ipb-10-4.yuv",
+        "hevc-matroska-ipb-10-5.yuv",
+        "hevc-matroska-ipb-10-6.yuv",
+        "hevc-matroska-ipb-10-7.yuv",
+        "hevc-matroska-ipb-10-8.yuv",
+        "hevc-matroska-ipb-10-9.yuv",
+        "hevc-matroska-ipb-10-10.yuv",
+        "hevc-matroska-ipb-10-11.yuv",
+        "hevc-matroska-ipb-10-12.yuv",
+        "hevc-matroska-ipb-10-13.yuv",
+        "hevc-matroska-ipb-10-14.yuv",
+        "hevc-matroska-ipb-10-15.yuv",
+        "hevc-matroska-ipb-10-16.yuv"
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "69f20d9a36d242993000411349f02243fa605fc55c138642136ab13aeefbe912"
+    },
+    {
+      "file": "hevc-complex-audio-10-gap.mkv",
+      "depth": 10,
+      "variant": "gap",
+      "interval_us": [
+        67123,
+        199789
+      ],
+      "frames": [
+        "hevc-matroska-ipb-10-0.yuv",
+        "hevc-matroska-ipb-10-1.yuv",
+        "hevc-matroska-ipb-10-2.yuv",
+        "hevc-matroska-ipb-10-3.yuv",
+        "hevc-matroska-ipb-10-4.yuv",
+        "hevc-matroska-ipb-10-5.yuv",
+        "hevc-matroska-ipb-10-6.yuv",
+        "hevc-matroska-ipb-10-7.yuv",
+        "hevc-matroska-ipb-10-8.yuv",
+        "hevc-matroska-ipb-10-9.yuv",
+        "hevc-matroska-ipb-10-10.yuv",
+        "hevc-matroska-ipb-10-11.yuv",
+        "hevc-matroska-ipb-10-12.yuv",
+        "hevc-matroska-ipb-10-13.yuv",
+        "hevc-matroska-ipb-10-14.yuv",
+        "hevc-matroska-ipb-10-15.yuv",
+        "hevc-matroska-ipb-10-16.yuv"
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "4f9a73bd2f8f1a8d2b4417c0c9cd7a7804bb819b41fc3167b44145903ab42c2c"
+    },
+    {
+      "file": "hevc-complex-audio-10-padding.mkv",
+      "depth": 10,
+      "variant": "padding",
+      "interval_us": [
+        67123,
+        199789
+      ],
+      "frames": [
+        "hevc-matroska-ipb-10-0.yuv",
+        "hevc-matroska-ipb-10-1.yuv",
+        "hevc-matroska-ipb-10-2.yuv",
+        "hevc-matroska-ipb-10-3.yuv",
+        "hevc-matroska-ipb-10-4.yuv",
+        "hevc-matroska-ipb-10-5.yuv",
+        "hevc-matroska-ipb-10-6.yuv",
+        "hevc-matroska-ipb-10-7.yuv",
+        "hevc-matroska-ipb-10-8.yuv",
+        "hevc-matroska-ipb-10-9.yuv",
+        "hevc-matroska-ipb-10-10.yuv",
+        "hevc-matroska-ipb-10-11.yuv",
+        "hevc-matroska-ipb-10-12.yuv",
+        "hevc-matroska-ipb-10-13.yuv",
+        "hevc-matroska-ipb-10-14.yuv",
+        "hevc-matroska-ipb-10-15.yuv",
+        "hevc-matroska-ipb-10-16.yuv"
+      ],
+      "size": [
+        128,
+        128
+      ],
+      "sha256": "1e4e610b153345df32fb1625fa72452535f9730b6f719821c1cb73fb0956778e"
+    }
+  ],
+  "provenance": "Own saved I/P/B access units and synthetic AAC/Opus packets repeated as valid coded frames, with authored nanosecond timing, 37 ms gaps and +/-1 ms interior padding. No private data, codec execution, FFmpeg or network."
+}

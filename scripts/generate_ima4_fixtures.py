@@ -26,3 +26,56 @@ if __name__ == '__main__':
         fmt += b''.join(struct.pack('<hh',a,b) for a,b in coefficients)
         (ROOT / name).write_bytes(quicktime_pcm(bytes([109,115,0,2]),16,payload,
             samples=frames,channels=channels,configuration=fmt))
+
+    # Playback regression: the edit list doubles presentation length while source
+    # blocks stay independent. Pair with the authored raw-video companion.
+    import hashlib, json
+    names=['ima4-ramp-edits.mov','ima-wav-stereo-edits.mov','ms-adpcm-stereo-edits.mov']
+    (ROOT/'adpcm-player-edits.json').write_text(json.dumps(dict(
+        video_companion='g711-alaw-2ch.avi',
+        cases=[dict(file=name,sha256=hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),
+                    presentation_frames=frames) for name,frames in zip(names,[128,18,12])]
+    ),indent=2)+'\n')
+
+    # Embed independently authored AVC PCM fields into each reproducer, so the
+    # same ADPCM edit failure is exercisable in a playable video container.
+    from generate_avc_field_pcm_samples import configuration, field
+    from avc_fixture_mp4 import mux
+    def boxes(data):
+        at=0
+        while at<len(data):
+            size,kind=struct.unpack_from('>I4s',data,at)
+            assert size>=8 and at+size<=len(data)
+            yield kind,data[at+8:at+size]
+            at+=size
+    def box(kind,body):return struct.pack('>I4s',len(body)+8,kind)+body
+    packets=[]
+    for i,bottom in enumerate([False,True]):
+        nal=field(bottom,8,i==0)
+        packets.append((i,i==0,len(nal).to_bytes(4,'big')+nal))
+    video=mux(configuration(8),packets,width=32,height=32,rate=25)
+    def shifted_track(data,shift):
+        out=b''
+        for kind,body in boxes(data):
+            if kind in [b'trak',b'mdia',b'minf',b'stbl']:body=shifted_track(body,shift)
+            elif kind==b'stco':
+                body=bytearray(body)
+                for at in range(8,len(body),4):struct.pack_into('>I',body,at,struct.unpack_from('>I',body,at)[0]+shift)
+            elif kind==b'tkhd':
+                body=bytearray(body);struct.pack_into('>I',body,12,2)
+            out+=box(kind,body)
+        return out
+    video_top=list(boxes(video))
+    for name in names:
+        audio_top=dict(boxes((ROOT/name).read_bytes()))
+        audio_mdat=box(b'mdat',audio_top[b'mdat'])
+        video_prefix=b''.join(box(k,v)for k,v in video_top if k!=b'moov')
+        track=next(v for k,v in video_top if k==b'moov')
+        video_tracks=b''.join(box(k,v)for k,v in boxes(track)if k==b'trak')
+        combined=audio_mdat+video_prefix+box(b'moov',audio_top[b'moov']+shifted_track(video_tracks,len(audio_mdat)))
+        (ROOT/name.replace('.mov','-video.mov')).write_bytes(combined)
+    manifest=json.loads((ROOT/'adpcm-player-edits.json').read_text())
+    for item in manifest['cases']:
+        item['video_file']=item['file'].replace('.mov','-video.mov')
+        item['video_sha256']=hashlib.sha256((ROOT/item['video_file']).read_bytes()).hexdigest()
+    (ROOT/'adpcm-player-edits.json').write_text(json.dumps(manifest,indent=2)+'\n')

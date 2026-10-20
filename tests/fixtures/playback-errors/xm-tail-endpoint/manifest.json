@@ -1,0 +1,38 @@
+{
+  "provenance": "Six authored three-row XM files with tempos32/63/125/127/199/255andexplicit keyoff before tail. Test independently rounds absolute score-plus-tail endpoint,not separate start/length. Native decoded tail is entirely silent,allowing exact zero extension oracle. Short authored native VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "file": "tempo-32.xm",
+      "bpm": 32
+    },
+    {
+      "file": "tempo-63.xm",
+      "bpm": 63
+    },
+    {
+      "file": "tempo-125.xm",
+      "bpm": 125
+    },
+    {
+      "file": "tempo-127.xm",
+      "bpm": 127
+    },
+    {
+      "file": "tempo-199.xm",
+      "bpm": 199
+    },
+    {
+      "file": "tempo-255.xm",
+      "bpm": 255
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "tempo-32.xm": "c63b4529f2f517f4ee777e1292e9087c1ec8f9f3d8aeadd1c818fbdce3426b8c",
+    "tempo-63.xm": "74db7a66111f889c842eb3a543b84e152d81b0d3a1cefe19e2c74fa690132f60",
+    "tempo-125.xm": "5617abe2561afe911fd6fc2a1a45533a442569daa943ef660db1a254b0f0cfba",
+    "tempo-127.xm": "4703f04d114649e4b0cfcd6be399e2eba488daaf78d32233f54a1373ae707dd3",
+    "tempo-199.xm": "c57ae10f32e1079f9a15bc9295c667352ccd88b1d6c4ed6e4d7a15f315fc4520",
+    "tempo-255.xm": "6b33dc353a6d317200ffef236a4f69b99db25faf840b8ec49b9a0a16370bbcb8"
+  }
+}

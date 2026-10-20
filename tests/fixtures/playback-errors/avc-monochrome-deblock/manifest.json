@@ -1,0 +1,110 @@
+[
+  {
+    "name": "mono-filter-8-0-cavlc",
+    "depth": 8,
+    "mode": 0,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-8-1-cavlc",
+    "depth": 8,
+    "mode": 1,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-8-2-cavlc",
+    "depth": 8,
+    "mode": 2,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-8-0-cabac",
+    "depth": 8,
+    "mode": 0,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-8-1-cabac",
+    "depth": 8,
+    "mode": 1,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-8-2-cabac",
+    "depth": 8,
+    "mode": 2,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-10-0-cavlc",
+    "depth": 10,
+    "mode": 0,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-10-1-cavlc",
+    "depth": 10,
+    "mode": 1,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-10-2-cavlc",
+    "depth": 10,
+    "mode": 2,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-10-0-cabac",
+    "depth": 10,
+    "mode": 0,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-10-1-cabac",
+    "depth": 10,
+    "mode": 1,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-10-2-cabac",
+    "depth": 10,
+    "mode": 2,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-14-0-cavlc",
+    "depth": 14,
+    "mode": 0,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-14-1-cavlc",
+    "depth": 14,
+    "mode": 1,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-14-2-cavlc",
+    "depth": 14,
+    "mode": 2,
+    "cabac": false
+  },
+  {
+    "name": "mono-filter-14-0-cabac",
+    "depth": 14,
+    "mode": 0,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-14-1-cabac",
+    "depth": 14,
+    "mode": 1,
+    "cabac": true
+  },
+  {
+    "name": "mono-filter-14-2-cabac",
+    "depth": 14,
+    "mode": 2,
+    "cabac": true
+  }
+]

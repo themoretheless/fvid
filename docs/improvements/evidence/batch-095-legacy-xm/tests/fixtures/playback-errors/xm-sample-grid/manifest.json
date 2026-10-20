@@ -1,0 +1,32 @@
+{
+  "provenance": "Authored31row held note using repository synthetic looping sample/instrument, four tempos including integer control. Separate authored native VP9/PCM companion. No encoder/private media/network.",
+  "cases": [
+    {
+      "file": "held-125.xm",
+      "bpm": 125,
+      "rows": 31
+    },
+    {
+      "file": "held-127.xm",
+      "bpm": 127,
+      "rows": 31
+    },
+    {
+      "file": "held-199.xm",
+      "bpm": 199,
+      "rows": 31
+    },
+    {
+      "file": "held-255.xm",
+      "bpm": 255,
+      "rows": 31
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "held-125.xm": "030e383934c2cb6e210e09dcda6a9b73f9a924646399d10267e9c7ab44eeed65",
+    "held-127.xm": "5ff1c5f0af1e8416d63df79e84ed3633afe51931615f590a616016fe3aa44285",
+    "held-199.xm": "3142af020b969367cccd77846165ee4a2abc69487e7abd083428bdce2d38db63",
+    "held-255.xm": "d67814c23ea08db87222ed3606f179ff85d2249bd1b4882c401309c93ea8e8df"
+  }
+}

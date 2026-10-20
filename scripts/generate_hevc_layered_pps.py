@@ -109,12 +109,12 @@ def colour(pattern='identity', depth=0, part=0, quant=0, delta=0, inp=(8,8), out
     return b, dict(dimensions=[ny,nc,nc], coefficients=wanted, input=list(inp), output=list(out), thresholds=thresholds, probes=samples)
 
 
-def pps(layer=3, id=0, scaling='none', reference=0, locations=(), mapping=None, future=False):
-    b = ue(id)+ue(0)+'0000000'+ue(0)+ue(0)+se(0)+'000'+se(0)+se(0)+'000000'+'00'
+def pps(layer=3, id=0, scaling='none', reference=0, locations=(), mapping=None, future=False, depth_tables=None, sps_id=0):
+    b = ue(id)+ue(sps_id)+'0000000'+ue(0)+ue(0)+se(0)+'000'+se(0)+se(0)+'000000'+'00'
     b += str(int(scaling == 'explicit'))
     if scaling == 'explicit':
         b += '1'+ue(25)+'1'*15+'01'*19  # first 4x4 matrix is 21, not SPS's 17
-    b += '0'+ue(0)+'1'+'1'+'0100'+('0001' if future else '0000')
+    b += '0'+ue(0)+'1'+'1'+('0110'if depth_tables is not None else '0100')+('0001' if future else '0000')
     b += '1'+str(int(scaling == 'infer'))
     if scaling == 'infer':
         b += f'{reference:06b}'
@@ -129,6 +129,7 @@ def pps(layer=3, id=0, scaling='none', reference=0, locations=(), mapping=None, 
         if 'phases' in loc:
             b += ''.join(ue(v) for v in loc['phases'])
     b += '0' if mapping is None else '1'+mapping
+    if depth_tables is not None:b += depth_tables
     if future:
         b += '010001001'
     b += '1'

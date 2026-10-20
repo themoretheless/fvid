@@ -1,0 +1,36 @@
+{
+  "provenance": "Authored native MIDI200ms two-window scripts at8kHz.124us events should first affect125us sample,99999us tail events update state for100ms next window without advancing a prior sample. Onset/release boundary controls and short native VP9/PCM video. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "onset"
+    },
+    {
+      "name": "release"
+    },
+    {
+      "name": "tail-onset"
+    },
+    {
+      "name": "tail-release"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "onset-actual-0.packet": "85ed92c08d607e281a747b2300fd5fd3621f0b2ef71c73cbe0539f1061b2eb6b",
+    "onset-actual-1.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "onset-control-0.packet": "086629175c812b59bc210f0c06130c1da812f77af3f973f040d0748c82c4ae9d",
+    "onset-control-1.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release-actual-0.packet": "5f96d01bb9790f0f9344961d51e1a485861b1de19d72ddbe1006596ce60c1922",
+    "release-actual-1.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "release-control-0.packet": "38e48ebd50a79c6c9e3db17dba4cf52406d30f9ce089b3419e79c24b723a16bc",
+    "release-control-1.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tail-onset-actual-0.packet": "f2aa66c32b4f52c85865268dc11bfedfcc57656edb21883209ef4a96ec5923e1",
+    "tail-onset-actual-1.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tail-onset-control-0.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tail-onset-control-1.packet": "f00e7b44ff287881a6ada3f54cb6b33d7e5296cc66c8a397633a04509a41c39b",
+    "tail-release-actual-0.packet": "28ec5e0221ae449ae3a800ff91bdc2cad03596bec641e6baca802bfc96ce7ec9",
+    "tail-release-actual-1.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tail-release-control-0.packet": "f00e7b44ff287881a6ada3f54cb6b33d7e5296cc66c8a397633a04509a41c39b",
+    "tail-release-control-1.packet": "0382b0681f8cc44c5489faaa798b944a006e41192579d0f2565506a26757fcc9"
+  }
+}

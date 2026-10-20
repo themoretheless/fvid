@@ -1,0 +1,1529 @@
+{
+  "cases": [
+    {
+      "name": "n960-tns0",
+      "n": 960,
+      "with_tns": false,
+      "frames": [
+        {
+          "sequence": 0,
+          "shape": 0,
+          "active": false,
+          "lag": 960,
+          "coefficient": 1,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 0,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 0
+        },
+        {
+          "sequence": 1,
+          "shape": 1,
+          "active": false,
+          "lag": 944,
+          "coefficient": 4,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 0,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 3840
+        },
+        {
+          "sequence": 2,
+          "shape": 0,
+          "active": true,
+          "lag": 928,
+          "coefficient": 7,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": [
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 6
+            },
+            null,
+            {
+              "lag": 10
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            }
+          ],
+          "ltp_offset": 0,
+          "ltp_bytes": 5,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 7680
+        },
+        {
+          "sequence": 2,
+          "shape": 1,
+          "active": true,
+          "lag": 960,
+          "coefficient": 2,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": [
+            {
+              "lag": null
+            },
+            {
+              "lag": 5
+            },
+            null,
+            {
+              "lag": 9
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 1
+            }
+          ],
+          "ltp_offset": 5,
+          "ltp_bytes": 6,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 11520
+        },
+        {
+          "sequence": 3,
+          "shape": 0,
+          "active": true,
+          "lag": 944,
+          "coefficient": 5,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 11,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 15360
+        },
+        {
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 928,
+          "coefficient": 0,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 11,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 19200
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 23040
+    },
+    {
+      "name": "n960-tns1",
+      "n": 960,
+      "with_tns": true,
+      "frames": [
+        {
+          "sequence": 0,
+          "shape": 0,
+          "active": false,
+          "lag": 960,
+          "coefficient": 1,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 11,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 23040
+        },
+        {
+          "sequence": 1,
+          "shape": 1,
+          "active": false,
+          "lag": 944,
+          "coefficient": 4,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 11,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 26880
+        },
+        {
+          "sequence": 2,
+          "shape": 0,
+          "active": true,
+          "lag": 928,
+          "coefficient": 7,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": [
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 6
+            },
+            null,
+            {
+              "lag": 10
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            }
+          ],
+          "ltp_offset": 11,
+          "ltp_bytes": 5,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": [
+            [
+              false,
+              0.25
+            ],
+            null,
+            [
+              false,
+              0.25
+            ],
+            [
+              true,
+              -0.125
+            ],
+            null,
+            [
+              true,
+              -0.125
+            ],
+            [
+              false,
+              0.25
+            ],
+            null
+          ],
+          "reference_offset": 30720
+        },
+        {
+          "sequence": 2,
+          "shape": 1,
+          "active": true,
+          "lag": 960,
+          "coefficient": 2,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": [
+            {
+              "lag": null
+            },
+            {
+              "lag": 5
+            },
+            null,
+            {
+              "lag": 9
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 1
+            }
+          ],
+          "ltp_offset": 16,
+          "ltp_bytes": 6,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": [
+            [
+              true,
+              0.25
+            ],
+            null,
+            [
+              true,
+              0.25
+            ],
+            [
+              false,
+              -0.125
+            ],
+            null,
+            [
+              false,
+              -0.125
+            ],
+            [
+              true,
+              0.25
+            ],
+            null
+          ],
+          "reference_offset": 34560
+        },
+        {
+          "sequence": 3,
+          "shape": 0,
+          "active": true,
+          "lag": 944,
+          "coefficient": 5,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 22,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 38400
+        },
+        {
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 928,
+          "coefficient": 0,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 22,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 42240
+        }
+      ],
+      "reference_offset": 23040,
+      "reference_bytes": 23040
+    },
+    {
+      "name": "n1024-tns0",
+      "n": 1024,
+      "with_tns": false,
+      "frames": [
+        {
+          "sequence": 0,
+          "shape": 0,
+          "active": false,
+          "lag": 1024,
+          "coefficient": 1,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 22,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 46080
+        },
+        {
+          "sequence": 1,
+          "shape": 1,
+          "active": false,
+          "lag": 1008,
+          "coefficient": 4,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 22,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 50176
+        },
+        {
+          "sequence": 2,
+          "shape": 0,
+          "active": true,
+          "lag": 992,
+          "coefficient": 7,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": [
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 6
+            },
+            null,
+            {
+              "lag": 10
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            }
+          ],
+          "ltp_offset": 22,
+          "ltp_bytes": 5,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 54272
+        },
+        {
+          "sequence": 2,
+          "shape": 1,
+          "active": true,
+          "lag": 1024,
+          "coefficient": 2,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": [
+            {
+              "lag": null
+            },
+            {
+              "lag": 5
+            },
+            null,
+            {
+              "lag": 9
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 1
+            }
+          ],
+          "ltp_offset": 27,
+          "ltp_bytes": 6,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 58368
+        },
+        {
+          "sequence": 3,
+          "shape": 0,
+          "active": true,
+          "lag": 1008,
+          "coefficient": 5,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 33,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 62464
+        },
+        {
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 992,
+          "coefficient": 0,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 33,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 66560
+        }
+      ],
+      "reference_offset": 46080,
+      "reference_bytes": 24576
+    },
+    {
+      "name": "n1024-tns1",
+      "n": 1024,
+      "with_tns": true,
+      "frames": [
+        {
+          "sequence": 0,
+          "shape": 0,
+          "active": false,
+          "lag": 1024,
+          "coefficient": 1,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 33,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 70656
+        },
+        {
+          "sequence": 1,
+          "shape": 1,
+          "active": false,
+          "lag": 1008,
+          "coefficient": 4,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 33,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 74752
+        },
+        {
+          "sequence": 2,
+          "shape": 0,
+          "active": true,
+          "lag": 992,
+          "coefficient": 7,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": [
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 6
+            },
+            null,
+            {
+              "lag": 10
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            }
+          ],
+          "ltp_offset": 33,
+          "ltp_bytes": 5,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ]
+          ],
+          "tns": [
+            [
+              false,
+              0.25
+            ],
+            null,
+            [
+              false,
+              0.25
+            ],
+            [
+              true,
+              -0.125
+            ],
+            null,
+            [
+              true,
+              -0.125
+            ],
+            [
+              false,
+              0.25
+            ],
+            null
+          ],
+          "reference_offset": 78848
+        },
+        {
+          "sequence": 2,
+          "shape": 1,
+          "active": true,
+          "lag": 1024,
+          "coefficient": 2,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": [
+            {
+              "lag": null
+            },
+            {
+              "lag": 5
+            },
+            null,
+            {
+              "lag": 9
+            },
+            {
+              "lag": null
+            },
+            null,
+            {
+              "lag": null
+            },
+            {
+              "lag": 1
+            }
+          ],
+          "ltp_offset": 38,
+          "ltp_bytes": 6,
+          "q": [
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ],
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ],
+            [
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1
+            ],
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": [
+            [
+              true,
+              0.25
+            ],
+            null,
+            [
+              true,
+              0.25
+            ],
+            [
+              false,
+              -0.125
+            ],
+            null,
+            [
+              false,
+              -0.125
+            ],
+            [
+              true,
+              0.25
+            ],
+            null
+          ],
+          "reference_offset": 82944
+        },
+        {
+          "sequence": 3,
+          "shape": 0,
+          "active": true,
+          "lag": 1008,
+          "coefficient": 5,
+          "used": [
+            true,
+            true
+          ],
+          "short_windows": null,
+          "ltp_offset": 44,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 87040
+        },
+        {
+          "sequence": 0,
+          "shape": 1,
+          "active": true,
+          "lag": 992,
+          "coefficient": 0,
+          "used": [
+            true,
+            false
+          ],
+          "short_windows": null,
+          "ltp_offset": 44,
+          "ltp_bytes": 0,
+          "q": [
+            [
+              0,
+              -1,
+              1,
+              0,
+              -1,
+              1,
+              0,
+              -1
+            ]
+          ],
+          "tns": null,
+          "reference_offset": 91136
+        }
+      ],
+      "reference_offset": 70656,
+      "reference_bytes": 24576
+    }
+  ],
+  "provenance": "Own EightShort AAC LTP syntax, history, analysis, TNS and LtpChannel trajectories for 960 and 1024 samples with per-subwindow lag offsets and sine/KBD shapes. No external codecs or private media."
+}

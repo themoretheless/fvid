@@ -1,0 +1,897 @@
+    Blocking waiting for file lock on build directory
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 10 warnings
+   Compiling syn v3.0.5
+   Compiling serde_derive v1.0.229
+   Compiling serde v1.0.229
+   Compiling fvid-media-info v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media-info)
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:325:5
+    |
+325 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:502:15
+    |
+502 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:509:15
+    |
+509 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:518:15
+    |
+518 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:42:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+42 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:55:15
+   |
+55 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:76:15
+   |
+76 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:96:15
+   |
+96 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:66:15
+   |
+66 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:22:15
+   |
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports_concat` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:72:15
+   |
+72 | pub(crate) fn supports_concat(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_wave_plan.rs:6:15
+  |
+6 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudness.rs:50:15
+   |
+50 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_adts_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:34:15
+   |
+34 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:31:15
+   |
+31 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:36:15
+   |
+36 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:36:15
+   |
+36 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:125:8
+    |
+ 75 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+125 |     fn convert(&self, data: &[u8]) -> Vec<u8> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:40:15
+   |
+40 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:108:15
+    |
+108 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:59:15
+   |
+59 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_container_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8728:15
+     |
+8728 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9440:15
+     |
+9440 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: `fvid-media` (lib) generated 31 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-codecs)
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid-codecs` (lib test) generated 6 warnings (5 duplicates)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21m 47s
+     Running unittests src/lib.rs (/private/tmp/fvid-improvements-target/debug/deps/fvid_codecs-cdac03dde17dac90)
+
+running 583 tests
+test codec::av1_decoder::tests::metadata_obus_hold_their_light_until_the_stream_is_flushed ... ok
+test codec::av1::tests::sample_framing_implicit_tail_is_bounded_by_sample_not_header_patterns ... ok
+test codec::av1::tests::every_truncation_is_bounded ... ok
+test codec::av1::tests::invalid_lengths_and_headers_terminate ... ok
+test codec::av1::tests::sample_framing_implicit_tail_keeps_header_and_delimiter_validation ... ok
+test codec::av1::tests::layers_reserved_units_and_nonminimal_lengths ... ok
+test codec::av1_decoder::grain::tests::random_sequence_and_lookup_boundaries ... ok
+test codec::av1_frame::grain_params::tests::absent_grain_does_not_consume_unrelated_bits ... ok
+test codec::av1_decoder::tests::publishes_only_complete_frames_and_reset_recovers ... ok
+test codec::av1_frame::grain_params::tests::inherited_parameters_keep_all_fields_but_replace_seed ... ok
+test codec::av1_frame::grain_params::tests::point_counts_and_order_are_validated_before_storage ... ok
+test codec::av1_frame::tests::first_keyframe_header_matches_trace ... ok
+test codec::av1_metadata::tests::a_content_light_payload_agrees_with_sei_144 ... ok
+test codec::av1_frame::grain_params::tests::maximum_points_and_ar_counts_consume_exact_syntax ... ok
+test codec::av1_metadata::tests::a_real_encoder_light_level_survives_its_own_trailing_byte ... ok
+test codec::av1_decoder::tests::segmentation_map_update_headers_and_flat_pictures_decode ... ok
+test codec::av1_metadata::tests::a_real_encoder_volume_states_the_panel_that_a_decoder_reports ... ok
+test codec::av1_metadata::tests::a_real_first_frame_packet_yields_both_halves_of_its_metadata ... ok
+test codec::av1_metadata::tests::a_type_may_be_written_over_several_bytes_and_a_truncated_one_is_not_a_volume ... ok
+test codec::av1_metadata::tests::bytes_that_are_not_a_stream_state_nothing_rather_than_failing ... ok
+test codec::av1_metadata::tests::fields_beyond_the_payload_read_as_their_missing_high_order_bytes ... ok
+test codec::av1_metadata::tests::one_packet_can_carry_both_halves_and_the_volume_and_light_add_up ... ok
+test codec::av1_metadata::tests::other_metadata_types_and_obus_of_other_kinds_state_nothing ... ok
+test codec::av1_metadata::tests::the_same_packet_states_its_signal_without_a_decoded_picture ... ok
+test codec::av1_metadata::tests::the_two_standards_do_not_share_a_volume_payload ... ok
+test codec::av1_picture::chroma_geometry::tests::cfl_preserves_three_fractional_bits_for_each_layout_and_edge ... ok
+test codec::av1_picture::chroma_geometry::tests::full_chroma_storage_is_admitted_instead_of_using_420_estimate ... ok
+test codec::av1_picture::chroma_geometry::tests::independent_axes_include_odd_last_samples ... ok
+test codec::av1_picture::inter::intrabc::tests::source_displacement_respects_tile_wavefront_and_integer_precision ... ok
+test codec::av1_picture::inter::intrabc::tests::sub8_source_tile_margin_only_applies_to_subsampled_axes ... ok
+test codec::av1_picture::motion_field::tests::bounded_positions_use_truncated_negative_offsets ... ok
+test codec::av1_picture::motion_field::tests::signed_projection_and_clipping ... ok
+test codec::av1_sequence::tests::svt_sequence_matches_independent_header_trace ... ok
+test codec::av1_sequence::tests::configuration_summary_uses_operating_point_zero_and_all_color_fields ... ok
+test codec::av1_picture::tests::flat_lossless_pixels ... ok
+test codec::av1_picture::tests::ramp_lossless_matches_oracle ... ok
+test codec::av1_sequence::tests::uvlc_saturates_at_32_zero_bits ... ok
+test codec::av1_symbol::tests::empty_alphabet_and_truncation_fail_without_panics ... ok
+test codec::av1_symbol::tests::bit_matches_two_symbol_read_and_survives_truncation ... ok
+test codec::av1_picture::inter::chroma_axis_tests::integer_motion_and_identity_scaling_use_each_reference_axis ... ok
+test codec::avc::tests::baseline_pps_and_truncated_or_wrong_reference ... ok
+test codec::avc::tests::rejects_truncated_and_extra_rbsp_data ... ok
+test codec::avc::tests::reads_real_baseline_geometry_and_timing ... ok
+test codec::av1_symbol::tests::libaom_encoded_symbols_with_and_without_adaptation ... ok
+test codec::avc_boundary::grid_tests::neighbours_slice_suppression_and_component_qp ... ok
+test codec::avc_boundary::tests::bipred_pairing_and_identical_reference_ambiguity ... ok
+test codec::avc_boundary::tests::mbaff_strength_priority_field_threshold_and_pairings ... ok
+test codec::avc_boundary::tests::strength_priority_and_quarter_sample_threshold ... ok
+test codec::avc_bypass::tests::dpcm_direction_and_checked_overflow ... ok
+test codec::avc_bypass::tests::dc_tiles_are_joined_before_accumulation ... ok
+test codec::avc_access_unit::tests::mixed_fields_reject_uniform_slice_type_promises ... ok
+test codec::avc_cabac::tests::eight_by_eight_uses_frame_and_field_context_maps ... ok
+test codec::avc_cabac::tests::implicit_last_chroma422_and_escape ... ok
+test codec::avc_cabac::tests::initialization_tables_and_unused_contexts ... ok
+test codec::avc_cabac::tests::pcm_discards_arithmetic_flush_bits_and_restarts_cabac ... ok
+test codec::avc_cabac::tests::reverse_levels_and_context_changes ... ok
+test codec::avc_cabac_inter::tests::field_flag_uses_one_regular_bin_with_symmetric_neighbours ... ok
+test codec::avc_cabac_inter::tests::b_prefixes_and_subpartitions_follow_distinct_contexts ... ok
+test codec::avc_cabac_inter::tests::reference_unary_and_motion_escape_boundaries ... ok
+test codec::avc_cabac_inter::tests::slice_termination_consumes_bins_only_at_complete_pair_boundaries ... ok
+test codec::avc_cabac_macroblock::tests::address_owned_cells_keep_cross_macroblock_neighbours ... ok
+test codec::avc_cabac_macroblock::tests::embedded_intra_in_real_p_slice_uses_shared_arithmetic_state ... ok
+test codec::avc_cabac_macroblock::tests::macroblock_contexts_preserve_availability_and_component_flags ... ok
+test codec::avc_cabac_macroblock::tests::mbaff_cbp_neighbours_select_actual_8x8_owner_across_mixed_rows ... ok
+test codec::avc_cabac_macroblock::tests::real_cabac_p_inter_residual_reconstructs_changed_luma ... ok
+test codec::avc_cabac_macroblock::tests::real_p_skip_blocks_publish_context_and_terminate ... ok
+test codec::avc_cabac_inter::tests::p_types_and_embedded_intra_select_normative_contexts ... ok
+test codec::avc_cabac_inter::tests::real_cabac_p_skip_picture_reaches_exact_slice_termination ... ok
+test codec::av1_decoder::tests::inter_frame_ids_reject_each_mismatched_reference_and_require_reset ... ok
+test codec::avc_cabac_macroblock::tests::saved_main_profile_picture_and_truncated_payloads ... ok
+test codec::avc_cabac_motion::tests::address_owned_cells_keep_distinct_partition_contexts_and_spatial_neighbours ... ok
+test codec::avc_cabac_motion::tests::budgets_overwrites_and_failed_entropy_do_not_allow_reuse ... ok
+test codec::avc_cabac_motion::tests::direct_and_non_inter_neighbours_supply_zero_conditions ... ok
+test codec::avc_cabac_motion::tests::mbaff_b_motion_reads_both_lists_and_direct_has_no_motion_bins ... ok
+test codec::avc_cabac_motion::tests::partition_updates_cross_macroblocks_but_not_slice_boundaries ... ok
+test codec::avc_coefficient_field::tests::complete_inter_macroblock_and_neighbour_boundaries ... ok
+test codec::avc_cabac_motion::tests::mbaff_reference_conditions_and_vertical_mvd_use_normative_units ... ok
+test codec::avc_cabac_motion::tests::mbaff_expanded_list_slice_isolation_and_error_poisoning ... ok
+test codec::avc_coefficient_field::tests::mbaff_inter_cursor_and_counts_commit_together ... ok
+test codec::avc_coefficient_field::tests::mixed_pair_context_reads_each_actual_boundary_owner ... ok
+test codec::avc_compensation::assembly_tests::mixed_partitions_preserve_luma_and_chroma_positions ... ok
+test codec::avc_compensation::residual_tests::inter_residual_dc_placement_clipping_and_zero_identity ... ok
+test codec::avc_compensation::unavailable_tests::absent_reference_has_no_planes_and_refuses_sampling_without_writing_output ... ok
+test codec::avc_compensation::tests::fractional_luma_chroma_and_bipred ... ok
+test codec::avc_compensation::tests::border_extension_and_invalid_geometry ... ok
+test codec::avc_deblock::inter_tests::weak_edges_use_distinct_clipping_thresholds ... ok
+test codec::avc_deblock::tests::field_line_filters_only_its_parity_and_rejects_invalid_footprints_atomically ... ok
+test codec::avc_deblock::tests::intra_field_horizontal_boundaries_use_normal_filter_strength ... ok
+test codec::avc_deblock::tests::strong_and_normal_edges_and_threshold_equality ... ok
+test codec::avc_deblock::slice_boundary_tests::intra_filter_respects_slice_boundary_and_disabled_slice ... ok
+test codec::avc_deblock::traversal_tests::mixed_horizontal_top_filters_both_parities_with_normal_strength ... ok
+test codec::avc_deblock::traversal_tests::mixed_vertical_boundary_uses_each_frame_owner_qp_and_slice ... ok
+test codec::avc_deblock::traversal_tests::segment_strength_and_invalid_metadata_atomicity ... ok
+test codec::avc_deblock::traversal_tests::mbaff_intra_traversal_matches_separate_field_planes ... ok
+test codec::av1_decoder::tests::malformed_show_existing_metadata_has_specific_refusal_and_reset ... ok
+test codec::avc_decoder::tests::dpb_retains_motion_identity_and_releases_evicted_metadata ... ok
+test codec::avc_decoder::tests::errors_poison_until_reset_and_metadata_does_not_create_pictures ... ok
+test codec::avc_decoder::tests::canonical_fields_keep_identity_through_frame_views_and_real_later_prediction ... ok
+test codec::avc_decoder::tests::frame_migration_shares_motion_between_parities_and_reset_releases_it ... ok
+test codec::avc_decoder::tests::native_field_migration_keeps_marking_motion_and_releases_old_stores ... ok
+test codec::avc_decoder::tests::rejects_multiple_slices_before_changing_picture_state_and_bounds_references ... ok
+test codec::avc_decoder::tests::b_field_reproducer_requires_motion_context_and_native_decode_accepts_it ... ok
+test codec::av1_decoder::tests::inter_frame_ids_decode_owned_reference_windows ... ok
+test codec::avc_direct::tests::mbaff_direct_corner_inference_and_expanded_index_63_are_checked ... ok
+test codec::avc_direct::tests::joined_field_frame_direct_selects_poc_and_scales_temporal_only ... ok
+test codec::avc_direct::tests::separate_field_temporal_mapping_uses_identity_parity_and_selected_poc ... ok
+test codec::avc_direct::tests::migrated_frame_direct_scales_temporal_only_and_maps_current_parity ... ok
+test codec::avc_direct::tests::mbaff_direct_uses_selected_field_pocs_and_reference_parity ... ok
+test codec::avc_direct::tests::temporal_direct_corner_selection_identity_mapping_and_atomic_rollback ... ok
+test codec::avc_dpb::tests::all_mmco_operations_and_atomic_failure ... ok
+test codec::avc_dpb::tests::b_lists_exclude_only_gap_entries_without_inferred_poc ... ok
+test codec::avc_dpb::tests::gap_metadata_rejects_modification_and_long_term_assignment_but_allows_forgetting ... ok
+test codec::avc_dpb::tests::idr_flush_and_all_long_term_window_failure ... ok
+test codec::avc_dpb::tests::inferred_field_orders_preserve_asymmetric_pocs_and_atomic_validation ... ok
+test codec::avc_dpb::tests::inferred_gap_entries_occupy_slots_without_sample_storage ... ok
+test codec::avc_dpb::tests::migration_preserves_long_limits_gap_orders_and_reference_ids ... ok
+test codec::avc_dpb::tests::inferred_sliding_window_wrap_and_failure_are_atomic ... ok
+test codec::avc_field_dpb::migration_tests::canonical_frame_mmco_matches_frame_buffer_for_complete_pairs ... ok
+test codec::avc_dpb::tests::nonexisting_only_buffers_allow_intra_but_require_real_inter_references ... ok
+test codec::avc_field_dpb::migration_tests::complete_pairs_transfer_ids_marking_pocs_and_pixel_free_gaps ... ok
+test codec::avc_dpb::tests::sliding_window_wrap_and_retained_display_owner ... ok
+test codec::avc_field_dpb::migration_tests::unsupported_pair_shapes_are_not_silently_discarded ... ok
+test codec::avc_field_references::tests::b_uses_frame_poc_then_parity_and_equal_lists_swap ... ok
+test codec::avc_field_references::tests::malformed_and_missing_field_selection_refused ... ok
+test codec::avc_field_references::tests::mixed_marking_and_distinct_long_indices_alternate_only_eligible_fields ... ok
+test codec::avc_field_references::tests::mixed_store_b_order_retains_both_field_pocs_and_opposite_long_index_reuse ... ok
+test codec::avc_field_references::tests::modifications_preserve_prefix_duplicates_and_select_parity ... ok
+test codec::avc_field_references::tests::p_fields_alternate_parity_across_unpaired_stores_and_wrap ... ok
+test codec::avc_inter::header_tests::field_prediction_reads_expanded_reference_index_without_relaxing_frames ... ok
+test codec::avc_inter::header_tests::inter_header_presence_and_transaction ... ok
+test codec::avc_inter::header_tests::transform8_subpartition_rules ... ok
+test codec::avc_inter::tests::cavlc_reference_and_motion_order ... ok
+test codec::avc_inter::tests::partition_tables_cover_every_pixel_once ... ok
+test codec::avc_inter_coefficients::nonzero_tests::field_8x8_interleave_and_chroma_ac_use_selected_scan ... ok
+test codec::avc_inter_coefficients::nonzero_tests::one_dc_coefficient_updates_context_and_raster_output ... ok
+test codec::avc_inter_coefficients::nonzero_tests::field_residual_uses_vertical_scan_and_preserves_counts ... ok
+test codec::avc_inter_coefficients::tests::coded_zero_blocks_and_truncation ... ok
+test codec::avc_inter_picture::tests::full_skip_and_zero_residual_pictures_copy_reference ... ok
+test codec::avc_inter_picture::tests::two_slice_b_skip_supports_independent_direct_modes ... ok
+test codec::avc_inter_prediction::tests::cavlc_to_motion_to_bipred_pixels ... ok
+test codec::avc_inter_prediction::tests::mbaff_b_weights_select_field_pocs_and_blend_every_component ... ok
+test codec::avc_inter_prediction::tests::mbaff_compensation_selects_parity_and_adjusts_only_opposite_chroma ... ok
+test codec::avc_inter_prediction::tests::mbaff_frame_prediction_keeps_progressive_compensation ... ok
+test codec::avc_inter_picture::tests::two_slice_p_skip_reconstructs_shared_planes_and_motion ... ok
+test codec::avc_inter_picture::tests::b_skip_reconstructs_spatial_temporal_and_implicit_weighted_pixels ... ok
+test codec::avc_inter_slice::tests::bounded_skip_and_poisoned_error ... ok
+test codec::avc_inter_slice::tests::fully_skipped_pairs_inherit_left_then_top_with_frame_default ... ok
+test codec::avc_inter_slice::tests::skipped_coded_skipped_and_rbsp_end ... ok
+test codec::avc_inter_slice::tests::skipped_top_looks_ahead_to_bottom_flag_without_consuming_it ... ok
+test codec::avc_intra::intra8_tests::filtered_edges_directional_negative_branch_and_missing_neighbours ... ok
+test codec::avc_compensation::tests::strided_field_views_match_packed_fields_for_fractional_and_edge_prediction ... ok
+test codec::avc_intra::tests::all_nine_modes_match_explicit_vectors ... ok
+test codec::avc_intra::tests::chroma_dc_quadrants_and_affine_plane ... ok
+test codec::avc_intra::tests::chroma_dc_retains_partial_four_sample_boundary_availability ... ok
+test codec::avc_intra::tests::unavailable_neighbours_and_top_right_replication ... ok
+test codec::avc_intra::tests::constant_fields_and_component_bounds ... ok
+test codec::avc_macroblock::tests::block_order_and_context_availability ... ok
+test codec::avc_macroblock::tests::context_budget_and_entropy_mode_are_explicit ... ok
+test codec::avc_mbaff::tests::cavlc_context_uses_available_frame_field_neighbours ... ok
+test codec::avc_mbaff::tests::component_context_cells_follow_mixed_frame_field_ownership ... ok
+test codec::avc_macroblock::tests::decodes_zero_residual_intra16_and_consumes_trailing_bits ... ok
+test codec::avc_mbaff::tests::deblocking_lines_resolve_mixed_pair_qp_owners ... ok
+test codec::avc_mbaff::tests::field_flag_is_read_once_per_pair_or_after_a_skipped_top ... ok
+test codec::avc_mbaff::tests::field_readiness_never_leaks_into_other_field_component_or_slice ... ok
+test codec::avc_mbaff::tests::inverse_address_preserves_boundaries_and_unavailable_pair_modes ... ok
+test codec::avc_macroblock::tests::inter_neighbour_participates_in_intra_mode_prediction ... ok
+test codec::avc_mbaff::tests::macroblock_context_origins_follow_pair_modes ... ok
+test codec::avc_mbaff::tests::malformed_dimensions_and_addresses_are_rejected ... ok
+test codec::avc_mbaff::tests::motion_partition_neighbours_resolve_all_four_mixed_locations ... ok
+test codec::avc_mbaff::tests::neighbours_cross_frame_field_pairs_with_component_row_stride ... ok
+test codec::avc_mbaff::tests::prediction_edges_follow_field_rows_and_sample_availability ... ok
+test codec::avc_mbaff::tests::reconstructed_field_blocks_interleave_without_touching_the_other_field ... ok
+test codec::avc_mbaff::tests::si_readiness_tags_follow_physical_parity_and_reset_without_extra_storage ... ok
+test codec::avc_mbaff::tests::mixed_frame_field_pairs_cover_each_component_exactly_once ... ok
+test codec::avc_mbaff_picture::inter_tests::invalid_plane_or_residual_never_partially_publishes ... ok
+test codec::avc_macroblock::tests::mixed_mbaff_context_checks_modes_and_preserves_external_cursor_on_error ... ok
+test codec::avc_motion::tests::edge_extension_stride_and_extreme_motion_vectors ... ok
+test codec::avc_motion::tests::half_sample_impulses_and_diagonal_no_intermediate_clipping ... ok
+test codec::avc_motion::tests::weights_offsets_rounding_and_clipping ... ok
+test codec::avc_motion::tests::affine_field_all_fractional_positions_and_signed_vectors ... ok
+test codec::avc_motion_field::macroblock_tests::entropy_partitions_connect_to_motion_and_rollback ... ok
+test codec::avc_motion_field::slice_snapshot_tests::address_owned_motion_keeps_raster_colocated_cells_and_slice_identity ... ok
+test codec::avc_motion_field::slice_snapshot_tests::independent_slice_lists_resolve_the_same_index_to_different_pictures ... ok
+test codec::avc_mbaff_picture::inter_tests::complete_mbaff_b_skip_pair_reconstructs_spatial_temporal_and_weighted_samples ... ok
+test codec::avc_motion_field::slice_snapshot_tests::mbaff_explicit_lists_normalize_then_add_and_publish_atomically ... ok
+test codec::avc_motion_field::slice_snapshot_tests::mbaff_macroblock_late_failure_rolls_back_cells_and_mode ... ok
+test codec::avc_motion_field::slice_snapshot_tests::mbaff_publication_normalizes_mixed_neighbours_and_preserves_slice_boundaries ... ok
+test codec::avc_motion_field::slice_snapshot_tests::mbaff_skip_derives_from_normalized_cells_and_publishes_full_block ... ok
+test codec::avc_motion_field::slice_snapshot_tests::mbaff_direct_publication_is_complete_and_late_failures_restore_storage ... ok
+test codec::avc_motion_field::slice_snapshot_tests::mbaff_temporal_direct_snapshot_retains_derived_field_reference_identity ... ok
+test codec::avc_motion_field::tests::prediction_order_slice_isolation_and_atomic_failure ... ok
+test codec::avc_mv::tests::availability_is_distinct_from_no_prediction ... ok
+test codec::avc_mv::tests::checked_motion_difference_and_extremes ... ok
+test codec::avc_mv::tests::field_predictor_uses_normalized_references_and_partition_preferences ... ok
+test codec::avc_mv::tests::field_skip_accepts_expanded_indices_and_checks_zero_after_normalization ... ok
+test codec::avc_mv::tests::mbaff_spatial_direct_keeps_raw_colzero_units_and_expanded_references ... ok
+test codec::avc_mv::tests::median_unique_reference_and_partition_direction ... ok
+test codec::avc_mv::tests::mixed_frame_field_normalization_keeps_sign_and_reference_units ... ok
+test codec::avc_mv::tests::spatial_direct_reference_selection_and_colocated_zero ... ok
+test codec::avc_mv::tests::temporal_scaling_long_term_and_implicit_weights ... ok
+test codec::avc_picture::tests::full_neutral_picture_and_visible_crop ... ok
+test codec::avc_picture::tests::rejects_budget_partial_picture_and_truncated_payload ... ok
+test codec::avc_picture::tests::whole_intra_edges_require_every_sample_to_be_available ... ok
+test codec::avc_poc::tests::inferred_cycle_and_decode_order_frames_advance_wrap_and_non_reference_history ... ok
+test codec::avc_poc::tests::inferred_cycle_offsets_are_signed_and_mmco_reset_starts_new_history ... ok
+test codec::avc_poc::tests::invalid_inferred_poc_inputs_and_overflow_do_not_mutate_history ... ok
+test codec::avc_poc::tests::mmco_five_reset_field_pictures_and_error_does_not_commit ... ok
+test codec::avc_poc::tests::type_one_cycles_and_type_two_frame_num_wrap ... ok
+test codec::avc_picture::tests::intra_pixels_exclude_unavailable_inter_neighbours ... ok
+test codec::avc_poc::tests::type_zero_gap_inference_preserves_reference_lsb_msb_and_frame_history ... ok
+test codec::avc_poc::tests::type_zero_reordering_wrap_and_non_reference_history ... ok
+test codec::avc_prediction::reconstruction_tests::macroblock_reconstruction_places_blocks_and_preserves_prediction ... ok
+test codec::avc_prediction::tests::dc_uses_only_available_neighbours ... ok
+test codec::avc_prediction::tests::directional_modes_preserve_neighbour_lines ... ok
+test codec::avc_prediction::tests::plane_reproduces_constant_and_affine_surface ... ok
+test codec::avc_reference_motion::tests::field_colocated_selection_matches_independent_frame_and_pair_indices ... ok
+test codec::avc_reference_motion::tests::incomplete_and_mixed_slice_fields_are_not_silently_snapshotted ... ok
+test codec::avc_reference_motion::tests::mbaff_direct_selection_uses_table_geometry_not_physical_sample_owner ... ok
+test codec::avc_reference_motion::tests::mbaff_temporal_mapping_retains_identity_and_field_parity ... ok
+test codec::avc_reference_motion::tests::mbaff_snapshot_retains_address_mode_vectors_and_reference_field_parity ... ok
+test codec::avc_reference_motion::tests::snapshots_keep_reference_identity_across_list_reordering ... ok
+test codec::avc_references::tests::initial_lists_wrap_and_b_order ... ok
+test codec::avc_reference_motion::tests::woven_field_motion_keeps_parity_raw_vectors_and_frame_selection ... ok
+test codec::avc_references::tests::mbaff_selects_frame_entry_and_same_or_opposite_field_for_both_lists ... ok
+test codec::avc_references::tests::modifications_wrap_long_term_and_repeat ... ok
+test codec::avc_residual_syntax::tests::inter_control_presence_and_error_rollback ... ok
+test codec::avc_residual_syntax::tests::mappings_and_qp_wrap_all_depths ... ok
+test codec::avc_slice::tests::baseline_idr_header_matches_reference_trace ... ok
+test codec::avc_slice::tests::short_headers_and_wrong_parameter_sets_are_rejected ... ok
+test codec::avc_slice_group_map::tests::changing_map_spatial_order_matches_fixed_examples ... ok
+test codec::avc_slice_group_map::tests::malformed_maps_refused ... ok
+test codec::avc_slice_group_map::tests::map_unit_conversion_distinguishes_frame_field_and_mbaff ... ok
+test codec::avc_slice_group_map::tests::static_maps_and_next_addresses ... ok
+test codec::avc_transform8::tests::dc_qp_rounding_clipping_and_invalid_parameters ... ok
+test codec::avc_transform8::tests::independent_matrix_basis_vectors ... ok
+test codec::avc_transform8::tests::scans_are_bijective_and_match_known_diagonals ... ok
+test codec::avc_transform::dc_tests::dc_hadamard_impulse_and_constant ... ok
+test codec::avc_transform::dc_tests::qp_steps_scale_flat_dc_and_custom_weights ... ok
+test codec::avc_transform::tests::rejects_invalid_parameters_and_bounds_extreme_coefficients ... ok
+test codec::avc_transform::tests::scan_orders_are_bijections_with_known_positions ... ok
+test codec::avc_transform::tests::transform_matches_matrix_for_even_intermediates ... ok
+test codec::avc_transform::tests::zero_dc_and_clipping_vectors ... ok
+test codec::bits::tests::crosses_bytes_and_preserves_position_on_short_read ... ok
+test codec::bits::tests::golomb_and_trailing_bits ... ok
+test codec::bits::tests::short_fields_match_general_reader_and_preserve_position_on_error ... ok
+test codec::bits::tests::unescapes_and_rejects_broken_sequences ... ok
+test codec::cabac::tests::fixed_arithmetic_trace ... ok
+test codec::cabac::tests::hevc_alignment_preserves_input_and_decodes_shift_register_bins ... ok
+test codec::cabac::tests::hevc_alignment_rejects_invalid_interval_without_mutation ... ok
+test codec::cabac::tests::independent_wide_interval_encoder_roundtrips_all_states ... ok
+test codec::cabac::tests::initialization_and_invalid_streams ... ok
+test codec::cabac::tests::termination_and_truncation_are_explicit ... ok
+test codec::cavlc::tests::every_normative_codeword_decodes_without_consuming_following_bits ... ok
+test codec::cavlc::tests::known_level_and_run_vectors ... ok
+test codec::avc_mbaff_picture::inter_tests::inter_residuals_publish_only_owned_frame_or_field_samples ... ok
+test codec::cavlc::tests::zeros_all_contexts_and_invalid_input ... ok
+test codec::av1_picture::tests::lossy_and_full_intra_match_oracle ... ok
+test codec::avc_decoder::tests::field_dpb_retains_slice_motion_and_reset_releases_it ... ok
+test codec::hevc_act::tests::coefficient_clipping_precedes_the_transform_without_sample_clipping ... ok
+test codec::hevc_act::tests::bypass_is_the_inverse_of_reversible_ycocg_for_signed_residuals ... ok
+test codec::hevc_act::tests::invalid_geometry_and_depth_are_rejected_before_modification ... ok
+test codec::hevc_act::tests::quantized_residuals_keep_chroma_scaling_signed_rounding_and_mixed_depth ... ok
+test codec::hevc_block::tests::explicit_rdpcm_flags_precede_coefficients_and_select_luma_chroma_contexts ... ok
+test codec::hevc_block::tests::implicit_rdpcm_accumulates_horizontal_and_vertical_residual_impulses ... ok
+test codec::hevc_block::tests::large_skip_reads_flag_and_reconstructs_impulse ... ok
+test codec::hevc_block::tests::rotation_of_skipped_and_bypassed_intra_impulses_leaves_inter_unchanged ... ok
+test codec::hevc_block::tests::scan_selection_distinguishes_luma_eight_and_chroma_four ... ok
+test codec::hevc_block::tests::syntax_to_pixels_obeys_skip_and_bypass_selection ... ok
+test codec::hevc_cabac::chroma_initialization_tests::chroma_selection_has_one_context_for_every_initialization ... ok
+test codec::hevc_cabac::palette_context_tests::palette_banks_follow_tables_and_survive_substream_restore ... ok
+test codec::hevc_cabac::pcm_tests::chroma422_pcm_reads_rectangular_planes_and_restarts_entropy ... ok
+test codec::hevc_cabac::pcm_tests::full_chroma_pcm_reads_three_equal_planes_and_restarts_entropy ... ok
+test codec::hevc_cabac::pcm_tests::pcm_reads_planes_scales_depth_and_preserves_contexts_on_restart ... ok
+test codec::av1_decoder::grain::tests::grain_workspace_admission_and_zero_strength_preserve_source ... ok
+test codec::hevc_cabac::pcm_tests::truncated_pcm_and_alignment_errors_poison_entropy_state ... ok
+test codec::hevc_cabac::tests::aligned_bypass_preserves_banks_and_poisoning_requires_reset ... ok
+test codec::hevc_cabac::tests::all_initialization_values_clip_qp_and_select_mps ... ok
+test codec::hevc_cabac::tests::persistent_rice_statistics_follow_entropy_context_snapshots ... ok
+test codec::hevc_cabac::tests::residual_bank_layout_and_xy_adaptation_are_independent ... ok
+test codec::hevc_cabac::tests::slice_table_swap_and_invalid_context_poisoning ... ok
+test codec::hevc_cabac::tests::cross_component_banks_initialize_adapt_and_survive_context_snapshots ... ok
+test codec::hevc_colour_planes::identity_tests::layer_identity_preserves_canonical_motion_pixels_and_boundaries ... ok
+test codec::hevc_colour_planes::tests::assembled_colour_planes_share_completed_pixel_storage ... ok
+test codec::hevc_colour_planes::identity_tests::layered_translation_shifts_each_nested_reference_by_its_saved_layer ... ok
+test codec::hevc_cross_component::tests::alpha_syntax_uses_component_banks_and_truncated_unary ... ok
+test codec::hevc_cross_component::tests::malformed_parameters_and_late_overflow_are_atomic ... ok
+test codec::hevc_colour_planes::tests::translated_pocs_preserve_pixels_motion_and_published_picture ... ok
+test codec::hevc_cross_component::tests::signed_rounding_and_depth_conversion_match_integer_formula ... ok
+test codec::avc::tests::mutations_never_panic_and_successful_geometry_is_positive ... ok
+test codec::hevc_deblock::tests::chroma_threshold_mapping_and_depth ... ok
+test codec::hevc_deblock::tests::luma_thresholds_scale_and_decisions_use_both_endpoint_lines ... ok
+test codec::hevc_deblock::tests::strong_luma_updates_three_samples_with_bounded_changes ... ok
+test codec::hevc_deblock::tests::weak_luma_uses_original_values_and_strict_delta_gate ... ok
+test codec::hevc_deblock::tests::signed_delta_clamping_and_independent_side_exclusion ... ok
+test codec::hevc_decoder::long_term_list_tests::annex_a_ignored_vps_tail_is_retained_for_later_annex_f_activation ... ok
+test codec::avc_slice::tests::bounded_mutations_do_not_panic ... ok
+test codec::hevc_decoder::long_term_list_tests::seek_parameter_priming_keeps_picture_state_empty_and_restores_late_idr ... ok
+test codec::hevc_decoder::substream::tests::framing_opaque_discard_and_sei_message_walk ... ok
+test codec::hevc_hrd::tests::absent_hrd_and_inherited_common_do_not_consume_extra_fields ... ok
+test codec::hevc_hrd::tests::nal_vcl_subpicture_low_delay_and_truncation ... ok
+test codec::hevc_decoder::long_term_list_tests::mixed_reference_lists_append_long_term_pictures_and_apply_modifications ... ok
+test codec::hevc_decoder::long_term_list_tests::bla_starts_with_no_prior_reference_pictures ... ok
+test codec::hevc_intra::tests::disabled_dc_and_axial_boundaries_keep_unmodified_predictors_at_every_depth ... ok
+test codec::hevc_intra::tests::explicit_planar_dc_and_negative_diagonal_vectors ... ok
+test codec::hevc_intra::tests::fractional_angles_round_and_extend_across_the_corner ... ok
+test codec::hevc_intra::tests::full_chroma_smooths_references_without_luma_only_corrections ... ok
+test codec::hevc_intra::tests::invalid_references_and_modes_are_rejected ... ok
+test codec::hevc_intra::tests::angular_transpose_symmetry_and_boundary_clipping ... ok
+test codec::hevc_intra::tests::strong_smoothing_uses_endpoints_and_strict_midpoint_threshold ... ok
+test codec::hevc_intra::tests::substitution_follows_bottom_left_to_top_right_order ... ok
+test codec::hevc_intra_syntax::tests::all_chroma_codes_and_unsplit_remainder_values ... ok
+test codec::hevc_intra_syntax::tests::chroma422_derived_angles_match_normative_table ... ok
+test codec::hevc_intra_syntax::tests::full_chroma_modes_follow_prediction_block_order_and_local_luma ... ok
+test codec::hevc_intra_syntax::tests::monochrome_cu_reads_no_chroma_bins ... ok
+test codec::hevc_intra_syntax::tests::nxn_reads_all_flags_before_indices_and_remainders ... ok
+test codec::hevc_long_term::tests::cycles_accumulate_but_reset_between_sps_and_explicit_entries ... ok
+test codec::hevc_long_term::tests::dpb_resolution_distinguishes_cycles_and_missing_unused_entries ... ok
+test codec::hevc_long_term::tests::empty_sps_and_explicit_lsb_only_reference ... ok
+test codec::hevc_long_term::tests::malformed_geometry_counts_indexes_and_poc_overflow_are_errors ... ok
+test codec::hevc_intra::tests::all_modes_sizes_components_preserve_constant_and_missing_edges ... ok
+test codec::hevc_long_term_fixture::generate_long_term_stream ... ignored, explicit synthetic fixture regeneration; requires FVID_HEVC_LONG_TERM_STREAM
+test codec::avc_slice_group_map::tests::changing_maps_cover_every_small_shape_cycle_and_direction ... ok
+test codec::hevc_intra::tests::mode_candidates_wrap_and_remainder_covers_exact_complement ... ok
+test codec::hevc_long_term_fixture::long_term_picture_cannot_be_reused_as_short_term_without_reset ... ok
+test codec::avc_deblock::traversal_tests::mixed_inter_walker_preserves_intra_filtering_and_rejects_missing_motion_before_mutation ... ok
+test codec::hevc_long_term_fixture::mixed_short_and_long_term_video_matches_independent_hm_pixels_and_rewind ... ok
+test codec::hevc_long_term_fixture::lsb_only_long_term_video_matches_independent_hm_pixels_and_rewind ... ok
+test codec::hevc_long_term_fixture::long_term_reference_video_matches_independent_hm_pixels_and_rewind ... ok
+test codec::hevc_long_term_fixture::sps_selected_long_term_video_matches_independent_hm_pixels_and_rewind ... ok
+test codec::hevc_motion::current_sampling_contract::ready_samples_copy_exactly_and_unavailable_or_overlapping_sources_fail ... ok
+test codec::hevc_motion::integer_precision_tests::predictors_floor_negative_quarters_and_wrap_signed_sixteen_bits ... ok
+test codec::hevc_motion::reference_remap_tests::reordered_and_overlapping_slice_lists_preserve_poc_and_vector ... ok
+test codec::hevc_motion::tests::reference_classification_controls_temporal_scaling_and_availability ... ok
+test codec::av1_decoder::tests::show_existing_timing_ids_and_reference_window_decode_owned_streams ... ok
+test codec::hevc_motion::tests::temporal_prediction_tries_center_after_a_reference_class_mismatch ... ok
+test codec::hevc_nal::tests::all_header_bit_patterns_preserve_fields_or_reject_invalid_bits ... ok
+test codec::hevc_nal::tests::payload_escape_budget_and_random_access_classification ... ok
+test codec::hevc_palette::tests::alternating_scan_and_copy_above_cross_row_boundaries ... ok
+test codec::hevc_palette::tests::bypass_runs_and_component_major_samples_are_bounded ... ok
+test codec::hevc_palette::tests::cabac_bridge_reconstructs_empty_palette_escape_block ... ok
+test codec::hevc_palette::tests::complete_map_adjusts_indices_and_infers_final_copy ... ok
+test codec::hevc_palette::tests::escape_fixed_lengths_and_eg3_are_bounded ... ok
+test codec::hevc_palette::tests::escape_map_consumes_only_subsampled_component_locations ... ok
+test codec::hevc_palette::tests::escape_scaling_clips_and_bypass_rejects_out_of_depth ... ok
+test codec::hevc_palette::tests::index_sequence_uses_rice_count_and_omits_later_binary_index ... ok
+test codec::hevc_palette::tests::malformed_updates_are_atomic_and_depth_is_component_specific ... ok
+test codec::hevc_palette::tests::parameter_initializers_inherit_or_override_as_specified ... ok
+test codec::hevc_palette::tests::reconstructed_maps_transpose_and_subsample_in_luma_coordinates ... ok
+test codec::hevc_palette::tests::reused_order_and_unused_tail_follow_normative_update ... ok
+test codec::hevc_palette::tests::run_prefix_contexts_switch_to_bypass_after_fifth_bin ... ok
+test codec::hevc_palette::tests::truncated_prefix_and_binary_suffix_cover_run_boundaries ... ok
+test codec::hevc_plane::shared_storage_tests::cloned_plane_shares_storage_until_reconstruction_mutates_it ... ok
+test codec::hevc_plane::slice_filter_tests::sao_edge_neighbours_obey_independent_slice_boundaries ... ok
+test codec::hevc_plane::tests::published_blocks_feed_prediction_but_future_samples_do_not ... ok
+test codec::hevc_plane::tests::rectangular_sao_matches_scalar_for_partial_ctus_and_boundaries ... ok
+test codec::hevc_plane::tests::residual_addition_matches_wide_clipping_at_integer_limits ... ok
+test codec::hevc_plane::tests::sao_preserves_protected_samples_but_uses_them_as_neighbours ... ok
+test codec::hevc_plane::tests::sao_uses_original_neighbours_and_commits_only_valid_output ... ok
+test codec::hevc_plane::tests::unavailable_boundaries_and_extreme_residuals_are_safe ... ok
+test codec::hevc_poc::layered::tests::layered_dpb_translation_preserves_published_pixels_and_shifts_nested_identities ... ok
+test codec::hevc_poc::tests::current_msb_checks_both_signed_boundaries ... ok
+test codec::hevc_poc::tests::current_msb_half_range_ties_have_opposite_directions ... ok
+test codec::cavlc::tests::roundtrip_sparse_dense_and_large_levels_in_every_context ... ok
+test codec::hevc_poc::tests::reset_extension_decodes_all_operations_and_keeps_future_tail ... ok
+test codec::hevc_poc::tests::reset_extension_enforces_base_layer_nal_constraints ... ok
+test codec::hevc_poc::tests::reset_extension_infers_and_reads_cycle_presence ... ok
+test codec::hevc_poc::tests::reset_extension_never_reads_beyond_declared_payload ... ok
+test codec::hevc_poc::tests::reset_period_decrements_once_and_infers_missing_period_id ... ok
+test codec::hevc_poc::tests::reset_period_random_access_entry_and_id_reuse ... ok
+test codec::hevc_poc::tests::reset_period_rejects_anchor_mismatch_without_changing_source ... ok
+test codec::hevc_poc::tests::reset_rejects_invalid_width_lsb_and_overflow ... ok
+test codec::hevc_poc::tests::reset_translation_preserves_reference_distances_across_wrap ... ok
+test codec::hevc_poc::tests::signalled_reset_entry_and_explicit_cycle ... ok
+test codec::hevc_pps::chroma_qp_fixture_tests::active_chroma_qp_fixture_parses_table_and_decodes_selection ... ok
+test codec::hevc_long_term_fixture::reordered_b_future_short_and_past_long_references_match_hm_pixels_and_timestamps ... ok
+test codec::hevc_long_term_fixture::b_frames_with_active_mixed_l0_l1_match_hm_pixels_and_rewind ... ok
+test codec::hevc_pps::chroma_qp_fixture_tests::chroma_qp_list_depth_count_offsets_and_truncation_are_bounded ... ok
+test codec::hevc_pps::chroma_qp_fixture_tests::chroma_qp_partition_fixtures_exercise_the_named_entropy_paths ... ok
+test codec::hevc_pps::layered::prepared_reference_tests::identity_reference_retains_real_inter_motion_and_full_reference_identities ... ok
+test codec::hevc_poc::tests::current_msb_matches_normative_equation_for_every_lsb_pair ... ok
+test codec::av1_transform::tests::all_sizes_types_depths_match_libaom ... ok
+test codec::hevc_pps::pcm_fixture_tests::monochrome_pcm_corpus_matches_hm_and_restarts ... ok
+test codec::hevc_pps::pcm_fixture_tests::pcm_reference_pictures_feed_inter_motion_with_and_without_wpp ... ok
+test codec::hevc_pps::pcm_fixture_tests::small_pcm_coding_units_match_every_hm_sample ... ok
+test codec::av1_decoder::tests::short_reference_signaling_matches_explicit_owned_streams ... ok
+test codec::hevc_pps::tests::real_pps_and_truncation ... ok
+test codec::hevc_pps::tests::uniform_and_explicit_tiles_partition_ctus ... ok
+test codec::hevc_profile::tests::absent_general_profile_forbids_sublayer_profile_presence ... ok
+test codec::hevc_profile::tests::profile_constraints_and_sublayer_presence ... ok
+test codec::hevc_profile::tests::real_x265_vps_and_sps_agree_and_leave_next_fields_aligned ... ok
+test codec::hevc_qp::chroma_selection_tests::cu_offsets_add_before_mapping_without_relaxing_base_bounds ... ok
+test codec::hevc_qp::chroma_selection_tests::every_list_size_index_zero_flag_and_truncation ... ok
+test codec::hevc_qp::tests::every_delta_and_asymmetric_limits ... ok
+test codec::hevc_qp::tests::full_chroma_qp_uses_linear_mapping_and_saturation ... ok
+test codec::hevc_qp::tests::prediction_wrap_negative_rounding_and_chroma_plateaus ... ok
+test codec::hevc_reference_list::tests::current_only_lists_repeat_without_a_completed_picture ... ok
+test codec::hevc_reference_list::tests::explicit_modification_controls_current_selection_and_duplicates ... ok
+test codec::hevc_reference_list::tests::truncated_l0_keeps_current_but_l1_keeps_normal_prefix ... ok
+test codec::hevc_residual::tests::alignment_precedes_sign_only_when_escape_data_is_present ... ok
+test codec::hevc_residual::tests::complete_dc_block_reads_level_sign_and_remainder ... ok
+test codec::hevc_residual::tests::every_position_size_component_and_scan_matches_normative_bins ... ok
+test codec::hevc_residual::tests::extended_remainder_normative_vectors_and_truncations ... ok
+test codec::hevc_residual::tests::groups_skip_infer_dc_carry_level_context_and_reset_rice ... ok
+test codec::hevc_residual::tests::persistent_statistic_uses_remainders_and_four_observations_per_parameter ... ok
+test codec::hevc_residual::tests::rice_adaptation_uses_previous_absolute_level_and_caps_at_four ... ok
+test codec::hevc_pps::chroma_qp_fixture_tests::chroma_qp_high_depth_fixtures_match_every_hm_sample_and_reset ... ok
+test codec::hevc_residual::tests::sign_hiding_infers_lowest_coefficient_from_group_parity ... ok
+test codec::hevc_residual::tests::significance_contexts_obey_group_edges_and_component_banks ... ok
+test codec::hevc_rps::tests::explicit_set_and_slice_predictor_distance ... ok
+test codec::hevc_rps::tests::invalid_predictors_and_derived_capacity_are_rejected ... ok
+test codec::hevc_rps::tests::predicted_set_crosses_zero_preserving_use_flags_and_order ... ok
+test codec::hevc_sao::tests::band_wrap_depth_scaling_clipping_and_invalid_parameters ... ok
+test codec::hevc_sao::tests::chroma_edge_type_and_class_are_shared_but_offsets_are_separate ... ok
+test codec::hevc_sao::tests::chroma_uses_its_own_scale_for_both_components ... ok
+test codec::hevc_sao::tests::edge_categories_missing_neighbours_and_directions ... ok
+test codec::hevc_sao::tests::merges_short_circuit_and_disabled_slices_consume_nothing ... ok
+test codec::hevc_sao::tests::scaled_offsets_preserve_signs_and_merge_without_rescaling ... ok
+test codec::hevc_sao::tests::ten_bit_band_offsets_signs_and_position ... ok
+test codec::hevc_scaling::tests::defaults_flat_and_diagonal_expansion ... ok
+test codec::hevc_scaling::tests::direct_diagonal_index_matches_scan_at_every_coordinate ... ok
+test codec::hevc_scaling::tests::explicit_deltas_copy_dc_wraparound_and_chroma_inference ... ok
+test codec::hevc_sei::tests::a_field_of_0ff_runs_adds_up_to_one_number ... ok
+test codec::hevc_sei::tests::a_message_that_is_too_short_for_the_volume_it_claims_states_nothing ... ok
+test codec::hevc_sei::tests::a_real_light_level_message_states_the_lights_it_names ... ok
+test codec::hevc_sei::tests::a_real_mastering_display_message_describes_the_volume_it_names ... ok
+test codec::hevc_sei::tests::active_parameter_payload_bounds_flags_and_alignment ... ok
+test codec::hevc_sei::tests::an_unread_message_is_passed_over_and_leaves_no_metadata ... ok
+test codec::hevc_sei::tests::messages_are_read_by_type_and_size_and_a_known_payload_is_not_consumed ... ok
+test codec::hevc_sei::tests::one_unit_can_carry_both_halves_and_a_later_block_overrides_only_what_it_knows ... ok
+test codec::hevc_sei::tests::only_sei_units_are_walked_and_a_multilayer_one_is_refused ... ok
+test codec::hevc_sei::tests::output_metadata_roundtrips_escaped_rbsp_and_rejects_invalid_light ... ok
+test codec::hevc_sei::tests::the_two_halves_of_one_stream_add_up_to_the_whole_volume ... ok
+test codec::hevc_sei::tests::trailing_bits_end_the_walk_and_a_truncated_payload_does_not ... ok
+test codec::hevc_slice::tests::real_idr_header_matches_trace_and_keeps_cabac_bytes ... ok
+test codec::hevc_sps::tests::real_main10_conformance_window_uses_chroma_units ... ok
+test codec::hevc_sps::tests::real_sps_geometry_tools_timing_and_truncation ... ok
+test codec::hevc_tiles::fixture_tests::cabac_alignment_fixture_admits_full_chroma_metadata_and_picture ... ok
+test codec::hevc_pps::pcm_fixture_tests::pcm_fixtures_match_hm_samples_restart_and_filter_policy ... ok
+test codec::hevc_cross_component::tests::owned_streams_exercise_nonzero_cross_component_prediction ... ok
+test codec::av1_decoder::tests::segmentation_data_inherits_replaces_and_clears_without_map_symbols ... ok
+test codec::hevc_tiles::fixture_tests::tiled_picture_checks_stream_bounds_geometry_and_combined_budget ... ok
+test codec::hevc_tiles::fixture_tests::tiled_segment_headers_accept_tile_scan_order_and_reconstruct ... ok
+test codec::hevc_long_term_fixture::poc_reset_long_term_stream_uses_long_term_motion_across_wraps ... ok
+test codec::hevc_tiles::fixture_tests::two_column_fixture_decodes_tiles_in_non_raster_order ... ok
+test codec::hevc_tiles::tests::asymmetric_tiles_visit_each_ctu_once_in_tile_scan_order ... ok
+test codec::hevc_tiles::tests::invalid_geometry_and_overflow_refuse_before_allocation ... ok
+test codec::hevc_tiles::tests::scalar_tile_address_conversion_does_not_allocate_or_overflow_at_u32_limit ... ok
+test codec::hevc_transform::tests::dc_scaling_depth_sizes_and_signed_rounding ... ok
+test codec::hevc_transform::tests::dst_impulse_is_not_dct_and_skip_and_bypass_are_distinct ... ok
+test codec::hevc_transform::tests::factored_dct_matches_dense_matrix_for_all_sizes ... ok
+test codec::hevc_transform::tests::four_by_four_matches_factored_reference_with_clipping ... ok
+test codec::hevc_transform::tests::nonflat_scaling_changes_ac_and_extreme_skip_is_bounded ... ok
+test codec::hevc_transform::tests::rejects_invalid_inputs_before_shifting_or_indexing ... ok
+test codec::hevc_transform_tree::tests::chroma422_false_parent_suppresses_both_descendant_flags ... ok
+test codec::hevc_transform_tree::tests::chroma422_split_minimum_parent_retains_both_blocks_at_last_child ... ok
+test codec::hevc_transform_tree::tests::chroma422_unsplit_reads_cb_pair_before_cr_pair ... ok
+test codec::hevc_transform_tree::tests::full_chroma_four_by_four_leaves_read_own_flags_and_coordinates ... ok
+test codec::hevc_transform_tree::tests::monochrome_tree_consumes_only_luma_syntax ... ok
+test codec::hevc_transform_tree::tests::split_four_by_four_defers_parent_chroma_to_last_child ... ok
+test codec::hevc_transform_tree::tests::unsplit_root_contexts_and_truncation ... ok
+test codec::hevc_tree::tests::depth_contexts_follow_completed_siblings_in_z_order ... ok
+test codec::hevc_tree::tests::picture_edges_force_splits_without_consuming_bins ... ok
+test codec::hevc_vps::tests::ordering_inference_monotonicity_and_bounds ... ok
+test codec::hevc_vps::tests::real_vps_and_every_truncation ... ok
+test codec::hevc_vps_extension::tests::bounded_extension_counts_and_format_validation ... ok
+test codec::hevc_vps_extension::tests::representation_inference_crop_depth_dependency_and_future_tail ... ok
+test codec::hevc_vps_extension::tests::single_layer_alignment_and_every_byte_truncation ... ok
+test codec::hevc_vps_extension::tests::vui_optional_fields_truncation_and_hrd_inheritance_bounds ... ok
+test codec::hevc_vui::aspect_tests::standard_extended_and_unspecified_sample_aspects_are_distinct ... ok
+test codec::hevc_vui::tests::optional_colour_window_and_restrictions_survive_parsing ... ok
+test codec::hevc_vui::tests::real_sps_vui_timing_and_end_alignment ... ok
+test codec::vp9::tests::real_key_and_inter_headers_and_atomic_truncation ... ok
+test codec::vp9::tests::superframes_are_little_endian_and_bounded ... ok
+test codec::vp9::tests::tile_lengths_cannot_escape_the_partition ... ok
+test codec::vp9_bool::tests::known_binary_fractions_and_extreme_probabilities ... ok
+test codec::vp9_bool::tests::marker_padding_and_exhaustion ... ok
+test codec::hevc_pps::chroma_qp_fixture_tests::active_chroma_qp_fixtures_match_hm_pixels_and_reset ... ok
+test codec::vp9_decoder::depth_tests::ten_and_twelve_bit_motion_crops_and_lossless_match_oracles ... ok
+test codec::hevc_pps::pcm_fixture_tests::subsampled_and_full_chroma_pcm_corpus_matches_hm_and_restarts ... ok
+test codec::hevc_residual::tests::rice_remainders_cross_prefix_escape_and_integer_boundaries ... ok
+test codec::hevc_pps::pcm_fixture_tests::deep_pcm_streams_match_hm_with_active_pcm_and_restart ... ok
+test codec::vp9_decoder::tests::key_and_inter_frames_match_independent_pixel_oracle ... ok
+test codec::vp9_filter::tests::batch4_matches_per_lane_filter ... ok
+test codec::vp9_intra::tests::directional_ramps_and_true_motion_clipping ... ok
+test codec::vp9_intra::tests::every_mode_size_and_depth_preserves_constant_references ... ok
+test codec::vp9_motion::tests::asymmetric_chroma_selects_normative_subblock_pairs_and_axis_fractions ... ok
+test codec::vp9_motion::tests::interpolation_integer_identity_bilinear_and_border_extension ... ok
+test codec::vp9_motion::tests::scaled_interpolation_matches_analytic_gradient_pixels ... ok
+test codec::vp9_motion::tests::scaled_positions_cover_signed_motion_chroma_and_ratio_limits ... ok
+test codec::vp9_picture::reference_context::tests::fixed_reference_order_covers_every_nonuniform_sign_bias ... ok
+test codec::vp9_picture::reference_context::tests::reference_contexts_cover_absent_intra_single_and_compound_neighbours ... ok
+test codec::vp9_picture::tests::complete_synthetic_keyframe_matches_ffmpeg_pixel_oracle ... ok
+test codec::vp9_probs::adaptation_tests::adaptation_uses_saved_context_and_preserves_intra_header_updates ... ok
+test codec::vp9_probs::adaptation_tests::forced_partition_symbols_include_unread_tree_branches ... ok
+test codec::vp9_probs::adaptation_tests::merge_rounding_saturation_and_empty_counts ... ok
+test codec::vp9_probs::tests::real_keyframe_compressed_header_and_partition_bounds ... ok
+test codec::vp9_probs::tests::remapped_probabilities_are_nonzero_for_the_entire_domain ... ok
+test codec::vp9_residual::tests::scans_are_permutations_with_available_context_neighbors ... ok
+test codec::vp9_residual::tests::zero_eob_and_dequantization_limits ... ok
+test codec::hevc_motion::tests::separable_prediction_matches_scalar_at_all_phases_and_borders ... ok
+test color::hdr::tests::a_containers_box_owns_the_half_it_names ... ok
+test color::hdr::tests::a_mastering_volume_answers_for_a_peak_the_content_never_stated ... ok
+test color::hdr::tests::a_read_garbage_order_volume_is_not_hdr10 ... ok
+test color::hdr::tests::a_statement_fills_only_the_codes_it_leaves_unspecified ... ok
+test color::hdr::tests::a_volume_outside_the_unit_square_is_refused ... ok
+test color::hdr::tests::clli_reads_maxcll_and_maxfall_in_candelas ... ok
+test color::hdr::tests::colour_description_resolves_h273_codes ... ok
+test color::hdr::tests::corners_and_payload_describe_the_same_volume ... ok
+test color::hdr::tests::empty_light_falls_back_to_the_assumed_peak ... ok
+test color::hdr::tests::mastering_display_feeds_the_tone_mapper_as_a_panel ... ok
+test color::hdr::tests::mdcv_payload_round_trips ... ok
+test color::hdr::tests::mdcv_reads_the_green_blue_red_order_the_standard_writes ... ok
+test color::hdr::tests::short_payloads_are_refused_not_panicked ... ok
+test color::log::tests::apple_log_hits_the_anchors_its_transcriptions_publish ... ok
+test color::log::tests::arri_log_c_is_normalised_to_grey_at_every_reference_point ... ok
+test color::log::tests::canon_log_codes_match_the_canon_tables ... ok
+test color::log::tests::code_mapping_scales_with_bit_depth ... ok
+test color::log::tests::every_code_a_camera_writes_comes_back_to_itself ... ok
+test color::log::tests::every_profile_is_monotonic_and_greys_get_darker_downwards ... ok
+test color::log::tests::every_profile_round_trips_over_its_own_domain ... ok
+test color::log::tests::labels_round_trip ... ok
+test color::log::tests::log_c_4_unwraps_in_the_gamut_its_specification_names ... ok
+test color::log::tests::log_profiles_reach_far_above_diffuse_white ... ok
+test color::log::tests::panasonic_v_log_hits_the_varicam_table ... ok
+test color::log::tests::sony_s_log3_hits_sony_published_codes ... ok
+test color::log::tests::sony_s_log_codes_follow_the_legal_range_table ... ok
+test color::primaries::tests::a_typed_gamut_name_survives_case_and_separators ... ok
+test color::primaries::tests::arri_wide_gamut_4_reproduces_arri_s_published_xyz_matrix ... ok
+test color::primaries::tests::bt709_gamut_fits_inside_bt2020 ... ok
+test color::primaries::tests::bt709_matrix_rows_match_itu_rec_709 ... ok
+test color::primaries::tests::bt709_to_bt2020_is_identity_on_rec709_gamut ... ok
+test color::primaries::tests::camera_gamut_to_bt709_matches_the_published_matrices ... ok
+test color::primaries::tests::camera_gamuts_are_wider_than_bt709_and_mutually_distinct ... ok
+test color::primaries::tests::camera_gamuts_derive_the_published_luma_weights ... ok
+test color::primaries::tests::decode_matrix_matches_the_published_coefficients ... ok
+test color::primaries::tests::every_named_gamut_resolves_from_its_own_label ... ok
+test color::primaries::tests::gamut_remap_is_identity_within_one_space ... ok
+test color::primaries::tests::kr_kb_matches_published_luma_weights ... ok
+test color::primaries::tests::matrix_codes_round_trip ... ok
+test color::primaries::tests::primaries_codes_cover_h273 ... ok
+test color::primaries::tests::rgb_to_xyz_maps_white_to_the_illuminant ... ok
+test color::primaries::tests::studio_range_round_trips ... ok
+test color::primaries::tests::vendor_and_recommendation_names_reach_the_same_triangle ... ok
+test color::primaries::tests::white_point_maps_to_itself ... ok
+test color::tonemap::tests::bt2020_to_bt709_uses_an_accurate_matrix ... ok
+test color::tonemap::tests::clip_leaves_sdr_content_untouched ... ok
+test color::tonemap::tests::curve_labels_round_trip ... ok
+test color::tonemap::tests::curves_match_the_ffmpeg_tonemap_reference_values ... ok
+test color::tonemap::tests::every_curve_is_monotonic_and_stays_in_range ... ok
+test color::tonemap::tests::gamut_compression_fixes_negative_legs_and_keeps_super_white ... ok
+test color::tonemap::tests::highlight_desaturation_kicks_in_above_paper_white ... ok
+test color::tonemap::tests::maxrgb_preserves_saturated_highlight_ratios ... ok
+test color::tonemap::tests::pq_code_maps_through_a_full_pipeline ... ok
+test color::tonemap::tests::tone_map_is_channel_uniform_for_greys ... ok
+test color::tonemap::tests::tone_map_preserves_hue_below_the_joint ... ok
+test color::tonemap::tests::tone_map_sends_the_content_peak_to_display_peak ... ok
+test color::transfer::tests::bt240_is_continuous_and_above_bt709 ... ok
+test color::transfer::tests::bt709_and_srgb_disagree_at_mid_grey ... ok
+test color::transfer::tests::bt709_carries_the_standard_s_own_breakpoint_step ... ok
+test color::transfer::tests::codes_and_labels_cover_h273 ... ok
+test color::transfer::tests::hdr_curves_round_trip_in_nits ... ok
+test color::transfer::tests::hlg_black_lift_matches_the_signal_domain_form ... ok
+test color::transfer::tests::hlg_curve_and_inverse_agree_with_bt_2100 ... ok
+test color::transfer::tests::hlg_low_segment_is_not_twelve_times_too_hot ... ok
+test color::transfer::tests::hlg_ootf_follows_bt_2100_2_form ... ok
+test color::transfer::tests::pq_anchors_match_st_2084 ... ok
+test color::transfer::tests::sdr_curves_round_trip ... ok
+test color::transfer::tests::table_is_monotonic_and_bounded ... ok
+test codec::vp9_transform::tests::all_transform_sizes_and_kinds_match_independent_libvpx_pixels ... ok
+test codec::hevc_tiles::fixture_tests::extended_precision_pixels_match_hm_and_reset ... ok
+test codec::vp9_decoder::motion_tests::moving_picture_reference_refresh_and_filters_match_every_pixel ... ok
+test codec::hevc_motion::current_fixture_tests::owned_ibc_streams_copy_current_samples_and_interpolate_odd_chroma ... ok
+test codec::hevc_act::tests::every_owned_scm_stream_uses_act_and_matches_pixels_after_reset ... ok
+test codec::hevc_tiles::fixture_tests::tiled_fixtures_match_every_hm_sample_and_reset ... ok
+test codec::vp9_decoder::edge_transform_tests::transform_blocks_clipped_by_the_frame_edge_keep_their_context_in_frame ... ok
+test codec::hevc_tiles::fixture_tests::full_chroma_pixels_match_hm_and_reset ... ok
+test codec::vp9_decoder::malformed_tests::bounded_truncations_and_mutations_never_publish_a_partial_picture_or_panic ... ok
+test codec::hevc_tiles::fixture_tests::tiled_segments_match_every_hm_sample_and_reset ... ok
+test codec::vp9_decoder::adaptation_tests::adaptive_frames_tiles_and_keyframe_resets_match_every_sample ... ok
+test codec::hevc_act::depth_fixtures::mixed_deep_and_slice_offset_streams_use_intra_and_inter_act ... ok
+test codec::av1_decoder::tests::sequences_tiles_inter_prediction_and_high_depth_match_oracle ... ok
+test codec::av1_decoder::tests::damaged_streams_are_bounded_and_do_not_panic has been running for over 60 seconds
+test codec::av1_picture::inter::chroma_axis_tests::fractional_filters_match_scalar_edges_and_identity_scaling has been running for over 60 seconds
+test codec::av1_decoder::tests::damaged_streams_are_bounded_and_do_not_panic ... ok
+test codec::av1_picture::inter::chroma_axis_tests::fractional_filters_match_scalar_edges_and_identity_scaling ... ok
+
+test result: ok. 582 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 7682.17s
+

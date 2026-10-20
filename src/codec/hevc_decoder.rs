@@ -38,11 +38,14 @@ pub struct Decoded {
     pub poc: i32,
     pub output: bool,
 }
+type RawParameter = (u8, u8, Arc<[u8]>);
 #[derive(Clone)]
 struct ParameterSets {
     vps: Vec<Vps>,
     sets: Vec<Sps>,
     pps_nals: Vec<(u8, Vec<u8>)>,
+    raw_parameters: Vec<RawParameter>,
+    raw_generation: u64,
     pairs: Vec<(Sps, Pps)>,
 }
 pub struct HevcDecoder {
@@ -61,14 +64,69 @@ pub struct HevcDecoder {
     primed_active_parameters: Option<hevc_sei::ActiveParameterSets>,
     pending_active_parameters: Option<hevc_sei::ActiveParameterSets>,
     active_parameters: Option<hevc_sei::ActiveParameterSets>,
+    cvs_raw_generation: u64,
+    cvs_no_update: bool,
     length: u8,
     budget: usize,
     failed: bool,
 }
+// Select the declared SPS before parsing PPS tools. Trying every SPS and
+// discarding errors hides a valid binding's actual malformed/unsupported tool.
+fn bind_pps<'a>(
+    nal: &[u8],
+    sets: &'a [Sps],
+    budget: usize,
+    missing: &str,
+) -> Result<(&'a Sps, Pps)> {
+    let id = Pps::referenced_sps_id(nal, budget)?;
+    let sps = sets.iter().find(|s| s.id == id).ok_or_else(|| invalid(missing))?;
+    Ok((sps, Pps::parse(nal, sps, budget)?))
+}
 impl HevcDecoder {
+    fn raw_ownership(lists: &[&Vec<RawParameter>], extra: usize, budget: usize) -> Result<()> {
+        let mut seen = [(std::ptr::null::<u8>(), 0usize); 96];
+        let mut count = 0;
+        let mut bytes = extra;
+        for list in lists {
+            bytes = bytes.checked_add(list.capacity().saturating_mul(std::mem::size_of::<RawParameter>()))
+                .ok_or_else(||invalid("HEVC raw parameter storage overflow"))?;
+            for (_,_,raw) in list.iter() {
+                let ptr = Arc::as_ptr(raw) as *const u8;
+                if seen[..count].iter().any(|(p,_)| *p == ptr) {continue;}
+                if count == seen.len() {return Err(invalid("HEVC raw parameter identity domain exceeded"));}
+                seen[count] = (ptr,raw.len()); count += 1;
+                bytes = bytes.checked_add(raw.len()).and_then(|n|n.checked_add(2*std::mem::size_of::<usize>()))
+                    .ok_or_else(||invalid("HEVC raw parameter storage overflow"))?;
+            }
+        }
+        if bytes > budget {return Err(invalid("HEVC raw parameter storage exceeds decode budget"));}
+        Ok(())
+    }
+    fn record_raw(
+        &self, updates: &mut Vec<RawParameter>, staged: Option<&ParameterSets>,
+        kind:u8, id:u8, nal:&[u8],
+    ) -> Result<bool> {
+        let queued = updates.iter().position(|(k,i,_)| *k==kind && *i==id);
+        let previous = queued.map(|i| &updates[i].2).or_else(||self.params.raw_parameters.iter()
+            .find(|(k,i,_)|*k==kind && *i==id).map(|p|&p.2));
+        if previous.is_some_and(|raw|raw.as_ref()==nal) {return Ok(false);}
+        let overwrite = previous.is_some();
+        if let Some(index)=queued {updates.remove(index);}
+        updates.try_reserve(1).map_err(|_|invalid("HEVC raw parameter allocation failed"))?;
+        let cached = self.params.raw_parameters.iter().chain(&self.initial_params.raw_parameters)
+            .find(|(k,i,raw)|*k==kind && *i==id && raw.as_ref()==nal).map(|p|Arc::clone(&p.2));
+        let extra = if cached.is_some(){0}else{nal.len().checked_add(2*std::mem::size_of::<usize>())
+            .ok_or_else(||invalid("HEVC raw parameter storage overflow"))?};
+        let empty=Vec::new();
+        Self::raw_ownership(&[&self.params.raw_parameters,&self.initial_params.raw_parameters,
+            updates,staged.map_or(&empty,|p|&p.raw_parameters)],extra,self.budget)?;
+        updates.push((kind,id,cached.unwrap_or_else(||Arc::from(nal))));
+        Ok(overwrite)
+    }
     pub fn from_configuration(data: &[u8], budget: usize) -> Result<Self> {
         let config = HevcConfig::parse(data)?;
         let mut vps = Vec::new();
+        let mut raw_parameters: Vec<RawParameter> = Vec::new();
         for array in &config.arrays {
             if array.nal_type == 32 {
                 for nal in &array.units {
@@ -76,6 +134,9 @@ impl HevcDecoder {
                     if vps.iter().any(|v: &Vps| v.id == new.id) {
                         return Err(invalid("duplicate HEVC VPS"));
                     }
+                    raw_parameters.try_reserve(1).map_err(|_|invalid("HEVC raw parameter allocation failed"))?;
+                    Self::raw_ownership(&[&raw_parameters,&raw_parameters],nal.len()+2*std::mem::size_of::<usize>(),budget)?;
+                    raw_parameters.push((32,new.id,Arc::from(&nal[..])));
                     vps.push(new);
                 }
             }
@@ -88,6 +149,9 @@ impl HevcDecoder {
                     if sets.iter().any(|s: &Sps| s.id == sps.id) {
                         return Err(invalid("duplicate HEVC SPS"));
                     }
+                    raw_parameters.try_reserve(1).map_err(|_|invalid("HEVC raw parameter allocation failed"))?;
+                    Self::raw_ownership(&[&raw_parameters,&raw_parameters],nal.len()+2*std::mem::size_of::<usize>(),budget)?;
+                    raw_parameters.push((33,sps.id,Arc::from(&nal[..])));
                     sets.push(sps);
                 }
             }
@@ -97,10 +161,8 @@ impl HevcDecoder {
         for array in &config.arrays {
             if array.nal_type == 34 {
                 for nal in &array.units {
-                    let pair = sets
-                        .iter()
-                        .find_map(|s| Pps::parse(nal, s, budget).ok().map(|p| (s.clone(), p)))
-                        .ok_or_else(|| invalid("HEVC PPS has no valid SPS"))?;
+                    let (sps, pps) = bind_pps(nal, &sets, budget, "HEVC PPS has no valid SPS")?;
+                    let pair = (sps.clone(), pps);
                     if pairs.iter().any(|(_, p): &(Sps, Pps)| p.id == pair.1.id) {
                         return Err(invalid("duplicate HEVC PPS"));
                     }
@@ -112,6 +174,7 @@ impl HevcDecoder {
         if pairs.is_empty() {
             return Err(invalid("HEVC configuration has no parameter-set pair"));
         }
+        Self::raw_ownership(&[&raw_parameters,&raw_parameters],0,budget)?;
         let mut primed = HdrMetadata::default();
         let mut primed_active_parameters = None;
         for array in &config.arrays {
@@ -136,6 +199,8 @@ impl HevcDecoder {
             vps,
             sets,
             pps_nals,
+            raw_parameters,
+            raw_generation: 0,
             pairs,
         };
         Ok(Self {
@@ -154,6 +219,8 @@ impl HevcDecoder {
             pending_active_parameters: primed_active_parameters.clone(),
             primed_active_parameters,
             active_parameters: None,
+            cvs_raw_generation: 0,
+            cvs_no_update: false,
             length: config.length_size,
             budget,
             failed: false,
@@ -179,6 +246,8 @@ impl HevcDecoder {
         self.hdr = self.primed;
         self.pending_active_parameters.clone_from(&self.primed_active_parameters);
         self.active_parameters = None;
+        self.cvs_raw_generation = 0;
+        self.cvs_no_update = false;
         self.failed = false;
     }
     /// The static HDR light the stream stated of itself: the SEI messages its
@@ -219,15 +288,22 @@ impl HevcDecoder {
         }
         let mut updated: Option<ParameterSets> = None;
         let mut seen_slice = false;
+        let mut first_vcl = None;
+        let mut prefix_end = false;
+        let mut raw_updates = Vec::new();
+        let mut raw_overwrite = false;
         for nal in NalUnits::new(packet, self.length)? {
             let nal = nal?;
             let header = NalHeader::parse(nal)?;
             header.require_base_layer()?;
+            if header.is_vcl() && first_vcl.is_none() {first_vcl=Some(header.unit_type);}
+            if !seen_slice && matches!(header.unit_type,36|37) {prefix_end=true;}
             seen_slice |= header.is_vcl();
             let params = updated.as_ref().unwrap_or(&self.params);
             match header.unit_type {
                 32 => {
                     let new = Vps::parse(nal, self.budget)?;
+                    raw_overwrite |= self.record_raw(&mut raw_updates,updated.as_ref(),32,new.id,nal)?;
                     let previous = params.vps.iter().find(|v| v.id == new.id);
                     if previous.is_some_and(|v| *v == new && v.same_reset_semantics(&new)) {
                         continue;
@@ -251,6 +327,7 @@ impl HevcDecoder {
                 }
                 33 => {
                     let new = Sps::parse(nal, self.budget)?;
+                    raw_overwrite |= self.record_raw(&mut raw_updates,updated.as_ref(),33,new.id,nal)?;
                     if params.sets.iter().any(|s| *s == new) {
                         continue;
                     }
@@ -265,11 +342,8 @@ impl HevcDecoder {
                     }
                 }
                 34 => {
-                    let pps = params
-                        .sets
-                        .iter()
-                        .find_map(|s| Pps::parse(nal, s, self.budget).ok())
-                        .ok_or_else(|| invalid("HEVC in-band PPS has no valid SPS"))?;
+                    let pps = bind_pps(nal, &params.sets, self.budget,
+                        "HEVC in-band PPS has no valid SPS")?.1;
                     if params
                         .pps_nals
                         .iter()
@@ -277,6 +351,7 @@ impl HevcDecoder {
                     {
                         continue;
                     }
+                    raw_overwrite |= params.pps_nals.iter().any(|(id,_)|*id==pps.id);
                     if seen_slice {
                         return Err(invalid("HEVC changed PPS follows picture slices"));
                     }
@@ -290,16 +365,35 @@ impl HevcDecoder {
                 _ => {}
             }
         }
+        let begins_cvs = self.sequence_ended || self.previous_poc.is_none() || prefix_end
+            || first_vcl.is_some_and(|kind|matches!(kind,16..=20));
+        if raw_overwrite && !begins_cvs
+            && self.cvs_no_update {
+            return Err(invalid("HEVC active parameter SEI forbids parameter updates"));
+        }
+        if raw_overwrite {
+            let params=updated.get_or_insert_with(||self.params.clone());
+            params.raw_generation=params.raw_generation.checked_add(1)
+                .ok_or_else(||invalid("HEVC raw parameter generation overflow"))?;
+        }
+        if !raw_updates.is_empty() {
+            let params=updated.get_or_insert_with(||self.params.clone());
+            for new in raw_updates {
+                if let Some(old)=params.raw_parameters.iter_mut().find(|p|p.0==new.0 && p.1==new.1){*old=new;}else{params.raw_parameters.push(new);}
+            }
+        }
+        if let Some(params)=&updated {
+            Self::raw_ownership(&[&self.params.raw_parameters,&self.initial_params.raw_parameters,
+                &params.raw_parameters],0,self.budget)?;
+        }
         if let Some(params) = &mut updated {
             params.pairs = params
                 .pps_nals
                 .iter()
                 .map(|(_, nal)| {
-                    params
-                        .sets
-                        .iter()
-                        .find_map(|s| Pps::parse(nal, s, self.budget).ok().map(|p| (s.clone(), p)))
-                        .ok_or_else(|| invalid("HEVC updated PPS has no valid SPS"))
+                    let (sps, pps) = bind_pps(nal, &params.sets, self.budget,
+                        "HEVC updated PPS has no valid SPS")?;
+                    Ok((sps.clone(), pps))
                 })
                 .collect::<Result<_>>()?;
         }
@@ -438,10 +532,15 @@ impl HevcDecoder {
             } else if matches!(header.unit_type, 32..=34) {
                 // Parameter sets were validated before parsing slices.
             } else if hevc_sei::is_sei_unit(header.unit_type) {
-                if let Ok(Some(active)) = hevc_sei::active_parameters_from_nal(nal, self.budget) {
+                if let Ok(Some(mut active)) = hevc_sei::active_parameters_from_nal(nal, self.budget) {
                     if slice.is_some() {
                         return Err(invalid("HEVC active parameter SEI follows picture slices"));
                     }
+                    // Multiple declarations can precede the same picture,
+                    // including in parameter-only packets. A later zero does
+                    // not revoke an earlier no-update promise.
+                    active.no_parameter_set_update |= self.pending_active_parameters
+                        .as_ref().is_some_and(|p| p.no_parameter_set_update);
                     self.pending_active_parameters = Some(active);
                 }
                 // An SEI this module cannot walk costs the guidance, never the
@@ -493,7 +592,15 @@ impl HevcDecoder {
         let begins_cvs = new_sequence || self.previous_poc.is_none()
             || header.nal.is_idr() || matches!(header.nal.unit_type, 16..=18);
         self.sequence_ended = end_after_picture;
+        if begins_cvs {
+            self.cvs_raw_generation = self.params.raw_generation;
+            self.cvs_no_update = false;
+        }
         if let Some(active) = self.pending_active_parameters.take() {
+            if active.no_parameter_set_update && self.params.raw_generation != self.cvs_raw_generation {
+                return Err(invalid("HEVC active parameter SEI forbids parameter updates"));
+            }
+            self.cvs_no_update |= active.no_parameter_set_update;
             if active.vps_id != sps.vps_id || active.sps_ids[0] != sps.id {
                 return Err(invalid("HEVC active parameter SEI disagrees with picture binding"));
             }
@@ -514,10 +621,18 @@ impl HevcDecoder {
         if header.nal.temporal_id as usize >= sps.ordering.len() {
             return Err(invalid("HEVC slice exceeds SPS temporal layers"));
         }
+        // No-update guidance remains about parameter identity, including
+        // known metadata unused by this base layer, not reconstruction equality.
+        if !begins_cvs
+            && self.cvs_no_update
+            && self.decoded_sps.as_ref().is_some_and(|previous| previous != sps)
+        {
+            return Err(invalid("HEVC active parameter SEI forbids parameter updates"));
+        }
         if self
             .decoded_sps
             .as_ref()
-            .is_some_and(|previous| previous != sps)
+            .is_some_and(|previous| !previous.same_base_decoding_parameters(sps))
         {
             if !header.nal.is_irap() {
                 return Err(invalid("HEVC SPS change requires a random-access picture"));

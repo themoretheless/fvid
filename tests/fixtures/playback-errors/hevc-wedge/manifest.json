@@ -1,0 +1,25 @@
+{
+  "provenance": "Authored mathematical I.6.6 component masks; not video playback or independent interoperability proof.",
+  "cases": [
+    {
+      "size": 4,
+      "count": 86,
+      "file": "4.bin"
+    },
+    {
+      "size": 8,
+      "count": 802,
+      "file": "8.bin"
+    },
+    {
+      "size": 16,
+      "count": 510,
+      "file": "16.bin"
+    },
+    {
+      "size": 32,
+      "count": 510,
+      "file": "32.bin"
+    }
+  ]
+}

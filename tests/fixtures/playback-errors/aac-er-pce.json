@@ -1,0 +1,1245 @@
+{
+  "provenance": "Own ER AAC-LC (AOT 17), ER AAC-LTP (AOT 19), and ER AAC-LD (AOT 23) explicit PCE configurations, packets, MP4/Matroska containers, and scalar PCM references. No private media, FFmpeg, network, or foreign decoder.",
+  "cases": [
+    {
+      "kind": "core",
+      "name": "aot17-960-mono-tag5",
+      "aot": 17,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 1,
+      "mask": 4,
+      "asc": "8b04058400000a0000",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 8
+        },
+        {
+          "offset": 8,
+          "bytes": 8
+        },
+        {
+          "offset": 16,
+          "bytes": 8
+        },
+        {
+          "offset": 24,
+          "bytes": 8
+        },
+        {
+          "offset": 32,
+          "bytes": 8
+        },
+        {
+          "offset": 40,
+          "bytes": 8
+        }
+      ],
+      "reference_offset": 0,
+      "reference_bytes": 23040,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot17-960-mono-tag5-synthetic.mp4",
+        "sha256": "c0b75925f4354afb1883a9f2165017b7a7631d8cea26886cab52aaba2a75258e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b04058400000a0000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-aot17-960-mono-tag5-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot17-960-stereo-tag9",
+      "aot": 17,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "8b0405840000320000",
+      "frames": [
+        {
+          "offset": 48,
+          "bytes": 16
+        },
+        {
+          "offset": 64,
+          "bytes": 16
+        },
+        {
+          "offset": 80,
+          "bytes": 16
+        },
+        {
+          "offset": 96,
+          "bytes": 16
+        },
+        {
+          "offset": 112,
+          "bytes": 16
+        },
+        {
+          "offset": 128,
+          "bytes": 16
+        }
+      ],
+      "reference_offset": 23040,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot17-960-stereo-tag9-synthetic.mp4",
+        "sha256": "894c771fd5128189fe4046288a6d6fd963e97d7217b0ad0781f86ae2ee3b348b",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0405840000320000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-aot17-960-stereo-tag9-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot17-960-quad-3p1",
+      "aot": 17,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 4,
+      "mask": 15,
+      "asc": "8b040588010007720000",
+      "frames": [
+        {
+          "offset": 144,
+          "bytes": 29
+        },
+        {
+          "offset": 173,
+          "bytes": 29
+        },
+        {
+          "offset": 202,
+          "bytes": 29
+        },
+        {
+          "offset": 231,
+          "bytes": 29
+        },
+        {
+          "offset": 260,
+          "bytes": 29
+        },
+        {
+          "offset": 289,
+          "bytes": 29
+        }
+      ],
+      "reference_offset": 69120,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot17-960-quad-3p1-synthetic.mp4",
+        "sha256": "f7481be12a2e337e6db3d21d8a1045295480b34f74bf2d6339c4fd4351d75829",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b040588010007720000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-aot17-960-quad-3p1-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot17-1024-mono-tag5",
+      "aot": 17,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 1,
+      "mask": 4,
+      "asc": "8b00058400000a0000",
+      "frames": [
+        {
+          "offset": 318,
+          "bytes": 8
+        },
+        {
+          "offset": 326,
+          "bytes": 8
+        },
+        {
+          "offset": 334,
+          "bytes": 8
+        },
+        {
+          "offset": 342,
+          "bytes": 8
+        },
+        {
+          "offset": 350,
+          "bytes": 8
+        },
+        {
+          "offset": 358,
+          "bytes": 8
+        }
+      ],
+      "reference_offset": 161280,
+      "reference_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot17-1024-mono-tag5-synthetic.mp4",
+        "sha256": "d335e4dcbdc1b73172f21864812fceb9185448078dee1abe99d1720c5198e00f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b00058400000a0000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-aot17-1024-mono-tag5-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot17-1024-stereo-tag9",
+      "aot": 17,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "8b0005840000320000",
+      "frames": [
+        {
+          "offset": 366,
+          "bytes": 16
+        },
+        {
+          "offset": 382,
+          "bytes": 16
+        },
+        {
+          "offset": 398,
+          "bytes": 16
+        },
+        {
+          "offset": 414,
+          "bytes": 16
+        },
+        {
+          "offset": 430,
+          "bytes": 16
+        },
+        {
+          "offset": 446,
+          "bytes": 16
+        }
+      ],
+      "reference_offset": 185856,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot17-1024-stereo-tag9-synthetic.mp4",
+        "sha256": "53c1212d81d625a05e810dfff67954a9c68ab651946285998591468a15172a19",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0005840000320000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-aot17-1024-stereo-tag9-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot17-1024-quad-3p1",
+      "aot": 17,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 4,
+      "mask": 15,
+      "asc": "8b000588010007720000",
+      "frames": [
+        {
+          "offset": 462,
+          "bytes": 29
+        },
+        {
+          "offset": 491,
+          "bytes": 29
+        },
+        {
+          "offset": 520,
+          "bytes": 29
+        },
+        {
+          "offset": 549,
+          "bytes": 29
+        },
+        {
+          "offset": 578,
+          "bytes": 29
+        },
+        {
+          "offset": 607,
+          "bytes": 29
+        }
+      ],
+      "reference_offset": 235008,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot17-1024-quad-3p1-synthetic.mp4",
+        "sha256": "0cdd897a264bcdc896774a1f198641d214f5044752648d4c8ce49c2aa822be1c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b000588010007720000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-aot17-1024-quad-3p1-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot19-960-mono-tag5",
+      "aot": 19,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 1,
+      "mask": 4,
+      "asc": "9b040d8400000a0000",
+      "frames": [
+        {
+          "offset": 636,
+          "bytes": 8
+        },
+        {
+          "offset": 644,
+          "bytes": 8
+        },
+        {
+          "offset": 652,
+          "bytes": 10
+        },
+        {
+          "offset": 662,
+          "bytes": 10
+        },
+        {
+          "offset": 672,
+          "bytes": 10
+        },
+        {
+          "offset": 682,
+          "bytes": 10
+        }
+      ],
+      "reference_offset": 333312,
+      "reference_bytes": 23040,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot19-960-mono-tag5-synthetic.mp4",
+        "sha256": "6e566b9d42580b3e14487d115b8312617853d57818310d77b8bf436a3e2fd540",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b040d8400000a0000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-aot19-960-mono-tag5-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot19-960-stereo-tag9",
+      "aot": 19,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "9b040d840000320000",
+      "frames": [
+        {
+          "offset": 692,
+          "bytes": 16
+        },
+        {
+          "offset": 708,
+          "bytes": 16
+        },
+        {
+          "offset": 724,
+          "bytes": 20
+        },
+        {
+          "offset": 744,
+          "bytes": 20
+        },
+        {
+          "offset": 764,
+          "bytes": 20
+        },
+        {
+          "offset": 784,
+          "bytes": 20
+        }
+      ],
+      "reference_offset": 356352,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot19-960-stereo-tag9-synthetic.mp4",
+        "sha256": "dcebefb54ff56ee9f5879c16881996bde33e08dbac989ee709ae08b9ed44998d",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b040d840000320000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-aot19-960-stereo-tag9-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot19-960-quad-3p1",
+      "aot": 19,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 4,
+      "mask": 15,
+      "asc": "9b040d88010007720000",
+      "frames": [
+        {
+          "offset": 804,
+          "bytes": 29
+        },
+        {
+          "offset": 833,
+          "bytes": 29
+        },
+        {
+          "offset": 862,
+          "bytes": 36
+        },
+        {
+          "offset": 898,
+          "bytes": 36
+        },
+        {
+          "offset": 934,
+          "bytes": 36
+        },
+        {
+          "offset": 970,
+          "bytes": 36
+        }
+      ],
+      "reference_offset": 402432,
+      "reference_bytes": 92160,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot19-960-quad-3p1-synthetic.mp4",
+        "sha256": "afd37231a7dce167ab7a40a80617c6fce7d18be756f6f4f13336f699d7a4e4f7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b040d88010007720000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-aot19-960-quad-3p1-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot19-1024-mono-tag5",
+      "aot": 19,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 1,
+      "mask": 4,
+      "asc": "9b000d8400000a0000",
+      "frames": [
+        {
+          "offset": 1006,
+          "bytes": 8
+        },
+        {
+          "offset": 1014,
+          "bytes": 8
+        },
+        {
+          "offset": 1022,
+          "bytes": 10
+        },
+        {
+          "offset": 1032,
+          "bytes": 10
+        },
+        {
+          "offset": 1042,
+          "bytes": 10
+        },
+        {
+          "offset": 1052,
+          "bytes": 10
+        }
+      ],
+      "reference_offset": 494592,
+      "reference_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot19-1024-mono-tag5-synthetic.mp4",
+        "sha256": "1383f0b43796111c850197a1897a46002fe17b8ec7e6649ce2f23d0e9a7803e3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b000d8400000a0000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-aot19-1024-mono-tag5-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot19-1024-stereo-tag9",
+      "aot": 19,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "9b000d840000320000",
+      "frames": [
+        {
+          "offset": 1062,
+          "bytes": 16
+        },
+        {
+          "offset": 1078,
+          "bytes": 16
+        },
+        {
+          "offset": 1094,
+          "bytes": 20
+        },
+        {
+          "offset": 1114,
+          "bytes": 20
+        },
+        {
+          "offset": 1134,
+          "bytes": 20
+        },
+        {
+          "offset": 1154,
+          "bytes": 20
+        }
+      ],
+      "reference_offset": 519168,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot19-1024-stereo-tag9-synthetic.mp4",
+        "sha256": "17de2368661a345e0e1e955c9762fe16edd8589970b21e7e14cbd317d128c815",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b000d840000320000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-aot19-1024-stereo-tag9-synthetic.mkv"
+    },
+    {
+      "kind": "core",
+      "name": "aot19-1024-quad-3p1",
+      "aot": 19,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 4,
+      "mask": 15,
+      "asc": "9b000d88010007720000",
+      "frames": [
+        {
+          "offset": 1174,
+          "bytes": 29
+        },
+        {
+          "offset": 1203,
+          "bytes": 29
+        },
+        {
+          "offset": 1232,
+          "bytes": 36
+        },
+        {
+          "offset": 1268,
+          "bytes": 36
+        },
+        {
+          "offset": 1304,
+          "bytes": 36
+        },
+        {
+          "offset": 1340,
+          "bytes": 36
+        }
+      ],
+      "reference_offset": 568320,
+      "reference_bytes": 98304,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot19-1024-quad-3p1-synthetic.mp4",
+        "sha256": "9dbf987afdb1882e6ab48f9963ed92eaa49343fc742ae8144ce837cadb1f2d1a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b000d88010007720000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-aot19-1024-quad-3p1-synthetic.mkv"
+    },
+    {
+      "kind": "ld",
+      "name": "aot23-480-mono-tag6",
+      "aot": 23,
+      "n": 480,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 1,
+      "mask": 4,
+      "asc": "bb04058400000c0000",
+      "frames": [
+        {
+          "offset": 1376,
+          "bytes": 41
+        },
+        {
+          "offset": 1417,
+          "bytes": 41
+        },
+        {
+          "offset": 1458,
+          "bytes": 46
+        },
+        {
+          "offset": 1504,
+          "bytes": 45
+        },
+        {
+          "offset": 1549,
+          "bytes": 41
+        },
+        {
+          "offset": 1590,
+          "bytes": 45
+        }
+      ],
+      "reference_offset": 666624,
+      "reference_bytes": 11520,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot23-480-mono-tag6-synthetic.mp4",
+        "sha256": "6f9b46d1d59c6a7eb35be0b5d0771fe4fd82d3782f5c6d7e181bab30191dd9be",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb04058400000c0000",
+        "pcm_offset": 0,
+        "samples": 2880
+      },
+      "mkv": "aac-er-pce-aot23-480-mono-tag6-synthetic.mkv"
+    },
+    {
+      "kind": "ld",
+      "name": "aot23-480-stereo-tag11",
+      "aot": 23,
+      "n": 480,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "bb0405840000360000",
+      "frames": [
+        {
+          "offset": 1635,
+          "bytes": 80
+        },
+        {
+          "offset": 1715,
+          "bytes": 81
+        },
+        {
+          "offset": 1796,
+          "bytes": 92
+        },
+        {
+          "offset": 1888,
+          "bytes": 89
+        },
+        {
+          "offset": 1977,
+          "bytes": 81
+        },
+        {
+          "offset": 2058,
+          "bytes": 89
+        }
+      ],
+      "reference_offset": 678144,
+      "reference_bytes": 23040,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot23-480-stereo-tag11-synthetic.mp4",
+        "sha256": "822ad0ab4d9f0e760f15ceab3f7cf12ab4f5814d23a10545816075d359e7a4e4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0405840000360000",
+        "pcm_offset": 0,
+        "samples": 2880
+      },
+      "mkv": "aac-er-pce-aot23-480-stereo-tag11-synthetic.mkv"
+    },
+    {
+      "kind": "ld",
+      "name": "aot23-480-quad-3p1",
+      "aot": 23,
+      "n": 480,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 4,
+      "mask": 15,
+      "asc": "bb040588010009810000",
+      "frames": [
+        {
+          "offset": 2147,
+          "bytes": 126
+        },
+        {
+          "offset": 2273,
+          "bytes": 126
+        },
+        {
+          "offset": 2399,
+          "bytes": 143
+        },
+        {
+          "offset": 2542,
+          "bytes": 139
+        },
+        {
+          "offset": 2681,
+          "bytes": 126
+        },
+        {
+          "offset": 2807,
+          "bytes": 139
+        }
+      ],
+      "reference_offset": 701184,
+      "reference_bytes": 46080,
+      "container_rate": 24000,
+      "container_frame_samples": 480,
+      "samples": 2880,
+      "pcm_offset": 0,
+      "slots": 7,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot23-480-quad-3p1-synthetic.mp4",
+        "sha256": "2660195481f7cb47744b570d70157185ec31a56bc986747d940266248a76ff98",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb040588010009810000",
+        "pcm_offset": 0,
+        "samples": 2880
+      },
+      "mkv": "aac-er-pce-aot23-480-quad-3p1-synthetic.mkv"
+    },
+    {
+      "kind": "ld",
+      "name": "aot23-512-mono-tag6",
+      "aot": 23,
+      "n": 512,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 1,
+      "mask": 4,
+      "asc": "bb00058400000c0000",
+      "frames": [
+        {
+          "offset": 2946,
+          "bytes": 42
+        },
+        {
+          "offset": 2988,
+          "bytes": 42
+        },
+        {
+          "offset": 3030,
+          "bytes": 48
+        },
+        {
+          "offset": 3078,
+          "bytes": 46
+        },
+        {
+          "offset": 3124,
+          "bytes": 42
+        },
+        {
+          "offset": 3166,
+          "bytes": 46
+        }
+      ],
+      "reference_offset": 747264,
+      "reference_bytes": 12288,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot23-512-mono-tag6-synthetic.mp4",
+        "sha256": "fee20c0a059284592d1b608e7884245da62af035e26a0822c7c8752736e0c495",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb00058400000c0000",
+        "pcm_offset": 0,
+        "samples": 3072
+      },
+      "mkv": "aac-er-pce-aot23-512-mono-tag6-synthetic.mkv"
+    },
+    {
+      "kind": "ld",
+      "name": "aot23-512-stereo-tag11",
+      "aot": 23,
+      "n": 512,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "bb0005840000360000",
+      "frames": [
+        {
+          "offset": 3212,
+          "bytes": 83
+        },
+        {
+          "offset": 3295,
+          "bytes": 83
+        },
+        {
+          "offset": 3378,
+          "bytes": 94
+        },
+        {
+          "offset": 3472,
+          "bytes": 92
+        },
+        {
+          "offset": 3564,
+          "bytes": 83
+        },
+        {
+          "offset": 3647,
+          "bytes": 92
+        }
+      ],
+      "reference_offset": 759552,
+      "reference_bytes": 24576,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot23-512-stereo-tag11-synthetic.mp4",
+        "sha256": "a21daaae657fea868b9daaabad412929aa37f3281cbbb6860d734a05089183d0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb0005840000360000",
+        "pcm_offset": 0,
+        "samples": 3072
+      },
+      "mkv": "aac-er-pce-aot23-512-stereo-tag11-synthetic.mkv"
+    },
+    {
+      "kind": "ld",
+      "name": "aot23-512-quad-3p1",
+      "aot": 23,
+      "n": 512,
+      "rate": 24000,
+      "output_rate": 24000,
+      "channels": 4,
+      "mask": 15,
+      "asc": "bb000588010009810000",
+      "frames": [
+        {
+          "offset": 3739,
+          "bytes": 130
+        },
+        {
+          "offset": 3869,
+          "bytes": 129
+        },
+        {
+          "offset": 3998,
+          "bytes": 147
+        },
+        {
+          "offset": 4145,
+          "bytes": 143
+        },
+        {
+          "offset": 4288,
+          "bytes": 129
+        },
+        {
+          "offset": 4417,
+          "bytes": 143
+        }
+      ],
+      "reference_offset": 784128,
+      "reference_bytes": 49152,
+      "container_rate": 24000,
+      "container_frame_samples": 512,
+      "samples": 3072,
+      "pcm_offset": 0,
+      "slots": 8,
+      "bands": 32,
+      "video": {
+        "file": "aac-er-pce-aot23-512-quad-3p1-synthetic.mp4",
+        "sha256": "4f76579b757fd0bc25522a6844b2d9646a89ea5711f0e2e09ee1ffbc73e4dda2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "bb000588010009810000",
+        "pcm_offset": 0,
+        "samples": 3072
+      },
+      "mkv": "aac-er-pce-aot23-512-quad-3p1-synthetic.mkv"
+    },
+    {
+      "kind": "ps",
+      "name": "ps-aot17-960",
+      "aot": 17,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 48000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "eb01c602c20000050000",
+      "control_asc": "eb09c600",
+      "frames": [
+        {
+          "offset": 4560,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 4698,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc"
+        },
+        {
+          "offset": 4717,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 4736,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 4874,
+          "bytes": 138
+        },
+        {
+          "offset": 5012,
+          "bytes": 19
+        },
+        {
+          "offset": 5031,
+          "bytes": 19
+        },
+        {
+          "offset": 5050,
+          "bytes": 138
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": {
+        "file": "aac-er-pce-ps-aot17-960-synthetic.mp4",
+        "sha256": "4869a23250fdc6b0c446da9fb6090657928c2636339de2f8eaef9ca2fafe479a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb01c602c20000050000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-ps-aot17-960-synthetic.mkv"
+    },
+    {
+      "kind": "ps",
+      "name": "ps-aot17-1024",
+      "aot": 17,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 48000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "eb01c402c20000050000",
+      "control_asc": "eb09c400",
+      "frames": [
+        {
+          "offset": 5188,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5326,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc"
+        },
+        {
+          "offset": 5345,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5364,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 5502,
+          "bytes": 138
+        },
+        {
+          "offset": 5640,
+          "bytes": 19
+        },
+        {
+          "offset": 5659,
+          "bytes": 19
+        },
+        {
+          "offset": 5678,
+          "bytes": 138
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": {
+        "file": "aac-er-pce-ps-aot17-1024-synthetic.mp4",
+        "sha256": "203456c476ad1591078b0add9849e5fd059a58c2e3fc7d3c8c4bfd916b6a2be0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb01c402c20000050000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-ps-aot17-1024-synthetic.mkv"
+    },
+    {
+      "kind": "ps",
+      "name": "ps-aot19-960",
+      "aot": 19,
+      "n": 960,
+      "rate": 24000,
+      "output_rate": 48000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "eb01ce06c20000050000",
+      "control_asc": "eb09ce00",
+      "frames": [
+        {
+          "offset": 5816,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 5954,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc"
+        },
+        {
+          "offset": 5973,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 5994,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 6134,
+          "bytes": 138
+        },
+        {
+          "offset": 6272,
+          "bytes": 19
+        },
+        {
+          "offset": 6291,
+          "bytes": 21
+        },
+        {
+          "offset": 6312,
+          "bytes": 140
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "samples": 5760,
+      "pcm_offset": 0,
+      "slots": 15,
+      "bands": 64,
+      "video": {
+        "file": "aac-er-pce-ps-aot19-960-synthetic.mp4",
+        "sha256": "cf7db3b15518eceaae84b614e6177647750be282e74852b916dc2da388289b6e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb01ce06c20000050000",
+        "pcm_offset": 0,
+        "samples": 5760
+      },
+      "mkv": "aac-er-pce-ps-aot19-960-synthetic.mkv"
+    },
+    {
+      "kind": "ps",
+      "name": "ps-aot19-1024",
+      "aot": 19,
+      "n": 1024,
+      "rate": 24000,
+      "output_rate": 48000,
+      "channels": 2,
+      "mask": 3,
+      "asc": "eb01cc06c20000050000",
+      "control_asc": "eb09cc00",
+      "frames": [
+        {
+          "offset": 6452,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        },
+        {
+          "offset": 6590,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc"
+        },
+        {
+          "offset": 6609,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc"
+        },
+        {
+          "offset": 6630,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0"
+        }
+      ],
+      "control_frames": [
+        {
+          "offset": 6770,
+          "bytes": 138
+        },
+        {
+          "offset": 6908,
+          "bytes": 19
+        },
+        {
+          "offset": 6927,
+          "bytes": 21
+        },
+        {
+          "offset": 6948,
+          "bytes": 140
+        }
+      ],
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "samples": 6144,
+      "pcm_offset": 0,
+      "slots": 16,
+      "bands": 64,
+      "video": {
+        "file": "aac-er-pce-ps-aot19-1024-synthetic.mp4",
+        "sha256": "d09482ae532b260b1b8eae732f59fed0b1198f69c37d2357ad820dafbc6f14dc",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb01cc06c20000050000",
+        "pcm_offset": 0,
+        "samples": 6144
+      },
+      "mkv": "aac-er-pce-ps-aot19-1024-synthetic.mkv"
+    }
+  ]
+}

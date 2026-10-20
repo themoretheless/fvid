@@ -1,0 +1,33 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0152"
+  ],
+  "checked_at": "2026-10-16T15:27:26.342095+00:00",
+  "origin": "User explicitly requested moving the shown seek preparation status to the upper player panel. Implemented during batch136;accepted only after real active-progress visual verification.",
+  "checks": [
+    {
+      "log": "evidence/batch-144-ui-proof.json",
+      "kind": "manual-native-ui",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-136-top-seek-build-final.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-143-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Before: status was painted at frame.bottom()-8 under bottom controls,the location shown in the user screenshot. After: it uses the upper title anchor,48logical pixels below the title and24below metadata. Existing macOS inset,skin text color,percentage computation and100ms repaint are retained. Drawing remains before the controls-fade return.",
+    "Actual native UI screenshot showed Подготовка быстрой перемотки:60% near the upper left while authored VP9 video was visible and controls had faded. No fake status or production debug hook was used. The initial short-video verification was inconclusive and counted zero until this real active state was captured.",
+    "Diagnostic long input is1000 stream-copy repeats of the existing authored VP9 fixture,generated explicitly with FFmpeg in temporary storage. No private media was copied. Ordinary tests and production playback are independent of FFmpeg.",
+    "Visual proof covers the windowed active-progress/faded-controls state. Fullscreen,narrow-width and preparation-completion screenshots were not captured. A later UI action returned noWindowsAvailable; it does not invalidate the already observed requested position or establish completion behavior.",
+    "No automated test mirroring coordinate literals was added for this reversible visual relocation. Player builds and actual native visual inspection provide the relevant verification."
+  ],
+  "counting": "One user-requested status placement improvement. Initial attempt136,diagnostic bundle,long input and screenshots add zero extra IDs."
+}

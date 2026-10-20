@@ -1,0 +1,768 @@
+{
+  "checked_at": "2026-10-15T09:36:09.711058+00:00",
+  "platform": "macOS-26.7.2-arm64-arm-64bit",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "method": "Six alternating paired processes of statically linked actual before/after decoder. Decode library is debug; wrapper -O. Acceptance uses exact allocator request count/bytes and peak requested live bytes, which do not depend on timing. Debug elapsed values are diagnostic only. Every picture compared with independent authored per-component arrays.",
+  "scope": "Allocator-requested heap storage/churn for authored MBAFF I_PCM keyframes, not process RSS or release-speed claims. Initialization/oracle loading/warmup outside tracked region.",
+  "source_after_sha256": "f729b9ab536ba9598c4d344f2f695815527d83190305daa345d3371553119ad6",
+  "summaries": [
+    {
+      "side": 64,
+      "field": false,
+      "before": {
+        "allocations": 82,
+        "allocated_bytes": 229246,
+        "peak_requested_live_delta": 33979
+      },
+      "after": {
+        "allocations": 18,
+        "allocated_bytes": 28542,
+        "peak_requested_live_delta": 21435
+      },
+      "removed_whole_picture_views": 16,
+      "saved_requested_bytes_per_decode": 200704,
+      "saved_peak_requested_bytes": 12544
+    },
+    {
+      "side": 64,
+      "field": true,
+      "before": {
+        "allocations": 82,
+        "allocated_bytes": 128894,
+        "peak_requested_live_delta": 27707
+      },
+      "after": {
+        "allocations": 18,
+        "allocated_bytes": 28542,
+        "peak_requested_live_delta": 21435
+      },
+      "removed_whole_picture_views": 16,
+      "saved_requested_bytes_per_decode": 100352,
+      "saved_peak_requested_bytes": 6272
+    },
+    {
+      "side": 128,
+      "field": false,
+      "before": {
+        "allocations": 274,
+        "allocated_bytes": 3320590,
+        "peak_requested_live_delta": 132331
+      },
+      "after": {
+        "allocations": 18,
+        "allocated_bytes": 109326,
+        "peak_requested_live_delta": 82155
+      },
+      "removed_whole_picture_views": 64,
+      "saved_requested_bytes_per_decode": 3211264,
+      "saved_peak_requested_bytes": 50176
+    },
+    {
+      "side": 128,
+      "field": true,
+      "before": {
+        "allocations": 274,
+        "allocated_bytes": 1714958,
+        "peak_requested_live_delta": 107243
+      },
+      "after": {
+        "allocations": 18,
+        "allocated_bytes": 109326,
+        "peak_requested_live_delta": 82155
+      },
+      "removed_whole_picture_views": 64,
+      "saved_requested_bytes_per_decode": 1605632,
+      "saved_peak_requested_bytes": 25088
+    },
+    {
+      "side": 256,
+      "field": false,
+      "before": {
+        "allocations": 1042,
+        "allocated_bytes": 51812686,
+        "peak_requested_live_delta": 525739
+      },
+      "after": {
+        "allocations": 18,
+        "allocated_bytes": 432462,
+        "peak_requested_live_delta": 325035
+      },
+      "removed_whole_picture_views": 256,
+      "saved_requested_bytes_per_decode": 51380224,
+      "saved_peak_requested_bytes": 200704
+    },
+    {
+      "side": 256,
+      "field": true,
+      "before": {
+        "allocations": 1042,
+        "allocated_bytes": 26122574,
+        "peak_requested_live_delta": 425387
+      },
+      "after": {
+        "allocations": 18,
+        "allocated_bytes": 432462,
+        "peak_requested_live_delta": 325035
+      },
+      "removed_whole_picture_views": 256,
+      "saved_requested_bytes_per_decode": 25690112,
+      "saved_peak_requested_bytes": 100352
+    }
+  ],
+  "runs": [
+    {
+      "pair": 1,
+      "version": "before",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 82,
+          "allocated_bytes": 229246,
+          "peak_requested_live_delta": 33979,
+          "debug_elapsed_ns_diagnostic": 16747583
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 82,
+          "allocated_bytes": 128894,
+          "peak_requested_live_delta": 27707,
+          "debug_elapsed_ns_diagnostic": 34992583
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 274,
+          "allocated_bytes": 3320590,
+          "peak_requested_live_delta": 132331,
+          "debug_elapsed_ns_diagnostic": 2726875584
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 274,
+          "allocated_bytes": 1714958,
+          "peak_requested_live_delta": 107243,
+          "debug_elapsed_ns_diagnostic": 1279247709
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 1042,
+          "allocated_bytes": 51812686,
+          "peak_requested_live_delta": 525739,
+          "debug_elapsed_ns_diagnostic": 46539685750
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 1042,
+          "allocated_bytes": 26122574,
+          "peak_requested_live_delta": 425387,
+          "debug_elapsed_ns_diagnostic": 20035983833
+        }
+      ]
+    },
+    {
+      "pair": 1,
+      "version": "after",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 718916
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 808708
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2819209
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2914250
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 90237833
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 172891417
+        }
+      ]
+    },
+    {
+      "pair": 2,
+      "version": "after",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 1028792
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 1171458
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 3122208
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 3867667
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 11865125
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 185110500
+        }
+      ]
+    },
+    {
+      "pair": 2,
+      "version": "before",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 82,
+          "allocated_bytes": 229246,
+          "peak_requested_live_delta": 33979,
+          "debug_elapsed_ns_diagnostic": 153922042
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 82,
+          "allocated_bytes": 128894,
+          "peak_requested_live_delta": 27707,
+          "debug_elapsed_ns_diagnostic": 26228625
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 274,
+          "allocated_bytes": 3320590,
+          "peak_requested_live_delta": 132331,
+          "debug_elapsed_ns_diagnostic": 2858890625
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 274,
+          "allocated_bytes": 1714958,
+          "peak_requested_live_delta": 107243,
+          "debug_elapsed_ns_diagnostic": 1380059583
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 1042,
+          "allocated_bytes": 51812686,
+          "peak_requested_live_delta": 525739,
+          "debug_elapsed_ns_diagnostic": 67631391708
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 1042,
+          "allocated_bytes": 26122574,
+          "peak_requested_live_delta": 425387,
+          "debug_elapsed_ns_diagnostic": 27262806917
+        }
+      ]
+    },
+    {
+      "pair": 3,
+      "version": "before",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 82,
+          "allocated_bytes": 229246,
+          "peak_requested_live_delta": 33979,
+          "debug_elapsed_ns_diagnostic": 370426500
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 82,
+          "allocated_bytes": 128894,
+          "peak_requested_live_delta": 27707,
+          "debug_elapsed_ns_diagnostic": 118587875
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 274,
+          "allocated_bytes": 3320590,
+          "peak_requested_live_delta": 132331,
+          "debug_elapsed_ns_diagnostic": 4586807958
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 274,
+          "allocated_bytes": 1714958,
+          "peak_requested_live_delta": 107243,
+          "debug_elapsed_ns_diagnostic": 3438415750
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 1042,
+          "allocated_bytes": 51812686,
+          "peak_requested_live_delta": 525739,
+          "debug_elapsed_ns_diagnostic": 47689187375
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 1042,
+          "allocated_bytes": 26122574,
+          "peak_requested_live_delta": 425387,
+          "debug_elapsed_ns_diagnostic": 13919365125
+        }
+      ]
+    },
+    {
+      "pair": 3,
+      "version": "after",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 718459
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 716916
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2906750
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 4441208
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 33709875
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 45136750
+        }
+      ]
+    },
+    {
+      "pair": 4,
+      "version": "after",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 1206542
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 1183708
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2900125
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 4395833
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 10971125
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 62269959
+        }
+      ]
+    },
+    {
+      "pair": 4,
+      "version": "before",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 82,
+          "allocated_bytes": 229246,
+          "peak_requested_live_delta": 33979,
+          "debug_elapsed_ns_diagnostic": 76841375
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 82,
+          "allocated_bytes": 128894,
+          "peak_requested_live_delta": 27707,
+          "debug_elapsed_ns_diagnostic": 158773500
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 274,
+          "allocated_bytes": 3320590,
+          "peak_requested_live_delta": 132331,
+          "debug_elapsed_ns_diagnostic": 1913400625
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 274,
+          "allocated_bytes": 1714958,
+          "peak_requested_live_delta": 107243,
+          "debug_elapsed_ns_diagnostic": 1138553167
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 1042,
+          "allocated_bytes": 51812686,
+          "peak_requested_live_delta": 525739,
+          "debug_elapsed_ns_diagnostic": 29982256416
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 1042,
+          "allocated_bytes": 26122574,
+          "peak_requested_live_delta": 425387,
+          "debug_elapsed_ns_diagnostic": 12945590958
+        }
+      ]
+    },
+    {
+      "pair": 5,
+      "version": "before",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 82,
+          "allocated_bytes": 229246,
+          "peak_requested_live_delta": 33979,
+          "debug_elapsed_ns_diagnostic": 26613709
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 82,
+          "allocated_bytes": 128894,
+          "peak_requested_live_delta": 27707,
+          "debug_elapsed_ns_diagnostic": 52666875
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 274,
+          "allocated_bytes": 3320590,
+          "peak_requested_live_delta": 132331,
+          "debug_elapsed_ns_diagnostic": 1024793333
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 274,
+          "allocated_bytes": 1714958,
+          "peak_requested_live_delta": 107243,
+          "debug_elapsed_ns_diagnostic": 636773708
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 1042,
+          "allocated_bytes": 51812686,
+          "peak_requested_live_delta": 525739,
+          "debug_elapsed_ns_diagnostic": 24004774458
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 1042,
+          "allocated_bytes": 26122574,
+          "peak_requested_live_delta": 425387,
+          "debug_elapsed_ns_diagnostic": 9012135875
+        }
+      ]
+    },
+    {
+      "pair": 5,
+      "version": "after",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 934958
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 652584
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 3067833
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2219084
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 23235000
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 24205167
+        }
+      ]
+    },
+    {
+      "pair": 6,
+      "version": "after",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 622833
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 28542,
+          "peak_requested_live_delta": 21435,
+          "debug_elapsed_ns_diagnostic": 610458
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2432625
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 109326,
+          "peak_requested_live_delta": 82155,
+          "debug_elapsed_ns_diagnostic": 2418667
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 10398167
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 18,
+          "allocated_bytes": 432462,
+          "peak_requested_live_delta": 325035,
+          "debug_elapsed_ns_diagnostic": 11345291
+        }
+      ]
+    },
+    {
+      "pair": 6,
+      "version": "before",
+      "cases": [
+        {
+          "side": 64,
+          "field": false,
+          "allocations": 82,
+          "allocated_bytes": 229246,
+          "peak_requested_live_delta": 33979,
+          "debug_elapsed_ns_diagnostic": 14557833
+        },
+        {
+          "side": 64,
+          "field": true,
+          "allocations": 82,
+          "allocated_bytes": 128894,
+          "peak_requested_live_delta": 27707,
+          "debug_elapsed_ns_diagnostic": 7558541
+        },
+        {
+          "side": 128,
+          "field": false,
+          "allocations": 274,
+          "allocated_bytes": 3320590,
+          "peak_requested_live_delta": 132331,
+          "debug_elapsed_ns_diagnostic": 1190893375
+        },
+        {
+          "side": 128,
+          "field": true,
+          "allocations": 274,
+          "allocated_bytes": 1714958,
+          "peak_requested_live_delta": 107243,
+          "debug_elapsed_ns_diagnostic": 580273625
+        },
+        {
+          "side": 256,
+          "field": false,
+          "allocations": 1042,
+          "allocated_bytes": 51812686,
+          "peak_requested_live_delta": 525739,
+          "debug_elapsed_ns_diagnostic": 17955218709
+        },
+        {
+          "side": 256,
+          "field": true,
+          "allocations": 1042,
+          "allocated_bytes": 26122574,
+          "peak_requested_live_delta": 425387,
+          "debug_elapsed_ns_diagnostic": 6385593000
+        }
+      ]
+    }
+  ],
+  "binary_sha256": {
+    "before": "6cd7e349ac9759d8eaeb4dd22bb3a8dab6cfb06c75ff3ade841602586f09d7c7",
+    "after": "ac6222ad9b0b2e3afad52a13f8033fcfce2c22c1c6fd83dc61ecd0e4d2c46e6f"
+  },
+  "source_before_sha256": "74880d342623575e283d4fb76ccabbfa56aa411ddc5bb19d5794aaa1da3d1c10",
+  "replay": "benchmark-mbaff-pcm-memory.py"
+}

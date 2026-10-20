@@ -1,0 +1,47 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0133"
+  ],
+  "checked_at": "2026-10-16T07:22:25.161682+00:00",
+  "before": [
+    "evidence/batch-114-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-114-integration.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-114-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-114-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-114-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six authored metadata cases compare parserandpublic AudioTracknames withliteral expected text;fullnativePCM/PTS remains identical toindependent metadata-free performance. Binary sequence IDbefore/afterrealname,sequence-only,extended binaryIDandtwo healthy plain/unnamed controls.",
+    "Before four cases usebinarysequencebytes aspubliclabels,includingNUL/controlcharacters,anddiscard actualSynthetic score title. FF00is SequenceNumber,nottext;only FF03is Sequence/TrackName.",
+    "After all six parser/AudioTracklabels match;nativePCMbytes andactualworker play/rewind/100msseek match metadata-free controls.10integrations,17parser units,fixture reproduction andcurrent player build pass.",
+    "Authored raw MIDIandVP9companion,no private media/encoder/network. This verifies public playback metadata andactualaudio worker,not a separate GUIappearance review. No UIlayout/style changes orperformance claim."
+  ],
+  "sources": [
+    {
+      "url": "https://www.cs.cmu.edu/~music/cmp/archives/cmsip/readings/Standard-MIDI-file-format-updated.pdf",
+      "section": "FF00SequenceNumber;FF03Sequence/TrackName",
+      "rule": "FF00carries a16bitbinary sequence identifier;FF03carries textual name."
+    }
+  ],
+  "compatibility": "Correct textual labels replacebinarysequence IDs.When no text name exists,name is empty.No public signatures/audio clocks orPCMchanged.",
+  "counting": "One metadata type-confusion defect;four failing variants andtwo healthycontrols add noextra IDs."
+}

@@ -55,15 +55,24 @@ fn process_with_fill(
     remaining.pad = None;
     remaining.scale = None;
     remaining.negate = None;
+    remaining.cas = None;
     remaining.curves = None;
     remaining.colorbalance = None;
     remaining.colorlevels = None;
     remaining.colorchannelmixer = None;
+    remaining.grayworld = None;
+    remaining.vibrance = None;
+    remaining.exposure = None;
+    remaining.colorcontrast = None;
+    remaining.colorhold = None;
     if remaining != DecodeTransform::default() {
         return Ok(None);
     }
     if frame.subsampling.is_some() || !(8..=16).contains(&depth) {
         return Err("invalid RGB transform layout or depth".into());
+    }
+    if request.colorhold.is_some() && !matches!(depth, 8 | 16) {
+        return Ok(None);
     }
     let pixel = if depth == 8 { 3 } else { 6 };
     let storage = |w: usize, h: usize| {
@@ -193,18 +202,21 @@ fn process_with_fill(
                 if media_sampling {
                     crate::owned_y4m_decode::point_sample(x, current.width, w)
                 } else {
-                    (x as u128 * current.width as u128 / w as u128) as usize
+                    (x as u64 * current.width as u64 / w as u64) as usize
                 },
                 if media_sampling {
                     crate::owned_y4m_decode::point_sample(y, current.height, h)
                 } else {
-                    (y as u128 * current.height as u128 / h as u128) as usize
+                    (y as u64 * current.height as u64 / h as u64) as usize
                 },
             ))
         })?;
     }
     if let Some(args) = request.negate.as_deref() {
         crate::owned_negate::Negate::parse(args)?.apply(&mut current.data, depth)?;
+    }
+    if let Some(args) = request.cas.as_deref() {
+        crate::owned_cas::Cas::parse(args)?.apply(&mut current, depth)?;
     }
     if let Some(args) = request.curves.as_deref() {
         let parsed;
@@ -244,6 +256,38 @@ fn process_with_fill(
             depth,
             3,
         )?;
+    }
+    if let Some(args) = request.grayworld.as_deref() {
+        if crate::owned_timeline::Timeline::grayworld(args)?.enabled(
+            n,
+            t,
+            current.width,
+            current.height,
+        )? {
+            crate::owned_grayworld::GrayWorld::default().apply_rgb(
+                &mut current.data,
+                current.width,
+                current.height,
+                depth,
+                3,
+            )?;
+        }
+    }
+    if let Some(args) = request.vibrance.as_deref() {
+        crate::owned_vibrance::Vibrance::parse(args)?.apply_rgb(&mut current.data, depth, 3)?;
+    }
+    if let Some(args) = request.exposure.as_deref() {
+        crate::owned_exposure::Exposure::parse(args)?.apply_rgb(&mut current.data, depth, 3)?;
+    }
+    if let Some(args) = request.colorcontrast.as_deref() {
+        crate::owned_colorcontrast::ColorContrast::parse(args)?.apply_rgb(
+            &mut current.data,
+            depth,
+            3,
+        )?;
+    }
+    if let Some(args) = request.colorhold.as_deref() {
+        crate::owned_colorhold::ColorHold::parse(args)?.apply_rgb(&mut current.data, depth, 3)?;
     }
     Ok(Some(current))
 }

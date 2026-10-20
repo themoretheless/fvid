@@ -1,0 +1,57 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0081"
+  ],
+  "checked_at": "2026-10-15T23:43:13.644135+00:00",
+  "before": [
+    "evidence/batch-057-pcm-specific-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-057-eof-after.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-057-wav-final.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-057-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-057-au.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-057-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-057-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-057-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Fourteen authored20ms native PCM cases in WAV/AIFF/AU decode exactly, with a matching VP9/PCM video companion. Ten supported format/width cases fail exact EOF, one-frame-beyond and i64MAX seek:30precise repetitions of the last packet. Existing exact-seek integer8/float AIFF/AU controls pass. WAV unsigned8 remains a distinct unsupported refusal, not acceptance.",
+    "All three packet readers now check known frame end before in-range window arithmetic and exhaust their cursor at/beyond it. This also avoids narrowing huge positive targets before comparison. Existing stateless exact seek and coded-window in-range behavior remain unchanged.",
+    "Actual capture workers verify full playback, rewind and EOF with zero repeated PCM, correct end position and known length.33 WAV,14 AIFF,9 AU,31 worker and two native EOF integrations pass; fixtures reproduce and player builds.",
+    "The G726 unit used a4500sample target beyond its4108..4120sample authored stream yet expected the final window. Its in-range probe now uses4100 and still lands4096; the4500probe explicitly expects exact EOF. This is an oracle update for the same EOF fix, not another ID.",
+    "No private media/codec parameters, FFmpeg/network dependency, physical device or performance claim. Four previously correct PCM variants and the WAV8 refusal are distinguished from the ten corrected cases."
+  ],
+  "compatibility": "WAV/AIFF/AU seek at or beyond a known duration now returns exact end with no further packets, instead of replaying a final window. In-range seek granularity remains unchanged.",
+  "counting": "One shared packet-reader EOF algorithm problem, corrected in three analogous wrappers. Thirty targets, widths, controls and old-oracle updates add no IDs.",
+  "subsequent_control_update": "FVID-0082 enables the previously refused Wave8 case as native acceptance; no additional81count is added."
+}

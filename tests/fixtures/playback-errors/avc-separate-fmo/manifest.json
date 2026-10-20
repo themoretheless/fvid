@@ -1,0 +1,82 @@
+[
+  {
+    "name": "separate-fmo-8-t0-d0-r0-s0",
+    "depth": 8,
+    "map_type": 0,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t1-d0-r0-s0",
+    "depth": 8,
+    "map_type": 1,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t2-d0-r0-s0",
+    "depth": 8,
+    "map_type": 2,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t3-d0-r0-s0",
+    "depth": 8,
+    "map_type": 3,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t3-d1-r0-s0",
+    "depth": 8,
+    "map_type": 3,
+    "direction": true,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t4-d0-r0-s0",
+    "depth": 8,
+    "map_type": 4,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t4-d1-r0-s0",
+    "depth": 8,
+    "map_type": 4,
+    "direction": true,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t5-d0-r0-s0",
+    "depth": 8,
+    "map_type": 5,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t5-d1-r0-s0",
+    "depth": 8,
+    "map_type": 5,
+    "direction": true,
+    "reverse": false,
+    "sign": 0
+  },
+  {
+    "name": "separate-fmo-8-t6-d0-r0-s0",
+    "depth": 8,
+    "map_type": 6,
+    "direction": false,
+    "reverse": false,
+    "sign": 0
+  }
+]

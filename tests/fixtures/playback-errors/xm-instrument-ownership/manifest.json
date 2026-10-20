@@ -1,0 +1,80 @@
+{
+  "provenance": "Authored A ramp,B reversed ramp with distinct default volume/pan/transposition,and clone A. Instrument-only clone controls preserve independent active-wave PCM;future B notes explicitly restore old A level/pan in controls. Cold/unselected controls stay silent until explicit trigger. Signed16loops,no envelopes/fades,VP9/PCM companion. No external encoder,network or private media.",
+  "cases": [
+    {
+      "name": "selection-only",
+      "file": "selection-only.xm",
+      "control": "selection-only-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "selection-then-note",
+      "file": "selection-then-note.xm",
+      "control": "selection-then-note-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "reset-volume",
+      "file": "reset-volume.xm",
+      "control": "reset-volume-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "reset-pan",
+      "file": "reset-pan.xm",
+      "control": "reset-pan-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "key-off-selection",
+      "file": "key-off-selection.xm",
+      "control": "key-off-selection-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "k00-selection",
+      "file": "k00-selection.xm",
+      "control": "k00-selection-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "cold-selection",
+      "file": "cold-selection.xm",
+      "control": "cold-selection-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "unselected-note",
+      "file": "unselected-note.xm",
+      "control": "unselected-note-control.xm",
+      "before_failure": true
+    },
+    {
+      "name": "explicit-trigger-control",
+      "file": "explicit-trigger-control.xm",
+      "control": "explicit-trigger-control-control.xm",
+      "before_failure": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "selection-only.xm": "65247ce3b1d3ea8b32db85f092b761d0783faa717dc3d26936879793506c4f60",
+    "selection-only-control.xm": "e9917f6d7480ea5ba1f2862ac2c240f9eb4e2ae5448e4ce420201366e9962a30",
+    "selection-then-note.xm": "5fcb84cae268fbe3623b67e818eeccdab92226722d1c9999b10b592a61f8cd44",
+    "selection-then-note-control.xm": "19390eaf760bd7992aee83f9773d602e1fc6577ec45af21fe6374a3b9a20eee7",
+    "reset-volume.xm": "29f36793a0662747034f421120d5d112ae60fe6bfe4f71dae9298709b5d1ad7e",
+    "reset-volume-control.xm": "bd5b967e1d88e7b52f57b155df125f48ec780afb6e7c321483404f5fd15b03cd",
+    "reset-pan.xm": "81fc70a43c38f02167e5b8fbac8dcf62ce1629cfd6ff5778c06907e064bd01c3",
+    "reset-pan-control.xm": "95e94325f908f0de40da0ce184750cf7410ff431212154a8a55a13baa45193c3",
+    "key-off-selection.xm": "3d28670e20aa40dbd3a59b35fb008f999dbbe9b001bcea9ee490c3a6f5e7ce71",
+    "key-off-selection-control.xm": "dbbde35dbe05dd7dc91e48417772f841cadb9a86f61d3016cf2c0b4f0766406b",
+    "k00-selection.xm": "cec8dc730f81a47151ec6e8a4c8f8107d244095350ec596ddbb5174c737cb8b6",
+    "k00-selection-control.xm": "edf857741d5c8da827caa8a77feb6103d5d085742a268a3826a108bf4ddcba42",
+    "cold-selection.xm": "e0932e154d7061e6a3e813675bf606141adf96e4e298f973a7538b8ada374f39",
+    "cold-selection-control.xm": "54b7c76b6e8d5590138f1cdeeb670a64a8d3c3dd417f599cb0af10689b4a226d",
+    "unselected-note.xm": "4162214494c038be9db38486055201e9eb462c23b779bd9512d96822c86b6deb",
+    "unselected-note-control.xm": "54b7c76b6e8d5590138f1cdeeb670a64a8d3c3dd417f599cb0af10689b4a226d",
+    "explicit-trigger-control.xm": "e7f26fd86bf76cadd67295c4d1ba9e16d76e2ce41dcc5c286eb17073a452b10d",
+    "explicit-trigger-control-control.xm": "e7f26fd86bf76cadd67295c4d1ba9e16d76e2ce41dcc5c286eb17073a452b10d"
+  }
+}

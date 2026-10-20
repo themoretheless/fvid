@@ -1,0 +1,60 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0073"
+  ],
+  "checked_at": "2026-10-15T22:59:44.672313+00:00",
+  "before": [
+    "evidence/batch-049-opus-endpoint-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-049-opus-endpoint-extended.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-049-webm-final.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-049-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-049-worker.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-049-cpal.log",
+      "kind": "rust",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-049-minimal-final.log",
+      "kind": "rust",
+      "passed": 24
+    },
+    {
+      "log": "evidence/batch-049-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-049-player.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twenty authored short VP9/Opus cases compare native PCM to the decoded unpadded control. Fixed and variable Xiph/EBML laces, complete and partial tail discard, whole discard, header preskip, CodecDelay, positive origin and untimed SimpleBlocks are covered.",
+    "Known indexed duration projects the same Opus priming, sample-grid clock and audible windows used by packet delivery, cached with OnceLock. Fully discarded packets do not extend the maximum audible endpoint. Unknown indexed timing retains its estimate until complete packet traversal establishes the endpoint; partial traversal does not overwrite it.",
+    "Actual capture workers verify PCM, timestamps, EOF, rewind and seek0. Handle startup agrees for known indexed timing; publication of newly discovered unknown timing is a separately reproduced pending worker issue.",
+    "The initial incorrectly qualified unit filter and feature-disabled zero-test integration runs are excluded. Final nonempty unit/minimal results and completed player build are recorded. No performance or physical device claim."
+  ],
+  "compatibility": "No public signatures change. Opus duration now denotes its audible presentation endpoint; known indexed timing is stable before and during decode and after navigation.",
+  "counting": "One Opus endpoint calculation improvement. Codec/lace/trim variants and regressions add no IDs."
+}

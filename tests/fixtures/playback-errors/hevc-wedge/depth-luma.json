@@ -1,0 +1,5765 @@
+{
+  "provenance": "Owned mixed-PB CABAC components, not full video acceptance.",
+  "cases": [
+    {
+      "file": "depth-luma-I-swap0-qp0.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 0,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-I-swap0-qp26.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 26,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-I-swap0-qp51.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 51,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-P-swap0-qp0.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 0,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-P-swap0-qp26.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 26,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-P-swap0-qp51.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 51,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-B-swap0-qp0.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 0,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-B-swap0-qp26.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 26,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-B-swap0-qp51.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 51,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-P-swap1-qp0.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 0,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-P-swap1-qp26.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 26,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-P-swap1-qp51.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 51,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-B-swap1-qp0.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 0,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-B-swap1-qp26.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 26,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "depth-luma-B-swap1-qp51.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 51,
+      "units": [
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 85
+            }
+          ]
+        },
+        {
+          "log": 2,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 801
+            }
+          ]
+        },
+        {
+          "log": 3,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 4,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": true,
+          "codes": [
+            {
+              "mode": "wedge",
+              "index": 0
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "contour"
+            },
+            {
+              "mode": "wedge",
+              "index": 509
+            }
+          ]
+        },
+        {
+          "log": 5,
+          "enabled": false,
+          "codes": [
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            },
+            {
+              "mode": "ordinary",
+              "mpm": true,
+              "value": 2
+            },
+            {
+              "mode": "ordinary",
+              "mpm": false,
+              "value": 31
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

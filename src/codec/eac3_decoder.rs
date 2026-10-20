@@ -66,11 +66,15 @@ const SYNCWORD: u32 = 0x0B77;
 const EAC3_BSID: u32 = 16;
 /// Rates the 2-bit `fscod` names, Table E2.2.
 const SAMPLE_RATES: [u32; 3] = [48_000, 44_100, 32_000];
+/// Reduced sample rates the 2-bit `fscod2` names when `fscod` == 3, Table E2.3.
+const REDUCED_SAMPLE_RATES: [u32; 3] = [24_000, 22_050, 16_000];
+/// All six sample rates Annex E supports across Table E2.2 and Table E2.3.
+const ALL_SAMPLE_RATES: [u32; 6] = [48_000, 44_100, 32_000, 24_000, 22_050, 16_000];
 /// Full-bandwidth channels per `acmod`, the count Annex E borrows from AC-3.
 const NFCHANS: [usize; 8] = [2, 1, 2, 3, 3, 4, 4, 5];
 /// Audio blocks per syncframe for `numblkscod`, Table E2.4.
 const BLOCK_COUNTS: [usize; 4] = [1, 2, 3, 6];
-/// The blocks a frame this reader accepts carries, which is `BLOCK_COUNTS[3]`.
+/// The most blocks a syncframe can carry, which is `BLOCK_COUNTS[3]`.
 const BLOCKS: usize = 6;
 /// The most full-bandwidth channels an `acmod` names: 5.1 without its LFE.
 const CHANS: usize = 5;
@@ -445,17 +449,17 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
     // `frmsiz` counts 16-bit words in the syncframe, itself included.
     let frame_bytes = bits.read(11)? as usize * 2 + 2;
     let fscod = bits.read(2)? as usize;
-    if fscod == 3 {
-        return Err(unsupported("an E-AC-3 frame at a reduced sample rate"));
-    }
-    let rate = SAMPLE_RATES[fscod];
-    let numblkscod = bits.read(2)? as usize;
-    if numblkscod != 3 {
-        return Err(unsupported(&format!(
-            "an E-AC-3 frame of {} blocks, which carries AC-3's conversion layer",
-            BLOCK_COUNTS[numblkscod]
-        )));
-    }
+    let (rate, rate_code, numblkscod, reduced_rate) = if fscod == 3 {
+        let fscod2 = bits.read(2)? as usize;
+        if fscod2 == 3 {
+            return Err(invalid("an E-AC-3 frame with reserved fscod2 = 3"));
+        }
+        (REDUCED_SAMPLE_RATES[fscod2], fscod2 as u8, 3usize, true)
+    } else {
+        let numblkscod = bits.read(2)? as usize;
+        (SAMPLE_RATES[fscod], fscod as u8, numblkscod, false)
+    };
+    let blocks = BLOCK_COUNTS[numblkscod];
     let acmod = bits.read(3)? as usize;
     let lfeon = bits.bit()?;
     let bsid = bits.read(5)?;
@@ -465,20 +469,20 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
             if bsid < EAC3_BSID { "AC-3's own syntax" } else { "a later revision" }
         )));
     }
-    let downmix = bsi(bits, acmod, lfeon, BLOCKS)?;
-    let audio = audfrm(bits, acmod, lfeon, frame_bytes)?;
+    let downmix = bsi(bits, acmod, lfeon, blocks, reduced_rate)?;
+    let audio = audfrm(bits, acmod, lfeon, blocks, frame_bytes)?;
     let position = bits.position();
     if position > frame_bytes * 8 {
         return Err(invalid("an E-AC-3 header longer than the frame that carries it"));
     }
     Ok(Frame {
         sample_rate: rate,
-        rate_code: fscod as u8,
+        rate_code,
         layout: acmod as u8,
         channels: (NFCHANS[acmod] + usize::from(lfeon)) as u16,
         low_frequency: lfeon,
         frame_bytes,
-        blocks: BLOCKS,
+        blocks,
         audio_bit: position,
         coupling: audio.coupling,
         coupling_stated: audio.coupling_stated,
@@ -506,17 +510,26 @@ struct Audio {
 }
 
 /// Read the audio frame of Table E1.3: the flags every block of the frame obeys, the
-/// exponent strategy codes, and where the blocks start. `numblkscod` is known to be
-/// six blocks, which is why `expstre` and `ahte` are fields here rather than defaults
-/// the table would have to supply, and why no conversion-layer strategy data is read.
-fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usize) -> Result<Audio> {
+/// exponent strategy codes, and where the blocks start.
+fn audfrm(
+    bits: &mut BitReader<'_>,
+    acmod: usize,
+    lfeon: bool,
+    blocks: usize,
+    frame_bytes: usize,
+) -> Result<Audio> {
     let nfchans = NFCHANS[acmod];
-    let expstre = bits.bit()?;
-    if bits.bit()? {
-        return Err(unsupported(
-            "an E-AC-3 frame whose blocks carry the adaptive hybrid transform",
-        ));
-    }
+    let expstre = if blocks == BLOCKS {
+        let expstre = bits.bit()?;
+        if bits.bit()? {
+            return Err(unsupported(
+                "an E-AC-3 frame whose blocks carry the adaptive hybrid transform",
+            ));
+        }
+        expstre
+    } else {
+        true
+    };
     let snr_strategy = bits.read(2)? as u8;
     if snr_strategy == 3 {
         return Err(unsupported(
@@ -550,7 +563,7 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
         // stated whether it couples at all.
         coupling[0] = bits.bit()?;
         coupling_stated[0] = true;
-        for blk in 1..BLOCKS {
+        for blk in 1..blocks {
             coupling_stated[blk] = bits.bit()?;
             coupling[blk] = if coupling_stated[blk] {
                 bits.bit()?
@@ -559,12 +572,12 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
             };
         }
     }
-    let coupled = coupling.iter().any(|&flag| flag);
+    let coupled = coupling[..blocks].iter().any(|&flag| flag);
 
     let exponents = if expstre {
         let mut strategy = [0u8; BLOCKS];
         let mut channels = [[0u8; CHANS]; BLOCKS];
-        for blk in 0..BLOCKS {
+        for blk in 0..blocks {
             if coupling[blk] {
                 strategy[blk] = bits.read(2)? as u8;
             }
@@ -586,16 +599,20 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
 
     let mut low_frequency_strategies = [false; BLOCKS];
     if lfeon {
-        for flag in low_frequency_strategies.iter_mut() {
+        for flag in low_frequency_strategies[..blocks].iter_mut() {
             *flag = bits.bit()?;
         }
     }
-    // `strmtyp` is known independent and the frame is known to hold six blocks, so
-    // the converter strategies that follow are always there, and always for the
-    // full-bandwidth channels alone.
     let mut converter_strategies = [0u8; CHANS];
-    for channel in converter_strategies[..nfchans].iter_mut() {
-        *channel = bits.read(5)? as u8;
+    let convexpstre = if blocks == BLOCKS {
+        true
+    } else {
+        bits.bit()?
+    };
+    if convexpstre {
+        for channel in converter_strategies[..nfchans].iter_mut() {
+            *channel = bits.read(5)? as u8;
+        }
     }
 
     let snr_offsets = if snr_strategy == 0 {
@@ -614,18 +631,16 @@ fn audfrm(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, frame_bytes: usiz
             }
         }
     }
-    // Only a frame of a single block omits the flag below, and those are refused
-    // above with the rest of the conversion layer.
     let mut block_starts = None;
-    if bits.bit()? {
+    if blocks > 1 && bits.bit()? {
         // The field is exactly wide enough to name a bit of this frame, so an entry
         // reads as the bit that block starts at rather than as an offset.
         let width = 4 + ceil_log2(frame_bytes / 2);
         let mut starts = [0usize; BLOCKS - 1];
-        for start in starts.iter_mut() {
+        for start in starts[..blocks - 1].iter_mut() {
             *start = bits.read(width as u8)? as usize;
         }
-        validate_starts(&starts, bits.position(), frame_bytes * 8)?;
+        validate_starts(&starts[..blocks - 1], bits.position(), frame_bytes * 8)?;
         block_starts = Some(starts);
     }
     Ok(Audio {
@@ -662,7 +677,7 @@ fn frame_strategies(bits: &mut BitReader<'_>, nfchans: usize) -> Result<[u8; CHA
 /// is the only check they can be given: a start inside the header, a start that is
 /// not ahead of the block before it, or a start past the end of the frame cannot
 /// frame a block, and no encoder here writes them to tell us what it meant instead.
-fn validate_starts(starts: &[usize; BLOCKS - 1], header_bits: usize, frame_bits: usize) -> Result<()> {
+fn validate_starts(starts: &[usize], header_bits: usize, frame_bits: usize) -> Result<()> {
     let mut previous = header_bits;
     for &start in starts {
         if start <= previous {
@@ -683,10 +698,14 @@ fn ceil_log2(n: usize) -> usize {
 }
 
 /// Step over `bsi` past the fields `header` has already read: Table E1.2 from
-/// `dialnorm` on. `strmtyp` is known independent and `numblkscod` known six blocks,
-/// which is what retires the dependent-stream and conversion fields of the table.
-/// The Lo/Ro coefficients the metadata carries come back with the walk.
-fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<Option<Downmix>> {
+/// `dialnorm` on. The Lo/Ro coefficients the metadata carries come back with the walk.
+fn bsi(
+    bits: &mut BitReader<'_>,
+    acmod: usize,
+    lfeon: bool,
+    blocks: usize,
+    reduced_rate: bool,
+) -> Result<Option<Downmix>> {
     bits.skip(5)?; // dialnorm
     if bits.bit()? {
         bits.skip(8)?; // compr
@@ -704,7 +723,10 @@ fn bsi(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Re
         None
     };
     if bits.bit()? {
-        information(bits, acmod)?;
+        information(bits, acmod, reduced_rate)?;
+    }
+    if blocks != BLOCKS {
+        bits.skip(1)?; // convsync
     }
     if bits.bit()? {
         let length = bits.read(6)? as usize;
@@ -766,11 +788,15 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) ->
         }
     }
     if bits.bit()? {
-        // A frame of one block states its mixing configuration once; six-block
-        // frames, which are all this reader accepts, state it per block.
-        for _ in 0..blocks {
-            if bits.bit()? {
-                bits.skip(5)?; // blkmixcfginfo
+        // A frame of one block states its mixing configuration once; multi-block
+        // frames state it per block behind `blkmixcfginfoe`.
+        if blocks == 1 {
+            bits.skip(5)?; // blkmixcfginfo
+        } else {
+            for _ in 0..blocks {
+                if bits.bit()? {
+                    bits.skip(5)?; // blkmixcfginfo
+                }
             }
         }
     }
@@ -822,7 +848,7 @@ fn external(bits: &mut BitReader<'_>) -> Result<()> {
 
 /// Step over the informational metadata, which is what a player shows rather than
 /// what it mixes by.
-fn information(bits: &mut BitReader<'_>, acmod: usize) -> Result<()> {
+fn information(bits: &mut BitReader<'_>, acmod: usize, reduced_rate: bool) -> Result<()> {
     bits.skip(3)?; // bsmod
     bits.skip(1)?; // copyrightb
     bits.skip(1)?; // origbs
@@ -843,9 +869,10 @@ fn information(bits: &mut BitReader<'_>, acmod: usize) -> Result<()> {
         bits.skip(2)?; // roomtyp2
         bits.skip(1)?; // adconvtyp2
     }
-    // sourcefscod is there for every rate this reader takes, and the conversion
-    // flag that follows it only for a frame of fewer than six blocks.
-    bits.skip(1)?;
+    // `sourcefscod` is present only when `fscod` < 3 (full sample rates).
+    if !reduced_rate {
+        bits.skip(1)?;
+    }
     Ok(())
 }
 
@@ -1116,6 +1143,7 @@ pub struct Eac3Decoder {
     core: Core,
     /// Samples still owed to [`ENCODER_DELAY`], which the stream's first blocks pay off.
     lead: usize,
+    initial_lead: usize,
     /// What this block knows about its spectral extension, and what the frame's next
     /// block inherits from it.
     spx: Spx,
@@ -1130,9 +1158,9 @@ impl Eac3Decoder {
     /// count one the folding can reach; anything else is refused by name.
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
         let _ = configuration;
-        if !SAMPLE_RATES.contains(&sample_rate) {
+        if !ALL_SAMPLE_RATES.contains(&sample_rate) {
             return Err(invalid(&format!(
-                "E-AC-3 track at {sample_rate} Hz is outside Annex E's 48000, 44100 and 32000 Hz"
+                "E-AC-3 track at {sample_rate} Hz is outside Annex E's 48000, 44100, 32000, 24000, 22050 and 16000 Hz"
             )));
         }
         if !(1..=6).contains(&channels) {
@@ -1145,9 +1173,21 @@ impl Eac3Decoder {
             channels: usize::from(channels),
             core: Core::new(),
             lead: ENCODER_DELAY,
+            initial_lead: ENCODER_DELAY,
             spx: Spx::default(),
             noise_state: NOISE_SEED,
         })
+    }
+
+    pub(crate) fn for_container(
+        configuration: &[u8],
+        sample_rate: u32,
+        channels: u16,
+    ) -> Result<Self> {
+        let mut decoder = Self::new(configuration, sample_rate, channels)?;
+        decoder.lead = 0;
+        decoder.initial_lead = 0;
+        Ok(decoder)
     }
 
     /// Current audio specification: the rate and channel count the track states, which
@@ -1193,13 +1233,21 @@ impl Eac3Decoder {
             };
             let silence = frame.blocks * SAMPLES * self.channels;
             let usable = frame.frame_bytes.min(raw.len());
+            let protected = usable == frame.frame_bytes
+                && crate::codec::ac3_decoder::frame_crc_valid(&raw[..usable]);
+            if protected && frame.sample_rate != self.sample_rate {
+                return Err(invalid(&format!(
+                    "E-AC-3 frame sample rate {} Hz disagrees with configured {} Hz",
+                    frame.sample_rate, self.sample_rate
+                )));
+            }
             // The header is read from the packet's own bytes, because only its length
             // says where the frame ends; the view the blocks are read from is trimmed to
             // that end, so a truncated tail mutes rather than reaching into whatever
             // follows the packet.
             let mut bits = Bits::at(&raw[..usable], frame.audio_bit);
             let mut samples = Vec::with_capacity(silence);
-            let sound = usable == frame.frame_bytes
+            let sound = protected
                 && self.syncframe(&frame, &mut bits, &mut samples)?;
             if std::env::var("EAC3_TRACE").is_ok() {
                 eprintln!(
@@ -1723,7 +1771,7 @@ impl AudioDecode for Eac3Decoder {
     /// after a seek the same packet rather than the same signal plus different noise.
     fn reset(&mut self) {
         self.core = Core::new();
-        self.lead = ENCODER_DELAY;
+        self.lead = self.initial_lead;
         self.spx.begin_frame();
     }
 }
@@ -1880,7 +1928,7 @@ mod tests {
         let acmod = bits.read(3).unwrap() as usize;
         let lfeon = bits.bit().unwrap();
         assert_eq!(bits.read(5).unwrap(), EAC3_BSID, "bsid");
-        bsi(&mut bits, acmod, lfeon, BLOCKS).unwrap();
+        bsi(&mut bits, acmod, lfeon, BLOCKS, false).unwrap();
         let position = bits.position();
         assert_eq!(
             bits.read(16).unwrap(),
@@ -2138,20 +2186,58 @@ mod tests {
     }
 
     #[test]
-    fn the_shapes_this_reader_will_not_unpack_yet_are_refused_by_name() {
+    fn conversion_layer_block_counts_and_reduced_rates_are_accepted_in_headers() {
         // One, two or three blocks per frame is the shape that carries AC-3's
-        // conversion layer; six is what the encoders here write.
-        let mut bytes = STEREO.to_vec();
-        bytes[4] &= 0xEF; // the low bit of the two that count the blocks
-        let error = header(&mut BitReader::new(&bytes)).unwrap_err();
-        assert!(error.to_string().contains("3 blocks"), "{error}");
+        // conversion layer; `numblkscod = 0` (1 block) is accepted with `convsync`
+        // in `bsi` and `convexpstre` in `audfrm`.
+        let mut sink = Sink::default();
+        sink.put(0x0B77, 16)
+            .put(0, 2) // strmtyp: independent
+            .put(0, 3) // substreamid
+            .put(200, 11) // frmsiz
+            .put(0, 2) // fscod: 48 kHz
+            .put(0, 2) // numblkscod: 1 block
+            .put(2, 3) // acmod: 2/0
+            .put(0, 1) // lfeon
+            .put(EAC3_BSID, 5)
+            .put(31, 5) // dialnorm
+            .put(0, 1) // compre
+            .put(0, 1) // mixmdate
+            .put(0, 1) // infomdate
+            .put(0, 1) // convsync
+            .put(0, 1) // addbsie
+            // audfrm (expstre is implicit true for < 6 blocks, no ahte bit)
+            .put(0, 2) // snroffststr: 0
+            .put(0, 1) // transproce
+            .put(0, 1) // blkswe
+            .put(0, 1) // dithflage
+            .put(0, 1) // bamode
+            .put(0, 1) // frmfgaincode
+            .put(0, 1) // dbaflde
+            .put(0, 1) // skipflde
+            .put(0, 1) // spxattene
+            .put(0, 1) // cplinu[0]
+            .put(1, 2) // chexpstr[0][0]: D15
+            .put(1, 2) // chexpstr[0][1]: D15
+            .put(0, 1) // convexpstre
+            .put(0, 10) // frmcsnroffst + frmfsnroffst
+            .finish();
+        let parsed = header(&mut BitReader::new(&sink.bytes)).expect("1-block header parses");
+        assert_eq!(parsed.blocks, 1);
 
-        // The reduced rates are the fourth `fscod`, which moves the band edges the
-        // reused AC-3 tables are keyed to.
+        // `fscod = 3` with `fscod2 = 0..=2` selects 24000, 22050, or 16000 Hz,
+        // while `fscod2 = 3` is reserved and refused as invalid.
+        let mut reduced = STEREO.to_vec();
+        reduced[4] = (reduced[4] & 0x0F) | 0xC0; // fscod = 3, fscod2 = 0 (24 kHz)
+        let parsed_reduced =
+            header(&mut BitReader::new(&reduced)).expect("24 kHz reduced-rate header parses");
+        assert_eq!(parsed_reduced.sample_rate, 24_000);
+        assert_eq!(parsed_reduced.blocks, 6);
+
         let mut bytes = STEREO.to_vec();
-        bytes[4] |= 0xC0;
+        bytes[4] |= 0xF0; // fscod = 3, fscod2 = 3
         let error = header(&mut BitReader::new(&bytes)).unwrap_err();
-        assert!(error.to_string().contains("reduced"), "{error}");
+        assert!(error.to_string().contains("reserved fscod2 = 3"), "{error}");
     }
 
     #[test]

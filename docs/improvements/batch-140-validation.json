@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0149"
+  ],
+  "checked_at": "2026-10-16T15:02:09.702500+00:00",
+  "before": [
+    "evidence/batch-140-before.log",
+    "evidence/batch-140-acceptance-before.log",
+    "evidence/batch-140-xm-before.rs",
+    "evidence/batch-140-initial-manifest.json"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-140-integration-verified.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-140-decoder.log",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-140-expanded-verified.log",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-140-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-140-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "EC0 now cuts channel volume on tick zero after note/instrument/volume-column processing. Delayed ECx uses its low-nibble tick within row speed. It preserves held-note identity and sample phase, so later volume restoration resumes the original voice; Kxx still releases the held key. Primary semantic reference: evidence/batch-140-reference.json.",
+    "Before: 16 cases reported ignored ECx; ten active-cut variants differed from independent volume-column controls, six out-of-row controls matched. Forced intended acceptance failed; actual worker failed generation0 packet0 with equal byte counts and different PCM. No separate pre-fix seek failure is claimed.",
+    "After: 17 cases include immediate/delayed cuts, out-of-row no-ops, restoration without retrigger, and mixed EC1/K03 channels with different deadlines. All 68 mono/stereo and 11025/44100 Hz combinations match independent split-row volume-column controls exactly. The additional mixed case is a post-fix scheduling regression and adds no extra improvement.",
+    "34 actual worker targets verify independent PCM through full playback, rewind, midpoint seek and EOF. Native authored VP9/PCM companion decodes. Related integrations,11 decoder units,fixture reproduction and player build pass. Generation and ordinary tests require no FFmpeg,network or private media.",
+    "Reuses bounded row tick scheduling without additional decoder fields or deadline allocation. This is support for a missing effect,not a measured performance optimization. Envelope/fadeout synthesis remains outside qualification; existing native ramp semantics are preserved.",
+    "Initial integration hit a concurrent AAC usize/u8 comparison build error. It had already been corrected externally before inspection; no AAC edit or ID was made here. Verified integration/build logs are separate from that failed attempt."
+  ],
+  "counting": "One native XM note-cut capability. Tick variants,restoration,mixed-channel test and fixtures count zero additional IDs."
+}

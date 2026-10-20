@@ -44,6 +44,8 @@ pub struct Track {
     /// HEVC or AV1 stream also states this in its own sequence header, and the
     /// decoder reads it there.
     pub colour: ColourDescription,
+    /// Explicit Matroska Range; None for absent/unspecified/derived values.
+    pub full_range: Option<bool>,
     /// `MasteringMetadata` and `MaxCLL`/`MaxFALL`, which a tone map needs and no
     /// bitstream of a container-only stream carries.
     pub hdr: HdrMetadata,
@@ -136,6 +138,7 @@ pub struct WebmReader<R> {
     pub track_metadata: std::collections::BTreeMap<u64,std::collections::BTreeMap<String,String>>,
     /// False for unsupported scopes, nested or oversized tags requiring a richer exporter.
     pub metadata_complete: bool,
+    disabled_tracks: std::collections::BTreeSet<u64>,
     limits: Limits,
     read_packet_bytes: usize,
     /// Where the walk of the Segment's children stands. Blocks are indexed a
@@ -145,6 +148,13 @@ pub struct WebmReader<R> {
     /// The `TimestampScale` the file's `Info` block states, or the one the
     /// specification gives it. Kept because a cluster's blocks arrive in it.
     scale: u64,
+    track_scales: Vec<(u64, f64)>,
+    scaled_audio_timings: Vec<BlockTiming>,
+    frame_prefixes: Vec<(u64, Vec<u8>)>,
+    zlib_tracks: Vec<u64>,
+    zlib_sizes: Vec<usize>,
+    /// Admitted compact mode tables, at most one per encountered Vorbis track.
+    vorbis_lace_setups: std::collections::BTreeMap<u64, Option<VorbisLaceSetup>>,
     duration_ticks: Option<f64>,
     /// Whether `Info` has been read, which is what makes a scale final and a
     /// track nameable: blocks before it are not indexed for a first picture.
@@ -162,7 +172,7 @@ pub struct WebmReader<R> {
 }
 use self::reader_ebml::{
     Element, bytes, element, end, fields, float, goto, lenient_text, read_chapters,
-    read_tags_collect, sint, text, uint,
+    read_tags_collect, sint, text, terminated_text_bytes, uint,
 };
 
 /// An ITU-T H.273 index stored as a `uInt` element.
@@ -180,9 +190,16 @@ fn read_rotation<R: Read + Seek>(r: &mut R, projection: Element, count: &mut usi
     for field in fields(r, projection, count, max)? {
         match field.id {
             0x7671 => kind = uint(r, field)?,
-            0x7673 => yaw = float(r, field)?,
-            0x7674 => pitch = float(r, field)?,
-            0x7675 => roll = float(r, field)?,
+            0x7673 | 0x7674 | 0x7675 => {
+                // RFC 8794 permits an empty float: these three Matroska
+                // elements all declare zero as their schema default.
+                let value = if end(field)? == field.data { 0.0 } else { float(r, field)? };
+                match field.id {
+                    0x7673 => yaw = value,
+                    0x7674 => pitch = value,
+                    _ => roll = value,
+                }
+            }
             _ => {},
         }
     }
@@ -215,7 +232,10 @@ fn read_colour<R: Read + Seek>(
             0x55b1 => track.colour.matrix = cicp_code(r, f)?,
             0x55ba => track.colour.transfer = cicp_code(r, f)?,
             0x55bb => track.colour.primaries = cicp_code(r, f)?,
-            0x55b9 => track.colour.full_range = uint(r, f)? == 2,
+            0x55b9 => {
+                track.full_range = match uint(r, f)? { 1 => Some(false), 2 => Some(true), _ => None };
+                track.colour.full_range = track.full_range.unwrap_or(false);
+            },
             0x55bc => light.max_cll = uint(r, f)? as f32,
             0x55bd => light.max_fall = uint(r, f)? as f32,
             0x55d0 => {
@@ -260,6 +280,39 @@ fn read_colour<R: Read + Seek>(
 impl<R: Read + Seek> WebmReader<R> {
     /// Precision of block timestamps; CodecDelay and DiscardPadding use ns.
     pub fn timestamp_scale_ns(&self) -> u64 { self.scale }
+    /// The track's exact IEEE TrackTimestampScale; absent tracks return None.
+    pub fn track_timestamp_scale(&self, number:u64)->Option<f64> {
+        self.tracks.iter().any(|t|t.number==number).then(||self.track_scales.iter()
+            .find(|&&(track,_)|track==number).map_or(1.0,|&(_,factor)|factor))
+    }
+    /// Original block grid for a scaled audio packet, including a lace offset.
+    /// Compact records are retained only for non-unit audio tracks.
+    pub fn packet_timestamp_grid(&self,index:usize)->Option<MatroskaPacketGrid> {
+        let packet=self.packets.get(index)?;
+        let at=self.scaled_audio_timings.partition_point(|t|t.range.end<=index);
+        let timing=self.scaled_audio_timings.get(at).filter(|t|t.range.contains(&index))?;
+        let factor=self.track_timestamp_scale(packet.track)?;
+        let base=fvid_media_clock_timestamp(timing.cluster,timing.relative,self.scale,factor)?;
+        Some(MatroskaPacketGrid{cluster:timing.cluster,relative:i32::from(timing.relative),
+            offset_ns:i128::from(packet.pts_ns)-i128::from(base)})
+    }
+    /// Whether an indexed track is usable for automatic playback selection.
+    /// Disabled tracks and their packets remain available for explicit inspection/copy.
+    pub fn track_enabled(&self, number: u64) -> bool {
+        self.tracks.iter().any(|t|t.number==number) && !self.disabled_tracks.contains(&number)
+    }
+    /// Prefer default tracks among the caller's usable/decodable candidates.
+    /// Retain candidate order and fall back to all usable candidates when none
+    /// states a default preference. Explicit index/packet access is unchanged.
+    pub fn preferred_track_numbers(&self, candidates: &[u64]) -> Vec<u64> {
+        let mut result = Vec::new();
+        for &number in candidates {
+            if self.track_enabled(number) && !result.contains(&number) { result.push(number); }
+        }
+        let is_default = |number|self.track_dispositions.get(&number).copied().unwrap_or(1)&1!=0;
+        if result.iter().any(|&number|is_default(number)) { result.retain(|&number|is_default(number)); }
+        result
+    }
     pub fn open(mut reader: R, limits: Limits) -> Result<Self> {
         let file_end = reader.seek(SeekFrom::End(0))?;
         reader.seek(SeekFrom::Start(0))?;
@@ -271,7 +324,7 @@ impl<R: Read + Seek> WebmReader<R> {
         let mut doctype = None;
         for e in fields(&mut reader, header, &mut count, limits.elements)? {
             if e.id == 0x4282 {
-                doctype = Some(bytes(&mut reader, e, 16)?);
+                doctype = Some(terminated_text_bytes(bytes(&mut reader, e, 16)?));
             }
         }
         if !matches!(doctype.as_deref(), Some(b"webm" | b"matroska")) {
@@ -297,11 +350,18 @@ impl<R: Read + Seek> WebmReader<R> {
             track_dispositions: Default::default(),
             track_metadata: Default::default(),
             metadata_complete: true,
+            disabled_tracks: Default::default(),
             limits,
             read_packet_bytes: limits.packet_bytes,
             segment_end: segment.end.unwrap_or(file_end),
             at: segment.data,
             scale: 1_000_000u64,
+            track_scales: Vec::new(),
+            scaled_audio_timings: Vec::new(),
+            frame_prefixes: Vec::new(),
+            zlib_tracks: Vec::new(),
+            zlib_sizes: Vec::new(),
+            vorbis_lace_setups: Default::default(),
             duration_ticks: None,
             info_seen: false,
             chapter_runs: Vec::new(),
@@ -336,6 +396,13 @@ impl<R: Read + Seek> WebmReader<R> {
             at,
             segment_end,
             scale,
+            track_scales,
+            scaled_audio_timings,
+            frame_prefixes,
+            zlib_tracks,
+            zlib_sizes,
+            vorbis_lace_setups,
+            read_packet_bytes,
             duration_ticks,
             info_seen,
             chapter_runs,
@@ -349,15 +416,16 @@ impl<R: Read + Seek> WebmReader<R> {
             track_dispositions,
             track_metadata,
             metadata_complete,
+            disabled_tracks,
             elements,
             scanned,
             tail_ns,
             duration_ns: _,
             chapters: _,
-            read_packet_bytes: _,
         } = self;
         let indexed = packets.len();
         let mut lace_groups = Vec::new();
+        let mut block_timings = Vec::new();
         while *at < *segment_end {
             goto(&mut *reader, *at)?;
             let e = element(&mut *reader, *segment_end, &mut *elements, limits.elements)?;
@@ -375,10 +443,14 @@ impl<R: Read + Seek> WebmReader<R> {
                         } else if f.id == 0x5741 {
                             *writing_app = lenient_text(&mut *reader, f, 1024).unwrap_or_default();
                         } else if f.id == 0x2ad7b1 {
-                            *scale = uint(&mut *reader, f)?;
-                            if *scale == 0 {
+                            let proposed_scale = if end(f)? == f.data { 1_000_000 } else { uint(&mut *reader, f)? };
+                            if proposed_scale == 0 {
                                 return Err(invalid("zero WebM timestamp scale"));
                             }
+                            if *info_seen && proposed_scale != *scale {
+                                return Err(invalid("changing WebM timestamp scale"));
+                            }
+                            *scale = proposed_scale;
                         }
                     }
                     // Whatever the block states or leaves out, the scale it did
@@ -412,6 +484,7 @@ impl<R: Read + Seek> WebmReader<R> {
                             codec_delay_ns: 0,
                             codec_private: Vec::new(),
                             colour: ColourDescription::default(),
+                            full_range: None,
                             hdr: HdrMetadata::default(),
                         };
                         // Two elements can state a language: the one in use now
@@ -420,24 +493,35 @@ impl<R: Read + Seek> WebmReader<R> {
                         // either writing order, so a track that carries both does
                         // not read as two different languages.
                         let mut output_sample_rate = None;
+                        let mut sampling_frequency_present = false;
+                        let mut channels_present = false;
+                        let mut track_scale = None;
+                        let mut frame_prefix = None;
                         let mut uid = None;
                         let mut ietf = None;
                         let mut disposition = 1i32;
+                        let mut enabled = None;
+                        let mut default_seen = false;
                         let mut language_present = false;
                         let mut legacy_language = None;
                         let mut older = String::new();
                         let mut current = String::new();
                         for f in fields(&mut *reader, entry, &mut *elements, limits.elements)? {
                             match f.id {
+                                0x23314f => {
+                                    let value = if end(f)? == f.data { 1.0 } else { float(&mut *reader, f)? };
+                                    if track_scale.is_some() || !value.is_finite() || value <= 0.0 {
+                                        return Err(invalid("invalid Matroska TrackTimestampScale"));
+                                    }
+                                    track_scale = Some(value);
+                                }
                                 0xd7 => track.number = uint(&mut *reader, f)?,
                                 0x73c5 => uid = Some(uint(&mut *reader,f)?),
                                 0x83 => track.kind = uint(&mut *reader, f)?,
                                 0x86 => {
                                     // Some muxers NUL-terminate the CodecID string.
-                                    track.codec = String::from_utf8(bytes(&mut *reader, f, 128)?)
-                                        .map_err(|_| invalid("invalid WebM codec ID"))?
-                                        .trim_end_matches('\0')
-                                        .to_owned();
+                                    track.codec = String::from_utf8(terminated_text_bytes(bytes(&mut *reader, f, 128)?))
+                                        .map_err(|_| invalid("invalid WebM codec ID"))?;
                                 }
                                 0x536e => {
                                     track.name = text(&mut *reader, f, 1024)?;
@@ -456,6 +540,12 @@ impl<R: Read + Seek> WebmReader<R> {
                                     language_present = true;
                                     older = text(&mut *reader, f, 128)?;
                                 }
+                                0xb9 => {
+                                    if enabled.is_some() { return Err(invalid("duplicate Matroska FlagEnabled")); }
+                                    let value = if end(f)? == f.data { 1 } else { uint(&mut *reader,f)? };
+                                    if value > 1 { return Err(invalid("invalid Matroska FlagEnabled")); }
+                                    enabled = Some(value != 0);
+                                }
                                 0x88 | 0x55aa | 0x55ab | 0x55ac | 0x55ad | 0x55ae | 0x55af => {
                                     let bit = match f.id {
                                         0x88 => 1,
@@ -466,7 +556,13 @@ impl<R: Read + Seek> WebmReader<R> {
                                         0x55ae => 4,
                                         _ => 8,
                                     };
-                                    if uint(&mut *reader, f)? != 0 {
+                                    if f.id == 0x88 {
+                                        if default_seen { return Err(invalid("duplicate Matroska FlagDefault")); }
+                                        default_seen = true;
+                                    }
+                                    let value = if f.id==0x88 && end(f)?==f.data {1} else {uint(&mut *reader,f)?};
+                                    if f.id==0x88 && value>1 { return Err(invalid("invalid Matroska FlagDefault")); }
+                                    if value != 0 {
                                         disposition |= bit;
                                     } else {
                                         disposition &= !bit;
@@ -524,7 +620,12 @@ impl<R: Read + Seek> WebmReader<R> {
                                     for v in fields(&mut *reader, f, &mut *elements, limits.elements)? {
                                         match v.id {
                                             0xb5 | 0x78b5 => {
-                                                let value = float(&mut *reader, v)?;
+                                                // Empty OutputSamplingFrequency inherits SamplingFrequency,
+                                                // including when the core frequency appears later.
+                                                if v.id == 0x78b5 && end(v)? == v.data { continue; }
+                                                let value = if v.id == 0xb5 && end(v)? == v.data {
+                                                    8000.0
+                                                } else { float(&mut *reader, v)? };
                                                 if !value.is_finite() || value <= 0.0 {
                                                     return Err(invalid(
                                                         "invalid WebM sampling frequency",
@@ -533,10 +634,15 @@ impl<R: Read + Seek> WebmReader<R> {
                                                 if v.id == 0x78b5 {
                                                     output_sample_rate = Some(value.round() as u64);
                                                 } else {
+                                                    sampling_frequency_present = true;
                                                     track.sample_rate = value.round() as u64;
                                                 }
                                             }
-                                            0x9f => track.channels = uint(&mut *reader, v)?,
+                                            0x9f => {
+                                                channels_present = true;
+                                                track.channels = if end(v)? == v.data { 1 } else { uint(&mut *reader, v)? };
+                                                if track.channels == 0 { return Err(invalid("invalid WebM channel count")); }
+                                            },
                                             // `BitDepth` under `Audio`, in the two-byte
                                             // form the specification gives it; PCM has
                                             // nothing else to state its sample width in.
@@ -546,9 +652,12 @@ impl<R: Read + Seek> WebmReader<R> {
                                     }
                                 }
                                 0x6d80 => {
-                                    return Err(unsupported(
-                                        "encoded/encrypted WebM tracks not supported",
-                                    ));
+                                    if frame_prefix.is_some() {
+                                        return Err(invalid("duplicate Matroska ContentEncodings"));
+                                    }
+                                    frame_prefix = Some(frame_compression(
+                                        &mut *reader, f, &mut *elements, *limits,
+                                    )?);
                                 }
                                 _ => {}
                             }
@@ -571,7 +680,16 @@ impl<R: Read + Seek> WebmReader<R> {
                         {
                             return Err(invalid("invalid WebM track"));
                         }
+                        if enabled == Some(false) {
+                            disabled_tracks.insert(track.number);
+                            // Transform writers cannot yet preserve this track attribute.
+                            *metadata_complete = false;
+                        }
                         if let Some(uid) = uid {track_uids.insert(track.number,uid);}
+                        if track.kind == 2 {
+                            if !sampling_frequency_present { track.sample_rate = 8000; }
+                            if !channels_present { track.channels = 1; }
+                        }
                         // OutputSamplingFrequency overrides the core frequency
                         // regardless of element order; timestamps stay in ns.
                         if let Some(rate) = output_sample_rate {
@@ -582,7 +700,7 @@ impl<R: Read + Seek> WebmReader<R> {
                             // or replace an explicitly stated output clock.
                             if let Ok(config) = WebmAacConfig::parse(&track.codec_private) {
                                 if config.sbr_present == Some(true)
-                                    && (track.sample_rate == 0
+                                    && (!sampling_frequency_present || track.sample_rate == 0
                                         || track.sample_rate == u64::from(config.core.sample_rate))
                                 {
                                     track.sample_rate = u64::from(config.output_sample_rate());
@@ -594,11 +712,27 @@ impl<R: Read + Seek> WebmReader<R> {
                                 // PS expands a mono core even when container
                                 // channel metadata describes that core.
                                 if config.ps_present == Some(true)
-                                    && (track.channels == 0
+                                    && (!channels_present || track.channels == 0
                                         || track.channels == u64::from(config.core.channels))
                                 {
                                     track.channels = u64::from(config.output_channels());
                                 }
+                            }
+                        }
+                        if let Some(value) = track_scale.filter(|&value| value != 1.0) {
+                            track_scales.try_reserve(1)
+                                .map_err(|_| invalid("Matroska track clock allocation failed"))?;
+                            track_scales.push((track.number, value));
+                        }
+                        if let Some((prefix, zlib)) = frame_prefix {
+                            if zlib {
+                                zlib_tracks.try_reserve(1)
+                                    .map_err(|_| invalid("Matroska compression index allocation failed"))?;
+                                zlib_tracks.push(track.number);
+                            } else if !prefix.is_empty() {
+                                frame_prefixes.try_reserve(1)
+                                    .map_err(|_| invalid("Matroska frame prefix allocation failed"))?;
+                                frame_prefixes.push((track.number, prefix));
                             }
                         }
                         tracks.push(track);
@@ -660,6 +794,8 @@ impl<R: Read + Seek> WebmReader<R> {
                                 &mut *packets,
                                 *limits,
                                 &mut lace_groups,
+                                (&*tracks, &*track_scales, &*frame_prefixes),
+                                &mut block_timings,
                             )?,
                             0xa0 => {
                                 let fs = fields(&mut *reader, child, &mut *elements, limits.elements)?;
@@ -687,6 +823,8 @@ impl<R: Read + Seek> WebmReader<R> {
                                             &mut *packets,
                                             *limits,
                                             &mut lace_groups,
+                                            (&*tracks, &*track_scales, &*frame_prefixes),
+                                            &mut block_timings,
                                         )?;
                                     }
                                 }
@@ -724,10 +862,39 @@ impl<R: Read + Seek> WebmReader<R> {
         // Blocks are indexed in the cluster timestamps they carry, which ride in
         // `TimestampScale`, so the scale is put on what this pass recorded: an
         // index that grew over several walks still reads in nanoseconds.
-        for p in &mut packets[indexed..] {
-            p.pts_ns = i64::try_from(i128::from(p.pts_ns) * i128::from(*scale))
-                .map_err(|_| invalid("WebM timestamp overflow"))?;
-            p.duration_ns = p.duration_ns.map(|ticks| ticks.checked_mul(*scale)
+        if !zlib_tracks.is_empty() {
+            zlib_sizes.try_reserve(packets.len().saturating_sub(zlib_sizes.len()))
+                .map_err(|_| invalid("Matroska compression index allocation failed"))?;
+            zlib_sizes.resize(packets.len(), 0);
+        }
+        let mut timing = block_timings.iter().peekable();
+        for (index, p) in packets.iter_mut().enumerate().skip(indexed) {
+            let prefix = frame_prefixes.iter().find(|&&(track, _)| track == p.track)
+                .map_or(&[][..], |(_, prefix)| prefix.as_slice());
+            if p.size.checked_add(prefix.len()).is_none_or(|size| size == 0 || size > limits.packet_bytes) {
+                return Err(invalid("WebM packet exceeds budget or has empty lace frame"));
+            }
+            if zlib_tracks.contains(&p.track) {
+                let mut restored = Vec::new();
+                read_frame_payload(&mut *reader, p, prefix, true, None, *read_packet_bytes, &mut restored)?;
+                if restored.is_empty() { return Err(invalid("empty Matroska zlib frame")); }
+                zlib_sizes[index] = restored.len();
+            }
+            while timing.peek().is_some_and(|raw| raw.range.end <= index) { timing.next(); }
+            let factor = track_scales.iter().find(|&&(track, _)| track == p.track)
+                .map_or(1.0, |&(_, value)| value);
+            p.pts_ns = if let Some(raw) = timing.peek().filter(|raw| raw.range.contains(&index)) {
+                fvid_media_clock_timestamp(raw.cluster, raw.relative, *scale, factor)
+                    .ok_or_else(|| invalid("WebM timestamp overflow"))?
+            } else {
+                i64::try_from(i128::from(p.pts_ns) * i128::from(*scale))
+                    .map_err(|_| invalid("WebM timestamp overflow"))?
+            };
+            p.duration_ns = p.duration_ns.map(|ticks| (if factor == 1.0 {
+                ticks.checked_mul(*scale)
+            } else {
+                fvid_media_clock_duration(ticks, *scale, factor)
+            })
                 .ok_or_else(|| invalid("WebM block duration overflow"))).transpose()?;
             *tail_ns = (*tail_ns).max(p.pts_ns);
             if !tracks.iter().any(|t: &Track| t.number == p.track) {
@@ -741,30 +908,72 @@ impl<R: Read + Seek> WebmReader<R> {
             let track = tracks.iter().find(|t| t.number == first.track).unwrap();
             let default = track.default_duration_ns;
             // BlockDuration describes the whole block, not an equal duration
-            // for every lace. Opus TOCs provide individual packet durations.
-            if default == 0 && track.codec == "A_OPUS" {
+            // for every lace. Supported Opus TOCs provide individual packet
+            // durations even when a track also supplies DefaultDuration.
+            // Preserve declared timing for unsupported mappings that previously
+            // remained indexable with a default (e.g. for video-only playback).
+            if track.codec == "A_OPUS" && (default == 0 || opus_lace_channels(&track.codec_private).is_ok()) {
                 opus_lace_channels(&track.codec_private).map_err(|_| unsupported(
                     "Opus lace timing requires mono/stereo mapping family 0"))?;
                 let mut elapsed = 0i128;
                 let mut data = Vec::new();
-                for packet in &mut packets[group] {
-                    goto(&mut *reader, packet.offset)?;
-                    data.clear();
-                    data.try_reserve_exact(packet.size).map_err(|_| invalid("Opus lace timing allocation failed"))?;
-                    data.resize(packet.size,0);
-                    reader.read_exact(&mut data)?;
+                for (offset, packet) in packets[group.clone()].iter_mut().enumerate() {
+                    let prefix = frame_prefixes.iter().find(|&&(track, _)| track == packet.track)
+                        .map_or(&[][..], |(_, prefix)| prefix.as_slice());
+                    let zlib = zlib_tracks.contains(&packet.track);
+                    let expected = zlib.then(|| zlib_sizes[group.start + offset]);
+                    read_frame_payload(&mut *reader, packet, prefix, zlib, expected, *read_packet_bytes, &mut data)?;
                     let duration = opus_lace_duration(&data).map_err(|e| invalid(&e.to_string()))?;
                     packet.pts_ns = i64::try_from(origin+elapsed).map_err(|_| invalid("WebM lace timestamp overflow"))?;
                     packet.duration_ns = Some(duration);
                     elapsed += i128::from(duration);
                     *tail_ns = (*tail_ns).max(packet.pts_ns);
                 }
+                spread_lace_padding(&mut packets[group.clone()])?;
+                continue;
+            }
+            if track.codec == "A_VORBIS"
+                && let Some((blocks, modes, rate)) = vorbis_lace_setups.entry(track.number)
+                    .or_insert_with(|| vorbis_lace_setup(&track.codec_private)).as_ref()
+            {
+                let mut data = Vec::new();
+                let mut block_size = |index: usize, packet: &Packet| -> Result<u64> {
+                    let prefix = frame_prefixes.iter().find(|&&(number, _)| number == packet.track)
+                        .map_or(&[][..], |(_, prefix)| prefix.as_slice());
+                    let zlib = zlib_tracks.contains(&packet.track);
+                    let expected = zlib.then(|| zlib_sizes[index]);
+                    read_frame_payload(&mut *reader, packet, prefix, zlib, expected, *read_packet_bytes, &mut data)?;
+                    let mode = fvid_codecs::vorbis::PacketMode::parse(
+                        &mut fvid_codecs::vorbis::PacketBits::new(&data), modes,
+                    ).map_err(|error| invalid(&error.to_string()))?;
+                    Ok(1u64 << blocks[usize::from(modes[mode.mode].long)])
+                };
+                // Vorbis overlap belongs to both adjacent blocks, including
+                // a predecessor outside this lace or an earlier scan pass.
+                let previous = packets[..group.start].iter().rposition(|packet| packet.track == track.number);
+                let mut previous = previous.map(|index| block_size(index, &packets[index])).transpose()?;
+                let mut samples = 0u128;
+                for (offset, packet) in packets[group.clone()].iter_mut().enumerate() {
+                    let block = block_size(group.start + offset, packet)?;
+                    let frames = previous.map_or(0, |previous| (previous + block) / 4);
+                    previous = Some(block);
+                    let start = samples * 1_000_000_000 / u128::from(*rate);
+                    samples += u128::from(frames);
+                    let finish = samples * 1_000_000_000 / u128::from(*rate);
+                    packet.pts_ns = i64::try_from(origin + i128::try_from(start)
+                        .map_err(|_| invalid("Vorbis lace timestamp overflow"))?)
+                        .map_err(|_| invalid("Vorbis lace timestamp overflow"))?;
+                    packet.duration_ns = Some(u64::try_from(finish - start)
+                        .map_err(|_| invalid("Vorbis lace duration overflow"))?);
+                    *tail_ns = (*tail_ns).max(packet.pts_ns);
+                }
+                spread_lace_padding(&mut packets[group])?;
                 continue;
             }
             let total = first.duration_ns.map(u128::from)
                 .or_else(|| (default != 0).then_some(u128::from(default)*count))
                 .ok_or_else(|| unsupported("Matroska lacing requires declared frame or block duration"))?;
-            for (index, packet) in packets[group].iter_mut().enumerate() {
+            for (index, packet) in packets[group.clone()].iter_mut().enumerate() {
                 let start = total * index as u128 / count;
                 let finish = total * (index+1) as u128 / count;
                 packet.pts_ns = i64::try_from(origin + i128::try_from(start)
@@ -773,6 +982,17 @@ impl<R: Read + Seek> WebmReader<R> {
                 packet.duration_ns = Some(u64::try_from(finish-start)
                     .map_err(|_| invalid("WebM lace duration overflow"))?);
                 *tail_ns = (*tail_ns).max(packet.pts_ns);
+            }
+            spread_lace_padding(&mut packets[group])?;
+        }
+        // Preserve raw scaled audio coordinates after exact PTS conversion.
+        // Video tracks and ordinary audio need no additional retained records.
+        for timing in block_timings {
+            let Some(packet)=packets.get(timing.range.start) else {continue;};
+            if tracks.iter().any(|t|t.number==packet.track&&t.kind==2)
+                && track_scales.iter().any(|&(number,factor)|number==packet.track&&factor!=1.0) {
+                scaled_audio_timings.try_reserve(1).map_err(|_|invalid("scaled audio block clock allocation failed"))?;
+                scaled_audio_timings.push(timing);
             }
         }
         *scanned = *at >= *segment_end;
@@ -788,11 +1008,10 @@ impl<R: Read + Seek> WebmReader<R> {
     fn settle(&mut self) -> Result<()> {
         self.duration_ns = match self.duration_ticks {
             Some(ticks) => {
-                let nanos = (ticks * self.scale as f64).round();
-                if !nanos.is_finite() || nanos < 1.0 || nanos >= u64::MAX as f64 {
-                    return Err(invalid("WebM Duration overflow"));
-                }
-                Some(nanos as u64)
+                let nanos = fvid_media_clock_duration(1, self.scale, ticks)
+                    .filter(|&nanos| nanos != 0)
+                    .ok_or_else(|| invalid("WebM Duration overflow"))?;
+                Some(nanos)
             }
             None => None,
         };
@@ -893,6 +1112,12 @@ impl<R: Read + Seek> WebmReader<R> {
         }
         let mut total = 0;
         vector(&mut total, &self.packets)?;
+        vector(&mut total, &self.track_scales)?;
+        vector(&mut total, &self.scaled_audio_timings)?;
+        vector(&mut total, &self.frame_prefixes)?;
+        vector(&mut total, &self.zlib_tracks)?;
+        vector(&mut total, &self.zlib_sizes)?;
+        for (_, prefix) in &self.frame_prefixes { add(&mut total, prefix.capacity())?; }
         vector(&mut total, &self.tracks)?;
         for track in &self.tracks {
             for text in [&track.codec, &track.name, &track.language] {
@@ -930,6 +1155,7 @@ impl<R: Read + Seek> WebmReader<R> {
         tags(&mut total, &self.metadata)?;
         records(&mut total, self.track_uids.len())?;
         records(&mut total, self.track_dispositions.len())?;
+        records(&mut total, self.disabled_tracks.len())?;
         for languages in [&self.track_languages, &self.track_legacy_languages] {
             records(&mut total, languages.len())?;
             for language in languages.values() {
@@ -972,26 +1198,40 @@ impl<R: Read + Seek> WebmReader<R> {
         self.read_packet_bytes = self.read_packet_bytes.min(maximum);
     }
 
+    /// Codec payload bytes after container frame decompression. Packet
+    /// offsets and sizes still describe the stored source-file span.
+    pub fn packet_payload_size(&self, index: usize) -> Result<usize> {
+        let packet = self.packets.get(index).ok_or_else(|| invalid("WebM packet index out of bounds"))?;
+        if self.zlib_tracks.contains(&packet.track) {
+            return self.zlib_sizes.get(index).copied().filter(|&size| size != 0)
+                .ok_or_else(|| invalid("missing Matroska decompressed packet size"));
+        }
+        let prefix = self.frame_prefixes.iter().find(|&&(track, _)| track == packet.track)
+            .map_or(0, |(_, prefix)| prefix.len());
+        packet.size.checked_add(prefix).ok_or_else(|| invalid("WebM packet size overflow"))
+    }
+
+    /// Temporary packet-read storage beyond the restored payload: compressed
+    /// input, fixed inflater state and one byte to detect output overflow.
+    pub fn packet_read_overhead(&self, index: usize) -> Result<usize> {
+        let packet = self.packets.get(index).ok_or_else(|| invalid("WebM packet index out of bounds"))?;
+        if !self.zlib_tracks.contains(&packet.track) { return Ok(0); }
+        packet.size.checked_add(fvid_matroska_zlib::state_bytes())
+            .and_then(|size| size.checked_add(1))
+            .ok_or_else(|| invalid("Matroska packet scratch size overflow"))
+    }
+
     pub fn read_packet_into(&mut self, index: usize, out: &mut Vec<u8>) -> Result<()> {
+        let restored_size = self.packet_payload_size(index)?;
+        if restored_size > self.read_packet_bytes { return Err(invalid("WebM packet exceeds budget")); }
         let p = self
             .packets
             .get(index)
             .ok_or_else(|| invalid("WebM packet index out of bounds"))?;
-        if p.size > self.read_packet_bytes {
-            return Err(invalid("WebM packet exceeds budget"));
-        }
-        // Blocks are read in the order the walk found them, which is the order
-        // they sit in the file, so the reader is usually already standing on the
-        // packet it is asked for and the bytes stay where they were read to.
-        goto(&mut self.reader, p.offset)?;
-        out.clear();
-        if out.capacity() < p.size {
-            out.try_reserve_exact(p.size - out.len())
-                .map_err(|_| invalid("WebM packet buffer allocation failed"))?;
-        }
-        out.resize(p.size, 0);
-        self.reader.read_exact(out)?;
-        Ok(())
+        let prefix = self.frame_prefixes.iter().find(|&&(track, _)| track == p.track)
+            .map_or(&[][..], |(_, prefix)| prefix.as_slice());
+        let zlib = self.zlib_tracks.contains(&p.track);
+        read_frame_payload(&mut self.reader, p, prefix, zlib, zlib.then_some(restored_size), self.read_packet_bytes, out)
     }
 
     pub fn read_packet(&mut self, index: usize) -> Result<Vec<u8>> {
@@ -1021,11 +1261,147 @@ fn lace_vint<R: Read + Seek>(r: &mut R, limit: u64) -> Result<(u64, u32)> {
     }
     Ok((value, width))
 }
+// RFC 9559 5.1.4.1.31: one frame-only zlib or header-stripping transform.
+// Other compression algorithms, codec-private transforms and encryption retain
+// their explicit refusal instead of publishing undecoded content as packets.
+fn frame_compression<R: Read + Seek>(
+    r: &mut R, e: Element, count: &mut usize, limits: Limits,
+) -> Result<(Vec<u8>, bool)> {
+    let unavailable = || unsupported("encoded/encrypted WebM tracks not supported");
+    let mut encodings = fields(r, e, count, limits.elements)?.into_iter().filter(|e| e.id == 0x6240);
+    let encoding = encodings.next().ok_or_else(unavailable)?;
+    if encodings.next().is_some() { return Err(unavailable()); }
+    let mut scope = 1;
+    let mut kind = 0;
+    let mut compression = None;
+    let mut seen = 0u8;
+    for field in fields(r, encoding, count, limits.elements)? {
+        let bit = match field.id { 0x5031 => 1, 0x5032 => 2, 0x5033 => 4, 0x5034 => 8, _ => 0 };
+        if seen & bit != 0 { return Err(invalid("duplicate Matroska ContentEncoding field")); }
+        seen |= bit;
+        match field.id {
+            0x5031 => { uint(r, field)?; } // A lone transform can have any order.
+            0x5032 => scope = if end(field)? == field.data { 1 } else { uint(r, field)? },
+            0x5033 => kind = uint(r, field)?,
+            0x5034 => compression = Some(field),
+            _ => {} // ContentEncryption must be ignored for compression type 0.
+        }
+    }
+    if scope != 1 || kind != 0 { return Err(unavailable()); }
+    let compression = compression.ok_or_else(unavailable)?;
+    let mut algorithm = 0;
+    let mut settings = None;
+    let mut seen_algorithm = false;
+    for field in fields(r, compression, count, limits.elements)? {
+        match field.id {
+            0x4254 => {
+                if seen_algorithm { return Err(invalid("duplicate Matroska ContentCompAlgo")); }
+                seen_algorithm = true;
+                algorithm = uint(r, field)?;
+            }
+            0x4255 => {
+                if settings.is_some() { return Err(invalid("duplicate Matroska ContentCompSettings")); }
+                settings = Some(field);
+            }
+            _ => {}
+        }
+    }
+    if algorithm == 0 {
+        if settings.is_some_and(|field| field.end != Some(field.data)) { return Err(unavailable()); }
+        return Ok((Vec::new(), true));
+    }
+    if algorithm != 3 { return Err(unavailable()); }
+    let prefix = settings.map(|field| bytes(r, field, limits.packet_bytes.min(256 << 10))).transpose()?;
+    Ok((prefix.unwrap_or_default(), false))
+}
+
+fn read_frame_payload<R: Read + Seek>(
+    reader: &mut R, packet: &Packet, prefix: &[u8], zlib: bool,
+    expected: Option<usize>, maximum: usize, out: &mut Vec<u8>,
+) -> Result<()> {
+    let size = packet.size.checked_add(prefix.len())
+        .filter(|&size| size <= maximum)
+        .ok_or_else(|| invalid("WebM packet exceeds budget"))?;
+    goto(reader, packet.offset)?;
+    if zlib {
+        let mut encoded = Vec::new();
+        encoded.try_reserve_exact(packet.size)
+            .map_err(|_| invalid("Matroska compressed buffer allocation failed"))?;
+        encoded.resize(packet.size, 0);
+        reader.read_exact(&mut encoded)?;
+        // Release a previous packet buffer before allocating its replacement.
+        // Admission checks above still precede any change to caller output.
+        *out = Vec::new();
+        let restored = fvid_matroska_zlib::decode(&encoded, expected.unwrap_or(maximum).min(maximum))
+            .map_err(invalid)?;
+        if expected.is_some_and(|expected| restored.len() != expected) {
+            return Err(invalid("Matroska decompressed packet size changed"));
+        }
+        *out = restored;
+        return Ok(());
+    }
+    out.clear();
+    if out.capacity() < size {
+        out.try_reserve_exact(size)
+            .map_err(|_| invalid("WebM packet buffer allocation failed"))?;
+    }
+    out.extend_from_slice(prefix);
+    out.resize(size, 0);
+    reader.read_exact(&mut out[prefix.len()..])?;
+    Ok(())
+}
+
 enum BlockKind {
     Simple,
     Group { keyframe: bool },
 }
 
+struct BlockTiming {
+    range: std::ops::Range<usize>,
+    cluster: u64,
+    relative: i16,
+}
+
+/// Only admitted setup enables codec-derived lace timing. Other headers keep
+/// their prior declared-timing indexability for non-audio consumers.
+type VorbisLaceSetup = ([u8; 2], Vec<fvid_codecs::vorbis::Mode>, u32);
+fn vorbis_lace_setup(private: &[u8]) -> Option<VorbisLaceSetup> {
+    let (ident, setup) = fvid_codecs::vorbis_audio::configuration_headers(private).ok()?;
+    let ident = fvid_codecs::vorbis::Identification::parse(ident).ok()?;
+    let limits = fvid_codecs::vorbis_admission::inspect(setup).ok()?.limits;
+    let setup = fvid_codecs::vorbis::Setup::parse(setup, ident.channels, limits).ok()?;
+    Some((ident.block_exponents, setup.modes, ident.sample_rate))
+}
+
+/// DiscardPadding belongs to the entire Block, including every laced frame.
+fn spread_lace_padding(packets: &mut [Packet]) -> Result<()> {
+    let signed: i128 = packets.iter().map(|p| i128::from(p.discard_padding_ns)).sum();
+    if signed == 0 { return Ok(()); }
+    let total = packets.iter().try_fold(0u128, |total, packet| {
+        packet.duration_ns.map(|duration| total + u128::from(duration))
+            .ok_or_else(|| invalid("Matroska lace padding requires frame durations"))
+    })?;
+    let mut remaining = signed.unsigned_abs();
+    if remaining > total {
+        return Err(invalid("Matroska discard padding exceeds laced block duration"));
+    }
+    let mut trim = |packet: &mut Packet| -> Result<()> {
+        let take = remaining.min(u128::from(packet.duration_ns.expect("lace durations validated")));
+        let signed_take = if signed < 0 { -(take as i128) } else { take as i128 };
+        packet.discard_padding_ns = i64::try_from(signed_take)
+            .map_err(|_| invalid("Matroska lace padding overflow"))?;
+        remaining -= take;
+        Ok(())
+    };
+    if signed < 0 {
+        for packet in packets.iter_mut() { trim(packet)?; }
+    } else {
+        for packet in packets.iter_mut().rev() { trim(packet)?; }
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
 fn read_block<R: Read + Seek>(
     r: &mut R,
     e: Element,
@@ -1034,6 +1410,8 @@ fn read_block<R: Read + Seek>(
     out: &mut Vec<Packet>,
     limits: Limits,
     groups: &mut Vec<std::ops::Range<usize>>,
+    clocks: (&[Track], &[(u64, f64)], &[(u64, Vec<u8>)]),
+    timings: &mut Vec<BlockTiming>,
 ) -> Result<()> {
     goto(r, e.data)?;
     let limit = end(e)?;
@@ -1041,7 +1419,9 @@ fn read_block<R: Read + Seek>(
     if track == 0 || track == (1u64 << (7 * width)) - 1 {
         return Err(invalid("invalid WebM block track"));
     }
-    if limit.saturating_sub(r.stream_position()?) < 4 {
+    let metadata_pending = !clocks.0.iter().any(|value| value.number == track);
+    let has_prefix = clocks.2.iter().any(|(number, prefix)| *number == track && !prefix.is_empty());
+    if limit.saturating_sub(r.stream_position()?) < if metadata_pending || has_prefix { 3 } else { 4 } {
         return Err(invalid("truncated WebM block"));
     }
     let mut h = [0; 3];
@@ -1050,6 +1430,7 @@ fn read_block<R: Read + Seek>(
     let mut count = 1usize;
     let mut sizes = [0u64; 256];
     if mode != 0 {
+        if r.stream_position()? >= limit { return Err(invalid("truncated Matroska lace header")); }
         let mut n = [0];
         r.read_exact(&mut n)?;
         count = usize::from(n[0]) + 1;
@@ -1108,7 +1489,7 @@ fn read_block<R: Read + Seek>(
     }
     if sizes[..count]
         .iter()
-        .any(|&n| n == 0 || n > limits.packet_bytes as u64)
+        .any(|&n| (n == 0 && !metadata_pending && !has_prefix) || n > limits.packet_bytes as u64)
     {
         return Err(invalid(
             "WebM packet exceeds budget or has empty lace frame",
@@ -1129,11 +1510,21 @@ fn read_block<R: Read + Seek>(
         out.try_reserve_exact(capacity - out.len())
             .map_err(|_| invalid("WebM packet index allocation failed"))?;
     }
-    let pts =
-        i128::from(timestamp.ok_or_else(|| invalid("WebM block precedes Cluster timestamp"))?)
-            + i128::from(i16::from_be_bytes([h[0], h[1]]));
-    let pts_ns = i64::try_from(pts).map_err(|_| invalid("WebM timestamp overflow"))?;
+    let cluster = timestamp.ok_or_else(|| invalid("WebM block precedes Cluster timestamp"))?;
+    let relative = i16::from_be_bytes([h[0], h[1]]);
+    // Late track declarations need the original relative clock too. Preserve
+    // that clock per block only for these cases and non-unit track scales.
+    let raw = metadata_pending
+        || clocks.1.iter().any(|&(number, _)| number == track);
+    let pts_ns = if raw { 0 } else {
+        i64::try_from(i128::from(cluster) + i128::from(relative))
+            .map_err(|_| invalid("WebM timestamp overflow"))?
+    };
     let first = out.len();
+    if raw {
+        timings.try_reserve(1).map_err(|_| invalid("Matroska block clock allocation failed"))?;
+        timings.push(BlockTiming { range: first..required, cluster, relative });
+    }
     for &size in &sizes[..count] {
         out.push(Packet {
             track,

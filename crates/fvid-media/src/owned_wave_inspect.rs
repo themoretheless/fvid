@@ -17,6 +17,8 @@ pub struct WaveInfo {
     pub float: bool,
     pub valid_bits: u16,
     pub channel_mask: u32,
+    /// True for WAVEFORMATEXTENSIBLE, including explicit DirectOut mask zero.
+    pub channel_mask_explicit: bool,
     pub data_offset: u64,
     pub sample_frames: u64,
     pub block: u16,
@@ -25,6 +27,14 @@ pub struct WaveInfo {
 }
 
 impl WaveInfo {
+    pub fn effective_channel_mask(&self) -> u32 {
+        if !self.channel_mask_explicit && self.channels <= 2 {
+            crate::owned_pcm_channels::standard_mask(self.channels).unwrap_or(0) as u32
+        } else {
+            self.channel_mask
+        }
+    }
+
     /// Codec name for the stored PCM precision; no decoded-width conversion.
     pub fn codec(&self) -> String {
         if self.float {
@@ -69,7 +79,7 @@ fn chunk<R: Read + Seek>(input: &mut R, at: u64, end: u64) -> Result<([u8; 4], u
     }
     Ok((head[..4].try_into().unwrap(), size, next))
 }
-fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32)> {
+fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32, bool)> {
     if !matches!(bytes.len(), 16 | 18 | 40) {
         return Err(invalid("unsupported WAVE format extension"));
     }
@@ -77,6 +87,7 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32)> {
     let u32at = |n| u32::from_le_bytes(bytes[n..n + 4].try_into().unwrap());
     let (mut tag, channels, rate, byte_rate, block, bits) =
         (u16at(0), u16at(2), u32at(4), u32at(8), u16at(12), u16at(14));
+    let explicit = tag == 0xfffe;
     let (mut valid_bits, mut channel_mask) = (bits, 0);
     if tag == 0xfffe {
         if bytes.len() != 40
@@ -97,7 +108,7 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32)> {
         if valid == 0
             || valid > bits
             || (tag == 3 && valid != bits)
-            || (mask != 0 && mask.count_ones() != u32::from(channels))
+            || (mask != 0 && mask.count_ones() > u32::from(channels))
         {
             return Err(invalid("invalid WAVE valid bits or channel mask"));
         }
@@ -124,23 +135,25 @@ fn format(bytes: &[u8]) -> Result<(u32, u16, u16, bool, u16, u16, u32)> {
         block,
         valid_bits,
         channel_mask,
+        explicit,
     ))
 }
 
 /// Strict RIFF bounds; only metadata safe to retain unchanged is admitted.
 /// Timed cue/loop/broadcast metadata needs its own retiming before it can be copied.
 pub fn inspect<R: Read + Seek>(input: &mut R, cancel: Option<&CancelFlag>) -> Result<WaveInfo> {
-    inspect_impl(input, cancel, true)
+    inspect_impl(input, cancel, true, None)
 }
 /// Read PCM geometry without copying or retiming opaque ancillary chunks.
 /// All chunk extents and audio geometry remain strictly validated.
 pub(crate) fn inspect_probe<R: Read + Seek>(input: &mut R) -> Result<WaveInfo> {
-    inspect_impl(input, None, false)
+    inspect_impl(input, None, false, None)
 }
 fn inspect_impl<R: Read + Seek>(
     input: &mut R,
     cancel: Option<&CancelFlag>,
     preserve: bool,
+    companded: Option<fvid_codecs::g711::Law>,
 ) -> Result<WaveInfo> {
     check(cancel)?;
     let length = input.seek(SeekFrom::End(0))?;
@@ -169,6 +182,33 @@ fn inspect_impl<R: Read + Seek>(
                 }
                 let mut bytes = [0; 40];
                 input.read_exact(&mut bytes[..size as usize])?;
+                if let Some(law) = companded {
+                    let actual = if u16::from_le_bytes(bytes[..2].try_into().unwrap()) == 0xfffe
+                        && size == 40
+                    {
+                        u32::from_le_bytes(bytes[24..28].try_into().unwrap())
+                    } else {
+                        u32::from(u16::from_le_bytes(bytes[..2].try_into().unwrap()))
+                    };
+                    let expected = if law == fvid_codecs::g711::Law::ALaw {
+                        6
+                    } else {
+                        7
+                    };
+                    if actual != expected
+                        || u16::from_le_bytes(bytes[14..16].try_into().unwrap()) != 8
+                    {
+                        return Err(invalid("G.711 WAVE format disagrees with its code width"));
+                    }
+                    // Reuse numeric geometry validation without exposing this
+                    // format to generic linear-PCM processing. Only this private
+                    // descriptor view is normalized; file bytes remain untouched.
+                    if size == 40 {
+                        bytes[24..28].copy_from_slice(&1u32.to_le_bytes());
+                    } else {
+                        bytes[..2].copy_from_slice(&1u16.to_le_bytes());
+                    }
+                }
                 fmt = Some(format(&bytes[..size as usize])?);
             }
             b"data" => {
@@ -208,7 +248,7 @@ fn inspect_impl<R: Read + Seek>(
         }
         at = next;
     }
-    let (rate, channels, bits, float, block, valid_bits, channel_mask) =
+    let (rate, channels, bits, float, block, valid_bits, channel_mask, explicit) =
         fmt.ok_or_else(|| invalid("missing WAVE format"))?;
     let data_bytes = data.ok_or_else(|| invalid("missing WAVE data"))?;
     if data_bytes % u32::from(block) != 0 {
@@ -226,11 +266,63 @@ fn inspect_impl<R: Read + Seek>(
         sample_frames: frames,
         valid_bits,
         channel_mask,
+        channel_mask_explicit: explicit,
         data_offset,
         block,
         data_bytes,
         end,
     })
+}
+
+/// Recognize the G.711 subtype without treating companded bytes as linear PCM.
+pub(crate) fn g711_law<R: Read + Seek>(
+    input: &mut R,
+    cancel: Option<&CancelFlag>,
+) -> Result<Option<fvid_codecs::g711::Law>> {
+    check(cancel)?;
+    let length = input.seek(SeekFrom::End(0))?;
+    input.seek(SeekFrom::Start(0))?;
+    let mut head = [0; 12];
+    input.read_exact(&mut head)?;
+    if &head[..4] != b"RIFF" || &head[8..] != b"WAVE" {
+        return Ok(None);
+    }
+    let end = u64::from(u32::from_le_bytes(head[4..8].try_into().unwrap())) + 8;
+    if end != length {
+        return Err(invalid("RIFF extent disagrees with file length"));
+    }
+    let mut at = 12;
+    while at < end {
+        check(cancel)?;
+        let (tag, size, next) = chunk(input, at, end)?;
+        if &tag == b"fmt " {
+            if !matches!(size, 16 | 18 | 40) {
+                return Ok(None);
+            }
+            let mut bytes = [0; 40];
+            input.read_exact(&mut bytes[..size as usize])?;
+            let tag = u16::from_le_bytes(bytes[..2].try_into().unwrap());
+            let tag = if tag == 0xfffe && size == 40 {
+                u32::from_le_bytes(bytes[24..28].try_into().unwrap())
+            } else {
+                u32::from(tag)
+            };
+            return Ok(match tag {
+                6 => Some(fvid_codecs::g711::Law::ALaw),
+                7 => Some(fvid_codecs::g711::Law::MuLaw),
+                _ => None,
+            });
+        }
+        at = next;
+    }
+    Ok(None)
+}
+pub(crate) fn inspect_g711<R: Read + Seek>(
+    input: &mut R,
+    cancel: Option<&CancelFlag>,
+    law: fvid_codecs::g711::Law,
+) -> Result<WaveInfo> {
+    inspect_impl(input, cancel, true, Some(law))
 }
 
 /// Retain non-timed INFO lists exactly, including unknown entries and padding.

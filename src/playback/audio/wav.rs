@@ -168,6 +168,7 @@ impl Pcm {
     /// rates several bytes wide.
     pub fn block_align(&self) -> usize {
         match self.coding {
+            Coding::ALaw | Coding::MuLaw => usize::from(self.channels),
             Coding::G722 => usize::from(self.channels),
             Coding::G726(code_size) => usize::from(self.channels) * g726_block(code_size).0,
             Coding::Gsm => GSM_BLOCK_BYTES,
@@ -246,8 +247,8 @@ impl Pcm {
             Coding::Pcm(PcmFormat::Int {
                 big_endian: true, ..
             }) => "A_PCM/INT/BIG",
-            Coding::ALaw => "pcm_alaw",
-            Coding::MuLaw => "pcm_mulaw",
+            Coding::Pcm(PcmFormat::ALaw) | Coding::ALaw => "pcm_alaw",
+            Coding::Pcm(PcmFormat::MuLaw) | Coding::MuLaw => "pcm_mulaw",
             Coding::G722 => "adpcm_g722",
             Coding::G726(_) => "adpcm_g726",
             Coding::Gsm => "gsm_ms",
@@ -289,6 +290,7 @@ impl Wav {
         let mut fmt = None;
         let mut data = None;
         let mut fact = None;
+        let mut fmt_body: Option<(usize, usize)> = None;
         // The walk stops at the end of the buffer rather than at the envelope's
         // declared size: a writer that got that size wrong still has readable chunks
         // in it, and the only claim a reader can check against samples is the one the
@@ -308,28 +310,44 @@ impl Wav {
             // Chunks are word aligned, so a writer adds a byte after an odd-length
             // one, and the next chunk starts past it.
             at = body.saturating_add(declared.saturating_add(declared & 1));
+            if tag == b"LIST" && bytes[body..end].starts_with(b"wavl") {
+                return Err(unsupported("Wave LIST/wavl audio is not supported"));
+            }
+            if tag == b"data" && data.is_some() {
+                return Err(unsupported("multiple Wave data chunks are not supported"));
+            }
+            if tag == b"fmt " && let Some((first, last)) = fmt_body
+                && bytes[first..last] != bytes[body..end]
+            {
+                return Err(invalid("conflicting Wave fmt chunks"));
+            }
+            let stated_fact = if tag == b"fact" {
+                bytes.get(body..end).and_then(|chunk| chunk.get(..4)).map(|field| {
+                    usize::try_from(u32::from_le_bytes(field.try_into().unwrap())).unwrap_or(usize::MAX)
+                })
+            } else { None };
+            if let (Some(first), Some(second)) = (fact, stated_fact) && first != second {
+                return Err(invalid("conflicting Wave fact sample counts"));
+            }
             let first_unseen = match tag {
                 b"fmt " => fmt.is_none(),
                 b"data" => data.is_none(),
                 // `fact` states the run's frame count, which is one of the header's
                 // redundant ways of saying how long the track is, so it is kept for the
-                // codings whose own byte rate says nothing - see `parse`. `LIST` and
-                // whatever else a writer adds are skipped: none of them can change how
-                // the samples are laid out.
+                // codings whose own byte rate says nothing - see `parse`. Audio
+                // lists refuse above; other metadata does not change the sample run.
                 b"fact" => fact.is_none(),
                 _ => false,
             };
             if first_unseen {
                 if tag == b"fmt " {
                     fmt = Some(parse_fmt(&bytes[body..end], limits)?);
+                    fmt_body = Some((body, end));
                 } else if tag == b"fact" {
                     // A `fact` chunk that stops before its one field states nothing,
                     // which is not the same as a statement the rest of the file
                     // contradicts.
-                    fact = bytes.get(body..end).and_then(|chunk| {
-                        let stated = u32::from_le_bytes(chunk.get(..4)?.try_into().ok()?);
-                        Some(usize::try_from(stated).unwrap_or(usize::MAX))
-                    });
+                    fact = stated_fact;
                 } else {
                     data = Some((body, end, declared));
                 }
@@ -347,6 +365,11 @@ impl Wav {
                 "sample run is over the {} byte limit",
                 limits.data_bytes
             )));
+        }
+        if matches!(pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
+            && !samples.len().is_multiple_of(pcm.block_align())
+        {
+            return Err(invalid("Wave PCM sample run ends in an incomplete channel frame"));
         }
         let blocks = samples.len() / pcm.block_align();
         let frames = blocks * pcm.frames_per_block();
@@ -395,6 +418,11 @@ impl Wav {
         &self.data[start..start + whole]
     }
 
+    /// Complete decoded frames packed into a window; coded blocks may not divide its nominal size.
+    fn window_frames(&self) -> usize {
+        self.window_bytes() / self.pcm.block_align() * self.pcm.frames_per_block()
+    }
+
     /// Bytes of one window: the player's own grain of frames, counted in the blocks
     /// this coding packs those frames into.
     fn window_bytes(&self) -> usize {
@@ -438,9 +466,27 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
             )));
         }
         format = data_format as u16;
-        // The width the samples are held in, which is what the decoder reads, while
-        // the field above is the width they are stored in.
-        bits = u16_at(18);
+        let valid_bits = u16_at(18);
+        match format {
+            PCM => {
+                if bits % 8 != 0 {
+                    return Err(invalid("extensible PCM container width is not byte-aligned"));
+                }
+                if valid_bits == 0 || valid_bits > bits {
+                    return Err(invalid("extensible PCM has invalid valid-bit precision"));
+                }
+                // Precision is left-aligned within the stored sample. Reading
+                // its full width preserves normalized amplitude and frame stride.
+            }
+            IEEE_FLOAT => {
+                if valid_bits != bits {
+                    return Err(invalid("extensible float precision differs from storage width"));
+                }
+            }
+            // The union describes samples per block for compressed formats.
+            // Retain their existing admission until separately qualified.
+            _ => bits = valid_bits,
+        }
     }
     if channels == 0 || channels as usize > limits.channels {
         return Err(invalid("channel count is out of range"));
@@ -449,10 +495,9 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
         return Err(invalid("sample rate of zero"));
     }
     let kind = match (format, bits) {
-        // RIFF's 8-bit PCM is offset by half its scale, while the player's decoder
-        // reads an 8-bit integer tag as signed - the width QuickTime's fourcc means.
-        // Re-shifting those bytes is the decoder's to offer, not something a header
-        // reader should do quietly, so this stays refused.
+        // RIFF PCM8 is unsigned; the existing unsigned decoder preserves its
+        // midpoint and numeric boundaries without rewriting encoded samples.
+        (PCM, 8) => Coding::Pcm(PcmFormat::Unsigned8),
         (PCM, 16 | 24 | 32) => Coding::Pcm(PcmFormat::Int {
             bits: bits as u8,
             big_endian: false,
@@ -605,6 +650,8 @@ fn parse_fmt(body: &[u8], limits: &Limits) -> Result<Pcm> {
 pub struct WavAudioReader {
     wav: Wav,
     packet: usize,
+    frame_skip: usize,
+    presentation_floor: u64,
 }
 
 impl WavAudioReader {
@@ -613,10 +660,12 @@ impl WavAudioReader {
     pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         Ok(Self {
             wav: Wav::parse(&bytes, &limits)?,
             packet: 0,
+            frame_skip: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -653,13 +702,20 @@ impl AudioStream for WavAudioReader {
     /// than the samples in it. Every other coding's rate is a whole number of bytes, so
     /// this is the same duration those files' headers claim.
     fn duration(&self) -> Option<Duration> {
-        Some(Duration::from_secs_f64(
-            self.wav.frames as f64 / f64::from(self.wav.pcm.sample_rate),
-        ))
+        Some(crate::audio::sample_duration(self.wav.frames as u64, self.wav.pcm.sample_rate))
     }
 
     /// PCM needs no setup: the header's fields have already gone into the decoder's
     /// construction.
+    fn validate_eof(&self) -> Result<()> {
+        let declared = self.wav.declared_bytes;
+        let available = self.wav.data.len();
+        if declared != u32::MAX as usize && available < declared {
+            return Err(invalid(&format!("Wave data payload is truncated: declared {declared} bytes, available {available}")));
+        }
+        Ok(())
+    }
+
     fn extra_data(&self) -> &[u8] {
         &[]
     }
@@ -677,25 +733,66 @@ impl AudioStream for WavAudioReader {
         if self.packet >= self.wav.packets() {
             return Ok(None);
         }
-        let data = self.wav.packet(self.packet).to_vec();
+        let skip = self.frame_skip;
+        let data = self.wav.packet(self.packet)[skip * self.wav.pcm.block_align()..].to_vec();
+        self.frame_skip = 0;
         let packet = EncodedPacket {
             duration: ((data.len() / self.wav.pcm.block_align()) * self.wav.pcm.frames_per_block())
                 as i64,
-            pts: (self.packet * PACKET_FRAMES) as i64,
+            pts: (self.packet * self.wav.window_frames() + skip) as i64,
             data,
         };
         self.packet += 1;
         Ok(Some(packet))
     }
 
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid decoded audio geometry"));
+        }
+        packet.pts = u64::try_from(source_pts)
+            .map_err(|_| invalid("decoded audio precedes its source timeline"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        let frames = packet.data.len() / stride;
+        let skip = self.presentation_floor.saturating_sub(packet.pts).min(frames as u64) as usize;
+        if skip == frames { return Ok(None); }
+        if skip != 0 {
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            packet.pts += skip as u64;
+        }
+        Ok(Some(packet))
+    }
+
     fn rewind(&mut self) {
         self.packet = 0;
+        self.frame_skip = 0;
+        self.presentation_floor = 0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let last = self.wav.packets().saturating_sub(1);
-        self.packet = (pts.max(0) as usize / PACKET_FRAMES).min(last);
-        (self.packet * PACKET_FRAMES) as i64
+        self.frame_skip = 0;
+        self.presentation_floor = (pts.max(0) as u64).min(self.wav.frames as u64);
+        if pts.max(0) as u64 >= self.wav.frames as u64 {
+            self.packet = self.wav.packets();
+            return self.wav.frames as i64;
+        }
+        if matches!(self.wav.pcm.coding, Coding::ALaw | Coding::MuLaw | Coding::Pcm(_)) {
+            let target = (pts.max(0) as usize).min(self.wav.frames);
+            if target == self.wav.frames {
+                self.packet = self.wav.packets();
+            } else {
+                self.packet = target / PACKET_FRAMES;
+                self.frame_skip = target % PACKET_FRAMES;
+            }
+            return target as i64;
+        }
+        // Predictive codecs need the complete preceding history after reset.
+        // Decode that history normally and suppress it in present_decoded.
+        self.packet = 0;
+        self.presentation_floor as i64
     }
 }
 
@@ -841,16 +938,16 @@ mod tests {
     #[test]
     fn the_cursor_rewinds_and_lands_on_a_window() {
         let mut reader = open(&wav(&vec![0i16; PACKET_FRAMES * 3]));
-        assert_eq!(reader.seek_to(2_500), 2_048);
+        assert_eq!(reader.seek_to(2_500), 2_500);
         assert_eq!(
             reader.next_packet().expect("packet").expect("third").pts,
-            2_048
+            2_500
         );
-        // Before the start, and past the file's end, which is the last window the run
-        // actually has.
+        // Before the start returns the first window; at/past the known end
+        // leaves the cursor exhausted instead of replaying the final window.
         assert_eq!(reader.seek_to(-1), 0);
-        assert_eq!(reader.seek_to(999_999), 4_096);
-        assert!(reader.next_packet().expect("packet").is_some());
+        assert_eq!(reader.seek_to(999_999), 6144);
+        assert!(reader.next_packet().expect("packet").is_none());
         assert!(reader.next_packet().expect("no more").is_none());
         reader.rewind();
         assert_eq!(reader.next_packet().expect("packet").expect("first").pts, 0);
@@ -963,7 +1060,7 @@ mod tests {
             assert_eq!(reader.wav().declared_frames, Some(16));
             assert_eq!(
                 reader.duration(),
-                Some(Duration::from_secs_f64(16.0 / f64::from(rate)))
+                Some(Duration::from_nanos(16 * 1_000_000_000 / u64::from(rate)))
             );
         }
     }
@@ -1018,13 +1115,13 @@ mod tests {
                 (4_096, 1_904, 952)
             ]
         );
-        // A seek lands on a window boundary in frames, whatever the coding's width.
-        assert_eq!(reader.seek_to(4_500), 4_096);
+        // Coded seeks replay the predictor history before presenting the exact target.
+        assert_eq!(reader.seek_to(4_500), 4_500);
         let tail = reader
             .next_packet()
             .expect("packet")
             .expect("the short window");
-        assert_eq!((tail.pts, tail.duration), (4_096, 1_904));
+        assert_eq!((tail.pts, tail.duration), (0, 2_048));
     }
 
     /// A G.726 `fmt ` whose two derived fields are stated by the caller: the byte rate is
@@ -1177,10 +1274,12 @@ mod tests {
                 "{code_size} bits"
             );
             assert_eq!(
-                reader.seek_to(4_500),
-                4_096,
-                "{code_size} bits: a seek lands on a window boundary"
+                reader.seek_to(4_100),
+                4_100,
+                "{code_size} bits: an in-range seek returns the exact sample"
             );
+            assert_eq!(reader.seek_to(4_500), (4_096 + frames_of * 3) as i64);
+            assert!(reader.next_packet().unwrap().is_none());
         }
     }
 
@@ -1413,9 +1512,9 @@ mod tests {
         // A float header at a width the decoder does not read.
         let bytes = file(&fmt(IEEE_FLOAT, 1, 8_000, 16), &vec![0u8; 4]);
         assert!(Wav::parse(&bytes, &Limits::default()).is_err());
-        // RIFF's unsigned 8-bit PCM, which the player's signed 8-bit tag inverts.
+        // RIFF's unsigned8 PCM now names the existing unsigned decoder.
         let bytes = file(&fmt(PCM, 1, 8_000, 8), &vec![0u8; 4]);
-        assert!(Wav::parse(&bytes, &Limits::default()).is_err());
+        assert_eq!(Wav::parse(&bytes, &Limits::default()).unwrap().pcm.coding, Coding::Pcm(PcmFormat::Unsigned8));
         // A codec other than PCM or G.711: `data` would be a bitstream, not samples.
         let bytes = file(&fmt(0x0055, 1, 8_000, 16), &vec![0u8; 4]);
         assert!(Wav::parse(&bytes, &Limits::default()).is_err());

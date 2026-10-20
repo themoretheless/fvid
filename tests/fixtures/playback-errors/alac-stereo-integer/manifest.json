@@ -1,0 +1,197 @@
+{
+  "cases": [
+    {
+      "name": "weight-128-shift7",
+      "weight": -128,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight-128-shift31",
+      "weight": -128,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight-127-shift7",
+      "weight": -127,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight-127-shift31",
+      "weight": -127,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight-64-shift7",
+      "weight": -64,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight-64-shift31",
+      "weight": -64,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight-1-shift7",
+      "weight": -1,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight-1-shift31",
+      "weight": -1,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight0-shift7",
+      "weight": 0,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight0-shift31",
+      "weight": 0,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight1-shift7",
+      "weight": 1,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight1-shift31",
+      "weight": 1,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight64-shift7",
+      "weight": 64,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight64-shift31",
+      "weight": 64,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "weight127-shift7",
+      "weight": 127,
+      "shift": 7,
+      "extra": 8
+    },
+    {
+      "name": "weight127-shift31",
+      "weight": 127,
+      "shift": 31,
+      "extra": 8
+    },
+    {
+      "name": "low16-weight-128-shift7",
+      "weight": -128,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-128-shift31",
+      "weight": -128,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-127-shift7",
+      "weight": -127,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-127-shift31",
+      "weight": -127,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-64-shift7",
+      "weight": -64,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-64-shift31",
+      "weight": -64,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-1-shift7",
+      "weight": -1,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight-1-shift31",
+      "weight": -1,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight0-shift7",
+      "weight": 0,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight0-shift31",
+      "weight": 0,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight1-shift7",
+      "weight": 1,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight1-shift31",
+      "weight": 1,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight64-shift7",
+      "weight": 64,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight64-shift31",
+      "weight": 64,
+      "shift": 31,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight127-shift7",
+      "weight": 127,
+      "shift": 7,
+      "extra": 16
+    },
+    {
+      "name": "low16-weight127-shift31",
+      "weight": 127,
+      "shift": 31,
+      "extra": 16
+    }
+  ],
+  "provenance": "Authored stereo PCM, varying low bytes, signed matrix weights, neutral VP9. Offline own generator only."
+}

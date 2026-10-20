@@ -1,0 +1,6700 @@
+{
+  "provenance": "Owned PCM/CABAC and MP4, independent integer H.265 chroma filter/round/clip oracle, no private media, external codec, network or test-time generation.",
+  "chroma_specification": "H.265 v8 8-241..8-261, 7-58, 8-277; BitDepthC=8 shift1=0/shift2=6, explicit denominator1; final rounding only.",
+  "filters": [
+    [
+      0,
+      64,
+      0,
+      0
+    ],
+    [
+      -2,
+      58,
+      10,
+      -2
+    ],
+    [
+      -4,
+      54,
+      16,
+      -2
+    ],
+    [
+      -6,
+      46,
+      28,
+      -4
+    ],
+    [
+      -4,
+      36,
+      36,
+      -4
+    ],
+    [
+      -4,
+      28,
+      46,
+      -6
+    ],
+    [
+      -2,
+      16,
+      54,
+      -4
+    ],
+    [
+      -2,
+      10,
+      58,
+      -2
+    ]
+  ],
+  "chroma_weights": [
+    [
+      [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          -5
+        ]
+      ],
+      [
+        [
+          2,
+          -3
+        ],
+        [
+          0,
+          11
+        ]
+      ],
+      [
+        [
+          -1,
+          7
+        ],
+        [
+          2,
+          1
+        ]
+      ]
+    ],
+    [
+      [
+        [
+          3,
+          -1
+        ],
+        [
+          -1,
+          8
+        ]
+      ],
+      [
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          -4
+        ]
+      ],
+      [
+        [
+          0,
+          9
+        ],
+        [
+          1,
+          6
+        ]
+      ]
+    ]
+  ],
+  "rounding_witnesses": [
+    {
+      "component": 1,
+      "x": 15,
+      "y": 0,
+      "correct": 173,
+      "early": 170
+    },
+    {
+      "component": 1,
+      "x": 14,
+      "y": 2,
+      "correct": 171,
+      "early": 167
+    },
+    {
+      "component": 1,
+      "x": 15,
+      "y": 2,
+      "correct": 40,
+      "early": 46
+    },
+    {
+      "component": 1,
+      "x": 13,
+      "y": 4,
+      "correct": 172,
+      "early": 167
+    },
+    {
+      "component": 1,
+      "x": 14,
+      "y": 4,
+      "correct": 41,
+      "early": 46
+    },
+    {
+      "component": 1,
+      "x": 12,
+      "y": 6,
+      "correct": 173,
+      "early": 168
+    },
+    {
+      "component": 1,
+      "x": 13,
+      "y": 6,
+      "correct": 42,
+      "early": 47
+    },
+    {
+      "component": 1,
+      "x": 11,
+      "y": 8,
+      "correct": 174,
+      "early": 168
+    },
+    {
+      "component": 1,
+      "x": 12,
+      "y": 8,
+      "correct": 43,
+      "early": 47
+    },
+    {
+      "component": 1,
+      "x": 10,
+      "y": 10,
+      "correct": 175,
+      "early": 169
+    },
+    {
+      "component": 1,
+      "x": 11,
+      "y": 10,
+      "correct": 44,
+      "early": 48
+    },
+    {
+      "component": 1,
+      "x": 9,
+      "y": 11,
+      "correct": 169,
+      "early": 166
+    },
+    {
+      "component": 1,
+      "x": 10,
+      "y": 12,
+      "correct": 45,
+      "early": 48
+    },
+    {
+      "component": 1,
+      "x": 8,
+      "y": 13,
+      "correct": 170,
+      "early": 166
+    },
+    {
+      "component": 1,
+      "x": 9,
+      "y": 13,
+      "correct": 39,
+      "early": 45
+    },
+    {
+      "component": 1,
+      "x": 8,
+      "y": 15,
+      "correct": 38,
+      "early": 46
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 0,
+      "correct": 91,
+      "early": 92
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 0,
+      "correct": 108,
+      "early": 109
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 0,
+      "correct": 125,
+      "early": 126
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 0,
+      "correct": 142,
+      "early": 143
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 0,
+      "correct": 159,
+      "early": 160
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 0,
+      "correct": 176,
+      "early": 177
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 0,
+      "correct": 193,
+      "early": 194
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 0,
+      "correct": 218,
+      "early": 216
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 0,
+      "correct": 99,
+      "early": 100
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 0,
+      "correct": 116,
+      "early": 117
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 0,
+      "correct": 133,
+      "early": 134
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 0,
+      "correct": 150,
+      "early": 151
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 0,
+      "correct": 39,
+      "early": 40
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 0,
+      "correct": 56,
+      "early": 57
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 0,
+      "correct": 73,
+      "early": 74
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 0,
+      "correct": 90,
+      "early": 91
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 1,
+      "correct": 97,
+      "early": 98
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 1,
+      "correct": 114,
+      "early": 115
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 1,
+      "correct": 131,
+      "early": 132
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 1,
+      "correct": 148,
+      "early": 149
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 1,
+      "correct": 165,
+      "early": 166
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 1,
+      "correct": 182,
+      "early": 183
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 1,
+      "correct": 199,
+      "early": 200
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 1,
+      "correct": 152,
+      "early": 153
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 1,
+      "correct": 105,
+      "early": 106
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 1,
+      "correct": 122,
+      "early": 123
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 1,
+      "correct": 139,
+      "early": 140
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 1,
+      "correct": 156,
+      "early": 157
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 1,
+      "correct": 45,
+      "early": 46
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 1,
+      "correct": 62,
+      "early": 63
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 1,
+      "correct": 79,
+      "early": 80
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 1,
+      "correct": 96,
+      "early": 97
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 2,
+      "correct": 108,
+      "early": 109
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 2,
+      "correct": 125,
+      "early": 126
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 2,
+      "correct": 142,
+      "early": 143
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 2,
+      "correct": 159,
+      "early": 160
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 2,
+      "correct": 176,
+      "early": 177
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 2,
+      "correct": 193,
+      "early": 194
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 2,
+      "correct": 218,
+      "early": 213
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 2,
+      "correct": 91,
+      "early": 94
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 2,
+      "correct": 116,
+      "early": 117
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 2,
+      "correct": 133,
+      "early": 134
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 2,
+      "correct": 150,
+      "early": 151
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 2,
+      "correct": 39,
+      "early": 40
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 2,
+      "correct": 56,
+      "early": 57
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 2,
+      "correct": 73,
+      "early": 74
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 2,
+      "correct": 90,
+      "early": 91
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 2,
+      "correct": 107,
+      "early": 108
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 3,
+      "correct": 119,
+      "early": 120
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 3,
+      "correct": 136,
+      "early": 137
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 3,
+      "correct": 153,
+      "early": 154
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 3,
+      "correct": 170,
+      "early": 171
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 3,
+      "correct": 187,
+      "early": 188
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 3,
+      "correct": 212,
+      "early": 210
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 3,
+      "correct": 157,
+      "early": 158
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 3,
+      "correct": 110,
+      "early": 111
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 3,
+      "correct": 127,
+      "early": 128
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 3,
+      "correct": 144,
+      "early": 145
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 3,
+      "correct": 161,
+      "early": 162
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 3,
+      "correct": 50,
+      "early": 51
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 3,
+      "correct": 67,
+      "early": 68
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 3,
+      "correct": 84,
+      "early": 85
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 3,
+      "correct": 101,
+      "early": 102
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 3,
+      "correct": 118,
+      "early": 119
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 4,
+      "correct": 130,
+      "early": 131
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 4,
+      "correct": 147,
+      "early": 148
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 4,
+      "correct": 164,
+      "early": 165
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 4,
+      "correct": 181,
+      "early": 182
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 4,
+      "correct": 198,
+      "early": 199
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 4,
+      "correct": 151,
+      "early": 152
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 4,
+      "correct": 96,
+      "early": 97
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 4,
+      "correct": 121,
+      "early": 122
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 4,
+      "correct": 138,
+      "early": 139
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 4,
+      "correct": 155,
+      "early": 156
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 4,
+      "correct": 44,
+      "early": 45
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 4,
+      "correct": 61,
+      "early": 62
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 4,
+      "correct": 78,
+      "early": 79
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 4,
+      "correct": 95,
+      "early": 96
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 4,
+      "correct": 112,
+      "early": 113
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 4,
+      "correct": 129,
+      "early": 130
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 5,
+      "correct": 141,
+      "early": 142
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 5,
+      "correct": 158,
+      "early": 159
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 5,
+      "correct": 175,
+      "early": 176
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 5,
+      "correct": 192,
+      "early": 193
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 5,
+      "correct": 217,
+      "early": 213
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 5,
+      "correct": 90,
+      "early": 94
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 5,
+      "correct": 115,
+      "early": 116
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 5,
+      "correct": 132,
+      "early": 133
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 5,
+      "correct": 149,
+      "early": 150
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 5,
+      "correct": 166,
+      "early": 167
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 5,
+      "correct": 55,
+      "early": 56
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 5,
+      "correct": 72,
+      "early": 73
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 5,
+      "correct": 89,
+      "early": 90
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 5,
+      "correct": 106,
+      "early": 107
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 5,
+      "correct": 123,
+      "early": 124
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 5,
+      "correct": 140,
+      "early": 141
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 6,
+      "correct": 152,
+      "early": 153
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 6,
+      "correct": 169,
+      "early": 170
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 6,
+      "correct": 186,
+      "early": 187
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 6,
+      "correct": 211,
+      "early": 210
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 6,
+      "correct": 156,
+      "early": 157
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 6,
+      "correct": 109,
+      "early": 110
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 6,
+      "correct": 126,
+      "early": 127
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 6,
+      "correct": 143,
+      "early": 144
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 6,
+      "correct": 160,
+      "early": 161
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 6,
+      "correct": 49,
+      "early": 50
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 6,
+      "correct": 66,
+      "early": 67
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 6,
+      "correct": 83,
+      "early": 84
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 6,
+      "correct": 100,
+      "early": 101
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 6,
+      "correct": 117,
+      "early": 118
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 6,
+      "correct": 134,
+      "early": 135
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 6,
+      "correct": 151,
+      "early": 152
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 7,
+      "correct": 163,
+      "early": 164
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 7,
+      "correct": 180,
+      "early": 181
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 7,
+      "correct": 197,
+      "early": 198
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 7,
+      "correct": 150,
+      "early": 151
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 7,
+      "correct": 95,
+      "early": 96
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 7,
+      "correct": 120,
+      "early": 121
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 7,
+      "correct": 137,
+      "early": 138
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 7,
+      "correct": 154,
+      "early": 155
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 7,
+      "correct": 43,
+      "early": 44
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 7,
+      "correct": 60,
+      "early": 61
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 7,
+      "correct": 77,
+      "early": 78
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 7,
+      "correct": 94,
+      "early": 95
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 7,
+      "correct": 111,
+      "early": 112
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 7,
+      "correct": 128,
+      "early": 129
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 7,
+      "correct": 145,
+      "early": 146
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 7,
+      "correct": 162,
+      "early": 163
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 8,
+      "correct": 174,
+      "early": 175
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 8,
+      "correct": 191,
+      "early": 192
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 8,
+      "correct": 216,
+      "early": 212
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 8,
+      "correct": 89,
+      "early": 93
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 8,
+      "correct": 114,
+      "early": 115
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 8,
+      "correct": 131,
+      "early": 132
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 8,
+      "correct": 148,
+      "early": 149
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 8,
+      "correct": 165,
+      "early": 166
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 8,
+      "correct": 54,
+      "early": 55
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 8,
+      "correct": 71,
+      "early": 72
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 8,
+      "correct": 88,
+      "early": 89
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 8,
+      "correct": 105,
+      "early": 106
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 8,
+      "correct": 122,
+      "early": 123
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 8,
+      "correct": 139,
+      "early": 140
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 8,
+      "correct": 156,
+      "early": 157
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 8,
+      "correct": 173,
+      "early": 174
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 9,
+      "correct": 185,
+      "early": 186
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 9,
+      "correct": 210,
+      "early": 209
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 9,
+      "correct": 155,
+      "early": 156
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 9,
+      "correct": 108,
+      "early": 109
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 9,
+      "correct": 125,
+      "early": 126
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 9,
+      "correct": 142,
+      "early": 143
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 9,
+      "correct": 159,
+      "early": 160
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 9,
+      "correct": 48,
+      "early": 49
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 9,
+      "correct": 65,
+      "early": 66
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 9,
+      "correct": 82,
+      "early": 83
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 9,
+      "correct": 99,
+      "early": 100
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 9,
+      "correct": 116,
+      "early": 117
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 9,
+      "correct": 133,
+      "early": 134
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 9,
+      "correct": 150,
+      "early": 151
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 9,
+      "correct": 167,
+      "early": 168
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 9,
+      "correct": 184,
+      "early": 185
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 10,
+      "correct": 196,
+      "early": 197
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 10,
+      "correct": 149,
+      "early": 150
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 10,
+      "correct": 94,
+      "early": 96
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 10,
+      "correct": 119,
+      "early": 120
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 10,
+      "correct": 136,
+      "early": 137
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 10,
+      "correct": 153,
+      "early": 154
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 10,
+      "correct": 42,
+      "early": 43
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 10,
+      "correct": 59,
+      "early": 60
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 10,
+      "correct": 76,
+      "early": 77
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 10,
+      "correct": 93,
+      "early": 94
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 10,
+      "correct": 110,
+      "early": 111
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 10,
+      "correct": 127,
+      "early": 128
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 10,
+      "correct": 144,
+      "early": 145
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 10,
+      "correct": 161,
+      "early": 162
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 10,
+      "correct": 178,
+      "early": 179
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 10,
+      "correct": 195,
+      "early": 196
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 11,
+      "correct": 215,
+      "early": 212
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 11,
+      "correct": 88,
+      "early": 93
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 11,
+      "correct": 113,
+      "early": 114
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 11,
+      "correct": 130,
+      "early": 131
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 11,
+      "correct": 147,
+      "early": 148
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 11,
+      "correct": 164,
+      "early": 165
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 11,
+      "correct": 53,
+      "early": 54
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 11,
+      "correct": 70,
+      "early": 71
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 11,
+      "correct": 87,
+      "early": 88
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 11,
+      "correct": 104,
+      "early": 105
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 11,
+      "correct": 121,
+      "early": 122
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 11,
+      "correct": 138,
+      "early": 139
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 11,
+      "correct": 155,
+      "early": 156
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 11,
+      "correct": 172,
+      "early": 173
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 11,
+      "correct": 189,
+      "early": 190
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 11,
+      "correct": 214,
+      "early": 211
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 12,
+      "correct": 154,
+      "early": 155
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 12,
+      "correct": 107,
+      "early": 108
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 12,
+      "correct": 124,
+      "early": 125
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 12,
+      "correct": 141,
+      "early": 142
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 12,
+      "correct": 158,
+      "early": 159
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 12,
+      "correct": 47,
+      "early": 48
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 12,
+      "correct": 64,
+      "early": 65
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 12,
+      "correct": 81,
+      "early": 82
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 12,
+      "correct": 98,
+      "early": 99
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 12,
+      "correct": 115,
+      "early": 116
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 12,
+      "correct": 132,
+      "early": 133
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 12,
+      "correct": 149,
+      "early": 150
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 12,
+      "correct": 166,
+      "early": 167
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 12,
+      "correct": 183,
+      "early": 184
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 12,
+      "correct": 153,
+      "early": 154
+    },
+    {
+      "component": 2,
+      "x": 0,
+      "y": 13,
+      "correct": 93,
+      "early": 95
+    },
+    {
+      "component": 2,
+      "x": 1,
+      "y": 13,
+      "correct": 118,
+      "early": 119
+    },
+    {
+      "component": 2,
+      "x": 2,
+      "y": 13,
+      "correct": 135,
+      "early": 136
+    },
+    {
+      "component": 2,
+      "x": 3,
+      "y": 13,
+      "correct": 152,
+      "early": 153
+    },
+    {
+      "component": 2,
+      "x": 4,
+      "y": 13,
+      "correct": 41,
+      "early": 42
+    },
+    {
+      "component": 2,
+      "x": 5,
+      "y": 13,
+      "correct": 58,
+      "early": 59
+    },
+    {
+      "component": 2,
+      "x": 6,
+      "y": 13,
+      "correct": 75,
+      "early": 76
+    },
+    {
+      "component": 2,
+      "x": 7,
+      "y": 13,
+      "correct": 92,
+      "early": 93
+    },
+    {
+      "component": 2,
+      "x": 8,
+      "y": 13,
+      "correct": 109,
+      "early": 110
+    },
+    {
+      "component": 2,
+      "x": 9,
+      "y": 13,
+      "correct": 126,
+      "early": 127
+    },
+    {
+      "component": 2,
+      "x": 10,
+      "y": 13,
+      "correct": 143,
+      "early": 144
+    },
+    {
+      "component": 2,
+      "x": 11,
+      "y": 13,
+      "correct": 160,
+      "early": 161
+    },
+    {
+      "component": 2,
+      "x": 12,
+      "y": 13,
+      "correct": 177,
+      "early": 178
+    },
+    {
+      "component": 2,
+      "x": 13,
+      "y": 13,
+      "correct": 194,
+      "early": 195
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 13,
+      "correct": 147,
+      "early": 148
+    },
+    {
+      "component": 2,
+      "x": 15,
+      "y": 13,
+      "correct": 92,
+      "early": 95
+    },
+    {
+      "component": 2,
+      "x": 14,
+      "y": 14,
+      "correct": 87,
+      "early": 92
+    }
+  ],
+  "chroma_view_offsets": [
+    [
+      0,
+      19,
+      71
+    ],
+    [
+      0,
+      37,
+      113
+    ]
+  ],
+  "cases": [
+    {
+      "file": "texture-iv-chroma-b-off-bi-0.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          0,
+          1024,
+          1280
+        ],
+        [
+          1536,
+          2560,
+          2816
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          3072,
+          4096,
+          4352
+        ],
+        [
+          4608,
+          5632,
+          5888
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-2.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          6144,
+          7168,
+          7424
+        ],
+        [
+          7680,
+          8704,
+          8960
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-3.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          9216,
+          10240,
+          10496
+        ],
+        [
+          10752,
+          11776,
+          12032
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          12288,
+          13312,
+          13568
+        ],
+        [
+          13824,
+          14848,
+          15104
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-0.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          15360,
+          16384,
+          16640
+        ],
+        [
+          16896,
+          17920,
+          18176
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          18432,
+          19456,
+          19712
+        ],
+        [
+          19968,
+          20992,
+          21248
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-2.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          21504,
+          22528,
+          22784
+        ],
+        [
+          23040,
+          24064,
+          24320
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-3.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          24576,
+          25600,
+          25856
+        ],
+        [
+          26112,
+          27136,
+          27392
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          27648,
+          28672,
+          28928
+        ],
+        [
+          29184,
+          30208,
+          30464
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-0.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          30720,
+          31744,
+          32000
+        ],
+        [
+          32256,
+          33280,
+          33536
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          33792,
+          34816,
+          35072
+        ],
+        [
+          35328,
+          36352,
+          36608
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-2.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          36864,
+          37888,
+          38144
+        ],
+        [
+          38400,
+          39424,
+          39680
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-3.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          39936,
+          40960,
+          41216
+        ],
+        [
+          41472,
+          42496,
+          42752
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          43008,
+          44032,
+          44288
+        ],
+        [
+          44544,
+          45568,
+          45824
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-0.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          46080,
+          47104,
+          47360
+        ],
+        [
+          47616,
+          48640,
+          48896
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          49152,
+          50176,
+          50432
+        ],
+        [
+          50688,
+          51712,
+          51968
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-2.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          52224,
+          53248,
+          53504
+        ],
+        [
+          53760,
+          54784,
+          55040
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-3.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          55296,
+          56320,
+          56576
+        ],
+        [
+          56832,
+          57856,
+          58112
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          58368,
+          59392,
+          59648
+        ],
+        [
+          59904,
+          60928,
+          61184
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          61440,
+          62464,
+          62720
+        ],
+        [
+          62976,
+          64000,
+          64256
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-cw-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          64512,
+          65536,
+          65792
+        ],
+        [
+          66048,
+          67072,
+          67328
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          67584,
+          68608,
+          68864
+        ],
+        [
+          69120,
+          70144,
+          70400
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-cw-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          70656,
+          71680,
+          71936
+        ],
+        [
+          72192,
+          73216,
+          73472
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          73728,
+          74752,
+          75008
+        ],
+        [
+          75264,
+          76288,
+          76544
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-cw-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          76800,
+          77824,
+          78080
+        ],
+        [
+          78336,
+          79360,
+          79616
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          79872,
+          80896,
+          81152
+        ],
+        [
+          81408,
+          82432,
+          82688
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-cw-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          82944,
+          83968,
+          84224
+        ],
+        [
+          84480,
+          85504,
+          85760
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          86016,
+          87040,
+          87296
+        ],
+        [
+          87552,
+          88576,
+          88832
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-bi-weighted-cw-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          89088,
+          90112,
+          90368
+        ],
+        [
+          90624,
+          91648,
+          91904
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          92160,
+          93184,
+          93440
+        ],
+        [
+          93696,
+          94720,
+          94976
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-cw-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          95232,
+          96256,
+          96512
+        ],
+        [
+          96768,
+          97792,
+          98048
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          98304,
+          99328,
+          99584
+        ],
+        [
+          99840,
+          100864,
+          101120
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-cw-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          101376,
+          102400,
+          102656
+        ],
+        [
+          102912,
+          103936,
+          104192
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          104448,
+          105472,
+          105728
+        ],
+        [
+          105984,
+          107008,
+          107264
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-cw-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          107520,
+          108544,
+          108800
+        ],
+        [
+          109056,
+          110080,
+          110336
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          110592,
+          111616,
+          111872
+        ],
+        [
+          112128,
+          113152,
+          113408
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-cw-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          113664,
+          114688,
+          114944
+        ],
+        [
+          115200,
+          116224,
+          116480
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          116736,
+          117760,
+          118016
+        ],
+        [
+          118272,
+          119296,
+          119552
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l0-weighted-cw-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          119808,
+          120832,
+          121088
+        ],
+        [
+          121344,
+          122368,
+          122624
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          122880,
+          123904,
+          124160
+        ],
+        [
+          124416,
+          125440,
+          125696
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-cw-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          125952,
+          126976,
+          127232
+        ],
+        [
+          127488,
+          128512,
+          128768
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          129024,
+          130048,
+          130304
+        ],
+        [
+          130560,
+          131584,
+          131840
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-cw-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          132096,
+          133120,
+          133376
+        ],
+        [
+          133632,
+          134656,
+          134912
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          135168,
+          136192,
+          136448
+        ],
+        [
+          136704,
+          137728,
+          137984
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-cw-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          138240,
+          139264,
+          139520
+        ],
+        [
+          139776,
+          140800,
+          141056
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          141312,
+          142336,
+          142592
+        ],
+        [
+          142848,
+          143872,
+          144128
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-cw-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          144384,
+          145408,
+          145664
+        ],
+        [
+          145920,
+          146944,
+          147200
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          147456,
+          148480,
+          148736
+        ],
+        [
+          148992,
+          150016,
+          150272
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-l1-weighted-cw-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          150528,
+          151552,
+          151808
+        ],
+        [
+          152064,
+          153088,
+          153344
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          153600,
+          154624,
+          154880
+        ],
+        [
+          155136,
+          156160,
+          156416
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-cw-0.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          156672,
+          157696,
+          157952
+        ],
+        [
+          158208,
+          159232,
+          159488
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          159744,
+          160768,
+          161024
+        ],
+        [
+          161280,
+          162304,
+          162560
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-cw-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          162816,
+          163840,
+          164096
+        ],
+        [
+          164352,
+          165376,
+          165632
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          165888,
+          166912,
+          167168
+        ],
+        [
+          167424,
+          168448,
+          168704
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-cw-2.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          168960,
+          169984,
+          170240
+        ],
+        [
+          170496,
+          171520,
+          171776
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          172032,
+          173056,
+          173312
+        ],
+        [
+          173568,
+          174592,
+          174848
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-cw-3.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          175104,
+          176128,
+          176384
+        ],
+        [
+          176640,
+          177664,
+          177920
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          178176,
+          179200,
+          179456
+        ],
+        [
+          179712,
+          180736,
+          180992
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-off-intra-weighted-cw-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          181248,
+          182272,
+          182528
+        ],
+        [
+          182784,
+          183808,
+          184064
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-0.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "offsets": [
+        [
+          184320,
+          185344,
+          185600
+        ],
+        [
+          185856,
+          186880,
+          187136
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          187392,
+          188416,
+          188672
+        ],
+        [
+          188928,
+          189952,
+          190208
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-2.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          190464,
+          191488,
+          191744
+        ],
+        [
+          192000,
+          193024,
+          193280
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-3.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          193536,
+          194560,
+          194816
+        ],
+        [
+          195072,
+          196096,
+          196352
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          196608,
+          197632,
+          197888
+        ],
+        [
+          198144,
+          199168,
+          199424
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-merge6-5.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          199680,
+          200704,
+          200960
+        ],
+        [
+          201216,
+          202240,
+          202496
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-0.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        0,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "offsets": [
+        [
+          202752,
+          203776,
+          204032
+        ],
+        [
+          204288,
+          205312,
+          205568
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          205824,
+          206848,
+          207104
+        ],
+        [
+          207360,
+          208384,
+          208640
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-2.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          208896,
+          209920,
+          210176
+        ],
+        [
+          210432,
+          211456,
+          211712
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-3.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          211968,
+          212992,
+          213248
+        ],
+        [
+          213504,
+          214528,
+          214784
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          215040,
+          216064,
+          216320
+        ],
+        [
+          216576,
+          217600,
+          217856
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-merge6-5.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          218112,
+          219136,
+          219392
+        ],
+        [
+          219648,
+          220672,
+          220928
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-0.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        2,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          -8
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "offsets": [
+        [
+          221184,
+          222208,
+          222464
+        ],
+        [
+          222720,
+          223744,
+          224000
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          224256,
+          225280,
+          225536
+        ],
+        [
+          225792,
+          226816,
+          227072
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-2.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          227328,
+          228352,
+          228608
+        ],
+        [
+          228864,
+          229888,
+          230144
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-3.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          230400,
+          231424,
+          231680
+        ],
+        [
+          231936,
+          232960,
+          233216
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          233472,
+          234496,
+          234752
+        ],
+        [
+          235008,
+          236032,
+          236288
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-merge6-5.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          236544,
+          237568,
+          237824
+        ],
+        [
+          238080,
+          239104,
+          239360
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-0.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          239616,
+          240640,
+          240896
+        ],
+        [
+          241152,
+          242176,
+          242432
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "DIShift",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          242688,
+          243712,
+          243968
+        ],
+        [
+          244224,
+          245248,
+          245504
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-2.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          245760,
+          246784,
+          247040
+        ],
+        [
+          247296,
+          248320,
+          248576
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-3.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          248832,
+          249856,
+          250112
+        ],
+        [
+          250368,
+          251392,
+          251648
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          251904,
+          252928,
+          253184
+        ],
+        [
+          253440,
+          254464,
+          254720
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-merge6-5.mp4",
+      "enabled": true,
+      "weighted": false,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          254976,
+          256000,
+          256256
+        ],
+        [
+          256512,
+          257536,
+          257792
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "offsets": [
+        [
+          258048,
+          259072,
+          259328
+        ],
+        [
+          259584,
+          260608,
+          260864
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-cw-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "offsets": [
+        [
+          261120,
+          262144,
+          262400
+        ],
+        [
+          262656,
+          263680,
+          263936
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          264192,
+          265216,
+          265472
+        ],
+        [
+          265728,
+          266752,
+          267008
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-cw-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          267264,
+          268288,
+          268544
+        ],
+        [
+          268800,
+          269824,
+          270080
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          270336,
+          271360,
+          271616
+        ],
+        [
+          271872,
+          272896,
+          273152
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-cw-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          273408,
+          274432,
+          274688
+        ],
+        [
+          274944,
+          275968,
+          276224
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          276480,
+          277504,
+          277760
+        ],
+        [
+          278016,
+          279040,
+          279296
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-cw-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          279552,
+          280576,
+          280832
+        ],
+        [
+          281088,
+          282112,
+          282368
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          282624,
+          283648,
+          283904
+        ],
+        [
+          284160,
+          285184,
+          285440
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-cw-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          285696,
+          286720,
+          286976
+        ],
+        [
+          287232,
+          288256,
+          288512
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "bi",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          288768,
+          289792,
+          290048
+        ],
+        [
+          290304,
+          291328,
+          291584
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-bi-weighted-cw-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "bi",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          291840,
+          292864,
+          293120
+        ],
+        [
+          293376,
+          294400,
+          294656
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        0,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "offsets": [
+        [
+          294912,
+          295936,
+          296192
+        ],
+        [
+          296448,
+          297472,
+          297728
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-cw-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        0,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          4
+        ],
+        [
+          0,
+          4
+        ]
+      ],
+      "offsets": [
+        [
+          297984,
+          299008,
+          299264
+        ],
+        [
+          299520,
+          300544,
+          300800
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          301056,
+          302080,
+          302336
+        ],
+        [
+          302592,
+          303616,
+          303872
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-cw-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          304128,
+          305152,
+          305408
+        ],
+        [
+          305664,
+          306688,
+          306944
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          307200,
+          308224,
+          308480
+        ],
+        [
+          308736,
+          309760,
+          310016
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-cw-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          310272,
+          311296,
+          311552
+        ],
+        [
+          311808,
+          312832,
+          313088
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          313344,
+          314368,
+          314624
+        ],
+        [
+          314880,
+          315904,
+          316160
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-cw-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          316416,
+          317440,
+          317696
+        ],
+        [
+          317952,
+          318976,
+          319232
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          319488,
+          320512,
+          320768
+        ],
+        [
+          321024,
+          322048,
+          322304
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-cw-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          322560,
+          323584,
+          323840
+        ],
+        [
+          324096,
+          325120,
+          325376
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l0",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          325632,
+          326656,
+          326912
+        ],
+        [
+          327168,
+          328192,
+          328448
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l0-weighted-cw-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l0",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          328704,
+          329728,
+          329984
+        ],
+        [
+          330240,
+          331264,
+          331520
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        2,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          -8
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "offsets": [
+        [
+          331776,
+          332800,
+          333056
+        ],
+        [
+          333312,
+          334336,
+          334592
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-cw-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 0,
+      "maximum": 5,
+      "label": "IV",
+      "references": [
+        2,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          -8
+        ],
+        [
+          0,
+          -8
+        ]
+      ],
+      "offsets": [
+        [
+          334848,
+          335872,
+          336128
+        ],
+        [
+          336384,
+          337408,
+          337664
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          337920,
+          338944,
+          339200
+        ],
+        [
+          339456,
+          340480,
+          340736
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-cw-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 1,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          340992,
+          342016,
+          342272
+        ],
+        [
+          342528,
+          343552,
+          343808
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          344064,
+          345088,
+          345344
+        ],
+        [
+          345600,
+          346624,
+          346880
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-cw-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          347136,
+          348160,
+          348416
+        ],
+        [
+          348672,
+          349696,
+          349952
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          350208,
+          351232,
+          351488
+        ],
+        [
+          351744,
+          352768,
+          353024
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-cw-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          353280,
+          354304,
+          354560
+        ],
+        [
+          354816,
+          355840,
+          356096
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          356352,
+          357376,
+          357632
+        ],
+        [
+          357888,
+          358912,
+          359168
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-cw-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          359424,
+          360448,
+          360704
+        ],
+        [
+          360960,
+          361984,
+          362240
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": false,
+      "mode": "l1",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          362496,
+          363520,
+          363776
+        ],
+        [
+          364032,
+          365056,
+          365312
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-l1-weighted-cw-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": false,
+      "mode": "l1",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          365568,
+          366592,
+          366848
+        ],
+        [
+          367104,
+          368128,
+          368384
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          368640,
+          369664,
+          369920
+        ],
+        [
+          370176,
+          371200,
+          371456
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-cw-0.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 0,
+      "maximum": 5,
+      "label": "DI",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          371712,
+          372736,
+          372992
+        ],
+        [
+          373248,
+          374272,
+          374528
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "DIShift",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          374784,
+          375808,
+          376064
+        ],
+        [
+          376320,
+          377344,
+          377600
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-cw-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 1,
+      "maximum": 5,
+      "label": "DIShift",
+      "references": [
+        1,
+        2
+      ],
+      "motion": [
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          377856,
+          378880,
+          379136
+        ],
+        [
+          379392,
+          380416,
+          380672
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          380928,
+          381952,
+          382208
+        ],
+        [
+          382464,
+          383488,
+          383744
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-cw-2.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 2,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          384000,
+          385024,
+          385280
+        ],
+        [
+          385536,
+          386560,
+          386816
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          387072,
+          388096,
+          388352
+        ],
+        [
+          388608,
+          389632,
+          389888
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-cw-3.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 3,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          390144,
+          391168,
+          391424
+        ],
+        [
+          391680,
+          392704,
+          392960
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          393216,
+          394240,
+          394496
+        ],
+        [
+          394752,
+          395776,
+          396032
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-cw-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 4,
+      "maximum": 5,
+      "label": "initial",
+      "references": [
+        2,
+        2
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          396288,
+          397312,
+          397568
+        ],
+        [
+          397824,
+          398848,
+          399104
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": false,
+      "intra": true,
+      "mode": "bi",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          399360,
+          400384,
+          400640
+        ],
+        [
+          400896,
+          401920,
+          402176
+        ]
+      ]
+    },
+    {
+      "file": "texture-iv-chroma-b-on-intra-weighted-cw-merge6-5.mp4",
+      "enabled": true,
+      "weighted": true,
+      "explicit_chroma": true,
+      "intra": true,
+      "mode": "bi",
+      "index": 5,
+      "maximum": 6,
+      "label": "initial",
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "offsets": [
+        [
+          402432,
+          403456,
+          403712
+        ],
+        [
+          403968,
+          404992,
+          405248
+        ]
+      ]
+    }
+  ]
+}

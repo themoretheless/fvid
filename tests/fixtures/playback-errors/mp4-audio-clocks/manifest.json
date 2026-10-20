@@ -1,0 +1,107 @@
+{
+  "provenance": "Authored60ms neutral16-square VP9 plus8kHz mono PCM/raw ALAC; five mdhd media clocks and signed-ctts negative-start companion. No encoder, private media or network.",
+  "cases": [
+    {
+      "file": "pcm-8000.mp4",
+      "codec": "sowt",
+      "clock": 8000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "pcm-1000.mp4",
+      "codec": "sowt",
+      "clock": 1000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "pcm-44100.mp4",
+      "codec": "sowt",
+      "clock": 44100,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "pcm-48000.mp4",
+      "codec": "sowt",
+      "clock": 48000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "pcm-90000.mp4",
+      "codec": "sowt",
+      "clock": 90000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "pcm-1000-negative.mp4",
+      "codec": "sowt",
+      "clock": 1000,
+      "rate": 8000,
+      "negative": true
+    },
+    {
+      "file": "alac-8000.mp4",
+      "codec": "alac",
+      "clock": 8000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "alac-1000.mp4",
+      "codec": "alac",
+      "clock": 1000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "alac-44100.mp4",
+      "codec": "alac",
+      "clock": 44100,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "alac-48000.mp4",
+      "codec": "alac",
+      "clock": 48000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "alac-90000.mp4",
+      "codec": "alac",
+      "clock": 90000,
+      "rate": 8000,
+      "negative": false
+    },
+    {
+      "file": "alac-1000-negative.mp4",
+      "codec": "alac",
+      "clock": 1000,
+      "rate": 8000,
+      "negative": true
+    }
+  ],
+  "sha256": {
+    "pcm-8000.mp4": "56a8b2fd0d842a36229b3294f434cacd0ce7036601b761acd0b6c3c1617b73ee",
+    "pcm-1000.mp4": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+    "pcm-44100.mp4": "362973004df4f815be3626d239654249a9162e91b1261bac268870b45249721e",
+    "pcm-48000.mp4": "7805e1d8f3cd3d9390fca78f3c1813ee028d94c31fde829b56a62a3905fdd162",
+    "pcm-90000.mp4": "a90fb92ddca9f77578006149ed379d18d4e68647943ae5d834159730c4b05257",
+    "pcm-1000-negative.mp4": "5fac8b6d888cb1396ca05a53f364c02419b175fc7b08645b1480f533d982c49c",
+    "alac-8000.mp4": "6a8dfb2a7060a95796abdcb0e52e932455ef9fd737afbdea0c4543cba6cf4dd4",
+    "alac-1000.mp4": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+    "alac-44100.mp4": "a2244d5488ebe17582bafaf17de5967b8c4aabf7e6d371031fb7e6c321304d40",
+    "alac-48000.mp4": "6c532abc5abd7076de676a5f3dced7595a439921f0569c4bf72b540332c678a1",
+    "alac-90000.mp4": "ae157ec0e54b5ac533bdf63e1c9a7772bf90cec9dcafb35dfa5a16b1a093baef",
+    "alac-1000-negative.mp4": "848e0a524b403c05c9c85d909a623a858db0a744c6d6ecfe5d1eb5767d55340b",
+    "pcm-seek-inside.mp4": "0315e937c4680085e78cbe5ae8188b6a4d48b0ff2e8860015ca8abce81d08f87",
+    "alac-seek-inside.mp4": "fe37897f88e3aca225e88bca23142c1138bd637cd743edf5eaf5553e3b782475",
+    "expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "negative-expected.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888"
+  }
+}

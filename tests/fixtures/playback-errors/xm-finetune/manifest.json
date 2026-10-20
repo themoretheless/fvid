@@ -1,0 +1,89 @@
+{
+  "provenance": "Thirteen authored signed raw finetune bytes with looped signed16ramp,note49andexplicit release. Independent pitch oracle uses signed finetune/128semitones from original XM formula. Short authored VP9/PCM companion. No private media/encoder/network.",
+  "cases": [
+    {
+      "name": "fine--128",
+      "file": "fine--128.xm",
+      "finetune": -128
+    },
+    {
+      "name": "fine--64",
+      "file": "fine--64.xm",
+      "finetune": -64
+    },
+    {
+      "name": "fine--16",
+      "file": "fine--16.xm",
+      "finetune": -16
+    },
+    {
+      "name": "fine--8",
+      "file": "fine--8.xm",
+      "finetune": -8
+    },
+    {
+      "name": "fine--1",
+      "file": "fine--1.xm",
+      "finetune": -1
+    },
+    {
+      "name": "fine-0",
+      "file": "fine-0.xm",
+      "finetune": 0
+    },
+    {
+      "name": "fine-1",
+      "file": "fine-1.xm",
+      "finetune": 1
+    },
+    {
+      "name": "fine-7",
+      "file": "fine-7.xm",
+      "finetune": 7
+    },
+    {
+      "name": "fine-8",
+      "file": "fine-8.xm",
+      "finetune": 8
+    },
+    {
+      "name": "fine-15",
+      "file": "fine-15.xm",
+      "finetune": 15
+    },
+    {
+      "name": "fine-16",
+      "file": "fine-16.xm",
+      "finetune": 16
+    },
+    {
+      "name": "fine-64",
+      "file": "fine-64.xm",
+      "finetune": 64
+    },
+    {
+      "name": "fine-127",
+      "file": "fine-127.xm",
+      "finetune": 127
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "fine--128.xm": "13ee220b15975ad60cfa192fb1ffb9d87551b41ae7b9fb8e2f56e92a306fa0ff",
+    "fine--64.xm": "bbe7a85e1ec211ccac774fc80e10318a61af279e22eb196a3c9638e73bced6be",
+    "fine--16.xm": "e8d200b0b880fe0edf5609d087bb0cf0e7a5e1fb5d70aea28b9a35b3cbff6dc0",
+    "fine--8.xm": "2b1e761aa0bc98e5d89ce1ddb8abc3538fbea09f7d31b8d6cfc1e2b6f41f375a",
+    "fine--1.xm": "f6458d14e2c4b8a38b088d8801e794419d84fc504b6d63301fc81c051447d945",
+    "fine-0.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "fine-1.xm": "625836595e809ac2e81ef1a01d2b5189f6efc9f7dbf940db5575b10cd2b0a222",
+    "fine-7.xm": "a4b29795aba44bf287e0b08af9cfaebfefcdd4b5bbbb2811313420a06e8001bf",
+    "fine-8.xm": "3a5142bd2a3607c49fa193b2e91e1b1197e17fb64631a86c20f03bb29e5407f7",
+    "fine-15.xm": "75edfdd77facd5e29a640c64527f58b24dc61dff2c3f2213f5258ef5ce004da3",
+    "fine-16.xm": "f700823b7bb60f6e5f994fd653e4d99ed25048f84f13386571446f36272aa59d",
+    "fine-64.xm": "67e65a90fc30a9379d0de0070ddee0251a7e9446a76decb7faece582a973966d",
+    "fine-127.xm": "dfc26752256606b6cbc69612f372bae3a5098123510b74a79d3a742f11386785",
+    "minus-semitone-control.xm": "7730192b0670a0bce3d1be40df2fc35ff0e85820f2cc135f80f87ccf067a3183",
+    "amiga-fine--128.xm": "45e03442c2051f58b10eca6ac5ea2f220cdfc0f9901d242009e0ac9c64d35ccb",
+    "amiga-minus-semitone-control.xm": "6d66ffa65ce6e69fa7831eb06518c500071178ace238e1659cbbc2bb256d5074"
+  }
+}

@@ -1,0 +1,4322 @@
+[
+  {
+    "name": "separate-field-p-8-e0-r0-o0-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o0-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o0-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o0-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o0-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o0-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o1-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o1-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o1-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o1-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o1-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r0-o1-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w0-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w0-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w0-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w0-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w1-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w1-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w1-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w1-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w2-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w2-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w2-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r0-w2-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o0-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o0-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o0-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o0-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o0-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o0-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o1-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o1-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o1-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o1-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o1-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e0-r1-o1-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w0-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w0-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w0-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w0-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w1-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w1-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w1-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w1-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w2-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w2-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w2-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e0-r1-w2-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o0-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o0-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o0-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o0-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o0-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o0-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o1-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o1-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o1-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o1-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o1-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r0-o1-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w0-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w0-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w0-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w0-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w1-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w1-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w1-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w1-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w2-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w2-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w2-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r0-w2-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o0-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o0-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o0-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o0-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o0-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o0-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o1-w0-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o1-w0-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o1-w0-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o1-w1-none",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o1-w1-dc",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-8-e1-r1-o1-w1-ac",
+    "kind": "p",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w0-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w0-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w0-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w0-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w1-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w1-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w1-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w1-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w2-temporal",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w2-skip",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w2-spatial",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-8-e1-r1-w2-bi",
+    "kind": "b",
+    "depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o0-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o0-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o0-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o0-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o0-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o0-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o1-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o1-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o1-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o1-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o1-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r0-o1-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w0-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w0-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w0-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w0-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w1-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w1-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w1-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w1-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w2-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w2-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w2-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r0-w2-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o0-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o0-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o0-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o0-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o0-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o0-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o1-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o1-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o1-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o1-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o1-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e0-r1-o1-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w0-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w0-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w0-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w0-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w1-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w1-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w1-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w1-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w2-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w2-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w2-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e0-r1-w2-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o0-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o0-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o0-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o0-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o0-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o0-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o1-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o1-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o1-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o1-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o1-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r0-o1-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w0-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w0-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w0-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w0-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w1-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w1-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w1-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w1-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w2-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w2-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w2-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r0-w2-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o0-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o0-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o0-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o0-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o0-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o0-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o1-w0-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o1-w0-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o1-w0-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o1-w1-none",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o1-w1-dc",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-10-e1-r1-o1-w1-ac",
+    "kind": "p",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w0-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w0-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w0-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w0-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w1-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w1-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w1-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w1-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w2-temporal",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w2-skip",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w2-spatial",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-10-e1-r1-w2-bi",
+    "kind": "b",
+    "depth": 10,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o0-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o0-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o0-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o0-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o0-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o0-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o1-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o1-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o1-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o1-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o1-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r0-o1-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w0-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w0-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w0-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w0-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w1-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w1-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w1-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w1-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w2-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w2-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w2-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r0-w2-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o0-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o0-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o0-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o0-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o0-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o0-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o1-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o1-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o1-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o1-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o1-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e0-r1-o1-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w0-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w0-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w0-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w0-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w1-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w1-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w1-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w1-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w2-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w2-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w2-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e0-r1-w2-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": false,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o0-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o0-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o0-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o0-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o0-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o0-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o1-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o1-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o1-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o1-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o1-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r0-o1-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w0-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w0-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w0-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w0-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w1-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w1-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w1-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w1-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w2-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w2-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w2-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r0-w2-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": false,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o0-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o0-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o0-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o0-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o0-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o0-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": false,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o1-w0-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o1-w0-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o1-w0-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": false,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o1-w1-none",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "none",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o1-w1-dc",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "dc",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-p-14-e1-r1-o1-w1-ac",
+    "kind": "p",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "opposite_parity": true,
+    "weighted": true,
+    "residual": "ac",
+    "decode_order": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w0-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w0-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w0-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w0-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 0,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w1-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w1-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w1-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w1-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 1,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w2-temporal",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "temporal",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w2-skip",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "skip",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w2-spatial",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "spatial",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  },
+  {
+    "name": "separate-field-b-14-e1-r1-w2-bi",
+    "kind": "b",
+    "depth": 14,
+    "cabac": true,
+    "bottom_first": true,
+    "weight": 2,
+    "mode": "bi",
+    "decode_order": [
+      0,
+      2,
+      1,
+      3
+    ]
+  }
+]

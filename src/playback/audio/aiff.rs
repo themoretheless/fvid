@@ -109,6 +109,7 @@ impl Aiff {
         };
         let mut comm = None;
         let mut ssnd = None;
+        let mut comm_body: Option<(usize, usize)> = None;
         // As in the Wave reader, the walk runs to the end of the buffer rather than to
         // the envelope's declared size: a writer that got that number wrong still has
         // readable chunks in it.
@@ -124,8 +125,17 @@ impl Aiff {
             // Chunks are word aligned, so a writer adds a byte after an odd-length
             // one, and the next chunk starts past it.
             at = body.saturating_add(declared.saturating_add(declared & 1));
+            if tag == b"SSND" && ssnd.is_some() {
+                return Err(unsupported("multiple AIFF SSND chunks are not supported"));
+            }
+            if tag == b"COMM" && let Some((first, last)) = comm_body
+                && bytes[first..last] != bytes[body..end]
+            {
+                return Err(invalid("conflicting AIFF COMM chunks"));
+            }
             if tag == b"COMM" && comm.is_none() {
                 comm = Some(parse_comm(&bytes[body..end], aifc, limits)?);
+                comm_body = Some((body, end));
             } else if tag == b"SSND" && ssnd.is_none() {
                 ssnd = Some((body, end));
             }
@@ -183,6 +193,11 @@ impl Aiff {
         &self.data[start..start + whole]
     }
 
+    /// Complete decoded frames packed into a window; coded blocks may not divide its nominal size.
+    fn window_frames(&self) -> usize {
+        self.window_bytes() / self.pcm.block_align() * self.pcm.frames_per_block()
+    }
+
     /// Bytes of one window: the player's own grain of frames, counted in the blocks
     /// this coding packs those frames into.
     fn window_bytes(&self) -> usize {
@@ -210,7 +225,23 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
     if channels == 0 || usize::from(channels) > limits.channels {
         return Err(invalid("channel count is out of range"));
     }
-    let coding = if kind == MAC3 {
+    let coding = if matches!(kind, b"fl32" | b"FL32" | b"fl64" | b"FL64") {
+        let width = if matches!(kind, b"fl32" | b"FL32") {
+            32
+        } else {
+            64
+        };
+        if bits != width {
+            return Err(invalid(
+                "AIFC float sample size disagrees with compression type",
+            ));
+        }
+        Coding::Pcm(PcmFormat::Float { bits: width as u8 })
+    } else if matches!(kind, b"alaw" | b"ALAW") {
+        Coding::ALaw
+    } else if matches!(kind, b"ulaw" | b"ULAW") {
+        Coding::MuLaw
+    } else if kind == MAC3 {
         Coding::Mace3
     } else if kind == MAC6 {
         Coding::Mace6
@@ -228,7 +259,7 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
         })
     } else {
         return Err(unsupported(&format!(
-            "AIFF compression {} is not PCM or MACE this decoder reads",
+            "AIFF compression {} is not supported PCM, G.711 or MACE",
             String::from_utf8_lossy(kind)
         )));
     };
@@ -245,7 +276,11 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
     // `00 00 01 02 03`, and its own decode of those bytes is 0.0, 0.0, 1/128, 2/128,
     // 3/128 - a signed row, not the offset-by-half-scale row a Wave file of the same
     // width holds. `pcm_decoder` reads it that way already.
-    if !matches!(coding, Coding::Mace3 | Coding::Mace6) && !matches!(bits, 8 | 16 | 24 | 32) {
+    if !matches!(
+        coding,
+        Coding::Mace3 | Coding::Mace6 | Coding::Pcm(PcmFormat::Float { .. })
+    ) && !matches!(bits, 8 | 16 | 24 | 32)
+    {
         return Err(unsupported(&format!(
             "AIFF PCM of {bits} bits a sample is a width this player has no decoder for"
         )));
@@ -297,6 +332,8 @@ fn read_extended_rate(bytes: &[u8]) -> Result<u32> {
 pub struct AiffAudioReader {
     aiff: Aiff,
     packet: usize,
+    frame_skip: usize,
+    presentation_floor: u64,
 }
 
 impl AiffAudioReader {
@@ -305,10 +342,12 @@ impl AiffAudioReader {
     pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         Ok(Self {
             aiff: Aiff::parse(&bytes, &limits)?,
             packet: 0,
+            frame_skip: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -319,8 +358,33 @@ impl AiffAudioReader {
 }
 
 impl AudioStream for AiffAudioReader {
+    fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if let Coding::Pcm(format) = self.aiff.pcm.coding {
+            // AIFF signed8 and Matroska unsigned8 share descriptive PCM tags.
+            // Construct from the parsed AIFF format instead of losing signedness.
+            let mut decoder = crate::codec::pcm_decoder::PcmDecoder::new(
+                format,
+                self.aiff.pcm.sample_rate,
+                self.aiff.pcm.channels,
+            )?;
+            decoder.set_float_big_endian(matches!(format, PcmFormat::Float { .. }));
+            Ok(Box::new(decoder))
+        } else {
+            crate::codec::make_audio_decoder(
+                self.codec(),
+                self.extra_data(),
+                self.sample_rate(),
+                self.channels(),
+                self.bits_per_sample(),
+            )
+        }
+    }
     fn codec(&self) -> &str {
-        self.aiff.pcm.codec()
+        match self.aiff.pcm.coding {
+            Coding::Pcm(PcmFormat::Float { bits: 32 }) => "fl32",
+            Coding::Pcm(PcmFormat::Float { bits: 64 }) => "fl64",
+            _ => self.aiff.pcm.codec(),
+        }
     }
 
     fn timescale(&self) -> u32 {
@@ -344,15 +408,30 @@ impl AudioStream for AiffAudioReader {
     /// dividing a run by its byte rate states a sixth of the seconds its samples play for.
     /// Every other coding's block is one frame wide, where the two agree.
     fn duration(&self) -> Option<Duration> {
-        Some(Duration::from_secs_f64(
-            self.aiff.frames as f64 / f64::from(self.aiff.pcm.sample_rate),
-        ))
+        Some(crate::audio::sample_duration(self.aiff.frames as u64, self.aiff.pcm.sample_rate))
+    }
+
+    fn validate_eof(&self) -> Result<()> {
+        if matches!(self.aiff.pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
+            && self.aiff.frames < self.aiff.declared_frames
+        {
+            return Err(invalid(&format!(
+                "AIFF sample payload is truncated: declared {} frames, available {}",
+                self.aiff.declared_frames, self.aiff.frames
+            )));
+        }
+        Ok(())
     }
 
     /// PCM needs no setup: the header's fields have already gone into the decoder's
     /// construction.
     fn extra_data(&self) -> &[u8] {
-        &[]
+        // The shared QuickTime float decoder uses zero as the big-endian marker.
+        if matches!(self.aiff.pcm.coding, Coding::Pcm(PcmFormat::Float { .. })) {
+            &[0]
+        } else {
+            &[]
+        }
     }
 
     fn audio_tracks(&self) -> Vec<AudioTrack> {
@@ -368,25 +447,71 @@ impl AudioStream for AiffAudioReader {
         if self.packet >= self.aiff.packets() {
             return Ok(None);
         }
-        let data = self.aiff.packet(self.packet).to_vec();
+        let skip = self.frame_skip;
+        let data = self.aiff.packet(self.packet)[skip * self.aiff.pcm.block_align()..].to_vec();
+        self.frame_skip = 0;
         let packet = EncodedPacket {
             duration: ((data.len() / self.aiff.pcm.block_align())
                 * self.aiff.pcm.frames_per_block()) as i64,
-            pts: (self.packet * PACKET_FRAMES) as i64,
+            pts: (self.packet * self.aiff.window_frames() + skip) as i64,
             data,
         };
         self.packet += 1;
         Ok(Some(packet))
     }
 
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid decoded audio geometry"));
+        }
+        packet.pts = u64::try_from(source_pts)
+            .map_err(|_| invalid("decoded audio precedes its source timeline"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        let frames = packet.data.len() / stride;
+        let skip = self.presentation_floor.saturating_sub(packet.pts).min(frames as u64) as usize;
+        if skip == frames { return Ok(None); }
+        if skip != 0 {
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            packet.pts += skip as u64;
+        }
+        Ok(Some(packet))
+    }
+
     fn rewind(&mut self) {
         self.packet = 0;
+        self.frame_skip = 0;
+        self.presentation_floor = 0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let last = self.aiff.packets().saturating_sub(1);
-        self.packet = (pts.max(0) as usize / PACKET_FRAMES).min(last);
-        (self.packet * PACKET_FRAMES) as i64
+        self.frame_skip = 0;
+        self.presentation_floor = (pts.max(0) as u64).min(self.aiff.frames as u64);
+        if pts.max(0) as u64 >= self.aiff.frames as u64 {
+            self.packet = self.aiff.packets();
+            return self.aiff.frames as i64;
+        }
+        if matches!(
+            self.aiff.pcm.coding,
+            Coding::ALaw
+                | Coding::MuLaw
+                | Coding::Pcm(_)
+        ) {
+            let target = (pts.max(0) as usize).min(self.aiff.frames);
+            if target == self.aiff.frames {
+                self.packet = self.aiff.packets();
+            } else {
+                self.packet = target / PACKET_FRAMES;
+                self.frame_skip = target % PACKET_FRAMES;
+            }
+            return target as i64;
+        }
+        // Predictive codecs need the complete preceding history after reset.
+        // Decode that history normally and suppress it in present_decoded.
+        self.packet = 0;
+        self.presentation_floor as i64
     }
 }
 
@@ -706,10 +831,11 @@ mod tests {
             stamps,
             vec![(0, 2_048, 8_192), (2_048, 2_048, 8_192), (4_096, 2, 8)]
         );
-        assert_eq!(reader.seek_to(2_500), 2_048);
+        assert_eq!(reader.seek_to(2_500), 2_500);
+        let suffix=reader.next_packet().unwrap().unwrap();assert_eq!((suffix.pts,suffix.duration),(2500,1596));
         assert_eq!(reader.seek_to(-1), 0);
-        assert_eq!(reader.seek_to(999_999), 4_096);
-        assert!(reader.next_packet().expect("packet").is_some());
+        assert_eq!(reader.seek_to(999_999), 4098);
+        assert!(reader.next_packet().expect("packet").is_none());
         assert!(reader.next_packet().expect("no more").is_none());
         reader.rewind();
         assert_eq!(reader.next_packet().expect("packet").expect("first").pts, 0);
@@ -864,9 +990,7 @@ mod tests {
             );
             assert_eq!(
                 reader.duration(),
-                Some(Duration::from_secs_f64(
-                    f64::from(frames as u32) / f64::from(rate as u32)
-                ))
+                Some(Duration::from_nanos(frames as u64 * 1_000_000_000 / rate as u64))
             );
         }
         // A 6-to-1 byte codes the same six samples a 3-to-1 pair does, so the two files of the
@@ -912,7 +1036,7 @@ mod tests {
         let first = reader.next_packet().expect("packet").expect("first");
         assert_eq!((first.pts, first.duration), (0, 2_046));
         let second = reader.next_packet().expect("packet").expect("second");
-        assert_eq!((second.pts, second.duration), (2_048, 1_026));
+        assert_eq!((second.pts, second.duration), (2_046, 1_026));
         assert!(reader.next_packet().expect("end").is_none());
 
         // The standing-over byte is the strictness the decoder would otherwise pay for with an

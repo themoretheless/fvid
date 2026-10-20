@@ -35,7 +35,7 @@ def boxes(data):
 
 def box(tag,body): return struct.pack('>I4s',len(body)+8,tag)+body
 
-def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
+def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4",write=True):
     # Existing authored AVC video is unchanged; original moov becomes equal-size
     # free, preserving its sample offsets. The audio template supplies container
     # structure only: original esds/sample tables/edits are all replaced.
@@ -87,9 +87,11 @@ def video_fixture(cases,blob,channels=1,filename="he-aac-sbr-synthetic.mp4"):
     header=bytearray(next(p for t,p in original_children if t==b'mvhd'));header[-4:]=struct.pack('>I',3);struct.pack_into('>I',header,16,max(struct.unpack_from('>I',header,16)[0],audio_duration))
     movie=box(b'mvhd',header)+b''.join(box(t,p) for t,p in original_children if t==b'trak')+audio
     data=b''.join(box(b'free' if t==b'moov' else t,p) for t,p in boxes(video))+box(b'mdat',b''.join(packets))+box(b'moov',movie)
-    (DEST/filename).write_bytes(data)
-    return dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),
+    if write: (DEST/filename).write_bytes(data)
+    result=dict(file=filename,sha256=hashlib.sha256(data).hexdigest(),
         video_seed_sha256=hashlib.sha256(video).hexdigest(),asc=case['asc'],pcm_offset=case['pcm_offset'],samples=case['samples'])
+    if not write: result['data']=data
+    return result
 
 def main():
     source=json.loads((DEST/'aac-sbr-dsp-oracles.json').read_text())

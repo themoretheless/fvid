@@ -75,6 +75,11 @@ pub(super) fn decode(
             &projected,
             budget / 3,
             layer_id,
+            None,
+            None,
+            None,
+            None,
+            None,
         )?));
     }
     let children: [Arc<Picture>; 3] = children
@@ -82,6 +87,16 @@ pub(super) fn decode(
         .map_err(|_| invalid("invalid HEVC plane count"))?;
     let first = &children[0];
     let picture = Picture {
+        nal:first.nal,
+        coding:first.coding.clone(),
+        #[cfg(test)]
+        queued_dim_blocks: children.iter().map(|p|p.queued_dim_blocks).sum(),
+        #[cfg(test)]
+        queued_inter_dc_blocks: children.iter().map(|p|p.queued_inter_dc_blocks).sum(),
+        #[cfg(test)]
+        queued_texture_blocks: children.iter().map(|p|p.queued_texture_blocks).sum(),
+        #[cfg(test)]
+        queued_inter_blocks: children.iter().map(|p|p.queued_inter_blocks).sum(),
         #[cfg(test)]
         pcm_luma_samples: children.iter().map(|p| p.pcm_luma_samples).sum(),
         #[cfg(test)]
@@ -184,6 +199,16 @@ impl Picture {
             ])
         } else { None };
         Ok(Self {
+            nal:self.nal,
+            coding:self.coding.clone(),
+            #[cfg(test)]
+            queued_dim_blocks: self.queued_dim_blocks,
+            #[cfg(test)]
+            queued_inter_dc_blocks: self.queued_inter_dc_blocks,
+            #[cfg(test)]
+            queued_texture_blocks: self.queued_texture_blocks,
+            #[cfg(test)]
+            queued_inter_blocks: self.queued_inter_blocks,
             #[cfg(test)]
             pcm_luma_samples: self.pcm_luma_samples,
             #[cfg(test)]
@@ -217,6 +242,9 @@ impl Picture {
         let mut n = self.storage_bytes()?;
         match (&self.colour_planes, &source.colour_planes) {
             (None, None) => {
+                if let (Some(prepared),Some(original))=(&self.coding,&source.coding) {
+                    if prepared.shares_storage(original) {n=n.checked_sub(prepared.heap_bytes()?)?;}
+                }
                 for (prepared, original) in self.planes.iter().zip(&source.planes) {
                     if prepared.shares_storage(original) { n = n.checked_sub(prepared.storage_bytes()?)?; }
                 }
@@ -238,6 +266,7 @@ impl Picture {
         // The assembled picture shares sample/availability allocations with
         // its children. Charge those allocations exactly once, in the children.
         if self.colour_planes.is_none() {
+            if let Some(map)=&self.coding {n=n.checked_add(map.heap_bytes()?)?;}
             for plane in &self.planes {
                 n = n.checked_add(plane.storage_bytes()?)?;
             }

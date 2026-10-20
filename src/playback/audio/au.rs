@@ -6,18 +6,10 @@
 //! [`crate::playback_aiff`] there is no codec setup to hand over and nothing to
 //! render.
 //!
-//! The header is smaller than either of those and states less, and one of its
-//! numbers is not safe to believe. The `encoding` word is read through a table the
-//! format's readers do not agree on. What this machine's FFmpeg writes and reads
-//! back was measured file by file: 1 is mu-law, 2 is 8-bit linear, 3 is 16-bit
-//! linear, 4 is 24-bit, 5 is 32-bit, 6 is a 32-bit float and A-law is 27 — a
-//! number the older lists leave unused, which is itself a tell, since the table
-//! that ships with the format puts A-law at 2, exactly where this FFmpeg puts its
-//! 8-bit linear PCM. A file claiming 2 therefore names one of two codecs that
-//! disagree on every byte of its run, so slot 2 is refused rather than guessed
-//! at. Slots 3, 4 and 5 are named the same way by both lists, and those three are
-//! what this reader plays: mu-law and A-law are not widths it can expand, and the
-//! float at 6 is big-endian, which [`crate::codec::pcm_decoder`] does not read.
+//! AU file encoding identifiers are independent of audio-device encoding identifiers.
+//! Codes 2..=5 are signed integer PCM, 6/7 are big-endian IEEE float, and
+//! 1/27 are G.711 mu-law/A-law. Float byte order is passed to the shared native
+//! decoder explicitly rather than inferred from the host architecture.
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::pcm_decoder::PcmFormat;
@@ -48,18 +40,18 @@ impl Default for Limits {
     }
 }
 
-/// The `encoding` numbers whose width this reader and the format's own document
-/// name the same way: 16-bit big-endian linear PCM.
+/// AU file encoding for signed 16-bit big-endian PCM.
 pub const LINEAR_16: u32 = 3;
-/// 24-bit big-endian linear PCM, the same agreement.
+/// AU file encoding for signed 24-bit big-endian PCM.
 pub const LINEAR_24: u32 = 4;
-/// 32-bit big-endian linear PCM, the same agreement again.
+/// AU file encoding for signed 32-bit big-endian PCM.
 pub const LINEAR_32: u32 = 5;
 
 /// The width an accepted `encoding` number states, and none for the numbers this
 /// reader refuses.
 fn linear_bits(encoding: u32) -> Option<u16> {
     match encoding {
+        2 => Some(8),
         LINEAR_16 => Some(16),
         LINEAR_24 => Some(24),
         LINEAR_32 => Some(32),
@@ -102,10 +94,25 @@ impl Au {
         let encoding = word(12);
         let sample_rate = word(16);
         let channels = word(20);
-        let Some(bits) = linear_bits(encoding) else {
-            return Err(unsupported(&format!(
-                "AU encoding {encoding} is not a linear PCM width this reader takes"
-            )));
+        let (coding, bits) = match encoding {
+            1 => (Coding::MuLaw, 8),
+            27 => (Coding::ALaw, 8),
+            6 => (Coding::Pcm(PcmFormat::Float { bits: 32 }), 32),
+            7 => (Coding::Pcm(PcmFormat::Float { bits: 64 }), 64),
+            _ => {
+                let bits = linear_bits(encoding).ok_or_else(|| {
+                    unsupported(&format!(
+                        "AU encoding {encoding} is not supported PCM or G.711"
+                    ))
+                })?;
+                (
+                    Coding::Pcm(PcmFormat::Int {
+                        bits: bits as u8,
+                        big_endian: true,
+                    }),
+                    bits,
+                )
+            }
         };
         if sample_rate == 0 {
             return Err(invalid("sample rate of zero"));
@@ -113,6 +120,8 @@ impl Au {
         if channels == 0 || usize::try_from(channels).unwrap_or(usize::MAX) > limits.channels {
             return Err(invalid("channel count is out of range"));
         }
+        let channels = u16::try_from(channels)
+            .map_err(|_| unsupported("AU channel count exceeds the audio interface range"))?;
         // The header says where the samples begin, and a file with an annotation says
         // so by moving them along; either way nothing before that word offset plays.
         if start < HEADER_BYTES {
@@ -138,14 +147,16 @@ impl Au {
             )));
         }
         let pcm = Pcm {
-            coding: Coding::Pcm(PcmFormat::Int {
-                bits: bits as u8,
-                big_endian: true,
-            }),
+            coding,
             sample_rate,
-            channels: channels as u16,
+            channels,
             bits_per_sample: bits,
         };
+        if matches!(pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
+            && !samples.len().is_multiple_of(pcm.block_align())
+        {
+            return Err(invalid("AU PCM sample run ends in an incomplete channel frame"));
+        }
         Ok(Self {
             declared_bytes: declared,
             frames: samples.len() / pcm.block_align(),
@@ -177,6 +188,7 @@ impl Au {
 pub struct AuAudioReader {
     au: Au,
     packet: usize,
+    frame_skip: usize,
 }
 
 impl AuAudioReader {
@@ -185,10 +197,11 @@ impl AuAudioReader {
     pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         Ok(Self {
             au: Au::parse(&bytes, &limits)?,
             packet: 0,
+            frame_skip: 0,
         })
     }
 
@@ -200,7 +213,12 @@ impl AuAudioReader {
 
 impl AudioStream for AuAudioReader {
     fn codec(&self) -> &str {
-        self.au.pcm.codec()
+        match self.au.pcm.coding {
+            Coding::Pcm(PcmFormat::Int { bits: 8, .. }) => "twos",
+            Coding::Pcm(PcmFormat::Float { bits: 32 }) => "fl32",
+            Coding::Pcm(PcmFormat::Float { bits: 64 }) => "fl64",
+            _ => self.au.pcm.codec(),
+        }
     }
 
     fn timescale(&self) -> u32 {
@@ -220,16 +238,26 @@ impl AudioStream for AuAudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        let per_second = self.au.pcm.block_align() * self.au.pcm.sample_rate as usize;
-        Some(Duration::from_secs_f64(
-            self.au.data.len() as f64 / per_second as f64,
-        ))
+        Some(crate::audio::sample_duration(self.au.frames as u64, self.au.pcm.sample_rate))
     }
 
     /// PCM needs no setup: the header's words have already gone into the decoder's
     /// construction.
+    fn validate_eof(&self) -> Result<()> {
+        let declared = self.au.declared_bytes;
+        let available = self.au.data.len();
+        if available < declared {
+            return Err(invalid(&format!("AU data payload is truncated: declared {declared} bytes, available {available}")));
+        }
+        Ok(())
+    }
+
     fn extra_data(&self) -> &[u8] {
-        &[]
+        if matches!(self.au.pcm.coding, Coding::Pcm(PcmFormat::Float { .. })) {
+            &[0] // Big-endian marker consumed by the shared native float decoder.
+        } else {
+            &[]
+        }
     }
 
     fn audio_tracks(&self) -> Vec<AudioTrack> {
@@ -245,10 +273,12 @@ impl AudioStream for AuAudioReader {
         if self.packet >= self.au.packets() {
             return Ok(None);
         }
-        let data = self.au.packet(self.packet).to_vec();
+        let skip = self.frame_skip;
+        let data = self.au.packet(self.packet)[skip * self.au.pcm.block_align()..].to_vec();
+        self.frame_skip = 0;
         let packet = EncodedPacket {
             duration: (data.len() / self.au.pcm.block_align()) as i64,
-            pts: (self.packet * PACKET_FRAMES) as i64,
+            pts: (self.packet * PACKET_FRAMES + skip) as i64,
             data,
         };
         self.packet += 1;
@@ -257,9 +287,30 @@ impl AudioStream for AuAudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
+        self.frame_skip = 0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
+        self.frame_skip = 0;
+        if pts.max(0) as u64 >= self.au.frames as u64 {
+            self.packet = self.au.packets();
+            return self.au.frames as i64;
+        }
+        if matches!(
+            self.au.pcm.coding,
+            Coding::ALaw
+                | Coding::MuLaw
+                | Coding::Pcm(_)
+        ) {
+            let target = (pts.max(0) as usize).min(self.au.frames);
+            if target == self.au.frames {
+                self.packet = self.au.packets();
+            } else {
+                self.packet = target / PACKET_FRAMES;
+                self.frame_skip = target % PACKET_FRAMES;
+            }
+            return target as i64;
+        }
         let last = self.au.packets().saturating_sub(1);
         self.packet = (pts.max(0) as usize / PACKET_FRAMES).min(last);
         (self.packet * PACKET_FRAMES) as i64
@@ -473,11 +524,9 @@ mod tests {
     }
 
     #[test]
-    fn every_encoding_the_table_disagrees_about_is_refused() {
+    fn unsupported_au_codings_remain_refused() {
         let samples = be16(&[0i16; 8]);
-        // mu-law, the contested slot 2, the two big-endian float widths, and A-law at
-        // 27 - the numbers either table reads as something this decoder does not hold.
-        for encoding in [1, 2, 6, 7, 27] {
+        for encoding in [0, 8, 9, 10] {
             let bytes = {
                 let mut bytes = header(24, samples.len() as u32, encoding, 48_000, 1);
                 bytes.extend_from_slice(&samples);
@@ -488,7 +537,7 @@ mod tests {
                     .err()
                     .map(|error| error.to_string()),
                 Some(format!(
-                    "AU encoding {encoding} is not a linear PCM width this reader takes"
+                    "AU encoding {encoding} is not supported PCM or G.711"
                 )),
                 "encoding {encoding}"
             );
@@ -535,10 +584,11 @@ mod tests {
             stamps,
             vec![(0, 2_048, 4_096), (2_048, 2_048, 4_096), (4_096, 2, 4)]
         );
-        assert_eq!(reader.seek_to(2_500), 2_048);
+        assert_eq!(reader.seek_to(2_500), 2_500);
+        let suffix=reader.next_packet().unwrap().unwrap();assert_eq!((suffix.pts,suffix.duration),(2500,1596));
         assert_eq!(reader.seek_to(-1), 0);
-        assert_eq!(reader.seek_to(999_999), 4_096);
-        assert!(reader.next_packet().expect("packet").is_some());
+        assert_eq!(reader.seek_to(999_999), 4098);
+        assert!(reader.next_packet().expect("packet").is_none());
         assert!(reader.next_packet().expect("no more").is_none());
         reader.rewind();
         assert_eq!(reader.next_packet().expect("packet").expect("first").pts, 0);

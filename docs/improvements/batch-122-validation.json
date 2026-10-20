@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0139"
+  ],
+  "checked_at": "2026-10-16T08:37:37.005454+00:00",
+  "before": [
+    "evidence/batch-122-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-122-integration.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-122-reader.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-122-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-122-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-122-ffmpeg-reference.json",
+      "kind": "external-reference",
+      "passed": 4
+    }
+  ],
+  "qualification": [
+    "Four authored constant16bitFLACstreams compare8bitkHz explicitrateswithindependent16bit10Hz encodings.1/8/254kHzcontrols healthy;255kHzinputrefusesatfirstindexheaderbeforefix.Nativecodecindependentlydecodeseachauthoredpacket toliteralPCM,specificfielderrornotcodecunsupported.",
+    "Accept255aslegal8bitkHzvalue. Zeroheader-rate/8000HzSTREAMINFO mismatchstillrefuseswithspecificgeometrycause,andnativecodecalsorefuses. No changes tomaximumsample-rate/profilegeometry/publicinterfaces.",
+    "AfterfourfullPCM/PTScontrols andeightactualmidpacket/EOFworkertargets plusfullplay/rewind pass.22readerunits,nineintegrations,fixture reproduction andplayerbuildpass. ExplicitlocalFFmpegreferenceindependentlymatchesliteralPCMfor allfourrates;version/bytecounts/SHArecorded.",
+    "FFmpegreferenceisoutsidenormaltests/generation,whichremainofflineandencoder-independent. AuthoredrawFLACplusVP9/PCMcompanion,no private media/performance/physical255kHzdeviceclaim."
+  ],
+  "sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9639.html",
+      "section": "9.1.2SampleRateBits;9.1.7UncommonSampleRate",
+      "rule": "Code12storesunsigned8bitkHzrate;255represents255000Hzandisnotreserved."
+    }
+  ],
+  "compatibility": "Valid255kHzexplicitheadernowindexes/playswithnativecodec;zero/mismatchingrateadmission unchanged.PublicAPI/PCMunchanged.",
+  "counting": "One explicit-rateadmission problem;healthyvariants,zeroguard andexternalreference add noextraIDs."
+}

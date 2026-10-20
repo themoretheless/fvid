@@ -14,11 +14,45 @@ pub struct LayeredSliceContext<'a> {
     pub pps: &'a LayeredPps,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SliceCameraPair {
+    pub reference_view:u16,
+    pub values:[i32;4],
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SliceCamera {
+    pub precision:u8,
+    pub view_index:u16,
+    pub pairs:Vec<SliceCameraPair>,
+}
+impl SliceCamera {
+    /// Bind Annex I.8.3.2's default view to this slice's camera transform.
+    /// A missing pair is an error only when a usable default view was selected.
+    pub fn default_disparity_transform(&self,
+        lists:[&[super::super::hevc_motion::disparity::CandidatePicture];2],
+        b_slice:bool,current_poc:i32,bit_depth:u8)
+        ->Result<Option<(u16,super::super::hevc_motion::disparity::CameraTransform)>> {
+        let Some(view)=super::super::hevc_motion::disparity::default_reference_view(
+            lists,b_slice,self.view_index,current_poc) else {return Ok(None)};
+        Ok(Some((view,self.disparity_transform(view,bit_depth)?)))
+    }
+    pub fn disparity_transform(&self,reference_view:u16,bit_depth:u8)
+        ->Result<super::super::hevc_motion::disparity::CameraTransform> {
+        let mut matches=self.pairs.iter().filter(|p|p.reference_view==reference_view);
+        let pair=matches.next().ok_or_else(||invalid("HEVC camera has no parameters for reference view"))?;
+        if matches.next().is_some() {return Err(invalid("duplicate HEVC slice camera reference"));}
+        super::super::hevc_motion::disparity::CameraTransform::new(pair.values,self.precision,bit_depth)
+    }
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LayeredSliceSyntax {
     pub discardable: bool,
     pub cross_layer_bla: bool,
+    pub illumination_compensation:Option<[bool;2]>,
+    pub camera:Option<SliceCamera>,
     /// None distinguishes absence from a coded disabled prediction flag.
     pub inter_layer_prediction: Option<bool>,
+    /// None means inCmpPredAvailFlag is zero; absence infers disabled prediction.
+    pub in_component_prediction: Option<bool>,
     pub coded_count_minus1: Option<u8>,
     /// RefPicLayerId, not VPS indices or inferred temporal-eligible indices.
     pub reference_layers: Vec<u8>,
@@ -30,8 +64,61 @@ pub(super) struct Layout<'a> {
     e: &'a LayeredExtensionPrefix,
     index: usize,
     nal: NalHeader,
+    reference_mask:u64,
 }
 impl LayeredSliceContext<'_> {
+    pub(super) fn illumination_flag_present(&self)->Result<bool> {
+        let annex_i=self.vps.three_d_extension.is_some()||self.sps.effective_profile.profile
+            .is_some_and(|p|p.space==0&&p.compatible_with(8));
+        if !annex_i||self.sps.sps.depth_layer {return Ok(false);}
+        let Some(e)=self.vps.extension.as_ref()else{return Ok(false)};
+        Ok(e.graph.reference_list_layers(self.sps.layer_id)?!=0)
+    }
+    pub(super) fn camera_parameters(&self,b:&mut BitReader<'_>,budget:usize)->Result<Option<SliceCamera>> {
+        let Some(c)=self.vps.three_d_extension.as_deref()else{return Ok(None)};
+        let graph=&self.vps.extension.as_ref().ok_or_else(||invalid("HEVC camera header requires VPS graph"))?.graph;
+        let view_index=graph.view_index(self.sps.layer_id)?;
+        let view=c.views.iter().find(|v|v.view_index==view_index)
+            .ok_or_else(||invalid("HEVC camera view is missing from VPS"))?;
+        if view.pairs.is_empty() {return Ok(None);}
+        let required=std::mem::size_of::<SliceCamera>()+view.pairs.len()*std::mem::size_of::<SliceCameraPair>();
+        if required>budget {return Err(invalid("HEVC slice camera metadata exceeds budget"));}
+        let mut bits=b.clone();let mut pairs=Vec::new();
+        pairs.try_reserve_exact(view.pairs.len()).map_err(|_|invalid("HEVC slice camera allocation failed"))?;
+        if std::mem::size_of::<SliceCamera>()+pairs.capacity()*std::mem::size_of::<SliceCameraPair>()>budget {
+            return Err(invalid("HEVC slice camera metadata exceeds budget"));
+        }
+        for pair in &view.pairs {
+            let values=if view.in_slice_header {
+                [bits.signed_golomb()?,bits.signed_golomb()?,bits.signed_golomb()?,bits.signed_golomb()?]
+            }else{pair.parameters.ok_or_else(||invalid("missing static HEVC camera values"))?};
+            pairs.push(SliceCameraPair {reference_view:pair.reference_view,values});
+        }
+        *b=bits;
+        Ok(Some(SliceCamera {precision:c.precision,view_index,pairs}))
+    }
+    /// Annex I-17/I-18 syntax availability, distinct from actual DPB presence.
+    pub fn in_component_prediction_available(&self,nal:NalHeader,syntax:&LayeredSliceSyntax)->Result<bool> {
+        let Some(layout)=self.layout(nal)? else {return Ok(false)};
+        let Some(tools)=&self.sps.sps.three_d else {return Ok(false)};
+        let depth=layout.e.graph.scalability_ids[layout.index][0]==1;
+        if depth!=self.sps.sps.depth_layer {return Err(invalid("HEVC in-component layer role disagrees with SPS"));}
+        let enabled=if depth {tools.intra_contour || tools.coding_tree_partition || tools.texture_motion}
+            else {tools.view_synthesis_prediction || tools.depth_based_partition || tools.depth_reference};
+        if !enabled {return Ok(false);}
+        let current=[nal.layer_id];
+        let components=if depth {current.as_slice()}else{syntax.reference_layers.as_slice()};
+        for &layer in components {
+            let Some(other)=layout.e.graph.view_component_layer(layer,!depth)? else {return Ok(false)};
+            let index=layout.e.graph.layer_ids.iter().position(|&id|id==other).unwrap();
+            let limit=layout.e.layer_sets.max_tid_ref_plus1[index][layout.index];
+            if limit>7 {return Err(invalid("HEVC in-component temporal limit exceeds range"));}
+            if layout.e.graph.direct[layout.index]&(1u64<<other)==0
+                || layout.e.layer_sets.sublayers_minus1[index]<nal.temporal_id
+                || nal.temporal_id!=0 && limit<=nal.temporal_id {return Ok(false);}
+        }
+        Ok(true)
+    }
     pub(crate) fn validate_poc_header(&self, header: &super::SliceHeader) -> Result<()> {
         let layout = self
             .layout(header.nal)?
@@ -44,6 +131,7 @@ impl LayeredSliceContext<'_> {
             || header.pps_id != self.pps.pps.id
             || header.poc_lsb >= (1u32 << self.sps.sps.poc_bits)
             || layout.reset(self, syntax, &header.extension, header.poc_lsb)? != syntax.poc_reset
+            || syntax.in_component_prediction.is_some()!=self.in_component_prediction_available(header.nal,syntax)?
         {
             return Err(invalid("HEVC layered POC header context disagrees"));
         }
@@ -115,10 +203,12 @@ impl LayeredSliceContext<'_> {
                 "HEVC slice layer is not necessary in active output set",
             ));
         }
-        Ok(Some(Layout { e, index, nal }))
+        let reference_mask=e.graph.reference_list_layers(nal.layer_id)?;
+        Ok(Some(Layout { e, index, nal,reference_mask }))
     }
 }
 impl Layout<'_> {
+    pub(super) fn reference_count(&self)->usize {self.reference_mask.count_ones() as usize}
     pub(super) fn direct_count(&self) -> usize {
         self.e.graph.direct[self.index].count_ones() as usize
     }
@@ -141,7 +231,10 @@ impl Layout<'_> {
         Ok(LayeredSliceSyntax {
             discardable,
             cross_layer_bla,
+            illumination_compensation:None,
+            camera:None,
             inter_layer_prediction: None,
+            in_component_prediction: None,
             coded_count_minus1: None,
             reference_layers: Vec::new(),
             poc_lsb_present: self.poc_present(),
@@ -181,7 +274,7 @@ impl Layout<'_> {
         let mut eligible_count = 0;
         for i in 0..self.index {
             let id = self.e.graph.layer_ids[i];
-            if self.e.graph.direct[self.index] & (1u64 << id) == 0 {
+            if self.reference_mask & (1u64 << id) == 0 {
                 continue;
             }
             let limit = self.e.layer_sets.max_tid_ref_plus1[i][self.index];
@@ -267,5 +360,41 @@ impl Layout<'_> {
             syntax.reference_layers.push(id);
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod camera_header_tests {
+    use super::*;
+    fn plan(data:&[u8])->crate::codec::hevc_decoder::LayeredAccessUnit {
+        use crate::codec::{hevc_decoder::{LayeredParameters,LayeredAccessUnit},hevc_poc::LayeredPocState};
+        let mut input=crate::container::mp4::Mp4Reader::open(std::io::Cursor::new(data),Default::default()).unwrap();
+        let p=LayeredParameters::from_configuration(&input.tracks()[0].configuration,64<<20).unwrap();
+        let mut packet=Vec::new();input.read_packet(0,0,&mut packet).unwrap();
+        LayeredAccessUnit::parse(&p,&LayeredPocState::default(),&packet,4,1,64<<20).unwrap()
+    }
+    #[test]
+    fn camera_header_budget_and_failure_keep_caller_cursor_unchanged() {
+        let plan=plan(include_bytes!("../../tests/fixtures/playback-errors/hevc-wedge/slice-camera-deferred.mp4"));
+        let ctx=plan.pictures()[1].binding.context();
+        let data=include_bytes!("../../tests/fixtures/playback-errors/hevc-wedge/slice-camera-values-prefixed.bin");
+        let mut bits=BitReader::new(data);bits.skip(3).unwrap();
+        let c=ctx.camera_parameters(&mut bits,4096).unwrap().unwrap();
+        assert_eq!(c.pairs[0].values,[1,0,0,0]);assert_eq!(bits.position(),9);
+        let needed=std::mem::size_of::<SliceCamera>()+c.pairs.capacity()*std::mem::size_of::<SliceCameraPair>();
+        for budget in [0,needed-1] {
+            let mut bits=BitReader::new(data);bits.skip(3).unwrap();
+            assert!(ctx.camera_parameters(&mut bits,budget).is_err());assert_eq!(bits.position(),3);
+        }
+        let mut bits=BitReader::new(data);bits.skip(3).unwrap();ctx.camera_parameters(&mut bits,needed).unwrap();
+        let mut bits=BitReader::new(&[]);assert!(ctx.camera_parameters(&mut bits,needed).is_err());assert_eq!(bits.position(),0);
+    }
+    #[test]
+    fn static_camera_values_are_inferred_without_consuming_slice_bits() {
+        let plan=plan(include_bytes!("../../tests/fixtures/playback-errors/hevc-wedge/camera-parameters-static.mp4"));
+        let ctx=plan.pictures()[1].binding.context();
+        let mut bits=BitReader::new(&[]);
+        let c=ctx.camera_parameters(&mut bits,4096).unwrap().unwrap();
+        assert_eq!(c.pairs[0].values,[3,-4,5,-6]);assert_eq!(c.precision,5);assert_eq!(bits.position(),0);
     }
 }

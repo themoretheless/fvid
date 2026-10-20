@@ -79,7 +79,7 @@ fn reconstruct_inter_job(
         } else {
             InterLumaResidual::Blocks4(&c.luma4)
         };
-        if job.bypass {
+        let prediction=if job.bypass {
             prediction.reconstruct_inter_bypass(luma, &c.chroma_dc, &c.chroma_ac)?
         } else {
             prediction.reconstruct_inter(
@@ -90,17 +90,21 @@ fn reconstruct_inter_job(
                 &[scaling.four[3], scaling.four[4], scaling.four[5]],
                 &scaling.eight[1],
             )?
-        }
+        };
+        if let Some(wide)=&c.chroma422 {prediction.reconstruct_chroma422(wide,job.qps,&[scaling.four[3],scaling.four[4],scaling.four[5]],job.bypass)?}else{prediction}
     } else {
         prediction
     };
     let x = job.origin[0];
-    for (plane, src, stride, size, px) in [
-        (y, prediction.y.as_slice(), w, 16, x),
-        (cb, prediction.cb.as_slice(), w / 2, 8, x / 2),
-        (cr, prediction.cr.as_slice(), w / 2, 8, x / 2),
+    let [pred_cb,pred_cr]=prediction.chroma_planes();
+    let cy=16/prediction.chroma_subsampling()[1];
+    for (plane, src, stride, size, rows, px) in [
+        (y, prediction.y.as_slice(), w, 16,16, x),
+        (cb, pred_cb, w / 2, 8,cy, x / 2),
+        (cr, pred_cr, w / 2, 8,cy, x / 2),
     ] {
-        for row in 0..size {
+        if plane.is_empty() {continue;}
+        for row in 0..rows {
             plane[row * stride + px..][..size].copy_from_slice(&src[row * size..][..size]);
         }
     }
@@ -211,10 +215,10 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         .first()
         .ok_or_else(|| invalid("missing inter slices"))?;
     if headers.iter().any(|h|matches!(h.slice_type,SliceType::Sp | SliceType::Si))
-        && (sps.profile!=88 || sps.mb_adaptive_frame_field || sps.bit_depth_luma!=8
+        && (sps.profile!=88 || sps.chroma_format!=1 || sps.separate_colour_plane || sps.bit_depth_luma!=8
             || sps.bit_depth_chroma!=8 || pps.cabac || pps.transform_8x8 || sps.transform_bypass)
     {
-        return Err(crate::unsupported("AVC SP/SI requires non-MBAFF eight-bit 4:2:0 CAVLC"));
+        return Err(crate::unsupported("AVC SP/SI requires eight-bit Extended-profile 4:2:0 CAVLC"));
     }
     if headers.len() != references_by_slice.len()
         || headers.len() != direct_by_slice.len()
@@ -231,7 +235,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         && !sps.frame_mbs_only
         && headers
             .iter()
-            .all(|h| matches!(h.slice_type, SliceType::I | SliceType::P) && !h.field_pic)
+            .all(|h| matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp) && !h.field_pic)
     {
         return super::avc_mbaff_picture::decode_optional_p_slices(
             headers,
@@ -248,7 +252,11 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         || header.disable_deblocking_filter_idc > 2
         || header.field_pic
         || (!sps.frame_mbs_only && sps.mb_adaptive_frame_field)
-        || sps.chroma_format != 1
+        || sps.chroma_format > 2
+        || (sps.chroma_format == 2
+            && headers
+                .iter()
+                .any(|h| !matches!(h.slice_type, SliceType::I | SliceType::P | SliceType::B)))
         || sps.separate_colour_plane
         || (pps.cabac && !matches!(pps.slice_groups, SliceGroups::Single))
         || header.redundant_pic_cnt != 0
@@ -264,9 +272,8 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
     let count = pixels / 256;
     // Conservative upper bound for motion/count fields, edge state and transient
     // grids, including scratch coefficients. Reference pictures are caller owned.
-    let required = pixels
-        .checked_mul(3)
-        .and_then(|n| count.checked_mul(4096).and_then(|m| n.checked_add(m)))
+    let plane_bytes=super::avc_picture::decoded_storage(sps,w,h)?;
+    let required = count.checked_mul(4096).and_then(|m| plane_bytes.checked_add(m))
         .and_then(|n| n.checked_add(16384))
         .ok_or_else(|| invalid("inter-picture budget overflow"))?;
     if w == 0 || h == 0 || count > 65536 || required > budget {
@@ -314,16 +321,20 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                     planes[list].push(Reference420::unavailable(sps.bit_depth_luma)?);
                     continue;
                 };
-                if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma || r.chroma_bit_depth != sps.bit_depth_chroma {
+                if r.coded_width != w || r.coded_height != h || r.bit_depth != sps.bit_depth_luma || r.chroma_bit_depth != sps.bit_depth_chroma || u32::from(r.chroma_format()?)!=sps.chroma_format {
                     return Err(invalid("inter-picture reference format mismatch"));
                 }
-                planes[list].push(Reference420::from_decoded_components(
+                planes[list].push(if sps.chroma_format==0 {
+                    Reference420::from_decoded_monochrome(&r.y,w,h,[r.bit_depth,r.chroma_bit_depth])?
+                } else if sps.chroma_format==2 {
+                    Reference420::from_decoded_422([&r.y,&r.cb,&r.cr],w,h,[r.bit_depth,r.chroma_bit_depth])?
+                } else {Reference420::from_decoded_components(
                     [&r.y, &r.cb, &r.cr],
                     w,
                     h,
                     [w, w / 2, w / 2],
                     [r.bit_depth,r.chroma_bit_depth],
-                )?);
+                )?});
             }
         }
         slice_planes.push(planes);
@@ -346,8 +357,8 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         bit_depth: sps.bit_depth_luma,
         chroma_bit_depth: sps.bit_depth_chroma,
         y: vec![0; pixels],
-        cb: vec![0; pixels / 4],
-        cr: vec![0; pixels / 4],
+        cb: vec![0; if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels / 4}],
+        cr: vec![0; if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels / 4}],
     };
     let width_mbs = w / 16;
     let row_count = h / 16;
@@ -392,12 +403,15 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         }
     };
     {
-        let bands: Vec<Mutex<(&mut [u16], &mut [u16], &mut [u16], Vec<InterJob>)>> = out
-            .y
-            .chunks_mut(16 * w)
-            .zip(out.cb.chunks_mut(8 * (w / 2)))
-            .zip(out.cr.chunks_mut(8 * (w / 2)))
-            .map(|((y, cb), cr)| Mutex::new((y, cb, cr, Vec::new())))
+        let mut cb_rows=out.cb.as_mut_slice();
+        let mut cr_rows=out.cr.as_mut_slice();
+        let chroma_band=if sps.chroma_format==0 {0}else if sps.chroma_format==2 {16*(w/2)}else{8*(w/2)};
+        let bands: Vec<Mutex<(&mut [u16], &mut [u16], &mut [u16], Vec<InterJob>)>> = out.y.chunks_mut(16*w)
+            .map(|y| {
+                let (cb,remaining)=std::mem::take(&mut cb_rows).split_at_mut(chroma_band);cb_rows=remaining;
+                let (cr,remaining)=std::mem::take(&mut cr_rows).split_at_mut(chroma_band);cr_rows=remaining;
+                Mutex::new((y,cb,cr,Vec::new()))
+            })
             .collect();
         let next = AtomicUsize::new(0);
         let threads = std::thread::available_parallelism()
@@ -456,6 +470,7 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                 .collect();
             let parsed: Result<()> = (|| {
                 let mut seen = 0;
+                let mut retained_422_bytes=0usize;
                 let mut covered = vec![false; count];
                 for (slice_index, header) in headers.iter().enumerate() {
                     let slice_id = slice_index as u32;
@@ -569,6 +584,10 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                         }
                     {
                         if let InterMacroblock::Intra(block) = mb {
+                            if block.chroma422.is_some() {
+                                retained_422_bytes=retained_422_bytes.checked_add(std::mem::size_of::<super::avc_macroblock::Chroma422>()).ok_or_else(||invalid("AVC 422 retained intra storage overflow"))?;
+                                if required.checked_add(retained_422_bytes).is_none_or(|n|n>budget) {return Err(invalid("AVC 422 retained intra storage exceeds budget"));}
+                            }
                             let address = block.address as usize;
                             if address >= count
                                 || covered[address]
@@ -662,6 +681,10 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
                                 header.residual.transform8,
                             ),
                         };
+                        if coefficients.as_ref().is_some_and(|c|c.chroma422.is_some()) {
+                            retained_422_bytes=retained_422_bytes.checked_add(std::mem::size_of::<super::avc_inter_coefficients::InterChroma422>()).ok_or_else(||invalid("422 inter coefficient storage overflow"))?;
+                            if required.checked_add(retained_422_bytes).is_none_or(|n|n>budget){return Err(invalid("422 inter coefficient storage exceeds budget"));}
+                        }
                         if address >= count
                             || covered[address]
                             || (!fmo && (address != seen || seen >= end))
@@ -917,6 +940,8 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
             .map(|(component, (plane, grid))| {
                 let scale = if component == 0 { 1 } else { 2 };
                 scope.spawn(move || {
+                    if component!=0 && plane.is_empty() {return Ok(());}
+                    if component!=0 && sps.chroma_format==2 {return super::avc_deblock::inter_plane_subsampled(plane,w/2,h,depths[1],[2,1],grid);}
                     inter_plane(plane, w / scale, h / scale, depths[usize::from(component!=0)], component != 0, grid)
                 })
             })

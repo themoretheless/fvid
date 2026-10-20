@@ -11,9 +11,10 @@
 //! # The profile, and what it leaves alone
 //!
 //! This plays the module's notes, its sample loops, its channel volumes and its
-//! panning. It does not play its *shapes*: an instrument's two envelopes are read
-//! and reported but never applied, and no cell's effect column is acted on beyond
-//! the three the container already consumed while laying the timeline out
+//! panning, including C0..CF in the volume column. It does not play its *shapes*: an instrument's two envelopes are read
+//! and reported but never applied. Volume-column fine slides 8x/9x apply once
+//! at the start of a row. The effect column supports 8xx panning, 9xx sample offsets, Cxx channel volume,
+//! Gxx global volume, tick-scheduled Kxx key-off, ECx volume cuts and E6x pattern loops plus the three effects the container consumed while laying the timeline out
 //! ([`xm::EFFECT_TEMPO`], [`xm::EFFECT_JUMP`], [`xm::EFFECT_BREAK`]). Every one of
 //! those omissions is counted in [`Ignored`], which the player can be asked for,
 //! so a module that needs what is missing is heard as a thin rendering rather than
@@ -56,6 +57,13 @@ const AMIGA_C4_PERIOD: f64 = 856.0;
 /// The loudest a channel's volume byte can ask for. The format's own top, and the
 /// divisor every volume becomes a gain through.
 const MAX_VOLUME: u8 = 64;
+/// Standard XM effect Cxx overrides the volume column on the same row.
+const EFFECT_SET_VOLUME: u8 = 0x0C;
+const EFFECT_SET_PANNING: u8 = 0x08;
+const EFFECT_SAMPLE_OFFSET: u8 = 0x09;
+const EFFECT_KEY_OFF: u8 = 0x14;
+const EFFECT_EXTENDED: u8 = 0x0E;
+const EFFECT_GLOBAL_VOLUME: u8 = 0x10;
 /// The width of the panning scale, which is also its centre: FastTracker II shows
 /// 0xA4 as centre and the fixtures hold that default, while libxm's mixing puts the
 /// acoustic centre at half the scale; the second is what this renderer uses, so a
@@ -82,10 +90,9 @@ const VOLUME_SET_MAX: u8 = 0x50;
 /// unaffected and how often the player was asked for it.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Ignored {
-    /// Cells whose effect column names something other than the three the
-    /// container already acted on.
+    /// Cells whose effect column names an unsupported command.
     pub effects: u32,
-    /// Cells whose volume column asks for a value outside the direct-set range.
+    /// Cells whose volume column asks for an unsupported command.
     pub volume_columns: u32,
     /// Instruments drawing a volume or panning envelope.
     pub envelopes: u32,
@@ -118,10 +125,14 @@ pub fn note_steps(note: u8, finetune: i8) -> Option<i16> {
 /// and lands about a percentile below it, which is why a module written to sound
 /// right on the hardware sounds a touch sharp on the table and vice versa.
 pub fn frames_per_second(linear: bool, steps: i16) -> Option<f64> {
+    frames_per_fractional_steps(linear, f64::from(steps))
+}
+
+fn frames_per_fractional_steps(linear: bool, steps: f64) -> Option<f64> {
     let period = if linear {
-        f64::from(7680 - i32::from(steps) * 4)
+        7680.0 - steps * 4.0
     } else {
-        (32.0 * AMIGA_C4_PERIOD * f64::exp2(f64::from(steps) / -192.0)).round()
+        (32.0 * AMIGA_C4_PERIOD * f64::exp2(steps / -192.0)).round()
     };
     // Both tables are held in a period's own field, and a period of none would be
     // a division by zero rather than a very low note.
@@ -139,9 +150,10 @@ pub fn frames_per_second(linear: bool, steps: i16) -> Option<f64> {
 /// of these per channel and a cell with nothing in it leaves it as it was.
 #[derive(Clone, Copy, Default)]
 struct Voice {
-    /// Instrument the channel is playing on, as an index, which sticks across the
-    /// cells that name none.
-    instrument: usize,
+    /// One-based instrument selected for the next note; zero means unselected.
+    instrument: u8,
+    /// One-based owner of the active sample, retained by instrument-only cells.
+    playing_instrument: u8,
     /// And which of that instrument's samples its current note is reading.
     sample: usize,
     sounding: bool,
@@ -151,6 +163,9 @@ struct Voice {
     /// Where in the sample the channel is, and how far it moves per frame, both in
     /// the sample's own frames.
     position: f64,
+    /// Last nonzero9xx argument, retained per channel across plain triggers.
+    sample_offset: u8,
+    reverse: bool,
     step: f64,
     volume: u8,
     panning: u8,
@@ -167,6 +182,7 @@ pub struct XmDecoder {
     output_channels: usize,
     voices: Vec<Voice>,
     ignored: Ignored,
+    global_volume: u8,
 }
 
 impl XmDecoder {
@@ -205,6 +221,7 @@ impl XmDecoder {
             voices,
             module,
             ignored,
+            global_volume: MAX_VOLUME,
         })
     }
 
@@ -226,10 +243,14 @@ impl XmDecoder {
             voices,
             ignored,
             sample_rate,
+            global_volume,
             ..
         } = self;
         for (voice, cell) in voices.iter_mut().zip(&row.cells) {
             apply_cell(module, voice, cell, ignored, linear, *sample_rate);
+            if cell.effect == EFFECT_GLOBAL_VOLUME {
+                *global_volume = cell.parameter.min(MAX_VOLUME);
+            }
         }
     }
 
@@ -250,16 +271,16 @@ impl XmDecoder {
             } else {
                 (voice.level - LEVEL_STEP).max(voice.target)
             };
-            if voice.level == 0.0 {
-                // A cut note has finished letting go, and a note that was never
-                // raised has nothing to say. Either way the sample stops being
-                // read, which is what makes room for the next one.
+            if voice.level == 0.0 && !voice.held {
+                // Only a released note has ended here. A held zero-volume
+                // sample still advances, preserving phase and its natural end
+                // if the channel is made audible again later.
                 voice.sounding = false;
                 continue;
             }
-            let Some(sample) = module
-                .instruments
-                .get(voice.instrument)
+            let Some(sample) = usize::from(voice.playing_instrument)
+                .checked_sub(1)
+                .and_then(|index| module.instruments.get(index))
                 .and_then(|instrument| instrument.samples.get(voice.sample))
             else {
                 voice.sounding = false;
@@ -283,12 +304,16 @@ impl XmDecoder {
     }
 }
 
+fn is_note_cut(cell: &Cell) -> bool {
+    cell.effect == EFFECT_EXTENDED && cell.parameter >> 4 == 0x0C
+}
+
 /// One cell, applied to the channel it belongs to.
 ///
 /// The order is the tracker's own, and it is the order that gives the answer: a
 /// note is triggered first, so it plays on the instrument the same cell names; the
 /// instrument's sample then sets the channel's volume and placement; and the volume
-/// column, if it holds a level rather than an effect, has the last word over both.
+/// column follows, then supported standard effects may override its settings.
 fn apply_cell(
     module: &xm::Module,
     voice: &mut Voice,
@@ -299,25 +324,41 @@ fn apply_cell(
 ) {
     if cell.instrument != 0 {
         if usize::from(cell.instrument) <= module.instruments.len() {
-            voice.instrument = usize::from(cell.instrument) - 1;
+            voice.instrument = cell.instrument;
         } else {
             ignored.missing_samples += 1;
         }
     }
-    match cell.note {
+    // K00 takes precedence over a new note on the same row. Other Kxx
+    // values are scheduled on nonzero ticks by the row renderer.
+    let immediate_key_off = cell.effect == EFFECT_KEY_OFF && cell.parameter == 0;
+    let note = if immediate_key_off { xm::NOTE_KEY_OFF } else { cell.note };
+    match note {
         0 => {}
         xm::NOTE_KEY_OFF => voice.held = false,
         xm::NOTE_MIN..=xm::NOTE_MAX => {
-            trigger(module, voice, cell.note, ignored, linear, sample_rate)
+            trigger(module, voice, cell.note, ignored, linear, sample_rate);
+            if cell.effect == EFFECT_SAMPLE_OFFSET {
+                if cell.parameter != 0 {
+                    voice.sample_offset = cell.parameter;
+                }
+                // FT2 counts decoded sample frames, for both8and16-bit samples.
+                let offset = usize::from(voice.sample_offset) * 256;
+                voice.position = offset as f64;
+                if let Some(sample) = current_sample(module, voice) {
+                    let end = if sample.loops() { sample.loop_end } else { sample.frames.len() };
+                    if offset >= end { voice.sounding = false; }
+                }
+            }
         }
         // Above the table's own top there is no pitch to ask for, and a note that
         // cannot be named is not the same failure as an instrument that holds
         // nothing for it.
         _ => ignored.unplayable_notes += 1,
     }
-    // The instrument's own sample says how loud and where, and does so on a change
-    // of instrument whether or not a note came with it - which is why a cell naming
-    // an instrument alone is the way a module retunes a held note.
+    // An instrument column resets volume/pan from the active sample defaults.
+    // Without a note it changes only the next selection, preserving the active
+    // sample, pitch and phase. An untriggered channel has no defaults to restore.
     if cell.instrument != 0
         && let Some(sample) = current_sample(module, voice)
     {
@@ -327,12 +368,27 @@ fn apply_cell(
     match cell.volume {
         0 => {}
         VOLUME_SET_MIN..=VOLUME_SET_MAX => voice.volume = cell.volume - VOLUME_SET_MIN,
+        0x80..=0x8F => voice.volume = voice.volume.saturating_sub(cell.volume & 0x0F),
+        0x90..=0x9F => voice.volume = voice.volume.saturating_add(cell.volume & 0x0F).min(MAX_VOLUME),
+        0xC0..=0xCF => voice.panning = (cell.volume & 0x0F) << 4,
         _ => ignored.volume_columns += 1,
     }
+    if cell.effect == EFFECT_SET_PANNING {
+        voice.panning = cell.parameter;
+    }
+    if cell.effect == EFFECT_SET_VOLUME {
+        voice.volume = cell.parameter.min(MAX_VOLUME);
+    }
+    if is_note_cut(cell) && cell.parameter & 15 == 0 {
+        voice.volume = 0;
+    }
     if cell.effect != 0
+        && !(cell.effect == EFFECT_EXTENDED && cell.parameter >> 4 == 6)
+        && !is_note_cut(cell)
+        && !immediate_key_off
         && !matches!(
             cell.effect,
-            xm::EFFECT_TEMPO | xm::EFFECT_JUMP | xm::EFFECT_BREAK
+            EFFECT_KEY_OFF | EFFECT_SET_PANNING | EFFECT_SAMPLE_OFFSET | EFFECT_SET_VOLUME | EFFECT_GLOBAL_VOLUME | xm::EFFECT_TEMPO | xm::EFFECT_JUMP | xm::EFFECT_BREAK
         )
     {
         ignored.effects += 1;
@@ -347,7 +403,7 @@ fn apply_cell(
 fn current_sample<'a>(module: &'a xm::Module, voice: &Voice) -> Option<&'a Sample> {
     module
         .instruments
-        .get(voice.instrument)?
+        .get(usize::from(voice.playing_instrument).checked_sub(1)?)?
         .samples
         .get(voice.sample)
 }
@@ -361,32 +417,42 @@ fn trigger(
     linear: bool,
     sample_rate: u32,
 ) {
-    let Some(slot) = module.sample_slot(voice.instrument, note) else {
+    let Some(instrument) = usize::from(voice.instrument).checked_sub(1) else {
         ignored.missing_samples += 1;
         silence(voice);
         return;
     };
-    let Some(sample) = module.instruments[voice.instrument].samples.get(slot) else {
+    let Some(slot) = module.sample_slot(instrument, note) else {
+        ignored.missing_samples += 1;
+        silence(voice);
+        return;
+    };
+    let Some(sample) = module.instruments[instrument].samples.get(slot) else {
         ignored.missing_samples += 1;
         return;
     };
     // A sample's relative note is the note it was recorded at, stated as an offset
     // from the one the cell names, so the pitch the table is asked for is the sum.
     let total = i16::from(note) + i16::from(sample.relative_note);
-    let steps = u8::try_from(total)
-        .ok()
-        .and_then(|total| note_steps(total, sample.finetune));
+    // Pattern bytes stop at B-7, but sample transposition extends the
+    // sounding pitch through A#9. A transposed 97 is a pitch, not key-off.
+    let steps = (1..=119).contains(&total).then(|| (total - 1) * 16);
     let Some(steps) = steps else {
         ignored.unplayable_notes += 1;
         silence(voice);
         return;
     };
-    let Some(rate) = frames_per_second(linear, steps) else {
+    // Raw XM finetune is 1/128 semitone; the public pitch helper counts
+    // sixteenths. Keep the fractional conversion rather than dropping low bits.
+    let tuned_steps = f64::from(steps) + f64::from(sample.finetune) / 8.0;
+    let Some(rate) = frames_per_fractional_steps(linear, tuned_steps) else {
         ignored.unplayable_notes += 1;
         return;
     };
+    voice.playing_instrument = voice.instrument;
     voice.sample = slot;
     voice.position = 0.0;
+    voice.reverse = false;
     voice.step = rate / f64::from(sample_rate);
     voice.sounding = true;
     voice.held = true;
@@ -429,19 +495,31 @@ fn read_frame(sample: &Sample, position: f64) -> Option<f32> {
 /// Move the cursor, and follow the sample's own loop once it reaches the end of
 /// what it plays.
 fn advance(voice: &mut Voice, sample: &Sample) {
-    voice.position += voice.step;
-    if !sample.loops() || voice.position < sample.loop_end as f64 {
+    if sample.loops() && sample.ping_pong && sample.loop_end - sample.loop_start > 1 {
+        let start = sample.loop_start as f64;
+        let span = (sample.loop_end - sample.loop_start - 1) as f64;
+        let period = 2.0 * span;
+        // Recover the unfolded phase from both position and direction. A folded
+        // position alone loses which half of the loop is currently playing.
+        let phase = if voice.reverse {
+            period - (voice.position - start)
+        } else {
+            voice.position - start
+        } + voice.step;
+        if !voice.reverse && phase < span {
+            // Includes the initial, non-looping prefix before loop_start.
+            voice.position += voice.step;
+            return;
+        }
+        let phase = phase.rem_euclid(period);
+        voice.reverse = phase >= span;
+        voice.position = start + phase.min(period - phase);
         return;
     }
-    let start = sample.loop_start as f64;
-    let length = (sample.loop_end - sample.loop_start) as f64;
-    if sample.ping_pong && length > 1.0 {
-        // Forward over the loop's frames, then back over them again, with neither
-        // end played twice: the cycle is two passes minus the two turning frames.
-        let period = 2.0 * length - 2.0;
-        let phase = (voice.position - start).rem_euclid(period);
-        voice.position = start + phase.min(period - phase);
-    } else {
+    voice.position += voice.step;
+    if sample.loops() && voice.position >= sample.loop_end as f64 {
+        let start = sample.loop_start as f64;
+        let length = (sample.loop_end - sample.loop_start) as f64;
         voice.position = start + (voice.position - start).rem_euclid(length);
     }
 }
@@ -456,21 +534,62 @@ impl AudioDecode for XmDecoder {
         duration: u64,
     ) -> Result<Option<AudioPacket>> {
         let row = xm::read_row(data)?;
-        self.apply_row(&row);
         let sample_rate = self.sample_rate;
         let channels = self.output_channels;
-        let frames = usize::try_from(duration * u64::from(sample_rate) / 1_000)
+        // Round absolute endpoints once, rather than losing a fractional PCM
+        // sample independently in every row. Adjacent rows then share a grid.
+        let start = u128::from(pts) * u128::from(sample_rate) / 1_000;
+        let end = (u128::from(pts) + u128::from(duration)) * u128::from(sample_rate) / 1_000;
+        let output_pts = u64::try_from(start)
+            .map_err(|_| invalid("module presentation exceeds the sample clock"))?;
+        let frames = usize::try_from(end - start)
             .map_err(|_| invalid("module row is longer than any block this renderer writes"))?;
-        let mut output = vec![0.0f32; frames * channels];
-        for frame in 0..frames {
+        let samples = frames.checked_mul(channels)
+            .ok_or_else(|| invalid("module row sample count overflows"))?;
+        let mut output = Vec::new();
+        output.try_reserve_exact(samples)
+            .map_err(|_| invalid("module row allocation failed"))?;
+        output.resize(samples, 0.0f32);
+        self.apply_row(&row);
+        let global_gain = f32::from(self.global_volume) / f32::from(MAX_VOLUME);
+        // Delayed Kxx uses five argument bits; ECx uses its low nibble.
+        // Traverse deadlines without allocating or scanning cells per sample.
+        let effect_tick = |cell: &Cell| {
+            let tick = if cell.effect == EFFECT_KEY_OFF {
+                cell.parameter & 31
+            } else if is_note_cut(cell) {
+                cell.parameter & 15
+            } else { return None; };
+            (tick != 0 && tick < row.speed).then_some(tick)
+        };
+        let mut next_tick = row.cells.iter().filter_map(effect_tick).min();
+        let tick_frame = |tick: u8| {
+            let at = u128::from(pts) * 1_000
+                + u128::from(tick) * u128::from(xm::tick_microseconds(row.bpm));
+            (at * u128::from(sample_rate) / 1_000_000).saturating_sub(start)
+        };
+        // The endpoint iteration applies deadlines sharing a rounded row end,
+        // including rows too short to contain one output sample.
+        for frame in 0..=frames {
+            while let Some(tick) = next_tick.filter(|&tick| tick_frame(tick) <= frame as u128) {
+                for (voice, cell) in self.voices.iter_mut().zip(&row.cells) {
+                    if effect_tick(cell) == Some(tick) {
+                        if is_note_cut(cell) { voice.volume = 0; }
+                        else { voice.held = false; }
+                        voice.target = 0.0;
+                    }
+                }
+                next_tick = row.cells.iter().filter_map(effect_tick).filter(|&other| other > tick).min();
+            }
+            if frame == frames { break; }
             let (left, right, dry) = self.mix_frame();
             let frame = frame * channels;
             if channels == 1 {
-                output[frame] = dry.clamp(-1.0, 1.0);
+                output[frame] = (dry * global_gain).clamp(-1.0, 1.0);
                 continue;
             }
-            output[frame] = left.clamp(-1.0, 1.0);
-            output[frame + 1] = right.clamp(-1.0, 1.0);
+            output[frame] = (left * global_gain).clamp(-1.0, 1.0);
+            output[frame + 1] = (right * global_gain).clamp(-1.0, 1.0);
             // What a wide layout gets besides the two speakers the module states
             // is nothing: a tracker places sound between left and right and has no
             // word for the rest.
@@ -481,13 +600,14 @@ impl AudioDecode for XmDecoder {
             .collect::<Vec<_>>();
         Ok(Some(AudioPacket {
             data: bytes,
-            pts,
+            pts: output_pts,
             timebase_num: 1,
             timebase_den: sample_rate,
         }))
     }
 
     fn reset(&mut self) {
+        self.global_volume = MAX_VOLUME;
         for voice in &mut self.voices {
             *voice = Voice::default();
         }
@@ -549,7 +669,7 @@ mod tests {
             .decode_encoded(data, 0, milliseconds)
             .expect("renders")
             .expect("a packet of PCM");
-        assert_eq!((audio.timebase_num, audio.timebase_den), (1, RATE));
+        assert_eq!((audio.timebase_num, audio.timebase_den), (1, decoder.sample_rate));
         audio
             .data
             .chunks_exact(4)
@@ -672,6 +792,9 @@ mod tests {
             "turned to {}",
             voice.position
         );
+        super::advance(&mut voice, &mirrored);
+        assert!((voice.position - 55.0).abs() < 1e-9, "reverse direction must persist");
+        assert!(voice.reverse);
         // And a whole cycle of it walks the loop up and back down without ever
         // leaving it, which is what the same cursor does over a long note.
         for _ in 0..1000 {

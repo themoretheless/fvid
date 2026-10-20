@@ -1,0 +1,100 @@
+{
+  "provenance": "Ten authored60ms neutral16/64-square VP9 MP4 pairs with tkhd flags, v0/v1 and faststart layouts. No private media/encoder/network.",
+  "spec": "https://developer.apple.com/documentation/quicktime-file-format/Track_header_atom/Flags",
+  "cases": [
+    {
+      "file": "legacy-zero.mp4",
+      "side": 16,
+      "flags": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "both-enabled.mp4",
+      "side": 16,
+      "flags": [
+        3,
+        3
+      ]
+    },
+    {
+      "file": "disabled-first.mp4",
+      "side": 64,
+      "flags": [
+        6,
+        3
+      ]
+    },
+    {
+      "file": "zero-first.mp4",
+      "side": 64,
+      "flags": [
+        0,
+        3
+      ]
+    },
+    {
+      "file": "preview-first.mp4",
+      "side": 64,
+      "flags": [
+        5,
+        3
+      ]
+    },
+    {
+      "file": "enabled-nonmovie-first.mp4",
+      "side": 64,
+      "flags": [
+        1,
+        3
+      ]
+    },
+    {
+      "file": "preview-only-choice.mp4",
+      "side": 64,
+      "flags": [
+        6,
+        5
+      ]
+    },
+    {
+      "file": "enabled-only-choice.mp4",
+      "side": 64,
+      "flags": [
+        0,
+        1
+      ]
+    },
+    {
+      "file": "version1-disabled.mp4",
+      "side": 64,
+      "flags": [
+        6,
+        3
+      ]
+    },
+    {
+      "file": "faststart-disabled.mp4",
+      "side": 64,
+      "flags": [
+        6,
+        3
+      ]
+    }
+  ],
+  "sha256": {
+    "legacy-zero.mp4": "fe71c2a946c284ccd7c26fd284ea892aeff7a85b5fa20019c202709717bd5ba7",
+    "both-enabled.mp4": "9094f9201088ebbba1eb508b199d850d5a76fe36d40d1792768dbc64a6360d38",
+    "disabled-first.mp4": "f9ea257475ce62c41d7ccc9a83c8e93e91ad3f08140c0186e03f61e2bc903718",
+    "zero-first.mp4": "9edd6546ebf6ca688f044b36c6381e6c693a3a1dc6ca4dbb7291e77b0d915100",
+    "preview-first.mp4": "c52bcc4b34063f7b3d98946a9af190b44e2bef44834d0772ce02e24390135f5d",
+    "enabled-nonmovie-first.mp4": "63da08392f64dbcb77c8e0ffdcfbcd765df2639343f43d7c5795e48b2f9b42f0",
+    "preview-only-choice.mp4": "d42070b2595c58032ff765926db8557967b48fc6045f5b18dc89df6390430707",
+    "enabled-only-choice.mp4": "084f52fb9e5d64a8a2b0b84507955c5bdea26e7ab8455efd3a3f2f6039bcfa88",
+    "version1-disabled.mp4": "17b3c28796a08313cd55dc1732edd6756255059b3adfb2e26496214f3b6def76",
+    "faststart-disabled.mp4": "9461111516d8f69e68bed311ee62c98e24dec3c11e0f1d49c546ceb46faacd5c",
+    "audiovisual.mp4": "0537c806fd4a9d2a41ff43945eac7e58d14dfb193efa987ff7a4c59e00e527f0",
+    "expected-audio.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

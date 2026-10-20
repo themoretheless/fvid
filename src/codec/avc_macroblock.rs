@@ -24,7 +24,14 @@ pub enum IntraLuma {
     },
 }
 #[derive(Debug)]
+pub struct Chroma422 {
+    pub dc: [[i32;8];2],
+    pub ac: [[[i32;16];8];2],
+    pub pcm: [[u16;128];2],
+}
+#[derive(Debug)]
 pub struct IntraMacroblock {
+    pub chroma422: Option<Box<Chroma422>>,
     pub address: u32,
     pub qp: i32,
     /// Present only for the switching SI macroblock, not ordinary I types in SI slices.
@@ -137,7 +144,7 @@ impl<'a> IntraCavlcReader<'a> {
         }
         if pps.cabac
             || (!mbaff && sps.mb_adaptive_frame_field && !header.field_pic)
-            || sps.chroma_format != 1
+            || sps.chroma_format > 2
             || sps.separate_colour_plane
             || (!allow_fmo && !matches!(pps.slice_groups, SliceGroups::Single))
         {
@@ -198,7 +205,7 @@ impl<'a> IntraCavlcReader<'a> {
             previous_address: None,
             qp: header.slice_qp,
             luma_counts: grid(count * 16)?,
-            chroma_counts: [grid(count * 4)?, grid(count * 4)?],
+            chroma_counts: [grid(count * if sps.chroma_format==2 {8}else{4})?, grid(count * if sps.chroma_format==2 {8}else{4})?],
             modes: grid(count * 16)?,
             finished: false,
             mbaff,
@@ -238,12 +245,10 @@ impl<'a> IntraCavlcReader<'a> {
         pps: &'a Pps,
         max_macroblocks: usize,
     ) -> Result<Self> {
-        if header.field_pic
-            || !matches!(
-                header.slice_type,
-                SliceType::I | SliceType::P | SliceType::B
-            )
-        {
+        if !matches!(
+            header.slice_type,
+            SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B
+        ) {
             return Err(invalid("invalid FMO mixed intra context"));
         }
         Self::new_context_impl(
@@ -273,10 +278,12 @@ impl<'a> IntraCavlcReader<'a> {
     ) -> Result<i8> {
         let width = self.sps.width_mbs as usize;
         let height = self.height_mbs();
-        let (grid, side, sub) = if component == 0 {
-            (&self.luma_counts, 4, [1, 1])
+        let (grid, side, cells, sub) = if component == 0 {
+            (&self.luma_counts, 4, 16, [1, 1])
+        } else if self.sps.chroma_format==2 {
+            (&self.chroma_counts[component-1],2,8,[2,1])
         } else {
-            (&self.chroma_counts[component - 1], 2, [2, 2])
+            (&self.chroma_counts[component - 1], 2, 4, [2, 2])
         };
         super::avc_mbaff::cavlc_context(
             address,
@@ -287,7 +294,7 @@ impl<'a> IntraCavlcReader<'a> {
             sub,
             |pair| self.pair_field(pair),
             |owner, local| {
-                grid.get(owner * side * side + local[1] * side + local[0])
+                grid.get(owner * cells + local[1] * side + local[0])
                     .copied()
                     .filter(|count| *count != 255)
             },
@@ -465,6 +472,7 @@ impl<'a> IntraCavlcReader<'a> {
         luma: [u8; 16],
         chroma: [[u8; 4]; 2],
     ) -> Result<()> {
+        if self.sps.chroma_format==2 && chroma.iter().flatten().any(|&v|v!=0) {return Err(invalid("AVC 422 requires eight-block coefficient counts"));}
         let width = self.sps.width_mbs as usize;
         if address >= width * self.height_mbs()
             || luma.iter().chain(chroma.iter().flatten()).any(|&v| v > 16)
@@ -478,11 +486,13 @@ impl<'a> IntraCavlcReader<'a> {
             2
         });
         for c in 0..2 {
-            self.chroma_counts[c][address * 4..address * 4 + 4].copy_from_slice(&chroma[c]);
+            if self.sps.chroma_format==2 {self.chroma_counts[c][address*8..address*8+8].fill(0);}
+            else{self.chroma_counts[c][address * 4..address * 4 + 4].copy_from_slice(&chroma[c]);}
         }
         Ok(())
     }
     pub fn counts(&self, address: usize) -> Result<([u8; 16], [[u8; 4]; 2])> {
+        if self.sps.chroma_format==2 {return Err(invalid("AVC 422 requires eight-block coefficient counts"));}
         let width = self.sps.width_mbs as usize;
         if address >= width * self.height_mbs() {
             return Err(invalid("AVC count address out of range"));
@@ -493,6 +503,16 @@ impl<'a> IntraCavlcReader<'a> {
                 std::array::from_fn(|i| self.chroma_counts[c][address * 4 + i])
             }),
         ))
+    }
+    pub(super) fn record_inter_422(&mut self,address:usize,luma:[u8;16],chroma:[[u8;8];2])->Result<()> {
+        if self.sps.chroma_format!=2||chroma.iter().flatten().any(|&v|v>16){return Err(invalid("invalid 422 mixed coefficient counts"));}
+        self.record_inter(address,luma,[[0;4];2])?;
+        for c in 0..2 {self.chroma_counts[c][address*8..address*8+8].copy_from_slice(&chroma[c]);}
+        Ok(())
+    }
+    pub(super) fn counts_422(&self,address:usize)->Result<([u8;16],[[u8;8];2])> {
+        if self.sps.chroma_format!=2||address>=self.sps.width_mbs as usize*self.height_mbs(){return Err(invalid("invalid 422 count address"));}
+        Ok((std::array::from_fn(|i|self.luma_counts[address*16+i]),std::array::from_fn(|c|std::array::from_fn(|i|self.chroma_counts[c][address*8+i]))))
     }
 
     fn read_body(&mut self, mb_type: u32) -> Result<Option<IntraMacroblock>> {
@@ -507,6 +527,7 @@ impl<'a> IntraCavlcReader<'a> {
             return Err(invalid("invalid intra macroblock type"));
         }
         let mut mb = IntraMacroblock {
+            chroma422: if self.sps.chroma_format==2 {Some(Box::new(Chroma422 {dc:[[0;8];2],ac:[[[0;16];8];2],pcm:[[0;128];2]}))}else{None},
             address: self.address,
             qp: self.qp,
             switching_qs: None,
@@ -530,15 +551,20 @@ impl<'a> IntraCavlcReader<'a> {
             for value in &mut y {
                 *value = self.bits.read(self.sps.bit_depth_luma)? as u16;
             }
-            for value in cb.iter_mut().chain(cr.iter_mut()) {
-                *value = self.bits.read(self.sps.bit_depth_chroma)? as u16;
+            if let Some(wide)=&mut mb.chroma422 {
+                for value in wide.pcm.iter_mut().flatten() {*value=self.bits.read(self.sps.bit_depth_chroma)? as u16;}
+            } else {
+                for value in cb.iter_mut().chain(cr.iter_mut()).take(if self.sps.chroma_format==0 {0}else{128}) {
+                    *value = self.bits.read(self.sps.bit_depth_chroma)? as u16;
+                }
             }
             mb.luma = IntraLuma::Pcm { y, cb, cr };
             mb.qp = 0;
             self.luma_counts[address * 16..address * 16 + 16].fill(16);
             self.modes[address * 16..address * 16 + 16].fill(2);
             for grid in &mut self.chroma_counts {
-                grid[address * 4..address * 4 + 4].fill(16);
+                let n=if self.sps.chroma_format==2 {8}else{4};
+                grid[address*n..address*n+n].fill(16);
             }
             self.advance_address()?;
             return Ok(Some(mb));
@@ -586,14 +612,18 @@ impl<'a> IntraCavlcReader<'a> {
                 }
             }
         }
-        let chroma = self.bits.unsigned_golomb()?;
-        mb.chroma_mode = ChromaMode::try_from(
-            u8::try_from(chroma).map_err(|_| invalid("chroma mode overflow"))?,
-        )?;
+        if self.sps.chroma_format!=0 {
+            let chroma = self.bits.unsigned_golomb()?;
+            mb.chroma_mode = ChromaMode::try_from(
+                u8::try_from(chroma).map_err(|_| invalid("chroma mode overflow"))?,
+            )?;
+        } else if mb.coded_block_pattern & 0x30 != 0 {
+            return Err(invalid("monochrome intra macroblock signals chroma residual"));
+        }
         if mb_type == 0 {
             let code = self.bits.unsigned_golomb()?;
             mb.coded_block_pattern =
-                super::avc_residual_syntax::coded_block_pattern(code, true, 1)?;
+                super::avc_residual_syntax::coded_block_pattern(code, true, self.sps.chroma_format as u8)?;
         }
         if mb.coded_block_pattern != 0 || mb_type != 0 {
             let delta = self.bits.signed_golomb()?;
@@ -636,12 +666,18 @@ impl<'a> IntraCavlcReader<'a> {
         }
         if mb.coded_block_pattern >> 4 != 0 {
             for component in 0..2 {
-                mb.chroma_dc[component]
-                    .copy_from_slice(&read_residual(&mut self.bits, -1, 4)?.coefficients[..4]);
+                if let Some(wide)=&mut mb.chroma422 {
+                    let values=read_residual(&mut self.bits,-2,8)?.coefficients;
+                    // 8.5.6, inverse 2x4 DC scan into raster coordinates.
+                    for (i,at)in [0,2,1,4,6,3,5,7].into_iter().enumerate(){wide.dc[component][at]=values[i];}
+                } else {
+                    mb.chroma_dc[component].copy_from_slice(&read_residual(&mut self.bits, -1, 4)?.coefficients[..4]);
+                }
             }
         }
         for component in 0..2 {
-            for block in 0..4 {
+            let cells=if self.sps.chroma_format==2 {8}else{4};
+            for block in 0..cells {
                 let mut count = 0;
                 if mb.coded_block_pattern >> 4 == 2 {
                     let context =
@@ -650,9 +686,10 @@ impl<'a> IntraCavlcReader<'a> {
                     count = r.total_coefficients;
                     let mut levels = [0; 16];
                     levels[1..].copy_from_slice(&r.coefficients[..15]);
-                    mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);
+                    if let Some(wide)=&mut mb.chroma422 {wide.ac[component][block]=inverse_scan_4x4(&levels,field);}
+                    else {mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);}
                 }
-                self.chroma_counts[component][address * 4 + block] = count;
+                self.chroma_counts[component][address * cells + block] = count;
             }
         }
         self.advance_address()?;

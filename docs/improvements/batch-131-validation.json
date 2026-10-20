@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0145"
+  ],
+  "checked_at": "2026-10-16T11:09:18.893835+00:00",
+  "before": [
+    "evidence/batch-131-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-131-integration.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-131-geometry-verified.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-131-decoder.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-131-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-131-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Five synthetic public MIDI decoder duration/rate/channel geometries cause debug multiplication panic before allocation. Valid native note record,100msSMFsource andVP9/PCMvideo controls pass beforefaultinjection. Each truePCMextent isunaddressable;no dangerous representable huge allocation isattempted. Faults are API/AudioStream-injected duration metadata,not claimed as durations emitted by the ordinary SMFreader.",
+    "Widen duration product tou128 beforedivision,checkusize frame/sample/byte geometry againstRustaddressable storage,then falliblyreservefloatandbytebuffers beforeapplyingevents oradvancingoscillators. Every badrequest nowreturns precise MIDI PCMwindow error andnextnormal100msPCM matchesfresh decoder. Actualworker firstpacketdurationi64MAX refuses withError andzeroPCM. Baselineworker fault wasnotrun: directpanics establishthe defect withoutwaitingforthread failure.",
+    "13distinct rootintegration tests pass,includingfinal2testgeometry rerun. Validone-second PCM matches tencontinuous100mswindows exactly;zero-length emptywindow andtimestamp retained.19decoderunits,fixture reproducibility andplayerbuild pass. Mainintegrationlog contains12tests;finaltargetlog addsone distinctlong/empty-windowtest andrerunsone existinggeometrytest.",
+    "No arbitrary duration orsample-rate cap isintroduced. This checksunaddressable arithmetic/capacity andrecoverable allocator errors,not anRSSbudget or aguarantee againstOSovercommit kills for hugeaddressable requests. Validation uses current64bitdebugplayer;release/32bitruntime isnotqualified. No performanceclaim.",
+    "Authoredvideo/audio controls andfaultmanifest areoffline;normaltests/generationneed noencoder,FFmpeg,network orprivate data. ExistingPCM/defaults/publicsignatures areunchanged;formerlypanicking impossible requests nowreturnErr."
+  ],
+  "compatibility": "Public signatures and all addressable valid-window geometry remain. Unaddressable requests refuse before state changes; recoverable allocation errors return Err. No fixed new duration/rate limit.",
+  "counting": "One public decoder buffer-geometry panic defect. Fivebadvariants,fallible two-buffer setup,state/worker guards andlong-windowcontrols add zero extraIDs."
+}

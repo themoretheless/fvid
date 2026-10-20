@@ -29,6 +29,8 @@ pub fn decode_matroska_pcm_f64<R: Read + Seek>(
 }
 mod precise {
     use super::*;
+    use crate::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
+    use crate::owned_matroska_grid_clock::grid_sample_matches as aac_quantized_grid_matches;
     use crate::owned_matroska_audio::{DecodeProgress, invalid, matroska_audio_index};
     use crate::owned_webm::WebmReader as MatroskaTimelineReader;
     type Result<T> = std::result::Result<T, Error>;

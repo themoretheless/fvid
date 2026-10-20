@@ -10,12 +10,26 @@ use crate::Error;
 /// Deterministic pseudo-random bytes; `Math.random`-free so failures reproduce.
 fn pseudo_packet(seed: u32, len: usize) -> Vec<u8> {
     let mut s = seed.wrapping_mul(2_654_435_761).wrapping_add(1);
-    (0..len)
+    let mut bytes: Vec<u8> = (0..len)
         .map(|_| {
             s = s.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
             (s >> 24) as u8
         })
-        .collect()
+        .collect();
+    assert!(len > 0);
+    if len <= 1276 {
+        bytes[0] = 0xfc; // One 20 ms frame; arbitrary entropy payload.
+    } else {
+        // Preserve exact packet length for Ogg lacing/continuation tests.
+        // One payload octet, with the remaining bytes encoded as Opus padding.
+        let lengths = (len - 3).div_ceil(255);
+        let padding = len - 3 - lengths;
+        bytes[0] = 0xff;
+        bytes[1] = 0x41;
+        bytes[2..2 + lengths - 1].fill(255);
+        bytes[1 + lengths] = (padding - 254 * (lengths - 1)) as u8;
+    }
+    bytes
 }
 
 fn mux(head: OpusHead, tags: OpusTags, packets: &[(Vec<u8>, u32)]) -> Vec<u8> {
@@ -301,7 +315,7 @@ fn writer_rejects_impossible_packets() {
         Err(Error::InvalidArgument(_))
     ));
     // 120 ms is the ceiling for a single Opus packet.
-    assert!(w.write_packet_with_duration(&[0xfc], 5760).is_ok());
+    assert!(w.write_packet_with_duration(&[0xff, 6], 5760).is_ok());
     assert!(matches!(
         w.write_packet_with_duration(&[0xfc], 5761),
         Err(Error::InvalidArgument(_))
@@ -588,4 +602,80 @@ fn a_failed_rewind_leaves_the_reader_where_it_was() {
         rest.push(p);
     }
     assert_eq!(rest, want[3..]);
+}
+
+#[test]
+fn multistream_writer_rejects_disagreeing_elementary_durations_without_mutation() {
+    use crate::{ChannelLayout, OggOpusWriter, OpusHead};
+    let bytes = include_bytes!(
+        "../../../../tests/fixtures/playback-errors/opus-surround-native-packets.bin"
+    );
+    let length = u32::from_le_bytes(bytes[..4].try_into().unwrap()) as usize;
+    let packet = &bytes[4..4 + length];
+    let mut writer = OggOpusWriter::new(
+        Vec::new(),
+        OpusHead::for_layout(&ChannelLayout::surround(6, 1).unwrap(), 48000),
+    )
+    .unwrap();
+    writer.write_packet(packet).unwrap();
+    let mut malformed = packet.to_vec();
+    let mut offset = 0;
+    let mut scratch = Vec::new();
+    for _ in 0..3 {
+        offset +=
+            crate::repacketizer::take_self_delimited_into(&packet[offset..], &mut scratch).unwrap();
+    }
+    malformed[offset] ^= 8;
+    let before = writer.get_ref().unwrap().clone();
+    let granule = writer.granule();
+    let error = writer.write_packet(&malformed).unwrap_err();
+    assert!(error.to_string().contains("durations disagree"), "{error}");
+    assert_eq!(writer.granule(), granule);
+    assert_eq!(writer.get_ref().unwrap(), &before);
+    assert!(writer.write_packet_with_duration(&malformed, 960).is_err());
+    assert_eq!(writer.granule(), granule);
+    writer.write_packet(packet).unwrap();
+    let actual = writer.finish().unwrap();
+    let mut expected = OggOpusWriter::new(
+        Vec::new(),
+        OpusHead::for_layout(&ChannelLayout::surround(6, 1).unwrap(), 48000),
+    )
+    .unwrap();
+    expected.write_packet(packet).unwrap();
+    expected.write_packet(packet).unwrap();
+    assert_eq!(actual, expected.finish().unwrap());
+}
+
+#[test]
+fn explicit_duration_cannot_exceed_coded_audio_or_precede_another_packet_after_trim() {
+    let raw = include_bytes!(
+        "../../../../tests/fixtures/playback-errors/opus-surround-native-packets.bin"
+    );
+    let length = u32::from_le_bytes(raw[..4].try_into().unwrap()) as usize;
+    for channels in [1usize, 6] {
+        let head = if channels == 1 {
+            OpusHead::new(1, 48000).unwrap()
+        } else {
+            OpusHead::for_layout(&crate::ChannelLayout::surround(6, 1).unwrap(), 48000)
+        };
+        let packet = if channels == 1 {
+            &[0xfc][..]
+        } else {
+            &raw[4..4 + length]
+        };
+        let mut writer = OggOpusWriter::new(Vec::new(), head).unwrap();
+        let before = writer.get_ref().unwrap().clone();
+        assert!(writer.write_packet_with_duration(packet, 961).is_err());
+        assert_eq!(writer.granule(), 0);
+        assert_eq!(writer.get_ref().unwrap(), &before);
+        writer.write_packet_with_duration(packet, 959).unwrap();
+        assert!(writer.write_packet(packet).is_err());
+        assert_eq!(writer.granule(), 959);
+        let bytes = writer.finish().unwrap();
+        let mut reader = OggOpusReader::new(std::io::Cursor::new(bytes)).unwrap();
+        let tail = reader.read_packet().unwrap().unwrap();
+        assert_eq!(tail.page_granule, 959);
+        assert!(tail.end_of_stream);
+        assert!(reader.read_packet().unwrap().is_none());
+    }
 }

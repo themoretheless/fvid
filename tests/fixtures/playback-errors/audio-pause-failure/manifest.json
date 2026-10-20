@@ -1,0 +1,9 @@
+{
+  "provenance": "Authored60ms VP9 and480 PCM samples for controlled backend pause fault injection. Native PCM is verified before the failing lifecycle call. No encoder/private media/network.",
+  "frames": 480,
+  "sample_rate": 8000,
+  "sha256": {
+    "clock.mkv": "610666e09c067e99e3a4207d7a1af91cd0df625cb3e14c29bc4c0c4fc44dd2ff",
+    "expected-source.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

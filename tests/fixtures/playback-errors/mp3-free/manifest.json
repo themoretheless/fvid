@@ -1,0 +1,667 @@
+{
+  "provenance": "FVid-authored compressed chains with free bitrate indices, recomputed CRCs, neutral VP9 video and inherited independent PCM; no encoder/private media/network",
+  "cases": [
+    {
+      "name": "48000-1ch-control",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 480
+    },
+    {
+      "name": "48000-1ch-640k",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        1920,
+        1921,
+        1920,
+        1921
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 960
+    },
+    {
+      "name": "48000-1ch-640k-single",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        1920
+      ],
+      "frames": 1,
+      "samples": 1152,
+      "false_sync": 960
+    },
+    {
+      "name": "48000-2ch-control",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 480
+    },
+    {
+      "name": "48000-2ch-640k",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        1920,
+        1921,
+        1920,
+        1921
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 960
+    },
+    {
+      "name": "24000-1ch-control",
+      "rate": 24000,
+      "channels": 1,
+      "sizes": [
+        480,
+        481,
+        480,
+        481
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 240
+    },
+    {
+      "name": "24000-1ch-640k",
+      "rate": 24000,
+      "channels": 1,
+      "sizes": [
+        1920,
+        1921,
+        1920,
+        1921
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 960
+    },
+    {
+      "name": "24000-1ch-640k-single",
+      "rate": 24000,
+      "channels": 1,
+      "sizes": [
+        1920
+      ],
+      "frames": 1,
+      "samples": 576,
+      "false_sync": 960
+    },
+    {
+      "name": "24000-2ch-control",
+      "rate": 24000,
+      "channels": 2,
+      "sizes": [
+        480,
+        481,
+        480,
+        481
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 240
+    },
+    {
+      "name": "24000-2ch-640k",
+      "rate": 24000,
+      "channels": 2,
+      "sizes": [
+        1920,
+        1921,
+        1920,
+        1921
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 960
+    },
+    {
+      "name": "8000-1ch-control",
+      "rate": 8000,
+      "channels": 1,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 720
+    },
+    {
+      "name": "8000-1ch-640k",
+      "rate": 8000,
+      "channels": 1,
+      "sizes": [
+        5760,
+        5761,
+        5760,
+        5761
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 2880
+    },
+    {
+      "name": "8000-1ch-640k-single",
+      "rate": 8000,
+      "channels": 1,
+      "sizes": [
+        5760
+      ],
+      "frames": 1,
+      "samples": 576,
+      "false_sync": 2880
+    },
+    {
+      "name": "8000-2ch-control",
+      "rate": 8000,
+      "channels": 2,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 720
+    },
+    {
+      "name": "8000-2ch-640k",
+      "rate": 8000,
+      "channels": 2,
+      "sizes": [
+        5760,
+        5761,
+        5760,
+        5761
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 2880
+    },
+    {
+      "name": "44100-1ch-control",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 522
+    },
+    {
+      "name": "44100-1ch-640k",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        2089,
+        2090,
+        2089,
+        2090
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 1044
+    },
+    {
+      "name": "44100-2ch-control",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 522
+    },
+    {
+      "name": "44100-2ch-640k",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        2089,
+        2090,
+        2089,
+        2090
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 1044
+    },
+    {
+      "name": "22050-1ch-control",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        522,
+        523,
+        522,
+        523
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 261
+    },
+    {
+      "name": "22050-1ch-640k",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        2089,
+        2090,
+        2089,
+        2090
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 1044
+    },
+    {
+      "name": "22050-2ch-control",
+      "rate": 22050,
+      "channels": 2,
+      "sizes": [
+        522,
+        523,
+        522,
+        523
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 261
+    },
+    {
+      "name": "22050-2ch-640k",
+      "rate": 22050,
+      "channels": 2,
+      "sizes": [
+        2089,
+        2090,
+        2089,
+        2090
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 1044
+    },
+    {
+      "name": "11025-1ch-control",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 522
+    },
+    {
+      "name": "11025-1ch-640k",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        4179,
+        4180,
+        4179,
+        4180
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 2089
+    },
+    {
+      "name": "11025-2ch-control",
+      "rate": 11025,
+      "channels": 2,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 522
+    },
+    {
+      "name": "11025-2ch-640k",
+      "rate": 11025,
+      "channels": 2,
+      "sizes": [
+        4179,
+        4180,
+        4179,
+        4180
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 2089
+    },
+    {
+      "name": "32000-1ch-control",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 720
+    },
+    {
+      "name": "32000-1ch-640k",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        2880,
+        2881,
+        2880,
+        2881
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 1440
+    },
+    {
+      "name": "32000-2ch-control",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 720
+    },
+    {
+      "name": "32000-2ch-640k",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        2880,
+        2881,
+        2880,
+        2881
+      ],
+      "frames": 4,
+      "samples": 4608,
+      "false_sync": 1440
+    },
+    {
+      "name": "16000-1ch-control",
+      "rate": 16000,
+      "channels": 1,
+      "sizes": [
+        720,
+        721,
+        720,
+        721
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 360
+    },
+    {
+      "name": "16000-1ch-640k",
+      "rate": 16000,
+      "channels": 1,
+      "sizes": [
+        2880,
+        2881,
+        2880,
+        2881
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 1440
+    },
+    {
+      "name": "16000-2ch-control",
+      "rate": 16000,
+      "channels": 2,
+      "sizes": [
+        720,
+        721,
+        720,
+        721
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 360
+    },
+    {
+      "name": "16000-2ch-640k",
+      "rate": 16000,
+      "channels": 2,
+      "sizes": [
+        2880,
+        2881,
+        2880,
+        2881
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 1440
+    },
+    {
+      "name": "12000-1ch-control",
+      "rate": 12000,
+      "channels": 1,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 480
+    },
+    {
+      "name": "12000-1ch-640k",
+      "rate": 12000,
+      "channels": 1,
+      "sizes": [
+        3840,
+        3841,
+        3840,
+        3841
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 1920
+    },
+    {
+      "name": "12000-2ch-control",
+      "rate": 12000,
+      "channels": 2,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 480
+    },
+    {
+      "name": "12000-2ch-640k",
+      "rate": 12000,
+      "channels": 2,
+      "sizes": [
+        3840,
+        3841,
+        3840,
+        3841
+      ],
+      "frames": 4,
+      "samples": 2304,
+      "false_sync": 1920
+    }
+  ],
+  "invalid": [
+    "bad-second-crc.mp3",
+    "bad-second-crc.mkv"
+  ],
+  "files": {
+    "48000-1ch-control.mp3": "9ebb2bd511cc8449b8560823192e6f3430ebcb59215c8aea55a40d8a1d1d9649",
+    "48000-1ch-control.mkv": "adb79d39a486e0dcabc3b3fc11d6c88be791822f5bf6603e074597aed3052eb3",
+    "48000-1ch-control.f32le": "9b4fd2ac1dfd5f91a94486c11304d1b75b6bd6a0f95a1f9f47efcb13b743eba5",
+    "bad-second-crc.mp3": "ebb3190d5634864c8422af63f991f79ec28e379d4a1247b0de2c4d507b1decea",
+    "bad-second-crc.mkv": "c3ada39a0e7c24265ed0209a7b0e2739942b9dc21336451a72824cde53d7bf63",
+    "48000-1ch-640k.mp3": "12dc0f67200c305b3b39bc6d1e13358db1d57c5e89a488f92be82dbb986a2000",
+    "48000-1ch-640k.mkv": "908edc242f43920c2d60a4ac72c4083784969a83fe3c1133a823ff274f5144df",
+    "48000-1ch-640k.f32le": "9b4fd2ac1dfd5f91a94486c11304d1b75b6bd6a0f95a1f9f47efcb13b743eba5",
+    "48000-1ch-640k-single.mp3": "b40321d567c55a69d6cb9d7623841a20c6792cba8ec9c90e4132f3655f73d40b",
+    "48000-1ch-640k-single.mkv": "f7e9b100b3d21bf9a6350d9ceb74a2517512b43d24890e685c67f4b5530a80f4",
+    "48000-1ch-640k-single.f32le": "1a568b972dea8061a86a5636740e590ffe4fd1dafd3c4769f02e243fcb6a57d7",
+    "48000-2ch-control.mp3": "acdcded4f0cdca0b9a19ed0a96841d1567536030c64a779a9dbb10bbc9fce55f",
+    "48000-2ch-control.mkv": "4743b1dbeab54305b3b500c63dbaed4b500237a60584b996e9e87ab23d9770b7",
+    "48000-2ch-control.f32le": "f18f65e9270281d9c68c7c36670e7c1a1c79b25b7a378b1bfa2114a3c7b624e4",
+    "48000-2ch-640k.mp3": "c8c33e07403172a337906a91dffdb3536cab95e04d75a363a7cb7bd674512f53",
+    "48000-2ch-640k.mkv": "a2dfe4bfd83d5c3282389d2a495a63693a578c84af7118d757394b237834b47f",
+    "48000-2ch-640k.f32le": "f18f65e9270281d9c68c7c36670e7c1a1c79b25b7a378b1bfa2114a3c7b624e4",
+    "24000-1ch-control.mp3": "77fb1245063139bd0133b243dab7cf375353f9eb9af4d56f633d545245deb440",
+    "24000-1ch-control.mkv": "1258684602e36ad06bda6b0a463042c9249d34b1ae5d5051335be3d0695b00c8",
+    "24000-1ch-control.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "24000-1ch-640k.mp3": "562723357afbfbfc087ab17cf551493c596ec28e3ada7c79b24bc15cc08c6989",
+    "24000-1ch-640k.mkv": "65f19c6b3de9d4da5621bf97f794cc2b776e69e603352aeef81fe732039e6216",
+    "24000-1ch-640k.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "24000-1ch-640k-single.mp3": "5dd95b94dce48c0951cf381fd82bb230cc10ad6ecf5b90d1b45f4a86a1c20aac",
+    "24000-1ch-640k-single.mkv": "63c9c9d885302bf284b84c38223bd78fd5e594437977f16d9ad5617801d3829f",
+    "24000-1ch-640k-single.f32le": "cdc3e2e07ab3a23ed6c68c2ae4b55a4d6073794bb033cecb60ace8c3e1bed647",
+    "24000-2ch-control.mp3": "b0268765af4e85acb091b076311a934e4eec34d7678751af8f4fb25180bd0baf",
+    "24000-2ch-control.mkv": "e79e396e2ce6cd8c9e11115eb360cc393c5b57d375ed6ee2d0b5e4918082beba",
+    "24000-2ch-control.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "24000-2ch-640k.mp3": "1576d4cefa04e7670ed9604668cdcdf0980310e979f3d1bdc3b47819be8b52de",
+    "24000-2ch-640k.mkv": "187bb354d3c360cc3e3e6c4d62391e24920645e170d078e990f9803495e0ba1d",
+    "24000-2ch-640k.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "8000-1ch-control.mp3": "9e1aeed31caf28e99f652c4715df21fc48989de53f711fbdc23b6e365f2eae47",
+    "8000-1ch-control.mkv": "00dc4504a5e52423aac816ed380f76a6c32556187f82dc51c0cc5d48e9711d71",
+    "8000-1ch-control.f32le": "b0c9d847c70ac1482886b15d90a3fe804633057f0d54a3e55f325c2f5bb7af0d",
+    "8000-1ch-640k.mp3": "85d5ff0eab2f630342169bea392b3925db84e25428f765f9f588d20a3fce67dd",
+    "8000-1ch-640k.mkv": "c9adddb3037fe4e4e7a166a03dced288b315bff019cda834029972a8665fa03b",
+    "8000-1ch-640k.f32le": "b0c9d847c70ac1482886b15d90a3fe804633057f0d54a3e55f325c2f5bb7af0d",
+    "8000-1ch-640k-single.mp3": "63106fa4873f9a457440d65c17ae78a7a4cbb68e9694e2ab90aa5bfe56133494",
+    "8000-1ch-640k-single.mkv": "cef38e563496b2028ff92e0ae086ae43376466080d132710637b3c2998549917",
+    "8000-1ch-640k-single.f32le": "cdc3e2e07ab3a23ed6c68c2ae4b55a4d6073794bb033cecb60ace8c3e1bed647",
+    "8000-2ch-control.mp3": "ba83478b34fba9aac82bc798868ecaf7807cce15ae67811fd8cebe2b9b1ba97e",
+    "8000-2ch-control.mkv": "a8197a3de5cb438aa996cec2b991a202f5434423fee56aefde08d684a4cea75f",
+    "8000-2ch-control.f32le": "de87010c8a84ec499a4b39a1363a4a1bd2fd5a3849fa203f73ddbb101e0dbae8",
+    "8000-2ch-640k.mp3": "3b86764b354ccf425ad0819343fcf773fae08744b9274b0da84c691a50e07e08",
+    "8000-2ch-640k.mkv": "b54fc1a6509eb570855ddf0b1290c716a8ceccf36f58112a9505ca21c217a415",
+    "8000-2ch-640k.f32le": "de87010c8a84ec499a4b39a1363a4a1bd2fd5a3849fa203f73ddbb101e0dbae8",
+    "44100-1ch-control.mp3": "b0899beb6a54b930fed7f2698b060b7aabb42521dc0a66ae743d99ef76b8c7a5",
+    "44100-1ch-control.mkv": "eb01bad63e08e6cc7805cf00f7174424cb1de3cb06a0a72a9c242dde46416815",
+    "44100-1ch-control.f32le": "c17d6658c9f5b5060015fbbbaa2906cc7ba49878618938744080b4b3b16fb03e",
+    "44100-1ch-640k.mp3": "7ed2d742a1e4405632fbadd9528d8b20925a9058eeeb082d157f142171c172d1",
+    "44100-1ch-640k.mkv": "c503847706f5a39ba90f898972b861d9f53e275000504b2db86646d8ce0be0f6",
+    "44100-1ch-640k.f32le": "c17d6658c9f5b5060015fbbbaa2906cc7ba49878618938744080b4b3b16fb03e",
+    "44100-2ch-control.mp3": "ee8fcb8cd4293330e638799efea1bbd84fd1cee218f2e46fd174ea95b81cabae",
+    "44100-2ch-control.mkv": "092ec20036e57329329e683c0b2d8747d222b4d51a0d6741ddf8c58be911143b",
+    "44100-2ch-control.f32le": "217d1a85a5e74c2c369f5522f35bc7566cb38a8e9411d0dc855b45de047bee2d",
+    "44100-2ch-640k.mp3": "2254b4e5deb8cd770b48f2f00981214eca810bbaecbda1bd7be3a6ca2f31c26d",
+    "44100-2ch-640k.mkv": "e32084de4abee3a68de7dc983618b38bb28125267eb9ea7d72425a7098fce15d",
+    "44100-2ch-640k.f32le": "217d1a85a5e74c2c369f5522f35bc7566cb38a8e9411d0dc855b45de047bee2d",
+    "22050-1ch-control.mp3": "3d4ec09e371c50bafe8281c914ccbb1776cc8b6409eb1781f10bf6dff8b28ced",
+    "22050-1ch-control.mkv": "b3e573328adb5031c8643b77722bfb0df33f65cbc5e696d7a589a4fa699e0e9b",
+    "22050-1ch-control.f32le": "6a0b6d5f8ebb790c3d8389023d39c47177d5c92d282f0b4b52e3c9b20c73a877",
+    "22050-1ch-640k.mp3": "ade26e597f92b991e48904374353f4ca891a6d425c6b5e5bf8174d840e1a7a21",
+    "22050-1ch-640k.mkv": "c926b40f33af01c96db5131017d5b04226c543103c36f3ac7c09d1ca93009faf",
+    "22050-1ch-640k.f32le": "6a0b6d5f8ebb790c3d8389023d39c47177d5c92d282f0b4b52e3c9b20c73a877",
+    "22050-2ch-control.mp3": "04982a86e04a8e4da3b84f66df47d40bed9789901dbfd58f02334bf906fb2193",
+    "22050-2ch-control.mkv": "d4fdef39791901fc3798953331e8c532afbab62eb93d3aa58510b52c3e26eab8",
+    "22050-2ch-control.f32le": "f161d01cf67100f3a9df0c1060e05e3976e754ea49d0ab1c2ed77b632f6cd720",
+    "22050-2ch-640k.mp3": "50381edb112d3cffbbdd7a559148edada2b0b6bee8f152aaea867d6637a60673",
+    "22050-2ch-640k.mkv": "e0b246f8edcd9027c987d5493812bb62b9f163e199083868fd408f1be748d2fa",
+    "22050-2ch-640k.f32le": "f161d01cf67100f3a9df0c1060e05e3976e754ea49d0ab1c2ed77b632f6cd720",
+    "11025-1ch-control.mp3": "b760d482daa5171413b2e6124ff73012763b97fa94a24cf467acf13012dffbe4",
+    "11025-1ch-control.mkv": "0f20bcdca0ba04020bba0db608db439bd800448d6fd2f7ad716ff0b094ffdab6",
+    "11025-1ch-control.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "11025-1ch-640k.mp3": "4456761c74a018bd6fc875a80938c992936d18ec69f331f02adea7078a8046f1",
+    "11025-1ch-640k.mkv": "0ca4f05c6c8fe305ed4c6676c1c221f7cfc1f30984f433c1fdba15193800f06c",
+    "11025-1ch-640k.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "11025-2ch-control.mp3": "23c22dfd6541583ab77460059caa27851d4a7e0e34e8e260da115e43bcabdee6",
+    "11025-2ch-control.mkv": "cd03b905813d7140621b1841b1b8956e93167c91299cec038e5130d4eb074ebe",
+    "11025-2ch-control.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "11025-2ch-640k.mp3": "214a52aa6239498ba2603b2a924ddb3c990e4d48c81f8e593695d0e6a85d8ecb",
+    "11025-2ch-640k.mkv": "ebea86397c010654b2adab0b871e636510239cc7ba5830df89bf3e8dc692e9b3",
+    "11025-2ch-640k.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "32000-1ch-control.mp3": "5d5d0d1974a9d275362a2cb2e20963317f0e8a6b72ded06a7bd45b091ec941f8",
+    "32000-1ch-control.mkv": "6bd34debd7d7d3866130b022db3eb7cbfdcbac3850efe4e56838ccbe99d87769",
+    "32000-1ch-control.f32le": "f18644d8ecffe0e99b387764e20b02f5ac35a1a8e7813fdb40ee29304166fc4a",
+    "32000-1ch-640k.mp3": "3aa0ab6479f439d028e0f3b762d7f5ca724d5334ac2ed873b7e52aa546bb8b2d",
+    "32000-1ch-640k.mkv": "41944875eb440219f9c9bbdb570e6841b4d9bfe0d1b6dd96a7596682aeb0a358",
+    "32000-1ch-640k.f32le": "f18644d8ecffe0e99b387764e20b02f5ac35a1a8e7813fdb40ee29304166fc4a",
+    "32000-2ch-control.mp3": "2584d276937c7a90a71819d55a6665c553252757aaa359282769617d976d0aff",
+    "32000-2ch-control.mkv": "a7b664df965f926fa878b56a01e9984212018e371ebc3470d1ee76447ee9afb1",
+    "32000-2ch-control.f32le": "8c3c4dbbd1556ebe7d0d85ad0ec7a1fcfcd373065d40f36a32c72a9d94e88306",
+    "32000-2ch-640k.mp3": "343fcaa8e02580e4637a0247b237498b5e395128e15f116880bda5658673c9fa",
+    "32000-2ch-640k.mkv": "3d4acda8fdbcafd8cb6e0d98a2c5d6232c316355a53151e5056cd8ac11720f13",
+    "32000-2ch-640k.f32le": "8c3c4dbbd1556ebe7d0d85ad0ec7a1fcfcd373065d40f36a32c72a9d94e88306",
+    "16000-1ch-control.mp3": "a8e7e707d80711d0e97f7442f776a750d276024158547a12e3f53284b5162760",
+    "16000-1ch-control.mkv": "c6a2bbb2c0abbb22c2ed01553a18af703348b98b011bb80d43f2d09a235fb528",
+    "16000-1ch-control.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "16000-1ch-640k.mp3": "27c969eaffb1459faa9404e469c6e9b6499e64553fc4fc1be6ef9e51f60776cb",
+    "16000-1ch-640k.mkv": "632a50c2f3ba301b78f2e0c9557ade2e0aa1ff6287fd708faacf3ccadaffbaee",
+    "16000-1ch-640k.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "16000-2ch-control.mp3": "4a4c69370a7690957d4b4e44371da9506171fe557fcb92987f7252aed25abc5e",
+    "16000-2ch-control.mkv": "307101d92681c54a02d7fb356becbdb5e0acb1d4fb39afbf26218ffca276181c",
+    "16000-2ch-control.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "16000-2ch-640k.mp3": "cbf4288933d3cd873763a7013f00e036030a6d137df53ef264fa691d581ef380",
+    "16000-2ch-640k.mkv": "f75b63128eabd1fdbf088861fbaf1d58d53f96d35a08809a97795a544e4014c0",
+    "16000-2ch-640k.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "12000-1ch-control.mp3": "965630768c61a0ffa99fbf42ace55d3e42e1a0b4080fc7733f10600437ca143e",
+    "12000-1ch-control.mkv": "aa49998a0fd50907ef18509d8180688de9b6f210d8e1cc4383f9bed93be35a1d",
+    "12000-1ch-control.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "12000-1ch-640k.mp3": "e96288a5c6215bcb72efd652e60425c0a5323ef96baf1c43a47de2e085c8ae30",
+    "12000-1ch-640k.mkv": "cb09eefa74e3b0607ff8249fa0848fbdcc21a8f2977c2c5a9658346f0e27c48b",
+    "12000-1ch-640k.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "12000-2ch-control.mp3": "b455f9ac0067597a2f0893223b6c6054d4b033428ce0c6e47a4d8108986a4923",
+    "12000-2ch-control.mkv": "da15687b0241303a2e13a9f05f58399dbd7a5ed71b553d6d99b919e80312f553",
+    "12000-2ch-control.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "12000-2ch-640k.mp3": "11818efce36543004ddf0d1c6c73a324eed6c322570e559c81e042072ff08fd9",
+    "12000-2ch-640k.mkv": "6e4e9afcb0335db9cc63b77605f94f9ca2e8087e21a53113e26ddaea7c97beb0",
+    "12000-2ch-640k.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df"
+  }
+}

@@ -66,11 +66,10 @@ pub(crate) fn try_decode(
     )
     .map_err(|e| e.to_string())?;
     reader.scan_all().map_err(|e| e.to_string())?;
-    let track = reader
-        .tracks
-        .iter()
-        .find(|v| v.kind == 1)
-        .ok_or("input has no video stream")?;
+    let Some(track) = crate::owned_webm_codec::video_track(&reader) else {
+        return if reader.tracks.iter().any(|t|t.kind==1 && reader.track_enabled(t.number)) {Ok(None)}
+            else {Err("input has no video stream".into())};
+    };
     if !matches!(track.codec.as_str(), "V_VP9" | "V_AV1")
         || track.crop != [0; 4]
         || track.rotation != 0

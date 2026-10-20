@@ -1,0 +1,124 @@
+{
+  "provenance": "Authored60ms VP9/8kHz mono PCM. CodecDelay shifts source presentation before clipping. One-ns, whole-packet/all-preroll and padding overlap controls. No encoder/private media/network.",
+  "cases": [
+    {
+      "file": "control.mkv",
+      "oracle": "control.f32le",
+      "delay_ns": 0,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 60000000
+    },
+    {
+      "file": "one-ns.mkv",
+      "oracle": "one-ns.f32le",
+      "delay_ns": 1,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 19999999,
+          "frames": 160
+        },
+        {
+          "pts_ns": 39999999,
+          "frames": 160
+        }
+      ],
+      "end_ns": 59999999
+    },
+    {
+      "file": "ten-ms.mkv",
+      "oracle": "ten-ms.f32le",
+      "delay_ns": 10000000,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 80
+        },
+        {
+          "pts_ns": 10000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 30000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 50000000
+    },
+    {
+      "file": "whole-head.mkv",
+      "oracle": "whole-head.f32le",
+      "delay_ns": 20000000,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 40000000
+    },
+    {
+      "file": "all-preroll.mkv",
+      "oracle": "all-preroll.f32le",
+      "delay_ns": 100000000,
+      "packets": [],
+      "end_ns": 0
+    },
+    {
+      "file": "padding-overlap.mkv",
+      "oracle": "padding-overlap.f32le",
+      "delay_ns": 10000000,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 80
+        },
+        {
+          "pts_ns": 10000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 30000000,
+          "frames": 80
+        }
+      ],
+      "end_ns": 40000000
+    }
+  ],
+  "invalid": "overflow-delay.mkv",
+  "sha256": {
+    "control.mkv": "1e4c81a628529064dfd81fd1c510a5dd6ef3a60f84ad52c5fac373c0b9d66f19",
+    "control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "one-ns.mkv": "ab0e58ea554858fd9c24d05d5366ce6a0e0a40b78e5830f30aeb599ff5024568",
+    "one-ns.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "ten-ms.mkv": "d7b3e0c758efece72cbde0aebc3db03c36c7c78ea0f4c97fa201b401a963d207",
+    "ten-ms.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "whole-head.mkv": "b893a566532d556b410456d2626942e7a5e2eb61e32ecef8ffb46358f1f87324",
+    "whole-head.f32le": "21324d273c6bd292debf776532aab3d3204ebfacef86d76a96767e0b26f41c46",
+    "all-preroll.mkv": "4fcfbb8ba35cfb92aa0886644a9ad5bebb3617f299c5cb7daaacdbaa9c452284",
+    "all-preroll.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "padding-overlap.mkv": "b9acd3d9dbe0c6bf2202617fafc40183573783c8eef1e3c38d914f3fda7dbe28",
+    "padding-overlap.f32le": "1af7b8333c247f7203b9bd665fc659b03bef4b3635bafc4a8e807a56e669c56b",
+    "overflow-delay.mkv": "70038f7665b052afb31b0dc573d5358142985669bad1a6857df933fb1dd200e5"
+  }
+}

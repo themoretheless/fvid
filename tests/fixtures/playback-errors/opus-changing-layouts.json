@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "file": "opus-surround-to-quad.opus",
+      "output_mask": 63,
+      "output_channels": 6,
+      "sha256": "de6f18495df0add0a3963a9a1016565642e1319822c0d31b761c6777476fe953"
+    },
+    {
+      "file": "opus-quad-to-surround.opus",
+      "output_mask": 63,
+      "output_channels": 6,
+      "sha256": "43aaa7864dcd996b8bc9f2fdf67f3860126eb95bef49094de486feb3ef085096"
+    },
+    {
+      "file": "opus-mono-to-quad.opus",
+      "output_mask": 55,
+      "output_channels": 5,
+      "sha256": "122de3be9b804cb8aef8f26408ff8668d3c88d806deec93941c6c959c290adc3"
+    },
+    {
+      "file": "opus-quad-to-mono.opus",
+      "output_mask": 55,
+      "output_channels": 5,
+      "sha256": "9854b815ca95742b36d37ec718fc074672efa731c2b48c0375a4b1588fcc8449"
+    }
+  ],
+  "pre_skips": [
+    312,
+    648
+  ],
+  "tail_trims": [
+    137,
+    211
+  ],
+  "provenance": "Authored HEVC/Opus video companions; selected coupled and mono elementary streams from existing synthetic packets. No private data, external codec execution or network."
+}

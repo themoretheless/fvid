@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0129"
+  ],
+  "checked_at": "2026-10-16T07:03:47.959980+00:00",
+  "before": [
+    "evidence/batch-110-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-110-integration.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-110-decoder-final.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-110-waveform-oracle.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-110-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-110-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Five authored ping-pong loops compare with independently unfolded forward loops. Prefix0/8,loop lengths1/3/32/64,normal/high note,five rows andexplicit release. Before four loops have maximum PCM error0.005524..0.173993;one-frame loop control is healthy.",
+    "Direction was lost after every folded advance: the next frame stepped forward again, trapping the cursor at the top. Store reverse direction,recover unfolded phase before advancing andfold over the full cycle. Reset/retrigger initializes forward direction;initial prefix andone-frame loops retain behavior.",
+    "After maximum independent PCM error is7.450581e-9overfour inputs and0forone-frame control,below predeclared1e-6tolerance. Every source/control packet PTS/byte count matches. Actual worker fullplay/rewind/midrow seek/EOF preserves every native PCM byte;ten worker targets. Before these native-self worker checks also pass,so only independently proven waveform error is claimed,not a pre-fixworkerseek defect.",
+    "13integrations,11decoder units including strengthened second-step direction assertion,fixture reproduction andcurrent player build pass. This preserves Fvid existing no-repeated-endpoint loop convention. It is a direction/phase correctness fix,not a claim of complete byte-identical FT2mixing/interpolation semantics.",
+    "Authored raw XM plus short VP9/PCM companion,no private media/encoder/network/performance/physical output claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/mixer/ft2_mix_macros.h",
+      "section": "START_PINGPONG;WRAP_PINGPONG_LOOP",
+      "rule": "Primary mixer carries samplingBackwards as persistent voice state. Its complete interpolation/endpoint convention is not asserted by this native-profile oracle."
+    }
+  ],
+  "compatibility": "Forward loops/unlooped samples retain existing advancement. Ping-pong waveform now traverses both directions;public interfaces unchanged.",
+  "counting": "One ping-pong direction-loss defect;four failures,one healthy control andstrengthened existing unit add no extra IDs."
+}

@@ -1,0 +1,439 @@
+{
+  "provenance": "Own opaque extension bits and active-parameter SEI; unchanged synthetic I/P/B payloads. Exact raw identity, not active tool support.",
+  "cases": [
+    {
+      "file": "main-ipb-vps-forbidden.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "forbidden",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-vps-allowed.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "allowed",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-vps-identical.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "identical",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-vps-change-return.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "change-return",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-vps-late-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "late-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-vps-same-packet-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "same-packet-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-vps-revoked.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "revoked",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-vps-late-clean-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "late-clean-claim",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-vps-late-return-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "late-return-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-vps-same-packet-revoked.mp4",
+      "seed": "main-ipb",
+      "kind": "vps",
+      "mode": "same-packet-revoked",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-forbidden.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "forbidden",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-allowed.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "allowed",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-sps-identical.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "identical",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-sps-change-return.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "change-return",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-late-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "late-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-same-packet-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "same-packet-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-revoked.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "revoked",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-late-clean-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "late-clean-claim",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-sps-late-return-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "late-return-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-same-packet-revoked.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "same-packet-revoked",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-forbidden.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "forbidden",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-allowed.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "allowed",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-pps-identical.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "identical",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-pps-change-return.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "change-return",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-late-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "late-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-same-packet-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "same-packet-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-revoked.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "revoked",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-late-clean-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "late-clean-claim",
+      "refusal": false
+    },
+    {
+      "file": "main-ipb-pps-late-return-claim.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "late-return-claim",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-pps-same-packet-revoked.mp4",
+      "seed": "main-ipb",
+      "kind": "pps",
+      "mode": "same-packet-revoked",
+      "refusal": true
+    },
+    {
+      "file": "main-ipb-sps-large-config.mp4",
+      "seed": "main-ipb",
+      "kind": "sps",
+      "mode": "large-config",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-vps-forbidden.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "forbidden",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-vps-allowed.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "allowed",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-vps-identical.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "identical",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-vps-change-return.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "change-return",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-vps-late-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "late-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-vps-same-packet-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "same-packet-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-vps-revoked.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "revoked",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-vps-late-clean-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "late-clean-claim",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-vps-late-return-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "late-return-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-vps-same-packet-revoked.mp4",
+      "seed": "main10-ipb",
+      "kind": "vps",
+      "mode": "same-packet-revoked",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-forbidden.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "forbidden",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-allowed.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "allowed",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-sps-identical.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "identical",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-sps-change-return.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "change-return",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-late-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "late-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-same-packet-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "same-packet-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-revoked.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "revoked",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-late-clean-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "late-clean-claim",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-sps-late-return-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "late-return-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-same-packet-revoked.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "same-packet-revoked",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-forbidden.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "forbidden",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-allowed.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "allowed",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-pps-identical.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "identical",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-pps-change-return.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "change-return",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-late-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "late-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-same-packet-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "same-packet-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-revoked.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "revoked",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-late-clean-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "late-clean-claim",
+      "refusal": false
+    },
+    {
+      "file": "main10-ipb-pps-late-return-claim.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "late-return-claim",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-pps-same-packet-revoked.mp4",
+      "seed": "main10-ipb",
+      "kind": "pps",
+      "mode": "same-packet-revoked",
+      "refusal": true
+    },
+    {
+      "file": "main10-ipb-sps-large-config.mp4",
+      "seed": "main10-ipb",
+      "kind": "sps",
+      "mode": "large-config",
+      "refusal": false
+    }
+  ]
+}

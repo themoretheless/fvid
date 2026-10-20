@@ -24,7 +24,7 @@ fn motions(v: &serde_json::Value) -> Vec<fvid::codec::hevc_motion::Motion> {
                 } else {
                     Some(fvid::codec::hevc_motion::Vector {
                         reference: entry[c]["reference"].as_u64().unwrap() as u8,
-                        mv: std::array::from_fn(|i| entry[c]["mv"][i].as_i64().unwrap() as i16),
+                        mv: std::array::from_fn(|i| entry[c]["mv"][i].as_i64().unwrap()),
                     })
                 }
             })

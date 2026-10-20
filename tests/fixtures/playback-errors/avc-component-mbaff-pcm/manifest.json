@@ -1,0 +1,2882 @@
+[
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-frame-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-frame-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-frame-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-frame-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-field-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-field-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-field-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-field-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-columns-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-columns-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-columns-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-columns-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-checker-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-checker-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-checker-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e0-checker-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-frame-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-frame-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-frame-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-frame-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-field-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-field-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-field-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-field-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-columns-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-columns-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-columns-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-columns-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-checker-a0-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-checker-a0-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-checker-a1-crop0",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y8-c8-e1-checker-a1-crop1",
+    "format": 0,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-frame-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-frame-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-frame-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-frame-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-field-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-field-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-field-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-field-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-columns-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-columns-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-columns-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-columns-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-checker-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-checker-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-checker-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e0-checker-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-frame-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-frame-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-frame-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-frame-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-field-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-field-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-field-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-field-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-columns-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-columns-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-columns-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-columns-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-checker-a0-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-checker-a0-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-checker-a1-crop0",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y10-c12-e1-checker-a1-crop1",
+    "format": 0,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-frame-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-frame-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-frame-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-frame-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-field-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-field-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-field-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-field-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-columns-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-columns-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-columns-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-columns-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-checker-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-checker-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-checker-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e0-checker-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-frame-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-frame-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-frame-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-frame-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-field-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-field-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-field-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-field-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-columns-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-columns-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-columns-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-columns-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-checker-a0-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-checker-a0-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-checker-a1-crop0",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f0-y14-c8-e1-checker-a1-crop1",
+    "format": 0,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-frame-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-frame-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-frame-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-frame-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-field-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-field-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-field-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-field-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-columns-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-columns-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-columns-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-columns-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-checker-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-checker-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-checker-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e0-checker-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-frame-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-frame-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-frame-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-frame-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-field-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-field-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-field-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-field-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-columns-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-columns-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-columns-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-columns-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-checker-a0-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-checker-a0-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-checker-a1-crop0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y8-c8-e1-checker-a1-crop1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-frame-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-frame-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-frame-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-frame-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-field-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-field-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-field-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-field-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-columns-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-columns-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-columns-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-columns-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-checker-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-checker-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-checker-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e0-checker-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-frame-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-frame-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-frame-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-frame-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-field-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-field-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-field-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-field-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-columns-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-columns-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-columns-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-columns-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-checker-a0-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-checker-a0-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-checker-a1-crop0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y10-c12-e1-checker-a1-crop1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-frame-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-frame-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-frame-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-frame-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-field-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-field-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-field-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-field-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-columns-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-columns-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-columns-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-columns-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-checker-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-checker-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-checker-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e0-checker-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-frame-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-frame-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-frame-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-frame-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "frame",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-field-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-field-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-field-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-field-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "field",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-columns-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-columns-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-columns-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-columns-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "columns",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-checker-a0-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-checker-a0-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-checker-a1-crop0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "mbaff-pcm-f2-y14-c8-e1-checker-a1-crop1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "topology": "checker",
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  }
+]

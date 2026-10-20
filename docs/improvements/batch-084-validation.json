@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0106"
+  ],
+  "checked_at": "2026-10-16T03:23:58.427379+00:00",
+  "before": [
+    "evidence/batch-084-crc-benchmark.json"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-084-integration.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-084-ac3-decoder.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-084-ac3-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-084-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "measurements": [
+    "evidence/batch-084-crc-benchmark.json",
+    "evidence/batch-084-final-benchmark.json"
+  ],
+  "qualification": [
+    "Compile-time256entry u16 CRC table replaces eight bit steps per byte. It adds512bytes of immutable data with no per-frame allocation; polynomial, protected range and concealment/rate policies are unchanged.",
+    "Two independent series each use9alternating-order pairs at2000full-stream reset/decode iterations for stereo tone and coupled noise. The optimized actual production decoder body is compiled standalone with minimal audio API type shims, rustc1.98.1 -O target-cpu=native; this is not an application/GPU/packaged-release benchmark.",
+    "First-series median paired time reductions are15.4421percent stereo and15.1571percent coupled; second-series14.8127percent stereo and15.8053percent coupled. First baseline/table median full reset/stream times261.868/222.770us and322.041/271.867us respectively. Raw pair times and both orders are retained.",
+    "35of36 workload pairs favor the table. One second-series coupled ratio1.215296 reversal remains in the evidence and summary; no slow pair is discarded. Both repeated medians remain clearly separated. No whole-player throughput or other-hardware improvement is claimed.",
+    "Final optimized variant verification compares full PCM bytes exactly for seven inputs: stereo/coupled/surround/mono32 and CRC1/CRC2/payload damage. Matching PCM SHA256 hashes are recorded. Initial series used length/FNV checks; final full-byte verification is authoritative.",
+    "10 AC3 decoder/6 reader units, seven integration targets spanning CRC/rate/precise seeks/container windows/truncated EOF, and player build pass. Bench input is existing authored synthetic media; no encoder/network/private input."
+  ],
+  "compatibility": "Private CRC implementation changes only. Full native PCM and concealment/refusal outcomes remain identical; no public interfaces or media timing change.",
+  "counting": "One measured AC3 integrity-check performance improvement. Workloads, benchmark pairs, output comparisons and harness infrastructure add no IDs."
+}

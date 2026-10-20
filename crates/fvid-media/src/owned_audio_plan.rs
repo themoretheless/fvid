@@ -28,6 +28,10 @@ pub(crate) fn matroska_descriptor(
     let source_codec = reader.tracks[index].codec.clone();
     drop(reader);
     let (rate, channels, mask, codec, precision) = match source_codec.as_str() {
+        "A_FLAC" => {
+            let (rate,channels)=crate::owned_matroska_flac_export::geometry(source,options)?;
+            (rate,channels,crate::owned_matroska_flac_export::channel_mask(source,options)?,"flac".into(),"float32".into())
+        }
         "A_AAC" => {
             let (rate, channels, mask) =
                 crate::owned_matroska_aac_export::geometry(source, options)?;
@@ -37,12 +41,17 @@ pub(crate) fn matroska_descriptor(
             let (rate, channels)=crate::owned_matroska_opus_export::geometry(source,options)?;
             (rate,channels,crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,"opus".into(),"float32".into())
         }
+        "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3" => {
+            let (rate, channels) = crate::owned_matroska_mp3_export::geometry(source, options)?;
+            (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+             match source_codec.as_str() { "A_MPEG/L1" => "mp1", "A_MPEG/L2" => "mp2", _=>"mp3" }.into(), "float32".into())
+        }
         "A_ALAC" => {
-            let (rate, channels) = crate::owned_matroska_alac_export::geometry(source, options)?;
+            let (rate, channels,mask) = crate::owned_matroska_alac_export::geometry_with_mask(source, options)?;
             (
                 rate,
                 channels,
-                crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+                mask,
                 "alac".into(),
                 "float32".into(),
             )
@@ -83,6 +92,7 @@ pub(crate) struct AudioDescriptor {
     adts: bool,
     mp4: bool,
     is_matroska: bool,
+    raw_encoded_audio: bool,
 }
 
 pub(crate) fn source_descriptor(source: &Path, options: &CopyOptions) -> Result<AudioDescriptor> {
@@ -90,6 +100,8 @@ pub(crate) fn source_descriptor(source: &Path, options: &CopyOptions) -> Result<
 }
 fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     transform: Option<&AudioDecodeTransform>) -> Result<AudioDescriptor> {
+    let raw_flac=crate::owned_raw_flac::recognizes(source)?;
+    let raw_encoded_audio = raw_flac || crate::owned_raw_mp3::recognizes(source)?;
     let adts = crate::owned_adts_export::recognizes(source)?;
     let mp4 = crate::owned_mp4_audio_export::recognizes(source, options)?;
     let matroska = matroska_descriptor(source, options)?;
@@ -108,6 +120,13 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     } else if let Some((index, rate, channels, mask, codec, precision)) = matroska {
         stream_index = index;
         (rate, channels, mask, codec, precision)
+    } else if raw_flac {
+        let (rate,channels,mask)=crate::owned_raw_flac::descriptor(source,options)?;
+        (rate,channels,mask,"flac".to_owned(),"float32".to_owned())
+    } else if raw_encoded_audio {
+        let (rate, channels, raw_codec) = crate::owned_raw_mp3::descriptor(source, options)?;
+        (rate, channels, crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+         raw_codec.to_owned(), "float32".to_owned())
     } else if adts {
         if !crate::owned_audio_export::simple_options(options) {
             return Err("ADTS has only stream 0".into());
@@ -159,7 +178,7 @@ fn source_descriptor_for_decode(source: &Path, options: &CopyOptions,
     };
     Ok(AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska,
+        adts, mp4, is_matroska, raw_encoded_audio,
     })
 }
 
@@ -175,18 +194,18 @@ pub fn plan_decode_audio(
     crate::owned_budget::check_rss_budget(options)?;
     let AudioDescriptor {
         rate, channels, mask, codec, precision, stream_index,
-        adts, mp4, is_matroska,
+        adts, mp4, is_matroska, raw_encoded_audio,
     } = source_descriptor_for_decode(source, options, Some(transform))?;
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
-    if output_channels != i32::from(channels) {
+    let aac_fold=codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router(source,rate,channels,options)?.is_some();
+    if output_channels != i32::from(channels) && !aac_fold {
         if !((channels <= 8 && matches!(output_channels, 1 | 2))
             || (channels <= 2 && (1..=8).contains(&output_channels)))
         {
             return Err("unsupported channel conversion".into());
         }
         if !(channels <= 2 && mask == 0)
-            && !crate::owned_pcm_channels::standard_mask(channels)
-                .is_some_and(|m| m == u64::from(mask))
+            && !crate::owned_pcm_channels::rematrix_layout_supported(channels,mask)
         {
             return Err("unsupported speaker layout".into());
         }
@@ -197,6 +216,8 @@ pub fn plan_decode_audio(
             format!("owned MP4 {codec} decoder and presentation scheduler; preserve silence, repeated edits and AAC preroll; private {precision} WAVE disk spool")
         } else if is_matroska {
             format!("owned Matroska {codec} decoder and presentation scheduler; preserve CodecDelay, signed padding and gaps; private {precision} WAVE disk spool")
+        } else if raw_encoded_audio {
+            format!("owned raw {} decoder; validated sample timeline and encoded packet limits; private float32 WAVE disk spool", codec.to_uppercase())
         } else if adts {
             "owned AAC-LC/HE-AAC decoder; negotiate implicit SBR output clock; retain ADTS priming and preroll; private float32 WAVE disk spool"
                 .into()
@@ -232,5 +253,5 @@ pub fn plan_decode_audio(
         });
     }
     steps.push(PlanStep{action:"write".into(),detail:format!("owned .wav writer; preserve {precision} precision; publish without overwriting; cleanup on failure")});
-    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),if adts {"read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()} else {"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()},if adts || mp4 || is_matroska {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
+    Ok(MediaPlan{command:"decode-audio".into(),input:source.into(),inputs:vec![source.into()],streams:vec![PlanStream{index:stream_index,media_type:"audio".into(),codec,disposition:"decode".into()}],steps,graph:None,notes:vec!["backend: owned fvid-media; no external demuxer, codec, resampler or muxer".into(),if adts {"read-only ADTS prefix negotiation checks the output clock and decoder admission without emitting progress; packet payloads and publication are revalidated during execution".into()} else {"read-only metadata preflight: packet tools, payload validity, DSP allocation admission and publication are checked during execution".into()},if adts || mp4 || is_matroska || raw_encoded_audio {"packet byte/count limits apply to selected encoded audio, including preroll; internal PCM blocks are excluded".into()} else {"packet limits apply to frame-aligned WAVE I/O blocks of at most 4096 sample frames".into()}]})
 }

@@ -1,0 +1,69 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0120"
+  ],
+  "checked_at": "2026-10-16T05:41:43.728121+00:00",
+  "before": [
+    "evidence/batch-100-reproduction-before.log",
+    "evidence/batch-100-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-100-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-100-final-acceptance.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-100-decoder.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-100-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-100-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-100-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Unsupported native sustain is handled transparently: original reproduction passes because CC64is ignored; acceptance initially remains ignored. Explicit --ignored run fails on10of12authored native/full-worker PCM comparisons versus delayed note-off controls. Worker helpers stop at generation0when fullplayback is wrong,so those pre-fixfailures are not counted as separate seek assertions.",
+    "Channel pedal state andvoice key-down state now preserve held envelopes until pedal-off. Threshold63/64/127,key-still-down/channel isolation,AllNotesOff,AllSoundOff,ResetControllers,same-tick release,non-resurrection,repeatedon andheld-pedal EOF are covered. EOF playback lifts sustain before releasing keys while retaining pitch/gain.",
+    "Acceptance is enabled; the former ignored-control reproduction now requires sustain PCM to differ from its no-pedal counterpart. Final13pairs add a fractional239tick EOF inside a decode window. All match independent explicit delayed note-off PCM/timestamps.39actual worker target checks at100ms,200ms andcompleteEOF exercise fullplay,rewind andseek after ordinary playback succeeds.",
+    "17decoder/5reader tests,11integration tests,pure fixture reproduction and current player build pass. A new unit holds/releases128distinct keys under sustain while preserving the existing32voice budget,andreset clears pedal state. The native EOF packet oracle explicitly verifies32pedal-off/note-off records.",
+    "No encoder/network/private media,physical output,full GeneralMIDI/Sostenuto/instrument conformance or performance claim. Existing native waveform/retrigger policy remains; this ID qualifies damper64and its interactions with supported commands only."
+  ],
+  "sources": [
+    {
+      "url": "https://midi.org/midi-1-0-control-change-messages",
+      "section": "Control64",
+      "rule": "Damper threshold0..63off and64..127on."
+    },
+    {
+      "url": "https://midi.org/summary-of-midi-1-0-messages",
+      "section": "Channel mode120",
+      "rule": "AllSoundOff immediately silences voices."
+    },
+    {
+      "url": "https://cdn.roland.com/assets/media/pdf/HP-101_MI.pdf",
+      "section": "MIDI implementation,page2,ResetAllControllers andAllNotesOff",
+      "rule": "Reset releases Hold1; Hold1has priority over AllNotesOff until pedal-off in the primary device implementation."
+    }
+  ],
+  "compatibility": "Previously ignored CC64now affects native PCM. AllNotesOff honors active sustain; AllSoundOff remains immediate. Playback-only EOF packets additionally turn sustain off to finish the existing release tail. Public signatures,timebase andparsed original MIDI events remain unchanged.",
+  "counting": "One useful native sustain capability. Pedal thresholds,channel/voice interactions,13pairs,39targets andEOF integration add noIDs."
+}

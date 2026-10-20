@@ -1,0 +1,11 @@
+{
+  "source": "https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c",
+  "retrieved_source_sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "scope": "Primary player implementation; semantic inspection only,no code copied into fvid.",
+  "observations": [
+    "getNewNote updates selected instrNum when the instrument column is nonzero,but a no-note row only calls resetVolumes and triggerInstrument.",
+    "triggerNote is the operation that selects instrPtr and smpPtr from instrNum and updates sample default oldVol/oldPan.",
+    "resetVolumes restores oldVol/oldPan of the active sample; it does not select the newly named instrument sample.",
+    "A note-only trigger uses the selected instrument but does not reset channel volume/pan unless the row also names an instrument. Unset initial selection uses the silent placeholder."
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "provenance": "Authored three VP9 keyframes and mono CELT silence, wrapped with Python standard-library zlib. No external encoder or private media.",
+  "cases": [
+    {
+      "file": "plain.mkv",
+      "control": "control.mkv"
+    },
+    {
+      "file": "empty-scope.mkv",
+      "control": "control.mkv"
+    },
+    {
+      "file": "implicit-algorithm.mkv",
+      "control": "control.mkv"
+    },
+    {
+      "file": "implicit-encoding.mkv",
+      "control": "control.mkv"
+    },
+    {
+      "file": "late-tracks.mkv",
+      "control": "control.mkv"
+    },
+    {
+      "file": "laced.mkv",
+      "control": "laced-control.mkv"
+    },
+    {
+      "file": "laced-late.mkv",
+      "control": "laced-control.mkv"
+    },
+    {
+      "file": "opus-zlib.mkv",
+      "control": "opus-control.mkv"
+    },
+    {
+      "file": "identical-zlib.mkv",
+      "control": "identical-control.mkv"
+    },
+    {
+      "file": "stored-deflate.mkv",
+      "control": "control.mkv"
+    },
+    {
+      "file": "fixed-deflate.mkv",
+      "control": "control.mkv"
+    }
+  ],
+  "invalid": {
+    "invalid-checksum.mkv": {
+      "error": "invalid or truncated Matroska zlib stream",
+      "packet_limit": 33554432
+    },
+    "invalid-truncated.mkv": {
+      "error": "invalid or truncated Matroska zlib stream",
+      "packet_limit": 33554432
+    },
+    "invalid-header.mkv": {
+      "error": "invalid or truncated Matroska zlib stream",
+      "packet_limit": 33554432
+    },
+    "invalid-trailing.mkv": {
+      "error": "trailing data after Matroska zlib stream",
+      "packet_limit": 33554432
+    },
+    "invalid-empty.mkv": {
+      "error": "empty Matroska zlib frame",
+      "packet_limit": 33554432
+    },
+    "invalid-output-budget.mkv": {
+      "error": "WebM packet exceeds budget",
+      "packet_limit": 16384
+    }
+  },
+  "files": {
+    "control.mkv": "da16b35b8e8a0944116129678973b7b30c1449e084937a415baaf3d5d28ec5d4",
+    "laced-control.mkv": "af0cf8f9054749bf1ae145dcf614034bf82a0d2ec061241d9c45eb65496cfe91",
+    "opus-control.mkv": "bbe9c4f151ff022d70f97d4c60f463b8a42d5cbe95a9004822ee2d2154614ed0",
+    "identical-control.mkv": "5dc491f67a8360bf1f9075ab0213b391284417820e7c0c93cc47c953d35aee06",
+    "identical-zlib.mkv": "f967560d503ef76fc670e8ea99ce7ce66cf14a6c4c4689b8257ebde7126acd4f",
+    "plain.mkv": "324a43a3a2df648b4833cde342b1ea9be752e15906fc5200c31980a45155e297",
+    "empty-scope.mkv": "1eae11bebcac636a297b30d04becda839182e600e6ef9f945f69cd639f50743d",
+    "implicit-algorithm.mkv": "cfa3ad283dc75ba1b8768336a16003fb6f997bdb57f5623e05d943b3727b3516",
+    "implicit-encoding.mkv": "deb7958ff8ad262b8c4f56485ecc7a578e04529586f7cde583bb5110827bed9d",
+    "late-tracks.mkv": "a5f09581b1857c4b9bde6a0c31faa9572163d12212b9ca1aab21d065225c91f1",
+    "laced.mkv": "593619d3e03411f3e8fe3b16e39a50caedccf6699583fd470f330d8a9f835dc4",
+    "laced-late.mkv": "b72c48c53c5e79b42bf57db355e35ccc7de2041436d1f630e1be3ab4292457cb",
+    "opus-zlib.mkv": "31a98dee2ec93aa716c5bb349677458c200cba75255c3a227793eb6713a4487c",
+    "stored-deflate.mkv": "7f788d6a882e55c21939e42059fe17ffb8db1d97652b22bf8a0d0c825780f009",
+    "fixed-deflate.mkv": "f13b46d0accfed198d6cf0e539335b093cb181f913cf2a72571b0d88e1a15e23",
+    "invalid-checksum.mkv": "d32911ae8a582a794ff8cd67c84068febb042757be3c55a10297cbf90e935c70",
+    "invalid-truncated.mkv": "ad7897bf212dc35c9537441987724026aca60b862669b388b69ffe876afb5977",
+    "invalid-header.mkv": "8717788597f311be48add8893e4cba57b0850c877bcbf4bcbdda768950919ad9",
+    "invalid-trailing.mkv": "9a86a5676dfdec8f5f77cc6ade7709961ca7e2b54d34ce5cf7825bb115505fd9",
+    "invalid-empty.mkv": "c1d3c13e64ff74e67af1a18adeb46b1e11edb4ec8dc1c3775638519055a77b8e",
+    "invalid-output-budget.mkv": "8bf147f79b5c9c2caf3caa9c7ef86b256ac14c549b7cfa746522d57fa0850ee1",
+    "frame.packet": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "frame.zlib": "28412373bbf02d45528027c5a4f5d0111350890b304cc9ac58014644674744a0"
+  }
+}

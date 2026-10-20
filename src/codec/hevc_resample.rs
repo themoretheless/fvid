@@ -49,6 +49,7 @@ pub enum MotionSource<'a> {
 }
 #[derive(Clone, Debug)]
 pub struct Resampling {
+    integer_depth: bool,
     current: [[usize; 2]; 3],
     reference: [[usize; 2]; 3],
     current_depth: [u8; 2],
@@ -166,6 +167,7 @@ impl Resampling {
             && geometry.phases == [0; 4];
         Ok(Self {
             identity,
+            integer_depth: current.depth_layer && reference.depth_layer,
             current: dimensions(current, cs),
             reference: dimensions(reference, rs),
             current_depth: current.depth,
@@ -187,6 +189,7 @@ impl Resampling {
         budget: usize,
     ) -> Result<Vec<super::hevc_motion::Motion>> {
         MotionResampling {
+            integer_depth: self.integer_depth,
             current: self.current[0],
             reference: self.reference[0],
             scales: self.scales[0],
@@ -311,6 +314,7 @@ impl Resampling {
 /// Motion-only H.8.1.4.3 processing, independent of chroma sample availability.
 #[derive(Clone, Debug)]
 pub struct MotionResampling {
+    integer_depth: bool,
     current: [usize; 2],
     reference: [usize; 2],
     scales: [i64; 2],
@@ -348,6 +352,7 @@ impl MotionResampling {
                 / geometry.scaled_size[a]) as i64
         });
         Ok(Self {
+            integer_depth: current.depth_layer && reference.depth_layer,
             current: current.dimensions.map(|v| v as usize),
             reference: reference.dimensions.map(|v| v as usize),
             scales,
@@ -372,6 +377,15 @@ impl MotionResampling {
         };
         if grid.is_some_and(|input| ref_columns.checked_mul(ref_rows) != Some(input.len())) {
             return Err(invalid("HEVC resampling motion grid mismatch"));
+        }
+        if self.integer_depth {
+            if let Some(input) = grid {
+                // Validate the complete source before allocation/publication,
+                // including vectors not sampled by the destination geometry.
+                for motion in input {
+                    super::hevc_motion::texture::integer_motion(*motion)?;
+                }
+            }
         }
         let count = columns
             .checked_mul(rows)
@@ -411,10 +425,13 @@ impl MotionResampling {
                                 + (self.geometry.reference_size[a] >> 1))
                                 / self.geometry.reference_size[a])
                                 .min(4095) as i64;
-                            let product = scale * i64::from(vector.mv[a]);
+                            // Stored depth motion is quarter-published, but
+                            // normative resampling rounds/clips integer units.
+                            let units = if self.integer_depth {vector.mv[a] / 4} else {vector.mv[a]};
+                            let product = i128::from(scale) * i128::from(units);
                             vector.mv[a] = (product.signum() * ((product.abs() + 127) >> 8))
                                 .clamp(-32768, 32767)
-                                as i16;
+                                as i64 * if self.integer_depth {4} else {1};
                         }
                     }
                 }
@@ -422,5 +439,59 @@ impl MotionResampling {
             }
         }
         Ok(output)
+    }
+}
+
+#[cfg(test)]
+mod depth_motion_tests {
+    use super::*;
+    use crate::codec::hevc_motion::Vector;
+    fn parameters(depth:bool,size:[u32;2])->Sps {
+        let path=std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/hevc-layered-sps-active-base.sps");
+        let mut sps=Sps::parse(&std::fs::read(path).unwrap(),1<<20).unwrap();
+        sps.depth_layer=depth;sps.chroma_format=0;sps.separate_colour_plane=false;
+        sps.dimensions=size;sps.crop=[0;4];sps
+    }
+    fn location()->ReferenceLocation {
+        ReferenceLocation{layer_id:3,scaled_offsets:None,region_offsets:None,phases:None}
+    }
+    #[test]
+    fn native_depth_rounding_preserves_reference_indices_and_texture_fractional_domain() {
+        for depth in [false,true] {
+            let reference=parameters(depth,[32,32]);let current=parameters(depth,[48,48]);
+            let grid=vec![[Some(Vector{reference:2,mv:[4,-4]}),Some(Vector{reference:1,mv:[-8,8]})];4];
+            let snapshot=grid.clone();
+            let output=MotionResampling::new(&current,&reference,&location()).unwrap()
+                .motion(MotionSource::Grid(&grid),1<<20).unwrap();
+            let mut active=0;
+            for motion in &output {
+                if let Some(v)=motion[0] {
+                    active+=1;assert_eq!(v.reference,2);
+                    assert_eq!(v.mv,if depth{[4,-4]}else{[6,-6]});
+                    assert_eq!(motion[1],Some(Vector{reference:1,mv:[-12,12]}));
+                }
+            }
+            assert!(active>0);assert_eq!(grid,snapshot);
+            assert_eq!(Resampling::new(&current,&reference,&location()).unwrap()
+                .motion(MotionSource::Grid(&grid),1<<20).unwrap(),output);
+        }
+    }
+    #[test]
+    fn depth_preflight_rejects_fractional_and_oversized_motion_even_for_identity() {
+        let depth=parameters(true,[32,32]);
+        let operation=MotionResampling::new(&depth,&depth,&location()).unwrap();
+        for mv in [[1,0],[131072,0],[-131076,0]] {
+            let mut grid=vec![[None;2];4];grid[3][1]=Some(Vector{reference:0,mv});
+            assert_eq!(operation.motion(MotionSource::Grid(&grid),1<<20).unwrap_err().to_string(),
+                "HEVC published depth motion is fractional or outside integer range");
+            assert!(Resampling::new(&depth,&depth,&location()).unwrap()
+                .motion(MotionSource::Grid(&grid),1<<20).is_err());
+        }
+        let texture=parameters(false,[32,32]);
+        let fractional=vec![[Some(Vector{reference:0,mv:[1,0]}),None];4];
+        assert_eq!(MotionResampling::new(&texture,&texture,&location()).unwrap()
+            .motion(MotionSource::Grid(&fractional),1<<20).unwrap(),fractional);
+        assert!(operation.motion(MotionSource::Intra,1<<20).unwrap().iter().all(|v|*v==[None;2]));
     }
 }

@@ -1,0 +1,192 @@
+{
+  "provenance": "Eight authored literal XM opcodes F03/F1F/F20/FFA,B01,D01 plus C40/G40default-volume no-op guards. Independent controls compile control flow/tempo into header/row order with no effects. C/Gguards do not claim arbitrary volume-effect support. Constant synthetic loop and short native VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "tempo-3",
+      "file": "tempo-3.xm",
+      "control": "tempo-3-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "limited_default_guard": false
+    },
+    {
+      "name": "tempo-31",
+      "file": "tempo-31.xm",
+      "control": "tempo-31-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "limited_default_guard": false
+    },
+    {
+      "name": "tempo-32",
+      "file": "tempo-32.xm",
+      "control": "tempo-32-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "limited_default_guard": false
+    },
+    {
+      "name": "tempo-250",
+      "file": "tempo-250.xm",
+      "control": "tempo-250-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "limited_default_guard": false
+    },
+    {
+      "name": "jump",
+      "file": "jump.xm",
+      "control": "jump-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "limited_default_guard": false
+    },
+    {
+      "name": "break",
+      "file": "break.xm",
+      "control": "break-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ]
+      ],
+      "limited_default_guard": false
+    },
+    {
+      "name": "default-channel-volume",
+      "file": "default-channel-volume.xm",
+      "control": "default-channel-volume-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "limited_default_guard": true
+    },
+    {
+      "name": "default-global-volume",
+      "file": "default-global-volume.xm",
+      "control": "default-global-volume-expanded.xm",
+      "paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "limited_default_guard": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "tempo-3.xm": "fb1e34826f4c7016aeb5aa7ee634e3066150cb0036755ed8ff5ae938d737ea28",
+    "tempo-3-expanded.xm": "5fd16059b1755ab2f33324eea7c6ad4a9d56e01b31485afcdcb50d2bf907d99f",
+    "tempo-31.xm": "8cd1243cbb34ceeaa1f3d0e282dc8bcad184294a6fc76b097ae8cb8edd82bc9d",
+    "tempo-31-expanded.xm": "00edb1fe1b3c28baf06018b930124e5198aad19cbd000123a19043aff1a37c1d",
+    "tempo-32.xm": "3bf3c753c9b4c99264db862991e3067ab52d3c5971e3acf118e672fdd32f3595",
+    "tempo-32-expanded.xm": "a5221a78390506b5076ab8a872ef8f9db408377fdfaf9cc88864a11c067b911a",
+    "tempo-250.xm": "ed5336a8773ee1324809102959c9865be1f338ac4191416f070797cb5a6fee8c",
+    "tempo-250-expanded.xm": "c3878844e7d8eca6ddd1d896cd8f8931e290fe0fcfd68089fe2b196e3f7320d3",
+    "jump.xm": "c67756c9ee96efec93c21423de9bb4c0155a63a72ab35844b659d091caac0516",
+    "jump-expanded.xm": "f3d4338ed0aa0bc63e0700e4850968b57edb917ca4ef2f11a31c403794296574",
+    "break.xm": "b4c72bac4d744cba9633608a7c4cb95896ed78ec5394a88c4ce15c91509f9494",
+    "break-expanded.xm": "f3d4338ed0aa0bc63e0700e4850968b57edb917ca4ef2f11a31c403794296574",
+    "default-channel-volume.xm": "8f9e77ce0ecdcce720986f49f145b9662b5f4eecf85589278d7570418981d14b",
+    "default-channel-volume-expanded.xm": "25f79d89aa00f428de8d3e962424ecf3921f6d5dcbe6810e7ca7e5dbcd356351",
+    "default-global-volume.xm": "070a83e4ae0ab83b509241f782547e25f3e980ee0bbb1d8656d327f60c3fe7be",
+    "default-global-volume-expanded.xm": "25f79d89aa00f428de8d3e962424ecf3921f6d5dcbe6810e7ca7e5dbcd356351"
+  }
+}

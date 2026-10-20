@@ -1,0 +1,190 @@
+{
+  "provenance": "Ten authored pan-command cases compare each row with independent continuous static-pan instrument references,triggered on the first note. Literal center/static row selections cover changes,persistence,return-center,volume andchannel isolation. No instrument-only pan assumption. Identical signed16ramp PCM,rate,volume andloop;authored VP9/PCM companion. No encoder,network orprivate media.",
+  "cases": [
+    {
+      "name": "pan-0",
+      "file": "pan-0.xm",
+      "control": "pan-0-instrument.xm",
+      "center_control": "pan-0-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "pan-0-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-64",
+      "file": "pan-64.xm",
+      "control": "pan-64-instrument.xm",
+      "center_control": "pan-64-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "pan-64-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-128",
+      "file": "pan-128.xm",
+      "control": "pan-128-instrument.xm",
+      "center_control": "pan-128-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "pan-128-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-192",
+      "file": "pan-192.xm",
+      "control": "pan-192-instrument.xm",
+      "center_control": "pan-192-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "pan-192-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-255",
+      "file": "pan-255.xm",
+      "control": "pan-255-instrument.xm",
+      "center_control": "pan-255-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "pan-255-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "note-on",
+      "file": "note-on.xm",
+      "control": "note-on-instrument.xm",
+      "center_control": "note-on-center.xm",
+      "reference_rows": [
+        "instrument",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "note-on-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-column",
+      "file": "volume-column.xm",
+      "control": "volume-column-instrument.xm",
+      "center_control": "volume-column-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "volume-column-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "persist",
+      "file": "persist.xm",
+      "control": "persist-instrument.xm",
+      "center_control": "persist-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "persist-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "return-center",
+      "file": "return-center.xm",
+      "control": "return-center-instrument.xm",
+      "center_control": "return-center-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "center",
+        "center",
+        "center"
+      ],
+      "without": "return-center-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "channel-isolation",
+      "file": "channel-isolation.xm",
+      "control": "channel-isolation-instrument.xm",
+      "center_control": "channel-isolation-center.xm",
+      "reference_rows": [
+        "center",
+        "instrument",
+        "instrument",
+        "instrument"
+      ],
+      "without": "channel-isolation-without.xm",
+      "seek": 1
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "pan-0.xm": "3bb5a1424c3f46207fdad9c2b01ab5008a0e8646d899903d4a232cfd9ba565b1",
+    "pan-0-instrument.xm": "95ce5d4797b4244c0da726403479503d06dccfdd22dd21e31acfca9aa6072d84",
+    "pan-0-center.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "pan-0-without.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "pan-64.xm": "e7af42b4b6f2c80d89dc47405cb6f4debdcab77559bc960c808d9e6dba831485",
+    "pan-64-instrument.xm": "d5235bf9dc08fa9d94914f7407d24a2f29bbd8aa04e1d1319db1a2a799908465",
+    "pan-64-center.xm": "4c79c7b9b999c227c52be42c370218c11daec75ad947647b625545020910ea15",
+    "pan-64-without.xm": "4c79c7b9b999c227c52be42c370218c11daec75ad947647b625545020910ea15",
+    "pan-128.xm": "bad9ffa8c319e28426ffb48beb7415287ce2e0bfe58b9531eccc95818bce2a09",
+    "pan-128-instrument.xm": "d1eea8a80b95987e4eaf93a1b2560a325f96d23b4b291a8c8e89072f285f9808",
+    "pan-128-center.xm": "5c5b5146f0f403f7eb31ed7e94db46dcc0d695d4bf2ef54ee81a27f7874f6a42",
+    "pan-128-without.xm": "5c5b5146f0f403f7eb31ed7e94db46dcc0d695d4bf2ef54ee81a27f7874f6a42",
+    "pan-192.xm": "108fcb49cef59929df821be5b9935f6f1536584dfbce6a480cf8bc5fda0ade02",
+    "pan-192-instrument.xm": "fa915b2cac8262250b9fe32488a1938e2d1be8c1d4506b1cd5fabc3c161503e0",
+    "pan-192-center.xm": "08ed2e5012f1f98a7c8f45c806214b4b7e90fb811f48f7367b802aa810fc1080",
+    "pan-192-without.xm": "08ed2e5012f1f98a7c8f45c806214b4b7e90fb811f48f7367b802aa810fc1080",
+    "pan-255.xm": "d947a011ff383c0e08e0f7f09643aeed5d420dce0ccc4395d7c8434e4633f264",
+    "pan-255-instrument.xm": "a11ddfe2c658add1c366a0755612d11dcc62870d879529d6613f3ef28486647b",
+    "pan-255-center.xm": "1b7c33922087c8373c5be2a147f1e24b832db4698611ca696d2ed38a8efdc30e",
+    "pan-255-without.xm": "1b7c33922087c8373c5be2a147f1e24b832db4698611ca696d2ed38a8efdc30e",
+    "note-on.xm": "ead2e1e14b2fe4277701dcff27ea3be17d82a0091e72bde48d3d15b68e98fb07",
+    "note-on-instrument.xm": "95ce5d4797b4244c0da726403479503d06dccfdd22dd21e31acfca9aa6072d84",
+    "note-on-center.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "note-on-without.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "volume-column.xm": "8d758724bcb7e4570ba959d88ba915760ec1473d71cca826e6f6e8648842b997",
+    "volume-column-instrument.xm": "ae52aab3294053bbfe8d73e876a94d6a0ec0b9c93cc795bb478605b2fbfef432",
+    "volume-column-center.xm": "040f43e30b2fb48758d8dd5d500325e764348729fd286a0a62fc30f07fcea6a2",
+    "volume-column-without.xm": "040f43e30b2fb48758d8dd5d500325e764348729fd286a0a62fc30f07fcea6a2",
+    "persist.xm": "e26ac675944b37bf59fa925a40b3e46c2a5c9cc6c30d5bfc655f030678b27b39",
+    "persist-instrument.xm": "7f0c22a89546bf0636fe717935016446daab9db124a696d3f764ee4b32f289d8",
+    "persist-center.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "persist-without.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "return-center.xm": "ba06e5286b28f22ef5ca25547d6a82e4bf27c10857376b9189b2d12beb1d1abf",
+    "return-center-instrument.xm": "7f0c22a89546bf0636fe717935016446daab9db124a696d3f764ee4b32f289d8",
+    "return-center-center.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "return-center-without.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "channel-isolation.xm": "cd5c6c79ee515b5492268ba4a8446e5b74c4913e26b3edbbb7ba1a19dc557637",
+    "channel-isolation-instrument.xm": "ecd195b6a7f3bfb615fb6b80b07828bd9d08ab22e59563d811c82d4251a4722b",
+    "channel-isolation-center.xm": "8775da10cc1df7380854db3b8a24cdeca55857d7feafc217ccea1273db1dc6eb",
+    "channel-isolation-without.xm": "8775da10cc1df7380854db3b8a24cdeca55857d7feafc217ccea1273db1dc6eb"
+  }
+}

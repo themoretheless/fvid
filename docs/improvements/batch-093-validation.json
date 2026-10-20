@@ -1,0 +1,67 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0113"
+  ],
+  "checked_at": "2026-10-16T04:42:33.618817+00:00",
+  "before": [
+    "evidence/batch-093-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-093-final-integration.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-093-midi-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-093-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-093-final-xm-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-093-midi-decoder.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-093-xm-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-093-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-093-grid-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-093-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Two specific native held-to-EOF PCM mismatches and two actual-worker fullplayback mismatches reproduce before fix. Seek-labeled helper attempts fail during generation0fullplayback and are not claimed as separate pre-fixseek assertions. Independent authored explicit note-off controls play correctly andreach exact silence. After correction the actual release-seek phases run andpass.",
+    "MIDI playback appends control123on16channels at the actual score-end microsecond offset, after existing events. XM playback adds keyoff cells in its existing tail row. Both use shared packet helpers for ordinary playback and decoder history reconstruction; parsed original events/module rows and standard files remain untouched.",
+    "Actual held-source PCM/timestamps match explicit controls through fullplay,rewind,EOF and release-window seek. The MIDI control has identical100ms score end; the XM control has an explicit extra keyoff row at240ms, whose first three windows supply the independent tail oracle. Control sources also play normally to their own EOF.",
+    "16MIDI/11XM decoder and5SMF/6XM reader tests,14related integration tests,fixture reproduction and current player build pass. The111grouped hold oracle now applies the independent playback tail release as a separate final row; complete hold/tail PCM still matches every byte.",
+    "Initial integration compile referenced a private score-end field; final code derives it from the existing public duration and final-integration supersedes that compile error. Existing SMF/XM reader packet oracles now explicitly check the injected release records. No new IDs for those repairs.",
+    "No encoder/network/private media,physical output,reference-synth quality or performance claim. Reserved tail length and metadata remain unchanged."
+  ],
+  "compatibility": "Playback packet contents now include native end-of-score release instructions. Canonical parsed event/row data and public signatures are unchanged; already explicitly released notes retain their PCM.",
+  "counting": "One missing end-of-score release policy across native timeline synthesis. Two formats and all control/history variants add noIDs."
+}

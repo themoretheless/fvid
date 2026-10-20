@@ -287,6 +287,7 @@ fn into_pixels(
 type CachePackets = Arc<std::sync::RwLock<Arc<[(u64, u64, Duration, Duration)]>>>;
 
 pub struct Playback {
+    seek_cache_status: Option<crate::playback_webm::SeekCacheStatus>,
     cache_packets: CachePackets,
     commands: SyncSender<Command>,
     events: Receiver<Event>,
@@ -326,6 +327,7 @@ impl Playback {
         grade: Option<Grade>,
         first: Option<RawFrame>,
     ) -> Self {
+        let seek_cache_status = reader.seek_cache_status();
         let cache_packets = Arc::new(std::sync::RwLock::new(Arc::from(reader.cache_packets())));
         let worker_packets = cache_packets.clone();
         let budget = reader.rgb_budget();
@@ -402,6 +404,7 @@ impl Playback {
             })
             .expect("spawn converter thread");
         Self {
+            seek_cache_status,
             cache_packets,
             commands,
             events,
@@ -411,6 +414,12 @@ impl Playback {
             decoder: Some(decoder),
             converter: Some(converter),
         }
+    }
+    pub fn prepared_frame_ranges(&self, total: Duration) -> Vec<[f32; 2]> {
+        self.seek_cache_status.as_ref().map_or_else(Vec::new, |status| status.ranges(total))
+    }
+    pub fn preparing_seek(&self) -> bool {
+        self.seek_cache_status.as_ref().is_some_and(|status| status.is_preparing())
     }
     pub fn cache_packets_if_changed(
         &self,

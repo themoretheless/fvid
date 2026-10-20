@@ -1,0 +1,8 @@
+{
+  "provenance": "Authored60ms VP9 and three20ms PCM packets. Backend flush failure is injected only after full native decoding succeeds. No encoder/private media/network.",
+  "sha256": {
+    "navigation.mkv": "f836a3b388dd73e5523842aa04810ccbca1ec089406d673536c09c6b1a33c36a",
+    "expected-packet.f32le": "25ba3c1471eb64a1ab8ac1d91cad8205e3abbef1cd7bc700249520816f2f6d76",
+    "expected-before.f32le": "9cc1df2c95816e96424cdab2d6afd8cfb8e0826bd3f25209395684c24560a07e"
+  }
+}

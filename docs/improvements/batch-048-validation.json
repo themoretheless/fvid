@@ -1,0 +1,67 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0072"
+  ],
+  "checked_at": "2026-10-15T22:31:15.916164+00:00",
+  "before": [
+    "evidence/batch-048-preroll-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-048-webm-audio.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-048-audio-thread.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-048-integration-final.log",
+      "kind": "rust",
+      "passed": 40
+    },
+    {
+      "log": "evidence/batch-048-cpal.log",
+      "kind": "rust",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-048-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-048-preroll-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-048-delay-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-048-padding-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-048-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twelve authored short VP9/PCM cases verify complete untrimmed samples and exact sourcePTS=originalPTS-CodecDelay. Six fail before: rounded latency/sample origins place a retained sample1ns below zero, ceil discards its nonpadding neighbor. Strict off-grid negatives and positive origins are separate controls.",
+    "Zero-origin clipping now uses the nearest count only when its sample time is no earlier than-1ns; that tiny residue clamps to0. Genuine off-grid preroll still ceils. Exact CodecDelay read/index/seek coordinates are unchanged.",
+    "Actual workers verify data/PTS through playback, rewind and seek0. Independent owned decoding agrees for zero-origin sample-count cases; full-preroll root EOF is acceptance while owned no-samples export remains a refusal.",
+    "Additional synthetic Opus/Vorbis negative-origin acceptance restores the same two-frame trim. Their direct native controls remain finite and frame-exact; Opus is compared to its decoded control rather than incorrectly assuming DTX is bit-zero. These are codec variants of the scalar failure, not additional IDs or conformance claims.",
+    "Positive1ns seek retains strict ceil for Opus/Vorbis. CodecDelay overflow reports its specific clock error with no backend PCM. The earlier54 one-ns oracle now preserves its sample; encoded literal timestamp tests remain exact.",
+    "Unit/build checks apply to final library source; the final integration rerun corrects only an overstrict DTX-zero test oracle. No public signatures, performance or physical-DAC claim."
+  ],
+  "compatibility": "PCM presentation at a quantized-1ns zero boundary is now retained at0 instead of losing one whole sample. Encoded timestamps remain literal. Off-grid/user seek boundaries keep their prior strict behavior.",
+  "counting": "One zero-origin sample-grid clipping improvement; metadata fields, rates, codecs, controls and oracle corrections add no IDs."
+}

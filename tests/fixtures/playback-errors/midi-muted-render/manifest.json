@@ -1,0 +1,108 @@
+{
+  "provenance": "Ten authored MIDI mute/render CPUprofiles. Volume/expression zero,1/8/32voices,phase continuity after200msunmute,release-before-unmute,fractional mid-window mute/unmute andpartialchannel mute compare independent continuous/unmuted-voice controls. Existing behavior baseline;notnewmediafailure claims. NativeVP9/PCMcompanion,no encoder/network/private media.",
+  "cases": [
+    {
+      "file": "volume-muted-1.mid",
+      "control": "volume-muted-1-continuous.mid",
+      "mode": "silent",
+      "resume_packet": null,
+      "voices": 1,
+      "edge_frame": null
+    },
+    {
+      "file": "volume-muted-8.mid",
+      "control": "volume-muted-8-continuous.mid",
+      "mode": "silent",
+      "resume_packet": null,
+      "voices": 8,
+      "edge_frame": null
+    },
+    {
+      "file": "volume-muted-32.mid",
+      "control": "volume-muted-32-continuous.mid",
+      "mode": "silent",
+      "resume_packet": null,
+      "voices": 32,
+      "edge_frame": null
+    },
+    {
+      "file": "volume-unmute-1.mid",
+      "control": "volume-unmute-1-continuous.mid",
+      "mode": "resume",
+      "resume_packet": 2,
+      "voices": 1,
+      "edge_frame": null
+    },
+    {
+      "file": "volume-unmute-8.mid",
+      "control": "volume-unmute-8-continuous.mid",
+      "mode": "resume",
+      "resume_packet": 2,
+      "voices": 8,
+      "edge_frame": null
+    },
+    {
+      "file": "volume-unmute-32.mid",
+      "control": "volume-unmute-32-continuous.mid",
+      "mode": "resume",
+      "resume_packet": 2,
+      "voices": 32,
+      "edge_frame": null
+    },
+    {
+      "file": "expression-unmute-8.mid",
+      "control": "expression-unmute-8-continuous.mid",
+      "mode": "resume",
+      "resume_packet": 2,
+      "voices": 8,
+      "edge_frame": null
+    },
+    {
+      "file": "released-before-unmute-8.mid",
+      "control": "released-before-unmute-8-continuous.mid",
+      "mode": "silent",
+      "resume_packet": null,
+      "voices": 8,
+      "edge_frame": null
+    },
+    {
+      "file": "partial-muted-32.mid",
+      "control": "partial-muted-32-continuous.mid",
+      "mode": "reference",
+      "resume_packet": null,
+      "voices": 32,
+      "edge_frame": null
+    },
+    {
+      "file": "fractional-unmute-8.mid",
+      "control": "fractional-unmute-8-continuous.mid",
+      "mode": "fractional",
+      "resume_packet": 2,
+      "voices": 8,
+      "edge_frame": 46
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "volume-muted-1.mid": "5832d75a9156ce882eaf57957e287050cd5d19f5cff08f23eb04f9a4eda9daef",
+    "volume-muted-1-continuous.mid": "8b8eb6aa2fa239b8ed6a11d74935a522edec97cf5928bdcd577426c715109646",
+    "volume-muted-8.mid": "4ec29859333647898562c6039f0e6937400f321ceeb9e29d8a2c793683d37669",
+    "volume-muted-8-continuous.mid": "438ba8f474ae3d4288bfaec6dd6ae233019db06447a70ac66b8ed22f8cf8a996",
+    "volume-muted-32.mid": "c2cd848833f3a5af78c0d7ff962c549c3a018ff20e46daf6f92ccc2550c9a0ef",
+    "volume-muted-32-continuous.mid": "90c13b95119cf50eb4cb3351c214b76713d139f60884769fd8536132577399a1",
+    "volume-unmute-1.mid": "aaf1414c9f5e11c5ed2297625952dfeef51b29b5753bff2a9c1408fc9d0c738e",
+    "volume-unmute-1-continuous.mid": "8b8eb6aa2fa239b8ed6a11d74935a522edec97cf5928bdcd577426c715109646",
+    "volume-unmute-8.mid": "6268081f8aa093dbc7fb001512f6f131db5f9156290911e7b6d954947ba8636a",
+    "volume-unmute-8-continuous.mid": "438ba8f474ae3d4288bfaec6dd6ae233019db06447a70ac66b8ed22f8cf8a996",
+    "volume-unmute-32.mid": "31bac6ecd585ae4ee1e8e7ed25b3b201727e95ab154f25108ad95114a9e89ae0",
+    "volume-unmute-32-continuous.mid": "90c13b95119cf50eb4cb3351c214b76713d139f60884769fd8536132577399a1",
+    "expression-unmute-8.mid": "4c922bf03316270d51d075e2f0dfee75cc15ca82ada0f70164ac7af5d42b7ca9",
+    "expression-unmute-8-continuous.mid": "438ba8f474ae3d4288bfaec6dd6ae233019db06447a70ac66b8ed22f8cf8a996",
+    "released-before-unmute-8.mid": "202c1159c9e70de2e3a6b3efbd29faa95b8d7acfe7038bd89617c5f480abd20f",
+    "released-before-unmute-8-continuous.mid": "9f3b77b779e748e6066aecb84dc01dde648ce2e8ed3b39f675cde96937d786d3",
+    "partial-muted-32.mid": "68c95b5dfd0edbf44d415265d0f8c76d0102fe45c0efd772f7830431aa9db533",
+    "partial-muted-32-continuous.mid": "b29d81e3e898860cb9f8ce4269ea0897c3408f53a4dc09f48c4683a9c4ae0d9c",
+    "fractional-unmute-8.mid": "4ee7c8ae47d76f61ee4b5297200400fbdb7b2a8c6aa19a450dae345586ace97c",
+    "fractional-unmute-8-continuous.mid": "438ba8f474ae3d4288bfaec6dd6ae233019db06447a70ac66b8ed22f8cf8a996"
+  }
+}

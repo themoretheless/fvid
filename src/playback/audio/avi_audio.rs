@@ -44,12 +44,13 @@ const ADPCM_IMA_WAV: u16 = 0x0011;
 /// uncompressed integers and floats and the two G.711 tables, all of which the Wave
 /// reader hands to an arm that already exists. A stream of one of these is missing
 /// this reader's record framing rather than a decoder, and says so.
-const FRAMED_ELSEWHERE: [u16; 4] = [0x0001, 0x0003, 0x0006, 0x0007];
+const FRAMED_ELSEWHERE: [u16; 2] = [0x0001, 0x0003];
 
 /// The dispatch name of a coding this reader frames, or `None` for one it leaves to
 /// another file's reader.
 fn coding(tag: u16) -> Option<&'static str> {
     match tag {
+        6=>Some("pcm_alaw"),7=>Some("pcm_mulaw"),
         ADPCM_MS => Some("adpcm_ms"),
         ADPCM_IMA_WAV => Some("adpcm_ima_wav"),
         _ => None,
@@ -89,6 +90,7 @@ struct Program {
     stream: usize,
     /// How many records the run holds, which is what the header's `dwLength` states.
     records: usize,
+    samples: Option<Vec<(u64,u64)>>,
 }
 
 /// An AVI file's playable audio, with its records still in the file's bytes.
@@ -98,6 +100,7 @@ pub struct AviAudioReader {
     programs: Vec<Program>,
     chosen: usize,
     packet: usize,
+    frame_skip: usize,
 }
 
 impl AviAudioReader {
@@ -118,7 +121,7 @@ impl AviAudioReader {
         // the run, and the run it indexes is what a reader of records walks.
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         let avi = Avi::parse(&bytes, &limits)?;
         let mut programs = Vec::new();
         for (index, stream) in avi.audio().iter().enumerate() {
@@ -145,6 +148,7 @@ impl AviAudioReader {
             programs,
             chosen: nth,
             packet: 0,
+            frame_skip: 0,
         })
     }
 
@@ -164,6 +168,7 @@ impl AviAudioReader {
 /// records fail to agree. Every check here compares one claim of the file with
 /// another; none of them fills in a number the file left out.
 fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program> {
+    if matches!(codec,"pcm_alaw"|"pcm_mulaw") {return laid_out_g711(codec,index,stream);}
     let format = stream.format;
     let block_bytes = u64::from(format.block_align);
     let rate = u64::from(format.sample_rate);
@@ -237,7 +242,22 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program
         setup: stream.setup.clone(),
         stream: index,
         records: stream.records.len(),
+        samples: None,
     })
+}
+
+fn laid_out_g711(codec: &'static str,index:usize,stream:&Audio)->Result<Program>{
+    let f=stream.format;
+    if f.bits!=8 || f.block_align!=f.channels || u64::from(f.sample_rate)*u64::from(f.channels)!=u64::from(f.bytes_per_second){return Err(invalid("inconsistent AVI G.711 sample geometry"));}
+    if stream.scale==0 || u64::from(stream.scale)*u64::from(f.sample_rate)!=u64::from(stream.rate){return Err(invalid("AVI G.711 clock disagrees with its sample rate"));}
+    let mut samples=Vec::new();let mut cursor=u64::from(stream.start);
+    for record in &stream.records {
+        if record.len==0||record.len%usize::from(f.channels)!=0{return Err(invalid("AVI G.711 record ends in an incomplete channel frame"));}
+        let frames=(record.len/usize::from(f.channels))as u64;samples.push((cursor,frames));
+        cursor=cursor.checked_add(frames).ok_or_else(||invalid("AVI G.711 clock overflow"))?;
+    }
+    if samples.is_empty() || cursor-u64::from(stream.start)!=u64::from(stream.declared){return Err(invalid("AVI G.711 declared frame count disagrees with records"));}
+    Ok(Program{codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),samples:Some(samples)})
 }
 
 /// Packets are timestamped in samples of the stream's own rate, which is the unit
@@ -265,10 +285,10 @@ impl AudioStream for AviAudioReader {
 
     fn duration(&self) -> Option<Duration> {
         let program = self.program();
-        let frames = program.frames * program.records as u64;
+        let frames = program.samples.as_ref().map_or(program.frames*program.records as u64,|s|s.last().map_or(0,|&(at,n)|at+n));
         let frames = i64::try_from(frames).unwrap_or(i64::MAX);
         (frames > 0)
-            .then(|| Duration::from_secs_f64(frames as f64 / f64::from(program.sample_rate.max(1))))
+            .then(|| crate::audio::sample_duration(frames as u64, program.sample_rate.max(1)))
     }
 
     fn extra_data(&self) -> &[u8] {
@@ -295,6 +315,12 @@ impl AudioStream for AviAudioReader {
             return Ok(None);
         }
         let at = self.packet;
+        if let Some(samples)=&program.samples {
+            let (start,frames)=samples[at];let skip=self.frame_skip;
+            let data=self.record(at).ok_or_else(||invalid("AVI G.711 record missing"))?[skip*usize::from(program.channels)..].to_vec();
+            self.packet+=1;self.frame_skip=0;
+            return Ok(Some(EncodedPacket{data,pts:(start+skip as u64)as i64,duration:frames as i64-skip as i64}));
+        }
         let data = self
             .record(at)
             .ok_or_else(|| invalid("an AVI record's bytes are not in the file it was read from"))?
@@ -310,16 +336,25 @@ impl AudioStream for AviAudioReader {
     }
 
     fn rewind(&mut self) {
-        self.packet = 0;
+        self.packet = 0;self.frame_skip=0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
         let program = self.program();
-        if program.records == 0 {
-            return 0;
+        if let Some(samples)=&program.samples {
+            let end=samples.last().map_or(0,|&(at,n)|at+n);
+            let target=(pts.max(0)as u64).min(end);
+            let packet=samples.iter().position(|&(at,n)|at+n>target).unwrap_or(samples.len());
+            let skip=samples.get(packet).map_or(0,|&(at,_)|target.saturating_sub(at)as usize);
+            self.packet=packet;self.frame_skip=skip;return target as i64;
         }
-        // Records are equal length, so the one a timestamp lands in is a division;
-        // the last of them is as far as a seek can go, past the end included.
+        let end = program.frames.saturating_mul(program.records as u64);
+        if pts.max(0) as u64 >= end {
+            self.packet = program.records;
+            return i64::try_from(end).unwrap_or(i64::MAX);
+        }
+        // Inside the stream, land at the preceding independently coded block.
+        // At its end there is no block left to present.
         let frames = program.frames.max(1);
         let wanted = pts.max(0) as u64 / frames;
         let at = wanted.min(program.records as u64 - 1) as usize;
@@ -501,11 +536,10 @@ mod tests {
         // The middle of the third block, and the start of the fourth.
         assert_eq!(stream.seek_to(5_000), 4_082);
         assert_eq!(stream.seek_to(6_123), 6_123);
-        // Past the end the cursor stops at the last block rather than running off.
-        assert_eq!(stream.seek_to(100_000), 4 * 2_041);
+        // At/past the end there is no final block to replay.
+        assert_eq!(stream.seek_to(100_000), 5 * 2_041);
         let rest = timeline(&mut stream);
-        assert_eq!(rest.len(), 1);
-        assert_eq!(rest[0], (1_024, 8_164, 2_041));
+        assert!(rest.is_empty());
         stream.rewind();
         assert_eq!(timeline(&mut stream).len(), 5);
     }

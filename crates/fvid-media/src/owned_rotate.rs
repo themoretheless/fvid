@@ -136,9 +136,9 @@ pub(crate) fn rotate_rgb_fill(
             }
         };
         for y in 0..oh {
+            let py = (y as f64 + 0.5) * dy as f64 - height as f64 / 2.0;
             for x in 0..ow {
                 let px = (x as f64 + 0.5) * dx as f64 - width as f64 / 2.0;
-                let py = (y as f64 + 0.5) * dy as f64 - height as f64 / 2.0;
                 let ix = (cos * px + sin * py + frame.width as f64 / 2.0) / dx as f64 - 0.5;
                 let iy = (-sin * px + cos * py + frame.height as f64 / 2.0) / dy as f64 - 0.5;
                 let x0 = ix.floor() as i64;

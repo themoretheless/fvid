@@ -1,0 +1,77 @@
+[
+  {
+    "name": "mono-cabac-8-zero",
+    "depth": 8,
+    "kind": "zero"
+  },
+  {
+    "name": "mono-cabac-8-positive",
+    "depth": 8,
+    "kind": "positive"
+  },
+  {
+    "name": "mono-cabac-8-negative",
+    "depth": 8,
+    "kind": "negative"
+  },
+  {
+    "name": "mono-cabac-8-pcm",
+    "depth": 8,
+    "kind": "pcm"
+  },
+  {
+    "name": "mono-cabac-8-i4-zero",
+    "depth": 8,
+    "kind": "i4-zero"
+  },
+  {
+    "name": "mono-cabac-10-zero",
+    "depth": 10,
+    "kind": "zero"
+  },
+  {
+    "name": "mono-cabac-10-positive",
+    "depth": 10,
+    "kind": "positive"
+  },
+  {
+    "name": "mono-cabac-10-negative",
+    "depth": 10,
+    "kind": "negative"
+  },
+  {
+    "name": "mono-cabac-10-pcm",
+    "depth": 10,
+    "kind": "pcm"
+  },
+  {
+    "name": "mono-cabac-10-i4-zero",
+    "depth": 10,
+    "kind": "i4-zero"
+  },
+  {
+    "name": "mono-cabac-14-zero",
+    "depth": 14,
+    "kind": "zero"
+  },
+  {
+    "name": "mono-cabac-14-positive",
+    "depth": 14,
+    "kind": "positive"
+  },
+  {
+    "name": "mono-cabac-14-negative",
+    "depth": 14,
+    "kind": "negative"
+  },
+  {
+    "name": "mono-cabac-14-pcm",
+    "depth": 14,
+    "kind": "pcm"
+  },
+  {
+    "name": "mono-cabac-14-i4-zero",
+    "depth": 14,
+    "kind": "i4-zero"
+  }
+]

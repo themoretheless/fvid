@@ -1,0 +1,118 @@
+{
+  "provenance": "Eleven authored volume-column fine-slide controls,8xdown/9xup,zero command,clamp0/64,persistence and standardCxxoverride. Independent direct volume-column assignments and signed16ramp loop;no other unsupported features. Authored VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "down-32-1",
+      "file": "down-32-1.xm",
+      "control": "down-32-1-column.xm",
+      "without": "down-32-1-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "down-32-15",
+      "file": "down-32-15.xm",
+      "control": "down-32-15-column.xm",
+      "without": "down-32-15-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "down-0-15",
+      "file": "down-0-15.xm",
+      "control": "down-0-15-column.xm",
+      "without": "down-0-15-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "down-64-15",
+      "file": "down-64-15.xm",
+      "control": "down-64-15-column.xm",
+      "without": "down-64-15-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "down-32-0",
+      "file": "down-32-0.xm",
+      "control": "down-32-0-column.xm",
+      "without": "down-32-0-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "up-32-1",
+      "file": "up-32-1.xm",
+      "control": "up-32-1-column.xm",
+      "without": "up-32-1-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "up-32-15",
+      "file": "up-32-15.xm",
+      "control": "up-32-15-column.xm",
+      "without": "up-32-15-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "up-0-15",
+      "file": "up-0-15.xm",
+      "control": "up-0-15-column.xm",
+      "without": "up-0-15-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "up-64-15",
+      "file": "up-64-15.xm",
+      "control": "up-64-15-column.xm",
+      "without": "up-64-15-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "up-32-0",
+      "file": "up-32-0.xm",
+      "control": "up-32-0-column.xm",
+      "without": "up-32-0-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "standard-volume-overrides",
+      "file": "standard-volume-overrides.xm",
+      "control": "standard-volume-overrides-column.xm",
+      "without": "standard-volume-overrides-without.xm",
+      "seek": 1
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "down-32-1.xm": "b24ccb8b93b6a7791924ec8309b60186da973b550f11bf15d459ee20d2860cd7",
+    "down-32-1-column.xm": "886d23484ee34db9dbe87e1b5f52a17069e0b56e550fdb6c266cf7b51f4a6f32",
+    "down-32-1-without.xm": "a016b6553a80a128178e3da2188048b8a2fafe7af1bb9205e55edca3970c792d",
+    "down-32-15.xm": "2c1675c90376cdfcf6d0c0c904db2d51f62d051345ad9fcbf57465945e70105f",
+    "down-32-15-column.xm": "ee1adaba6fa7827399738a6afbdec28e6267a6d8c02d42c5e336cd18e97ae83c",
+    "down-32-15-without.xm": "a016b6553a80a128178e3da2188048b8a2fafe7af1bb9205e55edca3970c792d",
+    "down-0-15.xm": "e13617c139c21ec226ccbd23e23d96ef924f1ba1eca04bbd5b775cabd4813d50",
+    "down-0-15-column.xm": "815b1228a47bf62250c8885f84e29b0c0bac124cff58b54d520014e65df9ecdf",
+    "down-0-15-without.xm": "18b3fb2afb4faa449aca6bbfcdf63d9bf747c3a48807dd28912d573bdd23d20e",
+    "down-64-15.xm": "cd1c8b191135a5a7636c9737503dda7c37dfe935bcddee11dfe6b272f8db56b0",
+    "down-64-15-column.xm": "947fc6e823baa041fa7417a26f4e98e3b99097514d520f0e184fee6efacf281e",
+    "down-64-15-without.xm": "08fd84e4bfbe1509b6740eb5d4ddf2818afd4ed8d81562c83c7ef00801c5d558",
+    "down-32-0.xm": "a2e616eeade28b88852809d1e9bb9dd81d1318f131a9bd65087e157ac9032419",
+    "down-32-0-column.xm": "88e467a76d2d20c88bdb2ff41eb0a1b8c9504091ebd8695308d2c9afdf55b636",
+    "down-32-0-without.xm": "a016b6553a80a128178e3da2188048b8a2fafe7af1bb9205e55edca3970c792d",
+    "up-32-1.xm": "a160944efa7063328640db3ed54a27c8afa8f08452c50f3c85c848c6ede8a8ec",
+    "up-32-1-column.xm": "848528d0c9b4f4cbf092ca52540d86c723f44de090792f153a2d1ae110acf162",
+    "up-32-1-without.xm": "a016b6553a80a128178e3da2188048b8a2fafe7af1bb9205e55edca3970c792d",
+    "up-32-15.xm": "32ff8f13f4beb1ab5c8b7cbbcc4fc9ade6175d59c689681a2e2f2237f3921059",
+    "up-32-15-column.xm": "56c0c665066cf55f3ae98bab6d82aa7318c96f8265276d4fb458e5cee573ce01",
+    "up-32-15-without.xm": "a016b6553a80a128178e3da2188048b8a2fafe7af1bb9205e55edca3970c792d",
+    "up-0-15.xm": "b706ba63f433c21d39b6a00ff533acd9cfcd8900117bc498c8d5b16f2ad97708",
+    "up-0-15-column.xm": "26e008bfd72e317a543d84f1e8511f4910859a5a00e62550c2a7fc599a1c3a92",
+    "up-0-15-without.xm": "18b3fb2afb4faa449aca6bbfcdf63d9bf747c3a48807dd28912d573bdd23d20e",
+    "up-64-15.xm": "f353acffd33208c89bcfc84a318485336d519666a6b4099f1f8fe6f412b26147",
+    "up-64-15-column.xm": "a258277cb0d59b0dfa783e42254b76584876d2b487e8cf0d8f6e7409a991d95b",
+    "up-64-15-without.xm": "08fd84e4bfbe1509b6740eb5d4ddf2818afd4ed8d81562c83c7ef00801c5d558",
+    "up-32-0.xm": "4ab3f72b9816103fbdf82aaf4e4ad2309cd8e6e8d923524795a4128004830864",
+    "up-32-0-column.xm": "88e467a76d2d20c88bdb2ff41eb0a1b8c9504091ebd8695308d2c9afdf55b636",
+    "up-32-0-without.xm": "a016b6553a80a128178e3da2188048b8a2fafe7af1bb9205e55edca3970c792d",
+    "standard-volume-overrides.xm": "098c746d57959e460cd7e37a70733f69aca12a8c8e106c09cdc5b96fe9bcd17c",
+    "standard-volume-overrides-column.xm": "89d2dad029182274ec8b4bf89fb2a67b37806ee5692232c93c2c7594a7d93cee",
+    "standard-volume-overrides-without.xm": "eb1935a2958294ad5d521a781fa3163f16fb061d0eb49b6156c3350958e4fa1d"
+  }
+}

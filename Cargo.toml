@@ -22,6 +22,14 @@ edition = "2024"
 description = "Bounded, fused planar video processing in safe Rust"
 license = "MIT AND MPL-2.0"
 
+# Native software decoding must keep up with playback in the default player
+# build too. Preserve dev diagnostics while optimizing pixel/entropy hot loops.
+[profile.dev.package.fvid-codecs]
+opt-level = 3
+
+[profile.dev.package.fvid-cpu]
+opt-level = 3
+
 [profile.release]
 lto = "thin"
 codegen-units = 1
@@ -55,7 +63,7 @@ fvid-platform = { path = "crates/fvid-platform", optional = true }
 eframe = { version = "0.36", optional = true }
 rfd = { version = "0.17.2", optional = true }
 cpal = { version = "0.15", optional = true }
-symphonia = { version = "0.6", optional = true, features = ["adpcm", "vorbis", "mp3", "mp2", "flac", "isomp4"] }
+symphonia = { version = "0.6", optional = true, default-features = false, features = ["opt-simd"] }
 wgpu = { version = "=30.0.1", optional = true, default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "dx12", "gles", "wgsl"] }
 pollster = { version = "0.4", optional = true }
 naga = { version = "=30.0.1", optional = true, features = ["wgsl-in"] }
@@ -78,6 +86,8 @@ airbug-otel = { git = "https://github.com/themoretheless/airbug", branch = "rele
 fvid-vt = { path = "crates/fvid-vt", optional = true }
 
 [dev-dependencies]
+# Independent MPEG PCM references are test-only; production dispatch is owned.
+symphonia = { version = "0.6", default-features = false, features = ["mp3", "mp2", "mp1"] }
 fvid-opus = { path = "crates/fvid-opus" }
 pollster = "0.4"
 naga = { version = "=30.0.1", features = ["wgsl-in", "glsl-out", "hlsl-out", "spv-out", "msl-out"] }

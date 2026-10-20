@@ -250,7 +250,7 @@ fn missing_cce_target_video_rejects_exact_failure_and_restores_sbr_histories() {
 }
 
 #[test]
-fn independent_sbr_admission_preserves_configured_pce_identity() {
+fn independent_sbr_admission_adopts_matching_in_band_coupling_roster() {
     for c in manifest()["cases"].as_array().unwrap() {
         let asc = hex(c["independent_asc"].as_str().unwrap());
         let parsed = AudioSpecificConfig::parse(&asc).unwrap();
@@ -258,14 +258,20 @@ fn independent_sbr_admission_preserves_configured_pce_identity() {
         let mut decoder =
             NativeAacDecoder::new_with_output_rate(&asc, c["output_rate"].as_u64().unwrap() as u32)
                 .unwrap();
-        // Admission now accepts independent CCE; this dependent in-band PCE
-        // must still fail, rather than silently changing the configured program.
-        assert!(
-            decoder
-                .decode(packet(&c["frames"][0]))
-                .unwrap_err()
-                .to_string()
-                .contains("AAC in-band PCE changed the configured layout")
-        );
+        // The authored in-band PCE changes only the CCE roster, not PCM geometry.
+        let saved = decoder.checkpoint();
+        let first = decoder.decode(packet(&c["frames"][0])).unwrap();
+        decoder.restore(&saved).unwrap();
+        assert_eq!(first, decoder.decode(packet(&c["frames"][0])).unwrap());
+        let mut actual = first;
+        for row in c["frames"].as_array().unwrap().iter().skip(1) {
+            actual.extend(decoder.decode(packet(row)).unwrap());
+        }
+        let expected = reference(c);
+        assert_eq!(actual.len(), expected.len());
+        assert!(expected.iter().any(|v| v.abs() > 1e-5));
+        for (index,(actual,expected)) in actual.iter().zip(&expected).enumerate() {
+            assert!((actual-expected).abs()<2e-7,"sample {index}: {actual} vs {expected}");
+        }
     }
 }

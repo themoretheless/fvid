@@ -104,12 +104,17 @@ pub(crate) fn bytes<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result
     r.read_exact(&mut out)?;
     Ok(out)
 }
-/// A UTF-8 string element, without the trailing NUL byte some muxers write.
+/// RFC 8794 section 13: the first NUL ends the value; later bytes are padding.
+pub(crate) fn terminated_text_bytes(mut value: Vec<u8>) -> Vec<u8> {
+    if let Some(end) = value.iter().position(|&byte| byte == 0) {
+        value.truncate(end);
+    }
+    value
+}
+/// Validate UTF-8 only within the semantic string, before its first NUL.
 pub(crate) fn text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Result<String> {
-    Ok(String::from_utf8(bytes(r, e, max)?)
-        .map_err(|_| invalid("invalid WebM text"))?
-        .trim_end_matches('\0')
-        .to_owned())
+    String::from_utf8(terminated_text_bytes(bytes(r, e, max)?))
+        .map_err(|_| invalid("invalid WebM text"))
 }
 pub(crate) fn uint<R: Read + Seek>(r: &mut R, e: Element) -> Result<u64> {
     Ok(bytes(r, e, 8)?

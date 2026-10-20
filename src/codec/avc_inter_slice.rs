@@ -33,6 +33,7 @@ pub struct InterCavlcSlice<'a> {
     failed: bool,
     width: usize,
     mbaff: bool,
+    field_picture: bool,
     pair_fields: Vec<Option<bool>>,
     previous_skipped: bool,
     slice_group_map: Vec<u8>,
@@ -50,7 +51,7 @@ impl<'a> InterCavlcSlice<'a> {
         syntax: InterSyntax,
         memory_limit: usize,
     ) -> Result<Self> {
-        if !matches!(syntax.slice, SliceType::P | SliceType::Sp | SliceType::B) || syntax.chroma_array_type != 1 {
+        if !matches!(syntax.slice, SliceType::P | SliceType::Sp | SliceType::B) || syntax.chroma_array_type > 2 {
             return Err(invalid(
                 "inter slice reader requires progressive 4:2:0 P/B CAVLC",
             ));
@@ -62,7 +63,7 @@ impl<'a> InterCavlcSlice<'a> {
             return Err(invalid("AVC first macroblock outside picture"));
         }
         super::avc_residual_syntax::update_qp(syntax.previous_qp, 0, syntax.bit_depth)?;
-        let counts = CoefficientField::new(width, height, memory_limit)?;
+        let counts = if syntax.chroma_array_type==2 {CoefficientField::new_422(width,height,memory_limit)?}else{CoefficientField::new(width, height, memory_limit)?};
         let mut bits = BitReader::new(rbsp);
         bits.skip(offset)?;
         Ok(Self {
@@ -79,6 +80,7 @@ impl<'a> InterCavlcSlice<'a> {
             failed: false,
             width,
             mbaff: false,
+            field_picture: false,
             pair_fields: Vec::new(),
             previous_skipped: false,
             slice_group_map: Vec::new(),
@@ -114,7 +116,7 @@ impl<'a> InterCavlcSlice<'a> {
         mbaff: bool,
         allow_fmo: bool,
     ) -> Result<Self> {
-        if header.field_pic {
+        if header.field_pic && (!allow_fmo || mbaff) {
             return Err(crate::unsupported("field slices are not supported"));
         }
         let count = (sps.width_mbs as usize)
@@ -128,7 +130,7 @@ impl<'a> InterCavlcSlice<'a> {
             })
             .ok_or_else(|| invalid("AVC context size overflow"))?;
         let extra = count
-            .checked_mul(if allow_fmo { 48 } else { 40 })
+            .checked_mul((if allow_fmo { 48 } else { 40 })+if sps.chroma_format==2 {8}else{0})
             .and_then(|n| n.checked_add(if mbaff { count } else { 0 }))
             .ok_or_else(|| invalid("AVC context budget overflow"))?;
         let remaining = memory_limit
@@ -139,7 +141,7 @@ impl<'a> InterCavlcSlice<'a> {
             active_references: [header.refs_l0, header.refs_l1],
             previous_qp: header.slice_qp,
             bit_depth: sps.bit_depth_luma,
-            chroma_array_type: 1,
+            chroma_array_type: sps.chroma_format as u8,
             transform8_enabled: pps.transform_8x8,
             direct8_inference: sps.direct_8x8_inference,
         };
@@ -159,6 +161,7 @@ impl<'a> InterCavlcSlice<'a> {
             syntax,
             remaining,
         )?;
+        reader.field_picture = header.field_pic;
         if allow_fmo {
             let map = super::avc_slice_group_map::map_units(
                 &pps.slice_groups,
@@ -216,7 +219,7 @@ impl<'a> InterCavlcSlice<'a> {
             sps,
             pps,
             memory_limit,
-            sps.mb_adaptive_frame_field && !sps.frame_mbs_only,
+            sps.mb_adaptive_frame_field && !sps.frame_mbs_only && !header.field_pic,
             true,
         )
     }
@@ -233,10 +236,11 @@ impl<'a> InterCavlcSlice<'a> {
         self.pair_fields.get(pair).copied().flatten()
     }
     pub fn field_decoding(&self) -> bool {
-        self.mbaff
-            && self
-                .previous_address
-                .is_some_and(|a| self.pair_field(a / 2) == Some(true))
+        self.field_picture
+            || self.mbaff
+                && self
+                    .previous_address
+                    .is_some_and(|a| self.pair_field(a / 2) == Some(true))
     }
     pub fn bit_position(&self) -> usize {
         self.bits.position()
@@ -327,9 +331,16 @@ impl<'a> InterCavlcSlice<'a> {
             }
         }
         if self.pending > 0 {
-            self.counts.store(address, 0, [0; 16], [[0; 4]; 2])?;
-            if let Some(intra) = &mut self.intra {
-                intra.record_inter(address, [0; 16], [[0; 4]; 2])?;
+            if self.syntax.chroma_array_type == 2 {
+                self.counts.store_422(address, 0, [0; 16], [[0; 8]; 2])?;
+                if let Some(intra) = &mut self.intra {
+                    intra.record_inter_422(address, [0; 16], [[0; 8]; 2])?;
+                }
+            } else {
+                self.counts.store(address, 0, [0; 16], [[0; 4]; 2])?;
+                if let Some(intra) = &mut self.intra {
+                    intra.record_inter(address, [0; 16], [[0; 4]; 2])?;
+                }
             }
             self.pending -= 1;
             self.advance_address()?;
@@ -367,8 +378,8 @@ impl<'a> InterCavlcSlice<'a> {
                     code - offset,
                 )?
             };
-            let (luma, chroma) = intra.counts(address)?;
-            self.counts.store(address, 0, luma, chroma)?;
+            if self.syntax.chroma_array_type==2 {let (luma,chroma)=intra.counts_422(address)?;self.counts.store_422(address,0,luma,chroma)?;}
+            else{let (luma, chroma) = intra.counts(address)?;self.counts.store(address, 0, luma, chroma)?;}
             // I_PCM preserves the preceding QP for following macroblocks.
             if !matches!(block.luma, super::avc_macroblock::IntraLuma::Pcm { .. }) {
                 self.syntax.previous_qp = block.qp;
@@ -395,14 +406,15 @@ impl<'a> InterCavlcSlice<'a> {
                 })?
         } else {
             self.counts
-                .read_inter(&mut self.bits, address, 0, &self.syntax)?
+                .read_inter_field(&mut self.bits, address, 0, &self.syntax, self.field_picture)?
         };
         if let Some(intra) = &mut self.intra {
-            intra.record_inter(
+            if let Some(wide)=&coefficients.chroma422 {intra.record_inter_422(address,coefficients.luma_counts,wide.counts)?;}
+            else{intra.record_inter(
                 address,
                 coefficients.luma_counts,
                 coefficients.chroma_counts,
-            )?;
+            )?;}
         }
         self.syntax.previous_qp = header.residual.qp;
         self.advance_address()?;

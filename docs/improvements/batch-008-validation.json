@@ -1,0 +1,55 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0030"
+  ],
+  "checked_at": "2026-10-15T05:06:48.383859+00:00",
+  "before": {
+    "passed": 2,
+    "failed": 1,
+    "evidence": "evidence/batch-008-ffv1-trim-before.log"
+  },
+  "qualification": [
+    "Deliberately irregular, nonconforming FFV1 timestamp order [0,40ms,20ms]. This is recovery consistency for already accepted input, not a Matroska conformance claim. RFC 9559 section 10 requires a past-timestamp frame to reference a known frame.",
+    "Each original FFV1 keyframe independently decodes to its authored distinct pixels; ordered and irregular files contain the same three decoded frames.",
+    "Full export previously accepted and sorted all frames. Before the fix, [0,30ms) trimming silently dropped the later stored 20ms frame. The fix retains both selected frames.",
+    "Exact trim boundaries and nonzero starts match ordered controls; packet count limits still reject excess work without publishing a partial output.",
+    "Software decoding/export qualification; no hardware playback or performance claim."
+  ],
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-10"
+  ],
+  "counting": "One robustness problem: preserve already recoverable frames consistently during trimming. Fixture generation, controls and resource checks are not separate IDs.",
+  "checks": [
+    {
+      "command": "cargo test --locked --offline --no-default-features --test ffv1_reordered_trim",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test native_ffv1 --test native_webm_lossless",
+      "passed": 12,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_empty_pose_playback --test matroska_header_stripping_playback",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_ffv1_reordered_trim_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 21,
+  "source_hashes": {
+    "crates/fvid-media/src/owned_webm_presentation.rs": "b3642484db4c503aba5bcb46f61ceb5b3fa3dc59e547a67d0de220fa6f314c78",
+    "tests/ffv1_reordered_trim.rs": "e507c072a20128ef38cfcdd60b9e0fbbd9262c6afdc27885f9c54527bbd2077f",
+    "scripts/generate_ffv1_reordered_trim_regressions.py": "1f26c52a7c3c86aa6aea97350953672ec9f105eb67efb1dea28d77174ec99cb1"
+  }
+}

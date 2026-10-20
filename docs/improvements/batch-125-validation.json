@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [],
+  "followup_ids": [
+    "FVID-0063"
+  ],
+  "checked_at": "2026-10-16T09:47:33.058460+00:00",
+  "before": [
+    "evidence/batch-125-before-ms-records.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-125-after-verified.log",
+      "kind": "rust",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-125-reader.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-125-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-125-independent-reference.json",
+      "kind": "external-reference",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-125-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six authored VP9/MS-ADPCM AVI files at exact sample-clock boundaries. Three have public duration rounded one nanosecond above the packet clock; three controls are healthy. Before correction all literal PCM and fullplay/rewind checks pass, while three actual generation2 publicEOFseek clocks fail. Independent local FFmpeg matches all six complete PCM outputs.",
+    "Use the existing exact integer sample_duration helper in the AVI adapter; preserve empty-duration and maximum-clock behavior. All six PCM/timestamp/EOF/worker checks, legacyAVI EOF regression,24format sample-grid regression and13AVI reader units pass. Player build passes.",
+    "Initial PCM fixtures fail unsupported-format admission; initial ADPCM draft groups multiple blocks in a single declared record and fails record-count validation. Neither reaches the intended bug. Their logs and rejectedPCM archive remain for audit and count zero. Final generator emits separate supported38byte MS ADPCM records with independent literal PCM.",
+    "No AVI video player acceptance is asserted. Separate native VP9/PCM Matroska companion verifies authored video; normal tests/generation need no FFmpeg/network/private data. An initial post-fix command named a nonexistent test target; corrected command/log is separate."
+  ],
+  "counting": "Existing FVID-0063 exact-duration family extended to AVI. Zero new accepted IDs; accepted count remains141."
+}

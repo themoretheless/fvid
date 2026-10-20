@@ -1,0 +1,87 @@
+running 12 tests
+
+thread 'missing_duration_uses_explicit_tail' (16852548) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "explicit-tail-inferred.mkv"
+  left: Some(60ms)
+ right: Some(240ms)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'missing_duration_uses_default_tail' (16852547) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "default-tail-inferred.mkv"
+  left: Some(60ms)
+ right: Some(50ms)
+
+thread 'previous_explicit_presentation_duration_defines_an_unknown_tail' (16852551) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "previous-explicit-inferred.mkv"
+  left: Some(60ms)
+ right: Some(45ms)
+
+thread 'inferred_cache_keeps_a_single_frame_before_playback' (16852545) panicked at tests/matroska_tail_playback.rs:43:5:
+assertion `left == right` failed: "single-default-inferred.mkv"
+  left: 0
+ right: 1
+
+thread 'single_frame_uses_its_default_duration' (16852552) panicked at tests/matroska_tail_playback.rs:32:5:
+assertion `left == right` failed: "single-default-inferred.mkv"
+  left: Some(33.333333ms)
+ right: Some(100ms)
+test missing_duration_uses_explicit_tail ... FAILED
+test missing_duration_uses_default_tail ... FAILED
+
+thread 'declared_cache_keeps_a_single_frame_before_playback' (16852542) panicked at tests/matroska_tail_playback.rs:43:5:
+assertion `left == right` failed: "single-default-declared.mkv"
+  left: 0
+ right: 1
+test single_frame_uses_its_default_duration ... FAILED
+
+thread 'previous_explicit_cache_tail_does_not_use_the_current_frame_period' (16852550) panicked at tests/matroska_tail_playback.rs:50:5:
+assertion `left == right` failed: "previous-explicit-inferred.mkv"
+  left: [(149, 4291, 0ns, 5ms), (4312, 8454, 20ms, 25ms), (8470, 12612, 40ms, 40ms)]
+ right: [(149, 4291, 0ns, 5ms), (4312, 8454, 20ms, 25ms), (8470, 12612, 40ms, 45ms)]
+
+thread 'inferred_cache_keeps_the_default_tail_before_playback' (16852546) panicked at tests/matroska_tail_playback.rs:50:5:
+assertion `left == right` failed: "default-tail-inferred.mkv"
+  left: [(155, 4297, 0ns, 20ms), (4306, 8448, 20ms, 40ms), (8457, 12599, 40ms, 40ms)]
+ right: [(155, 4297, 0ns, 20ms), (4306, 8448, 20ms, 40ms), (8457, 12599, 40ms, 50ms)]
+
+thread 'timestamp_gap_and_single_unknown_frame_fallbacks_stay_consistent' (16852553) panicked at tests/matroska_tail_playback.rs:50:5:
+assertion `left == right` failed: "inferred-gap-inferred.mkv"
+  left: [(144, 4286, 0ns, 20ms), (4295, 8437, 20ms, 40ms), (8446, 12588, 40ms, 40ms)]
+ right: [(144, 4286, 0ns, 20ms), (4295, 8437, 20ms, 40ms), (8446, 12588, 40ms, 60ms)]
+test inferred_cache_keeps_a_single_frame_before_playback ... FAILED
+test previous_explicit_presentation_duration_defines_an_unknown_tail ... FAILED
+test declared_cache_keeps_a_single_frame_before_playback ... FAILED
+test previous_explicit_cache_tail_does_not_use_the_current_frame_period ... FAILED
+test inferred_cache_keeps_the_default_tail_before_playback ... FAILED
+test timestamp_gap_and_single_unknown_frame_fallbacks_stay_consistent ... FAILED
+
+thread 'declared_cache_keeps_the_default_tail_before_playback' (16852543) panicked at tests/matroska_tail_playback.rs:50:5:
+assertion `left == right` failed: "default-tail-declared.mkv"
+  left: [(169, 4311, 0ns, 20ms), (4320, 8462, 20ms, 40ms), (8471, 12613, 40ms, 40ms)]
+ right: [(169, 4311, 0ns, 20ms), (4320, 8462, 20ms, 40ms), (8471, 12613, 40ms, 50ms)]
+test declared_cache_keeps_the_default_tail_before_playback ... FAILED
+test explicit_cache_tail_stays_stable_during_playback ... ok
+
+thread 'paired_controls_decode_the_same_frames_with_exact_intervals_seek_and_eof' (16852549) panicked at tests/matroska_tail_playback.rs:160:13:
+assertion `left == right` failed
+  left: 73333333
+ right: 60000000
+test paired_controls_decode_the_same_frames_with_exact_intervals_seek_and_eof ... FAILED
+
+failures:
+
+failures:
+    declared_cache_keeps_a_single_frame_before_playback
+    declared_cache_keeps_the_default_tail_before_playback
+    inferred_cache_keeps_a_single_frame_before_playback
+    inferred_cache_keeps_the_default_tail_before_playback
+    missing_duration_uses_default_tail
+    missing_duration_uses_explicit_tail
+    paired_controls_decode_the_same_frames_with_exact_intervals_seek_and_eof
+    previous_explicit_cache_tail_does_not_use_the_current_frame_period
+    previous_explicit_presentation_duration_defines_an_unknown_tail
+    single_frame_uses_its_default_duration
+    timestamp_gap_and_single_unknown_frame_fallbacks_stay_consistent
+
+test result: FAILED. 1 passed; 11 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+

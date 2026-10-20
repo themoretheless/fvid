@@ -1,0 +1,263 @@
+{
+  "provenance": "Authored short neutral VP9 clips. Paired files differ only in Info Duration; no private media, network or encoder.",
+  "cases": [
+    {
+      "inferred": "explicit-tail-inferred.mkv",
+      "declared": "explicit-tail-declared.mkv",
+      "expected_ns": 240000000,
+      "origin_ns": 0,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          240000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "inferred": "overlapping-explicit-inferred.mkv",
+      "declared": "overlapping-explicit-declared.mkv",
+      "expected_ns": 50000000,
+      "origin_ns": 70000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          25000000
+        ],
+        [
+          40000000,
+          50000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "inferred": "default-tail-inferred.mkv",
+      "declared": "default-tail-declared.mkv",
+      "expected_ns": 50000000,
+      "origin_ns": 0,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          50000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "inferred": "single-default-inferred.mkv",
+      "declared": "single-default-declared.mkv",
+      "expected_ns": 100000000,
+      "origin_ns": 0,
+      "intervals": [
+        [
+          0,
+          100000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ]
+      ]
+    },
+    {
+      "inferred": "inferred-gap-inferred.mkv",
+      "declared": "inferred-gap-declared.mkv",
+      "expected_ns": 60000000,
+      "origin_ns": 0,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "inferred": "previous-explicit-inferred.mkv",
+      "declared": "previous-explicit-declared.mkv",
+      "expected_ns": 45000000,
+      "origin_ns": 0,
+      "intervals": [
+        [
+          0,
+          5000000
+        ],
+        [
+          20000000,
+          25000000
+        ],
+        [
+          40000000,
+          45000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    },
+    {
+      "inferred": "single-unknown-inferred.mkv",
+      "declared": "single-unknown-declared.mkv",
+      "expected_ns": 33333333,
+      "origin_ns": 0,
+      "intervals": [
+        [
+          0,
+          33333333
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ]
+      ]
+    },
+    {
+      "inferred": "offset-gap-inferred.mkv",
+      "declared": "offset-gap-declared.mkv",
+      "expected_ns": 60000000,
+      "origin_ns": 70000000,
+      "intervals": [
+        [
+          0,
+          20000000
+        ],
+        [
+          20000000,
+          40000000
+        ],
+        [
+          40000000,
+          60000000
+        ]
+      ],
+      "sizes": [
+        [
+          16,
+          16
+        ],
+        [
+          32,
+          16
+        ],
+        [
+          16,
+          32
+        ]
+      ]
+    }
+  ],
+  "files": {
+    "default-tail-declared.mkv": "f906a03416d86c3ac24c5116fdbfa9c6886d5165e1bc59bbfdf53fd3662d876f",
+    "default-tail-inferred.mkv": "662be33c78c48342927f4586009a4669eb9bad950c38fcf7d74d9090fd118ba0",
+    "explicit-tail-declared.mkv": "c2dcc285b753856022e810f1440488c326bf7122c5368eda309df07d703dbe27",
+    "explicit-tail-inferred.mkv": "34e9cbe202802b22444e1e882321becb2f7184090e1c7c2ba892f93e67c56381",
+    "inferred-gap-declared.mkv": "d1cea27c328037d96ff9f12950296b234cdedb4101970a8fd1c1d4544855a2ac",
+    "inferred-gap-inferred.mkv": "5cae76462371ae3dc8e4814b5a5b3fce607b3a39d14aa27bf1f4621aacb71b25",
+    "offset-gap-declared.mkv": "4daad9ae034b43d2b75f0ac5ef4c68c011717d9ff9fd986d1556ae4b99a64d5d",
+    "offset-gap-inferred.mkv": "ba9c7a06db13c68b31f09b3f9c3e908675453be467f5a6cad54fd655fc316e7e",
+    "overlapping-explicit-declared.mkv": "58628fc58bf01aecbf08b5b5db226878cb62c644c71a8cee1b515b38eeb54384",
+    "overlapping-explicit-inferred.mkv": "6a1af860cac276cee82603418155bdcbbd2584561eb157bce2c108a936278740",
+    "previous-explicit-declared.mkv": "09f08453b6780f3de23454635ad943ef56cf211b32a2f86cba43b70157ccbeae",
+    "previous-explicit-inferred.mkv": "1bdd1984ff4770f79c639d0bc5637f531a5bc638360b77e2a795d44f5f0c6070",
+    "single-default-declared.mkv": "9d06dab6da091e239cddd8d1721a8cb6c640f1a8d870776a5ea0c088391e78d1",
+    "single-default-inferred.mkv": "24b3597209a283e3e637de9dd0643fe386748ecc9de9dc1aeb6833f1706e2055",
+    "single-unknown-declared.mkv": "318f9102ba0debc3c9147b9d70511dc8a0be9904f53c77d90eee11aa6df19089",
+    "single-unknown-inferred.mkv": "ae67b3e84d81429e4b36a54ff677cde3dc2cddaaf41ac9f7c447f4b13920a8e1"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "median_ratio": 0.9429089238078849,
+  "bootstrap_median95": [
+    0.8923345280788455,
+    1.1472883159457896
+  ],
+  "ratios": [
+    0.6771801827044419,
+    0.979984523783672,
+    0.9231854109730074,
+    1.0394433931871199,
+    0.8923345280788455,
+    0.9429089238078849,
+    0.910367150224327,
+    0.9447942253233789,
+    1.685492000464341,
+    0.6217553238070859,
+    1.1472883159457896,
+    1.1950733378840566,
+    0.6720394788457297,
+    1.6477056047216536,
+    0.4354647322030514
+  ],
+  "scope": "Release nativeMIDI CPUrender only.15alternatingpairs,no owncompilationduringtiming,hostloadnotisolated,alloutliersretained.Whole-processCPUincludesuntimedcontrols/warmups.",
+  "binaries": {
+    "before": "3b4e1a1ae5824352b9edf180e49b27219ce5500238974ce51f08769822e75128",
+    "after": "69ee30a0dc70759e1ac8a24fab724ec0f12957aadc233e70d6736412cd496911"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "fixtures": [
+    {
+      "file": "aifc-float-32-1ch.aifc",
+      "sha256": "dd97cf85d7d22112f4982915cf80a69e38e601ef44f9cfafc374a8bedbe0df6b",
+      "pcm": "aifc-float-32-1ch.f32le",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aifc-float-32-1ch-uppercase.aifc",
+      "sha256": "17b5845d02a9c99779a60c219ad8c00f78467c636f0f8d3efa1465c2eb61a71c",
+      "pcm": "aifc-float-32-1ch.f32le",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aifc-float-32-2ch.aifc",
+      "sha256": "fe5346a90641a3f83be1363026d8cea58934809e126b261f888a52f37a35e0c0",
+      "pcm": "aifc-float-32-2ch.f32le",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "aifc-float-32-2ch-uppercase.aifc",
+      "sha256": "0541fd314bfe1803237357693c47cb076c33e9f4f25ab05f647f26f0a0a59d99",
+      "pcm": "aifc-float-32-2ch.f32le",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "aifc-float-64-1ch.aifc",
+      "sha256": "df2714afd057430d447d92ab1a7f3ac9320da45767044a3406e206e4ce0265f3",
+      "pcm": "aifc-float-64-1ch.f32le",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aifc-float-64-1ch-uppercase.aifc",
+      "sha256": "5768bc1bd0f208be4b4b80bd976c2351640deea62246de4d3a4567205f14eeda",
+      "pcm": "aifc-float-64-1ch.f32le",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aifc-float-64-2ch.aifc",
+      "sha256": "22247bf71d1500765b19b4c951f27d1d528e7e7c5abd2e378ad071b255dd9758",
+      "pcm": "aifc-float-64-2ch.f32le",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "aifc-float-64-2ch-uppercase.aifc",
+      "sha256": "6db589f6aa909d50f92bc42a7c8405c4199e30b08bfe1c6c42ef3074f123be5d",
+      "pcm": "aifc-float-64-2ch.f32le",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    }
+  ]
+}

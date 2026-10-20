@@ -48,6 +48,7 @@ pub struct OggOpusWriter<W: Write> {
     /// `None` only after `finish` has taken it.
     sink: Option<W>,
     serial: u32,
+    streams: usize,
     sequence: u32,
     page_target: usize,
 
@@ -67,6 +68,7 @@ pub struct OggOpusWriter<W: Write> {
     /// The page being assembled resumes a packet started on the previous one.
     continued: bool,
     finished: bool,
+    trimmed: bool,
     /// Scratch, reused so steady-state muxing does not allocate.
     scratch: Vec<u8>,
 }
@@ -104,9 +106,11 @@ impl<W: Write> OggOpusWriter<W> {
 
     /// Start a stream with an explicit serial number.
     pub fn with_serial(sink: W, head: OpusHead, tags: OpusTags, serial: u32) -> Result<Self> {
+        let identification = OpusHead::parse(&head.to_packet())?;
         let mut w = OggOpusWriter {
             sink: Some(sink),
             serial,
+            streams: usize::from(identification.stream_count),
             sequence: 0,
             page_target: DEFAULT_PAGE_TARGET,
             segments: Vec::with_capacity(MAX_SEGMENTS),
@@ -120,6 +124,7 @@ impl<W: Write> OggOpusWriter<W> {
             page_granule: None,
             continued: false,
             finished: false,
+            trimmed: false,
             scratch: Vec::new(),
         };
 
@@ -177,14 +182,15 @@ impl<W: Write> OggOpusWriter<W> {
     /// The duration advances the granule position, which is what a player uses
     /// to seek and to know when the stream ends. It is not something a caller
     /// should have to supply: an Opus packet states its own duration in its TOC
-    /// byte, and this reads it with [`packet::samples_48k`](crate::packet::samples_48k).
+    /// framing; all elementary streams are checked for common duration using
+    /// [`multistream_packet_samples`](crate::multistream_packet_samples).
     ///
     /// Use [`write_packet_with_duration`](Self::write_packet_with_duration)
     /// only when the granule must deliberately differ from the audio — the
     /// end-trim of RFC 7845 §4.4, where the final page reports less audio than
     /// its packets carry.
     pub fn write_packet(&mut self, packet: &[u8]) -> Result<()> {
-        let samples_48k = crate::packet::samples_48k(packet)? as u32;
+        let samples_48k = crate::multistream_packet_samples(packet, self.streams)? as u32;
         self.write_packet_with_duration(packet, samples_48k)
     }
 
@@ -193,11 +199,11 @@ impl<W: Write> OggOpusWriter<W> {
     /// `samples_48k` is the packet's duration in 48 kHz samples — 960 for a
     /// 20 ms frame — regardless of the rate the encoder ran at. Prefer
     /// [`write_packet`](Self::write_packet), which reads the same number out of
-    /// the packet and cannot get it wrong; a value that disagrees with the
-    /// audio produces a file that decodes correctly but seeks and reports its
-    /// duration wrongly. The reason to use this one is the end-trim of RFC 7845
-    /// §4.4: a final granule deliberately short of the audio, so a clip that is
-    /// not a whole number of frames ends where it should.
+    /// the packet. An explicit value cannot exceed the coded duration.
+    /// A shorter value marks this as the final audio packet: no further packets
+    /// may be appended, but `finish` writes its EOS page. This implements the
+    /// end-trim of RFC 7845 §4.4, so a clip that is not a whole number of frames
+    /// ends where it should. Invalid framing is rejected before container mutation.
     pub fn write_packet_with_duration(&mut self, packet: &[u8], samples_48k: u32) -> Result<()> {
         if self.finished {
             return Err(Error::InvalidArgument("writer has already been finished"));
@@ -213,6 +219,18 @@ impl<W: Write> OggOpusWriter<W> {
             ));
         }
 
+        if self.trimmed {
+            return Err(Error::InvalidArgument(
+                "cannot append audio after a trimmed final packet",
+            ));
+        }
+        let coded_samples = crate::multistream_packet_samples(packet, self.streams)? as u32;
+        if samples_48k > coded_samples {
+            return Err(Error::InvalidArgument(
+                "explicit duration exceeds coded Opus audio",
+            ));
+        }
+
         // Flush a full page *before* the next packet rather than after the last,
         // so `finish` always has something to put on its EOS page.
         if self.payload.len() >= self.page_target || self.segments.len() == MAX_SEGMENTS {
@@ -223,6 +241,7 @@ impl<W: Write> OggOpusWriter<W> {
         self.push_packet_bytes(packet)?;
         self.granule += i64::from(samples_48k);
         self.page_granule = Some(self.granule);
+        self.trimmed = samples_48k < coded_samples;
         Ok(())
     }
 

@@ -1,0 +1,52 @@
+{
+  "fixtures": [
+    {
+      "file": "au-pcm-8-1ch.au",
+      "sha256": "163adfe4f63fb4475bbe7efe0e0dd2cbe5191712a4ac51a8936be414c0e72843",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "au-pcm-8-2ch.au",
+      "sha256": "7b85ffb304deac38b4f0ae5d34542631cb268cdaced7485ebb85c4b3c28f7cc5",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "au-pcm-32-1ch.au",
+      "sha256": "311115eb3bd67f1d2f252796819102c84adedf14e334d01182b1d57849146b4a",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "au-pcm-32-2ch.au",
+      "sha256": "5eb0cb46628e1b07642ca6e62066887037d9d0c4b5cc26b26b5419efdbb85062",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "au-pcm-64-1ch.au",
+      "sha256": "a9005930a77b27d8ac68348eacfe13053d9c9b773cc4b0bacd63a5486d196b82",
+      "sample_frames": 4103,
+      "channels": 1,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "au-pcm-64-2ch.au",
+      "sha256": "152712de2748da472fa294ca778a0b4e2a485f5a8cffeade2cc31a26bf4017b9",
+      "sample_frames": 4103,
+      "channels": 2,
+      "sample_rate": 8000,
+      "video_companion": "g711-alaw-2ch.avi"
+    }
+  ]
+}

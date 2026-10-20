@@ -1,0 +1,23 @@
+{
+  "provenance": "Authored AVI with VP9 video and three8byte IMA/MS ADPCM constant-predictor blocks. Identical VP9 bitstream in Matroska verifies the video independently; IVF is also authored as a reference; AVI video playback support is not asserted. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "ima",
+      "frames": 27,
+      "block_frames": 9
+    },
+    {
+      "name": "ms",
+      "frames": 12,
+      "block_frames": 4
+    }
+  ],
+  "sha256": {
+    "video.ivf": "e5cbfb0f0a8ada81502186285bb77f1d1ab9d2d7fe3f641cffa9997698f337e9",
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "ima.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "ms.avi": "c26a2b060e651708c7972ea814ceb95e2b67d0cf4d384aaf4770ba09f6c5a814",
+    "ms.f32le": "d35ee49b68fa2e1fb8d67b7a2c0cb26efac6d95eb83c897c5e2dcec7c147ae81"
+  }
+}

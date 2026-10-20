@@ -1,0 +1,197 @@
+{
+  "provenance": "Authored literal full-width PCM and own packets/neutral VP9; offline only",
+  "cases": [
+    {
+      "name": "order1-negative",
+      "order": 1,
+      "sign": -1,
+      "stats": {
+        "ordinary": 206,
+        "escapes": 4,
+        "runs": 2,
+        "run_samples": 48,
+        "resumed_run_samples": 0,
+        "adaptive_negative": 9,
+        "adaptive_updates": 10,
+        "adaptive_positions": 1,
+        "adaptive_positive": 1
+      }
+    },
+    {
+      "name": "order1-positive",
+      "order": 1,
+      "sign": 1,
+      "stats": {
+        "ordinary": 206,
+        "escapes": 4,
+        "runs": 2,
+        "run_samples": 48,
+        "resumed_run_samples": 0,
+        "adaptive_positive": 9,
+        "adaptive_updates": 10,
+        "adaptive_positions": 1,
+        "adaptive_negative": 1
+      }
+    },
+    {
+      "name": "order2-negative",
+      "order": 2,
+      "sign": -1,
+      "stats": {
+        "ordinary": 206,
+        "escapes": 4,
+        "runs": 2,
+        "run_samples": 48,
+        "resumed_run_samples": 0,
+        "adaptive_negative": 6,
+        "adaptive_updates": 16,
+        "adaptive_positions": 3,
+        "adaptive_positive": 2
+      }
+    },
+    {
+      "name": "order2-positive",
+      "order": 2,
+      "sign": 1,
+      "stats": {
+        "ordinary": 206,
+        "escapes": 4,
+        "runs": 2,
+        "run_samples": 48,
+        "resumed_run_samples": 0,
+        "adaptive_positive": 6,
+        "adaptive_updates": 16,
+        "adaptive_positions": 3,
+        "adaptive_negative": 2
+      }
+    },
+    {
+      "name": "order4-negative",
+      "order": 4,
+      "sign": -1,
+      "stats": {
+        "ordinary": 206,
+        "escapes": 4,
+        "runs": 2,
+        "run_samples": 48,
+        "resumed_run_samples": 0,
+        "adaptive_negative": 10,
+        "adaptive_updates": 28,
+        "adaptive_positions": 14,
+        "adaptive_positive": 4
+      }
+    },
+    {
+      "name": "order4-positive",
+      "order": 4,
+      "sign": 1,
+      "stats": {
+        "ordinary": 206,
+        "escapes": 4,
+        "runs": 1,
+        "run_samples": 47,
+        "resumed_run_samples": 0,
+        "adaptive_positive": 10,
+        "adaptive_updates": 28,
+        "adaptive_positions": 14,
+        "adaptive_negative": 4
+      }
+    },
+    {
+      "name": "order8-negative",
+      "order": 8,
+      "sign": -1,
+      "stats": {
+        "ordinary": 208,
+        "escapes": 4,
+        "runs": 1,
+        "run_samples": 45,
+        "resumed_run_samples": 0,
+        "adaptive_negative": 11,
+        "adaptive_updates": 39,
+        "adaptive_positions": 240,
+        "adaptive_positive": 8
+      }
+    },
+    {
+      "name": "order8-positive",
+      "order": 8,
+      "sign": 1,
+      "stats": {
+        "ordinary": 208,
+        "escapes": 4,
+        "runs": 1,
+        "run_samples": 45,
+        "resumed_run_samples": 0,
+        "adaptive_positive": 11,
+        "adaptive_updates": 39,
+        "adaptive_positions": 240,
+        "adaptive_negative": 8
+      }
+    },
+    {
+      "name": "order16-negative",
+      "order": 16,
+      "sign": -1,
+      "stats": {
+        "ordinary": 214,
+        "escapes": 5,
+        "runs": 1,
+        "run_samples": 38,
+        "resumed_run_samples": 0,
+        "adaptive_negative": 18,
+        "adaptive_updates": 63,
+        "adaptive_positions": 63488,
+        "adaptive_positive": 11
+      }
+    },
+    {
+      "name": "order16-positive",
+      "order": 16,
+      "sign": 1,
+      "stats": {
+        "ordinary": 215,
+        "escapes": 4,
+        "runs": 1,
+        "run_samples": 38,
+        "resumed_run_samples": 0,
+        "adaptive_positive": 18,
+        "adaptive_updates": 61,
+        "adaptive_positions": 63488,
+        "adaptive_negative": 10
+      }
+    },
+    {
+      "name": "order30-negative",
+      "order": 30,
+      "sign": -1,
+      "stats": {
+        "ordinary": 227,
+        "escapes": 10,
+        "runs": 1,
+        "run_samples": 20,
+        "resumed_run_samples": 0,
+        "adaptive_negative": 27,
+        "adaptive_updates": 100,
+        "adaptive_positions": 1056964608,
+        "adaptive_positive": 19
+      }
+    },
+    {
+      "name": "order30-positive",
+      "order": 30,
+      "sign": 1,
+      "stats": {
+        "ordinary": 227,
+        "escapes": 10,
+        "runs": 1,
+        "run_samples": 20,
+        "resumed_run_samples": 0,
+        "adaptive_positive": 27,
+        "adaptive_updates": 98,
+        "adaptive_positions": 1056964608,
+        "adaptive_negative": 18
+      }
+    }
+  ]
+}

@@ -1016,12 +1016,12 @@ impl Strategy {
         self.subnd = subnd;
         if banding_stated {
             for bnd in 1..subnd {
-                self.bndstrc[bnd] = bits.flag();
+                self.bndstrc[self.cplbegf + bnd] = bits.flag();
             }
         }
         let mut merged = 0;
         for bnd in 1..subnd {
-            if self.bndstrc[bnd] {
+            if self.bndstrc[self.cplbegf + bnd] {
                 merged += 1;
             }
         }
@@ -1120,7 +1120,9 @@ impl Strategy {
         let mut relative = 0;
         while bnd < self.bnd {
             let mut span = 1;
-            while relative + span < self.subnd && self.bndstrc[relative + span] {
+            while relative + span < self.subnd
+                && self.bndstrc[self.cplbegf + relative + span]
+            {
                 span += 1;
             }
             for offset in 0..span {
@@ -1445,6 +1447,7 @@ pub struct Ac3Decoder {
     core: Core,
     /// Samples still owed to `ENCODER_DELAY`, which the stream's first blocks pay off.
     lead: usize,
+    initial_lead: usize,
 }
 
 impl Ac3Decoder {
@@ -1470,7 +1473,16 @@ impl Ac3Decoder {
             channels: usize::from(channels),
             core: Core::new(),
             lead: ENCODER_DELAY,
+            initial_lead: ENCODER_DELAY,
         })
+    }
+
+    /// Containers express priming and padding in their own presentation windows.
+    pub(crate) fn for_container(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
+        let mut decoder = Self::new(configuration, sample_rate, channels)?;
+        decoder.lead = 0;
+        decoder.initial_lead = 0;
+        Ok(decoder)
     }
 
     /// Current audio specification: the rate and channel count the track states,
@@ -1503,7 +1515,15 @@ impl Ac3Decoder {
             // whatever follows the packet.
             bits.data = &raw[..usable];
             let mut samples = Vec::with_capacity(silence);
-            if usable == header.frame_bytes && self.syncframe(header, &mut bits, &mut samples) {
+            let protected = usable == header.frame_bytes && frame_crc_valid(&raw[..usable]);
+            let coded_rate = SAMPLE_RATES[header.rate];
+            if protected && coded_rate != self.sample_rate {
+                return Err(invalid(&format!(
+                    "AC-3 frame sample rate {coded_rate} Hz disagrees with configured {} Hz",
+                    self.sample_rate
+                )));
+            }
+            if protected && self.syncframe(header, &mut bits, &mut samples) {
                 samples.truncate(silence);
             } else {
                 samples.clear();
@@ -2280,6 +2300,31 @@ fn ifft(re: &mut [f32], im: &mut [f32], twc: &[f32; FFT], tws: &[f32; FFT]) {
     }
 }
 
+/// A/52 section 7.10.1: full-frame CRC2 covers every byte after the syncword.
+/// A complete protected frame has a zero remainder with polynomial 0x8005.
+const AC3_CRC_TABLE: [u16; 256] = {
+    let mut table = [0u16; 256];
+    let mut index = 0;
+    while index < 256 {
+        let mut crc = (index as u16) << 8;
+        let mut bit = 0;
+        while bit < 8 {
+            crc = (crc << 1) ^ if crc & 0x8000 != 0 { 0x8005 } else { 0 };
+            bit += 1;
+        }
+        table[index] = crc;
+        index += 1;
+    }
+    table
+};
+pub(crate) fn frame_crc_valid(frame: &[u8]) -> bool {
+    let mut crc = 0u16;
+    for &byte in frame.get(2..).unwrap_or_default() {
+        crc = (crc << 8) ^ AC3_CRC_TABLE[usize::from((crc >> 8) as u8 ^ byte)];
+    }
+    frame.len() >= 4 && crc == 0
+}
+
 impl AudioDecode for Ac3Decoder {
     /// Decode every syncframe of the packet. A packet is normally one frame or a few,
     /// and each contributes its 1536 samples per channel.
@@ -2317,7 +2362,7 @@ impl AudioDecode for Ac3Decoder {
     /// after a seek the same packet rather than the same signal plus different noise.
     fn reset(&mut self) {
         self.core = Core::new();
-        self.lead = ENCODER_DELAY;
+        self.lead = self.initial_lead;
     }
 }
 

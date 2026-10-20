@@ -79,7 +79,7 @@ fn multilayer_sps_base_layer_pixels_timing_seek_and_rewind_accept() {
     }
 }
 #[test]
-fn multilayer_sps_malformed_rbsp_is_invalid_and_three_d_remains_refusal() {
+fn multilayer_sps_malformed_rbsp_and_missing_three_d_fields_are_invalid() {
     for seed in ["main-ipb", "main10-ipb"] {
         for kind in ["missing-constraint", "missing-stop"] {
             let bytes = data(&name(seed, kind));
@@ -91,7 +91,7 @@ fn multilayer_sps_malformed_rbsp_is_invalid_and_three_d_remains_refusal() {
             assert!(matches!(result, Err(fvid::Error::Invalid(_))));
         }
         let e = parse(data(&name(seed, "three-d"))).unwrap_err();
-        assert!(matches!(e, fvid::Error::Unsupported(_)));
-        assert_eq!(e.to_string(), "HEVC 3D SPS extension is not implemented");
+        assert!(matches!(e, fvid::Error::Invalid(_)));
+        assert_eq!(e.to_string(), "truncated HEVC 3D SPS extension");
     }
 }

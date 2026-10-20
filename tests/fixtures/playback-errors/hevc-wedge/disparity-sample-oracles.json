@@ -1,0 +1,6443 @@
+{
+  "provenance": "Owned PCM/CABAC depth movie and independent per-output-sample Python Fraction oracle for I-300..I-312. Extreme public arithmetic cases are component ranges, not coded MV acceptance. No FFmpeg, private source or network.",
+  "dimensions": [
+    32,
+    32
+  ],
+  "values": [
+    -3,
+    -1,
+    2,
+    4
+  ],
+  "precision": 2,
+  "depth": 8,
+  "cases": [
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 0
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 64
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 128
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 192
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 256
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 320
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 384
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 448
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 512
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 576
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 640
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 704
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 768
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 832
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 896
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 960
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 1024
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 1088
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 1152
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 1216
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 1280
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 1344
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 1408
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 1472
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 1536
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 1600
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 1664
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 1728
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 1792
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 1856
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 1920
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 1984
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 2048
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 2112
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 2176
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 2240
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 2304
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 2368
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 2432
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 2496
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 2560
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 2624
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 2688
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 2752
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 2816
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 2880
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 2944
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 3008
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 3072
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 3136
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 3200
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 3264
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 3328
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 3392
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 3456
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 3520
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 3584
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 3648
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 3712
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 3776
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 3840
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 3904
+    },
+    {
+      "block": [
+        8,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 3968
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 4032
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 4160
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 4288
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 4416
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 4544
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 4672
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 4800
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 4928
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 5056
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 5184
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 5312
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 5440
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 5568
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 5696
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 5824
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 5952
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 6080
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 6208
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 6336
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 6464
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 6592
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 6720
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 6848
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 6976
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 7104
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 7232
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 7360
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 7488
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 7616
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 7744
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 7872
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 8000
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 8128
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 8256
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 8384
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 8512
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 8640
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 8768
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 8896
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 9024
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 9152
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 9280
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 9408
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 9536
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 9664
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 9792
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 9920
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 10048
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 10176
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 10304
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 10432
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 10560
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 10688
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 10816
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 10944
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 11072
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 11200
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 11328
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 11456
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 11584
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 11712
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 11840
+    },
+    {
+      "block": [
+        16,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 11968
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 12096
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 12224
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 12352
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 12480
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 12608
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 12736
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 12864
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 12992
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 13120
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 13248
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 13376
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 13504
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 13632
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 13760
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 13888
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 14016
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 14144
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 14272
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 14400
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 14528
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 14656
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 14784
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 14912
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 15040
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 15168
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 15296
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 15424
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 15552
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 15680
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 15808
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 15936
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 16064
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 16192
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 16320
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 16448
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 16576
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 16704
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 16832
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 16960
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 17088
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 17216
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 17344
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 17472
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 17600
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 17728
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 17856
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 17984
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 18112
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 18240
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 18368
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 18496
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 18624
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 18752
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 18880
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 19008
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 19136
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 19264
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 19392
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 19520
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 19648
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 19776
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 19904
+    },
+    {
+      "block": [
+        8,
+        16
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 20032
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 20160
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 21184
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 22208
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 23232
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 24256
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 25280
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 26304
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 27328
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 28352
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 29376
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 30400
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 31424
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 32448
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 33472
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 34496
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 35520
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 36544
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 37568
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 38592
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 39616
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 40640
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 41664
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 42688
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 43712
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 44736
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 45760
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 46784
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 47808
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 48832
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 49856
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 50880
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 51904
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 52928
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 53952
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 54976
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 56000
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 57024
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 58048
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 59072
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 60096
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 61120
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 62144
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 63168
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 64192
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 65216
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 66240
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 67264
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 68288
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 69312
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 70336
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 71360
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 72384
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 73408
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 74432
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 75456
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 76480
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 77504
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 78528
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 79552
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 80576
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 81600
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 82624
+    },
+    {
+      "block": [
+        32,
+        32
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 83648
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 84672
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 84704
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 84736
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 84768
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 84800
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 84832
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 84864
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 84896
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 84928
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 84960
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 84992
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85024
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85056
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85088
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85120
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85152
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85184
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85216
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85248
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85280
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85312
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85344
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85376
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85408
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85440
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85472
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85504
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85536
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85568
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85600
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85632
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85664
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85696
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85728
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85760
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85792
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85824
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85856
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85888
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 85920
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 85952
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 85984
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86016
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86048
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86080
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86112
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86144
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86176
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86208
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86240
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86272
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86304
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86336
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86368
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86400
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86432
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86464
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86496
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86528
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86560
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86592
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86624
+    },
+    {
+      "block": [
+        8,
+        4
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": true,
+      "offset": 86656
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86688
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86720
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 86752
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86784
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86816
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 86848
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86880
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 86912
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 86944
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 86976
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87008
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87040
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87072
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87104
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87136
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87168
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87200
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87232
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87264
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87296
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87328
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87360
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87392
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87424
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87456
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87488
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87520
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87552
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87584
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87616
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87648
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87680
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87712
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87744
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87776
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87808
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87840
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87872
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 87904
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 87936
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 87968
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        5,
+        9
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88000
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88032
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88064
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        0,
+        0
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88096
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88128
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88160
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -3,
+        2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88192
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88224
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88256
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -2,
+        -2
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88288
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88320
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88352
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        1,
+        3
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88384
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88416
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88448
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        125,
+        -129
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88480
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88512
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88544
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        -9223372036854775808,
+        9223372036854775807
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88576
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 0,
+      "horizontal": false,
+      "offset": 88608
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 1,
+      "horizontal": false,
+      "offset": 88640
+    },
+    {
+      "block": [
+        4,
+        8
+      ],
+      "origin": [
+        31,
+        31
+      ],
+      "vector": [
+        9223372036854775807,
+        -9223372036854775808
+      ],
+      "part": 2,
+      "horizontal": false,
+      "offset": 88672
+    }
+  ]
+}

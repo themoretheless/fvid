@@ -1,0 +1,26 @@
+{
+  "provenance": "Existing short authored native AC3 stereo tone/coupled pink-noise/32k mono references read in place. Sample-exact seek is compared with full continuous native decoding; no reference-quality codec claim. Short authored VP9/PCM companion. No private input/encoder/network.",
+  "cases": [
+    {
+      "name": "stereo",
+      "source": "audio/ac3-stereo.ac3",
+      "rate": 48000,
+      "channels": 2,
+      "sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb"
+    },
+    {
+      "name": "coupled",
+      "source": "audio/ac3-coupled.ac3",
+      "rate": 48000,
+      "channels": 2,
+      "sha256": "36072c0de62aa1f4655ceaae9c87cf8c5dd142ce859eca17ff6c9ef3a836823a"
+    },
+    {
+      "name": "mono32",
+      "source": "audio/ac3-mono-32k.ac3",
+      "rate": 32000,
+      "channels": 1,
+      "sha256": "df6ee1cb2a06855fb11bddfe0485367ef535b70e37569c10565274869daa1530"
+    }
+  ]
+}

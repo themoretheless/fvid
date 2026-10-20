@@ -1,0 +1,248 @@
+{
+  "provenance": "Twenty-four authored nativePCM/constantFLACtracks at six sample-clock boundaries. Independent exactinteger endpoint versusnearest-nanosecond floatduration;three clockcases round upward andthree healthycontrols. Short VP9/PCMcompanion,no encoder/network/private media.",
+  "cases": [
+    {
+      "file": "wav-44100-128-3.wav",
+      "kind": "wav",
+      "rate": 44100,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 8707482
+    },
+    {
+      "file": "aiff-44100-128-3.aiff",
+      "kind": "aiff",
+      "rate": 44100,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 8707482
+    },
+    {
+      "file": "au-44100-128-3.au",
+      "kind": "au",
+      "rate": 44100,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 8707482
+    },
+    {
+      "file": "flac-44100-128-3.flac",
+      "kind": "flac",
+      "rate": 44100,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 8707482
+    },
+    {
+      "file": "wav-44100-64-3.wav",
+      "kind": "wav",
+      "rate": 44100,
+      "samples": 192,
+      "size": 64,
+      "count": 3,
+      "end_ns": 4353741
+    },
+    {
+      "file": "aiff-44100-64-3.aiff",
+      "kind": "aiff",
+      "rate": 44100,
+      "samples": 192,
+      "size": 64,
+      "count": 3,
+      "end_ns": 4353741
+    },
+    {
+      "file": "au-44100-64-3.au",
+      "kind": "au",
+      "rate": 44100,
+      "samples": 192,
+      "size": 64,
+      "count": 3,
+      "end_ns": 4353741
+    },
+    {
+      "file": "flac-44100-64-3.flac",
+      "kind": "flac",
+      "rate": 44100,
+      "samples": 192,
+      "size": 64,
+      "count": 3,
+      "end_ns": 4353741
+    },
+    {
+      "file": "wav-48000-64-1.wav",
+      "kind": "wav",
+      "rate": 48000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 1333333
+    },
+    {
+      "file": "aiff-48000-64-1.aiff",
+      "kind": "aiff",
+      "rate": 48000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 1333333
+    },
+    {
+      "file": "au-48000-64-1.au",
+      "kind": "au",
+      "rate": 48000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 1333333
+    },
+    {
+      "file": "flac-48000-64-1.flac",
+      "kind": "flac",
+      "rate": 48000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 1333333
+    },
+    {
+      "file": "wav-48000-128-1.wav",
+      "kind": "wav",
+      "rate": 48000,
+      "samples": 128,
+      "size": 128,
+      "count": 1,
+      "end_ns": 2666666
+    },
+    {
+      "file": "aiff-48000-128-1.aiff",
+      "kind": "aiff",
+      "rate": 48000,
+      "samples": 128,
+      "size": 128,
+      "count": 1,
+      "end_ns": 2666666
+    },
+    {
+      "file": "au-48000-128-1.au",
+      "kind": "au",
+      "rate": 48000,
+      "samples": 128,
+      "size": 128,
+      "count": 1,
+      "end_ns": 2666666
+    },
+    {
+      "file": "flac-48000-128-1.flac",
+      "kind": "flac",
+      "rate": 48000,
+      "samples": 128,
+      "size": 128,
+      "count": 1,
+      "end_ns": 2666666
+    },
+    {
+      "file": "wav-96000-64-1.wav",
+      "kind": "wav",
+      "rate": 96000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 666666
+    },
+    {
+      "file": "aiff-96000-64-1.aiff",
+      "kind": "aiff",
+      "rate": 96000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 666666
+    },
+    {
+      "file": "au-96000-64-1.au",
+      "kind": "au",
+      "rate": 96000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 666666
+    },
+    {
+      "file": "flac-96000-64-1.flac",
+      "kind": "flac",
+      "rate": 96000,
+      "samples": 64,
+      "size": 64,
+      "count": 1,
+      "end_ns": 666666
+    },
+    {
+      "file": "wav-8000-128-3.wav",
+      "kind": "wav",
+      "rate": 8000,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 48000000
+    },
+    {
+      "file": "aiff-8000-128-3.aiff",
+      "kind": "aiff",
+      "rate": 8000,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 48000000
+    },
+    {
+      "file": "au-8000-128-3.au",
+      "kind": "au",
+      "rate": 8000,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 48000000
+    },
+    {
+      "file": "flac-8000-128-3.flac",
+      "kind": "flac",
+      "rate": 8000,
+      "samples": 384,
+      "size": 128,
+      "count": 3,
+      "end_ns": 48000000
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "wav-44100-128-3.wav": "74a21cea1d0eef6deaa51508f6233a29daaa030d99b545492d75321fcef767da",
+    "aiff-44100-128-3.aiff": "e48b054c8e98bb80ee05963051d1a838e568cf114aa86f0ea5b0dfebaafddbd4",
+    "au-44100-128-3.au": "f95bc4ea1ad663bfa442109fa28e426af5c2d363cafcaf2574c0da2a8f36d8ae",
+    "flac-44100-128-3.flac": "9b1a44e2174e45bb762293981d7c7e15fce274b604ecad7a9e77d487ce87030b",
+    "wav-44100-64-3.wav": "926f705fb9f9de45ecb92bfcb0f5353b06e03a0204a78baf641c12581188963d",
+    "aiff-44100-64-3.aiff": "f9e80d01b25c01c985a3b5a8a01693e79b371ed97f0f0fe690af9767f0948674",
+    "au-44100-64-3.au": "2be6fcb763c723aa95f2bffdd65493a7fa78781167261411818019c822d58feb",
+    "flac-44100-64-3.flac": "1dd5031ab1eb1cb752278535dfa5c6d0afd76ce46e6936a12557b0f20b98222a",
+    "wav-48000-64-1.wav": "e501e0ae399258075eed48f3c5890fa6df27704a5ab16b8345dca7cb341e25f2",
+    "aiff-48000-64-1.aiff": "3132248ce31abee183e462d576592d846cfc1023766b3409059576b2b4641571",
+    "au-48000-64-1.au": "490392e41dbd36a6fb7e8d7a6188a7c8119bbe3581e247e8b6f67281f4db3608",
+    "flac-48000-64-1.flac": "cac35f31a91633576d277b9ef4c83110d09de2d3943a72dbdab4b7efdcf5c0bd",
+    "wav-48000-128-1.wav": "b5465f7a1c3454c6e9988559287e5b88243864396720c3bfd8565b83998a3354",
+    "aiff-48000-128-1.aiff": "18530446f4f2877aa0ff10d85df9f494dd57f8dc2886cee4e70a0613b36452dd",
+    "au-48000-128-1.au": "6d0585b9144578a473caf2990003712eedfdf6be9a2d6cb2dc8eddc17b3e94a4",
+    "flac-48000-128-1.flac": "ec79031450e96e15206f1740584527925e34d80f473b961fff41cb18f903cfc1",
+    "wav-96000-64-1.wav": "d0c47e9e98d11e7244951c22d8f50b2ffa642508f1e02b27bd9ecd7e99107376",
+    "aiff-96000-64-1.aiff": "301d220c5bb29f3d7df423450728436d42894ff2fd024790d65eb111aa94615f",
+    "au-96000-64-1.au": "fa664554b70ece978f087d68b149fcb75bddc72dbbf57497ac54ca131a5d4611",
+    "flac-96000-64-1.flac": "e9627d40e1502283d70dd139b856c47ea646b08c6ed12ec0f45192d60f81978d",
+    "wav-8000-128-3.wav": "4f052f1b01f8b699309635d7e57d5cead030a0bd8a901971c9b3acaa778fe058",
+    "aiff-8000-128-3.aiff": "c6df00fc7efcc6ab95bdd2a1b0b87ffc4c64691e105280471e4a8e671015e7e4",
+    "au-8000-128-3.au": "db98c2e0bb7784945ddc7907a4f673fff7a3bfb31637d12e2725c168c9c07799",
+    "flac-8000-128-3.flac": "8b7b9662184d34ee82c5ae9c7d8380550584a25aa50f23d85714252095a42bb4"
+  }
+}

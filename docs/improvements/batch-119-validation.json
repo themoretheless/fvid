@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0137"
+  ],
+  "checked_at": "2026-10-16T08:13:21.265053+00:00",
+  "before": [
+    "evidence/batch-119-before-isolated.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-119-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-119-reader.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-119-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-119-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Seven authored shortconstant16bitFLACstreams coverthe127/128coded-number boundary forfixed frameandvariable samplenumbers. Allauthored accessunits independently decode through nativecodec toliteralPCMbeforeindexadmission. Beforefour validstreams loseindexedframesandfailSTREAMINFOsample totals;threecontrols healthy.",
+    "The headerindex decoder mistook leading-onecount forcontinuationcount,consumingoneextrabyte. Readtotalcodedlengthcorrectly,validatecontinuations/canonicalminimum and31bitfixed/36bitvariablebounds. No compresseddecoderchange;it alreadyhandlescanonicalnumberscorrectly.",
+    "Thirteen canonicalheader-only probes cover1..7byteboundaryranges;12multi-byteheaders failbeforeandpassafter.Nativecodecindependentlyacceptseachisolatedframe.These areheaderconformance probes,notcomplete longaudiofilesorlongseekqualification.Sixmalformednumberguards remainrefused byindexheaderandnativecodec.",
+    "Aftersevenstreams preserveeveryauthoredpacket/PCMbyte/PTS,and14actualworkermidpacket/EOFtargets plusfullplay/rewind pass.22readerunits,sixintegrations,nativeFLACmatrix,video-companions/layouts,fixture reproduction andplayerbuildpass.",
+    "Initialcombinedtesthit an unrelated1nsfloat-durationEOFmismatch inhealthycontrol. Isolatedbaseline usesindependentcanonicalintegerend instead ofrounded publicduration;correct-number failurethenconfirmed.Futurezero-IDclockfollowuptrackedseparately. No claim thatthefirstunisolatedfailureprovesUTF8bug.",
+    "PureauthoredrawFLACplusnativeVP9/PCMcompanion,noFFmpeg/network/private media/performance/physicalDACclaim."
+  ],
+  "sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9639.html",
+      "section": "9.1.5CodedNumber;Table18",
+      "rule": "UTF8-likeleadingonesencode totalbytecount.Framevaluesare31bits/samplevalues36bits;canonicalcodesare1..7bytes."
+    }
+  ],
+  "compatibility": "Validmulti-byteFLACcodednumbers nowindexandplay;malformed/noncanonicalnumbersrefuse.PublicsignaturesandPCMdecoderunchanged.",
+  "counting": "One coded-number field-parser defect;fourfailingstreams,wideheaders,malformedguards andduration-isolation add noextra IDs."
+}

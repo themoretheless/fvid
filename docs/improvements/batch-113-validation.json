@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0132"
+  ],
+  "checked_at": "2026-10-16T07:19:15.219803+00:00",
+  "before": [
+    "evidence/batch-113-extensions-before-verified.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-113-extensions-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-113-extensions-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-113-extensions-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-113-extensions-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Three authored extended tempo events(length4/5/127)were incorrectly refused despite a complete3byte250000us tempo prefix. Independent canonical tempo/PCMcontrol plus11valid inputs coverknown-tempo extensions,EndOfTrackextra fields andpost-EOTpadding;three too-short tempo inputs require exact refusal.",
+    "Read the defined tempo3byteprefix andignore bounded trailing fields according to genericSMFmeta extension rule. Zero tempo andshort prefixes remain refused. Extended EOTalready supported andis only a preserved control,not a new fix.",
+    "After every valid input matches fullnativePCM andactual worker play/rewind/100msseek. Three malformed short inputs fail withspecifictempo-length cause atparser andreader admission.11integrations,17parser units,fixture reproduction andcurrent player build pass.",
+    "Rejected initial experiment: strictzero-length EOTrefusal contradicted genericSMFextension rule. Patch reverted,wrong refusal tests removed andauthored bytes archived underbatch-113-rejected-strict-end-fixtures;no acceptedID for that experiment. Original logs retained. One later fixture-path mistake andone incorrect test-target name were corrected before qualified runs.",
+    "Raw MIDIandindependent syntheticVP9/PCMcompanion;no FFmpeg/network/private media/performance/physical output/fullGMclaim."
+  ],
+  "sources": [
+    {
+      "url": "https://www.cs.cmu.edu/~music/cmp/archives/cmsip/readings/Standard-MIDI-file-format-updated.pdf",
+      "section": "Generic meta-event syntax pages6..7;FF51",
+      "rule": "Known meta-events may be bigger than expected;ignore unknown trailing bytes.FF51defines a3byte tempo prefix."
+    }
+  ],
+  "compatibility": "Validextended tempo events now play;complete length is still bounded bytrackbytes.Too-short/zero tempos stay invalid.Public APIs unchanged.",
+  "counting": "One extended-tempo compatibility defect;EOTcontrols/rejected strict experiment/refusalvariants add noextra ID."
+}

@@ -1,0 +1,16 @@
+{
+  "file": "y4m-interrupted-header.y4m",
+  "sha256": "59b8b5b6a103c5ce61d170471a6857aa6a27655aeeb36c399c02a3b005cddf95",
+  "interrupt_at": [
+    0,
+    8,
+    34,
+    37,
+    46,
+    70
+  ],
+  "frames": 3,
+  "width": 2,
+  "height": 2,
+  "provenance": "Three authored raw progressive YUV420 pictures; no source media or external tools."
+}

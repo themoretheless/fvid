@@ -1,0 +1,245 @@
+{
+  "provenance": "Own synthetic three-view PCM/CABAC movie and explicit camera VPS fields. No private data, external codec or network; tests read pre-generated files.",
+  "cases": [
+    {
+      "name": "none",
+      "precision": 0,
+      "views": [
+        [
+          false,
+          []
+        ],
+        [
+          false,
+          []
+        ]
+      ],
+      "error": null,
+      "video": true
+    },
+    {
+      "name": "static",
+      "precision": 5,
+      "views": [
+        [
+          false,
+          [
+            [
+              0,
+              [
+                3,
+                -4,
+                5,
+                -6
+              ]
+            ]
+          ]
+        ],
+        [
+          false,
+          [
+            [
+              0,
+              [
+                128,
+                -64,
+                7,
+                -8
+              ]
+            ],
+            [
+              1,
+              [
+                -11,
+                12,
+                -13,
+                14
+              ]
+            ]
+          ]
+        ]
+      ],
+      "error": null,
+      "video": true
+    },
+    {
+      "name": "deferred",
+      "precision": 2,
+      "views": [
+        [
+          true,
+          [
+            [
+              0,
+              null
+            ]
+          ]
+        ],
+        [
+          true,
+          [
+            [
+              0,
+              null
+            ],
+            [
+              1,
+              null
+            ]
+          ]
+        ]
+      ],
+      "error": null,
+      "video": false
+    },
+    {
+      "name": "sparse",
+      "precision": 1,
+      "views": [
+        [
+          false,
+          [
+            [
+              65535,
+              [
+                2147483647,
+                -2147483647,
+                0,
+                1
+              ]
+            ]
+          ]
+        ],
+        [
+          false,
+          []
+        ]
+      ],
+      "error": null,
+      "video": false
+    },
+    {
+      "name": "bad-precision",
+      "precision": 6,
+      "views": [
+        [
+          false,
+          []
+        ],
+        [
+          false,
+          []
+        ]
+      ],
+      "error": "HEVC VPS camera precision exceeds range",
+      "video": true
+    },
+    {
+      "name": "duplicate",
+      "precision": 0,
+      "views": [
+        [
+          false,
+          []
+        ],
+        [
+          false,
+          [
+            [
+              0,
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ],
+            [
+              0,
+              [
+                5,
+                6,
+                7,
+                8
+              ]
+            ]
+          ]
+        ]
+      ],
+      "error": "duplicate HEVC VPS camera reference",
+      "video": true
+    },
+    {
+      "name": "bad-reference",
+      "precision": 0,
+      "views": [
+        [
+          false,
+          [
+            [
+              65536,
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          ]
+        ],
+        [
+          false,
+          []
+        ]
+      ],
+      "error": "HEVC VPS camera reference exceeds range",
+      "video": true
+    },
+    {
+      "name": "truncated",
+      "precision": 0,
+      "views": [
+        [
+          false,
+          [
+            [
+              0,
+              [
+                3,
+                -4,
+                5,
+                -6
+              ]
+            ]
+          ]
+        ],
+        [
+          false,
+          [
+            [
+              0,
+              [
+                128,
+                -64,
+                7,
+                -8
+              ]
+            ],
+            [
+              1,
+              [
+                -11,
+                12,
+                -13,
+                14
+              ]
+            ]
+          ]
+        ]
+      ],
+      "error": "truncated HEVC VPS 3D extension",
+      "video": true
+    }
+  ],
+  "opaque_namespace_control": "camera-parameters-unrelated-namespace.vps"
+}

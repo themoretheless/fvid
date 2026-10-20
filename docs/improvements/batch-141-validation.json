@@ -1,0 +1,41 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0150"
+  ],
+  "checked_at": "2026-10-16T15:08:38.272223+00:00",
+  "before": [
+    "evidence/batch-141-before.log",
+    "evidence/batch-141-acceptance-before.log",
+    "evidence/batch-141-xm-container-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-141-after.log",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-141-integration.log",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-141-units.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-141-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-141-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Dxx now changes the break row while retaining the destination order selected by an earlier Bxx on the same row. A later Bxx still overrides that order and resets the row to zero. Channel evaluation order and existing large-break normalization are preserved. Primary implementation inspection: evidence/batch-141-reference.json.",
+    "Before: three combined jump-then-break scores produce wrong literal order/row traces and different PCM. The first fixture visits nine rows instead of three, including order1 despite B02. Three controls (reverse command order,isolated B,isolated D) are already correct. Forced intended acceptance fails specifically on the incorrect trace.",
+    "After: all six literal traces and 24 mono/stereo PCM comparisons at11025/44100Hz match independent flattened-score controls exactly. Twelve actual worker targets compare independent control PCM through full play,rewind,midpoint seek and EOF; public durations match the independent score. No distinct pre-fix seek defect is claimed.",
+    "35 parser/decoder/reader units,related integrations,authored fixture reproduction and player build pass. Native authored VP9/PCM companion decodes; generation and ordinary tests need no FFmpeg,network or private media. Public interfaces and one-pass loop policy remain unchanged."
+  ],
+  "counting": "One compound Bxx/Dxx navigation defect; reverse ordering,multiple breaks,large targets and independent controls count zero extra IDs."
+}

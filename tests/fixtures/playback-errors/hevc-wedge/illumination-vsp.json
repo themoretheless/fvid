@@ -1,0 +1,5061 @@
+{
+  "provenance": "Owned PCM/CABAC CU-level VSP/IC/VSP transitions with independent depth, motion, interpolation and IC boundary oracle; no private data or external codec.",
+  "cases": [
+    {
+      "file": "illumination-vsp-64-0-0-4.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": false,
+      "scale": 4,
+      "oracle_offset": 0,
+      "motion_offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-64-0-0--4.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": false,
+      "scale": -4,
+      "oracle_offset": 6144,
+      "motion_offset": 8192,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1512
+    },
+    {
+      "file": "illumination-vsp-64-0-0-128.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": false,
+      "scale": 128,
+      "oracle_offset": 12288,
+      "motion_offset": 16384,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            147,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1523
+    },
+    {
+      "file": "illumination-vsp-64-0-0--128.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": false,
+      "scale": -128,
+      "oracle_offset": 18432,
+      "motion_offset": 24576,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-64-0-1-4.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": true,
+      "scale": 4,
+      "oracle_offset": 24576,
+      "motion_offset": 32768,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-64-0-1--4.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": true,
+      "scale": -4,
+      "oracle_offset": 30720,
+      "motion_offset": 40960,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1512
+    },
+    {
+      "file": "illumination-vsp-64-0-1-128.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": true,
+      "scale": 128,
+      "oracle_offset": 36864,
+      "motion_offset": 49152,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            147,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1523
+    },
+    {
+      "file": "illumination-vsp-64-0-1--128.mp4",
+      "size": 64,
+      "direct": false,
+      "refine": true,
+      "scale": -128,
+      "oracle_offset": 43008,
+      "motion_offset": 57344,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-64-1-0-4.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": false,
+      "scale": 4,
+      "oracle_offset": 49152,
+      "motion_offset": 65536,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-64-1-0--4.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": false,
+      "scale": -4,
+      "oracle_offset": 55296,
+      "motion_offset": 73728,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1512
+    },
+    {
+      "file": "illumination-vsp-64-1-0-128.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": false,
+      "scale": 128,
+      "oracle_offset": 61440,
+      "motion_offset": 81920,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            147,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1523
+    },
+    {
+      "file": "illumination-vsp-64-1-0--128.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": false,
+      "scale": -128,
+      "oracle_offset": 67584,
+      "motion_offset": 90112,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-64-1-1-4.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": true,
+      "scale": 4,
+      "oracle_offset": 73728,
+      "motion_offset": 98304,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-64-1-1--4.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": true,
+      "scale": -4,
+      "oracle_offset": 79872,
+      "motion_offset": 106496,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1512
+    },
+    {
+      "file": "illumination-vsp-64-1-1-128.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": true,
+      "scale": 128,
+      "oracle_offset": 86016,
+      "motion_offset": 114688,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            147,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1523
+    },
+    {
+      "file": "illumination-vsp-64-1-1--128.mp4",
+      "size": 64,
+      "direct": true,
+      "refine": true,
+      "scale": -128,
+      "oracle_offset": 92160,
+      "motion_offset": 122880,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-128-0-0-4.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": false,
+      "scale": 4,
+      "oracle_offset": 98304,
+      "motion_offset": 131072,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-128-0-0--4.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": false,
+      "scale": -4,
+      "oracle_offset": 122880,
+      "motion_offset": 163840,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1511
+    },
+    {
+      "file": "illumination-vsp-128-0-0-128.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": false,
+      "scale": 128,
+      "oracle_offset": 147456,
+      "motion_offset": 196608,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            252,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            83,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            255,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            179,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            160,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            107,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1517
+    },
+    {
+      "file": "illumination-vsp-128-0-0--128.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": false,
+      "scale": -128,
+      "oracle_offset": 172032,
+      "motion_offset": 229376,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -204,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -237,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -145,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -215,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -175,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -255,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-128-0-1-4.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": true,
+      "scale": 4,
+      "oracle_offset": 196608,
+      "motion_offset": 262144,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-128-0-1--4.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": true,
+      "scale": -4,
+      "oracle_offset": 221184,
+      "motion_offset": 294912,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1511
+    },
+    {
+      "file": "illumination-vsp-128-0-1-128.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": true,
+      "scale": 128,
+      "oracle_offset": 245760,
+      "motion_offset": 327680,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            252,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            83,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            255,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            179,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            160,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            107,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1517
+    },
+    {
+      "file": "illumination-vsp-128-0-1--128.mp4",
+      "size": 128,
+      "direct": false,
+      "refine": true,
+      "scale": -128,
+      "oracle_offset": 270336,
+      "motion_offset": 360448,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -204,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -237,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -145,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -215,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -175,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -255,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-128-1-0-4.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": false,
+      "scale": 4,
+      "oracle_offset": 294912,
+      "motion_offset": 393216,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-128-1-0--4.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": false,
+      "scale": -4,
+      "oracle_offset": 319488,
+      "motion_offset": 425984,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1511
+    },
+    {
+      "file": "illumination-vsp-128-1-0-128.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": false,
+      "scale": 128,
+      "oracle_offset": 344064,
+      "motion_offset": 458752,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            252,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            83,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            255,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            179,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            160,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            107,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1517
+    },
+    {
+      "file": "illumination-vsp-128-1-0--128.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": false,
+      "scale": -128,
+      "oracle_offset": 368640,
+      "motion_offset": 491520,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -204,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -237,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -145,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -215,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -175,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -255,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    },
+    {
+      "file": "illumination-vsp-128-1-1-4.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": true,
+      "scale": 4,
+      "oracle_offset": 393216,
+      "motion_offset": 524288,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1516
+    },
+    {
+      "file": "illumination-vsp-128-1-1--4.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": true,
+      "scale": -4,
+      "oracle_offset": 417792,
+      "motion_offset": 557056,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -8,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -4,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -5,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -6,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -7,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -3,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -8,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1511
+    },
+    {
+      "file": "illumination-vsp-128-1-1-128.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": true,
+      "scale": 128,
+      "oracle_offset": 442368,
+      "motion_offset": 589824,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            252,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            83,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            87,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            255,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            179,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            173,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            160,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            107,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        }
+      ],
+      "changed_samples": 1517
+    },
+    {
+      "file": "illumination-vsp-128-1-1--128.mp4",
+      "size": 128,
+      "direct": true,
+      "refine": true,
+      "scale": -128,
+      "oracle_offset": 466944,
+      "motion_offset": 622592,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "ic": false,
+          "base": [
+            0,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "ic": true,
+          "base": [
+            -241,
+            0
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "ic": false,
+          "base": [
+            3,
+            -3
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "ic": false,
+          "base": [
+            -238,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -241,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -204,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "ic": false,
+          "base": [
+            -237,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -218,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -145,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "ic": false,
+          "base": [
+            -215,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -58,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -240,
+            0
+          ],
+          "subblock": [
+            8,
+            4
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -175,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "ic": false,
+          "base": [
+            -255,
+            0
+          ],
+          "subblock": [
+            4,
+            8
+          ]
+        }
+      ],
+      "changed_samples": 1520
+    }
+  ]
+}

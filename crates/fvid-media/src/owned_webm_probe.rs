@@ -71,6 +71,9 @@ pub fn try_probe_webm(path: &Path) -> Result<Option<MediaInfo>, String> {
             "V_MPEG4/ISO/AVC" => "h264",
             "V_MPEGH/ISO/HEVC" => "hevc",
             "V_FFV1" => "ffv1",
+            "A_MPEG/L1" => "mp1",
+            "A_MPEG/L2" => "mp2",
+            "A_MPEG/L3" => "mp3",
             "A_AAC" => "aac",
             "A_OPUS" => "opus",
             "A_VORBIS" => "vorbis",
@@ -208,12 +211,8 @@ mod tests {
             );
         }
         let encoded = root.join("webm-probe-content-encoding.mkv");
-        assert!(try_probe_webm(&encoded).unwrap().is_none());
-        assert!(
-            probe_webm(&encoded)
-                .unwrap_err()
-                .contains("content encoding")
-        );
+        assert_eq!(try_probe_webm(&encoded).unwrap().unwrap().streams[0].codec, "ffv1");
+        assert_eq!(probe_webm(&encoded).unwrap().streams[0].codec, "ffv1");
         let laced = root.join("webm-probe-laced.mkv");
         assert_eq!(try_probe_webm(&laced).unwrap().unwrap().streams[0].codec, "ffv1");
         let broken = root.join("webm-probe-segment-beyond-file.mkv");

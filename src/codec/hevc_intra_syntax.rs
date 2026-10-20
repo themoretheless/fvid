@@ -15,6 +15,61 @@ impl LumaCode {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DepthLumaCode {
+    Ordinary(LumaCode),
+    Wedge(usize),
+    Contour,
+}
+
+/// Annex I.7.3.8.5: mode extensions interleave with each PB's ordinary flag;
+/// ordinary mode values follow only after every PB flag has been consumed.
+pub fn read_depth_luma(
+    b: &mut impl ResidualBins,
+    nxn: bool,
+    log2_pb: u8,
+    enabled: [bool; 2],
+    nal_type: u8,
+    table: Option<&super::hevc_wedge::Table>,
+) -> Result<Vec<DepthLumaCode>> {
+    use super::hevc_depth_dc::{IntraMode, read_intra_mode};
+    if !(2..=6).contains(&log2_pb) || nxn && log2_pb == 6 {
+        return Err(crate::invalid("invalid HEVC depth intra partition size"));
+    }
+    let mut codes = Vec::with_capacity(if nxn { 4 } else { 1 });
+    for _ in 0..if nxn { 4 } else { 1 } {
+        codes.push(
+            match read_intra_mode(b, log2_pb, enabled, nal_type, table)? {
+                IntraMode::Ordinary => DepthLumaCode::Ordinary(LumaCode {
+                    mpm: b.decision(Syntax::PreviousIntraLuma, 0)?,
+                    value: 0,
+                }),
+                IntraMode::Wedge(index) => DepthLumaCode::Wedge(index),
+                IntraMode::Contour => DepthLumaCode::Contour,
+            },
+        );
+    }
+    for code in &mut codes {
+        if let DepthLumaCode::Ordinary(code) = code {
+            read_value(b, code)?;
+        }
+    }
+    Ok(codes)
+}
+
+fn read_value(b: &mut impl ResidualBins, code: &mut LumaCode) -> Result<()> {
+    if code.mpm {
+        if b.bypass()? {
+            code.value = 1 + u8::from(b.bypass()?);
+        }
+    } else {
+        for _ in 0..5 {
+            code.value = (code.value << 1) | u8::from(b.bypass()?);
+        }
+    }
+    Ok(())
+}
+
 /// Read one 2Nx2N or four NxN prediction-block codes, after PCM is excluded.
 /// No chroma bins are consumed; the caller reads chroma once for a 4:2:0 CU.
 pub fn read_luma(b: &mut impl ResidualBins, nxn: bool) -> Result<Vec<LumaCode>> {
@@ -27,15 +82,7 @@ pub fn read_luma(b: &mut impl ResidualBins, nxn: bool) -> Result<Vec<LumaCode>> 
         });
     }
     for code in &mut codes {
-        if code.mpm {
-            if b.bypass()? {
-                code.value = 1 + u8::from(b.bypass()?);
-            }
-        } else {
-            for _ in 0..5 {
-                code.value = (code.value << 1) | u8::from(b.bypass()?);
-            }
-        }
+        read_value(b, code)?;
     }
     Ok(codes)
 }

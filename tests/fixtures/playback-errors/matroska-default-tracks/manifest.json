@@ -1,0 +1,104 @@
+{
+  "provenance": "Nine authored60ms VP9/unknown-codec pairs and video/two PCM/subtitle tracks. All usable; default flags alone control priority. Empty/default values and late tracks. No private media/encoder/network.",
+  "spec": "https://www.matroska.org/technical/elements.html#FlagDefault",
+  "cases": [
+    {
+      "file": "prefer-second.mkv",
+      "side": 64,
+      "defaults": [
+        false,
+        true
+      ]
+    },
+    {
+      "file": "prefer-first.mkv",
+      "side": 16,
+      "defaults": [
+        true,
+        false
+      ]
+    },
+    {
+      "file": "both-default.mkv",
+      "side": 16,
+      "defaults": [
+        true,
+        true
+      ]
+    },
+    {
+      "file": "no-default.mkv",
+      "side": 16,
+      "defaults": [
+        false,
+        false
+      ]
+    },
+    {
+      "file": "empty-first.mkv",
+      "side": 16,
+      "defaults": [
+        true,
+        true
+      ]
+    },
+    {
+      "file": "empty-second.mkv",
+      "side": 64,
+      "defaults": [
+        false,
+        true
+      ]
+    },
+    {
+      "file": "missing-first.mkv",
+      "side": 16,
+      "defaults": [
+        true,
+        false
+      ]
+    },
+    {
+      "file": "late-prefer-second.mkv",
+      "side": 64,
+      "defaults": [
+        false,
+        true
+      ]
+    },
+    {
+      "file": "unsupported-default.mkv",
+      "side": 16,
+      "defaults": [
+        false,
+        true
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "invalid-value.mkv",
+      "error": "invalid Matroska FlagDefault"
+    },
+    {
+      "file": "duplicate-default.mkv",
+      "error": "duplicate Matroska FlagDefault"
+    }
+  ],
+  "sha256": {
+    "prefer-second.mkv": "31d8e15d2d4aa748f33e241e82b29ef23fd0a3b9473f1a9d913a1458c1b38380",
+    "prefer-first.mkv": "66822950beb31331647192f1914536b1e7f99e81beedffe3bd9941ba55aa6dc0",
+    "both-default.mkv": "7461ac8a21d583ba2b2033c5248361bf7ca249684484f37f762651a4756139b5",
+    "no-default.mkv": "83f030de09deed337ad0e9775844cf383cc9cf98fb97cf572444873957da128a",
+    "empty-first.mkv": "56ffc809c6d030e82ebe32890fef3e20ac19d32a11d4b16a3b75b76702768fdc",
+    "empty-second.mkv": "02e48a3763748a42157a0a2f4ee212fd552e32a122431cca92c5ac387b76b6d3",
+    "missing-first.mkv": "b530991a42a2805a3ef11a6e51c912fb722668fd71f11be629dc0eea95b64848",
+    "late-prefer-second.mkv": "3e92090bc9449ac2f93be6b85edab8b9deba93ffacdd3379d727ee21c322b533",
+    "unsupported-default.mkv": "a715dab360a68c4fd98727daa8a684be25effbbac5df55932a204784c441013b",
+    "invalid-value.mkv": "16cd86e38c6c3c2fcdaa6631ef52e98562f6aa705a75090b32b06a6379c5366e",
+    "duplicate-default.mkv": "b4f65f325e92015312f8766a8a2e440ce9386c2999ffe85c66606385f9f4ae0d",
+    "audiovisual.mkv": "9c4f283bde4f1585b0a7063deb7b49cf0b3db708fd2447a641990cae6cd351d5",
+    "expected-audio.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "movie-priority.mp4": "4033f5408cbc1b7ba4a6edf216940772b1fe205fce852599ae79d347a886e8d1"
+  }
+}

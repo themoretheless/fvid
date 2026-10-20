@@ -53,3 +53,16 @@ pub fn prioritize_playback_thread() {
         }
     }
 }
+
+/// Prepare optional caches below interactive playback scheduling priority.
+pub fn background_preparation_thread() {
+    #[cfg(target_os = "macos")]
+    {
+        unsafe extern "C" {
+            fn pthread_set_qos_class_self_np(class: u32, relative_priority: i32) -> i32;
+        }
+        // SAFETY: affects only this thread, no pointers; 0x11 is utility QoS.
+        let status = unsafe { pthread_set_qos_class_self_np(0x11, 0) };
+        if status != 0 { eprintln!("FVid: preparation thread QoS request failed ({status})"); }
+    }
+}

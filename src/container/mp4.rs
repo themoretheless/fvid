@@ -246,6 +246,7 @@ pub struct SkippedTrack {
 pub struct Mp4Reader<R> {
     reader: R,
     tracks: Vec<Track>,
+    track_header_flags: Vec<u32>,
     /// Tracks read all the way to their sample entry and then set aside because
     /// that entry names a coding with no arm here. Kept so a caller can tell a
     /// coding it has to implement apart from a file it failed to read.
@@ -482,6 +483,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         }
         let (movie_timescale, movie_duration) = media_time(required(&movie, b"mvhd")?)?;
         let mut tracks = Vec::new();
+        let mut track_header_flags = Vec::new();
         let mut refused = Vec::new();
         let mut remaining = limits.samples;
         let mut skipped = 0usize;
@@ -489,7 +491,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             if tracks.len() >= limits.tracks {
                 return Err(invalid("MP4 track limit exceeded"));
             }
-            let Some(track) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
+            let Some((track, flags)) = parse_track(atom.data, &mdats, remaining, fragmented, &mut refused)?
             else {
                 skipped += 1;
                 continue;
@@ -499,6 +501,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
             }
             remaining -= track.samples.cost();
             tracks.push(track);
+            track_header_flags.push(flags);
         }
         if fragmented {
             index_fragments(
@@ -534,6 +537,7 @@ impl<R: Read + Seek> Mp4Reader<R> {
         Ok(Self {
             reader,
             tracks,
+            track_header_flags,
             refused,
             chapters,
             tags,
@@ -541,6 +545,22 @@ impl<R: Read + Seek> Mp4Reader<R> {
             limits,
             position: u64::MAX,
         })
+    }
+    /// The stored tkhd flags for an indexed track, without the version byte.
+    pub fn track_header_flags(&self, index: usize) -> Option<u32> {
+        self.track_header_flags.get(index).copied()
+    }
+    /// Automatic candidates in file order, preferring enabled movie tracks,
+    /// then enabled tracks. Preserve the legacy fallback if none is enabled.
+    /// Explicit packet/track access is unaffected by this preference.
+    pub fn automatic_track_indices(&self, handlers: &[[u8; 4]]) -> Vec<usize> {
+        let mut candidates: Vec<_> = self.tracks.iter().enumerate()
+            .filter_map(|(index,t)|handlers.contains(&t.handler).then_some(index)).collect();
+        let rank = |index| match self.track_header_flags[index] & 3 { 3 => 2, 1 => 1, _ => 0 };
+        if let Some(best) = candidates.iter().map(|&index|rank(index)).max() {
+            candidates.retain(|&index|rank(index)==best);
+        }
+        candidates
     }
     pub fn tracks(&self) -> &[Track] {
         &self.tracks
@@ -581,7 +601,12 @@ impl<R: Read + Seek> Mp4Reader<R> {
         // Sequential playback reads samples back-to-back inside one mdat chunk,
         // so the file is usually already positioned at the next packet.
         if self.position != sample.offset {
-            self.reader.seek(SeekFrom::Start(sample.offset))?;
+            // A failed seek need not leave the source cursor unchanged.
+            self.position = u64::MAX;
+            if let Err(error) = self.reader.seek(SeekFrom::Start(sample.offset)) {
+                output.clear();
+                return Err(error.into());
+            }
         }
         if let Err(error) = self.reader.read_exact(output) {
             output.clear();
@@ -949,10 +974,11 @@ fn parse_track(
     limit: usize,
     fragmented: bool,
     refused: &mut Vec<SkippedTrack>,
-) -> Result<Option<Track>> {
+) -> Result<Option<(Track, u32)>> {
     let track = atoms(data)?;
     let tkhd = required(&track, b"tkhd")?;
     let narrow = version(tkhd, 1)? == 0;
+    let flags = u32be(tkhd, 0)? & 0x00ff_ffff;
     let id = u32be(tkhd, if narrow { 12 } else { 20 })?;
     if id == 0 {
         return Err(invalid("zero MP4 track ID"));
@@ -1159,7 +1185,7 @@ fn parse_track(
         // entry spells it `ac-3`. Every frame carries its own geometry, so no
         // configuration box follows; the `dac3` some writers nest states only what
         // the frames restate, and the setup block the decoder is handed stays empty.
-        (b"soun", b"ac-3") => {
+        (b"soun", b"ac-3" | b"ec-3") => {
             if !audio_entry(entry.data, &mut result)? {
                 return Ok(None);
             }
@@ -1277,7 +1303,7 @@ fn parse_track(
             });
         }
     }
-    Ok(Some(result))
+    Ok(Some((result, flags)))
 }
 
 /// The sample tables of one track collapsed into an index, or `None` when the

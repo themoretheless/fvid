@@ -8,7 +8,7 @@ pub fn inventory() -> Capabilities {
     inventory
         .decoders
         .extend(["av1", "h264", "hevc", "opus", "vp9"].map(str::to_owned));
-    inventory.decoders.sort();
+    inventory.decoders.sort_unstable();
     inventory.decoders.dedup();
     inventory
 }

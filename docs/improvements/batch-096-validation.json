@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0116"
+  ],
+  "checked_at": "2026-10-16T05:05:15.192347+00:00",
+  "before": [
+    "evidence/batch-096-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-096-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-096-parser.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-096-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-096-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-096-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-096-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Five independently authored constant sample pairs cover signed8negative fullscale,negativeLSB,zero,positiveLSB andpositive fullscale versus signed16value*256. Four nonzero decoded frame values,full native PCM and actual-worker PCM mismatch before fix; equivalent16controls andzero8control pass.",
+    "Byte replication is replaced by signed high-byte alignment. This removes a positive DC bias,including negativeLSB -1 incorrectly becoming16bit -1 instead of-256. Exhaustive256single-delta values and a signed wrapping sequence validate the entire8bit domain.",
+    "All five saved8/16input pairs now produce identical complete native PCM and presentation clocks. Actual workers check independent16bit controls and8bit fullplay,rewind and120msseek; related tests cover EOF,source duration,held notes,published boundaries and interrupted/replaced seek.",
+    "18parser/11decoder/6reader units,11integration tests,pure fixture reproduction and current player build pass. Existing canonical fixture bytes remain unchanged because8bit serialization still writes the original signed byte. This intentionally corrects8bit waveform amplitude; the earlier115migration-only PCM snapshots are historical and not asserted unchanged after this separate numerical fix.",
+    "No encoder/network/private media,physical DAC,full tracker-reference quality or performance claim.16bit sample reconstruction is unchanged."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_sample_ed.c",
+      "section": "pasteCopiedData:8bit->16bit conversion",
+      "rule": "Primary FT2 sample editor aligns signed8PCM by shifting8bits; reverse conversion takes the high byte."
+    }
+  ],
+  "compatibility": "XM8bit Sample.frames and emitted floatPCM now use standard signed PCM scale; consumers relying on biased byte-replicated amplitudes receive corrected values. Signatures,raw sample bytes,timing and16bit samples remain unchanged.",
+  "counting": "One signed8to16 normalization problem. Four wrong constants,256values,wrapping checks,fivepairs and worker variants add noIDs."
+}

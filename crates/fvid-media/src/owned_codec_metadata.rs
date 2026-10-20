@@ -93,6 +93,7 @@ pub fn descriptor(name: &str) -> Option<CodecDescriptor> {
         "flac" => ("flac", &[]),
         "alac" => ("alac", &[]),
         "mp3" => ("mp3", &[]),
+        "mp1" => ("mp1", &[]),
         "mp2" => ("mp2", &[]),
         "ac3" => ("ac3", &[]),
         "eac3" => ("eac3", &[(30, "Dolby Digital Plus + Dolby Atmos")]),

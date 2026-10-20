@@ -1,0 +1,56 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0153"
+  ],
+  "checked_at": "2026-10-16T15:46:44.805469+00:00",
+  "before": [
+    "evidence/batch-145-before.log",
+    "evidence/batch-145-acceptance-before.log",
+    "evidence/batch-145-xm-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-145-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-145-integration-verified.log",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-145-units.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-145-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-145-set-pan-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-145-volume-pan-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-145-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Separate one-based instrument selection for the next note from the owner of the active sample. An instrument-only row now retains active waveform,pitch,phase and sample defaults while changing future selection. Volume/pan reset comes from the active sample. A successful note trigger changes the owner; initial selection/owner are unset. Primary semantic inspection: evidence/batch-145-reference.json.",
+    "Before: eight authored scores differ from independent cloned-wave/default controls; one explicit-trigger score is healthy. Cases include selection-only,future note,volume/pan reset,key-off,K00,cold selection and a note before any instrument. Forced intended acceptance fails specifically on PCM.",
+    "After: all36 combinations of nine scores,mono/stereo and11025/44100Hz match independent controls exactly.18 actual worker targets verify full playback,rewind,120ms seek and EOF. An unselected note stays silent and reports one missing sample; a later explicit valid note recovers. This diagnostic counter change is intentional; no public signatures change.",
+    "Related integration exposed invalid historical pan oracles that selected a different instrument without a note to change active pan. Replaced them with continuous static-pan scores triggered on the first note and literal per-row reference selection. No tested pan opcode or instrument-only switch generates expected pan changes.20 old reference files,generators and manifests are archived with exact original hashes. All40 actual/without pan inputs and video companions remain byte-identical.",
+    "35 parser/decoder/reader units,13 related integration targets,three fixture reproduction checks and player build pass. Authored VP9/PCM companion decodes. Generation and ordinary tests need no FFmpeg,network or private media. Private raw instrument numbers reserve0for unset state; no per-row allocation or public packet-format change.",
+    "Scope is sample ownership,selection and existing native smoothing/pan semantics. Envelope/fadeout synthesis and full FT2 bit-exact fidelity remain outside qualification. No performance gain is claimed. Existing missing-instrument fallback regressions remain passing."
+  ],
+  "migration_artifacts": [
+    "evidence/batch-145-set-pan-input-preservation.json",
+    "evidence/batch-145-volume-pan-input-preservation.json",
+    "evidence/batch-145-pan-references-before/"
+  ],
+  "counting": "One selected-versus-active instrument ownership defect. Cold state,defaults,key-off/future-note cases and20pan-oracle migrations add zero extra IDs."
+}

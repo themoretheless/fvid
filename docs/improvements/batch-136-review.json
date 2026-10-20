@@ -1,0 +1,16 @@
+{
+  "status": "accepted-via-batch-144",
+  "accepted_ids": [],
+  "requested_change": "Move seek preparation progress from bottom window edge to upper title panel, below file metadata.",
+  "source": "src/player.rs",
+  "checks": [
+    "evidence/batch-136-top-seek-build-final.log"
+  ],
+  "qualification": [
+    "Preserves percentage,100ms refresh and visibility when controls fade; respects fullscreen/macOS title inset and skin color.",
+    "Local development app launches and authored VP9 video plays. Preparation finished before captured screenshot; actual progress-state visual verification remains incomplete. Counts zero until verified.",
+    "Separate bounded AVC audit: healthy original decodes,3120 truncated/bit-flipped packets refused without panic. Qualified log:evidence/batch-136-avc-mutation-qualified.log. Audit alone counts zero.",
+    "Separate .app bundles allowed UI access; short authored VP9 played. Long-preview app quit before progress-state verification; no screenshot of active status and no accepted ID."
+  ],
+  "resolved_by": "FVID-0152"
+}

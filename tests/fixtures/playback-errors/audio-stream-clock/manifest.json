@@ -1,0 +1,9 @@
+{
+  "provenance": "Authored60ms VP9 and480 PCM samples for stream timestamp precision. Stored cluster origin is9000000000001ms; decoded payload remains60ms. No encoder/private media/network.",
+  "frames": 480,
+  "sample_rate": 8000,
+  "sha256": {
+    "clock.mkv": "83154a9a5d71b7c13de6b8d40a1cbd4f16f413dd7b1fed7a54ad8e989d9a9836",
+    "expected-source.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

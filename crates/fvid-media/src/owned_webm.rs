@@ -1,4 +1,7 @@
 //! Owned bounded, incrementally indexed WebM/Matroska reader.
+use crate::owned_matroska_time::{timestamp_ns as fvid_media_clock_timestamp, duration_ns as fvid_media_clock_duration};
+use crate::owned_matroska_zlib as fvid_matroska_zlib;
+use crate::owned_matroska_grid_clock::PacketGrid as MatroskaPacketGrid;
 #[derive(Debug)]
 pub struct Error {
     message: String,
@@ -211,4 +214,23 @@ mod lace_integer_tests {
         assert!(lace_vint(&mut Cursor::new([0]),1).unwrap_err().to_string().contains("zero"));
     }
     use std::io::Cursor;
+}
+
+#[cfg(test)]
+mod scaled_aac_clock_memory_tests {
+    use super::*;
+    #[test]
+    fn retained_scaled_aac_clock_records_are_charged_and_unit_scale_allocates_none() {
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/playback-errors");
+        for(name,blocks)in [("half.mkv",6),("lace-third.mkv",2),("warm-third.mkv",72)] {
+            let mut reader=WebmReader::open(std::io::Cursor::new(std::fs::read(root.join("aac-scaled-clock").join(name)).unwrap()),Default::default()).unwrap();
+            reader.scan_all().unwrap();assert_eq!(reader.scaled_audio_timings.len(),blocks);
+            let with=reader.estimated_index_payload_bytes().unwrap();let records=std::mem::take(&mut reader.scaled_audio_timings);
+            let without=reader.estimated_index_payload_bytes().unwrap();
+            assert_eq!(with-without,records.capacity()*std::mem::size_of::<BlockTiming>());
+            assert!(reader.track_timestamp_scale(u64::MAX).is_none());assert!(reader.packet_timestamp_grid(usize::MAX).is_none());
+        }
+        let mut reader=WebmReader::open(std::io::Cursor::new(std::fs::read(root.join("aac-device-layout/normal-ten.mkv")).unwrap()),Default::default()).unwrap();reader.scan_all().unwrap();
+        assert!(reader.scaled_audio_timings.is_empty());assert_eq!(reader.scaled_audio_timings.capacity(),0);
+    }
 }

@@ -1,0 +1,11 @@
+{
+  "provenance": "Own separate-colour-plane PCM streams; no external codec or source media.",
+  "cases": [
+    "separate-pcm-8-0",
+    "separate-pcm-8-1",
+    "separate-pcm-10-0",
+    "separate-pcm-10-1",
+    "separate-pcm-14-0",
+    "separate-pcm-14-1"
+  ]
+}

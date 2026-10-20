@@ -251,7 +251,15 @@ impl DownloadedInput {
         let result: Result<()> = (|| {
             loop {
                 cancelled(options)?;
-                let count = match body.read(&mut scratch) {
+                // One extra byte distinguishes exact EOF from an oversized body.
+                // Do not consume an entire transport chunk beyond the budget.
+                let want = options.max_bytes.map_or(scratch.len(), |limit| {
+                    limit
+                        .saturating_sub(input.bytes)
+                        .saturating_add(1)
+                        .min(scratch.len() as u64) as usize
+                });
+                let count = match body.read(&mut scratch[..want]) {
                     Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
                     result => result.map_err(|e| format!("HTTP media body read: {e}"))?,
                 };
@@ -320,8 +328,12 @@ mod tests {
     const VIDEO: &[u8] = include_bytes!("../../../tests/fixtures/playback-errors/rotate-grid.y4m");
     #[test]
     fn unknown_length_body_does_not_read_a_whole_chunk_past_its_byte_budget() {
-        const CLIP: &[u8] = include_bytes!("../../../tests/fixtures/playback-errors/http-byte-limit.y4m");
-        struct Counted { source: std::io::Cursor<&'static [u8]>, bytes: usize }
+        const CLIP: &[u8] =
+            include_bytes!("../../../tests/fixtures/playback-errors/http-byte-limit.y4m");
+        struct Counted {
+            source: std::io::Cursor<&'static [u8]>,
+            bytes: usize,
+        }
         impl Read for Counted {
             fn read(&mut self, output: &mut [u8]) -> std::io::Result<usize> {
                 let count = self.source.read(output)?;
@@ -330,16 +342,34 @@ mod tests {
             }
         }
         let control = DownloadedInput::from_body(CLIP, None, "y4m", &Default::default()).unwrap();
-        assert_eq!(crate::owned_y4m_decode::decode_video(control.path()).unwrap().video_frames, 3);
+        assert_eq!(
+            crate::owned_y4m_decode::decode_video(control.path())
+                .unwrap()
+                .video_frames,
+            3
+        );
         for limit in [0, 1, 31, CLIP.len() as u64 - 1] {
-            let mut body = Counted { source: std::io::Cursor::new(CLIP), bytes: 0 };
-            let options = DownloadOptions { max_bytes: Some(limit), ..Default::default() };
+            let mut body = Counted {
+                source: std::io::Cursor::new(CLIP),
+                bytes: 0,
+            };
+            let options = DownloadOptions {
+                max_bytes: Some(limit),
+                ..Default::default()
+            };
             let error = DownloadedInput::from_body(&mut body, None, "y4m", &options).unwrap_err();
             assert!(error.contains("byte limit"));
-            assert!(body.bytes as u64 <= limit + 1, "budget {limit} consumed {} bytes", body.bytes);
+            assert!(
+                body.bytes as u64 <= limit + 1,
+                "budget {limit} consumed {} bytes",
+                body.bytes
+            );
         }
         for limit in [CLIP.len() as u64, u64::MAX] {
-            let options = DownloadOptions { max_bytes: Some(limit), ..Default::default() };
+            let options = DownloadOptions {
+                max_bytes: Some(limit),
+                ..Default::default()
+            };
             let input = DownloadedInput::from_body(CLIP, None, "y4m", &options).unwrap();
             assert_eq!(std::fs::read(input.path()).unwrap(), CLIP);
         }

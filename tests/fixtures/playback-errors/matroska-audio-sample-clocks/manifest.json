@@ -1,0 +1,35 @@
+{
+  "provenance": "240ms authored440Hz mono tone with authored16-square VP9 neutral video. No private input. Generation uses FFmpeg; tests load saved bytes only.",
+  "cases": [
+    {
+      "file": "flac.mkv",
+      "encoder": "flac",
+      "sha256": "6caa7ec16acdc6f50eb3dce623ac9667c0349eb64154109721c8a003d362bfcc"
+    },
+    {
+      "file": "alac.mkv",
+      "encoder": "alac",
+      "sha256": "2fae9dca675199eed1b49c3b30b2f464b0bec1048f9c7ee924db029be6480ea0"
+    },
+    {
+      "file": "mp3.mkv",
+      "encoder": "libmp3lame",
+      "sha256": "c478ffd795ee5fdf1c76d3d16645c1e62a2e048ccff2d99c6a44512b053b56b2"
+    },
+    {
+      "file": "mp2.mkv",
+      "encoder": "mp2",
+      "sha256": "d3ba45d24362bddea48d5725a12b274f1900420dd38ffcc32e1568e7ee5e9e24"
+    },
+    {
+      "file": "vorbis.mkv",
+      "encoder": "vorbis",
+      "sha256": "0d351273a159e944f6e42bf22ea292bddfd57c82d403118e60b7c8288bf32dc4"
+    },
+    {
+      "file": "ac3.mkv",
+      "encoder": "ac3",
+      "sha256": "4337f7088d37caf8eba4b93d3dc39a128273b7cbfd25a752102ca0a32a769a99"
+    }
+  ]
+}

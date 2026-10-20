@@ -40,6 +40,52 @@ pub struct OpusHead {
 }
 
 impl OpusHead {
+    /// WAVE speaker mask for the defined family-0/1 output semantics.
+    /// The PCM adapter must also reorder Vorbis channels into WAVE order.
+    /// Discrete or unknown families have no assigned speaker mask.
+    pub fn wave_channel_mask(&self) -> Option<u32> {
+        match (self.mapping_family, self.channel_count) {
+            (0 | 1, 1) => Some(0x4),
+            (0 | 1, 2) => Some(0x3),
+            (1, 3) => Some(0x7),
+            (1, 4) => Some(0x33),
+            (1, 5) => Some(0x37),
+            (1, 6) => Some(0x3f),
+            (1, 7) => Some(0x70f),
+            (1, 8) => Some(0x63f),
+            _ => None,
+        }
+    }
+
+    /// Layout for the defined mono/stereo, Vorbis and discrete mapping families.
+    /// Discrete channels retain their declared order without speaker assignment.
+    pub fn decoding_layout(&self) -> Result<crate::ChannelLayout> {
+        let layout = match self.mapping_family {
+            0 => crate::ChannelLayout::surround(usize::from(self.channel_count), 0)?,
+            1 | 255 => {
+                if self.mapping_family == 1 && self.channel_count > 8 {
+                    return Err(Error::InvalidStream(
+                        "mapping family 1 allows at most 8 channels",
+                    ));
+                }
+                crate::ChannelLayout {
+                    mapping_family: self.mapping_family,
+                    nb_channels: usize::from(self.channel_count),
+                    nb_streams: usize::from(self.stream_count),
+                    nb_coupled_streams: usize::from(self.coupled_count),
+                    mapping: self.channel_mapping.clone(),
+                }
+            }
+            _ => {
+                return Err(Error::InvalidStream(
+                    "unsupported Opus channel mapping family",
+                ));
+            }
+        };
+        layout.validate()?;
+        Ok(layout)
+    }
+
     /// libopus's algorithmic delay at 48 kHz, for an encoder using
     /// [`Application::Audio`](crate::Application::Audio) or
     /// [`Voip`](crate::Application::Voip).
@@ -275,6 +321,11 @@ impl OpusHead {
             // Every output channel must name a decoded channel that exists, or
             // 255 for silence (§5.1.1).
             let decoded = stream_count as usize + coupled_count as usize;
+            if decoded > 255 {
+                return Err(Error::InvalidStream(
+                    "OpusHead declares more than 255 decoded channels",
+                ));
+            }
             let mapping = data[21..need].to_vec();
             if mapping.iter().any(|&m| m != 255 && (m as usize) >= decoded) {
                 return Err(Error::InvalidStream(
@@ -385,7 +436,8 @@ impl OpusTags {
         v
     }
 
-    pub(crate) fn parse(data: &[u8]) -> Result<Self> {
+    /// Parse an OpusTags comment packet, checking lengths and replacing invalid UTF-8.
+    pub fn parse(data: &[u8]) -> Result<Self> {
         if data.len() < 12 || &data[..8] != OPUS_TAGS_MAGIC {
             return Err(Error::InvalidStream("not an OpusTags packet"));
         }
@@ -569,5 +621,74 @@ mod tests {
             comments: vec!["WEIRD".into(), "X=y=z".into(), "=empty-name".into()],
         };
         assert_eq!(OpusTags::parse(&tags.to_packet()).unwrap(), tags);
+    }
+}
+
+#[cfg(test)]
+mod decoded_channel_limit_tests {
+    use super::*;
+
+    #[test]
+    fn identification_limits_decoded_channels_independently_of_output_count() {
+        let layout = ChannelLayout::surround(6, 1).unwrap();
+        let mut bytes = OpusHead::for_layout(&layout, 48000).to_packet();
+        bytes[18] = 255;
+        for (streams, coupled, valid) in [
+            (255, 0, true),
+            (254, 1, true),
+            (128, 127, true),
+            (254, 2, false),
+            (128, 128, false),
+            (255, 255, false),
+        ] {
+            bytes[19] = streams;
+            bytes[20] = coupled;
+            let result = OpusHead::parse(&bytes);
+            if valid {
+                let head = result.unwrap();
+                assert!(head.decoding_layout().is_ok());
+            } else {
+                assert!(
+                    result
+                        .unwrap_err()
+                        .to_string()
+                        .contains("more than 255 decoded channels")
+                );
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod wave_speaker_semantics_tests {
+    use super::*;
+    #[test]
+    fn opus_surround_orders_declare_correct_wave_speakers_and_discrete_is_unassigned() {
+        for (channels, mask) in [
+            (1, 0x4),
+            (2, 0x3),
+            (3, 0x7),
+            (4, 0x33),
+            (5, 0x37),
+            (6, 0x3f),
+            (7, 0x70f),
+            (8, 0x63f),
+        ] {
+            let mut head =
+                OpusHead::for_layout(&ChannelLayout::surround(channels, 1).unwrap(), 48000);
+            assert_eq!(head.wave_channel_mask(), Some(mask));
+            head.mapping_family = 255;
+            assert_eq!(head.wave_channel_mask(), None);
+            head.mapping_family = 2;
+            assert_eq!(head.wave_channel_mask(), None);
+        }
+        assert_eq!(
+            OpusHead::new(1, 48000).unwrap().wave_channel_mask(),
+            Some(4)
+        );
+        assert_eq!(
+            OpusHead::new(2, 48000).unwrap().wave_channel_mask(),
+            Some(3)
+        );
     }
 }

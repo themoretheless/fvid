@@ -36,7 +36,7 @@
 //! - A row lasts `speed` ticks at `2 500 000 / bpm` microseconds apiece, which is
 //!   the same statement as `speed * 2.5 / bpm` seconds.
 //! - Effects are stored as the letter the tracker shows, minus `A`, plus one, so
-//!   `0` in the file states no effect and `16` is `P`, the tempo.
+//!   `0` in the file states no effect and `15` is `F`, the tempo.
 
 use crate::{Result, invalid};
 use std::collections::HashSet;
@@ -70,15 +70,15 @@ pub const BPM_MIN: u16 = 32;
 pub const BPM_MAX: u16 = 255;
 pub const SPEED_MIN: u8 = 1;
 pub const SPEED_MAX: u8 = 31;
-/// The effect byte that states tempo: the letter `P`. Its parameter is a tick
+/// The effect byte that states tempo: `Fxx`. Its parameter is a tick
 /// count up to 31 and a tempo above that, which is the one column of a module
 /// that changes the length of every row after it.
-pub const EFFECT_TEMPO: u8 = 16;
-/// The effect byte that ends the pattern and names the order to play next: `L`.
-pub const EFFECT_JUMP: u8 = 12;
+pub const EFFECT_TEMPO: u8 = 0x0F;
+/// The effect byte that ends the pattern and names the order to play next: `Bxx`.
+pub const EFFECT_JUMP: u8 = 0x0B;
 /// The effect byte that ends the pattern and names the row of the next order to
-/// resume at: `N`.
-pub const EFFECT_BREAK: u8 = 14;
+/// resume at: `Dxx`.
+pub const EFFECT_BREAK: u8 = 0x0D;
 /// A sample type byte that is not FastTracker II's own: the value ModPlug writes
 /// where the reserved byte says `AD`, which is 4-bit ADPCM rather than
 /// delta-coded PCM.
@@ -227,7 +227,7 @@ pub struct Sample {
     pub ping_pong: bool,
     /// 0..=64 in the file's own units.
     pub volume: u8,
-    /// Sixteenths of a semitone, signed, added to the pitch the note names.
+    /// Signed 1/128ths of a semitone, added to the pitch the note names.
     pub finetune: i8,
     /// 0..=255, where the tracker's own centre is 0xA4 and 0xFF asks for the
     /// surround panning of the Amiga rather than a place between the speakers.
@@ -276,8 +276,8 @@ impl Envelope {
 pub struct Instrument {
     pub name: String,
     pub samples: Vec<Sample>,
-    /// 96 bytes, one per note the tracker shows, holding a one-based index into
-    /// `samples` or 0 for none.
+    /// 96 bytes, one per note the tracker shows, holding a zero-based index into
+    /// `samples`. Index zero selects the first sample.
     pub keymap: Vec<u8>,
     pub volume_envelope: Envelope,
     pub panning_envelope: Envelope,
@@ -506,16 +506,15 @@ impl Module {
     }
 
     /// Which sample of an instrument a note selects, as an index into its
-    /// `samples`, or `None` when the instrument names none for it. The keymap's
-    /// byte is one-based in the file, and a mixer that wants the sample beside the
-    /// slot it came from needs the zero-based index more than the reference.
+    /// `samples`, or `None` for an absent instrument/note or an out-of-range map.
+    /// Sample maps are zero-based; pattern instrument numbers remain one-based.
     pub fn sample_slot(&self, instrument: usize, note: u8) -> Option<usize> {
         let instrument = self.instruments.get(instrument)?;
         if !(NOTE_MIN..=NOTE_MAX).contains(&note) {
             return None;
         }
         let slot = *instrument.keymap.get(usize::from(note - NOTE_MIN))?;
-        let slot = usize::from(slot).checked_sub(1)?;
+        let slot = usize::from(slot);
         instrument.samples.get(slot)?;
         Some(slot)
     }
@@ -624,36 +623,36 @@ fn lay_out_timeline(
 ) -> Result<(Vec<TimelineRow>, u64)> {
     let mut timeline: Vec<TimelineRow> = Vec::new();
     let mut entered: HashSet<usize> = HashSet::new();
+    // E6x state belongs to each channel and survives order changes, as in FT2.
+    let channels = patterns.first().map_or(0, Pattern::channels);
+    let mut loop_states = Vec::new();
+    loop_states.try_reserve_exact(channels)
+        .map_err(|_| invalid("module pattern-loop state allocation failed"))?;
+    loop_states.resize(channels, (0u8, 0u8));
     let mut order = 0usize;
     let mut row = 0usize;
+    let mut order_entry = true;
+    let mut break_row = 0usize;
     let mut speed = speed;
     let mut bpm = bpm;
     let mut microseconds = 0u64;
     while order < orders.len() {
-        if timeline.len() > limits.rows {
-            return Err(invalid(&format!(
-                "module does not end within the {} rows this reader takes",
-                limits.rows
-            )));
-        }
         let pattern = &patterns[usize::from(orders[order])];
         if row >= pattern.row_count() {
             order += 1;
             row = 0;
+            order_entry = true;
             continue;
         }
-        // An order entered from its first row twice is the module looping
-        // itself - which trackers do, and a timeline cannot be measured against
-        // - so the walk stops where the loop would begin, and the module is the
-        // one pass of what it played.
-        if row == 0 && !entered.insert(order) {
+        // Finite local row repeats do not re-enter the order. Keep the existing
+        // one-pass policy for global order jumps entering row zero again.
+        if order_entry && row == 0 && !entered.insert(order) {
             break;
         }
-        // The tempo a row states is the tempo that row is played under: the
-        // tracker applies a tempo change from the tick it is read at, so the row
-        // carrying it is the first thing the new number measures.
-        let mut next: Option<(usize, usize)> = None;
-        for cell in pattern.row(row) {
+        order_entry = false;
+        let mut next_order = None;
+        let mut loop_jump = false;
+        for (cell, (start, remaining)) in pattern.row(row).iter().zip(&mut loop_states) {
             match cell.effect {
                 EFFECT_TEMPO if cell.parameter != 0 => {
                     if cell.parameter <= SPEED_MAX {
@@ -662,18 +661,46 @@ fn lay_out_timeline(
                         bpm = tempo;
                     }
                 }
-                EFFECT_JUMP => next = Some((usize::from(cell.parameter), 0)),
+                EFFECT_JUMP => {
+                    next_order = Some(usize::from(cell.parameter));
+                    break_row = 0;
+                }
                 EFFECT_BREAK => {
-                    // The parameter states the row the way the tracker shows it:
-                    // in decimal, so `24` is the row the tracker calls 24.
-                    let resume =
-                        usize::from(cell.parameter >> 4) * 10 + usize::from(cell.parameter & 0xF);
-                    next = Some((order + 1, resume));
+                    let resume = usize::from(cell.parameter >> 4) * 10
+                        + usize::from(cell.parameter & 0xF);
+                    break_row = if resume <= 63 { resume } else { 0 };
+                    // Dxx retains an earlier Bxx destination; a later Bxx
+                    // overwrites it and resets the shared break row to zero.
+                    next_order.get_or_insert(order + 1);
+                }
+                0x0E if cell.parameter >> 4 == 6 => {
+                    let repeats = cell.parameter & 15;
+                    if repeats == 0 {
+                        *start = row as u8;
+                    } else {
+                        let repeat = if *remaining == 0 {
+                            *remaining = repeats;
+                            true
+                        } else {
+                            *remaining -= 1;
+                            *remaining != 0
+                        };
+                        if repeat {
+                            break_row = usize::from(*start);
+                            loop_jump = true;
+                        }
+                    }
                 }
                 _ => {}
             }
         }
         let duration = u64::from(speed) * tick_microseconds(bpm);
+        if timeline.len() >= limits.rows {
+            return Err(invalid(&format!(
+                "module does not end within the {} rows this reader takes",
+                limits.rows
+            )));
+        }
         timeline.push(TimelineRow {
             order,
             row,
@@ -683,10 +710,18 @@ fn lay_out_timeline(
             bpm,
         });
         microseconds += duration;
-        row += 1;
-        if let Some((next_order, resume)) = next {
-            order = next_order;
-            row = resume;
+        row = if loop_jump { break_row } else { row + 1 };
+        if next_order.is_some() || row >= pattern.row_count() {
+            order = next_order.unwrap_or(order + 1);
+            let resume = break_row;
+            break_row = 0;
+            // FT2's loop break row persists until order transition, including
+            // its documented next-pattern start-row quirk. Bound the selected
+            // row against the actual destination pattern before reading it.
+            row = orders.get(order).map_or(0, |&destination| {
+                if resume < patterns[usize::from(destination)].row_count() { resume } else { 0 }
+            });
+            order_entry = true;
         }
     }
     Ok((timeline, microseconds))
@@ -1031,13 +1066,10 @@ pub fn decode_delta_8(data: &[u8]) -> Vec<i16> {
         .collect()
 }
 
-/// Widen the 8-bit form the tracker records samples in to the 16-bit one a mixer
-/// reads, by repeating the byte into both halves so full scale stays full scale.
-/// The same shape as a multiply by 257, which is what an i8's own bottom has no
-/// answer for: -128 times 257 is below what an i16 holds.
+/// Align signed 8-bit PCM in the high byte of the mixer's signed 16-bit domain.
+/// The low byte is zero: copying the source byte there biases negative samples.
 fn widen_8(value: i8) -> i16 {
-    let wide = i16::from(value);
-    (wide << 8) | (wide & 0xFF)
+    i16::from(value) << 8
 }
 
 /// Undo the same thing over little-endian words, which is the 16-bit form.
@@ -1120,7 +1152,7 @@ mod tests {
 
     struct InstrumentSpec {
         name: &'static str,
-        /// One slot per note, holding a one-based sample index or 0 for none.
+        /// One slot per note, holding a zero-based sample index.
         keymap: Vec<u8>,
         samples: Vec<SampleSpec>,
         envelope_flags: u16,
@@ -1362,7 +1394,7 @@ mod tests {
     /// when there is one, so a module of two samples can be heard to hold both.
     fn keymap(notes: usize) -> Vec<u8> {
         (0..96)
-            .map(|index| if index < notes { 1 } else { 2 })
+            .map(|index| if index < notes { 0 } else { 1 })
             .collect()
     }
 
@@ -1404,7 +1436,7 @@ mod tests {
     fn one_shape() -> Vec<InstrumentSpec> {
         vec![InstrumentSpec {
             name: "one",
-            keymap: vec![1; 96],
+            keymap: vec![0; 96],
             envelope_flags: 0,
             fadeout: 0,
             samples: vec![SampleSpec {
@@ -1455,7 +1487,7 @@ mod tests {
             ]],
             instruments: vec![InstrumentSpec {
                 name: "one shape",
-                keymap: vec![1; 96],
+                keymap: vec![0; 96],
                 envelope_flags: 0,
                 fadeout: 0,
                 samples: vec![SampleSpec {

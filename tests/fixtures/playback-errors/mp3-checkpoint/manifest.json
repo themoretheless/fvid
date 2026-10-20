@@ -1,0 +1,30 @@
+{
+  "cases": [
+    {
+      "name": "long",
+      "frames": 160,
+      "rate": 48000,
+      "backwards": false
+    },
+    {
+      "name": "fractional",
+      "frames": 160,
+      "rate": 44100,
+      "backwards": false
+    },
+    {
+      "name": "backwards",
+      "frames": 160,
+      "rate": 48000,
+      "backwards": true
+    }
+  ],
+  "reference": "Checkpoint suffix compared against uninterrupted owned PCM; not a new codec PCM oracle",
+  "files": {
+    "long.mp3": "f66aaa7bcdd674eeb00bfd2399d53c166eb65ca63afc951df36fc2d19bb7b601",
+    "long.mkv": "9dd69cf8a033965f2c2dd3fc8ad77c3a8bf2833b4d67ee9f2673aa47dee49861",
+    "fractional.mp3": "1f8dbb95078a050f03e417de9a1737ef842b0320b1a44b6b6d2089d99bad7c27",
+    "fractional.mkv": "479288cb06e2e59b04cbb131aab7e5d361e633f23371e494fba4017326d9da31",
+    "backwards.mkv": "efffb00fa9cf44c44654588309a46fca8692b6c9c0b935b980e0c5bf2616ca65"
+  }
+}

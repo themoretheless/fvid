@@ -1,0 +1,16 @@
+{
+  "provenance": "Three authored VP9 keyframes and 480 authored mono PCM samples. 60ms video, RFC9559 audio defaults. No private media, external encoder or network.",
+  "files": {
+    "control.mkv": "2861f11241b5228f107c56e353029b73f20f233ff0414c75c7b977b7362a6b50",
+    "missing-rate.mkv": "3f9d60b0afadc3510d9473fe7da49814e3effe714e81faabbe7473ce62177996",
+    "missing-channels.mkv": "9520dcda27d78aaeb537bb3659256dbb522f511b28725d6fe4e7d96f42b74f4a",
+    "missing-both.mkv": "8c63315cc9991b49d9ec352b54a68c5c90df5b974dda46f9ecfbe0e46e8a668f",
+    "empty-rate.mkv": "59183bb4cec2746280c77698e458d4ce77914f6c97d66797a0ccd8baa5b4523b",
+    "empty-channels.mkv": "4237b418f778156c003ce706ed520fcc6e0172b099fa93fe412a4b39ef3f856b",
+    "empty-both.mkv": "63e96b113e1307bfef1ced7b766ce81a08726fe2321a5b50adbe748321c670fd",
+    "zero-rate.mkv": "d95fccbe64176ef6cf761509411723df13b13634cc4894bee47b6ec23130ee61",
+    "zero-channels.mkv": "bfac50f9b22255d4d5abc433ed4e24a724b85db74fb6c4682eec05e045fa4ea5",
+    "empty-output-rate.mkv": "c987d990a087869486b5817f550a4cb4f176ed14bb93f531a075fc6d7d405bb5",
+    "expected.f32le": "0e14de481fd305d1c213a1cdd1c1c41a03edb4bc26fd86ab6f694bcb678e677b"
+  }
+}

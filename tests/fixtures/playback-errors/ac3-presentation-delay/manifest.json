@@ -1,0 +1,8 @@
+{
+  "provenance": "First two complete frames of existing authored synthetic AC3 tone, unchanged CRC-protected packets. Native grouped PCM is compared with per-frame reader presentation and worker output after intrinsic256sample leading trim. Short native VP9/PCM video. No private input/encoder/network.",
+  "source_sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb",
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "stream.ac3": "3c0d4333e96a45b765e08e832a6399c7beb81c6ff027edd51e40d123d0fb4569"
+  }
+}

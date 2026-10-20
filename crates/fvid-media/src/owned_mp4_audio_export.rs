@@ -27,8 +27,9 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
         return Ok(false);
     }
     let reader = open(source, options)?;
+    let automatic = reader.automatic_track_indices(&[*b"soun"]);
     Ok(reader.tracks().iter().enumerate().any(|(index, t)| {
-        (options.streams.is_empty() || options.streams.contains(&index))
+        ((options.streams.is_empty() && automatic.contains(&index)) || options.streams.contains(&index))
             && t.handler == *b"soun"
             && matches!(
                 &t.codec,
@@ -115,7 +116,8 @@ pub(crate) fn supports(
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
     let output = transform.channels.unwrap_or(i32::from(channels));
-    if output != i32::from(channels)
+    let aac_fold=if output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router(source,rate,channels,options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
+    if output != i32::from(channels) && !aac_fold
         && (!((channels <= 2 && (1..=8).contains(&output))
             || (channels <= 8 && matches!(output, 1 | 2)))
             || !crate::owned_pcm_channels::standard_mask(channels)
@@ -189,7 +191,7 @@ pub(crate) fn apply(
             result.map_err(|e| e.to_string())
         },
     )?;
-    crate::owned_adts_export::export_spool(spool, destination, transform, options)
+    crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
 }
 
 #[cfg(test)]

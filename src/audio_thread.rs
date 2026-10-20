@@ -46,7 +46,7 @@ pub struct AudioPlayback {
     thread: Option<thread::JoinHandle<()>>,
     position: Arc<Mutex<Duration>>,
     timescale: u32,
-    duration: Option<Duration>,
+    duration: Arc<Mutex<Option<Duration>>>,
 }
 
 impl AudioPlayback {
@@ -62,7 +62,8 @@ impl AudioPlayback {
         F: FnOnce() -> Box<dyn AudioBackend> + Send + 'static,
     {
         let timescale = stream.timescale();
-        let duration = stream.duration();
+        let duration = Arc::new(Mutex::new(stream.duration()));
+        let duration_clone = duration.clone();
         let (commands, command_rx) = sync_channel(16);
         let (event_tx, events) = sync_channel(QUEUE);
         let position = Arc::new(Mutex::new(Duration::ZERO));
@@ -79,11 +80,12 @@ impl AudioPlayback {
 
                 let mut backend = backend_factory();
 
-                if let Err(e) = backend.start(crate::audio::AudioSpec {
+                let stereo_router=match stream.stereo_router(){Ok(mask)=>mask,Err(error)=>{let _=event_tx.send(AudioEvent::Error(format!("Audio speaker layout: {error}")));return;}};
+                if let Err(e) = backend.start_with_router(crate::audio::AudioSpec {
                     sample_rate,
                     channels,
                     format: crate::audio::SampleFormat::F32,
-                }) {
+                },stereo_router) {
                     let _ = event_tx.send(AudioEvent::Error(format!("Audio backend start: {e}")));
                     return;
                 }
@@ -99,14 +101,14 @@ impl AudioPlayback {
 
                 let _ = event_tx.send(AudioEvent::Started);
 
-                Worker { checkpoints:Vec::new(),
+                Worker { duration: duration_clone, checkpoints:Vec::new(),
                     stream,
                     decoder,
                     backend,
                     commands: command_rx,
                     events: event_tx,
                     playing: false,
-                    ended: false,
+                    ended: false, draining: false, queued_frontier: Duration::ZERO,
                     generation: 0,
                     position: position_clone,
                 }
@@ -125,10 +127,10 @@ impl AudioPlayback {
         }
     }
 
-    /// Length of the track, as the container stated it when the stream opened.
+    /// Latest track length, refreshed after the source completes successfully.
     /// An item with no picture takes its timeline total from here.
     pub fn duration(&self) -> Option<Duration> {
-        self.duration
+        *self.duration.lock().unwrap()
     }
 
     /// Generation of the most recent rewind or seek.
@@ -155,6 +157,7 @@ impl AudioPlayback {
         let _ = self.commands.send(Command::Tempo(milli));
     }
 
+    /// Return to the beginning while preserving the current play/pause state.
     pub fn rewind(&mut self) {
         self.generation += 1;
         let _ = self.commands.send(Command::Rewind);
@@ -164,7 +167,17 @@ impl AudioPlayback {
     pub fn seek(&mut self, target: Duration) {
         self.generation += 1;
         if self.timescale > 0 {
-            let pts = (target.as_secs_f64() * f64::from(self.timescale)) as i64;
+            let scale = u128::from(self.timescale);
+            let mut ticks = u128::from(target.as_secs()) * scale
+                + u128::from(target.subsec_nanos()) * scale / 1_000_000_000;
+            // Recover a tick whose exact public Duration was rounded down to ns.
+            // Other targets retain floor semantics; sub-ns clocks are ambiguous.
+            if scale < 1_000_000_000
+                && (ticks + 1) * 1_000_000_000 / scale == target.as_nanos()
+            {
+                ticks += 1;
+            }
+            let pts = i64::try_from(ticks).unwrap_or(i64::MAX);
             let _ = self.commands.send(Command::Seek(pts));
         }
     }
@@ -201,6 +214,7 @@ impl Drop for AudioPlayback {
 }
 
 struct Worker {
+    duration: Arc<Mutex<Option<Duration>>>,
     checkpoints:Vec<(i64,crate::audio::AudioCheckpoint)>,
     stream: Box<dyn AudioStream>,
     decoder: Box<dyn AudioDecode>,
@@ -209,6 +223,8 @@ struct Worker {
     events: SyncSender<AudioEvent>,
     playing: bool,
     ended: bool,
+    draining: bool,
+    queued_frontier: Duration,
     generation: u64,
     position: Arc<Mutex<Duration>>,
 }
@@ -221,30 +237,61 @@ impl Worker {
         Ok(())
     }
 
+    fn finish_source(&mut self) -> (Option<AudioEvent>, Duration) {
+        if let Err(error) = self.stream.validate_eof() {
+            self.ended = true;
+            return (Some(AudioEvent::Error(error.to_string())), Duration::ZERO);
+        }
+        if let Some(duration) = self.stream.duration() {
+            if let Ok(mut published) = self.duration.lock() { *published = Some(duration); }
+        }
+        if let Err(error) = self.backend.begin_drain() {
+            self.ended = true;
+            return (Some(AudioEvent::Error(format!("Audio output drain: {error}"))), Duration::ZERO);
+        }
+        self.draining = true;
+        self.drain_output()
+    }
+
+    fn drain_output(&mut self) -> (Option<AudioEvent>, Duration) {
+        let drained = match self.backend.drain_status() {
+            Ok(drained) => drained,
+            Err(error) => {
+                self.ended = true;
+                self.draining = false;
+                return (Some(AudioEvent::Error(format!("Audio output drain: {error}"))), Duration::ZERO);
+            }
+        };
+        if let Ok(mut position) = self.position.lock() { *position = self.backend.position(); }
+        if drained {
+            self.ended = true;
+            self.draining = false;
+            (Some(AudioEvent::Ended(self.generation)), Duration::ZERO)
+        } else {
+            // Command-channel waits keep Pause/Seek/Stop responsive during the
+            // final device buffer, without re-decoding or re-validating input.
+            (None, Duration::from_millis(5))
+        }
+    }
+
     /// Decode and queue one packet, reporting a terminal event if the stream
     /// ended or failed and how long to wait before feeding the next one.
     fn decode_next(&mut self) -> (Option<AudioEvent>, Duration) {
+        if self.draining { return self.drain_output(); }
         let step = match self.stream.next_step() {
             Ok(Some(p)) => p,
             Ok(None) => {
                 if !self.stream.drain_decoded_at_eof() {
                     self.decoder.reset();
-                    self.ended = true;
-                    return match self.stream.validate_eof() {
-                        Ok(()) => (Some(AudioEvent::Ended(self.generation)), Duration::ZERO),
-                        Err(error) => (Some(AudioEvent::Error(error.to_string())), Duration::ZERO),
-                    };
+                    return self.finish_source();
                 }
                 return match self.decoder.finish_packet() {
                     Ok(Some(frame)) => self.present_frame(frame),
-                    Ok(None) => {
-                        self.ended=true;
-                        match self.stream.validate_eof() {
-                            Ok(()) => (Some(AudioEvent::Ended(self.generation)),Duration::ZERO),
-                            Err(error) => (Some(AudioEvent::Error(error.to_string())),Duration::ZERO),
-                        }
-                    },
-                    Err(error) => {self.ended=true;(Some(AudioEvent::Error(error.to_string())),Duration::ZERO)},
+                    Ok(None) => self.finish_source(),
+                    Err(error) => {
+                        self.ended = true;
+                        (Some(AudioEvent::Error(error.to_string())), Duration::ZERO)
+                    }
                 };
             }
             Err(e) => {
@@ -255,8 +302,7 @@ impl Worker {
 
         let (decoded, source_end) = match step {
             crate::audio::AudioStep::ResetDecoder => {
-                self.decoder.reset();
-                if let Err(e)=self.restore_preroll() {self.ended=true;return (Some(AudioEvent::Error(e.to_string())),Duration::ZERO);}
+                if let Err(e)=self.stream.reset_decoder(&mut self.decoder).and_then(|_|self.restore_preroll()) {self.ended=true;return (Some(AudioEvent::Error(e.to_string())),Duration::ZERO);}
                 return (None,Duration::ZERO);
             }
             crate::audio::AudioStep::Pcm(packet) => (packet,None),
@@ -315,19 +361,17 @@ impl Worker {
         self.queue_pcm(decoded,Some(frame.source_pts.max(0).saturating_add(end)))
     }
 
-    fn queue_pcm(&mut self,decoded:crate::audio::AudioPacket,source_end:Option<i64>)->(Option<AudioEvent>,Duration) {
-        let frontier = if matches!(self.stream.codec(), "mp4a" | "A_OPUS") || source_end.is_none() {
+    fn queue_pcm(&mut self,decoded:crate::audio::AudioPacket,_source_end:Option<i64>)->(Option<AudioEvent>,Duration) {
+        let frontier = {
             let stride = usize::from(self.stream.channels()) * 4;
             let rate = self.stream.sample_rate();
             if stride == 0 || rate == 0 || !decoded.data.len().is_multiple_of(stride) {
                 self.ended = true;
-                return (Some(AudioEvent::Error("invalid decoded AAC PCM geometry".into())),Duration::ZERO);
+                return (Some(AudioEvent::Error("invalid decoded PCM geometry".into())),Duration::ZERO);
             }
             let frames = decoded.data.len()/stride;
             let nanos = frames as u128 * 1_000_000_000/u128::from(rate);
             decoded.presentation_time().saturating_add(Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)))
-        } else {
-            self.stream.time_of(source_end.unwrap())
         };
 
         if let Err(e) = self.backend.push(decoded) {
@@ -345,25 +389,35 @@ impl Worker {
             *pos = device_pos;
         }
 
+        self.queued_frontier = frontier;
         (None, pacing(frontier, device_pos))
+    }
+
+    /// Terminate a failed device transition before publishing a new clock.
+    fn fail_output(&mut self, operation: &str, error: impl std::fmt::Display) {
+        self.playing = false;
+        self.ended = true;
+        self.draining = false;
+        let message = match self.backend.stop() {
+            Ok(()) => format!("Audio {operation}: {error}"),
+            Err(stop) => format!("Audio {operation}: {error}; stopping device: {stop}"),
+        };
+        let _ = self.events.send(AudioEvent::Error(message));
     }
 
     /// Run the device from wherever its clock currently sits. Play is
     /// idempotent because the caller commands it at every resume as well as at
     /// the first presentation.
-    fn resume_clock(&mut self) {
+    fn resume_clock(&mut self) -> bool {
         if self.playing {
-            return;
+            return true;
+        }
+        if let Err(error) = self.backend.resume() {
+            self.fail_output("resume", error);
+            return false;
         }
         self.playing = true;
-        // A device that refuses to run means no audio at all, and without a
-        // clock the picture would freeze at the last frame the gate allowed.
-        if let Err(error) = self.backend.resume() {
-            self.ended = true;
-            let _ = self
-                .events
-                .send(AudioEvent::Error(format!("Audio resume: {error}")));
-        }
+        true
     }
 
     fn drain_commands(&mut self, first: Option<Command>) -> bool {
@@ -385,21 +439,26 @@ impl Worker {
                 },
             };
             match cmd {
-                Command::Play => self.resume_clock(),
+                Command::Play => { if !self.resume_clock() { return false; } },
                 Command::Pause => {
                     if self.playing {
                         self.playing = false;
-                        let _ = self.backend.pause();
+                        if let Err(error) = self.backend.pause() {
+                            self.fail_output("pause", error);
+                            return false;
+                        }
                     }
                 }
                 Command::Rewind => {
                     self.generation += 1;
                     self.ended = false;
+                    self.draining = false;
                     nav = Some(DeferredNav::Rewind);
                 }
                 Command::Seek(pts) => {
                     self.generation += 1;
                     self.ended = false;
+                    self.draining = false;
                     nav = Some(DeferredNav::Seek(pts));
                 }
                 Command::Level(milli) => latest_level = Some(milli),
@@ -409,39 +468,44 @@ impl Worker {
         }
         if let Some(milli) = latest_level {
             if let Err(error) = self.backend.set_volume(milli) {
-                let _ = self
-                    .events
-                    .send(AudioEvent::Error(format!("Audio volume: {error}")));
+                self.fail_output("volume", error);
+                return false;
             }
         }
         if let Some(milli) = latest_tempo {
             if let Err(error) = self.backend.set_rate(milli) {
-                let _ = self
-                    .events
-                    .send(AudioEvent::Error(format!("Audio rate: {error}")));
+                self.fail_output("rate", error);
+                return false;
             }
         }
         match nav {
             Some(DeferredNav::Rewind) => {
                 self.stream.rewind();
-                self.decoder.reset();
-                let _ = self.backend.flush(Duration::ZERO);
+                if let Err(error) = self.stream.reset_decoder(&mut self.decoder) {
+                    self.fail_output("rewind decoder reset", error);
+                    return false;
+                }
+                if let Err(error) = self.backend.flush(Duration::ZERO) {
+                    self.fail_output("rewind flush", error);
+                    return false;
+                }
                 if let Ok(mut pos) = self.position.lock() {
                     *pos = Duration::ZERO;
                 }
-                self.resume_clock();
             }
             Some(DeferredNav::Seek(pts)) => {
                 let result_pts = self.stream.seek_to(pts);
-                self.decoder.reset();
-                if let Err(e) = self.restore_preroll() {
-                    self.ended = true;
-                    let _ = self.events.send(AudioEvent::Error(e.to_string()));
+                if let Err(error) = self.stream.reset_decoder(&mut self.decoder).and_then(|_|self.restore_preroll()) {
+                    self.fail_output("seek decoder reset", error);
+                    return false;
                 }
                 // Anchor the clock at the sample actually landed on, which can
                 // precede the requested point; the backend advances from there.
                 let anchor = self.stream.time_of(result_pts);
-                let _ = self.backend.flush(anchor);
+                if let Err(error) = self.backend.flush(anchor) {
+                    self.fail_output("seek flush", error);
+                    return false;
+                }
                 if let Ok(mut pos) = self.position.lock() {
                     *pos = anchor;
                 }
@@ -468,14 +532,28 @@ impl Worker {
                 // Waiting on the command channel instead of sleeping lets a seek
                 // or a stop land in the middle of the pacing window.
                 if !pace.is_zero() {
-                    match self.commands.recv_timeout(pace) {
-                        Ok(command) => {
-                            if !self.drain_commands(Some(command)) {
-                                return;
+                    let started = std::time::Instant::now();
+                    let mut remaining = pace;
+                    while !remaining.is_zero() {
+                        match self.commands.recv_timeout(remaining.min(Duration::from_millis(5))) {
+                            Ok(command) => {
+                                if !self.drain_commands(Some(command)) {
+                                    return;
+                                }
+                                break;
                             }
+                            Err(RecvTimeoutError::Timeout) => {
+                                if let Ok(mut position) = self.position.lock() {
+                                    *position = self.backend.position();
+                                }
+                            }
+                            Err(RecvTimeoutError::Disconnected) => return,
                         }
-                        Err(RecvTimeoutError::Timeout) => {}
-                        Err(RecvTimeoutError::Disconnected) => return,
+                        remaining = if self.draining {
+                            pace.saturating_sub(started.elapsed())
+                        } else {
+                            pacing(self.queued_frontier, self.backend.position())
+                        };
                     }
                 }
                 continue;
@@ -693,6 +771,24 @@ mod tests {
 
 #[cfg(test)]
 mod presentation_window_tests {
+    /// Independent PCM oracle for a seek inside a saved nanosecond packet.
+    /// Trim sample boundaries directly; do not call production seek helpers.
+    pub(super) fn matroska_suffix(packets:&[(u64,Vec<u8>)],target:u64,rate:u32,channels:u16)->Vec<(u64,Vec<u8>)>{
+        // These authored/legacy controls begin on the zero sample grid. Their
+        // integer ns PTS are rational-floor projections, not fractional samples.
+        assert_eq!(packets.first().map(|p|p.0),Some(0));
+        let stride=usize::from(channels)*4;
+        let target_sample=(u128::from(target)*u128::from(rate)).div_ceil(1_000_000_000);
+        packets.iter().filter_map(|(pts,data)|{
+            let scaled=u128::from(*pts)*u128::from(rate);
+            let sample=(scaled+500_000_000)/1_000_000_000;
+            assert!(scaled.abs_diff(sample*1_000_000_000)<=2*u128::from(rate));
+            let frames=data.len()/stride;
+            let skip=target_sample.saturating_sub(sample).min(frames as u128)as usize;
+            (skip<frames).then(||(((sample+skip as u128)*1_000_000_000/u128::from(rate))as u64,data[skip*stride..].to_vec()))
+        }).collect()
+    }
+
     use super::*;
     pub(super) struct Capture(pub(super) Arc<Mutex<Vec<crate::audio::AudioPacket>>>);
     impl AudioBackend for Capture {
@@ -711,7 +807,7 @@ mod presentation_window_tests {
         let counts = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = counts.lock().unwrap();
         let sizes:Vec<usize> = packets.iter().map(|p| p.data.len()/8).collect();
@@ -734,9 +830,9 @@ mod presentation_window_tests {
         worker.drain_commands(Some(Command::Seek(2400)));
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = counts.lock().unwrap();
-        assert_eq!(packets[0].pts,2056);
+        assert_eq!(packets[0].pts,2400);
         let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
-        assert!(actual==expected[2056*8..],"seek PCM differs from continuous decode");
+        assert!(actual==expected[2400*8..],"seek PCM differs from continuous decode");
         drop(packets);
         counts.lock().unwrap().clear();
         worker.drain_commands(Some(Command::Seek(0)));
@@ -761,16 +857,16 @@ mod no_edit_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         captured.lock().unwrap().clear();
         worker.drain_commands(Some(Command::Seek(2400)));
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = captured.lock().unwrap();
-        assert_eq!(packets[0].pts,2040);
+        assert_eq!(packets[0].pts,2400);
         let actual:Vec<u8> = packets.iter().flat_map(|p|p.data.iter().copied()).collect();
-        assert!(actual==expected[2040*8..],"un-edited seek PCM differs from continuous decode");
+        assert!(actual==expected[2400*8..],"un-edited seek PCM differs from continuous decode");
     }
 }
 
@@ -814,7 +910,7 @@ mod preroll_control_tests {
         let worker_commands = command_tx.clone();
         let worker_calls = calls.clone();
         let thread = std::thread::spawn(move || {
-            let worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+            let worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
             worker.run();
         });
         let paused = paused_rx.recv_timeout(Duration::from_secs(5));
@@ -839,10 +935,10 @@ mod adts_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..frames { assert!(worker.decode_next().0.is_none()); }
         let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
-        for (request,landed) in [(3000,2048),(0,0)] {
+        for (request,landed) in [(3000,3000),(0,0)] {
             captured.lock().unwrap().clear();
             worker.drain_commands(Some(Command::Seek(request)));
             for _ in 0..frames { assert!(worker.decode_next().0.is_none()); }
@@ -866,7 +962,7 @@ mod matroska_aac_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         let mut final_pace = Duration::ZERO;
         for _ in 0..48 {
             let (event,pace) = worker.decode_next();
@@ -875,7 +971,10 @@ mod matroska_aac_seek_tests {
         }
         let packets = captured.lock().unwrap();
         let last = packets.last().unwrap();
-        let expected_end = last.presentation_time()+Duration::from_nanos(21_333_333);
+        // The fixture has Matroska tail padding: pacing follows the audible
+        // PCM window, not the untrimmed 1024-sample coded access unit.
+        let frames=last.data.len()/4/usize::from(worker.stream.channels());
+        let expected_end = last.presentation_time()+Duration::from_nanos(frames as u64*1_000_000_000/u64::from(worker.stream.sample_rate()));
         assert_eq!(final_pace,expected_end.saturating_sub(LEAD));
         drop(packets);
         let expected:Vec<(u64,Vec<u8>)> = captured.lock().unwrap().iter().map(|p| { assert_eq!(p.timebase_den,1_000_000_000); (p.pts,p.data.clone()) }).collect();
@@ -883,13 +982,12 @@ mod matroska_aac_seek_tests {
         worker.drain_commands(Some(Command::Seek(50_000_000)));
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = captured.lock().unwrap();
-        assert!((25_000_000..=50_000_000).contains(&packets[0].pts));
-        let index = expected.iter().position(|(pts,_)| *pts==packets[0].pts).unwrap();
-        assert_eq!(packets.len(),expected.len()-index);
-        for (actual,(pts,data)) in packets.iter().zip(&expected[index..]) {
-            assert_eq!(actual.pts,*pts);
-            assert_eq!(actual.timebase_den,1_000_000_000);
-            assert!(actual.data==*data,"Matroska seek PCM differs from continuous decode");
+        let wanted=super::presentation_window_tests::matroska_suffix(&expected,50_000_000,worker.stream.sample_rate(),worker.stream.channels());
+        assert_eq!(packets[0].pts,50_000_000);
+        assert_eq!(packets.len(),wanted.len());
+        for (actual,(pts,data))in packets.iter().zip(&wanted){
+            assert_eq!(actual.pts,*pts);assert_eq!(actual.timebase_den,1_000_000_000);
+            assert!(actual.data==*data,"Matroska exact seek PCM differs from continuous decode");
         }
     }
 }
@@ -923,7 +1021,7 @@ mod scheduling_step_tests {
         let steps=Steps([pcm(0),AudioStep::ResetDecoder,pcm(960)].into());
         let counts=Arc::new(Mutex::new(Vec::new()));let resets=Arc::new(Mutex::new(0));
         let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker { checkpoints:Vec::new(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         assert!(worker.decode_next().0.is_none());
         let (event,pace)=worker.decode_next();assert!(event.is_none());assert_eq!(pace,Duration::ZERO);
         assert_eq!(*resets.lock().unwrap(),1);
@@ -955,7 +1053,7 @@ mod mp4_edit_scheduler_tests {
         let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(data),Default::default()).unwrap();
         let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
         let packets=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker { checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         for _ in 0..200 {
             let(event,_)=worker.decode_next();
             if let Some(event)=event {assert!(matches!(event,AudioEvent::Ended(_)),"unexpected playback error");break;}
@@ -1001,7 +1099,7 @@ mod checkpoint_seek_tests {
             let scale=stream.timescale();
             let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
             let packets=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-            let mut worker=Worker {checkpoints:Vec::new(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             fn finish(w:&mut Worker)->usize {
                 for n in 0..300 {match w.decode_next().0 {Some(AudioEvent::Ended(_))=>return n,Some(AudioEvent::Error(e))=>panic!("{e}"),_=>{}}}
                 panic!("audio did not end");
@@ -1010,9 +1108,16 @@ mod checkpoint_seek_tests {
             let expected:Vec<_>=packets.lock().unwrap().iter().map(|p|(p.pts,p.data.clone())).collect();
             packets.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(i64::from(scale)*17/10)));
             let steps=finish(&mut worker);assert!(steps<full*3/4,"preroll was not skipped: {steps}/{full}");
-            let actual=packets.lock().unwrap();let start=expected.iter().position(|(pts,_)|*pts==actual[0].pts).unwrap();
-            assert_eq!(actual.len(),expected.len()-start);
-            for (p,(pts,data)) in actual.iter().zip(&expected[start..]) {assert_eq!(p.pts,*pts);assert!(p.data==*data);}
+            let actual=packets.lock().unwrap();
+            if scale<1_000_000_000 {
+                let request=u64::from(scale)*17/10;assert_eq!(actual[0].pts,request);
+                let full:Vec<_>=expected.iter().flat_map(|(_,data)|data.iter().copied()).collect();let suffix:Vec<_>=actual.iter().flat_map(|p|p.data.iter().copied()).collect();
+                assert!(suffix==full[request as usize*usize::from(worker.stream.channels())*4..],"checkpoint seek changed exact ADTS suffix");
+            } else {
+                let wanted=super::presentation_window_tests::matroska_suffix(&expected,1_700_000_000,worker.stream.sample_rate(),worker.stream.channels());
+                assert_eq!(actual.len(),wanted.len());
+                for(p,(pts,data))in actual.iter().zip(&wanted){assert_eq!(p.pts,*pts);assert!(p.data==*data,"checkpoint seek changed the exact Matroska suffix");}
+            }
             drop(actual);packets.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(0)));finish(&mut worker);
             let actual=packets.lock().unwrap();assert_eq!(actual.len(),expected.len());
             for(p,(pts,data))in actual.iter().zip(&expected) {assert_eq!(p.pts,*pts);assert!(p.data==*data);}
@@ -1025,7 +1130,7 @@ mod checkpoint_seek_tests {
         let scale=stream.timescale();let channels=usize::from(stream.channels());
         let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
         let packets=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         fn finish(worker:&mut Worker)->usize {
             for count in 0..300 {
                 match worker.decode_next().0 {
@@ -1075,7 +1180,7 @@ mod ps_eof_tests {
             }
             let mut f=baseline.finish().unwrap().unwrap();f.packet.data.truncate(f.source_duration as usize*8);expected.push(f.packet);
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
             assert!(worker.decode_next().0.is_none());assert!(captured.lock().unwrap().is_empty());
             for count in 1..=3 {assert!(worker.decode_next().0.is_none());assert!(!worker.ended);assert_eq!(captured.lock().unwrap().len(),count);}
             assert!(matches!(worker.decode_next().0,Some(AudioEvent::Ended(7))));assert!(worker.ended);
@@ -1125,7 +1230,7 @@ mod ps_edit_worker_tests {
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(edited),Default::default()).unwrap();
             let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             run(&mut worker);
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
             check(0);
@@ -1149,14 +1254,13 @@ mod ps_edit_worker_tests {
             crate::native_media::decode_mp4_aac_pcm(edited, &mut expected).unwrap();
             let total=expected.len()/8;assert!(matches!(total,5760|6144|9600));
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(edited),Default::default()).unwrap();
-            let has_edits=!stream.track().edits.is_empty();
             assert_eq!(stream.channels(),2);
             let decoder=stream.make_decoder().unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
             run(&mut worker);check(0);
-            for request in [4000,(total*2/3) as i64,(total-480) as i64,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(request)));run(&mut worker);let landed=if has_edits {request as usize} else {request as usize/(total/3)*(total/3)};check(landed);}
+            for request in [4000,(total*2/3) as i64,(total-480) as i64,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(request)));run(&mut worker);check(request as usize);}
             captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Rewind));run(&mut worker);check(0);
         }
     }
@@ -1179,7 +1283,7 @@ mod ps_edit_worker_tests {
             assert!(old_error.contains("configuration disagrees with container sample rate or channels"));
             let decoder=stream.make_decoder().unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert!(bytes==expected[from*8..],"core/output clock changes altered PCM");};
             run(&mut worker);check(0);
             for sample in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(sample/2)));run(&mut worker);check(sample as usize);}
@@ -1191,7 +1295,7 @@ mod ps_edit_worker_tests {
         for bytes in [include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-1024-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-960-synthetic.mp4").as_slice()] {
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap();let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0 {Some(AudioEvent::Error(e))=>{assert!(e.contains("AAC edit extends beyond source packets"),"{e}");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
             assert!(saw_error);assert_eq!(captured.lock().unwrap().len(),3);
         }
@@ -1235,14 +1339,14 @@ mod ps_matroska_preroll_tests {
             let (_command_tx, commands) = sync_channel(1);
             let (events, _) = sync_channel(1);
             let mut worker = Worker {
-                checkpoints: Vec::new(),
+                duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(),
                 stream: Box::new(stream),
                 decoder,
                 backend: Box::new(super::presentation_window_tests::Capture(captured.clone())),
                 commands,
                 events,
                 playing: true,
-                ended: false,
+                ended: false, draining: false, queued_frontier: Duration::ZERO,
                 generation: 0,
                 position: Arc::new(Mutex::new(Duration::ZERO)),
             };
@@ -1295,6 +1399,427 @@ mod ps_matroska_preroll_tests {
                     assert_eq!(a.timebase_den, e.timebase_den);
                 }
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod ogg_opus_configuration_tests {
+    use super::*;
+    use crate::audio::AudioStream;
+    fn run(worker: &mut Worker) {
+        for _ in 0..64 {
+            match worker.decode_next().0 {
+                Some(AudioEvent::Ended(_)) => return,
+                Some(AudioEvent::Error(e)) => panic!("Ogg Opus worker: {e}"),
+                _ => {}
+            }
+        }
+        panic!("Ogg Opus worker did not terminate");
+    }
+    #[test]
+    fn ogg_opus_worker_reconfigures_mapping_and_gain_after_boundaries_and_navigation() {
+        let root =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let mut expected = Vec::new();
+        for (name, trim) in [
+            ("hevc-opus-surround-companion.mkv", 137),
+            ("hevc-opus-reconfigured-companion.mkv", 211),
+        ] {
+            let bytes = std::fs::read(root.join(name)).unwrap();
+            let mut pcm = Vec::new();
+            fvid_media::owned_matroska_opus::decode_matroska_opus_pcm(
+                std::io::Cursor::new(bytes),
+                &mut pcm,
+                None,
+                &Default::default(),
+            )
+            .unwrap();
+            pcm.truncate(pcm.len() - trim * 24);
+            expected.extend(pcm);
+        }
+        let bytes = std::fs::read(root.join("opus-surround-reconfigured.opus")).unwrap();
+        let stream =
+            crate::playback_ogg_opus::OggOpusAudioReader::open(&bytes[..], Default::default())
+                .unwrap();
+        let decoder = stream.make_decoder().unwrap();
+        let captured = Arc::new(Mutex::new(Vec::new()));
+        let (_command_tx, commands) = sync_channel(1);
+        let (events, _) = sync_channel(8);
+        let mut worker = Worker {
+            duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(),
+            stream: Box::new(stream),
+            decoder,
+            backend: Box::new(super::presentation_window_tests::Capture(captured.clone())),
+            commands,
+            events,
+            playing: true,
+            ended: false, draining: false, queued_frontier: Duration::ZERO,
+            generation: 0,
+            position: Arc::new(Mutex::new(Duration::ZERO)),
+        };
+        let check = |from: usize| {
+            let packets = captured.lock().unwrap();
+            let mut cursor = from as u64;
+            let mut pcm = Vec::new();
+            for packet in packets.iter() {
+                assert_eq!(packet.pts, cursor);
+                assert_eq!(packet.timebase_den, 48000);
+                cursor += packet.data.len() as u64 / 24;
+                pcm.extend_from_slice(&packet.data);
+            }
+            assert_eq!(cursor, 10212);
+            assert_eq!(pcm, expected[from * 24..]);
+        };
+        run(&mut worker);
+        check(0);
+        for target in [7000usize, 0, 5311, 5310, 7000] {
+            captured.lock().unwrap().clear();
+            assert!(worker.drain_commands(Some(Command::Seek(target as i64))));
+            run(&mut worker);
+            check(target);
+        }
+        captured.lock().unwrap().clear();
+        assert!(worker.drain_commands(Some(Command::Rewind)));
+        run(&mut worker);
+        check(0);
+    }
+}
+
+#[cfg(test)]
+mod ogg_opus_output_layout_tests {
+    use super::*;
+    use crate::audio::AudioStream;
+    struct Capture {
+        pcm: Arc<Mutex<Vec<crate::audio::AudioPacket>>>,
+        starts: Arc<std::sync::atomic::AtomicUsize>,
+    }
+    impl AudioBackend for Capture {
+        fn start(&mut self, spec: crate::audio::AudioSpec) -> Result<(), crate::audio::AudioError> {
+            assert_eq!(spec.channels, 6);
+            assert_eq!(spec.sample_rate, 48000);
+            self.starts
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            Ok(())
+        }
+        fn push(&mut self, p: crate::audio::AudioPacket) -> Result<(), crate::audio::AudioError> {
+            assert_eq!(p.data.len() % 24, 0);
+            self.pcm.lock().unwrap().push(p);
+            Ok(())
+        }
+        fn position(&self) -> Duration {
+            Duration::ZERO
+        }
+        fn flush(&mut self, _: Duration) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn pause(&mut self) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn resume(&mut self) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+        fn stop(&mut self) -> Result<(), crate::audio::AudioError> {
+            Ok(())
+        }
+    }
+    fn run(worker: &mut Worker) {
+        for _ in 0..64 {
+            match worker.decode_next().0 {
+                Some(AudioEvent::Ended(_)) => return,
+                Some(AudioEvent::Error(e)) => panic!("Opus layout worker: {e}"),
+                _ => {}
+            }
+        }
+        panic!("Opus layout worker did not terminate");
+    }
+    #[test]
+    fn ogg_opus_channel_changes_preserve_pcm_without_restarting_the_backend() {
+        let root =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors");
+        let decode_video = |name: &str| {
+            let bytes = std::fs::read(root.join(name)).unwrap();
+            let mut pcm = Vec::new();
+            fvid_media::owned_matroska_opus::decode_matroska_opus_pcm(
+                std::io::Cursor::new(bytes),
+                &mut pcm,
+                None,
+                &Default::default(),
+            )
+            .unwrap();
+            pcm
+        };
+        let six = decode_video("hevc-opus-surround-companion.mkv");
+        let quad = decode_video("hevc-opus-quad-companion.mkv");
+        let expand = |bytes: &[u8]| {
+            let mut out = Vec::new();
+            for row in bytes.chunks_exact(16) {
+                out.extend_from_slice(&row[..8]);
+                out.extend([0; 8]);
+                out.extend_from_slice(&row[8..]);
+            }
+            out
+        };
+        for reverse in [false, true] {
+            let name = if reverse {
+                "opus-quad-to-surround.opus"
+            } else {
+                "opus-surround-to-quad.opus"
+            };
+            let mut expected = if reverse {
+                expand(&quad[..5311 * 16])
+            } else {
+                six[..5311 * 24].to_vec()
+            };
+            expected.extend(if reverse {
+                six[336 * 24..5237 * 24].to_vec()
+            } else {
+                expand(&quad[336 * 16..5237 * 16])
+            });
+            let bytes = std::fs::read(root.join(name)).unwrap();
+            let stream =
+                crate::playback_ogg_opus::OggOpusAudioReader::open(&bytes[..], Default::default())
+                    .unwrap();
+            let decoder = stream.make_decoder().unwrap();
+            let captured = Arc::new(Mutex::new(Vec::new()));
+            let starts = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+            let mut backend = Capture {
+                pcm: captured.clone(),
+                starts: starts.clone(),
+            };
+            backend
+                .start(crate::audio::AudioSpec {
+                    sample_rate: stream.sample_rate(),
+                    channels: stream.channels(),
+                    format: crate::audio::SampleFormat::F32,
+                })
+                .unwrap();
+            let (_tx, commands) = sync_channel(1);
+            let (events, _) = sync_channel(8);
+            let mut worker = Worker {
+                duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(),
+                stream: Box::new(stream),
+                decoder,
+                backend: Box::new(backend),
+                commands,
+                events,
+                playing: true,
+                ended: false, draining: false, queued_frontier: Duration::ZERO,
+                generation: 0,
+                position: Arc::new(Mutex::new(Duration::ZERO)),
+            };
+            let check = |from: usize| {
+                let packets = captured.lock().unwrap();
+                let mut cursor = from as u64;
+                let mut actual = Vec::new();
+                for p in packets.iter() {
+                    assert_eq!(p.pts, cursor);
+                    assert_eq!(p.timebase_den, 48000);
+                    cursor += p.data.len() as u64 / 24;
+                    actual.extend_from_slice(&p.data);
+                }
+                assert_eq!(cursor, 10212);
+                assert_eq!(actual, expected[from * 24..]);
+                assert_eq!(starts.load(std::sync::atomic::Ordering::SeqCst), 1);
+            };
+            run(&mut worker);
+            check(0);
+            for target in [7000usize, 0, 5311, 5310] {
+                captured.lock().unwrap().clear();
+                assert!(worker.drain_commands(Some(Command::Seek(target as i64))));
+                run(&mut worker);
+                check(target);
+            }
+            captured.lock().unwrap().clear();
+            assert!(worker.drain_commands(Some(Command::Rewind)));
+            run(&mut worker);
+            check(0);
+        }
+    }
+}
+
+#[cfg(test)]
+#[path = "playback/audio/vorbis_worker_tests.rs"]
+mod vorbis_worker_tests;
+
+#[cfg(test)]
+mod exact_seek_clock_regressions {
+    use super::*;
+    #[test]
+    fn duration_to_seek_ticks_preserves_the_stored_matroska_boundary() {
+        let bytes=include_bytes!("../tests/fixtures/playback-errors/audio-stream-clock/clock.mkv");
+        let mut source=crate::playback_webm_audio::WebmAudioReader::open(
+            std::io::Cursor::new(bytes.as_slice()),Default::default()).unwrap();
+        let packet=source.next_packet().unwrap().unwrap();
+        assert_eq!(packet.pts,9_000_000_000_001_000_000);
+        let (commands,received)=sync_channel(QUEUE);
+        let (_,events)=sync_channel(QUEUE);
+        let mut playback=AudioPlayback{commands,events,generation:0,thread:None,
+            position:Arc::new(Mutex::new(Duration::ZERO)),timescale:source.timescale(),duration:Arc::new(Mutex::new(None))};
+        for (target,expected) in [
+            (Duration::new(9_000_000_000,1_000_000),packet.pts),
+            (Duration::from_nanos(1),1),
+            (Duration::from_nanos(999_999_999),999_999_999),
+            (Duration::MAX,i64::MAX),
+        ] {
+            playback.seek(target);
+            match received.try_recv().unwrap() {
+                Command::Seek(pts)=>assert_eq!(pts,expected,"target={target:?}"),
+                _=>panic!("seek did not send a navigation command"),
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod pause_failure_regressions {
+    use super::*;
+    use crate::audio::{AudioError,AudioPacket,AudioSpec};
+    use std::sync::atomic::{AtomicBool,Ordering};
+    struct Device { pcm:Arc<Mutex<Vec<u8>>>,paused:Arc<AtomicBool>,stopped:Arc<AtomicBool>,fail:bool,fail_stop:bool }
+    impl AudioBackend for Device {
+        fn start(&mut self,_:AudioSpec)->Result<(),AudioError>{Ok(())}
+        fn push(&mut self,p:AudioPacket)->Result<(),AudioError>{self.pcm.lock().unwrap().extend(p.data);Ok(())}
+        fn position(&self)->Duration{Duration::ZERO}
+        fn flush(&mut self,_:Duration)->Result<(),AudioError>{Ok(())}
+        fn pause(&mut self)->Result<(),AudioError>{self.paused.store(true,Ordering::Release);if self.fail{Err(AudioError::PlaybackError("injected pause failure".into()))}else{Ok(())}}
+        fn resume(&mut self)->Result<(),AudioError>{Ok(())}
+        fn stop(&mut self)->Result<(),AudioError>{self.stopped.store(true,Ordering::Release);if self.fail_stop{Err(AudioError::PlaybackError("injected stop failure".into()))}else{Ok(())}}
+        fn drain_status(&self)->Result<bool,AudioError>{Ok(false)}
+    }
+    #[test]
+    fn pause_failure_reports_terminal_error_and_stops_device_after_valid_pcm() {
+        let media=include_bytes!("../tests/fixtures/playback-errors/audio-pause-failure/clock.mkv");
+        let expected=include_bytes!("../tests/fixtures/playback-errors/audio-pause-failure/expected-source.f32le");
+        let mut video=crate::playback_native::NativeReader::software(std::io::Cursor::new(media.as_slice()),32<<20).unwrap();
+        for _ in 0..3 {assert!(video.read_frame_raw().unwrap().is_some());}
+        assert!(video.read_frame_raw().unwrap().is_none());
+        for (fail,fail_stop) in [(false,false),(true,false),(true,true)] {
+            let source=crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(media.as_slice()),Default::default()).unwrap();
+            let pcm=Arc::new(Mutex::new(Vec::new()));let paused=Arc::new(AtomicBool::new(false));let stopped=Arc::new(AtomicBool::new(false));
+            let device=Device{pcm:pcm.clone(),paused:paused.clone(),stopped:stopped.clone(),fail,fail_stop};
+            let playback=AudioPlayback::start(Box::new(source),move||Box::new(device));playback.play();
+            let deadline=std::time::Instant::now()+Duration::from_secs(5);
+            while pcm.lock().unwrap().len()!=expected.len(){assert!(std::time::Instant::now()<deadline);thread::sleep(Duration::from_millis(1));}
+            assert_eq!(pcm.lock().unwrap().as_slice(),expected);
+            playback.pause();let deadline=std::time::Instant::now()+Duration::from_millis(100);
+            let mut failure=None;
+            while std::time::Instant::now()<deadline {
+                match playback.poll(){Some(AudioEvent::Error(e))=>{failure=Some(e);break},Some(AudioEvent::Ended(_))=>panic!("pause failure must not become EOF"),_=>{}}
+                thread::sleep(Duration::from_millis(1));
+            }
+            assert!(paused.load(Ordering::Acquire));
+            if fail {
+                assert!(failure.as_deref().is_some_and(|e|e.contains("injected pause failure")),"pause failure silently discarded: {failure:?}");
+                assert!(stopped.load(Ordering::Acquire),"failed pause did not attempt to stop device");
+                if fail_stop {assert!(failure.as_deref().unwrap().contains("injected stop failure"));}
+            } else {assert!(failure.is_none());assert!(!stopped.load(Ordering::Acquire));}
+        }
+    }
+}
+
+#[cfg(test)]
+mod flush_failure_regressions {
+    use super::*;
+    use crate::audio::{AudioError,AudioPacket,AudioSpec};
+    use std::sync::atomic::{AtomicBool,AtomicUsize,Ordering};
+    struct Device { pcm:Arc<Mutex<Vec<u8>>>,total:Arc<AtomicUsize>,flushed:Arc<AtomicBool>,stopped:Arc<AtomicBool>,fail:bool }
+    impl AudioBackend for Device {
+        fn start(&mut self,_:AudioSpec)->Result<(),AudioError>{Ok(())}
+        fn push(&mut self,p:AudioPacket)->Result<(),AudioError>{self.total.fetch_add(p.data.len(),Ordering::AcqRel);self.pcm.lock().unwrap().extend(p.data);Ok(())}
+        fn position(&self)->Duration{Duration::ZERO}
+        fn flush(&mut self,_:Duration)->Result<(),AudioError>{self.flushed.store(true,Ordering::Release);if self.fail{Err(AudioError::PlaybackError("injected flush failure".into()))}else{self.pcm.lock().unwrap().clear();Ok(())}}
+        fn pause(&mut self)->Result<(),AudioError>{Ok(())}
+        fn resume(&mut self)->Result<(),AudioError>{Ok(())}
+        fn stop(&mut self)->Result<(),AudioError>{self.stopped.store(true,Ordering::Release);Ok(())}
+        fn drain_status(&self)->Result<bool,AudioError>{Ok(false)}
+    }
+    #[test]
+    fn failed_navigation_flush_cannot_mix_new_decoding_into_old_device_queue() {
+        let media=include_bytes!("../tests/fixtures/playback-errors/audio-flush-failure/navigation.mkv");
+        let expected=include_bytes!("../tests/fixtures/playback-errors/audio-flush-failure/expected-before.f32le");
+        let mut video=crate::playback_native::NativeReader::software(std::io::Cursor::new(media.as_slice()),32<<20).unwrap();
+        for _ in 0..3 {assert!(video.read_frame_raw().unwrap().is_some());}
+        assert!(video.read_frame_raw().unwrap().is_none());
+        let mut ignored=Vec::new();
+        for rewind in [false,true] {for fail in [false,true] {
+            let source=crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(media.as_slice()),Default::default()).unwrap();
+            let pcm=Arc::new(Mutex::new(Vec::new()));let total=Arc::new(AtomicUsize::new(0));let flushed=Arc::new(AtomicBool::new(false));let stopped=Arc::new(AtomicBool::new(false));
+            let device=Device{pcm:pcm.clone(),total:total.clone(),flushed:flushed.clone(),stopped:stopped.clone(),fail};
+            let mut playback=AudioPlayback::start(Box::new(source),move||Box::new(device));playback.play();
+            let deadline=std::time::Instant::now()+Duration::from_secs(5);
+            while pcm.lock().unwrap().len()!=expected.len(){assert!(std::time::Instant::now()<deadline);thread::sleep(Duration::from_millis(1));}
+            assert_eq!(pcm.lock().unwrap().as_slice(),expected);
+            if rewind {playback.rewind();}else{playback.seek(Duration::from_millis(20));}
+            let deadline=std::time::Instant::now()+Duration::from_millis(100);let mut failure=None;
+            while std::time::Instant::now()<deadline {
+                match playback.poll(){Some(AudioEvent::Error(e))=>{failure=Some(e);break},Some(AudioEvent::Ended(_))=>panic!("flush failure must not become EOF"),_=>{}}
+                thread::sleep(Duration::from_millis(1));
+            }
+            assert!(flushed.load(Ordering::Acquire));
+            if fail {
+                if !failure.as_deref().is_some_and(|e|e.contains("injected flush failure")) {
+                    ignored.push(format!("rewind={rewind}, bytes queued={}",total.load(Ordering::Acquire)));
+                    continue;
+                }
+                assert_eq!(total.load(Ordering::Acquire),expected.len());
+                assert!(stopped.load(Ordering::Acquire));
+            }else{
+                assert!(failure.is_none(),"{failure:?}");
+                assert_eq!(pcm.lock().unwrap().as_slice(),if rewind {expected.as_slice()} else {&expected[640..]});
+            }
+        }}
+        assert!(ignored.is_empty(),"flush refusals were ignored: {ignored:?}");
+    }
+}
+
+#[cfg(test)]
+mod duration_publication_guards {
+    use super::*;
+    struct Source { value:Option<Duration>, valid:bool }
+    impl AudioStream for Source {
+        fn codec(&self)->&str {"A_PCM/FLOAT/IEEE"}
+        fn timescale(&self)->u32 {48000}
+        fn sample_rate(&self)->u32 {48000}
+        fn channels(&self)->u16 {1}
+        fn bits_per_sample(&self)->u16 {32}
+        fn duration(&self)->Option<Duration> {self.value}
+        fn extra_data(&self)->&[u8] {&[]}
+        fn audio_tracks(&self)->Vec<crate::audio::AudioTrack> {Vec::new()}
+        fn next_packet(&mut self)->crate::Result<Option<crate::audio::EncodedPacket>> {Ok(None)}
+        fn rewind(&mut self) {}
+        fn seek_to(&mut self,pts:i64)->i64 {pts}
+        fn validate_eof(&self)->crate::Result<()> {if self.valid {Ok(())}else{Err(crate::error::invalid("injected incomplete source"))}}
+    }
+    #[test]
+    fn completion_publication_preserves_known_length_on_unknown_or_invalid_eof() {
+        for (value,valid,expected) in [(None,true,60),(Some(Duration::ZERO),true,0),(Some(Duration::from_millis(20)),false,60)] {
+            let stream=Source{value,valid};let decoder=stream.make_decoder().unwrap();
+            let duration=Arc::new(Mutex::new(Some(Duration::from_millis(60))));
+            let (_tx,commands)=sync_channel(1);let(events,_rx)=sync_channel(1);
+            let mut worker=Worker{duration:duration.clone(),checkpoints:Vec::new(),stream:Box::new(stream),decoder,backend:Box::new(crate::audio::NullBackend::default()),commands,events,playing:true,ended:false,draining:false,queued_frontier:Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let result=worker.finish_source().0;
+            assert_eq!(*duration.lock().unwrap(),Some(Duration::from_millis(expected)));
+            assert_eq!(matches!(result,Some(AudioEvent::Error(_))),!valid);
+        }
+    }
+}
+
+#[cfg(test)]
+mod sample_seek_clock_regressions {
+    use super::*;
+    #[test]
+    fn inverse_seek_recovers_floored_sample_boundaries_and_keeps_other_targets_floored() {
+        for scale in [8000u32,44100,48000,1_000_000_000] {
+            let (commands,received)=sync_channel(QUEUE);let (_,events)=sync_channel(QUEUE);
+            let mut playback=AudioPlayback{commands,events,generation:0,thread:None,position:Arc::new(Mutex::new(Duration::ZERO)),timescale:scale,duration:Arc::new(Mutex::new(None))};
+            for tick in [0u64,1,2,7,2816,12032,9_000_000_000_000_000_000,i64::MAX as u64] {
+                let rate=u64::from(scale);let target=Duration::new(tick/rate,((tick%rate)*1_000_000_000/rate) as u32);
+                playback.seek(target);match received.try_recv().unwrap(){Command::Seek(at)=>assert_eq!(at,tick as i64,"rate{scale} tick{tick}"),_=>panic!("seek command")}
+            }
+            if scale==48000 {for (ns,expected) in [(1,0),(20832,0),(20833,1),(20834,1),(41665,1),(41666,2)] {
+                playback.seek(Duration::from_nanos(ns));match received.try_recv().unwrap(){Command::Seek(at)=>assert_eq!(at,expected,"fractional target{ns}"),_=>panic!("seek command")}
+            }}
         }
     }
 }

@@ -1,0 +1,6 @@
+{"side":64,"field":false,"allocations":18,"allocated_bytes":28542,"peak_requested_live_delta":21435,"debug_elapsed_ns_diagnostic":737375}
+{"side":64,"field":true,"allocations":18,"allocated_bytes":28542,"peak_requested_live_delta":21435,"debug_elapsed_ns_diagnostic":731625}
+{"side":128,"field":false,"allocations":18,"allocated_bytes":109326,"peak_requested_live_delta":82155,"debug_elapsed_ns_diagnostic":7144292}
+{"side":128,"field":true,"allocations":18,"allocated_bytes":109326,"peak_requested_live_delta":82155,"debug_elapsed_ns_diagnostic":7019042}
+{"side":256,"field":false,"allocations":18,"allocated_bytes":432462,"peak_requested_live_delta":325035,"debug_elapsed_ns_diagnostic":37159041}
+{"side":256,"field":true,"allocations":18,"allocated_bytes":432462,"peak_requested_live_delta":325035,"debug_elapsed_ns_diagnostic":116711916}

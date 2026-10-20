@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0100"
+  ],
+  "checked_at": "2026-10-16T02:10:16.343995+00:00",
+  "before": [
+    "evidence/batch-076-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-076-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-076-midi-decoder.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-076-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-076-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-076-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four authored8kHz native MIDI200ms scripts show onset/release124us differing from the correct first-eligible125us sample control, and99999us tail onset/release differing from an equivalent next-window100ms boundary. Flooring offsets applies state too early and advances oscillator/envelope before the eligible sample.",
+    "Wide exact offset*rate <= frame*1000000 comparison prevents early application. Validated events between final PCM sample and window end are applied after rendering without advancing phase/envelope, preserving their state for the next window.",
+    "All four actual scripts now have bit-identical PCM/PTS to exact boundary controls. Native recording workers verify play, rewind and empty200msEOF seek. Tail comparisons ensure the event is neither rendered early nor lost.",
+    "16 MIDI decoder/5 reader units, six related integration targets including malformed windows, fractional tempos, wide clocks and stateful seeks, fixture reproduction and player build pass. A short authored VP9/PCM companion decodes.",
+    "This is scalar native MIDI scheduling at8kHz with integral100ms windows. No encoder/network/private input, physical audio, performance or reference synth-quality claim."
+  ],
+  "compatibility": "Subsample MIDI events now affect the first sample at or after their timestamp. Tail state is retained for the next window. Existing integral sample-boundary timing and public interfaces remain unchanged.",
+  "counting": "One MIDI sample-eligibility/window-tail scheduling problem. Onset/release, boundary controls and worker phases add no IDs."
+}

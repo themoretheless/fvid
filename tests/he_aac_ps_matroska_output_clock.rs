@@ -36,21 +36,51 @@ fn matroska_output_sampling_frequency_selects_independent_ps_pcm_and_wav_clock()
                 .sample_rate,
             48000
         );
+        let mut indexed =
+            fvid_media::owned_webm::WebmReader::open(Cursor::new(&file), Default::default())
+                .unwrap();
+        indexed.scan_all().unwrap();
+        let audio = indexed
+            .tracks
+            .iter()
+            .find(|t| t.codec == "A_AAC")
+            .unwrap()
+            .number;
+        let actual_pts: Vec<_> = indexed
+            .packets
+            .iter()
+            .filter(|p| p.track == audio)
+            .map(|p| p.pts_ns)
+            .collect();
+        let declared: Vec<_> = c["source_pts_ns"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|p| p.as_i64().unwrap())
+            .collect();
+        assert_eq!(actual_pts, declared);
         let frames = c["slots"].as_u64().unwrap() as usize * 128;
-        let mut expected = vec![0f32; (4800 + frames) * 2];
+        let mut expected = vec![0f32; (4320 + frames) * 2];
         for frame in 0..3 {
             let start = c["frame_starts"][frame].as_u64().unwrap() as usize;
             for channel in 0..2 {
                 let offset = c["pcm"][channel][0].as_u64().unwrap() as usize;
-                for n in 0..frames {
+                // Negative source preroll is decoded for history, not shifted
+                // forward into the container presentation interval.
+                let skip = if frame == 0 {
+                    c["first_skip_samples"].as_u64().unwrap() as usize
+                } else {
+                    0
+                };
+                for n in skip..frames {
                     let at = offset + (frame * frames + n) * 8;
-                    expected[(start + n) * 2 + channel] =
+                    expected[(start + n - skip) * 2 + channel] =
                         f64::from_le_bytes(oracle[at..at + 8].try_into().unwrap()) as f32;
                 }
             }
         }
         for (interval, options, from, to, count) in [
-            (None, CopyOptions::default(), 0, 4800 + frames, 3),
+            (None, CopyOptions::default(), 0, 4320 + frames, 3),
             (
                 Some((Duration::from_millis(1), Duration::from_millis(118))),
                 CopyOptions::default(),
@@ -65,7 +95,7 @@ fn matroska_output_sampling_frequency_selects_independent_ps_pcm_and_wav_clock()
                     ..Default::default()
                 },
                 0,
-                2400 + frames,
+                1920 + frames,
                 2,
             ),
             (
@@ -75,7 +105,7 @@ fn matroska_output_sampling_frequency_selects_independent_ps_pcm_and_wav_clock()
                     ..Default::default()
                 },
                 0,
-                4800 + frames,
+                4320 + frames,
                 3,
             ),
         ] {
@@ -118,12 +148,12 @@ fn matroska_output_sampling_frequency_selects_independent_ps_pcm_and_wav_clock()
         let _ = std::fs::remove_file(&destination);
         let stats =
             fvid_media::decode_audio(&source, &destination, &CopyOptions::default()).unwrap();
-        assert_eq!(stats.sample_frames, (4800 + frames) as u64);
+        assert_eq!(stats.sample_frames, (4320 + frames) as u64);
         let mut wave = std::fs::File::open(&destination).unwrap();
         let info = fvid_media::owned_wave_inspect::inspect(&mut wave, None).unwrap();
         assert_eq!(
             (info.sample_rate, info.channels, info.sample_frames),
-            (48000, 2, (4800 + frames) as u64)
+            (48000, 2, (4320 + frames) as u64)
         );
         std::fs::remove_file(destination).unwrap();
         for budget in [1, 10 * 1024 * 1024] {

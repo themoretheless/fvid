@@ -1,0 +1,14 @@
+{
+  "status": "audit-only",
+  "accepted_ids": [],
+  "source": "examples/avc_small_mutation_probe.rs",
+  "log": "evidence/batch-138-avc-mutation.log",
+  "checks": {
+    "healthy_original": "native16x16I_PCMdecodes",
+    "mutations": 6621,
+    "refused": 3166,
+    "panics": 0
+  },
+  "qualification": "Fixed clean SPS/PPS and bounded32MiBdecoderbudget; truncated tail mutations plus full-packet bit flips. Successful changed sample payloads are ordinary admitted inputs,not defects. This is a small deterministic slice audit,not fuzzing completeness or full AVC qualification.",
+  "counting": "Zero IDs; no production AVC changes."
+}

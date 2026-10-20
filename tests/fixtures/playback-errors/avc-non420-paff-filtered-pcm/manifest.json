@@ -1,0 +1,8645 @@
+{
+  "provenance": "Owned non-4:2:0 PAFF frame and filtered I_PCM fixtures across monochrome/4:2:2/4:4:4. No external codec or private media.",
+  "cases": [
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d0-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a0-crop0-0.packet",
+          "offset": 0
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a0-crop0-1.packet",
+          "offset": 1536
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d0-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a0-crop1-0.packet",
+          "offset": 3072
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a0-crop1-1.packet",
+          "offset": 4608
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d0-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a1-crop0-0.packet",
+          "offset": 6144
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a1-crop0-1.packet",
+          "offset": 7680
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d0-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a1-crop1-0.packet",
+          "offset": 9216
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d0-a1-crop1-1.packet",
+          "offset": 10752
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d2-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a0-crop0-0.packet",
+          "offset": 12288
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a0-crop0-1.packet",
+          "offset": 13824
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d2-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a0-crop1-0.packet",
+          "offset": 15360
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a0-crop1-1.packet",
+          "offset": 16896
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d2-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a1-crop0-0.packet",
+          "offset": 18432
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a1-crop0-1.packet",
+          "offset": 19968
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e0-d2-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a1-crop1-0.packet",
+          "offset": 21504
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e0-d2-a1-crop1-1.packet",
+          "offset": 23040
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d0-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a0-crop0-0.packet",
+          "offset": 24576
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a0-crop0-1.packet",
+          "offset": 26112
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d0-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a0-crop1-0.packet",
+          "offset": 27648
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a0-crop1-1.packet",
+          "offset": 29184
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d0-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a1-crop0-0.packet",
+          "offset": 30720
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a1-crop0-1.packet",
+          "offset": 32256
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d0-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a1-crop1-0.packet",
+          "offset": 33792
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d0-a1-crop1-1.packet",
+          "offset": 35328
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d2-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a0-crop0-0.packet",
+          "offset": 36864
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a0-crop0-1.packet",
+          "offset": 38400
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d2-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a0-crop1-0.packet",
+          "offset": 39936
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a0-crop1-1.packet",
+          "offset": 41472
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d2-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a1-crop0-0.packet",
+          "offset": 43008
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a1-crop0-1.packet",
+          "offset": 44544
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y8-c8-e1-d2-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a1-crop1-0.packet",
+          "offset": 46080
+        },
+        {
+          "packet": "prog-filtered-f3-y8-c8-e1-d2-a1-crop1-1.packet",
+          "offset": 47616
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d0-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a0-crop0-0.packet",
+          "offset": 49152
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a0-crop0-1.packet",
+          "offset": 50688
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d0-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a0-crop1-0.packet",
+          "offset": 52224
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a0-crop1-1.packet",
+          "offset": 53760
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d0-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a1-crop0-0.packet",
+          "offset": 55296
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a1-crop0-1.packet",
+          "offset": 56832
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d0-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a1-crop1-0.packet",
+          "offset": 58368
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d0-a1-crop1-1.packet",
+          "offset": 59904
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d2-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a0-crop0-0.packet",
+          "offset": 61440
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a0-crop0-1.packet",
+          "offset": 62976
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d2-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a0-crop1-0.packet",
+          "offset": 64512
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a0-crop1-1.packet",
+          "offset": 66048
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d2-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a1-crop0-0.packet",
+          "offset": 67584
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a1-crop0-1.packet",
+          "offset": 69120
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e0-d2-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a1-crop1-0.packet",
+          "offset": 70656
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e0-d2-a1-crop1-1.packet",
+          "offset": 72192
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d0-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a0-crop0-0.packet",
+          "offset": 73728
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a0-crop0-1.packet",
+          "offset": 75264
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d0-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a0-crop1-0.packet",
+          "offset": 76800
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a0-crop1-1.packet",
+          "offset": 78336
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d0-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a1-crop0-0.packet",
+          "offset": 79872
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a1-crop0-1.packet",
+          "offset": 81408
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d0-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a1-crop1-0.packet",
+          "offset": 82944
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d0-a1-crop1-1.packet",
+          "offset": 84480
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d2-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a0-crop0-0.packet",
+          "offset": 86016
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a0-crop0-1.packet",
+          "offset": 87552
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d2-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a0-crop1-0.packet",
+          "offset": 89088
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a0-crop1-1.packet",
+          "offset": 90624
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d2-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a1-crop0-0.packet",
+          "offset": 92160
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a1-crop0-1.packet",
+          "offset": 93696
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y10-c12-e1-d2-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a1-crop1-0.packet",
+          "offset": 95232
+        },
+        {
+          "packet": "prog-filtered-f3-y10-c12-e1-d2-a1-crop1-1.packet",
+          "offset": 96768
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d0-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a0-crop0-0.packet",
+          "offset": 98304
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a0-crop0-1.packet",
+          "offset": 99840
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d0-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a0-crop1-0.packet",
+          "offset": 101376
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a0-crop1-1.packet",
+          "offset": 102912
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d0-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a1-crop0-0.packet",
+          "offset": 104448
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a1-crop0-1.packet",
+          "offset": 105984
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d0-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a1-crop1-0.packet",
+          "offset": 107520
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d0-a1-crop1-1.packet",
+          "offset": 109056
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d2-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a0-crop0-0.packet",
+          "offset": 110592
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a0-crop0-1.packet",
+          "offset": 112128
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d2-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a0-crop1-0.packet",
+          "offset": 113664
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a0-crop1-1.packet",
+          "offset": 115200
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d2-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a1-crop0-0.packet",
+          "offset": 116736
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a1-crop0-1.packet",
+          "offset": 118272
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e0-d2-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a1-crop1-0.packet",
+          "offset": 119808
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e0-d2-a1-crop1-1.packet",
+          "offset": 121344
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d0-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a0-crop0-0.packet",
+          "offset": 122880
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a0-crop0-1.packet",
+          "offset": 124416
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d0-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a0-crop1-0.packet",
+          "offset": 125952
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a0-crop1-1.packet",
+          "offset": 127488
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d0-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a1-crop0-0.packet",
+          "offset": 129024
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a1-crop0-1.packet",
+          "offset": 130560
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d0-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a1-crop1-0.packet",
+          "offset": 132096
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d0-a1-crop1-1.packet",
+          "offset": 133632
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d2-a0-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a0-crop0-0.packet",
+          "offset": 135168
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a0-crop0-1.packet",
+          "offset": 136704
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d2-a0-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a0-crop1-0.packet",
+          "offset": 138240
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a0-crop1-1.packet",
+          "offset": 139776
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d2-a1-crop0",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a1-crop0-0.packet",
+          "offset": 141312
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a1-crop0-1.packet",
+          "offset": 142848
+        }
+      ]
+    },
+    {
+      "name": "prog-filtered-f3-y14-c8-e1-d2-a1-crop1",
+      "kind": "progressive",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 16,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "frames": [
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a1-crop1-0.packet",
+          "offset": 144384
+        },
+        {
+          "packet": "prog-filtered-f3-y14-c8-e1-d2-a1-crop1-1.packet",
+          "offset": 145920
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e0-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d1-a0-crop0-0.packet",
+          "offset": 147456
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d1-a0-crop0-1.packet",
+          "offset": 148480
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e0-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d1-a1-crop1-0.packet",
+          "offset": 149504
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d1-a1-crop1-1.packet",
+          "offset": 150528
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e0-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d0-a0-crop0-0.packet",
+          "offset": 151552
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d0-a0-crop0-1.packet",
+          "offset": 152576
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e0-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d0-a1-crop1-0.packet",
+          "offset": 153600
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d0-a1-crop1-1.packet",
+          "offset": 154624
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e0-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d2-a0-crop0-0.packet",
+          "offset": 155648
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d2-a0-crop0-1.packet",
+          "offset": 156672
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e0-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d2-a1-crop1-0.packet",
+          "offset": 157696
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e0-d2-a1-crop1-1.packet",
+          "offset": 158720
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e1-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d1-a0-crop0-0.packet",
+          "offset": 159744
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d1-a0-crop0-1.packet",
+          "offset": 160768
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e1-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d1-a1-crop1-0.packet",
+          "offset": 161792
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d1-a1-crop1-1.packet",
+          "offset": 162816
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e1-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d0-a0-crop0-0.packet",
+          "offset": 163840
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d0-a0-crop0-1.packet",
+          "offset": 164864
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e1-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d0-a1-crop1-0.packet",
+          "offset": 165888
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d0-a1-crop1-1.packet",
+          "offset": 166912
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e1-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d2-a0-crop0-0.packet",
+          "offset": 167936
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d2-a0-crop0-1.packet",
+          "offset": 168960
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y8-c8-e1-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d2-a1-crop1-0.packet",
+          "offset": 169984
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y8-c8-e1-d2-a1-crop1-1.packet",
+          "offset": 171008
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e0-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d1-a0-crop0-0.packet",
+          "offset": 172032
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d1-a0-crop0-1.packet",
+          "offset": 173056
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e0-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d1-a1-crop1-0.packet",
+          "offset": 174080
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d1-a1-crop1-1.packet",
+          "offset": 175104
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e0-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d0-a0-crop0-0.packet",
+          "offset": 176128
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d0-a0-crop0-1.packet",
+          "offset": 177152
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e0-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d0-a1-crop1-0.packet",
+          "offset": 178176
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d0-a1-crop1-1.packet",
+          "offset": 179200
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e0-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d2-a0-crop0-0.packet",
+          "offset": 180224
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d2-a0-crop0-1.packet",
+          "offset": 181248
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e0-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d2-a1-crop1-0.packet",
+          "offset": 182272
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e0-d2-a1-crop1-1.packet",
+          "offset": 183296
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e1-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d1-a0-crop0-0.packet",
+          "offset": 184320
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d1-a0-crop0-1.packet",
+          "offset": 185344
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e1-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d1-a1-crop1-0.packet",
+          "offset": 186368
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d1-a1-crop1-1.packet",
+          "offset": 187392
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e1-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d0-a0-crop0-0.packet",
+          "offset": 188416
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d0-a0-crop0-1.packet",
+          "offset": 189440
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e1-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d0-a1-crop1-0.packet",
+          "offset": 190464
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d0-a1-crop1-1.packet",
+          "offset": 191488
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e1-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d2-a0-crop0-0.packet",
+          "offset": 192512
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d2-a0-crop0-1.packet",
+          "offset": 193536
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f0-y10-c12-e1-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d2-a1-crop1-0.packet",
+          "offset": 194560
+        },
+        {
+          "packet": "paff-frame-pcm-f0-y10-c12-e1-d2-a1-crop1-1.packet",
+          "offset": 195584
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e0-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d1-a0-crop0-0.packet",
+          "offset": 196608
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d1-a0-crop0-1.packet",
+          "offset": 198656
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e0-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d1-a1-crop1-0.packet",
+          "offset": 200704
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d1-a1-crop1-1.packet",
+          "offset": 202752
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e0-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d0-a0-crop0-0.packet",
+          "offset": 204800
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d0-a0-crop0-1.packet",
+          "offset": 206848
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e0-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d0-a1-crop1-0.packet",
+          "offset": 208896
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d0-a1-crop1-1.packet",
+          "offset": 210944
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e0-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d2-a0-crop0-0.packet",
+          "offset": 212992
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d2-a0-crop0-1.packet",
+          "offset": 215040
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e0-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d2-a1-crop1-0.packet",
+          "offset": 217088
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e0-d2-a1-crop1-1.packet",
+          "offset": 219136
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e1-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d1-a0-crop0-0.packet",
+          "offset": 221184
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d1-a0-crop0-1.packet",
+          "offset": 223232
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e1-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d1-a1-crop1-0.packet",
+          "offset": 225280
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d1-a1-crop1-1.packet",
+          "offset": 227328
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e1-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d0-a0-crop0-0.packet",
+          "offset": 229376
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d0-a0-crop0-1.packet",
+          "offset": 231424
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e1-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d0-a1-crop1-0.packet",
+          "offset": 233472
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d0-a1-crop1-1.packet",
+          "offset": 235520
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e1-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d2-a0-crop0-0.packet",
+          "offset": 237568
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d2-a0-crop0-1.packet",
+          "offset": 239616
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y8-c8-e1-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d2-a1-crop1-0.packet",
+          "offset": 241664
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y8-c8-e1-d2-a1-crop1-1.packet",
+          "offset": 243712
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e0-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d1-a0-crop0-0.packet",
+          "offset": 245760
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d1-a0-crop0-1.packet",
+          "offset": 247808
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e0-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d1-a1-crop1-0.packet",
+          "offset": 249856
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d1-a1-crop1-1.packet",
+          "offset": 251904
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e0-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d0-a0-crop0-0.packet",
+          "offset": 253952
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d0-a0-crop0-1.packet",
+          "offset": 256000
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e0-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d0-a1-crop1-0.packet",
+          "offset": 258048
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d0-a1-crop1-1.packet",
+          "offset": 260096
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e0-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d2-a0-crop0-0.packet",
+          "offset": 262144
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d2-a0-crop0-1.packet",
+          "offset": 264192
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e0-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d2-a1-crop1-0.packet",
+          "offset": 266240
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e0-d2-a1-crop1-1.packet",
+          "offset": 268288
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e1-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d1-a0-crop0-0.packet",
+          "offset": 270336
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d1-a0-crop0-1.packet",
+          "offset": 272384
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e1-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d1-a1-crop1-0.packet",
+          "offset": 274432
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d1-a1-crop1-1.packet",
+          "offset": 276480
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e1-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d0-a0-crop0-0.packet",
+          "offset": 278528
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d0-a0-crop0-1.packet",
+          "offset": 280576
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e1-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d0-a1-crop1-0.packet",
+          "offset": 282624
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d0-a1-crop1-1.packet",
+          "offset": 284672
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e1-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d2-a0-crop0-0.packet",
+          "offset": 286720
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d2-a0-crop0-1.packet",
+          "offset": 288768
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f2-y10-c12-e1-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d2-a1-crop1-0.packet",
+          "offset": 290816
+        },
+        {
+          "packet": "paff-frame-pcm-f2-y10-c12-e1-d2-a1-crop1-1.packet",
+          "offset": 292864
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e0-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d1-a0-crop0-0.packet",
+          "offset": 294912
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d1-a0-crop0-1.packet",
+          "offset": 297984
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e0-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d1-a1-crop1-0.packet",
+          "offset": 301056
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d1-a1-crop1-1.packet",
+          "offset": 304128
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e0-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d0-a0-crop0-0.packet",
+          "offset": 307200
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d0-a0-crop0-1.packet",
+          "offset": 310272
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e0-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d0-a1-crop1-0.packet",
+          "offset": 313344
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d0-a1-crop1-1.packet",
+          "offset": 316416
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e0-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d2-a0-crop0-0.packet",
+          "offset": 319488
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d2-a0-crop0-1.packet",
+          "offset": 322560
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e0-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d2-a1-crop1-0.packet",
+          "offset": 325632
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e0-d2-a1-crop1-1.packet",
+          "offset": 328704
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e1-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d1-a0-crop0-0.packet",
+          "offset": 331776
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d1-a0-crop0-1.packet",
+          "offset": 334848
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e1-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d1-a1-crop1-0.packet",
+          "offset": 337920
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d1-a1-crop1-1.packet",
+          "offset": 340992
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e1-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d0-a0-crop0-0.packet",
+          "offset": 344064
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d0-a0-crop0-1.packet",
+          "offset": 347136
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e1-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d0-a1-crop1-0.packet",
+          "offset": 350208
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d0-a1-crop1-1.packet",
+          "offset": 353280
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e1-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d2-a0-crop0-0.packet",
+          "offset": 356352
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d2-a0-crop0-1.packet",
+          "offset": 359424
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y8-c8-e1-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d2-a1-crop1-0.packet",
+          "offset": 362496
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y8-c8-e1-d2-a1-crop1-1.packet",
+          "offset": 365568
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e0-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d1-a0-crop0-0.packet",
+          "offset": 368640
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d1-a0-crop0-1.packet",
+          "offset": 371712
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e0-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d1-a1-crop1-0.packet",
+          "offset": 374784
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d1-a1-crop1-1.packet",
+          "offset": 377856
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e0-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d0-a0-crop0-0.packet",
+          "offset": 380928
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d0-a0-crop0-1.packet",
+          "offset": 384000
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e0-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d0-a1-crop1-0.packet",
+          "offset": 387072
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d0-a1-crop1-1.packet",
+          "offset": 390144
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e0-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d2-a0-crop0-0.packet",
+          "offset": 393216
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d2-a0-crop0-1.packet",
+          "offset": 396288
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e0-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d2-a1-crop1-0.packet",
+          "offset": 399360
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e0-d2-a1-crop1-1.packet",
+          "offset": 402432
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e1-d1-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d1-a0-crop0-0.packet",
+          "offset": 405504
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d1-a0-crop0-1.packet",
+          "offset": 408576
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e1-d1-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d1-a1-crop1-0.packet",
+          "offset": 411648
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d1-a1-crop1-1.packet",
+          "offset": 414720
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e1-d0-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d0-a0-crop0-0.packet",
+          "offset": 417792
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d0-a0-crop0-1.packet",
+          "offset": 420864
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e1-d0-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d0-a1-crop1-0.packet",
+          "offset": 423936
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d0-a1-crop1-1.packet",
+          "offset": 427008
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e1-d2-a0-crop0",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d2-a0-crop0-0.packet",
+          "offset": 430080
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d2-a0-crop0-1.packet",
+          "offset": 433152
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-pcm-f3-y10-c12-e1-d2-a1-crop1",
+      "kind": "paff_frame",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d2-a1-crop1-0.packet",
+          "offset": 436224
+        },
+        {
+          "packet": "paff-frame-pcm-f3-y10-c12-e1-d2-a1-crop1-1.packet",
+          "offset": 439296
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y8-c8-e0-d1",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e0-d1-0.packet",
+          "offset": 442368
+        },
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e0-d1-1.packet",
+          "offset": 443392
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y8-c8-e0-d0",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e0-d0-0.packet",
+          "offset": 444416
+        },
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e0-d0-1.packet",
+          "offset": 445440
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y8-c8-e1-d1",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e1-d1-0.packet",
+          "offset": 446464
+        },
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e1-d1-1.packet",
+          "offset": 447488
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y8-c8-e1-d0",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e1-d0-0.packet",
+          "offset": 448512
+        },
+        {
+          "packet": "paff-frame-i16-f0-y8-c8-e1-d0-1.packet",
+          "offset": 449536
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y10-c12-e0-d1",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e0-d1-0.packet",
+          "offset": 450560
+        },
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e0-d1-1.packet",
+          "offset": 451584
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y10-c12-e0-d0",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e0-d0-0.packet",
+          "offset": 452608
+        },
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e0-d0-1.packet",
+          "offset": 453632
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y10-c12-e1-d1",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e1-d1-0.packet",
+          "offset": 454656
+        },
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e1-d1-1.packet",
+          "offset": 455680
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f0-y10-c12-e1-d0",
+      "kind": "paff_frame_compressed",
+      "format": 0,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e1-d0-0.packet",
+          "offset": 456704
+        },
+        {
+          "packet": "paff-frame-i16-f0-y10-c12-e1-d0-1.packet",
+          "offset": 457728
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y8-c8-e0-d1",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e0-d1-0.packet",
+          "offset": 458752
+        },
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e0-d1-1.packet",
+          "offset": 460800
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y8-c8-e0-d0",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e0-d0-0.packet",
+          "offset": 462848
+        },
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e0-d0-1.packet",
+          "offset": 464896
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y8-c8-e1-d1",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e1-d1-0.packet",
+          "offset": 466944
+        },
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e1-d1-1.packet",
+          "offset": 468992
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y8-c8-e1-d0",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e1-d0-0.packet",
+          "offset": 471040
+        },
+        {
+          "packet": "paff-frame-i16-f2-y8-c8-e1-d0-1.packet",
+          "offset": 473088
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y10-c12-e0-d1",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e0-d1-0.packet",
+          "offset": 475136
+        },
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e0-d1-1.packet",
+          "offset": 477184
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y10-c12-e0-d0",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e0-d0-0.packet",
+          "offset": 479232
+        },
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e0-d0-1.packet",
+          "offset": 481280
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y10-c12-e1-d1",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e1-d1-0.packet",
+          "offset": 483328
+        },
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e1-d1-1.packet",
+          "offset": 485376
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-i16-f2-y10-c12-e1-d0",
+      "kind": "paff_frame_compressed",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e1-d0-0.packet",
+          "offset": 487424
+        },
+        {
+          "packet": "paff-frame-i16-f2-y10-c12-e1-d0-1.packet",
+          "offset": 489472
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d0-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d0-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d0-a0-crop0-1.packet"
+          ],
+          "offset": 491520
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d0-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d0-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d0-a0-crop1-1.packet"
+          ],
+          "offset": 494592
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d0-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d0-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d0-a1-crop0-1.packet"
+          ],
+          "offset": 497664
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d0-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d0-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d0-a1-crop1-1.packet"
+          ],
+          "offset": 500736
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d2-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d2-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d2-a0-crop0-1.packet"
+          ],
+          "offset": 503808
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d2-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d2-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d2-a0-crop1-1.packet"
+          ],
+          "offset": 506880
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d2-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d2-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d2-a1-crop0-1.packet"
+          ],
+          "offset": 509952
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e0-d2-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e0-d2-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e0-d2-a1-crop1-1.packet"
+          ],
+          "offset": 513024
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d0-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d0-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d0-a0-crop0-1.packet"
+          ],
+          "offset": 516096
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d0-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d0-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d0-a0-crop1-1.packet"
+          ],
+          "offset": 519168
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d0-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d0-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d0-a1-crop0-1.packet"
+          ],
+          "offset": 522240
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d0-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d0-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d0-a1-crop1-1.packet"
+          ],
+          "offset": 525312
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d2-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d2-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d2-a0-crop0-1.packet"
+          ],
+          "offset": 528384
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d2-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d2-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d2-a0-crop1-1.packet"
+          ],
+          "offset": 531456
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d2-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d2-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d2-a1-crop0-1.packet"
+          ],
+          "offset": 534528
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y8-c8-e1-d2-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y8-c8-e1-d2-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y8-c8-e1-d2-a1-crop1-1.packet"
+          ],
+          "offset": 537600
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d0-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d0-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d0-a0-crop0-1.packet"
+          ],
+          "offset": 540672
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d0-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d0-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d0-a0-crop1-1.packet"
+          ],
+          "offset": 543744
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d0-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d0-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d0-a1-crop0-1.packet"
+          ],
+          "offset": 546816
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d0-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d0-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d0-a1-crop1-1.packet"
+          ],
+          "offset": 549888
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d2-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d2-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d2-a0-crop0-1.packet"
+          ],
+          "offset": 552960
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d2-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d2-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d2-a0-crop1-1.packet"
+          ],
+          "offset": 556032
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d2-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d2-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d2-a1-crop0-1.packet"
+          ],
+          "offset": 559104
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e0-d2-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e0-d2-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e0-d2-a1-crop1-1.packet"
+          ],
+          "offset": 562176
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d0-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d0-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d0-a0-crop0-1.packet"
+          ],
+          "offset": 565248
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d0-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d0-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d0-a0-crop1-1.packet"
+          ],
+          "offset": 568320
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d0-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d0-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d0-a1-crop0-1.packet"
+          ],
+          "offset": 571392
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d0-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d0-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d0-a1-crop1-1.packet"
+          ],
+          "offset": 574464
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d2-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d2-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d2-a0-crop0-1.packet"
+          ],
+          "offset": 577536
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d2-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d2-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d2-a0-crop1-1.packet"
+          ],
+          "offset": 580608
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d2-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d2-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d2-a1-crop0-1.packet"
+          ],
+          "offset": 583680
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y10-c12-e1-d2-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y10-c12-e1-d2-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y10-c12-e1-d2-a1-crop1-1.packet"
+          ],
+          "offset": 586752
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d0-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d0-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d0-a0-crop0-1.packet"
+          ],
+          "offset": 589824
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d0-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d0-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d0-a0-crop1-1.packet"
+          ],
+          "offset": 592896
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d0-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d0-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d0-a1-crop0-1.packet"
+          ],
+          "offset": 595968
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d0-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d0-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d0-a1-crop1-1.packet"
+          ],
+          "offset": 599040
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d2-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d2-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d2-a0-crop0-1.packet"
+          ],
+          "offset": 602112
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d2-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d2-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d2-a0-crop1-1.packet"
+          ],
+          "offset": 605184
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d2-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d2-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d2-a1-crop0-1.packet"
+          ],
+          "offset": 608256
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e0-d2-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e0-d2-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e0-d2-a1-crop1-1.packet"
+          ],
+          "offset": 611328
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d0-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d0-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d0-a0-crop0-1.packet"
+          ],
+          "offset": 614400
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d0-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d0-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d0-a0-crop1-1.packet"
+          ],
+          "offset": 617472
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d0-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d0-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d0-a1-crop0-1.packet"
+          ],
+          "offset": 620544
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d0-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d0-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d0-a1-crop1-1.packet"
+          ],
+          "offset": 623616
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d2-a0-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d2-a0-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d2-a0-crop0-1.packet"
+          ],
+          "offset": 626688
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d2-a0-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d2-a0-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d2-a0-crop1-1.packet"
+          ],
+          "offset": 629760
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d2-a1-crop0",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d2-a1-crop0-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d2-a1-crop0-1.packet"
+          ],
+          "offset": 632832
+        }
+      ]
+    },
+    {
+      "name": "paff-field-filtered-f3-y14-c8-e1-d2-a1-crop1",
+      "kind": "paff_field",
+      "format": 3,
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packets": [
+            "paff-field-filtered-f3-y14-c8-e1-d2-a1-crop1-0.packet",
+            "paff-field-filtered-f3-y14-c8-e1-d2-a1-crop1-1.packet"
+          ],
+          "offset": 635904
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-frame-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d0-a0-crop0-0.packet",
+          "offset": 638976
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d0-a0-crop0-1.packet",
+          "offset": 645120
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-frame-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d0-a1-crop1-0.packet",
+          "offset": 651264
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d0-a1-crop1-1.packet",
+          "offset": 657408
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-frame-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d2-a0-crop0-0.packet",
+          "offset": 663552
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d2-a0-crop0-1.packet",
+          "offset": 669696
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-frame-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d2-a1-crop1-0.packet",
+          "offset": 675840
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-frame-d2-a1-crop1-1.packet",
+          "offset": 681984
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-field-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d0-a0-crop0-0.packet",
+          "offset": 688128
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d0-a0-crop0-1.packet",
+          "offset": 694272
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-field-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d0-a1-crop1-0.packet",
+          "offset": 700416
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d0-a1-crop1-1.packet",
+          "offset": 706560
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-field-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d2-a0-crop0-0.packet",
+          "offset": 712704
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d2-a0-crop0-1.packet",
+          "offset": 718848
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-field-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d2-a1-crop1-0.packet",
+          "offset": 724992
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-field-d2-a1-crop1-1.packet",
+          "offset": 731136
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-columns-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d0-a0-crop0-0.packet",
+          "offset": 737280
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d0-a0-crop0-1.packet",
+          "offset": 743424
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-columns-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d0-a1-crop1-0.packet",
+          "offset": 749568
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d0-a1-crop1-1.packet",
+          "offset": 755712
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-columns-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d2-a0-crop0-0.packet",
+          "offset": 761856
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d2-a0-crop0-1.packet",
+          "offset": 768000
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-columns-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d2-a1-crop1-0.packet",
+          "offset": 774144
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-columns-d2-a1-crop1-1.packet",
+          "offset": 780288
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-checker-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d0-a0-crop0-0.packet",
+          "offset": 786432
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d0-a0-crop0-1.packet",
+          "offset": 792576
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-checker-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d0-a1-crop1-0.packet",
+          "offset": 798720
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d0-a1-crop1-1.packet",
+          "offset": 804864
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-checker-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d2-a0-crop0-0.packet",
+          "offset": 811008
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d2-a0-crop0-1.packet",
+          "offset": 817152
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e0-checker-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d2-a1-crop1-0.packet",
+          "offset": 823296
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e0-checker-d2-a1-crop1-1.packet",
+          "offset": 829440
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-frame-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d0-a0-crop0-0.packet",
+          "offset": 835584
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d0-a0-crop0-1.packet",
+          "offset": 841728
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-frame-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d0-a1-crop1-0.packet",
+          "offset": 847872
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d0-a1-crop1-1.packet",
+          "offset": 854016
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-frame-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d2-a0-crop0-0.packet",
+          "offset": 860160
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d2-a0-crop0-1.packet",
+          "offset": 866304
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-frame-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d2-a1-crop1-0.packet",
+          "offset": 872448
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-frame-d2-a1-crop1-1.packet",
+          "offset": 878592
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-field-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d0-a0-crop0-0.packet",
+          "offset": 884736
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d0-a0-crop0-1.packet",
+          "offset": 890880
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-field-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d0-a1-crop1-0.packet",
+          "offset": 897024
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d0-a1-crop1-1.packet",
+          "offset": 903168
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-field-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d2-a0-crop0-0.packet",
+          "offset": 909312
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d2-a0-crop0-1.packet",
+          "offset": 915456
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-field-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d2-a1-crop1-0.packet",
+          "offset": 921600
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-field-d2-a1-crop1-1.packet",
+          "offset": 927744
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-columns-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d0-a0-crop0-0.packet",
+          "offset": 933888
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d0-a0-crop0-1.packet",
+          "offset": 940032
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-columns-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d0-a1-crop1-0.packet",
+          "offset": 946176
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d0-a1-crop1-1.packet",
+          "offset": 952320
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-columns-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d2-a0-crop0-0.packet",
+          "offset": 958464
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d2-a0-crop0-1.packet",
+          "offset": 964608
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-columns-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d2-a1-crop1-0.packet",
+          "offset": 970752
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-columns-d2-a1-crop1-1.packet",
+          "offset": 976896
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-checker-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d0-a0-crop0-0.packet",
+          "offset": 983040
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d0-a0-crop0-1.packet",
+          "offset": 989184
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-checker-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d0-a1-crop1-0.packet",
+          "offset": 995328
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d0-a1-crop1-1.packet",
+          "offset": 1001472
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-checker-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d2-a0-crop0-0.packet",
+          "offset": 1007616
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d2-a0-crop0-1.packet",
+          "offset": 1013760
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y8-c8-e1-checker-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d2-a1-crop1-0.packet",
+          "offset": 1019904
+        },
+        {
+          "packet": "mbaff-filtered-f3-y8-c8-e1-checker-d2-a1-crop1-1.packet",
+          "offset": 1026048
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-frame-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d0-a0-crop0-0.packet",
+          "offset": 1032192
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d0-a0-crop0-1.packet",
+          "offset": 1038336
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-frame-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d0-a1-crop1-0.packet",
+          "offset": 1044480
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d0-a1-crop1-1.packet",
+          "offset": 1050624
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-frame-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d2-a0-crop0-0.packet",
+          "offset": 1056768
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d2-a0-crop0-1.packet",
+          "offset": 1062912
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-frame-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d2-a1-crop1-0.packet",
+          "offset": 1069056
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-frame-d2-a1-crop1-1.packet",
+          "offset": 1075200
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-field-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d0-a0-crop0-0.packet",
+          "offset": 1081344
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d0-a0-crop0-1.packet",
+          "offset": 1087488
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-field-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d0-a1-crop1-0.packet",
+          "offset": 1093632
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d0-a1-crop1-1.packet",
+          "offset": 1099776
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-field-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d2-a0-crop0-0.packet",
+          "offset": 1105920
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d2-a0-crop0-1.packet",
+          "offset": 1112064
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-field-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d2-a1-crop1-0.packet",
+          "offset": 1118208
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-field-d2-a1-crop1-1.packet",
+          "offset": 1124352
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-columns-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d0-a0-crop0-0.packet",
+          "offset": 1130496
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d0-a0-crop0-1.packet",
+          "offset": 1136640
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-columns-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d0-a1-crop1-0.packet",
+          "offset": 1142784
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d0-a1-crop1-1.packet",
+          "offset": 1148928
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-columns-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d2-a0-crop0-0.packet",
+          "offset": 1155072
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d2-a0-crop0-1.packet",
+          "offset": 1161216
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-columns-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d2-a1-crop1-0.packet",
+          "offset": 1167360
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-columns-d2-a1-crop1-1.packet",
+          "offset": 1173504
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-checker-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d0-a0-crop0-0.packet",
+          "offset": 1179648
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d0-a0-crop0-1.packet",
+          "offset": 1185792
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-checker-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d0-a1-crop1-0.packet",
+          "offset": 1191936
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d0-a1-crop1-1.packet",
+          "offset": 1198080
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-checker-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d2-a0-crop0-0.packet",
+          "offset": 1204224
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d2-a0-crop0-1.packet",
+          "offset": 1210368
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e0-checker-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d2-a1-crop1-0.packet",
+          "offset": 1216512
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e0-checker-d2-a1-crop1-1.packet",
+          "offset": 1222656
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-frame-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d0-a0-crop0-0.packet",
+          "offset": 1228800
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d0-a0-crop0-1.packet",
+          "offset": 1234944
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-frame-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d0-a1-crop1-0.packet",
+          "offset": 1241088
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d0-a1-crop1-1.packet",
+          "offset": 1247232
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-frame-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d2-a0-crop0-0.packet",
+          "offset": 1253376
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d2-a0-crop0-1.packet",
+          "offset": 1259520
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-frame-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d2-a1-crop1-0.packet",
+          "offset": 1265664
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-frame-d2-a1-crop1-1.packet",
+          "offset": 1271808
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-field-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d0-a0-crop0-0.packet",
+          "offset": 1277952
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d0-a0-crop0-1.packet",
+          "offset": 1284096
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-field-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d0-a1-crop1-0.packet",
+          "offset": 1290240
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d0-a1-crop1-1.packet",
+          "offset": 1296384
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-field-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d2-a0-crop0-0.packet",
+          "offset": 1302528
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d2-a0-crop0-1.packet",
+          "offset": 1308672
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-field-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d2-a1-crop1-0.packet",
+          "offset": 1314816
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-field-d2-a1-crop1-1.packet",
+          "offset": 1320960
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-columns-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d0-a0-crop0-0.packet",
+          "offset": 1327104
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d0-a0-crop0-1.packet",
+          "offset": 1333248
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-columns-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d0-a1-crop1-0.packet",
+          "offset": 1339392
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d0-a1-crop1-1.packet",
+          "offset": 1345536
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-columns-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d2-a0-crop0-0.packet",
+          "offset": 1351680
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d2-a0-crop0-1.packet",
+          "offset": 1357824
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-columns-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d2-a1-crop1-0.packet",
+          "offset": 1363968
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-columns-d2-a1-crop1-1.packet",
+          "offset": 1370112
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-checker-d0-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d0-a0-crop0-0.packet",
+          "offset": 1376256
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d0-a0-crop0-1.packet",
+          "offset": 1382400
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-checker-d0-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d0-a1-crop1-0.packet",
+          "offset": 1388544
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d0-a1-crop1-1.packet",
+          "offset": 1394688
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-checker-d2-a0-crop0",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d2-a0-crop0-0.packet",
+          "offset": 1400832
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d2-a0-crop0-1.packet",
+          "offset": 1406976
+        }
+      ]
+    },
+    {
+      "name": "mbaff-filtered-f3-y10-c12-e1-checker-d2-a1-crop1",
+      "kind": "mbaff",
+      "format": 3,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 64,
+      "crop": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d2-a1-crop1-0.packet",
+          "offset": 1413120
+        },
+        {
+          "packet": "mbaff-filtered-f3-y10-c12-e1-checker-d2-a1-crop1-1.packet",
+          "offset": 1419264
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e0-w0-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w0-d1-0.packet",
+          "offset": 1425408
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w0-d1-1.packet",
+          "offset": 1427456
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e0-w0-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w0-d0-0.packet",
+          "offset": 1429504
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w0-d0-1.packet",
+          "offset": 1431552
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e0-w1-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w1-d1-0.packet",
+          "offset": 1433600
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w1-d1-1.packet",
+          "offset": 1435648
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e0-w1-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w1-d0-0.packet",
+          "offset": 1437696
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e0-w1-d0-1.packet",
+          "offset": 1439744
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e1-w0-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w0-d1-0.packet",
+          "offset": 1441792
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w0-d1-1.packet",
+          "offset": 1443840
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e1-w0-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w0-d0-0.packet",
+          "offset": 1445888
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w0-d0-1.packet",
+          "offset": 1447936
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e1-w1-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w1-d1-0.packet",
+          "offset": 1449984
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w1-d1-1.packet",
+          "offset": 1452032
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y8-c8-e1-w1-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w1-d0-0.packet",
+          "offset": 1454080
+        },
+        {
+          "packet": "paff-frame-422-p-y8-c8-e1-w1-d0-1.packet",
+          "offset": 1456128
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e0-w0-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w0-d1-0.packet",
+          "offset": 1458176
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w0-d1-1.packet",
+          "offset": 1460224
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e0-w0-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w0-d0-0.packet",
+          "offset": 1462272
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w0-d0-1.packet",
+          "offset": 1464320
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e0-w1-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w1-d1-0.packet",
+          "offset": 1466368
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w1-d1-1.packet",
+          "offset": 1468416
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e0-w1-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w1-d0-0.packet",
+          "offset": 1470464
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e0-w1-d0-1.packet",
+          "offset": 1472512
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e1-w0-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w0-d1-0.packet",
+          "offset": 1474560
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w0-d1-1.packet",
+          "offset": 1476608
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e1-w0-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w0-d0-0.packet",
+          "offset": 1478656
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w0-d0-1.packet",
+          "offset": 1480704
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e1-w1-d1",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w1-d1-0.packet",
+          "offset": 1482752
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w1-d1-1.packet",
+          "offset": 1484800
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-p-y10-c12-e1-w1-d0",
+      "kind": "paff_frame_422_p",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w1-d0-0.packet",
+          "offset": 1486848
+        },
+        {
+          "packet": "paff-frame-422-p-y10-c12-e1-w1-d0-1.packet",
+          "offset": 1488896
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w0-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-l0-0.packet",
+          "offset": 1490944
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-l0-1.packet",
+          "offset": 1492992
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-l0-2.packet",
+          "offset": 1495040
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w0-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-l1-0.packet",
+          "offset": 1497088
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-l1-1.packet",
+          "offset": 1499136
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-l1-2.packet",
+          "offset": 1501184
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w0-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-bi-0.packet",
+          "offset": 1503232
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-bi-1.packet",
+          "offset": 1505280
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-bi-2.packet",
+          "offset": 1507328
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w0-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-spatial-0.packet",
+          "offset": 1509376
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-spatial-1.packet",
+          "offset": 1511424
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-spatial-2.packet",
+          "offset": 1513472
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w0-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-temporal-0.packet",
+          "offset": 1515520
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-temporal-1.packet",
+          "offset": 1517568
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-temporal-2.packet",
+          "offset": 1519616
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w0-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-skip-0.packet",
+          "offset": 1521664
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-skip-1.packet",
+          "offset": 1523712
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w0-skip-2.packet",
+          "offset": 1525760
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w1-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-l0-0.packet",
+          "offset": 1527808
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-l0-1.packet",
+          "offset": 1529856
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-l0-2.packet",
+          "offset": 1531904
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w1-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-l1-0.packet",
+          "offset": 1533952
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-l1-1.packet",
+          "offset": 1536000
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-l1-2.packet",
+          "offset": 1538048
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w1-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-bi-0.packet",
+          "offset": 1540096
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-bi-1.packet",
+          "offset": 1542144
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-bi-2.packet",
+          "offset": 1544192
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w1-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-spatial-0.packet",
+          "offset": 1546240
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-spatial-1.packet",
+          "offset": 1548288
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-spatial-2.packet",
+          "offset": 1550336
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w1-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-temporal-0.packet",
+          "offset": 1552384
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-temporal-1.packet",
+          "offset": 1554432
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-temporal-2.packet",
+          "offset": 1556480
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w1-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-skip-0.packet",
+          "offset": 1558528
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-skip-1.packet",
+          "offset": 1560576
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w1-skip-2.packet",
+          "offset": 1562624
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w2-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-l0-0.packet",
+          "offset": 1564672
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-l0-1.packet",
+          "offset": 1566720
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-l0-2.packet",
+          "offset": 1568768
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w2-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-l1-0.packet",
+          "offset": 1570816
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-l1-1.packet",
+          "offset": 1572864
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-l1-2.packet",
+          "offset": 1574912
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w2-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-bi-0.packet",
+          "offset": 1576960
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-bi-1.packet",
+          "offset": 1579008
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-bi-2.packet",
+          "offset": 1581056
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w2-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-spatial-0.packet",
+          "offset": 1583104
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-spatial-1.packet",
+          "offset": 1585152
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-spatial-2.packet",
+          "offset": 1587200
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w2-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-temporal-0.packet",
+          "offset": 1589248
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-temporal-1.packet",
+          "offset": 1591296
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-temporal-2.packet",
+          "offset": 1593344
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e0-w2-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-skip-0.packet",
+          "offset": 1595392
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-skip-1.packet",
+          "offset": 1597440
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e0-w2-skip-2.packet",
+          "offset": 1599488
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w0-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-l0-0.packet",
+          "offset": 1601536
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-l0-1.packet",
+          "offset": 1603584
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-l0-2.packet",
+          "offset": 1605632
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w0-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-l1-0.packet",
+          "offset": 1607680
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-l1-1.packet",
+          "offset": 1609728
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-l1-2.packet",
+          "offset": 1611776
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w0-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-bi-0.packet",
+          "offset": 1613824
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-bi-1.packet",
+          "offset": 1615872
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-bi-2.packet",
+          "offset": 1617920
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w0-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-spatial-0.packet",
+          "offset": 1619968
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-spatial-1.packet",
+          "offset": 1622016
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-spatial-2.packet",
+          "offset": 1624064
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w0-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-temporal-0.packet",
+          "offset": 1626112
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-temporal-1.packet",
+          "offset": 1628160
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-temporal-2.packet",
+          "offset": 1630208
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w0-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-skip-0.packet",
+          "offset": 1632256
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-skip-1.packet",
+          "offset": 1634304
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w0-skip-2.packet",
+          "offset": 1636352
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w1-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-l0-0.packet",
+          "offset": 1638400
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-l0-1.packet",
+          "offset": 1640448
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-l0-2.packet",
+          "offset": 1642496
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w1-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-l1-0.packet",
+          "offset": 1644544
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-l1-1.packet",
+          "offset": 1646592
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-l1-2.packet",
+          "offset": 1648640
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w1-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-bi-0.packet",
+          "offset": 1650688
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-bi-1.packet",
+          "offset": 1652736
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-bi-2.packet",
+          "offset": 1654784
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w1-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-spatial-0.packet",
+          "offset": 1656832
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-spatial-1.packet",
+          "offset": 1658880
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-spatial-2.packet",
+          "offset": 1660928
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w1-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-temporal-0.packet",
+          "offset": 1662976
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-temporal-1.packet",
+          "offset": 1665024
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-temporal-2.packet",
+          "offset": 1667072
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w1-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-skip-0.packet",
+          "offset": 1669120
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-skip-1.packet",
+          "offset": 1671168
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w1-skip-2.packet",
+          "offset": 1673216
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w2-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-l0-0.packet",
+          "offset": 1675264
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-l0-1.packet",
+          "offset": 1677312
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-l0-2.packet",
+          "offset": 1679360
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w2-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-l1-0.packet",
+          "offset": 1681408
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-l1-1.packet",
+          "offset": 1683456
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-l1-2.packet",
+          "offset": 1685504
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w2-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-bi-0.packet",
+          "offset": 1687552
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-bi-1.packet",
+          "offset": 1689600
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-bi-2.packet",
+          "offset": 1691648
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w2-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-spatial-0.packet",
+          "offset": 1693696
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-spatial-1.packet",
+          "offset": 1695744
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-spatial-2.packet",
+          "offset": 1697792
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w2-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-temporal-0.packet",
+          "offset": 1699840
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-temporal-1.packet",
+          "offset": 1701888
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-temporal-2.packet",
+          "offset": 1703936
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y8-c8-e1-w2-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-skip-0.packet",
+          "offset": 1705984
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-skip-1.packet",
+          "offset": 1708032
+        },
+        {
+          "packet": "paff-frame-422-b-y8-c8-e1-w2-skip-2.packet",
+          "offset": 1710080
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w0-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-l0-0.packet",
+          "offset": 1712128
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-l0-1.packet",
+          "offset": 1714176
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-l0-2.packet",
+          "offset": 1716224
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w0-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-l1-0.packet",
+          "offset": 1718272
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-l1-1.packet",
+          "offset": 1720320
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-l1-2.packet",
+          "offset": 1722368
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w0-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-bi-0.packet",
+          "offset": 1724416
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-bi-1.packet",
+          "offset": 1726464
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-bi-2.packet",
+          "offset": 1728512
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w0-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-spatial-0.packet",
+          "offset": 1730560
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-spatial-1.packet",
+          "offset": 1732608
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-spatial-2.packet",
+          "offset": 1734656
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w0-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-temporal-0.packet",
+          "offset": 1736704
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-temporal-1.packet",
+          "offset": 1738752
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-temporal-2.packet",
+          "offset": 1740800
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w0-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-skip-0.packet",
+          "offset": 1742848
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-skip-1.packet",
+          "offset": 1744896
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w0-skip-2.packet",
+          "offset": 1746944
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w1-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-l0-0.packet",
+          "offset": 1748992
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-l0-1.packet",
+          "offset": 1751040
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-l0-2.packet",
+          "offset": 1753088
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w1-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-l1-0.packet",
+          "offset": 1755136
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-l1-1.packet",
+          "offset": 1757184
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-l1-2.packet",
+          "offset": 1759232
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w1-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-bi-0.packet",
+          "offset": 1761280
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-bi-1.packet",
+          "offset": 1763328
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-bi-2.packet",
+          "offset": 1765376
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w1-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-spatial-0.packet",
+          "offset": 1767424
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-spatial-1.packet",
+          "offset": 1769472
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-spatial-2.packet",
+          "offset": 1771520
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w1-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-temporal-0.packet",
+          "offset": 1773568
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-temporal-1.packet",
+          "offset": 1775616
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-temporal-2.packet",
+          "offset": 1777664
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w1-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-skip-0.packet",
+          "offset": 1779712
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-skip-1.packet",
+          "offset": 1781760
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w1-skip-2.packet",
+          "offset": 1783808
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w2-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-l0-0.packet",
+          "offset": 1785856
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-l0-1.packet",
+          "offset": 1787904
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-l0-2.packet",
+          "offset": 1789952
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w2-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-l1-0.packet",
+          "offset": 1792000
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-l1-1.packet",
+          "offset": 1794048
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-l1-2.packet",
+          "offset": 1796096
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w2-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-bi-0.packet",
+          "offset": 1798144
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-bi-1.packet",
+          "offset": 1800192
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-bi-2.packet",
+          "offset": 1802240
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w2-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-spatial-0.packet",
+          "offset": 1804288
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-spatial-1.packet",
+          "offset": 1806336
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-spatial-2.packet",
+          "offset": 1808384
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w2-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-temporal-0.packet",
+          "offset": 1810432
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-temporal-1.packet",
+          "offset": 1812480
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-temporal-2.packet",
+          "offset": 1814528
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e0-w2-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-skip-0.packet",
+          "offset": 1816576
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-skip-1.packet",
+          "offset": 1818624
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e0-w2-skip-2.packet",
+          "offset": 1820672
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w0-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-l0-0.packet",
+          "offset": 1822720
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-l0-1.packet",
+          "offset": 1824768
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-l0-2.packet",
+          "offset": 1826816
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w0-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-l1-0.packet",
+          "offset": 1828864
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-l1-1.packet",
+          "offset": 1830912
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-l1-2.packet",
+          "offset": 1832960
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w0-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-bi-0.packet",
+          "offset": 1835008
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-bi-1.packet",
+          "offset": 1837056
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-bi-2.packet",
+          "offset": 1839104
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w0-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-spatial-0.packet",
+          "offset": 1841152
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-spatial-1.packet",
+          "offset": 1843200
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-spatial-2.packet",
+          "offset": 1845248
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w0-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-temporal-0.packet",
+          "offset": 1847296
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-temporal-1.packet",
+          "offset": 1849344
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-temporal-2.packet",
+          "offset": 1851392
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w0-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-skip-0.packet",
+          "offset": 1853440
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-skip-1.packet",
+          "offset": 1855488
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w0-skip-2.packet",
+          "offset": 1857536
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w1-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-l0-0.packet",
+          "offset": 1859584
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-l0-1.packet",
+          "offset": 1861632
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-l0-2.packet",
+          "offset": 1863680
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w1-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-l1-0.packet",
+          "offset": 1865728
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-l1-1.packet",
+          "offset": 1867776
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-l1-2.packet",
+          "offset": 1869824
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w1-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-bi-0.packet",
+          "offset": 1871872
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-bi-1.packet",
+          "offset": 1873920
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-bi-2.packet",
+          "offset": 1875968
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w1-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-spatial-0.packet",
+          "offset": 1878016
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-spatial-1.packet",
+          "offset": 1880064
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-spatial-2.packet",
+          "offset": 1882112
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w1-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-temporal-0.packet",
+          "offset": 1884160
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-temporal-1.packet",
+          "offset": 1886208
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-temporal-2.packet",
+          "offset": 1888256
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w1-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-skip-0.packet",
+          "offset": 1890304
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-skip-1.packet",
+          "offset": 1892352
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w1-skip-2.packet",
+          "offset": 1894400
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w2-l0",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-l0-0.packet",
+          "offset": 1896448
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-l0-1.packet",
+          "offset": 1898496
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-l0-2.packet",
+          "offset": 1900544
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w2-l1",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-l1-0.packet",
+          "offset": 1902592
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-l1-1.packet",
+          "offset": 1904640
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-l1-2.packet",
+          "offset": 1906688
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w2-bi",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-bi-0.packet",
+          "offset": 1908736
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-bi-1.packet",
+          "offset": 1910784
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-bi-2.packet",
+          "offset": 1912832
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w2-spatial",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-spatial-0.packet",
+          "offset": 1914880
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-spatial-1.packet",
+          "offset": 1916928
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-spatial-2.packet",
+          "offset": 1918976
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w2-temporal",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-temporal-0.packet",
+          "offset": 1921024
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-temporal-1.packet",
+          "offset": 1923072
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-temporal-2.packet",
+          "offset": 1925120
+        }
+      ]
+    },
+    {
+      "name": "paff-frame-422-b-y10-c12-e1-w2-skip",
+      "kind": "paff_frame_422_b",
+      "format": 2,
+      "luma_depth": 10,
+      "chroma_depth": 12,
+      "width": 32,
+      "height": 32,
+      "crop": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "frames": [
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-skip-0.packet",
+          "offset": 1927168
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-skip-1.packet",
+          "offset": 1929216
+        },
+        {
+          "packet": "paff-frame-422-b-y10-c12-e1-w2-skip-2.packet",
+          "offset": 1931264
+        }
+      ]
+    }
+  ]
+}

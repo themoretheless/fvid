@@ -1,0 +1,175 @@
+{
+  "provenance": "Eleven authored literal XM Gxxcases:0/1/16/32/64/255clamped,sticky state,zero/recover,all-channel scope,last command precedence and32channel pre-clamp headroom. Ordinary cases compare output to gain-scaled effect-free native reference; clipping case uses independent per-channel quarter-volume encoding beyond64smoothing frames. Signed16ramp loops,no other unsupported features. Short authored VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "level-0",
+      "file": "level-0.xm",
+      "control": "level-0-reference.xm",
+      "gains": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "level-1",
+      "file": "level-1.xm",
+      "control": "level-1-reference.xm",
+      "gains": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "level-16",
+      "file": "level-16.xm",
+      "control": "level-16-reference.xm",
+      "gains": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "level-32",
+      "file": "level-32.xm",
+      "control": "level-32-reference.xm",
+      "gains": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "level-64",
+      "file": "level-64.xm",
+      "control": "level-64-reference.xm",
+      "gains": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "level-255",
+      "file": "level-255.xm",
+      "control": "level-255-reference.xm",
+      "gains": [
+        64,
+        64,
+        64,
+        64
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "persist",
+      "file": "persist.xm",
+      "control": "persist-reference.xm",
+      "gains": [
+        64,
+        32,
+        32,
+        32,
+        32
+      ],
+      "seek": 2,
+      "oracle": "linear"
+    },
+    {
+      "name": "recover",
+      "file": "recover.xm",
+      "control": "recover-reference.xm",
+      "gains": [
+        64,
+        0,
+        64,
+        64,
+        64
+      ],
+      "seek": 2,
+      "oracle": "linear"
+    },
+    {
+      "name": "all-channels",
+      "file": "all-channels.xm",
+      "control": "all-channels-reference.xm",
+      "gains": [
+        32,
+        32,
+        32,
+        32
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "last-command",
+      "file": "last-command.xm",
+      "control": "last-command-reference.xm",
+      "gains": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "seek": 1,
+      "oracle": "linear"
+    },
+    {
+      "name": "preclip-headroom",
+      "file": "preclip-headroom.xm",
+      "control": "preclip-headroom-reference.xm",
+      "gains": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "seek": 1,
+      "oracle": "column-steady"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "level-0.xm": "5751c567cf6f549b26349c0c6dee078ddf1ef19621f7e44858946f988c5f2291",
+    "level-0-reference.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "level-1.xm": "bed37d91425209927149717dba18362781a7cf60e32c82b12fa2d4e9ede24dba",
+    "level-1-reference.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "level-16.xm": "ac5c6b62f996bc3a300d21d675f93e80fa7d4cb106eb6820a1d33ec675c8d9df",
+    "level-16-reference.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "level-32.xm": "c74f7ca5d0a67ac9e6f41744bbdb2627e70ca0a21cbd85648d106a7bb897b84c",
+    "level-32-reference.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "level-64.xm": "5e4001adab3215f7e8d9d518d6dc9abedd783a4abc816dfb2d87633de975035b",
+    "level-64-reference.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "level-255.xm": "493ff7602fec2c9e51d3b20dc01f7798e242159b56794ef0fb05984904c3e61f",
+    "level-255-reference.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "persist.xm": "f11926091f3a19ddeff5a9d97be5b2f6919e8e61739542fe4b67bf724e35f052",
+    "persist-reference.xm": "e8c067a4877adf8759d6ede7e50c28ed3af3675b5828ac40207fbe857288295d",
+    "recover.xm": "f1d2e3e0c3ca7bba1bb5bdde775db2c695237719954889411cae076f6e360c23",
+    "recover-reference.xm": "e8c067a4877adf8759d6ede7e50c28ed3af3675b5828ac40207fbe857288295d",
+    "all-channels.xm": "9644dd36e558c8d79b7f23af413c3e86b59ea1b4f153d809802e1854271b1aa5",
+    "all-channels-reference.xm": "8d1950e952446e9967dcd46702af657ba7d0252b33fbacbee2b6f45f72d4ad68",
+    "last-command.xm": "5234547feb5318b47461afe43e082ff97649b08824fd2692c4fbd08d42a6e997",
+    "last-command-reference.xm": "8d1950e952446e9967dcd46702af657ba7d0252b33fbacbee2b6f45f72d4ad68",
+    "preclip-headroom.xm": "e274ecbac92fcddcee1cbb655dca459781017ec9c0477af2ba1196a8fbf24a42",
+    "preclip-headroom-reference.xm": "7cb89654d2c57be6ba9b61b728d74d038e7b8e73397541ed7d0030fa73bb8e2d"
+  }
+}

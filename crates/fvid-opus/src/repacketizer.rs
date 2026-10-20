@@ -110,6 +110,7 @@ pub(crate) fn parse_packet(
     let mut len = data.len() as i32 - 1;
     let mut cbr = false;
     let mut last_size = len;
+    let mut padding = 0usize;
     let mut sizes = FrameList::<i32>::new();
 
     let count: usize = match toc & 0x3 {
@@ -161,6 +162,7 @@ pub(crate) fn parse_packet(
                     len -= 1;
                     let tmp = if p == 255 { 254 } else { p as i32 };
                     len -= tmp;
+                    padding += tmp as usize;
                     if p != 255 {
                         break;
                     }
@@ -243,7 +245,9 @@ pub(crate) fn parse_packet(
         frames.push(&data[off..off + s as usize]);
         off += s as usize;
     }
-    let packet_offset = off; // for self-delimited multistream advancement
+    let packet_offset = off.checked_add(padding)
+        .filter(|&n| n <= data.len())
+        .ok_or(Error::InvalidPacket("invalid packet padding"))?; // include trailing padding before the next stream
     Ok((toc, frames, packet_offset))
 }
 
@@ -598,6 +602,19 @@ mod tests {
             assert_eq!(consumed, sd.len() - trailer.len(), "lens {lens:?}");
             assert_eq!(out, rp.out().unwrap(), "lens {lens:?}");
         }
+    }
+
+    #[test]
+    fn self_delimited_padding_is_consumed_before_the_next_stream() {
+        let toc = 12u8 << 3;
+        let mut packet = vec![toc | 3, 65, 7, 3, 1, 2, 3];
+        packet.extend([0; 7]);
+        let length=packet.len();
+        packet.extend([toc, 4, 5, 6]);
+        let mut output=Vec::new();
+        assert_eq!(take_self_delimited_into(&packet,&mut output).unwrap(),length);
+        assert_eq!(output,[toc,1,2,3]);
+        assert_eq!(&packet[length..],[toc,4,5,6]);
     }
 
     #[test]

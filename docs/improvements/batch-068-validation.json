@@ -1,0 +1,56 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0092"
+  ],
+  "checked_at": "2026-10-16T01:47:46.472940+00:00",
+  "before": [
+    "evidence/batch-068-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-068-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-068-final-duration.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-068-smf.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-068-xm.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-068-player-route.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-068-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-068-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "After91 source-clock correction, actual MIDI/XM worker endpoints2200ms/480ms remain longer than advertised source durations2000ms/360ms. Baseline confirms full native synthesis and timestamps are correct while metadata omits release windows.",
+    "Only playback adapter duration changes: MIDI reports complete packet windows; XM reports complete scheduled end using the same helper as bounded seek. Canonical SmfFile/Module score durations remain unchanged.",
+    "Default MIDI/XM and three authored XM tempo127/199/255 variants verify metadata equals scheduled packet endpoint. Actual PCM ends at or less than that endpoint by less than one sample where integer-millisecond duration converts to fractional PCM frames. Metadata/EOF seek use the scheduled integer tick endpoint consistently.",
+    "Actual workers preserve full PCM on play/rewind, and seek to complete endpoint yields no extra audio. Native video control,5 SMF/6 XM units, Player audio-factory duration, related clock/seek/budget integrations, fixture reproduction and player build pass.",
+    "No physical audio device, visual UI, performance, reference synthesis quality or exact sub-sample duration claim."
+  ],
+  "compatibility": "AudioStream duration for synthesized MIDI/XM now includes the existing release tail. Consumers needing score-only duration can still query file()/module().duration(). Public signatures and synthesized PCM remain unchanged.",
+  "counting": "One playback-duration omission across synthesized timeline adapters. Clock correction91 and seek correction90 are separate reproduced problems; tempo/control variants add no IDs."
+}

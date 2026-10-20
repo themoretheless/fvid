@@ -1,0 +1,40 @@
+{
+  "provenance": "Five injected public MIDI decoder window geometries. Baseline debug multiplication panics before allocating; after fix each truebufferextent isunaddressable andmustrefusebefore any large allocation. Native10byte note record,authored100ms MIDI/VP9+PCM controls. No dangerous fit-sized allocation probe,encoder/network/private media.",
+  "cases": [
+    {
+      "name": "normal-rate-overflow",
+      "rate": 44100,
+      "channels": 2,
+      "duration": 18446744073709551615
+    },
+    {
+      "name": "wide-frame-count",
+      "rate": 4294967295,
+      "channels": 8,
+      "duration": 18446744073709551615
+    },
+    {
+      "name": "sample-count-overflow",
+      "rate": 1000,
+      "channels": 8,
+      "duration": 18446744073709551615
+    },
+    {
+      "name": "byte-count-overflow",
+      "rate": 1000,
+      "channels": 1,
+      "duration": 18446744073709551615
+    },
+    {
+      "name": "addressable-capacity-overflow",
+      "rate": 1000,
+      "channels": 1,
+      "duration": 2305843009213693952
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "control.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "note.packet": "f00e7b44ff287881a6ada3f54cb6b33d7e5296cc66c8a397633a04509a41c39b"
+  }
+}

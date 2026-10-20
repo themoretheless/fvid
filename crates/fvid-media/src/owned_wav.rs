@@ -10,7 +10,7 @@ pub fn default_pcm_mask(channels: u16) -> Result<u32, String> {
         4 => 0x107,
         5 => 0x37,
         6 => 0x3f,
-        7..=64 => 0,
+        7..=255 => 0,
         _ => return Err(error("unsupported WAV channel count")),
     })
 }
@@ -47,7 +47,7 @@ pub(crate) fn pcm_wav_header(
     }) {
         return Err(error("unsupported WAVE precision"));
     }
-    if !(1..=64).contains(&channels) || (mask != 0 && mask.count_ones() != u32::from(channels)) {
+    if !(1..=255).contains(&channels) || (mask != 0 && mask.count_ones() > u32::from(channels)) {
         return Err(error("invalid WAV channel mask"));
     }
     let align = channels * (bits / 8);

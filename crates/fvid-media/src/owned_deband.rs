@@ -130,7 +130,7 @@ impl Deband {
             let size = frame.width * frame.height;
             let cw = frame.width.div_ceil(sx);
             let ch = frame.height.div_ceil(sy);
-            vec![
+            [
                 Plane {
                     width: frame.width,
                     height: frame.height,
@@ -151,14 +151,12 @@ impl Deband {
                 },
             ]
         } else {
-            [1usize, 2, 0]
-                .map(|offset| Plane {
-                    width: frame.width,
-                    height: frame.height,
-                    offset,
-                    stride: 3,
-                })
-                .to_vec()
+            [1usize, 2, 0].map(|offset| Plane {
+                width: frame.width,
+                height: frame.height,
+                offset,
+                stride: 3,
+            })
         };
         self.process(&mut frame.data, depth, &planes, n, t)
     }
@@ -180,7 +178,16 @@ impl Deband {
         let cw = w.div_ceil(sub[0]);
         let ch = h.div_ceil(sub[1]);
         let chroma = cw.checked_mul(ch).ok_or("deband dimensions overflow")?;
-        let mut planes = vec![
+        let third_offset = size
+            .checked_add(chroma)
+            .ok_or("deband dimensions overflow")?;
+        let alpha_offset = if alpha {
+            size.checked_add(chroma.checked_mul(2).ok_or("deband dimensions overflow")?)
+                .ok_or("deband dimensions overflow")?
+        } else {
+            0
+        };
+        let planes = [
             Plane {
                 width: w,
                 height: h,
@@ -196,23 +203,17 @@ impl Deband {
             Plane {
                 width: cw,
                 height: ch,
-                offset: size
-                    .checked_add(chroma)
-                    .ok_or("deband dimensions overflow")?,
+                offset: third_offset,
+                stride: 1,
+            },
+            Plane {
+                width: w,
+                height: h,
+                offset: alpha_offset,
                 stride: 1,
             },
         ];
-        if alpha {
-            planes.push(Plane {
-                width: w,
-                height: h,
-                offset: size
-                    .checked_add(chroma.checked_mul(2).ok_or("deband dimensions overflow")?)
-                    .ok_or("deband dimensions overflow")?,
-                stride: 1,
-            });
-        }
-        self.process(data, depth, &planes, n, t)
+        self.process(data, depth, &planes[..if alpha { 4 } else { 3 }], n, t)
     }
     pub fn apply_rgb(
         &self,
@@ -227,24 +228,13 @@ impl Deband {
         if !matches!(channels, 3 | 4) {
             return Err("invalid deband RGB channel count".into());
         }
-        let mut planes: Vec<_> = [1usize, 2, 0]
-            .into_iter()
-            .map(|offset| Plane {
-                width: w,
-                height: h,
-                offset,
-                stride: channels,
-            })
-            .collect();
-        if channels == 4 {
-            planes.push(Plane {
-                width: w,
-                height: h,
-                offset: 3,
-                stride: channels,
-            });
-        }
-        self.process(data, depth, &planes, n, t)
+        let planes = [1usize, 2, 0, 3].map(|offset| Plane {
+            width: w,
+            height: h,
+            offset,
+            stride: channels,
+        });
+        self.process(data, depth, &planes[..channels], n, t)
     }
     pub fn apply_gray(
         &self,

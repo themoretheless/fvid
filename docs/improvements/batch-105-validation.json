@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0124"
+  ],
+  "checked_at": "2026-10-16T06:51:26.839495+00:00",
+  "before": [
+    "evidence/batch-105-reproduction-before.log",
+    "evidence/batch-105-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-105-integration.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-105-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-104-reader-verified.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-105-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-104-player-build-recheck.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Ten authored literal8xx cases compare full native PCM against independent identical-sample instruments with different panning. Mono/stereo,0/64/128/192/255,onset,persistence,return-center,channel isolation and volume-column combination are covered.",
+    "Before: ignored-control reproduction passes; forced ignored acceptance fails20unsupported classifications and nine stereo PCM mismatches. Mono and center-pan audio are healthy. Worker before failures stop at generation0, so no distinct pre-fix seek failure is claimed.",
+    "After: acceptance enabled and old reproduction requires supported observable stereo change. Twenty actual worker targets verify row seek andEOF after fullplay/rewind. Instrument-only controls preserve sample phase; all PCM bytes and timestamps match.",
+    "Existing instrument-pan law remains unchanged. Private effect setter after volume column; public interfaces and raw timeline unchanged. Authored raw XM plus independent synthetic VP9/PCM companion; not video-embedded XM. No performance/physical output/full tracker conformance claim."
+  ]
+}

@@ -1,0 +1,19 @@
+pair0 stereo: table/bitwise=0.851634
+pair0 coupled: table/bitwise=0.860322
+pair1 stereo: table/bitwise=0.838342
+pair1 coupled: table/bitwise=0.852634
+pair2 stereo: table/bitwise=0.853137
+pair2 coupled: table/bitwise=0.882167
+pair3 stereo: table/bitwise=0.843675
+pair3 coupled: table/bitwise=0.848429
+pair4 stereo: table/bitwise=0.830969
+pair4 coupled: table/bitwise=0.846230
+pair5 stereo: table/bitwise=0.845579
+pair5 coupled: table/bitwise=0.857949
+pair6 stereo: table/bitwise=0.856534
+pair6 coupled: table/bitwise=0.817681
+pair7 stereo: table/bitwise=0.843559
+pair7 coupled: table/bitwise=0.845126
+pair8 stereo: table/bitwise=0.863785
+pair8 coupled: table/bitwise=0.823655
+{"stereo": {"median_ratio": 0.8455785110852225, "ratios": [0.8516337631905105, 0.8383422219231655, 0.8531372371836754, 0.8436750485142477, 0.8309692662209106, 0.8455785110852225, 0.8565342873914086, 0.8435588245104624, 0.8637846286297729]}, "coupled": {"median_ratio": 0.8484294840874985, "ratios": [0.8603216471244683, 0.8526335470976713, 0.8821665544626374, 0.8484294840874985, 0.8462296890222012, 0.8579487631010708, 0.8176808252343432, 0.845126085355208, 0.8236550416746372]}}

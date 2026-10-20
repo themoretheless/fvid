@@ -1,0 +1,222 @@
+{
+  "cases": [
+    {
+      "name": "mono-lfe",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 8
+    },
+    {
+      "name": "mono-unassigned",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 0
+    },
+    {
+      "name": "stereo-unassigned",
+      "source": "16-1-verbatim-0",
+      "channels": 2,
+      "mask": 0
+    },
+    {
+      "name": "stereo-rear",
+      "source": "16-1-verbatim-0",
+      "channels": 2,
+      "mask": 48
+    },
+    {
+      "name": "four-fc-bc",
+      "source": "extended-lpc-4-1-0-0",
+      "channels": 4,
+      "mask": 263
+    },
+    {
+      "name": "four-height",
+      "source": "extended-lpc-4-1-0-0",
+      "channels": 4,
+      "mask": 20483
+    },
+    {
+      "name": "four-centers",
+      "source": "extended-lpc-4-1-0-0",
+      "channels": 4,
+      "mask": 73988
+    },
+    {
+      "name": "four-unassigned",
+      "source": "extended-lpc-4-1-0-0",
+      "channels": 4,
+      "mask": 0
+    },
+    {
+      "name": "four-stereo-prefix",
+      "source": "extended-lpc-4-1-0-0",
+      "channels": 4,
+      "mask": 3
+    },
+    {
+      "name": "speaker-0",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 1
+    },
+    {
+      "name": "speaker-1",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 2
+    },
+    {
+      "name": "speaker-2",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 4
+    },
+    {
+      "name": "speaker-3",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 8
+    },
+    {
+      "name": "speaker-4",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 16
+    },
+    {
+      "name": "speaker-5",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 32
+    },
+    {
+      "name": "speaker-6",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 64
+    },
+    {
+      "name": "speaker-7",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 128
+    },
+    {
+      "name": "speaker-8",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 256
+    },
+    {
+      "name": "speaker-9",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 512
+    },
+    {
+      "name": "speaker-10",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 1024
+    },
+    {
+      "name": "speaker-11",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 2048
+    },
+    {
+      "name": "speaker-12",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 4096
+    },
+    {
+      "name": "speaker-13",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 8192
+    },
+    {
+      "name": "speaker-14",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 16384
+    },
+    {
+      "name": "speaker-15",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 32768
+    },
+    {
+      "name": "speaker-16",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 65536
+    },
+    {
+      "name": "speaker-17",
+      "source": "16-0-verbatim-0",
+      "channels": 1,
+      "mask": 131072
+    }
+  ],
+  "files": {
+    "mono-lfe.flac": "99494730b01619ad3006b69444c245c2e73b5d204ee755f05b9ebb3c5c2dde78",
+    "mono-lfe.mkv": "8a41e0afbb3eb840143e641d02e78099ba199bbbffd5243021bfabe9631fb59e",
+    "mono-unassigned.flac": "a8c07254f99ef147bbcbfa1efabd7d97dcdd7d8c7cf0d2f42850493c68cb1e46",
+    "mono-unassigned.mkv": "ffe9ef21cea9c95ff311cf74a1d1db85524898271bf79c19acb8d3182690e9d4",
+    "stereo-unassigned.flac": "41f455a912ed063fcef60c26ee3c6473007581d22fa0d03550335b9a6d3f18a0",
+    "stereo-unassigned.mkv": "0f51cd23c0c9341f069cf7b5e8dd4fbd930a4ec268dd6433ae0000d1f21bf1d2",
+    "stereo-rear.flac": "c28c3d67c9d56f096e8a6aada9e7acbfe354a5300535ba34f7a6fa523eea701b",
+    "stereo-rear.mkv": "a87f889eee424bce25acce248cb0cd101d4b98cd4038be5ee922a695c65c1ae4",
+    "four-fc-bc.flac": "6210a520b3a0fd35aa21aaa66e5f2e85850bd14a766ce277781ed722fe17fc86",
+    "four-fc-bc.mkv": "4cbff6e82b56a2883ed49f776274363edaf26b4422afaec9e505a2f57af27e12",
+    "four-height.flac": "9c9b4abc10702cbcabf8d0b9847a0a4df934162729e1ff44c55cf91ea54f16f6",
+    "four-height.mkv": "b5946952fece74fd6b456b360d37a38defadaad15a61d7722bc178f9642e88fa",
+    "four-centers.flac": "8b33aeabcf607c187e0570e983b2a435f6f28cb07b999810cee7c59f86189a38",
+    "four-centers.mkv": "4c8d262cf9e4e17bf4de9ba9b0231f55083ae3a9855dabb4df5bb78b8b549fd0",
+    "four-unassigned.flac": "b18a776c249f2941276a277886181d0b29d4d7f69194bd371655478669525189",
+    "four-unassigned.mkv": "3abf32811dc7bb68e32bd996e214597c9348a711e22e3097e47c009e48d4414e",
+    "four-stereo-prefix.flac": "dd4b42c004871e7eef8003c94ad5d1d880f9abf6bc89034a58bbb1a9ad8d45c5",
+    "four-stereo-prefix.mkv": "afc5baed78aad7e209cec81e51d3d9df48a6b64760939f4869e649d2bc679b9b",
+    "speaker-0.flac": "490864026a029a778298581a89c86657879bd5c00bb0f179590f3382ed4fdfbd",
+    "speaker-0.mkv": "29dcd64f5aa71ef7b3a2634e320f810fd907f5044a1371d3ffe95b02000b1e51",
+    "speaker-1.flac": "a108624fa1ffceac3b5836f9931c5ef28ae0d545d914eec991ef5948e43d3d64",
+    "speaker-1.mkv": "ade1e451cc0ac8be794b5e3345cedee9b7aed746157b507c1aa86ed3327d1945",
+    "speaker-2.flac": "0725d8cd9beb882ef71ff0948e57ac36cfa3b5e2c72c7008cb503a774166d910",
+    "speaker-2.mkv": "ba06c573d746ca9638afe5bf0b5442c5f0c84c871bca99795cd9e9f9b56fbc64",
+    "speaker-3.flac": "99494730b01619ad3006b69444c245c2e73b5d204ee755f05b9ebb3c5c2dde78",
+    "speaker-3.mkv": "8a41e0afbb3eb840143e641d02e78099ba199bbbffd5243021bfabe9631fb59e",
+    "speaker-4.flac": "5b47b94df63ae67298136ec168ebbd4dde13103466a1e96e8b94ee7657be1edd",
+    "speaker-4.mkv": "50e55e7c2d9a7809ccac3e474464eb818cd57b89728a12617fe216af8d59b5df",
+    "speaker-5.flac": "90b1c419773d7fa2e7239a8e1c2e30d892b63a98fafdce515ed88d66e99bc0ac",
+    "speaker-5.mkv": "b00f8713de9ba5486d647bd49c898317f6477acd70867feb457da203512a4176",
+    "speaker-6.flac": "eab49577af694be3ab96d5cb770f09561739188b18c3611a4297e177453e94eb",
+    "speaker-6.mkv": "cafe2b5f4671c3b04b4a803e31c45c4557898e207a01c7b828fe469f1b754d49",
+    "speaker-7.flac": "b2880bf967c5b05bad1c09c473a5ae7c7dcd5b78e047c2a8ac12c4ff0dd179b6",
+    "speaker-7.mkv": "16ce24531b8d5fef74d2164d701c0c9ae767be9555cc27d956a8ec03ca25b612",
+    "speaker-8.flac": "40b57f721d04321f98fd3f393a22513993efbe0aefacc7603185e499c8a4f2c5",
+    "speaker-8.mkv": "f6c23f438f81e6101b1f0175dcb752abaa808d09bdbe360c273d9e9a497ebd40",
+    "speaker-9.flac": "12126bdeb6b3abe079f9ea9d2c7d23139f98bd8a6165f48716493916a8f5bfad",
+    "speaker-9.mkv": "2b809bc91e62956e74a50b1e58fa0b6c3d3bb55828f1da954fbab8947ac4a61a",
+    "speaker-10.flac": "0d5b2a86086b9dd9affcf4c55ed9a4d41b8dc1647bbab900c5b10d670d62780d",
+    "speaker-10.mkv": "5dc6913a503b7ceb5ac9c7fa4d379e0b581b02f619499213f28676dc5bc66ff9",
+    "speaker-11.flac": "dbbd90f5c1f258851db69887eaabaa4f8bb18172f0bebd2b26402ca0aa1b581c",
+    "speaker-11.mkv": "6354cee8de8f4a0bd4cbcc3fae339757dade223d70a2547fa3e3ee81250e2cbd",
+    "speaker-12.flac": "20768c410934d0b911e793e0b0c194476ed0bc244049e9b11a9112fa793040ee",
+    "speaker-12.mkv": "e832a13c4fa10c750bfe7270c3ca90bf8087b0f8d04756954a6245f4962c9880",
+    "speaker-13.flac": "06dcd007a9a23da50d53d5471fbdba48e8109146fa9cd7bbb2637ff07e5dcdea",
+    "speaker-13.mkv": "ee30c6376b6c1cd6c19a82dabafb3bbed1963eae781a570e43792e3defd15e5e",
+    "speaker-14.flac": "0e98f22bd37aa0ab7bcb0e1235cd5776c30605d5cf11aae1a43f0c2c15f4a14f",
+    "speaker-14.mkv": "4c56db479cd3883d39fe7703975820f1b6d4200e5c3103db32a0a44dd048b377",
+    "speaker-15.flac": "f623e322af3034f53a032e13a5d2c5628542f39bb2d315ad963cee7cdab2c394",
+    "speaker-15.mkv": "1123f43536f8fd65465b7c85159f58104eff8db58bb7d0c3f373c3b2e9d2548e",
+    "speaker-16.flac": "1fe94f93b9e1fd3247a2597515b5819ee102fa3bf4680ae76e9886329c890344",
+    "speaker-16.mkv": "746aef3f73bae666bdf4bfd575e17c75ef6a925bf559feaad4917af388c59481",
+    "speaker-17.flac": "67b3c9a41b7ce148df9812226b4e205ca753552f721e8d080949b14b9dc31380",
+    "speaker-17.mkv": "87d32e4eb939c376073a2caa1f8b945b059146ab8bf2d63631cfd1ef2a7e2044"
+  }
+}

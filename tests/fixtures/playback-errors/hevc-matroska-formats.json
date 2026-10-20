@@ -1,0 +1,3749 @@
+{
+  "cases": [
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r0-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r0-crop0-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r0-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r0-crop0-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r0-crop0-2.display"
+        }
+      ],
+      "sha256": "76c2e28c566879da7c011a27a88d8d2a23384f3bebe938667ada06c4ffd569b1"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r0-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r0-crop2-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r0-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r0-crop2-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r0-crop2-2.display"
+        }
+      ],
+      "sha256": "b6056be6b4983f5c2ffc6048fbed119e51ba062486a283d48e492eacf2c1ffc5"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r90-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r90-crop0-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r90-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r90-crop0-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r90-crop0-2.display"
+        }
+      ],
+      "sha256": "896a4b592a789866f40bcf914c913d3ea35f3174b1da590813b2f828ad270a41"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r90-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r90-crop2-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r90-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r90-crop2-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r90-crop2-2.display"
+        }
+      ],
+      "sha256": "bf075afaebbf9f60bdfd7c4a38701323b51007f713ed8eee544bb810d84cdf04"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r180-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r180-crop0-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r180-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r180-crop0-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r180-crop0-2.display"
+        }
+      ],
+      "sha256": "c7ea69b97a2433017a0357545cd711fb13947fd215194bcb090793217c87b552"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r180-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r180-crop2-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r180-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r180-crop2-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r180-crop2-2.display"
+        }
+      ],
+      "sha256": "6e8a03969d54c6477703ee29d0d3318b958ee52dd99a5c109d10075d6498b7fc"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r270-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r270-crop0-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r270-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r270-crop0-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r270-crop0-2.display"
+        }
+      ],
+      "sha256": "f891e50a03b7c9e00a723f6ddcc8ca4c5e4a8ef3785fb53e67e51e0c38eceb41"
+    },
+    {
+      "file": "hevc-pcm-444-reference-rext8-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-444-reference-rext8.mp4",
+      "oracle": "hevc-pcm-444-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r270-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r270-crop2-1.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r270-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-reference-rext8-matroska-r270-crop2-2.packed",
+          "display": "hevc-pcm-444-reference-rext8-matroska-r270-crop2-2.display"
+        }
+      ],
+      "sha256": "fddda679a4d470bcf50da5f523c775b641e9fee2dddab2c7df12299dd1f0fc73"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "d69933d7418a13712e5e1b6a9af13d3970602e5396e07bbd90755c4b93041af5"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "ef9c280872a5af9d1c204d44e8b080f7cd7e5aeb3a70d290caef8f4a6a03eddf"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "b01afca37c975c7b8e480b5594582d3adaf453fb6568bd9450a5678f2a34b400"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "f1e306735f225173479e31ac9bf480ca15313a6a2f19ec812b3e139b3494e4af"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "b94d779e4149f7d0bc535cfc0cb3e74dfe6541a3a16d5d02fd73eb5b2664764b"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "6f1ecd1f45d1a55cdcfc18d344aa41d3c2daf604b66d9cc3b5c593ed68ec1b6c"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "4e3d546bc7d479969dcb5a117bebf7a3ae640a2f015629118ffe9226619b5268"
+    },
+    {
+      "file": "hevc-pcm-444-full10-rext10-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-444-full10-rext10.mp4",
+      "oracle": "hevc-pcm-444-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full10-rext10-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-444-full10-rext10-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "1fc025b9a75b07dc4aa6878c92f7d010f84c7449b6045ef91b0374ab67a6ea38"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "7f3b2ef41c75660aa8190f98709fd1a8eeb093b7962970f7e9629862dd4faf09"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "97efad688b04c107f06893f49e754a242a61a5637f020d97cfe9740470cc5cfb"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "a360094127bb74f8908b97f2f2e043d5146d01d8a4a6d906cc040ab1afd86d7b"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "fd0f4d340a1b88636bf55accadfab7e97871926b7ba4acb49b1d2308f3bee3e0"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "1da5b3f7c67f3655a0733f5e2b3cc1264f963771d4bf03dfb9bc6c48a186e554"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "273d63b5edee1b1e121c8ebcadbf235052766c59e70dee989344623b0556f4db"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "f7754fc357af1911154fff0a70e13b717ad73c6070764fddf25e0c7119d21bd9"
+    },
+    {
+      "file": "hevc-pcm-444-full12-rext12-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-444-full12-rext12.mp4",
+      "oracle": "hevc-pcm-444-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-full12-rext12-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-444-full12-rext12-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "9b01685e660acb5680d2d639f59d8c07ce3273f5deceb29819bfe92baa6151b3"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r0-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r0-crop0-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r0-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r0-crop0-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r0-crop0-2.display"
+        }
+      ],
+      "sha256": "996fad8739cb945b58ca934d0ea18021c1e029847934a910d0d6b427860dec8d"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r0-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r0-crop2-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r0-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r0-crop2-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r0-crop2-2.display"
+        }
+      ],
+      "sha256": "5bb7fbe85520d3c647df9682ef97d2010367053d803d94193c7e43e4b2690d12"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r90-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r90-crop0-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r90-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r90-crop0-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r90-crop0-2.display"
+        }
+      ],
+      "sha256": "b0fdd05041455229f58715fbccb158cc128135f0a809e776565bec928ce046bf"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r90-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r90-crop2-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r90-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r90-crop2-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r90-crop2-2.display"
+        }
+      ],
+      "sha256": "8f935fe3f58a0ee6a0ade84142b7cbf7dade1886174cfecabe9737785965b317"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r180-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r180-crop0-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r180-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r180-crop0-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r180-crop0-2.display"
+        }
+      ],
+      "sha256": "9c6aa235daf9815c8196be468ad500330acc3087650fa11be95b35655363af82"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r180-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r180-crop2-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r180-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r180-crop2-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r180-crop2-2.display"
+        }
+      ],
+      "sha256": "151e841b0cd002d9801800b1387a5060bd4b35a64cf2a252eee0ea73dd855434"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r270-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r270-crop0-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r270-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r270-crop0-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r270-crop0-2.display"
+        }
+      ],
+      "sha256": "9af1b2ae7f7ebe5db7ac36439ea968ab7ecf0a7eb6814144ee71a9e914fdab46"
+    },
+    {
+      "file": "hevc-pcm-422-reference-rext8-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-422-reference-rext8.mp4",
+      "oracle": "hevc-pcm-422-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r270-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r270-crop2-1.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r270-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-422-reference-rext8-matroska-r270-crop2-2.packed",
+          "display": "hevc-pcm-422-reference-rext8-matroska-r270-crop2-2.display"
+        }
+      ],
+      "sha256": "49934ddf11be73e1ec306d87b48218168a617df50edd9a80d9f49f27033c6a35"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "2f27aa2fab5335100878556793551b22d068b1dcb1ccf94fc8f4d799e7ab01e7"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "792e45011914e8aafb9c8b6d814e7d558e54118df98385e36921b28062a89d01"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "bda8db816ac1f887c34ee61c3f1e0d0881edb3be5fd12b9a6bd9096af0e2191f"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "16dd1e14da56c3eb351bc18978e08021d6f32cd82c5dabea7ca5c00faa47993e"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "4d615ce61a3818e0f18e92e3665bbec4d5386286a6b7f2cb584b5ca7ff52ecab"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "6c3cffe138b22015ab77d671bfaa67efbe5fe960c7e4392f77ee1e662e17bf6b"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "e17af9af8ccd382616bf97e06257a42d73f8b024e14f1c3565325513ee0bf53e"
+    },
+    {
+      "file": "hevc-pcm-422-full10-rext10-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-422-full10-rext10.mp4",
+      "oracle": "hevc-pcm-422-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full10-rext10-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-422-full10-rext10-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "aff06f058a307aab9dfd82797e95c2a054a63feb0fc7622baf35331ef58077aa"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "a2bfa54f99eef84300346f1c0cd83edff5d78d1bb184c06e99a065e70c17d4cb"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "c0aba292005cad409536cbf97035cd8d693fe2488147718db4acf337daa1ac2b"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "1f122a13a189648d5807c7c46e791fa2997756906c690fa14a44c057d77a96f2"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "c4d4bf629c3f394c73e4130ac3c57753de47287e4e507e12ae1c910d5c1a47d7"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "0c5c18476adb582c8576ab96f2c31163f2dd1aa825ebc867edb77dab70745e4e"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "c959040b3b1ede24d312166baa9a5b13e8d7a861b0b94547a5bf9740805ac411"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "1fa654fd0a4c44f760fc927a3a7a607dd895a90238ff3607f8984d636c8c08f4"
+    },
+    {
+      "file": "hevc-pcm-422-full12-rext12-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-422-full12-rext12.mp4",
+      "oracle": "hevc-pcm-422-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 2,
+      "subsampling": [
+        2,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-422-full12-rext12-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-422-full12-rext12-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "3ba144a06f51b9daadbadd4e9ea74e1f4393b4584f14ea9ecd014635c466e991"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r0-crop0-2.display"
+        }
+      ],
+      "sha256": "9703f35e5d6e65d26d77e31e05374cd4cfb960216a810dd63b23510c1a7014a8"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r0-crop2-2.display"
+        }
+      ],
+      "sha256": "5d9a1ed2243f07389f4b57bd74c1dae0733d22a3443c9be3e3b34c7247bc3272"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r90-crop0-2.display"
+        }
+      ],
+      "sha256": "f8b5e9cf15fcdd8fd992c5fc6e2d5b0f7637bc79f77ea47aad4280906f263c4f"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r90-crop2-2.display"
+        }
+      ],
+      "sha256": "8a082fbb6df01af1a37212360cc947c0928d756d08c51ff4ff1ed2c5196bb9be"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r180-crop0-2.display"
+        }
+      ],
+      "sha256": "139987e24c280921f8018789505e5c2611445ec84cc9eb0dca428902dfb631c1"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r180-crop2-2.display"
+        }
+      ],
+      "sha256": "1ec82b5dee93e9444741e5257900867eb25a7c24dfa91e5f8ad64951579cc8e6"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r270-crop0-2.display"
+        }
+      ],
+      "sha256": "e83a6c09be129dc1f4a37e4a1afe1eb767552ec1df6d866f8168fb46aba4d653"
+    },
+    {
+      "file": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-mono-reference-rext8.mp4",
+      "oracle": "hevc-pcm-mono-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2-1.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2-2.packed",
+          "display": "hevc-pcm-mono-reference-rext8-matroska-r270-crop2-2.display"
+        }
+      ],
+      "sha256": "9a37a9f4c79f395dfcf617df3c33cd66c011bcfafc9e45e827f622e3bddad863"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "297a6c9fa190e96e4394b8f8e8499dc790235f84c2f0c466a714bfdf9eddad9c"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "22c9295098cf9f7bc86bef66dd14267834b1b470c37865d61c6c9509e474a9e0"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "c653ab3671835aa52fdafa406dfaf326fc87736d12f31d5b9a82fae0df597202"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "71df4f8b9fa0310befc9dc21c862ce2ba458114e3d4d37cc89b05e36f7a9ef55"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "e69c6ecdefbe5bc77528325c1012c037eb1698eba8b63fadbe837b7be7745d8d"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "902049cd78d44a853526f97b5a36f8cdc7194cc408f9fc16ad964d2bfc8e14fb"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "ba0755883129cc69cdd7cfd5d480695733c9638e410351b39047d37d9eb01058"
+    },
+    {
+      "file": "hevc-pcm-mono-full10-rext10-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-mono-full10-rext10.mp4",
+      "oracle": "hevc-pcm-mono-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full10-rext10-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-mono-full10-rext10-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "821a5c3aab85ff6f9ac658c4d69a8fa39f92089f5ed13ad7cb43d2c5ea0d4173"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "25cd5a3156cadec50fc96098a40b8d81a61a71fbf34547033f33749ef967c02e"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "942627cc460dd32faa840258dfd1d850479ddf72e9dd4a31cc084ca04adfa6c7"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "b353ef2e48b78e3b69893448b0eb3c3de406f181243c354975d11392e9e587f2"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "9c6288dfdc493b54a9c0725c133472a9893dd4ae8bce6ddabd4ae3592a88c5f1"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "62fada5f9461cabd7b46471891ed9df3cc8a9ebddf48c177d9f1f8e24a763c36"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "76ed146131c80590b57d79877fd0e62389e58cf67c05bdff63ab21727f0eefc1"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "a1862800b9428a713a72c43999a806f4cdfb47c3f1266d24ffd0922210855b98"
+    },
+    {
+      "file": "hevc-pcm-mono-full12-rext12-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-mono-full12-rext12.mp4",
+      "oracle": "hevc-pcm-mono-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 0,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-mono-full12-rext12-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-mono-full12-rext12-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "49e6cf83046987ee6d55240c77cf02f5f32875d004cf45f6022cf4015f5c960b"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r0-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r0-crop0-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r0-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r0-crop0-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r0-crop0-2.display"
+        }
+      ],
+      "sha256": "a5de1e340c6921f72d067ef5fcf789d4d7cec72a3eae61b55a8413f565c53a78"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r0-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r0-crop2-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r0-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r0-crop2-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r0-crop2-2.display"
+        }
+      ],
+      "sha256": "8d4afd8cee465af6121a753495418e654bd79b11aae6ca9506f116046169debc"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r90-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r90-crop0-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r90-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r90-crop0-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r90-crop0-2.display"
+        }
+      ],
+      "sha256": "c8508cf4c378df1b2cb9e27cb73e003863e20ad464064a767554e7d4e866fa44"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r90-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r90-crop2-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r90-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r90-crop2-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r90-crop2-2.display"
+        }
+      ],
+      "sha256": "82644c1ec74e5d8af16f5f6b1c45d3684f8546d96dcd5751fd19bef6142d69bc"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r180-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r180-crop0-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r180-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r180-crop0-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r180-crop0-2.display"
+        }
+      ],
+      "sha256": "45337f508f525895877cdcb6245295b5731d4233dcb24c8e091d9cb7c16d5567"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r180-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r180-crop2-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r180-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r180-crop2-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r180-crop2-2.display"
+        }
+      ],
+      "sha256": "b7a9a8a4bd661da3b832ec30e430fde8490a9d6378e763cbe23fe5fa269d5407"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r270-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r270-crop0-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r270-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r270-crop0-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r270-crop0-2.display"
+        }
+      ],
+      "sha256": "7a4da69bc5681fdf5786730c847ee0ce3e22d3ac88ede6e30678cda4613b20de"
+    },
+    {
+      "file": "hevc-pcm-reference-rext8-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-reference-rext8.mp4",
+      "oracle": "hevc-pcm-reference-rext8.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r270-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r270-crop2-1.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r270-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-reference-rext8-matroska-r270-crop2-2.packed",
+          "display": "hevc-pcm-reference-rext8-matroska-r270-crop2-2.display"
+        }
+      ],
+      "sha256": "d8d4afa357bccdafb047806af454319b1e8ee0885d5758f43df2b3a1afe53685"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "2869bfcaaf61e6f50d7884c58906277f799a475b86d874c5633b90c0618ffe3e"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "e86bc1214e47c0356aac78eb477c309b7f58f539be821c7b54b3c9cc7be337c4"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "094aa79764a042f134a6460332665fe41cc5960cff7f4630c7f8d0181eb5470a"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "3ec2dc955a411ee72155947fe5e3886d0cdc7c0a9f102a2de5a4f782b2f8b817"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "6136d5a9bab5d5317734ae4f4ef29d2b9d937c2eab2d0c0fa99a687b7225b148"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "076927ac492a3c5dcef67eebe351d300e565a495151550aa88140d9e7cc8658e"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "272f867b285ec22399527ff8cd2df9b3f67c03645db134975131a96f8d605082"
+    },
+    {
+      "file": "hevc-pcm-full10-rext10-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-full10-rext10.mp4",
+      "oracle": "hevc-pcm-full10-rext10.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full10-rext10-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-full10-rext10-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "fefc84db2dd2fa865994dec8913dc0455d576315ed93809617a9084331c5c8cb"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r0-crop0-0.display"
+        }
+      ],
+      "sha256": "1a0d701d32b9661475b2e1af88d78efac0966f2d29b98c444f67d338fb318906"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r0-crop2-0.display"
+        }
+      ],
+      "sha256": "42c86e58d80cad767357aed434d072d9968bc97e1613cd5f0af98746680f0047"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r90-crop0-0.display"
+        }
+      ],
+      "sha256": "eb84a994d1e4470627cc23887ca54c720f444f314d6f447367004d5b787e62c3"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r90-crop2-0.display"
+        }
+      ],
+      "sha256": "211f1a3c2fe56b87a2b54e87c47e84e6a3672ea5ea9ecec318fff63247bbfba0"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r180-crop0-0.display"
+        }
+      ],
+      "sha256": "f38ca868739ae404f346ec8ab7640884d380e378a70bf84987c40a0f38aaaecd"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r180-crop2-0.display"
+        }
+      ],
+      "sha256": "10234eb634fc3f0117deefa9e5717a2d6170a2cb8faf7037c71f2059cd71892e"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r270-crop0-0.display"
+        }
+      ],
+      "sha256": "a1199512208108040bf37519a102348404fde5d60c3d22a6dbb7c19d33b3fbcc"
+    },
+    {
+      "file": "hevc-pcm-full12-rext12-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-full12-rext12.mp4",
+      "oracle": "hevc-pcm-full12-rext12.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "chroma_format": 1,
+      "subsampling": [
+        2,
+        2
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-full12-rext12-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-full12-rext12-matroska-r270-crop2-0.display"
+        }
+      ],
+      "sha256": "8feedf003ee3aa5e1b90a82b77af44d1f55de97aaf2d02e5e88facbc94b810e5"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop0-2.display"
+        }
+      ],
+      "sha256": "9f4669e4ef1fe1a580bafacad96977f2c7eac2b40ddd370ffce05d4f4dd2880c"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r0-crop2-2.display"
+        }
+      ],
+      "sha256": "a1ca380dece519df0aec179fe032c2c1620e49fc8f94e54884bee1f9bd5b4769"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop0-2.display"
+        }
+      ],
+      "sha256": "821f224e09b63ca950bfbeedb51bbfabe6477d9e692d73432599dc3d3c64e305"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r90-crop2-2.display"
+        }
+      ],
+      "sha256": "7cf7eac90bf78ca2476e909116a079cc83bd2ee511ad24abc8564941f6ea38b7"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop0-2.display"
+        }
+      ],
+      "sha256": "1cf73909cb977fddf36f75571fb692cceb5b41716ec4c67b987b333e815b31ab"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r180-crop2-2.display"
+        }
+      ],
+      "sha256": "80f1111b2d3d5a0a8dc4fb27afa26e51caef2158404cff793ae3ca6eb7b45994"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop0-2.display"
+        }
+      ],
+      "sha256": "de624d8f7411dba54cc8dc3cd6af079e4e84da818e8e99a15d5363c0a9eb4f25"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext14.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext14.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext14-matroska-r270-crop2-2.display"
+        }
+      ],
+      "sha256": "ca5759945bf2e6edbc098e2b8187c3e7e8017dde05fd89713c67c94e496851d6"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop0-2.display"
+        }
+      ],
+      "sha256": "3e2e0ebc81b3ca81bbb64ff774ffc896fd5fe4679b2c4136ce65a3eb0f27ba82"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r0-crop2-2.display"
+        }
+      ],
+      "sha256": "ca9b3558331099f6c84923c009e28e2a4f730167b27673d9ce34fcac8dd08644"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop0-2.display"
+        }
+      ],
+      "sha256": "0cb83e622ac311cc0e032b9c07da2868c663b19bde06ef9feeeb80969cba65a1"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r90-crop2-2.display"
+        }
+      ],
+      "sha256": "62686e466245cbfa53f1634514ce0e429c4f852b27c2b3f5fa6de5119a7d8377"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop0-2.display"
+        }
+      ],
+      "sha256": "bd71c2c4762591469a1d8a0450ebdb5f59527f1df6c4ebb066bb88f917a30dc5"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r180-crop2-2.display"
+        }
+      ],
+      "sha256": "90018b812260db431214dab33380b7784c633d7b07b132202343897b380db694"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop0-2.display"
+        }
+      ],
+      "sha256": "d216bc0f9deed12cfc0f4ce1b513184505fb2a5a08d6d66d075dbcec49c57737"
+    },
+    {
+      "file": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2.mkv",
+      "source": "hevc-pcm-444-deep-full-rext16.mp4",
+      "oracle": "hevc-pcm-444-deep-full-rext16.yuv",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "chroma_format": 3,
+      "subsampling": [
+        1,
+        1
+      ],
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2-0.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2-0.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2-1.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2-1.display"
+        },
+        {
+          "packed": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2-2.packed",
+          "display": "hevc-pcm-444-deep-full-rext16-matroska-r270-crop2-2.display"
+        }
+      ],
+      "sha256": "a0c18f87c52422420297086325e273f30839d710287b459afb9ab0314ea2158f"
+    }
+  ],
+  "provenance": "Only already authored HEVC PCM packets/HM synthetic sample oracles are reused. Own MP4 extraction/Matroska wrapping, independent per-plane crop/rotation arrays. No private media, external codec execution or network."
+}

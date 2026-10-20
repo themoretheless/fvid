@@ -1,0 +1,72 @@
+{
+  "provenance": "Eight authored100ms MIDI same-tick attack/stop sequences versus equivalent surviving-note controls. Unmatched key,other channel,one chord key release,channel-mode123/120 and three intended-silence controls. Separate authored native VP9/PCM video. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "unmatched-key",
+      "file": "unmatched-key.mid",
+      "control": "unmatched-key-explicit.mid",
+      "audible": true
+    },
+    {
+      "name": "other-key-release",
+      "file": "other-key-release.mid",
+      "control": "other-key-release-explicit.mid",
+      "audible": true
+    },
+    {
+      "name": "other-channel-release",
+      "file": "other-channel-release.mid",
+      "control": "other-channel-release-explicit.mid",
+      "audible": true
+    },
+    {
+      "name": "other-channel-notes-off",
+      "file": "other-channel-notes-off.mid",
+      "control": "other-channel-notes-off-explicit.mid",
+      "audible": true
+    },
+    {
+      "name": "other-channel-sound-off",
+      "file": "other-channel-sound-off.mid",
+      "control": "other-channel-sound-off-explicit.mid",
+      "audible": true
+    },
+    {
+      "name": "matching-release-control",
+      "file": "matching-release-control.mid",
+      "control": "matching-release-control-explicit.mid",
+      "audible": false
+    },
+    {
+      "name": "matching-notes-off-control",
+      "file": "matching-notes-off-control.mid",
+      "control": "matching-notes-off-control-explicit.mid",
+      "audible": false
+    },
+    {
+      "name": "matching-sound-off-control",
+      "file": "matching-sound-off-control.mid",
+      "control": "matching-sound-off-control-explicit.mid",
+      "audible": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "unmatched-key.mid": "9d228dfc48fbb01b324d392f74cf110c338f1aeb73c07223add7161d7d457de8",
+    "unmatched-key-explicit.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "other-key-release.mid": "0f08464ddbd08c576b596d1bc3fbd277faa484adfbfecbc705fe901345869168",
+    "other-key-release-explicit.mid": "8d1a7e826ce897b87ccea461f7b14d116d9d4cd27b502b78d2d195a26b259092",
+    "other-channel-release.mid": "8289424e0538efa9c7c7624f4ca758fb1038600bcba4b01266ea1ddddf2b805f",
+    "other-channel-release-explicit.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "other-channel-notes-off.mid": "87bb8b358effae1b4bd1ab743efa2b2c6d7fe26ec17b98605f1f70bff8c2d561",
+    "other-channel-notes-off-explicit.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "other-channel-sound-off.mid": "257fe579b6e5542f01021d549add2bf6f23ee313069ced72365ec9e308211fc4",
+    "other-channel-sound-off-explicit.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "matching-release-control.mid": "c05f4309983eda130654f7efd685b8e53536c6e2c63bc8fed59aef6dd106d457",
+    "matching-release-control-explicit.mid": "358536d52f643be63a48815b80e9a071395ad562a4dffee6343723200f8f7634",
+    "matching-notes-off-control.mid": "45c926693f368ffabc2f2d4e981853caa7d97c793e6c3d4994c4ba00e4d2cc7d",
+    "matching-notes-off-control-explicit.mid": "358536d52f643be63a48815b80e9a071395ad562a4dffee6343723200f8f7634",
+    "matching-sound-off-control.mid": "0e83b9cb72d0986ebe36437d267442676f665b6c1aa5397e5a0e6d0f42a56bd9",
+    "matching-sound-off-control-explicit.mid": "358536d52f643be63a48815b80e9a071395ad562a4dffee6343723200f8f7634"
+  }
+}

@@ -55,8 +55,74 @@ fn resolve<const N: usize>(
     }
 }
 impl ScalingMatrices {
+    /// H.264 8.5: separate planes use their own 4x4 and 8x8 scaling lists.
+    /// Resolve fallback before projecting the selected component onto luma.
+    pub fn for_colour_plane(sps: &Sps, pps: &Pps, plane: usize) -> Result<Self> {
+        if sps.chroma_format != 3 || !sps.separate_colour_plane || plane >= 3 {
+            return Err(invalid("invalid AVC separate scaling plane"));
+        }
+        if sps
+            .scaling_lists
+            .as_ref()
+            .is_some_and(|lists| lists.len() != 12)
+            || pps
+                .scaling_lists
+                .as_ref()
+                .is_some_and(|lists| !matches!(lists.len(), 6 | 12))
+        {
+            return Err(invalid("invalid AVC separate-plane scaling-list count"));
+        }
+        let mut mono = sps.clone();
+        mono.chroma_format = 0;
+        mono.separate_colour_plane = false;
+        if let Some(lists) = &mut mono.scaling_lists {
+            lists.truncate(8);
+        }
+        let mut picture = pps.clone();
+        if let Some(lists) = &mut picture.scaling_lists {
+            lists.truncate(8);
+        }
+        let mut result = Self::new(&mono, &picture)?;
+        result.four[0] = result.four[plane];
+        result.four[3] = result.four[3 + plane];
+        let mut eight = [[16; 64]; 6];
+        if let Some(lists) = &sps.scaling_lists {
+            for i in 0..6 {
+                let fallback = if i < 2 { DEFAULT8[i] } else { eight[i - 2] };
+                eight[i] = resolve(
+                    lists[6 + i].as_ref(),
+                    fallback,
+                    DEFAULT8[i % 2],
+                    &FRAME_SCAN,
+                )?;
+            }
+        }
+        if let Some(lists) = &pps.scaling_lists {
+            if lists.len() > 6 {
+                let sequence = eight;
+                for i in 0..6 {
+                    let fallback = if i >= 2 {
+                        eight[i - 2]
+                    } else if sps.scaling_lists.is_some() {
+                        sequence[i]
+                    } else {
+                        DEFAULT8[i]
+                    };
+                    eight[i] = resolve(
+                        lists.get(6 + i).and_then(Option::as_ref),
+                        fallback,
+                        DEFAULT8[i % 2],
+                        &FRAME_SCAN,
+                    )?;
+                }
+            }
+        }
+        result.eight = [eight[plane * 2], eight[plane * 2 + 1]];
+        Ok(result)
+    }
+
     pub fn new(sps: &Sps, pps: &Pps) -> Result<Self> {
-        if sps.chroma_format != 1 {
+        if sps.chroma_format > 2 {
             return Err(invalid("AVC scaling reconstruction requires 4:2:0"));
         }
         let mut result = Self {
@@ -107,18 +173,20 @@ impl ScalingMatrices {
                     &FRAME_SCAN_4X4,
                 )?;
             }
-            for i in 0..2 {
-                let fallback = if sps.scaling_lists.is_some() {
-                    sequence.eight[i]
-                } else {
-                    DEFAULT8[i]
-                };
-                result.eight[i] = resolve(
-                    lists.get(6 + i).and_then(Option::as_ref),
-                    fallback,
-                    DEFAULT8[i],
-                    &FRAME_SCAN,
-                )?;
+            if lists.len() > 6 {
+                for i in 0..2 {
+                    let fallback = if sps.scaling_lists.is_some() {
+                        sequence.eight[i]
+                    } else {
+                        DEFAULT8[i]
+                    };
+                    result.eight[i] = resolve(
+                        lists.get(6 + i).and_then(Option::as_ref),
+                        fallback,
+                        DEFAULT8[i],
+                        &FRAME_SCAN,
+                    )?;
+                }
             }
         }
         Ok(result)

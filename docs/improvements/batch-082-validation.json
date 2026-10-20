@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0104"
+  ],
+  "checked_at": "2026-10-16T03:03:58.868858+00:00",
+  "before": [
+    "evidence/batch-082-clean-rate-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-082-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-082-final-rate.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-082-ac3-decoder.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-082-ac3-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-082-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-082-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Three clean direct frames/configured-rate contradictions48k->32k/44.1k and32k->48k produce native PCM with an incorrect playback clock. Authored Matroska/MP4 rate metadata48k->32k reproduces the same error while coded payload/CRC stays identical and all6video pictures remain valid.",
+    "A complete CRC-valid AC3 frame must match the configured PCM rate before synthesis; a mismatch returns a precise error. The native decoder performs no sample-rate conversion, so relabeling the PCM is not supported playback.",
+    "Both contradicted containers now cause actual worker refusal with zero queued PCM. Correct48k/32k and intentional stereo-to-mono downmix remain accepted; normal container native workers play/rewind/EOF. Clean mid-packet rate change also refuses; a CRC-damaged rate field retains existing silence concealment rather than being mistaken for a trusted configuration disagreement.",
+    "10 AC3 decoder/6 reader units, container priming/raw timing/CRC/truncation/EOF integrations, pure fixture reproduction and player build pass. No encoder/network/private input, physical DAC, new resampling or performance claim.",
+    "Fixture authoring needed structural fixes to select the audio elst and sample-entry field rather than the first matching video edit/rate word. Initial missing-fixture logs batch-082-before/rate-before are excluded; clean-rate-before contains all5specific reproduced contradictions."
+  ],
+  "compatibility": "Contradictory clean AC3 frame/output sample rates now refuse instead of playing at the wrong speed. Requested channel folding stays supported; matching-rate streams and signatures remain unchanged.",
+  "counting": "One clean frame versus configured PCM-clock admission defect. Rate pairs, container metadata cases, folding and CRC controls add no IDs."
+}

@@ -104,19 +104,16 @@ fn invalid_analysis_preserves_output_and_is_reusable() {
         );
         assert!(out.iter().all(|x| *x == 123.));
         input.fill(0.);
-        assert!(
-            a.analyze(
-                &input,
-                WindowSequence::EightShort,
-                WindowShape::Sine,
-                WindowShape::Sine,
-                &mut out
-            )
-            .unwrap_err()
-            .to_string()
-            .contains("short-window LTP")
-        );
-        assert!(out.iter().all(|x| *x == 123.));
+        a.analyze(
+            &input,
+            WindowSequence::EightShort,
+            WindowShape::Sine,
+            WindowShape::Sine,
+            &mut out,
+        )
+        .unwrap();
+        assert!(out.iter().all(|x| *x == 0.));
+        out.fill(123.);
         assert!(
             a.analyze(
                 &input[..n],

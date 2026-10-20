@@ -67,7 +67,7 @@ fn audio_plan(
                 return Err("audio mix/merge requires nonempty owned audio inputs".into());
             }
         }
-        if !(1..=64).contains(&info.channels) {
+        if !(1..=255).contains(&info.channels) {
             return Err("audio mix/merge requires nonempty owned audio inputs".into());
         }
         if let Some((rate, channels)) = geometry {
@@ -207,7 +207,7 @@ where
             "mix-audio requires float PCM inputs (flt); integer formats are not qualified".into(),
         );
     }
-    if info.sample_frames == 0 || !(1..=64).contains(&info.channels) {
+    if info.sample_frames == 0 || !(1..=255).contains(&info.channels) {
         return Err("no decoded audio samples or invalid channel count".into());
     }
     let rate = i32::try_from(info.sample_rate).map_err(|_| "invalid decoded audio rate")?;

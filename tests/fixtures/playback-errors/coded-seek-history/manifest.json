@@ -1,0 +1,116 @@
+{
+  "provenance": "Fully authored short predictive MACE/GSM/TrueSpeech/G722/G726/Creative runs. No speech, private media or codec parameter copies. Continuous native PCM and existing rewind are controls for restoring state across coded window seeks. Short native VP9/PCM companion. No encoder/network.",
+  "cases": [
+    {
+      "name": "mac3-1",
+      "kind": "aiff",
+      "file": "mac3-1.aiff",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2046
+    },
+    {
+      "name": "mac3-2",
+      "kind": "aiff",
+      "file": "mac3-2.aiff",
+      "frames": 6144,
+      "channels": 2,
+      "grain": 2046
+    },
+    {
+      "name": "mac6-1",
+      "kind": "aiff",
+      "file": "mac6-1.aiff",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2046
+    },
+    {
+      "name": "mac6-2",
+      "kind": "aiff",
+      "file": "mac6-2.aiff",
+      "frames": 6144,
+      "channels": 2,
+      "grain": 2046
+    },
+    {
+      "name": "gsm",
+      "kind": "wav",
+      "file": "gsm.wav",
+      "frames": 4480,
+      "channels": 1,
+      "grain": 1920
+    },
+    {
+      "name": "truespeech",
+      "kind": "wav",
+      "file": "truespeech.wav",
+      "frames": 4800,
+      "channels": 1,
+      "grain": 1920
+    },
+    {
+      "name": "g722",
+      "kind": "wav",
+      "file": "g722.wav",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2048
+    },
+    {
+      "name": "creative",
+      "kind": "wav",
+      "file": "creative.wav",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2048
+    },
+    {
+      "name": "g726-2",
+      "kind": "wav",
+      "file": "g726-2.wav",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2048
+    },
+    {
+      "name": "g726-3",
+      "kind": "wav",
+      "file": "g726-3.wav",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2048
+    },
+    {
+      "name": "g726-4",
+      "kind": "wav",
+      "file": "g726-4.wav",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2048
+    },
+    {
+      "name": "g726-5",
+      "kind": "wav",
+      "file": "g726-5.wav",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2048
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "mac3-1.aiff": "92ffcb853e143383d5ed411ccdcd17baf674694f84d22f3e4f01cb234da9c2b3",
+    "mac3-2.aiff": "56fb8fe44c7d450e9a14c28686454427fd97f91c34846c8f596f9c4133ba13f6",
+    "mac6-1.aiff": "ceae2f1b62bf9de264873bf17a9df799ccdc2fc9a6c480d95ce8e479c4521b37",
+    "mac6-2.aiff": "0f36fca0196c6f90ef72ce19eee2e4ac2bd861a15557aa9edccffec9c6066d3b",
+    "gsm.wav": "82f1efc55ab78606e92b097b41ea63ef9a304a2643f8cd6856d4aacacee88a15",
+    "truespeech.wav": "c80215f22c27cc17b4dd8075d92010c963d999ecb3998fd03f643ecca0d97a67",
+    "g722.wav": "bb5e6ea19ba5838c330c2224d0308272f790c07868e47913bad53b022f7e030c",
+    "creative.wav": "051cea4c10a51cc36d4f9974687e032f965eecbee12aa6e72ca15b33d05c2000",
+    "g726-2.wav": "db2613d956694771ea89c139b282a5dd89eea59b84266958d207e2283d1236f5",
+    "g726-3.wav": "982cbcd5fed4d4816a84e672acce6392fb54cad64475d399de4bc40a564c0872",
+    "g726-4.wav": "ef8ce796026d92c5a79dfb44f831b88837d7d53711357d90feac090ae6f7a49f",
+    "g726-5.wav": "02f112ed775f901c4001c503a11089a148827b7e33d5a5cd779bd4daf68a77c0"
+  }
+}

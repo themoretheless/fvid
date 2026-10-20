@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0114"
+  ],
+  "checked_at": "2026-10-16T04:47:53.265976+00:00",
+  "before": [
+    "evidence/batch-094-pause-resume-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-094-integration.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-094-final-controls.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-094-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-094-xm-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-094-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-094-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Two authored native synthesis sources reproduce blocked pause service. Test gates first and second real native decoder calls: Pause is queued before releasing the first, yet old synchronous reset enters the second before servicing it. Both old runs resume to correct continuous suffixes after explicit gate cleanup; the specific defect is command starvation, not corrupt input or wrong baseline PCM.",
+    "Reset now clears the decoder, records the selected source-clock presentation floor and starts history at packet0. The ordinary worker loop decodes one window per step and suppresses preroll via present_decoded, so its existing command drain runs between windows. XM compares source ticks rather than rounded PCM stamps.",
+    "Four actual worker controls cover MIDI/XM pause/resume and replacement seek during preroll. Pause acknowledges after exactly one decode; replacement seek resets before the second. Resuming reaches EOF with exact continuous native PCM suffix and timestamps in the correct navigation generation. Gates are always released before cleanup. This is deterministic window-boundary ordering, not a host-speed performance benchmark.",
+    "5SMF/6XM reader units,nine related integration tests,pure reference/fixture reproduction and current player build pass. Existing tail-release,held-note history,absolute PCM grid,published row selection andEOF controls remain healthy.",
+    "Initial test wrapper omitted required audio_tracks; native-before and pause-resume-before supersede that compile failure. No production worker code,source timebase or seek landing changes. No new IDs for wrapper/test repairs.",
+    "Cold reconstruction remains linear; this change guarantees command service between decoder windows, not a bound within a single decode call or reduced total seek latency. No encoder/network/private media,physical DAC or measured throughput claim."
+  ],
+  "compatibility": "seek_to still selects/returns the same raw packet before reset. After reset_decoder, custom AudioStream consumers must process incremental encoded preroll through present_decoded and discard None, as the ordinary worker already does. Public signatures and presented landing remain unchanged.",
+  "counting": "One synchronous history-loop command-starvation problem across native timeline synthesis. Pause/reseek variants,two codecs and resumption checks add noIDs."
+}

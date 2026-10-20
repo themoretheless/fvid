@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0108"
+  ],
+  "checked_at": "2026-10-16T04:01:48.780789+00:00",
+  "before": [
+    "evidence/batch-087-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-087-integration.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-087-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-087-final-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-087-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-087-final-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six fully authored MACE3/MACE6mono/stereo, Microsoft GSM and TrueSpeech runs preserve exact native PCM under grouped/per-packet decoding. Before correction,22packet-PTS/packed-window seek observations use nominal2048 instead of actual2046/1920samples and accumulate gaps.",
+    "WAV/AIFF derive complete frame grain from their existing block-aligned byte window and use it for encoded PTS and coarse coded seek. Byte grouping, packet durations, codec reconstruction and total sample metadata are unchanged; PCM widths retain2048grain and exact byte offsets107.",
+    "Actual recording workers now play/rewind/EOF-seek six sources with exact grouped native PCM and contiguous clocks/endpoints. The tests assert decoded packet frames equal stated durations, full metadata equals total native frames and coarse seek lands on the packed boundary. In-range predictor-history fidelity is not claimed.",
+    "33 WAV/14 AIFF units, five related PCM/EOF/truncation/read-budget integration targets, pure fixture reproduction and current player build pass. Short native VP9/PCM companion decodes. No speech/private media or codec parameter copies, encoder/network, physical output or performance claim.",
+    "One existing MACE unit expected the incorrect2048PTS for a2046sample first packet; its clock oracle is corrected. Initial player build overlapped external AAC speaker-routing edits before their module export existed; export appeared without any repair from this task. The excluded initial build failure and external routing work count zero."
+  ],
+  "compatibility": "Coded audio packet starts and coarse seek positions now follow the actual complete samples packed per window. This removes artificial gaps; direct PCM seek semantics, byte payloads and public signatures remain unchanged.",
+  "counting": "One nominal-versus-packed coded-audio window clock problem. Formats, mono/stereo,22observations, oracle corrections and fixture variants add no IDs."
+}

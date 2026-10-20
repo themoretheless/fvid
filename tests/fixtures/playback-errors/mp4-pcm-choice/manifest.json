@@ -1,0 +1,11 @@
+{
+  "provenance": "Authored60ms VP9/two PCM MP4 tracks. Unsupported272bit preferred movie track must not block valid16bit PCM. No encoder/private media/network.",
+  "sha256": {
+    "valid-movie.mp4": "c991f9abc33377496871a7ba74f15615f509cec1eef8c43b444ca8a5229c27a9",
+    "valid-movie-expected.f32le": "155e437b946ac82ae591ff382b8d19efda9397b2282672dbabd91ec31ce8a651",
+    "unsupported-movie.mp4": "dd637f5619037ff224b9853ede6b02bf96d37e32bd9788d5eab831686e3d0345",
+    "unsupported-movie-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "both-movie.mp4": "ec8f5a76c12ebcbc503583edffcd3d7d84b012148bd7a923534b74b50b3569b2",
+    "both-movie-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "file": "voices-1.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "3c97dfbfe8cc99cf5a95e2d18d0b4a0515ae7e387b6d44d4b0b01bec8d4c4a8d"
+  },
+  {
+    "file": "voices-8.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "43facfb1ab884406ac60045e16f62572fc4ff147f14d491d3124d2bf459e4c87"
+  },
+  {
+    "file": "voices-32.f32le",
+    "bytes": 176400,
+    "byte_equal": true,
+    "sha256": "da317b877eac39404fbc51998076e8c175b526cc68897d46aa28b3ee51d5cbf7"
+  }
+]

@@ -354,7 +354,7 @@ impl NativeAacDecoder {
         let ltp_coupling_synthesis = if matches!(config.object_type,4|19) {vec![None;16]} else {Vec::new()};
         let ssr_synthesis = if config.object_type == 3 { vec![super::aac_ssr_synthesis::SsrSynthesis::new()?; usize::from(config.channels)] } else { Vec::new() };
         // Four-bit CCE tags occupy a separate fixed domain after audio slots.
-        let element_slots = usize::from(config.channels) + if program.is_some() { 16 } else { 0 };
+        let element_slots = usize::from(config.channels) + 16;
         let ssr_coupling_synthesis = if config.object_type==3 {vec![None;16]} else {Vec::new()};
         let main_prediction = if config.object_type == 1 {
             let tables = BandTables::for_config(&config)?;
@@ -415,7 +415,7 @@ impl NativeAacDecoder {
         Ok(decoder)
     }
     fn sbr_slots(&self) -> usize {
-        usize::from(self.config.channels) + if self.program.is_some() { 16 } else { 0 }
+        usize::from(self.config.channels) + 16
     }
     pub fn sample_rate(&self) -> u32 {
         self.sbr_rate.unwrap_or(self.config.sample_rate)
@@ -521,7 +521,24 @@ impl NativeAacDecoder {
         let mut ltp_data=if matches!(self.config.object_type,4|19) {vec![None;usize::from(self.config.channels)]} else {Vec::new()};
         let mut decoded_elements = Vec::new();
         let mut couplings = Vec::new();
+        let pce_elements: Vec<u32> = current_program
+            .as_ref()
+            .filter(|_| self.config.channel_configuration == 0)
+            .map(|p| {
+                p.elements
+                    .iter()
+                    .map(|e| {
+                        if e.position == super::aac_pce::Position::Lfe {
+                            3
+                        } else {
+                            u32::from(e.pair)
+                        }
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
         let elements: &[u32] = match self.config.channel_configuration {
+            0 => &pce_elements,
             1 => &[0],
             2 => &[1],
             3 => &[0, 1],
@@ -549,7 +566,7 @@ impl NativeAacDecoder {
                 }
                 element_index += 1;
                 let signaled_tag = bits.read(4)?;
-                let tag = if er {element_index as u32} else {signaled_tag};
+                let tag = if er && current_program.is_none() {element_index as u32} else {signaled_tag};
                 if let Some(program) = &current_program {
                     let mut offset = 0;
                     let mut found = None;
@@ -644,16 +661,33 @@ impl NativeAacDecoder {
                 4 => super::aac_pce::skip_data_stream(&mut bits)?,
                 5 => {
                     let program = super::aac_pce::ProgramConfig::read(&mut bits, 0)?;
-                    let expected = current_program.as_ref().ok_or_else(|| {
-                        unsupported("in-band PCE needs an explicit configured program")
-                    })?;
-                    if program.elements != expected.elements
-                        || program.sample_rate != expected.sample_rate
-                        || program.object_type != expected.object_type
-                        || program.height_layers()? != expected.height_layers()?
-                        || program.pcm_layout()?.0 != self.channel_mask
-                    {
-                        return Err(invalid("AAC in-band PCE changed the configured layout"));
+                    if let Some(expected) = current_program.as_ref() {
+                        if program.elements != expected.elements
+                            || program.sample_rate != expected.sample_rate
+                            || program.object_type != expected.object_type
+                            || program.height_layers()? != expected.height_layers()?
+                            || program.pcm_layout()?.0 != self.channel_mask
+                        {
+                            return Err(invalid("AAC in-band PCE changed the configured layout"));
+                        }
+                    } else {
+                        // An indexed ASC already fixes PCM geometry. A matching
+                        // PCE may name its elements without rebuilding histories.
+                        let layout = program.pcm_layout()?;
+                        let kinds = program.elements.iter().map(|element| {
+                            if element.position == super::aac_pce::Position::Lfe {
+                                3
+                            } else { u32::from(element.pair) }
+                        });
+                        if u32::from(program.object_type) != self.config.object_type
+                            || program.sample_rate != self.config.sample_rate
+                            || program.channels() != usize::from(self.config.channels)
+                            || layout.0 != self.channel_mask
+                            || layout.1 != self.mapping
+                            || !kinds.eq(elements.iter().copied())
+                        {
+                            return Err(invalid("AAC in-band PCE changed the configured layout"));
+                        }
                     }
                     current_program = Some(program);
                 }

@@ -12,6 +12,7 @@ pub struct CoefficientNeighbours {
     pub chroma_top: [[Option<u8>; 2]; 2],
 }
 pub struct InterCoefficients {
+    pub chroma422: Option<Box<InterChroma422>>,
     pub luma4: [[i32; 16]; 16],
     pub luma8: [[i32; 64]; 4],
     pub chroma_dc: [[i32; 4]; 2],
@@ -19,6 +20,43 @@ pub struct InterCoefficients {
     /// Raster counts for propagation into the next macroblocks' nC context.
     pub luma_counts: [u8; 16],
     pub chroma_counts: [[u8; 4]; 2],
+}
+pub struct InterChroma422 {
+    pub dc:[[i32;8];2],
+    pub ac:[[[i32;16];8];2],
+    pub counts:[[u8;8];2],
+}
+#[derive(Default)]
+pub struct Chroma422Neighbours {
+    pub left:[[Option<u8>;4];2],
+    pub top:[[Option<u8>;2];2],
+}
+pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma:Chroma422Neighbours)->Result<InterCoefficients> {
+    read_inter_coefficients_422_field(bits,pattern,transform8,neighbours,chroma,false)
+}
+pub(super) fn read_inter_coefficients_422_field(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma:Chroma422Neighbours,field:bool)->Result<InterCoefficients> {
+    if pattern>47||chroma.left.iter().flatten().chain(chroma.top.iter().flatten()).any(|n|n.is_some_and(|v|v>16)) {return Err(invalid("invalid 422 residual pattern or coefficient context"));}
+    let mut input=bits.clone();
+    let mut out=read_inter_coefficients_field(&mut input,pattern&15,transform8,neighbours,field)?;
+    if pattern>>4!=0 {
+        let mut wide=Box::new(InterChroma422 {dc:[[0;8];2],ac:[[[0;16];8];2],counts:[[0;8];2]});
+        for component in 0..2 {
+            let values=read_residual(&mut input,-2,8)?.coefficients;
+            for (i,at)in [0,2,1,4,6,3,5,7].into_iter().enumerate(){wide.dc[component][at]=values[i];}
+        }
+        if pattern>>4==2 {
+            for component in 0..2 {for block in 0..8 {
+                let (x,y)=(block%2,block/2);
+                let left=if x==0 {chroma.left[component][y]}else{Some(wide.counts[component][block-1])};
+                let top=if y==0 {chroma.top[component][x]}else{Some(wide.counts[component][block-2])};
+                let r=read_residual(&mut input,context(left,top),15)?;wide.counts[component][block]=r.total_coefficients;
+                let mut levels=[0;16];levels[1..].copy_from_slice(&r.coefficients[..15]);wide.ac[component][block]=inverse_scan_4x4(&levels,field);
+            }}
+        }
+        out.chroma422=Some(wide);
+    }
+    *bits=input;
+    Ok(out)
 }
 fn context(left: Option<u8>, top: Option<u8>) -> i8 {
     match (left, top) {
@@ -58,6 +96,7 @@ pub fn read_inter_coefficients_field(
     }
     let mut b = bits.clone();
     let mut out = InterCoefficients {
+        chroma422:None,
         luma4: [[0; 16]; 16],
         luma8: [[0; 64]; 4],
         chroma_dc: [[0; 4]; 2],
@@ -241,5 +280,31 @@ mod nonzero_tests {
         assert_eq!(c.luma_counts[0], 1);
         assert_eq!(c.luma_counts.iter().sum::<u8>(), 1);
         assert_eq!(c.luma4[0][0], 1);
+    }
+}
+
+#[cfg(test)]
+mod field_422_scan_tests {
+    use super::*;
+    #[test]
+    fn rectangular_field_ac_scan_is_vertical_and_truncation_is_atomic() {
+        // Two zero DC tokens; one positive AC1 with zero preceding zeros;
+        // the other fifteen chroma AC blocks have zero coefficients.
+        let payload = [0xd7, 0xff, 0xf8];
+        for field in [false, true] {
+            let mut bits = BitReader::new(&payload);
+            let out = read_inter_coefficients_422_field(&mut bits, 32, false,
+                CoefficientNeighbours::default(), Chroma422Neighbours::default(), field).unwrap();
+            assert_eq!(bits.position(), 21);
+            let wide = out.chroma422.unwrap();
+            assert_eq!(wide.counts[0], [1,0,0,0,0,0,0,0]);
+            assert_eq!(wide.counts[1], [0;8]);
+            assert_eq!(wide.ac[0][0][if field {4}else{1}], 1);
+            assert_eq!(wide.ac[0][0].iter().filter(|&&v|v!=0).count(), 1);
+        }
+        let mut truncated = BitReader::new(&payload[..2]);
+        assert!(read_inter_coefficients_422_field(&mut truncated, 32, false,
+            CoefficientNeighbours::default(), Chroma422Neighbours::default(), true).is_err());
+        assert_eq!(truncated.position(), 0);
     }
 }

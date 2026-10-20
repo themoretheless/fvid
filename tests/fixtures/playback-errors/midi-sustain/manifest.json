@@ -1,0 +1,138 @@
+{
+  "provenance": "Thirteen authored short MIDI scores compare sustain64with independently delayed note-offs,threshold63/64/127,key-down andchannel isolation,AllNotesOff,AllSoundOff,ResetControllers,same-tick release,non-resurrection,repeatedon,pedal-held EOF andfractional-tick EOF inside a decode window. No-pedal counterparts preserve original ignored-control reproduction separately. Short native VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "threshold64",
+      "file": "threshold64.mid",
+      "control": "threshold64-explicit.mid",
+      "without": "threshold64-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "threshold127",
+      "file": "threshold127.mid",
+      "control": "threshold127-explicit.mid",
+      "without": "threshold127-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "threshold63",
+      "file": "threshold63.mid",
+      "control": "threshold63-explicit.mid",
+      "without": "threshold63-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "key-still-down",
+      "file": "key-still-down.mid",
+      "control": "key-still-down-explicit.mid",
+      "without": "key-still-down-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "channel-isolation",
+      "file": "channel-isolation.mid",
+      "control": "channel-isolation-explicit.mid",
+      "without": "channel-isolation-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "all-notes-off",
+      "file": "all-notes-off.mid",
+      "control": "all-notes-off-explicit.mid",
+      "without": "all-notes-off-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "all-sound-off",
+      "file": "all-sound-off.mid",
+      "control": "all-sound-off-explicit.mid",
+      "without": "all-sound-off-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "reset-pedal",
+      "file": "reset-pedal.mid",
+      "control": "reset-pedal-explicit.mid",
+      "without": "reset-pedal-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "same-tick-off",
+      "file": "same-tick-off.mid",
+      "control": "same-tick-off-explicit.mid",
+      "without": "same-tick-off-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "pedal-after-release",
+      "file": "pedal-after-release.mid",
+      "control": "pedal-after-release-explicit.mid",
+      "without": "pedal-after-release-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "repeated-on",
+      "file": "repeated-on.mid",
+      "control": "repeated-on-explicit.mid",
+      "without": "repeated-on-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "held-pedal-eof",
+      "file": "held-pedal-eof.mid",
+      "control": "held-pedal-eof-explicit.mid",
+      "without": "held-pedal-eof-no-pedal.mid",
+      "end_tick": 288
+    },
+    {
+      "name": "held-pedal-fractional-eof",
+      "file": "held-pedal-fractional-eof.mid",
+      "control": "held-pedal-fractional-eof-explicit.mid",
+      "without": "held-pedal-fractional-eof-no-pedal.mid",
+      "end_tick": 239
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "threshold64.mid": "447303e019d4630e252d6fdf916c0c6800b15f31e44f66f95183b6a6fcce7ade",
+    "threshold64-explicit.mid": "ad9b77adc6863d1df538345d6d4e171c6be1d979e01515517512891002fb3bf5",
+    "threshold64-no-pedal.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "threshold127.mid": "1ffcc06f183266aca21b92fd82bb82acdc9ddc9dd718db65ed0ec0e610d818ae",
+    "threshold127-explicit.mid": "ad9b77adc6863d1df538345d6d4e171c6be1d979e01515517512891002fb3bf5",
+    "threshold127-no-pedal.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "threshold63.mid": "5c6f2e3a250404dbfb4da8e46eff9235498e2e49896acba0821ae6b2a6c53e63",
+    "threshold63-explicit.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "threshold63-no-pedal.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "key-still-down.mid": "5a1868a5dc2f8be1c837bb7208bcce76cfd37186861d11a867e92aba8848e59e",
+    "key-still-down-explicit.mid": "4105245f0df48724a8fa012c1a8eaddb9c4aee772922490ab8a5d43c2504d6ad",
+    "key-still-down-no-pedal.mid": "6ec5f1b9096da7e6a876360a5429fe985a7903b6b8de9ed266bc6edc64f05a96",
+    "channel-isolation.mid": "217d2ea3f54a579e381c08137bbfadd93eb744b2bcd9aed709091c971213ad2b",
+    "channel-isolation-explicit.mid": "de86329ff9b3dcb1b6451069690efef540d134d3e60a81d5e42c29e62067d143",
+    "channel-isolation-no-pedal.mid": "d276db295d7bb7ffcdee276f63e211418b3e121b4ce76457a3bba65730f47179",
+    "all-notes-off.mid": "b3512984192173efe0d915f7cd684e14e3afae860e55a6cb7bee197d76856b80",
+    "all-notes-off-explicit.mid": "ad9b77adc6863d1df538345d6d4e171c6be1d979e01515517512891002fb3bf5",
+    "all-notes-off-no-pedal.mid": "d1d1f4a98e5ac48e59f9dcfd316aea5a249174bb05bc609a8b9e88f3a01719d7",
+    "all-sound-off.mid": "24b95d77cb645ba93e58078931131aab58913b310371e814616c8face40b572f",
+    "all-sound-off-explicit.mid": "b6bac83cd94ae2937dbd284ef8e9563de7d2b37fea926a059b629e51beb38dfd",
+    "all-sound-off-no-pedal.mid": "a7d3c0da05d9dfdebd468abfef9199e72c21f3dfc1cda1f0991a28f84577ec52",
+    "reset-pedal.mid": "0768b10b972cff5491a54b14af3a445486ae2ec7aae348f4ace9ac0dca0e8aad",
+    "reset-pedal-explicit.mid": "45fda24b9a750e9fd9d033ddcec5af6dec09c52b59e6962c70372693c449bcc1",
+    "reset-pedal-no-pedal.mid": "8e01debda7d23851c1873cb8617238febdaf792724bf413d6e05b9bad027bc4d",
+    "same-tick-off.mid": "04e35ee553b4de5d20fc76b65fe85edc460f5254b14165e2d78a14d1d7df89f9",
+    "same-tick-off-explicit.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "same-tick-off-no-pedal.mid": "cc4ca31770f2cccb875e8c6c5cfcb078a82ad516791f8a1d8d34f8c5a5fac19b",
+    "pedal-after-release.mid": "4ca7295ef832358bf905f89ae4a19b6bb37c807026476e61642194b32dc08cf3",
+    "pedal-after-release-explicit.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "pedal-after-release-no-pedal.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "repeated-on.mid": "ac884898bbef4b5f97d935d4923836639ac7112a8228e0598adbd6eb2ac5d8b2",
+    "repeated-on-explicit.mid": "ad9b77adc6863d1df538345d6d4e171c6be1d979e01515517512891002fb3bf5",
+    "repeated-on-no-pedal.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "held-pedal-eof.mid": "810d349c8ae1792f2d5c349daa7232633c2ac02637df3e7c07d8ff5ccac5980b",
+    "held-pedal-eof-explicit.mid": "02c4d54cb8108d60ee19632b9b351bb422493ff0cd024a4bc870172cc7d3746c",
+    "held-pedal-eof-no-pedal.mid": "d313ac771727382c9d9c26125bfa7985f6b46f5e18e5fc57af0b149f8f76a0f3",
+    "held-pedal-fractional-eof.mid": "0592b7235325303fcf2919fd31ef0708e2fb0e3fb6e61df21492c9ee979f8b6b",
+    "held-pedal-fractional-eof-explicit.mid": "237918a3f60c37a940a129b45de0ec632e5192c228369a9f07ccbc25fc5a63ab",
+    "held-pedal-fractional-eof-no-pedal.mid": "f43237e0744a8ab020d85a8edf5cc1670042d9b0843d1e9ff949ee727db6d6f6"
+  }
+}

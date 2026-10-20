@@ -1,0 +1,40 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0102"
+  ],
+  "checked_at": "2026-10-16T02:28:55.319358+00:00",
+  "before": [
+    "evidence/batch-079-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-079-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-079-worker.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-079-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-079-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four authored1/2/7sample44.1/48kHz native PCM files correctly exhaust raw tick seek, but recording workers seek to the exact already-presented floor-nanosecond end and replay one packet.8kHz integral control passes; five authored VP9/PCM companions decode natively.",
+    "Duration-to-tick conversion recovers a missing next tick only when that tick maps back to exactly the requested public floor-nanosecond Duration. Other user targets retain floor semantics; sub-nanosecond source clocks retain prior ambiguous behavior.",
+    "Actual worker play/rewind/seek-to-end now preserve exact PCM and return empty EOF for all five cases. Private command regressions verify sample ticks0/1/2/7/2816/12032/large9e18/i64MAX at8k/44.1k/48k/1GHz plus nearby non-boundary targets.",
+    "32 worker tests, existing exact large Matroska clock regression, related EOF/stream-clock/timeline integrations, fixture reproduction and player build pass. No floats, decoder changes, encoder/network/private media, physical DAC or performance claim."
+  ],
+  "compatibility": "Seek to a canonical presented sample boundary now recovers its original tick instead of falling one tick behind. Non-boundary targets keep floor semantics and signed range saturation remains.",
+  "counting": "One inverse rational-clock boundary recovery issue. Rates, sample counts, large ticks and worker phases add no IDs."
+}

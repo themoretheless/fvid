@@ -1,0 +1,76 @@
+{
+  "checked_at": "2026-10-14T15:50:51.248989+00:00",
+  "head": "aafc89b629cd6e23d075632e0dcebc797276517f",
+  "configuration": "locked offline no-default-features; CARGO_TARGET_DIR=/private/tmp/fvid-improvements-target",
+  "root_suites": [
+    {
+      "suite": "core",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "suite": "ebml_io_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "suite": "edit_contract",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "suite": "matroska_copy_io_regressions",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "suite": "matroska_lacing",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "suite": "playback_error_samples",
+      "passed": 16,
+      "failed": 0
+    },
+    {
+      "suite": "y4m_io_regressions",
+      "passed": 2,
+      "failed": 0
+    },
+    {
+      "suite": "y4m_probe_dispatch",
+      "passed": 2,
+      "failed": 0
+    }
+  ],
+  "root_test_count": 42,
+  "control_cpu_tests": 23,
+  "python_tests": {
+    "fixture_regeneration": 1,
+    "native_dependency_policy": 18
+  },
+  "separate_baseline_ffv1_tests": 16,
+  "limitations": [
+    "Shared working tree changed during checks; baseline fixes excluded from improvement count.",
+    "No GUI, hardware playback, audio device or performance qualification."
+  ],
+  "additional_cancellation_check": {
+    "suite": "matroska_copy_io_regressions",
+    "passed": 3,
+    "failed": 0,
+    "note": "Replaces the earlier two-test result; includes one new cancellation regression."
+  },
+  "rust_tests_excluding_baseline": 65,
+  "finalized_at": "2026-10-14T15:53:07.988544+00:00",
+  "source_sha256_at_report_time": {
+    "crates/fvid-cpu/src/lib.rs": "0d7d994b00974012403e91c9b67da25f4f6b016d025d6f1d0a580a94c73524e2",
+    "crates/fvid-control/src/error.rs": "d71aeb143d065c7ec9286bc5b07069d20f9a6b5118707de79f922caf6a08cb55",
+    "crates/fvid-media/src/owned_ebml_impl.rs": "d4938d1dbdac36ba83a83ee1a05f963c9712b0fc808e1cd0cc6d57e28e9ddd1f",
+    "src/edit/planner.rs": "e5eb1a9f668f833feddc3db0d6f18e0a27a895bd66c35ad731302518f4526260",
+    "src/edit/transform.rs": "06e82792f280fc3dd09d138b9493f2d3848d0bad7695623054664fc06d91375e",
+    "crates/fvid-media/src/owned_y4m_impl.rs": "1e9b5d95c3bf88878b38158c9d43202acdbb49b785de0c2abf42434cf80941e5",
+    "crates/fvid-media/src/owned_matroska_copy_impl.rs": "5cdd1c85f2c1069ab12d0c17113eeb695bf08eb65e1e39d69907584a869f2021"
+  },
+  "source_hash_note": "Shared checkout at report time, not a frozen test input snapshot."
+}

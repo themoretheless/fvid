@@ -1,0 +1,50 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0096"
+  ],
+  "checked_at": "2026-10-16T02:01:16.805730+00:00",
+  "before": [
+    "evidence/batch-072-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-073-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-073-smf-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-073-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-073-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-073-channel-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-073-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "26 authored128/255operands across seven channel-message classes and running status are accepted as ordinary data. Fifteen valid0/127/running-status controls natively decode/play/rewind/EOF.",
+    "The shared channel-operand loop checks the status bit before constructing or ignoring channel events. All26malformed streams now refuse precisely, both parser and source adapter. No new message interpretation is introduced.",
+    "Initial batch-072 parser suite16pass/1fail exposed an independently malformed Song Position unit and existing zero-width message consumption97. That failed intermediate log is excluded; final acceptance uses batch-073 after97 and corrected unit bytes.",
+    "17 MIDI parser/5 reader units, related channel/system/tempo/wide-clock/seek integrations, both fixture reproduction checks and player build pass after both independent fixes. No encoder/network/private inputs or physical output claim."
+  ],
+  "compatibility": "Malformed status-bit channel operands now refuse instead of becoming notes/controls or silently ignored malformed messages. Valid7bit/running status behavior remains.",
+  "counting": "One MIDI channel data admission problem;26malformed and15valid variants add no IDs."
+}

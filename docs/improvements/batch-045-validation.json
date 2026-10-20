@@ -1,0 +1,68 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0069"
+  ],
+  "checked_at": "2026-10-15T21:07:47.531394+00:00",
+  "before": [
+    "evidence/batch-045-pcm-choice-before.log",
+    "evidence/batch-045-mp4-choice-before.log",
+    "evidence/batch-045-missing-setup-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-045-webm-audio-accepted.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-045-mp4-audio-accepted.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-045-audio-thread-accepted.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-045-integration-accepted.log",
+      "kind": "rust",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-045-player-choice-accepted.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-045-minimal-accepted.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-045-track-fixtures-qualified.log",
+      "kind": "python",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-045-choice-fixtures-qualified.log",
+      "kind": "python",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-045-player-build-accepted.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored60ms Matroska/MP4 video and explicit valid PCM alternatives decode/play exact480-sample controls. Before unsupported default/movie widths select index0; after automatically select valid index1 without reordering the two manual choices.",
+    "Additional Matroska default Opus/AAC/Vorbis missing-setup fixtures previously prevent opening the valid alternative with precise header errors. Metadata/setup admission now rejects these candidates before default preference. Vorbis uses its actual decoder admission because the raw/Xiph normalization wrapper alone accepts empty opaque input.",
+    "Real Player.open_item_audio file factories select alternate index1 for every malformed preferred fixture; valid first preference and explicit/invalid-index fallback controls remain. Actual decoder workers validate exact PCM through playback/rewind. No physical-DAC acceptance claim.",
+    "All-invalid candidates retain the previous detailed refusal path; explicit bad widths/header choices still report the specific unsupported/header error. No public signatures or Read+Seek bounds change.",
+    "Early attempted filtering after preferred_track_numbers missed nondefault alternatives; admission now happens before preference. Failed intermediate logs and zero-test binary filter are excluded from accepted evidence.",
+    "No startup-speed claim. Dynamic compressed payload errors and later codec probing are outside this admission proof."
+  ],
+  "counting": "One automatic candidate-admission improvement across both containers; codec/header/preference variants and actual-player checks add no IDs."
+}

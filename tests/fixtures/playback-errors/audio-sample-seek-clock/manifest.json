@@ -1,0 +1,47 @@
+{
+  "provenance": "Authored1/2/7frame native PCM WAV and VP9/PCM video companions. Exact sample ticks map to floored nanosecond Duration; seek to that stored boundary must recover the original tick.8kHz integral control. No encoder/private input/network.",
+  "cases": [
+    {
+      "name": "48000-1",
+      "rate": 48000,
+      "frames": 1
+    },
+    {
+      "name": "44100-1",
+      "rate": 44100,
+      "frames": 1
+    },
+    {
+      "name": "44100-2",
+      "rate": 44100,
+      "frames": 2
+    },
+    {
+      "name": "48000-7",
+      "rate": 48000,
+      "frames": 7
+    },
+    {
+      "name": "8000-1",
+      "rate": 8000,
+      "frames": 1
+    }
+  ],
+  "sha256": {
+    "48000-1.wav": "c5072ba8a23df80d081757277a1b9a78188946f91ea8dfec2ba571ab4006f47f",
+    "48000-1.f32le": "31b67dba7cfd6e2d7540f9c96d90a45b8f2d44956620723024d4e1beeacd4602",
+    "48000-1.mkv": "e266115dd9b76c26dc04f8063905d267e4609c29270fdcfb07d84c35ff206cc2",
+    "44100-1.wav": "626e92dc1618bfe9d272d761fe03d78d93e96f82fe4ff9cd3d8b207f3e606089",
+    "44100-1.f32le": "31b67dba7cfd6e2d7540f9c96d90a45b8f2d44956620723024d4e1beeacd4602",
+    "44100-1.mkv": "7be450af90d9ed6a832bacf27593e65191098038b114acc9aeacf7564c4c4aa6",
+    "44100-2.wav": "db195179fbb7c5007c2d83c9bd8de84e267847bb9a601e70cde20947adecec45",
+    "44100-2.f32le": "2664511ba26df0a4fb8887c1d707dc3723c21867d47b9fffb44890d27e5a28c5",
+    "44100-2.mkv": "d4ff3e757a709322f157797d3bda00f284e135de95fae72e2dee085b2a4fe1d6",
+    "48000-7.wav": "afcacc66dd214588a510858362248ce7340a6cfe5d58c94c8423c4231681f653",
+    "48000-7.f32le": "cb87a942073c0eca9bebf90cf8f6ccc1718f256c9d1f518056ed14bf1ebd36f7",
+    "48000-7.mkv": "cba17a7b0d3a9bc876af4da03660fbf16f0ca7c62b20637b35b276ca78cbd84e",
+    "8000-1.wav": "94433ea0855e2d9ee9bbcb3c2a6a4ba2a7ba7593f79b9811c2e7572e952013cf",
+    "8000-1.f32le": "31b67dba7cfd6e2d7540f9c96d90a45b8f2d44956620723024d4e1beeacd4602",
+    "8000-1.mkv": "338774afda335f333775a2b6c183b47e3b107268ea1d22325883fe18aa797cd9"
+  }
+}

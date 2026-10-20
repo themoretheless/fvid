@@ -1,0 +1,36 @@
+{
+  "status": "accepted-followup",
+  "accepted_ids": [],
+  "followup_of": "FVID-0126",
+  "checked_at": "2026-10-16T15:26:54.122763+00:00",
+  "before": [
+    "evidence/batch-143-before.log",
+    "evidence/batch-143-acceptance-before.log",
+    "evidence/batch-143-xm-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-143-integration.log",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-143-units.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-143-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-143-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "After resolving the destination order,validate Dxx resume against that actual pattern row count. A globally legal break outside a shorter pattern now resumes at row0 instead of discarding the pattern. Earlier Bxx selection and reverse command precedence remain unchanged.",
+    "Before: six D02/D03/D63 cases skip the two-row target pattern and differ from independent PCM; six D00/D01/D64controls are healthy. Forced acceptance shows trace[[0,0]]instead of[[0,0],[1,0],[1,1]],and public duration240ms instead of480ms. No pre-fix seek failure is claimed.",
+    "After: twelve literal traces,48 mono/stereo PCM comparisons and24 actual worker targets match independent flattened scores. Includes both natural-next and earlier B02destinations.35 units,related integrations,fixture reproduction and player build pass. Authored VP9/PCM companion decodes;ordinary tests/generator need no FFmpeg,network or private media.",
+    "Primary behavior inspection is recorded in evidence/batch-143-reference.json. This extends the existing pattern-break row-zero fallback family underFVID-0126; no extra ID. No public interfaces or default limits changed."
+  ],
+  "counting": "Zero new IDs; followup of the previously accepted pattern-break target bounds."
+}

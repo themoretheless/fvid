@@ -14,7 +14,7 @@ fn motions(v: &serde_json::Value) -> Vec<Motion> {
                 } else {
                     Some(Vector {
                         reference: entry[c]["reference"].as_u64().unwrap() as u8,
-                        mv: array::<2>(&entry[c]["mv"]).map(|v| v as i16),
+                        mv: array::<2>(&entry[c]["mv"]).map(|v| v as i64),
                     })
                 }
             })

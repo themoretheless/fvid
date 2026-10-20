@@ -1,0 +1,28 @@
+{
+  "provenance": "Authored100ms MIDI note on/off, PPQ3, redundant or changing tempos with exact100000us cumulative duration. Short native VP9/PCM video control. No private input/encoder/network.",
+  "cases": [
+    {
+      "name": "control",
+      "file": "control.mid"
+    },
+    {
+      "name": "duplicate-tempo",
+      "file": "duplicate-tempo.mid"
+    },
+    {
+      "name": "changing-tempo",
+      "file": "changing-tempo.mid"
+    },
+    {
+      "name": "final-tempo",
+      "file": "final-tempo.mid"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "control.mid": "d1a31b332ac877d80535be03a4c443c139f8578db89ceffffb078bbbe7b6cbdd",
+    "duplicate-tempo.mid": "74fc9ee7d6fded729583474e65470a7e5deaa4f190f6b8a48ec3d851efd3bf0a",
+    "changing-tempo.mid": "e2d6058f403aa97bfec7d6ee437364e927f904327f8000695aaa34df55481098",
+    "final-tempo.mid": "f8ff652bfee8ecac5b2ebfc93666037a1a5438d0c7b331fc21895124d2c21b01"
+  }
+}

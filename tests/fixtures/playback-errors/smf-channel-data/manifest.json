@@ -1,0 +1,254 @@
+{
+  "provenance": "Authored100ms MIDI note/control messages: seven channel voice status classes,7bit boundaries and status-bit operand corruption, including running status. Separate short VP9/PCM video. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "valid-80-0",
+      "file": "valid-80-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-80-127",
+      "file": "valid-80-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-80-0-128",
+      "file": "bad-80-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-80-0-255",
+      "file": "bad-80-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-80-1-128",
+      "file": "bad-80-1-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-80-1-255",
+      "file": "bad-80-1-255.mid",
+      "bad": true
+    },
+    {
+      "name": "valid-90-0",
+      "file": "valid-90-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-90-127",
+      "file": "valid-90-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-90-0-128",
+      "file": "bad-90-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-90-0-255",
+      "file": "bad-90-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-90-1-128",
+      "file": "bad-90-1-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-90-1-255",
+      "file": "bad-90-1-255.mid",
+      "bad": true
+    },
+    {
+      "name": "valid-a0-0",
+      "file": "valid-a0-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-a0-127",
+      "file": "valid-a0-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-a0-0-128",
+      "file": "bad-a0-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-a0-0-255",
+      "file": "bad-a0-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-a0-1-128",
+      "file": "bad-a0-1-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-a0-1-255",
+      "file": "bad-a0-1-255.mid",
+      "bad": true
+    },
+    {
+      "name": "valid-b0-0",
+      "file": "valid-b0-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-b0-127",
+      "file": "valid-b0-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-b0-0-128",
+      "file": "bad-b0-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-b0-0-255",
+      "file": "bad-b0-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-b0-1-128",
+      "file": "bad-b0-1-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-b0-1-255",
+      "file": "bad-b0-1-255.mid",
+      "bad": true
+    },
+    {
+      "name": "valid-c0-0",
+      "file": "valid-c0-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-c0-127",
+      "file": "valid-c0-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-c0-0-128",
+      "file": "bad-c0-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-c0-0-255",
+      "file": "bad-c0-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "valid-d0-0",
+      "file": "valid-d0-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-d0-127",
+      "file": "valid-d0-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-d0-0-128",
+      "file": "bad-d0-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-d0-0-255",
+      "file": "bad-d0-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "valid-e0-0",
+      "file": "valid-e0-0.mid",
+      "bad": false
+    },
+    {
+      "name": "valid-e0-127",
+      "file": "valid-e0-127.mid",
+      "bad": false
+    },
+    {
+      "name": "bad-e0-0-128",
+      "file": "bad-e0-0-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-e0-0-255",
+      "file": "bad-e0-0-255.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-e0-1-128",
+      "file": "bad-e0-1-128.mid",
+      "bad": true
+    },
+    {
+      "name": "bad-e0-1-255",
+      "file": "bad-e0-1-255.mid",
+      "bad": true
+    },
+    {
+      "name": "running-valid",
+      "file": "running-valid.mid",
+      "bad": false
+    },
+    {
+      "name": "running-bad-128",
+      "file": "running-bad-128.mid",
+      "bad": true
+    },
+    {
+      "name": "running-bad-255",
+      "file": "running-bad-255.mid",
+      "bad": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "valid-80-0.mid": "6b0f825f4b1b09ea1ece8ec1ecdd641b6efeed867e8f6ac263fe52f947641c00",
+    "valid-80-127.mid": "23f6d73ff8b6b8214b568c3623ae564ed42fa3e43fa90540fc2be5a900357c59",
+    "bad-80-0-128.mid": "a8acc6d006a3efa817394082bc8482287d5a49474bac0f3fe2b2b91714c10cf0",
+    "bad-80-0-255.mid": "b54dadea34995838e4c36a47fb97867e7eeff66162fa9c3d4c07efd6e29fe6c5",
+    "bad-80-1-128.mid": "ac502de9616e60e6ce888d69c4dad52aa9f1f959c87c4e16eff40481f19fc419",
+    "bad-80-1-255.mid": "007ebfca25e0595c63d948a9a988df54c5c8a7834403a646765e974eb24ac818",
+    "valid-90-0.mid": "ffdbc16311404461eddfc4e32c13eb31e1546888e77a888c89a347298405c26a",
+    "valid-90-127.mid": "995069495c751568ec3df745d0f05bd03fc2997dc66cd61480f450f3ddd7d513",
+    "bad-90-0-128.mid": "f638337305db271ef1ccd7a20908f2901a9491c63e84268ac2100493aec60454",
+    "bad-90-0-255.mid": "dfedcd286cc00e804ce53f7efe94b2d4ae27cd8499ba06160a177742442678b4",
+    "bad-90-1-128.mid": "edd3a951a4f06275fb619d0bbd22ff76521779673caa18996e85cdcf96ea26a8",
+    "bad-90-1-255.mid": "6fb91379ab9e2d1ea6deb395d0aabc6b33d9f85239a79ab372ba86ac5f5dccda",
+    "valid-a0-0.mid": "a5d22955cbd1481e2a3254d83549dc08c21bfba250b6be0826e75a5dff23c9f1",
+    "valid-a0-127.mid": "ac9f591bd2a9098e0513a86198a704a41d9f0267c2bb2b1dd8ecbcc98e05ebd0",
+    "bad-a0-0-128.mid": "8628d0d8edf86c5f4df86b17d190040a917ade8ad98bad3ca717f7977be84e98",
+    "bad-a0-0-255.mid": "edabfba702bc474ffe93aec04d7e2897530bceb3c0777dc21ea6c1fdb4684d9d",
+    "bad-a0-1-128.mid": "a93398ffff4b085e0e8bee17294a9303340768b668121e35cc2e2913af99cc8a",
+    "bad-a0-1-255.mid": "905ccb58630d74237c2cc913b858c0977fa0eb3a86877fd9f5bf7ce52fafdbcc",
+    "valid-b0-0.mid": "3b8a35979e8f3a65db3f80361c97da4ea08b092bd7f03949641b128279727fa4",
+    "valid-b0-127.mid": "e1b3c7c60e9d56082a82b1d7be2a1f16a19770d42a04731191604bafd0acdab8",
+    "bad-b0-0-128.mid": "9ffd8aeceebe417bfb5eb5bfb2bc76129524eb99110e82c1e7c3b5ce03621f70",
+    "bad-b0-0-255.mid": "2aefd7c045093676bc40e64982339b262fe8417477639227c37d7027d2c20f46",
+    "bad-b0-1-128.mid": "bef0ffa0a4624d5e4a259298ffc2374104cc0a34f59058d15fca6eafd2819e12",
+    "bad-b0-1-255.mid": "8e8d7e5c7aabeaf8316c7de764cc48e0abbff44ac2469f0ba0447df81d99dbfb",
+    "valid-c0-0.mid": "c44a3931623c81675f2fb3fc0b9cafa3ccc7d98874109fb2200e2a85e7804cbc",
+    "valid-c0-127.mid": "41660c82e3da6f0693e126e1fed419d61dc65e59b9234e1300e6c18341dce8ec",
+    "bad-c0-0-128.mid": "a4503ef35b06c3c16bb6be11c1a8d0ac7f141b997613076c0ae45775fd7e4fb0",
+    "bad-c0-0-255.mid": "dc9b0dd1edd7b4863402d7bff07836bbfc73e2da2cdd0350671ad8068e385d36",
+    "valid-d0-0.mid": "c9bfd2ea0d649fb287414d23762a25716d6a6478e224939f6185f4865873baf2",
+    "valid-d0-127.mid": "c9b4a3cc7841b9f9eeca628a467b9188221e8d309810030b2d998cecb3c02d0e",
+    "bad-d0-0-128.mid": "326122b2d916c8e3e7ef536556a3213d171bb36f5f86b9b63996fc723fd69a76",
+    "bad-d0-0-255.mid": "c089c8875c2bab91b452d619489c9ce3ac55e84ddbc203bb743baf43eb308de3",
+    "valid-e0-0.mid": "789662e7770d54f7ae8b0024f848e9034e2dc3afaa2978360512d7586847b1a1",
+    "valid-e0-127.mid": "0add6adde01e6795d54828b8d1ae9ffd58111e1a512baaa7d4a62cd0c5a7c8f1",
+    "bad-e0-0-128.mid": "9292d6cf5c74dc211a992a43dd2e25db04d9070d43691130db41ba98682b1c80",
+    "bad-e0-0-255.mid": "977103e9c53dbddcd0d8a87279ed3cdd4dd133864d5ecae54d4948f9968827cc",
+    "bad-e0-1-128.mid": "aca2d50898befcd7686b34ad5585d795cf8b55d7162d8765f7148d40b02f04a0",
+    "bad-e0-1-255.mid": "eaab8ef5953c84bb5a0969f7e8da2258d6ce8004771a24a07b92f2e780b1bed9",
+    "running-valid.mid": "640b65b961f353de2d9c023bc2909051eab3ed9400967bd6406599f37b21144d",
+    "running-bad-128.mid": "d3c7ce67908d0ca84c9b98c9c3b88946b942b771be41a72be5848a132b293eea",
+    "running-bad-255.mid": "cdb5accc014bb7b01392f4fc40c42762e3db03a61b5d578a227897627e6d51b9"
+  }
+}

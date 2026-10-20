@@ -315,15 +315,21 @@ pub(crate) fn try_export(
         }
     }
     packets.sort_unstable();
+    let enabled: Vec<_> = input.selected.iter().map(|&index|
+        crate::owned_mp4_matroska::effective_track_enabled(&input.reader,index)).collect();
+    let defaults: Vec<_> = input.selected.iter().map(|&index|
+        crate::owned_mp4_matroska::effective_track_default(&input.reader,index)).collect();
     let mut copied = 0;
     let event = crate::owned_matroska_remux::publish(destination, options, |output| {
-        let mut writer = mkv::PacketWriter::new_with_text_metadata(
+        let mut writer = mkv::PacketWriter::new_with_track_preferences(
             output,
             &specs,
             &track_options,
             &metadata,
             &video.metadata,
             &scoped,
+            &enabled,
+            &defaults,
         )
         .map_err(|e| e.to_string())?;
         let mut payload = Vec::new();

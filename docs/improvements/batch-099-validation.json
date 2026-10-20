@@ -1,0 +1,74 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0119"
+  ],
+  "checked_at": "2026-10-16T05:31:28.146741+00:00",
+  "before": [
+    "evidence/batch-099-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-099-integration.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-099-parser.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-099-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-099-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-099-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-099-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-099-before-snapshot-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-099-after-snapshot-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Literal standard opcodes F03/F1F/F20/FFA,B01,D01 anddefault-volume C40/G40guards expose eight precise failures. Constants16/12/14wereincorrectlyusedforF/B/D,instead of15/11/13. All eight native andactual-worker fullplayback comparisons fail before fix against expanded row/header controls. Seek-labeled pre-fixhelper invocations also fail at generation0,so no separate pre-fixworker seek assertion is claimed. After correction their nonzero-seek phases run andpass.",
+    "Correct constants drive existing bounded row walking andnative ignored-effect classification. Regression asserts actual order/row paths andcanonical score duration plus playback metadata,complete PCM andtimestamp equivalence to effect-free controls. Actual workers check play,rewind,EOF andnonzero coarse row seeks.",
+    "C40/G40guards set the already-default channel/global volume64; they must preserve flow/tempo. They qualify these default-state no-op cases only. Arbitrary channel/global volume effects remain unimplemented and are not claimed accepted by this ID.",
+    "18parser/11decoder/6reader units,12integration tests,pure fixture reproduction and current player build pass. Fspeed31/Ftempo32boundary cases are included; full tracker conformance andsub-millisecond source-clock upgrades are not claimed.",
+    "Existing authored early-format fixture intended a tempo40change butusedwrongopcode16. Original current bytes are preserved in evidence/batch-099-legacy-early-format.xm before changing that byte to15. Explicit snapshots early-before.json/early-after.json andearly-migration.log prove identical native PCM SHA256,byte count andevery presentation timestamp across this authoring normalization.",
+    "No encoder/network/private media,physical output,reference tracker sample-quality or performance claim. Fixture/test maintenance andsnapshot helper reuse add noIDs."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/danielepiccone/xm_file/main/xm.txt",
+      "section": "Original Triton XM format effect list",
+      "rule": "Original primary format description identifies Fspeed/tempo,Bposition jump andDpattern break."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "JumpTab_TickZero",
+      "rule": "Primary FT2 replayer maps Bto positionJump,Dto patternBreak,Fto setSpeed andGto global volume."
+    }
+  ],
+  "compatibility": "Public EFFECT_TEMPO/JUMP/BREAK constants now encode actual XM bytes. Clients writing standard XM through those names get corrected data; legacy handcrafted16/12/14tempo/jump/break intents must migrate to15/11/13. Actual C/G/extended-effect bytes are no longer aliased to unrelated flow commands.",
+  "counting": "One effect-opcode namespace correctness problem. Three named effects,eight input variants,default-state guards andlegacy fixture normalization add noIDs."
+}

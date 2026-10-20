@@ -1,0 +1,44 @@
+{
+  "checked_at": "2026-10-14T16:50:05.715676+00:00",
+  "accepted_ids": [
+    "FVID-0014",
+    "FVID-0015",
+    "FVID-0016",
+    "FVID-0017",
+    "FVID-0018",
+    "FVID-0019",
+    "FVID-0020",
+    "FVID-0021",
+    "FVID-0022",
+    "FVID-0023"
+  ],
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --test player_controls_regressions --test playback_numeric_regressions",
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --lib",
+      "passed": 499,
+      "failed": 0,
+      "ignored": 3,
+      "note": "Explicit network tests remain ignored; no FFmpeg or network required."
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --features media --test legacy_media_controls",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_stream_input_regressions.py",
+      "passed": 3,
+      "failed": 0
+    }
+  ],
+  "qualification": [
+    "Subtitle parsing and clip-path tests consume saved synthetic clips/sidecars. Unicode OSD test decodes the tagged synthetic VP9 clip before exercising the text formatters.",
+    "Numeric boundary tests qualify public control APIs using explicit sidecar inputs and a decodable control clip. They do not claim playback of a long-duration video or a GUI session."
+  ],
+  "counting": "Shared causes across controls/formats count once; no per-input, per-fixture or per-test inflation."
+}

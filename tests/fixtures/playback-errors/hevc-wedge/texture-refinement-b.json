@@ -1,0 +1,975 @@
+{
+  "provenance": "Owned mixed-role PCM/CABAC B pictures, camera parameters and MP4. No external codec, private media, network or test-time generation.",
+  "decode_order": [
+    0,
+    2,
+    1
+  ],
+  "display_order": [
+    0,
+    1,
+    2
+  ],
+  "cases": [
+    {
+      "file": "texture-refinement-b-0-0-intra-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "intra",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-intra--1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "intra",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-intra-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-intra--4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "intra",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-intra-128.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-bi-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "bi",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-bi--1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "bi",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-bi-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-bi--4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "bi",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-bi-128.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l0-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l0",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l0--1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l0",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l0-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l0--4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l0",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l0-128.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l1-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l1",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l1--1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l1",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l1-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l1--4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l1",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-l1-128.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp8-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp8--1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp8-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp8--4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp8-128.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp24-1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp24--1.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp24-4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp24--4.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-0-amp24-128.mp4",
+      "enabled": false,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-intra-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "intra",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-intra--1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "intra",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-intra-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-intra--4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "intra",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-intra-128.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-bi-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "bi",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-bi--1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "bi",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-bi-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-bi--4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "bi",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-bi-128.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l0-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l0",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l0--1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l0",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l0-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l0--4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l0",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l0-128.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l1-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l1",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l1--1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l1",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l1-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l1--4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l1",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-l1-128.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp8-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp8--1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp8-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp8--4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp8-128.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp24-1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": 1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp24--1.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": -1,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp24-4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp24--4.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-0-1-amp24-128.mp4",
+      "enabled": false,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 0
+    },
+    {
+      "file": "texture-refinement-b-1-0-intra-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "intra",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-0-intra--1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "intra",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-0-intra-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-0-intra--4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "intra",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-0-intra-128.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-0-bi-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "bi",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-0-bi--1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "bi",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-0-bi-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-0-bi--4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "bi",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-0-bi-128.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-0-l0-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l0",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-0-l0--1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l0",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-0-l0-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-0-l0--4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l0",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-0-l0-128.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-0-l1-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l1",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-0-l1--1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l1",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-0-l1-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-0-l1--4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l1",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-0-l1-128.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp8-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp8--1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp8-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp8--4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp8-128.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp24-1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp24--1.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp24-4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp24--4.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-0-amp24-128.mp4",
+      "enabled": true,
+      "weighted": false,
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-1-intra-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "intra",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-1-intra--1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "intra",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-1-intra-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "intra",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-1-intra--4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "intra",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-1-intra-128.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "intra",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-1-bi-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "bi",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-1-bi--1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "bi",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-1-bi-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "bi",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-1-bi--4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "bi",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-1-bi-128.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "bi",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-1-l0-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l0",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-1-l0--1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l0",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-1-l0-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l0",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-1-l0--4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l0",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-1-l0-128.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l0",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-1-l1-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l1",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-1-l1--1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l1",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-1-l1-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l1",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-1-l1--4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l1",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-1-l1-128.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "l1",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp8-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp8--1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp8-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp8--4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp8-128.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp8",
+      "scale": 128,
+      "disparity": 254
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp24-1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": 1,
+      "disparity": 2
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp24--1.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": -1,
+      "disparity": -2
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp24-4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": 4,
+      "disparity": 8
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp24--4.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": -4,
+      "disparity": -8
+    },
+    {
+      "file": "texture-refinement-b-1-1-amp24-128.mp4",
+      "enabled": true,
+      "weighted": true,
+      "mode": "amp24",
+      "scale": 128,
+      "disparity": 254
+    }
+  ]
+}

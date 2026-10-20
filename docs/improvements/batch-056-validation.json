@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0080"
+  ],
+  "checked_at": "2026-10-15T23:36:37.160439+00:00",
+  "before": [
+    "evidence/batch-056-avi-specific-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-056-avi-after.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-056-avi-unit.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-056-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-056-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-056-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Two entirely authored short AVI videos contain a VP9 frame and three8byte native IMA/MS ADPCM blocks with exact constant predictors. The identical VP9 bitstream is verified via a Matroska companion; AVI video playback support is not asserted. Initial IVF-to-NativeReader attempt was an unrelated unsupported-container error and is excluded.",
+    "Full native audio decode is bit-exact:27IMA or12MS frames. In-range and negative seek controls pass. At exact EOF, one frame beyond and i64MAX, before correction seek lands on18/8 and replays the final block. These six failures confirm the precise EOF defect.",
+    "At/beyond known end the AVI block reader now uses the exhausted record cursor and returns exact end. Earlier independently coded block landing remains unchanged for in-range seeks. The old unit expectation that deliberately replayed the last block is updated to EOF acceptance.",
+    "Actual capture workers verify full playback, rewind and seek-to-end with no replayed PCM and exact end clock.13 AVI and31 worker tests, fixture reproducibility and player build pass. G711 concurrent work is preserved and not counted. No physical output, AVI picture-player support or performance claim."
+  ],
+  "compatibility": "AVI block-audio seek at or beyond known duration now reports EOF rather than landing on/replaying the last block. In-range seek rounding is unchanged.",
+  "counting": "One AVI EOF seek improvement. Both ADPCM codings, targets, companion video and controls are variants, not separate IDs."
+}

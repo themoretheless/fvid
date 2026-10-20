@@ -1063,7 +1063,6 @@ fn run_parsed(parsed: PlayArgs) -> Result<(), Box<dyn std::error::Error>> {
         for name in crate::audio::PlatformBackend::output_devices() { println!("{name}"); }
         return Ok(());
     }
-    crate::playback_spool::reserve_startup_buffer();
     let gpu_configuration = crate::player_gpu::configuration(parsed.gpu_backend, parsed.gpu_device)?;
     let shader = parsed.shader;
     let mut app = Player {
@@ -1703,6 +1702,7 @@ struct OpenedItem {
 }
 
 enum OpenProgress {
+    Stage(&'static str),
     Download(u64),
     Buffer(Arc<std::sync::atomic::AtomicUsize>),
     Spool(Option<SpoolHandle>),
@@ -1718,9 +1718,6 @@ struct NextFile {
 }
 
 fn prepare_source(path: &Path, cancelled: &std::sync::atomic::AtomicBool) -> PreparedSource {
-    if let Some(source) = crate::playback_spool::Source::in_memory_cancellable(path, None, cancelled)? {
-        return Ok((source, None));
-    }
     if cancelled.load(std::sync::atomic::Ordering::Acquire) { return Err(std::io::ErrorKind::Interrupted.into()); }
     // Large files get a bounded local lead even on a fast source.
     let spool = crate::playback_spool::Spool::adaptive(path)?;
@@ -1827,6 +1824,8 @@ struct Player {
     cache_packets: Vec<(u64, u64, Duration, Duration)>,
     loading_buffer: Option<Arc<std::sync::atomic::AtomicUsize>>,
     asynchronous_open: bool,
+    loading_since: Option<Instant>,
+    opening_stage: &'static str,
     opening: Option<std::sync::mpsc::Receiver<OpenProgress>>,
     open_progress: Option<std::sync::mpsc::Sender<OpenProgress>>,
     skin: player_skin::Skin,
@@ -2084,6 +2083,8 @@ impl Default for Player {
             cache_packets: Vec::new(),
             loading_buffer: None,
             asynchronous_open: false,
+            loading_since: None,
+            opening_stage: "Открытие файла",
             opening: None,
             open_progress: None,
             buffering: true,
@@ -2172,26 +2173,26 @@ impl Player {
         Ok(())
     }
 
+    fn open_stage(&self, stage: &'static str) {
+        if let Some(progress) = &self.open_progress { let _ = progress.send(OpenProgress::Stage(stage)); }
+    }
+
     fn open_local(&mut self, path: PathBuf) -> crate::Result<()> {
-        // A cloud drive answers in bursts no frame clock can wait inside, so
-        // the source is measured before it is read: what cannot keep up with
-        // its own item is copied to local disk while it plays.
+        self.open_stage("Ожидание данных файла");
+        // Start every source through a bounded streaming lead. Do not read
+        // the whole file or probe an unrelated cold range before decoding.
         let prepared = self.prepared_source.take().and_then(|receiver| receiver.recv().ok());
-        let used_prefetch = prepared.as_ref().is_some_and(Result::is_ok);
         let (source, spool) = if let Some(Ok(source)) = prepared {
             source
-        } else if let Some(source) = crate::playback_spool::Source::in_memory(&path, None)? {
-            (source, None)
-        } else { crate::playback_spool::Source::open(
-            &path,
-            crate::playback_spool::SPOOL_UNDER,
-            crate::playback_spool::SPOOL_LEAD,
-        )? };
+        } else {
+            prepare_source(&path, &std::sync::atomic::AtomicBool::new(false))?
+        };
         self.spool_wait = spool.is_some().then(Instant::now);
         self.spool = spool;
         if let Some(progress) = &self.open_progress {
             let _ = progress.send(OpenProgress::Spool(self.spool.clone()));
         }
+        self.open_stage("Чтение индекса и первого кадра");
         let video = NativeReader::without_memory_limit(BufReader::with_capacity(
             crate::playback_spool::READ_AHEAD,
             source,
@@ -2222,23 +2223,7 @@ impl Player {
                 return Err(video);
             }
         };
-        // Duration becomes known after demuxing. Large short clips also qualify.
-        if !used_prefetch && file_size(&path).is_some_and(|size| size >= 256 << 20) {
-            if let Some(source) = crate::playback_spool::Source::in_memory(&path, reader.duration())? {
-                let mut cached = NativeReader::without_memory_limit(BufReader::with_capacity(
-                    crate::playback_spool::READ_AHEAD, source,
-                ))?;
-                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                if self.shared_surfaces { cached.enable_shared_surfaces()?; }
-                first_frame = cached.read_frame_raw()?.ok_or_else(|| crate::invalid("video has no frames"))?;
-                reader = cached;
-                self.spool = None;
-                self.spool_wait = None;
-                if let Some(progress) = &self.open_progress {
-                    let _ = progress.send(OpenProgress::Spool(None));
-                }
-            }
-        }
+        reader.warm_seeking(&path);
         // `--start-time` and `--stop-time` belong to the first item of the queue.
         let bounds = std::mem::take(&mut self.bounds);
         if let Some(start) = bounds.start {
@@ -2297,6 +2282,7 @@ impl Player {
         self.audio_tracks = Vec::new();
         self.audio_track = 0;
         self.sound_codec = String::new();
+        self.open_stage("Подготовка звука");
         self.open_item_audio(&path);
         // A nonzero start must anchor both clocks before the preroll releases
         // audio; otherwise the picture waits for sound to catch up from zero.
@@ -2304,6 +2290,7 @@ impl Player {
             audio.seek(start);
         }
         self.apply_audio_controls();
+        self.open_stage("Чтение субтитров и метаданных");
         self.load_subtitles(&path);
         let facts = container_facts(&path);
         self.chapters = facts.chapters;
@@ -2431,9 +2418,12 @@ impl Player {
     /// reports no codec information of its own.
     /// False when the file has no such track.
     fn try_start_audio(&mut self, path: &Path, nth: usize) -> bool {
+        self.try_start_audio_choice(path,Some(nth))
+    }
+    fn try_start_audio_choice(&mut self, path: &Path, selected: Option<usize>) -> bool {
         let mut stream = None;
-        for &attempt in AUDIO_READERS {
-            if let Some(found) = attempt(path, nth) {
+        for attempt in AUDIO_READERS {
+            if let Some(found) = attempt.open(path, selected) {
                 stream = Some(found);
                 break;
             }
@@ -2448,7 +2438,7 @@ impl Player {
         // list: the decoder was built for it, so this is the coding actually
         // sounding, which is what the panel is asked to name.
         self.sound_codec = sound_codec(stream.codec());
-        self.audio_track = nth;
+        self.audio_track = selected.unwrap_or_else(||stream.audio_track_index());
         let output = self.preferred_output.clone();
         self.audio = Some(crate::audio_thread::AudioPlayback::start(stream, move || {
             Box::new(crate::audio::PlatformBackend::with_output_device(output))
@@ -2461,24 +2451,11 @@ impl Player {
     /// own list does not reach leaves the first track, because that is the one
     /// there is to hear.
     fn open_item_audio(&mut self, path: &Path) -> bool {
-        if self.no_audio {
-            return false;
+        if self.no_audio { return false; }
+        match self.preferred_audio {
+            Some(nth) => self.try_start_audio(path,nth) || self.try_start_audio(path,0),
+            None => self.try_start_audio_choice(path,None),
         }
-        if !self.try_start_audio(path, 0) {
-            return false;
-        }
-        let Some(nth) = self
-            .preferred_audio
-            .filter(|nth| *nth < self.audio_tracks.len())
-        else {
-            return true;
-        };
-        if nth == 0 {
-            return true;
-        }
-        // Dropping the old handle stops its thread before the new one starts.
-        self.audio = None;
-        self.try_start_audio(path, nth)
     }
 
     /// Hold the item the command line asked to hold. Space lets it go again; the
@@ -3199,14 +3176,21 @@ impl Player {
         }
     }
 
-    fn swap_ranges(&self) -> Vec<[f32; 2]> {
-        let (Some(spool), Some(total)) = (&self.spool, self.duration) else {
-            return Vec::new();
-        };
-        if total.is_zero() {
-            return Vec::new();
+    fn storage_ranges(&self, memory: bool) -> Vec<[f32; 2]> {
+        let Some(total) = self.duration.filter(|total| !total.is_zero()) else { return Vec::new(); };
+        let mut ranges = self.spool.as_ref().filter(|spool| spool.is_memory() == memory)
+            .map_or_else(Vec::new, |spool|
+                cached_time_ranges(&self.cache_packets, &spool.ranges(), total));
+        if memory {
+            if let Some(playback) = &self.playback { ranges.extend(playback.prepared_frame_ranges(total)); }
         }
-        cached_time_ranges(&self.cache_packets, &spool.ranges(), total)
+        ranges
+    }
+
+    fn swap_ranges(&self) -> Vec<[f32; 2]> {
+        let mut ranges = self.storage_ranges(false);
+        ranges.extend(self.storage_ranges(true));
+        ranges
     }
 
     fn begin_open(&mut self, path: PathBuf) {
@@ -3257,6 +3241,8 @@ impl Player {
             drop(old_network_input);
         });
         self.opening = Some(receive);
+        self.loading_since = Some(Instant::now());
+        self.opening_stage = "Открытие файла";
         self.loading_buffer = None;
         self.spool = None;
         self.cache_packets.clear();
@@ -3367,12 +3353,14 @@ impl Player {
                 return;
             };
             match progress {
+                OpenProgress::Stage(stage) => self.opening_stage = stage,
                 OpenProgress::Download(bytes) => self.network_downloaded = Some(bytes),
                 OpenProgress::Spool(spool) => { self.spool = spool; self.network_downloaded = None; },
                 OpenProgress::Buffer(counter) => self.loading_buffer = Some(counter),
                 OpenProgress::Ready(result) => {
                     self.network_cancel = None;
                     self.opening = None;
+                    self.loading_since = None;
                     self.loading_buffer = None;
                     match result {
                         Ok(mut ready) => {
@@ -3448,7 +3436,7 @@ impl Player {
                 .add_filter(
                     "Audio",
                     &[
-                        "mp3", "mp2", "flac", "aac", "ac3", "wav", "aif", "aiff", "au", "snd",
+                        "mp3", "mp2", "mp1", "flac", "aac", "ac3", "wav", "aif", "aiff", "au", "snd",
                         "ogg", "mid", "xm",
                     ],
                 ),
@@ -3513,7 +3501,7 @@ impl Player {
             }
         } else {
             playback.play();
-            if let Some(audio) = &self.audio {
+            if !self.buffering && let Some(audio) = &self.audio {
                 audio.play();
             }
             self.deadline = Instant::now();
@@ -3546,6 +3534,9 @@ impl Player {
             (Some(playback), audio) => {
                 playback.rewind();
                 if let Some(audio) = audio {
+                    // Hold the audio clock across restarted picture preroll.
+                    // present() resumes it when the first frame is ready.
+                    audio.pause();
                     audio.rewind();
                 }
             }
@@ -3595,6 +3586,10 @@ impl Player {
             return;
         }
         if let Some(audio) = &mut self.audio {
+            if self.playback.is_some() {
+                // The seek picture must finish preroll before sound can run.
+                audio.pause();
+            }
             audio.seek(target);
         }
         self.audio_ended = false;
@@ -3726,6 +3721,11 @@ impl Player {
         let Some(audio) = &self.audio else {
             return;
         };
+        // Sound-only timelines follow the latest successfully completed source
+        // estimate; a picture keeps its own container duration.
+        if self.playback.is_none() && let Some(duration) = audio.duration() {
+            self.duration = Some(duration);
+        }
         let generation = audio.generation();
         let mut ran_out = false;
         let mut failure = None;
@@ -3804,6 +3804,18 @@ impl Player {
         Some(crate::playback_spool::preroll_bytes(bytes, duration))
     }
 
+    fn buffer_on_stall(&mut self, now: Instant) {
+        if !self.paused && !self.ended && !self.buffering
+            && now.saturating_duration_since(self.deadline) >= Duration::from_millis(500)
+        {
+            self.buffering = true;
+            self.spool_wait = Some(now);
+            self.loading_since = Some(now);
+            self.opening_stage = "Ожидание данных файла";
+            if let Some(audio) = &self.audio { audio.pause(); }
+        }
+    }
+
     /// Take decoded frames from the thread and show the one whose time has come.
     fn present(&mut self, ctx: &egui::Context) {
         if let Some(packets) = self.playback.as_ref().and_then(|playback| playback.cache_packets_if_changed(self.cache_packets.len())) {
@@ -3862,6 +3874,7 @@ impl Player {
                 now + crate::playback_thread::startup_buffer(frame.period)
             };
             self.buffering = false;
+            self.loading_since = None;
             // Sound and picture have to start from the same instant: the audio
             // thread was held paused across the preroll, so this is the first
             // moment its clock can run. Starting it any earlier leaves the
@@ -4001,6 +4014,10 @@ impl Player {
             if now >= self.deadline && self.presentation_stats.is_some() {
                 self.starved_polls = self.starved_polls.saturating_add(1);
             }
+            // Stop the media clock during an I/O stall, while the UI keeps
+            // showing progress over the last picture. Resume both clocks
+            // together through the normal preroll path when frames return.
+            self.buffer_on_stall(now);
             // Waiting on the decoder: check again soon.
             ctx.request_repaint_after(Duration::from_millis(8));
         }
@@ -4328,12 +4345,14 @@ fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
 /// gave it, because some name on the panel beats a blank one.
 fn sound_codec(tag: &str) -> String {
     match tag {
+        "A_OGG/VORBIS_OPUS" => "Vorbis/Opus",
         "A_VORBIS" => "Vorbis",
         "A_MPEG/L3" => "MP3",
         "A_MPEG/L2" => "MP2",
         "A_FLAC" => "FLAC",
         "A_ALAC" | "alac" => "ALAC",
         "A_AC3" | "ac-3" => "Dolby Digital",
+        "A_EAC3" | "ec-3" => "Dolby Digital Plus",
         "mp4a" => "AAC",
         "A_PCM/INT/LIT" | "A_PCM/INT/BIG" | "A_PCM/FLOAT/IEEE" | "sowt" | "twos" | "fl32"
         | "fl64" => "PCM",
@@ -4351,13 +4370,30 @@ fn sound_codec(tag: &str) -> String {
 /// One file format's claim on a path: open its nth audio track, or say the
 /// file isn't ours. Each reader below is the whole of its format's arm: the
 /// table only states the order they are tried in.
-type AudioAttempt = fn(&Path, usize) -> Option<Box<dyn crate::audio::AudioStream>>;
+struct AudioAttempt {
+    explicit: fn(&Path,usize)->Option<Box<dyn crate::audio::AudioStream>>,
+    preferred: Option<fn(&Path)->Option<Box<dyn crate::audio::AudioStream>>>,
+}
+impl AudioAttempt {
+    fn open(&self,path:&Path,selected:Option<usize>)->Option<Box<dyn crate::audio::AudioStream>> {
+        match (selected,self.preferred) {
+            (None,Some(open))=>open(path),
+            (selected,_) => (self.explicit)(path,selected.unwrap_or(0)),
+        }
+    }
+}
+fn preferred_mp4_audio_stream(path:&Path)->Option<Box<dyn crate::audio::AudioStream>> {
+    crate::playback_mp4_audio::Mp4AudioReader::open(BufReader::new(crate::playback_spool::open_shared(path).ok()?),crate::container::mp4::Limits::default()).ok().map(boxed_stream)
+}
+fn preferred_webm_audio_stream(path:&Path)->Option<Box<dyn crate::audio::AudioStream>> {
+    crate::playback_webm_audio::WebmAudioReader::open(BufReader::new(crate::playback_spool::open_shared(path).ok()?),crate::container::webm::Limits::default()).ok().map(boxed_stream)
+}
 
 /// MP4 first: it is the container the video reader already opened for the
 /// picture, so its audio track is the one most often asked for.
 fn mp4_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
-    let file = File::open(path).ok()?;
-    crate::playback_mp4_audio::Mp4AudioReader::<std::io::BufReader<File>>::open_at(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_mp4_audio::Mp4AudioReader::<std::io::BufReader<crate::playback_spool::SharedFile>>::open_at(
         BufReader::new(file),
         crate::container::mp4::Limits::default(),
         nth,
@@ -4370,8 +4406,8 @@ fn mp4_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
 /// audio decoder answers for, and it follows the MP4 one the way the
 /// picture's reader order does.
 fn webm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
-    let file = File::open(path).ok()?;
-    crate::playback_webm_audio::WebmAudioReader::<std::io::BufReader<File>>::open_at(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_webm_audio::WebmAudioReader::<std::io::BufReader<crate::playback_spool::SharedFile>>::open_at(
         BufReader::new(file),
         crate::container::webm::Limits::default(),
         nth,
@@ -4385,8 +4421,8 @@ fn webm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
 /// for the codings whose record counting it has measured, of which the
 /// Microsoft-spelled ADPCM blocks are the ones this build decodes.
 fn avi_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
-    let file = File::open(path).ok()?;
-    crate::playback_avi_audio::AviAudioReader::open_at::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_avi_audio::AviAudioReader::open_at::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::container::avi::Limits::default(),
         nth,
@@ -4401,8 +4437,8 @@ fn smf_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_smf::SmfAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_smf::SmfAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::container::smf::Limits::default(),
     )
@@ -4416,8 +4452,8 @@ fn xm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Audi
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_xm::XmAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_xm::XmAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::container::xm::Limits::default(),
     )
@@ -4429,16 +4465,7 @@ fn xm_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Audi
 /// rather than in a field, and one program can be written as several
 /// chains after each other, so it is still one track to choose.
 fn ogg_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::AudioStream>> {
-    if nth > 0 {
-        return None;
-    }
-    let file = File::open(path).ok()?;
-    crate::playback_ogg_audio::OggAudioReader::open::<std::io::BufReader<File>>(
-        BufReader::new(file),
-        crate::container::ogg::Limits::default(),
-    )
-    .ok()
-    .map(boxed_stream)
+    crate::playback_ogg_catalog::Reader::open(path,nth).ok().map(boxed_stream)
 }
 
 /// A Wave file holds one run of samples, so as with the two performances
@@ -4447,8 +4474,8 @@ fn wav_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_wav::WavAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_wav::WavAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_wav::Limits::default(),
     )
@@ -4462,8 +4489,8 @@ fn aiff_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_aiff::AiffAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_aiff::AiffAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_aiff::Limits::default(),
     )
@@ -4477,8 +4504,8 @@ fn au_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Audi
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_au::AuAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_au::AuAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_au::Limits::default(),
     )
@@ -4493,8 +4520,8 @@ fn flac_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_flac::FlacAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_flac::FlacAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_flac::Limits::default(),
     )
@@ -4509,8 +4536,8 @@ fn mp3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_mp3::Mp3AudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_mp3::Mp3AudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_mp3::Limits::default(),
     )
@@ -4526,8 +4553,8 @@ fn ac3_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Aud
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_ac3::Ac3AudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_ac3::Limits::default(),
     )
@@ -4544,8 +4571,8 @@ fn adts_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Au
     if nth > 0 {
         return None;
     }
-    let file = File::open(path).ok()?;
-    crate::playback_aac::AacAudioReader::open::<std::io::BufReader<File>>(
+    let file = crate::playback_spool::open_shared(path).ok()?;
+    crate::playback_aac::AacAudioReader::open::<std::io::BufReader<crate::playback_spool::SharedFile>>(
         BufReader::new(file),
         crate::playback_aac::Limits::default(),
     )
@@ -4565,19 +4592,19 @@ fn boxed_stream<R: crate::audio::AudioStream + 'static>(
 /// A container that names itself with a magic goes first; the bare elementary
 /// streams open last, because their first bytes are free to look like anything.
 const AUDIO_READERS: &[AudioAttempt] = &[
-    mp4_audio_stream,
-    webm_audio_stream,
-    avi_audio_stream,
-    smf_audio_stream,
-    xm_audio_stream,
-    ogg_audio_stream,
-    wav_audio_stream,
-    aiff_audio_stream,
-    au_audio_stream,
-    flac_audio_stream,
-    mp3_audio_stream,
-    ac3_audio_stream,
-    adts_audio_stream,
+    AudioAttempt { explicit: mp4_audio_stream, preferred: Some(preferred_mp4_audio_stream) },
+    AudioAttempt { explicit: webm_audio_stream, preferred: Some(preferred_webm_audio_stream) },
+    AudioAttempt { explicit: avi_audio_stream, preferred: None },
+    AudioAttempt { explicit: smf_audio_stream, preferred: None },
+    AudioAttempt { explicit: xm_audio_stream, preferred: None },
+    AudioAttempt { explicit: ogg_audio_stream, preferred: None },
+    AudioAttempt { explicit: wav_audio_stream, preferred: None },
+    AudioAttempt { explicit: aiff_audio_stream, preferred: None },
+    AudioAttempt { explicit: au_audio_stream, preferred: None },
+    AudioAttempt { explicit: flac_audio_stream, preferred: None },
+    AudioAttempt { explicit: mp3_audio_stream, preferred: None },
+    AudioAttempt { explicit: ac3_audio_stream, preferred: None },
+    AudioAttempt { explicit: adts_audio_stream, preferred: None },
 ];
 
 /// A file's size in the units an information panel counts in: the largest one
@@ -4617,6 +4644,33 @@ fn bitrate_text(bytes: u64, duration: Duration) -> Option<String> {
     } else {
         format!("{:.0} kb/s", bits as f64 / 1_000.0)
     })
+}
+
+/// Retargetable drawing-only motion; pointer targets and playback clocks stay exact.
+fn smooth_timeline_position(ctx: &egui::Context, id: egui::Id, target: f32) -> f32 {
+    smooth_timeline_value(ctx, id, target, target, 0.080)
+}
+
+/// Exponential retargeting keeps the transition continuous when hover reverses.
+fn smooth_timeline_value(
+    ctx: &egui::Context,
+    id: egui::Id,
+    target: f32,
+    initial: f32,
+    seconds: f32,
+) -> f32 {
+    let dt = ctx.input(|input| input.stable_dt).clamp(0.0, 0.05);
+    let value = ctx.data_mut(|data| {
+        let previous = data.get_temp::<f32>(id).unwrap_or(initial);
+        let next = previous + (target - previous) * (1.0 - (-dt / seconds).exp());
+        let next = if (target - next).abs() < 0.0001 { target } else { next };
+        data.insert_temp(id, next);
+        next
+    });
+    if value != target {
+        ctx.request_repaint();
+    }
+    value
 }
 
 /// A round hit area with an icon painted by `draw`; returns whether it was clicked.
@@ -4727,18 +4781,6 @@ fn icon_fullscreen(painter: &egui::Painter, c: Pos2, s: f32, color: Color32, exi
     }
 }
 
-fn icon_close(painter: &egui::Painter, c: Pos2, s: f32, color: Color32) {
-    let stroke = Stroke::new(2.0, color);
-    let h = s / 2.0;
-    painter.line_segment(
-        [Pos2::new(c.x - h, c.y - h), Pos2::new(c.x + h, c.y + h)],
-        stroke,
-    );
-    painter.line_segment(
-        [Pos2::new(c.x - h, c.y + h), Pos2::new(c.x + h, c.y - h)],
-        stroke,
-    );
-}
 
 /// A control the keyboard asked for.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -4890,13 +4932,16 @@ fn playlist_osd(index: usize, len: usize) -> String {
 fn playable_path(path: &Path) -> bool {
     matches!(path.extension().and_then(|ext| ext.to_str()).map(str::to_ascii_lowercase).as_deref(),
         Some("y4m" | "mp4" | "mov" | "m4v" | "m4a" | "webm" | "mkv" | "mka" |
-            "mp3" | "mp2" | "flac" | "aac" | "ac3" | "wav" | "aif" | "aiff" |
+            "mp3" | "mp2" | "mp1" | "flac" | "aac" | "ac3" | "wav" | "aif" | "aiff" |
             "au" | "snd" | "ogg" | "mid" | "xm"))
 }
 
 fn expand_inputs(inputs: &[PathBuf]) -> Vec<PathBuf> {
     let mut out = Vec::with_capacity(inputs.len());
     for input in inputs {
+        // Known media paths need no synchronous filesystem query on the UI
+        // thread. Their worker reports missing files and slow mounts.
+        if playable_path(input) { out.push(input.clone()); continue; }
         if input.is_dir() {
             let mut files: Vec<PathBuf> = std::fs::read_dir(input).into_iter().flatten()
                 .filter_map(Result::ok).map(|entry| entry.path())
@@ -5076,7 +5121,7 @@ fn snapshot_name(video: &Path, at: Duration) -> PathBuf {
 /// track is MP4 or QuickTime. A Y4M stream, or a file either reader refuses,
 /// offers none.
 fn embedded_subtitles(path: &Path) -> Vec<SubtitleSource> {
-    let Ok(file) = File::open(path) else {
+    let Ok(file) = crate::playback_spool::open_shared(path) else {
         return Vec::new();
     };
     let mut buffered = BufReader::new(file);
@@ -5121,7 +5166,7 @@ fn embedded_subtitles(path: &Path) -> Vec<SubtitleSource> {
 /// too. A stream carrying neither, or one the reader cannot open, leaves both
 /// empty.
 fn container_facts(path: &Path) -> ContainerFacts {
-    let Ok(file) = File::open(path) else {
+    let Ok(file) = crate::playback_spool::open_shared(path) else {
         return ContainerFacts::default();
     };
     let mut buffered = BufReader::new(file);
@@ -5617,13 +5662,14 @@ impl eframe::App for Player {
                     }));
             }
 
-            if self.opening.is_some() || (self.playback.is_some() && self.buffering && self.presented.is_none() && self.error.is_none()) {
+            if self.opening.is_some() || (self.playback.is_some() && self.buffering && self.error.is_none()) {
                 ctx.request_repaint_after(Duration::from_millis(16));
                 ui.put(Rect::from_center_size(frame.center() - Vec2::new(0.0, 52.0), Vec2::splat(24.0)), egui::Spinner::new());
                 let loading = if let Some(bytes) = self.network_downloaded {
                     format!("Загрузка {}\nHTTP: {:.1} МБ", self.name, bytes as f64 / 1048576.0)
                 } else {
-                    format!("Загрузка {}\nБуфер: {} кадров · Swap: {:.1} МБ", self.name,
+                    format!("Загрузка {}\n{} · {} с\nБуфер: {} кадров · Загружено: {:.1} МБ", self.name,
+                        self.opening_stage, self.loading_since.map_or(0, |since| since.elapsed().as_secs()),
                         self.playback.as_ref().map_or_else(|| self.loading_buffer.as_ref().map_or(0, |counter| counter.load(std::sync::atomic::Ordering::Relaxed)), |playback| playback.filled()),
                         self.spool.as_ref().map_or(0.0, |spool| spool.copied() as f64 / 1048576.0))
                 };
@@ -5778,33 +5824,74 @@ impl eframe::App for Player {
                 }
                 painter.galley(at, wrapped, Color32::from_rgb(0xff, 0xff, 0xff));
             }
-            // The key message sits in the corner opposite the title, clear of
-            // the close button while the panel shows.
+            // The key message sits in the corner opposite the title.
             if let Some((message, since)) = &self.osd
                 && since.elapsed() < OSD_AFTER
             {
                 let galley =
                     painter.layout_no_wrap(message.clone(), FontId::proportional(15.0), skin_text);
                 let size = galley.size() + Vec2::new(32.0, 20.0);
-                let right = if visible {
-                    frame.right() - pad - BUTTON - 12.0
-                } else {
-                    frame.right() - pad
-                };
+                let right = frame.right() - pad;
                 let backing =
                     Rect::from_min_size(Pos2::new(right - size.x, frame.top() + 24.0), size);
                 painter.rect_filled(backing, CornerRadius::same(10), skin_panel);
                 painter.galley(backing.min + Vec2::new(16.0, 10.0), galley, skin_text);
             }
 
+            // Keep cached coverage visible when controls fade, at the window edge.
+            let pixel = 1.0 / ctx.pixels_per_point();
+            let bottom = (frame.bottom() / pixel).floor() * pixel;
+            let (elapsed, total) = self.timeline();
+            let decoded_range = elapsed.zip(total).filter(|(_, total)| !total.is_zero())
+                .and_then(|(elapsed, total)| self.playback.as_ref().map(|playback| {
+                    let near = (elapsed.as_secs_f32() / total.as_secs_f32()).clamp(0.0, 1.0);
+                    [near, buffered_fraction(near, playback.filled(), self.period, Some(total))]
+                }));
+            // Independent rows: active decode queue, RAM cache, disk spool.
+            // One physical pixel per row, with one dark pixel between rows.
+            let rows = [
+                (decoded_range.into_iter().collect::<Vec<_>>(), Color32::from_rgb(0x26, 0x8b, 0xff)),
+                (self.storage_ranges(true), Color32::from_rgb(0x42, 0xd3, 0x92)),
+                (self.storage_ranges(false), Color32::from_rgb(0xff, 0xb4, 0x54)),
+            ];
+            painter.rect_filled(
+                Rect::from_min_max(Pos2::new(frame.left(), bottom - 5.0 * pixel), Pos2::new(frame.right(), bottom)),
+                CornerRadius::ZERO, Color32::from_rgb(12, 14, 18));
+            for (row, (ranges, color)) in rows.into_iter().enumerate() {
+                let y = bottom - row as f32 * 2.0 * pixel;
+                painter.rect_filled(
+                    Rect::from_min_max(Pos2::new(frame.left(), y - pixel), Pos2::new(frame.right(), y)),
+                    CornerRadius::ZERO, color.gamma_multiply(0.18));
+                for [near, far] in ranges {
+                    let left = frame.left() + frame.width() * near.clamp(0.0, 1.0);
+                    let right = frame.left() + frame.width() * far.clamp(0.0, 1.0);
+                    if right > left {
+                        painter.rect_filled(
+                            Rect::from_min_max(Pos2::new(left, y - pixel), Pos2::new(right, y)),
+                            CornerRadius::ZERO,
+                            color,
+                        );
+                    }
+                }
+            }
+
+            // Top: title block.
+            // Keep the title block clear of the macOS traffic lights over the hidden title bar.
+            let title_left = if fullscreen { pad } else { pad.max(96.0) };
+            let top = Pos2::new(frame.left() + title_left, frame.top() + 24.0);
+            if let Some(playback) = self.playback.as_ref().filter(|p| p.preparing_seek()) {
+                ctx.request_repaint_after(Duration::from_millis(100));
+                let progress: f32 = self.duration.map_or(0.0, |total|
+                    playback.prepared_frame_ranges(total).iter().map(|[a,b]| b-a).sum());
+                painter.text(Pos2::new(top.x, top.y + 48.0),
+                    Align2::LEFT_TOP, format!("Подготовка быстрой перемотки: {:.0}%", progress.clamp(0.0, 1.0) * 100.0),
+                    FontId::proportional(12.0), skin_text);
+            }
+
             if !visible {
                 return;
             }
 
-            // Top: title block and close.
-            // Keep the title block clear of the macOS traffic lights over the hidden title bar.
-            let title_left = if fullscreen { pad } else { pad.max(96.0) };
-            let top = Pos2::new(frame.left() + title_left, frame.top() + 24.0);
             if self.item_open() {
                 painter.text(
                     top,
@@ -5853,41 +5940,6 @@ impl eframe::App for Player {
                     );
                 }
             }
-            let skin_at = Pos2::new(frame.right() - pad - BUTTON - 110.0, frame.top() + 36.0);
-            let skin_rect = Rect::from_min_size(skin_at, Vec2::new(100.0, 28.0));
-            let skin_button = ui.interact(skin_rect, ui.id().with("skin"), Sense::click());
-            painter.rect_filled(skin_rect, 5.0, self.skin.panel);
-            painter.text(
-                skin_rect.center(),
-                Align2::CENTER_CENTER,
-                format!("◐ {}", self.skin.name),
-                FontId::monospace(13.0),
-                self.skin.text,
-            );
-            if skin_button
-                .on_hover_text("Switch skin: Diagram / Classic")
-                .clicked()
-            {
-                self.skin = if self.skin.diagram {
-                    player_skin::Skin::classic()
-                } else {
-                    player_skin::Skin::diagram()
-                };
-            }
-            let close_at = Pos2::new(
-                frame.right() - pad - BUTTON / 2.0,
-                frame.top() + 24.0 + BUTTON / 2.0,
-            );
-            if round_button(ui, "close", close_at, BUTTON, CHIP, |p, c, color| {
-                icon_close(p, c, 12.0, color);
-            }) {
-                if fullscreen {
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
-                } else {
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                }
-            }
-
             // Bottom: one panel holding the clocks, the progress line under
             // them and the control row, on a backing the picture shows through.
             let panel_bottom = frame.bottom() - 20.0;
@@ -5938,8 +5990,14 @@ impl eframe::App for Player {
             // itself happens on release so a drag decodes only once. Where the
             // pointer rests on it, the line thickens and names the moment.
             let mut hover = None;
+            let mut timeline_active = false;
             if fraction.is_some() && self.seekable {
                 let seek = ui.interact(hit, ui.id().with("seek"), Sense::click_and_drag());
+                // Keep the expansion alive even when a drag leaves the hit
+                // area, or a diagram label takes hover ownership.
+                timeline_active = seek.is_pointer_button_down_on()
+                    || self.scrub.is_some()
+                    || ui.rect_contains_pointer(hit);
                 let at = |pos: Pos2| ((pos.x - hit.left()) / hit.width()).clamp(0.0, 1.0);
                 if seek.dragged()
                     && let Some(pos) = seek.interact_pointer_pos()
@@ -5954,21 +6012,39 @@ impl eframe::App for Player {
                     self.seek_fraction(target);
                     fraction = Some(target);
                 }
-                if seek.hovered() || self.scrub.is_some() {
+                if timeline_active {
                     ctx.set_cursor_icon(egui::CursorIcon::PointingHand);
-                    hover = self.scrub.or_else(|| seek.hover_pos().map(at));
+                    hover = self.scrub.or_else(|| ctx.pointer_hover_pos().map(at));
                 }
                 if let Some(scrub) = self.scrub {
                     fraction = Some(scrub);
                 }
             }
+            let preview_id = ui.id().with("timeline-last-preview");
+            if let Some(target) = hover {
+                ctx.data_mut(|data| data.insert_temp(preview_id, target));
+            }
+            let expansion = smooth_timeline_value(
+                &ctx,
+                ui.id().with("timeline-expansion"),
+                if timeline_active { 1.0 } else { 0.0 },
+                0.0,
+                0.120,
+            );
             let thick = if self.skin.diagram {
-                20.0
-            } else if hover.is_some() {
-                8.0
+                20.0 + 4.0 * expansion
             } else {
-                4.0
+                4.0 + 6.0 * expansion
             };
+            // Animate only the drawing; seeks and preview timestamps keep the
+            // exact pointer target. A short transition also follows a drag.
+            let fraction = fraction.map(|target| {
+                smooth_timeline_position(
+                    &ctx,
+                    ui.id().with("timeline-position"),
+                    target,
+                )
+            });
             let bar = Rect::from_min_max(
                 Pos2::new(hit.left(), bar_y - thick / 2.0),
                 Pos2::new(hit.right(), bar_y + thick / 2.0),
@@ -5981,25 +6057,12 @@ impl eframe::App for Player {
             if self.skin.diagram {
                 painter.line_segment(
                     [bar.left_center(), bar.right_center()],
-                    Stroke::new(1.0, self.skin.track),
+                    Stroke::new(1.0 + 2.0 * expansion, self.skin.track),
                 );
             } else {
                 painter.rect_filled(bar, round, self.skin.track);
             }
-            // What the swap file covers: the stretch of the item that answers
-            // without asking the source, drawn under the pictures already in
-            // hand so the two read as one growing load with the nearer,
-            // brighter part inside the further one.
             let swap_ranges = self.swap_ranges();
-            for [near, far] in &swap_ranges {
-                let left = bar.left() + bar.width() * near;
-                let right = bar.left() + bar.width() * far;
-                if right > left {
-                    let span = Rect::from_min_max(Pos2::new(left, bar.min.y), Pos2::new(right, bar.max.y));
-                    if self.skin.diagram { player_skin::pattern(&painter, span, self.skin.swap, false); }
-                    else { painter.rect_filled(span, CornerRadius::ZERO, self.skin.swap); }
-                }
-            }
             if let (Some(played), Some(loaded)) = (played, loaded) {
                 let from = bar.left() + bar.width() * played;
                 let actual_to = bar.left() + bar.width() * loaded;
@@ -6047,7 +6110,7 @@ impl eframe::App for Player {
             if let Some(fraction) = fraction.filter(|_| !self.skin.diagram) {
                 painter.circle_filled(
                     Pos2::new(bar.left() + bar.width() * fraction, bar_y),
-                    7.0,
+                    5.0 + 3.0 * expansion,
                     skin_text,
                 );
             }
@@ -6120,7 +6183,12 @@ impl eframe::App for Player {
             }
             // The tip over the panel: the moment under the pointer and the
             // chapter it falls in.
-            if let (Some(hover), Some(total)) = (hover, total) {
+            let preview = hover.or_else(|| {
+                (expansion > 0.0)
+                    .then(|| ctx.data(|data| data.get_temp::<f32>(preview_id)))
+                    .flatten()
+            });
+            if let (Some(hover), Some(total)) = (preview, total) {
                 let moment = total.mul_f32(hover);
                 let mut label = clock(moment);
                 if let Some((_, title)) = chapter_at(&self.chapters, moment)
@@ -6130,11 +6198,33 @@ impl eframe::App for Player {
                 }
                 let galley = painter.layout_no_wrap(label, FontId::monospace(13.0), skin_text);
                 let size = galley.size() + Vec2::new(16.0, 8.0);
-                let x = (bar.left() + bar.width() * hover - size.x / 2.0)
+                // Keep the timestamp exact while the preview follows the pointer smoothly.
+                let preview_position = smooth_timeline_position(
+                    &ctx,
+                    ui.id().with("timeline-preview-position"),
+                    hover,
+                );
+                if !self.skin.diagram {
+                    // Follow the same animated position as the timestamp.
+                    // Pointer hit testing and the actual seek remain exact.
+                    painter.circle_filled(
+                        Pos2::new(bar.left() + bar.width() * preview_position, bar_y),
+                        3.0 * expansion,
+                        skin_text.gamma_multiply(0.55 * expansion),
+                    );
+                }
+                let x = (bar.left() + bar.width() * preview_position - size.x / 2.0)
                     .clamp(frame.left() + 8.0, frame.right() - 8.0 - size.x);
-                let tip = Rect::from_min_size(Pos2::new(x, panel.top() - 8.0 - size.y), size);
-                painter.rect_filled(tip, CornerRadius::same(6), skin_panel);
-                painter.galley(tip.min + Vec2::new(8.0, 4.0), galley, skin_text);
+                let tip = Rect::from_min_size(
+                    Pos2::new(x, panel.top() - 8.0 - size.y + 4.0 * (1.0 - expansion)),
+                    size,
+                );
+                painter.rect_filled(tip, CornerRadius::same(6), skin_panel.gamma_multiply(expansion));
+                painter.galley(
+                    tip.min + Vec2::new(8.0, 4.0),
+                    galley,
+                    skin_text.gamma_multiply(expansion),
+                );
             }
             // Clocks over the two ends of the line; the right one flips between
             // the whole length and what is left of it.
@@ -6338,6 +6428,47 @@ mod tests {
                 .map(|word| word.to_string())
                 .collect::<Vec<_>>(),
         )
+    }
+
+    #[test]
+    fn timeline_animation_expands_reverses_and_settles() {
+        use eframe::egui;
+        let ctx = egui::Context::default();
+        let id = egui::Id::new("timeline-animation-test");
+        let mut value = 0.0f32;
+        let mut time = 0.0;
+        let mut step = |target: f32| {
+            time += 1.0 / 60.0;
+            let _ = ctx.run_ui(egui::RawInput { time: Some(time), ..Default::default() }, |ui| {
+                value = super::smooth_timeline_value(ui.ctx(), id, target, 0.0, 0.120);
+            });
+            value
+        };
+        let first = step(1.0);
+        let second = step(1.0);
+        assert!(first > 0.0 && second > first && second < 1.0);
+        let reversed = step(0.0);
+        assert!(reversed > 0.0 && reversed < second);
+        for _ in 0..180 { step(0.0); }
+        assert_eq!(step(0.0), 0.0);
+        for _ in 0..180 { step(1.0); }
+        assert_eq!(step(1.0), 1.0);
+    }
+
+    #[test]
+    fn timeline_animation_position_initializes_exactly_then_tracks_new_targets() {
+        use eframe::egui;
+        let ctx = egui::Context::default();
+        let id = egui::Id::new("timeline-position-test");
+        let mut value = 0.0f32;
+        for (frame, target) in [0.2f32, 0.8, 0.1].into_iter().enumerate() {
+            let before = value;
+            let _ = ctx.run_ui(egui::RawInput {
+                time: Some(frame as f64 / 60.0), ..Default::default()
+            }, |ui| { value = super::smooth_timeline_position(ui.ctx(), id, target); });
+            if frame == 0 { assert_eq!(value, target); }
+            else { assert!(value > before.min(target) && value < before.max(target)); }
+        }
     }
 
     #[test]
@@ -7639,6 +7770,7 @@ mod tests {
     #[test]
     fn every_sound_this_build_decodes_has_the_name_a_viewer_gives_it() {
         for (tag, named) in [
+            ("A_OGG/VORBIS_OPUS", "Vorbis/Opus"),
             ("mp4a", "AAC"),
             ("A_VORBIS", "Vorbis"),
             ("A_FLAC", "FLAC"),
@@ -9270,6 +9402,36 @@ mod tests {
     }
 
     #[test]
+    fn cache_lines_separate_ram_and_disk_and_retain_ranges_after_seeks() {
+        use std::io::{Read, Seek, SeekFrom};
+        let directory = scratch("fvid-cache-line-tiers", &[]);
+        let path = directory.join("synthetic.bin");
+        std::fs::write(&path, vec![0x5a; 4096]).unwrap();
+        for memory in [true, false] {
+            let mut spool = if memory {
+                crate::playback_spool::Spool::in_memory(&path, 4096)
+            } else { crate::playback_spool::Spool::open(&path, 4096) }.unwrap();
+            let handle = spool.handle();
+            assert_eq!(handle.is_memory(), memory);
+            let mut player = Player { duration: Some(Duration::from_secs(4)),
+                spool: Some(handle), cache_packets: vec![
+                    (0, 1024, Duration::ZERO, Duration::from_secs(1)),
+                    (2048, 3072, Duration::from_secs(2), Duration::from_secs(3)),
+                ], ..Default::default() };
+            let mut bytes = Vec::new(); spool.read_to_end(&mut bytes).unwrap();
+            for at in [2048, 0, 3072, 0] {
+                spool.seek(SeekFrom::Start(at)).unwrap();
+                let mut byte = [0]; spool.read_exact(&mut byte).unwrap();
+                assert_eq!(byte, [0x5a]);
+                assert_eq!(player.storage_ranges(memory), vec![[0.0, 0.25], [0.5, 0.75]]);
+                assert!(player.storage_ranges(!memory).is_empty());
+            }
+            player.spool = None;
+        }
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
     fn neighbouring_cached_frames_form_one_solid_strip() {
         let packets = vec![(0, 10, Duration::ZERO, Duration::from_nanos(33_333_333)),
             (10, 20, Duration::from_nanos(33_333_334), Duration::from_nanos(66_666_667))];
@@ -9277,6 +9439,69 @@ mod tests {
         assert_eq!(ranges.len(), 1);
         assert_eq!(ranges[0][0], 0.0);
         assert!(ranges[0][1] > 0.066);
+    }
+
+    #[test]
+    fn slow_source_shows_buffering_and_resumes_when_frames_arrive() {
+        let directory = scratch("fvid-stall-buffer", &[]);
+        let path = directory.join("cloud-startup.y4m");
+        std::fs::write(&path, include_bytes!("../tests/fixtures/playback-errors/cloud-startup.y4m")).unwrap();
+        let mut player = Player { no_audio: true, ..Default::default() };
+        player.open(path).unwrap();
+        player.buffering = false;
+        let now = Instant::now();
+        player.deadline = now;
+        player.buffer_on_stall(now);
+        assert!(!player.buffering, "normal frame interval is not a stall");
+        player.buffer_on_stall(now + Duration::from_secs(1));
+        assert!(player.buffering);
+        assert!(player.loading_since.is_some());
+        assert_eq!(player.opening_stage, "Ожидание данных файла");
+        let ctx = eframe::egui::Context::default();
+        let until = Instant::now() + Duration::from_secs(5);
+        while player.buffering {
+            assert!(Instant::now() < until, "buffering never resumed");
+            player.present(&ctx);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(player.loading_since.is_none());
+        assert!(player.error.is_none());
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn cloud_startup_stays_loading_until_delayed_source_arrives() {
+        let directory = scratch("fvid-cloud-startup", &[]);
+        let path = directory.join("cloud-startup.y4m");
+        std::fs::write(&path, include_bytes!("../tests/fixtures/playback-errors/cloud-startup.y4m")).unwrap();
+        let (send, receive) = std::sync::mpsc::channel();
+        let mut player = Player { asynchronous_open: true, no_audio: true,
+            prepared_source: Some(receive), ..Default::default() };
+        player.begin_open(path.clone());
+        let ctx = eframe::egui::Context::default();
+        // The source is deliberately unavailable; polling must still return.
+        for _ in 0..3 { player.poll_open(&ctx); }
+        assert!(player.opening.is_some());
+        assert!(player.loading_since.is_some());
+        assert!(player.buffering);
+        assert!(player.error.is_none());
+        assert!(player.playback.is_none());
+        let prepared = super::prepare_source(&path, &std::sync::atomic::AtomicBool::new(false)).unwrap();
+        assert!(matches!(&prepared.0, crate::playback_spool::Source::Spooled(_)));
+        send.send(Ok(prepared)).unwrap();
+        let until = Instant::now() + Duration::from_secs(5);
+        while player.opening.is_some() {
+            assert!(Instant::now() < until);
+            player.poll_open(&ctx);
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(player.error.is_none(), "{:?}", player.error);
+        assert!(player.playback.is_some());
+        assert!(player.loading_since.is_none());
+        assert_eq!(player.dimensions, [2, 2]);
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
     }
 
     #[test]
@@ -11539,5 +11764,334 @@ mod http_input_tests {
         drop(reader);
         drop(player);
         assert!(!path.exists());
+    }
+}
+
+#[cfg(test)]
+mod ogg_opus_track_dispatch_tests {
+    #[test]
+    fn ogg_opus_track_selection_reaches_the_player_factory() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/opus-surround-parallel.opus");
+        for (track, skip, samples) in [(0, 312, 5311), (1, 648, 4975)] {
+            let mut stream = super::ogg_audio_stream(&path, track).unwrap();
+            assert_eq!(stream.codec(), "A_OPUS");
+            assert_eq!(stream.audio_tracks().len(), 2);
+            let head = fvid_opus::OpusHead::parse(stream.extra_data()).unwrap();
+            assert_eq!(head.pre_skip, skip);
+            assert_eq!(
+                stream.duration().unwrap().as_nanos(),
+                samples as u128 * 1_000_000_000 / 48000
+            );
+            assert_eq!(stream.next_packet().unwrap().unwrap().pts, -i64::from(skip));
+        }
+        assert!(super::ogg_audio_stream(&path, 2).is_none());
+    }
+}
+
+#[cfg(test)]
+mod default_track_selection_regressions {
+    use super::*;
+    #[test]
+    fn automatic_audio_open_uses_container_preference_in_the_player() {
+        for file in ["matroska-default-tracks/audiovisual.mkv","mp4-enabled-tracks/audiovisual.mp4"] {
+            let path=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors").join(file);
+            let mut player=Player::default();
+            assert!(player.open_item_audio(&path));
+            assert_eq!((player.audio_tracks.len(),player.audio_track),(2,1),"{file}");
+        }
+    }
+}
+
+#[cfg(test)]
+mod preferred_audio_worker_regressions {
+    use super::*;
+    use std::sync::{Arc,Mutex};
+    struct Capture {
+        packets:Arc<Mutex<Vec<crate::audio::AudioPacket>>>,
+        spec:Option<crate::audio::AudioSpec>,
+        at:Duration,
+    }
+    impl crate::audio::AudioBackend for Capture {
+        fn start(&mut self,spec:crate::audio::AudioSpec)->Result<(),crate::audio::AudioError>{self.spec=Some(spec);Ok(())}
+        fn push(&mut self,packet:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{let spec=self.spec.unwrap();self.at=packet.presentation_time()+Duration::from_secs_f64((packet.data.len()/4/usize::from(spec.channels)) as f64/f64::from(spec.sample_rate));self.packets.lock().unwrap().push(packet);Ok(())}
+        fn position(&self)->Duration{self.at}
+        fn flush(&mut self,at:Duration)->Result<(),crate::audio::AudioError>{self.at=at;self.packets.lock().unwrap().clear();Ok(())}
+        fn pause(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn resume(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn stop(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+    }
+    fn ended(playback:&crate::audio_thread::AudioPlayback,generation:u64){
+        let until=Instant::now()+Duration::from_secs(5);
+        loop {assert!(Instant::now()<until,"preferred audio did not reach EOF");match playback.poll(){Some(crate::audio_thread::AudioEvent::Ended(g)) if g==generation=>return,Some(crate::audio_thread::AudioEvent::Error(e))=>panic!("{e}"),_=>{}}std::thread::sleep(Duration::from_millis(1));}
+    }
+    #[test]
+    fn actual_preferred_audio_worker_preserves_pcm_clock_rewind_and_seek() {
+        let fixtures = [
+            ("matroska-default-tracks", "audiovisual.mkv", "expected-audio.f32le", 1, 2, 60, 40),
+            ("mp4-enabled-tracks", "audiovisual.mp4", "expected-audio.f32le", 1, 2, 60, 40),
+            ("matroska-pcm-clock", "clock.mkv", "clock.f32le", 0, 1, 60, 40),
+            ("matroska-pcm-clock", "big.mkv", "big.f32le", 0, 1, 60, 40),
+            ("matroska-pcm-clock", "float.mkv", "float.f32le", 0, 1, 60, 40),
+            ("matroska-pcm-clock", "negative.mkv", "negative.f32le", 0, 1, 50, 30),
+            ("mp4-audio-clocks", "pcm-8000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "pcm-1000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "pcm-44100.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "pcm-48000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "pcm-90000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "pcm-1000-negative.mp4", "negative-expected.f32le", 0, 1, 50, 30),
+            ("mp4-audio-clocks", "alac-8000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "alac-1000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "alac-44100.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "alac-48000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "alac-90000.mp4", "expected.f32le", 0, 1, 60, 40),
+            ("mp4-audio-clocks", "alac-1000-negative.mp4", "negative-expected.f32le", 0, 1, 50, 30),
+        ];
+        for (folder, file, oracle, chosen, count, end_ms, seek_ms) in fixtures {
+            let base = Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/playback-errors").join(folder);
+            let path = base.join(file);
+            let expected = std::fs::read(base.join(oracle)).unwrap();
+            let stream = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, None)).unwrap();
+            assert_eq!(stream.audio_track_index(), chosen);
+            assert_eq!(stream.audio_tracks().len(), count);
+            let packets = Arc::new(Mutex::new(Vec::new()));
+            let captured = packets.clone();
+            let mut playback = crate::audio_thread::AudioPlayback::start(stream, move ||
+                Box::new(Capture { packets: captured, spec: None, at: Duration::ZERO }));
+            for generation in 0..2 {
+                if generation != 0 { playback.rewind(); }
+                playback.play();
+                ended(&playback, generation);
+                let actual: Vec<_> = packets.lock().unwrap().iter().flat_map(|p| p.data.iter().copied()).collect();
+                assert_eq!(actual, expected, "{file}, generation{generation}");
+                assert_eq!(playback.position(), Duration::from_millis(end_ms), "{file}");
+            }
+            playback.seek(Duration::from_millis(seek_ms));
+            playback.play();
+            ended(&playback, 2);
+            let actual: Vec<_> = packets.lock().unwrap().iter().flat_map(|p| p.data.iter().copied()).collect();
+            assert_eq!(actual, expected[expected.len()-160*4..], "{file} seek");
+            assert_eq!(playback.position(), Duration::from_millis(end_ms), "{file} seek");
+        }
+    }
+    #[test]
+    fn explicit_audio_choice_and_invalid_index_fallback_remain_compatible(){
+        let path=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/matroska-default-tracks/audiovisual.mkv");
+        for (requested,chosen) in [(None,1),(Some(0),0),(Some(1),1),(Some(9),0)]{let mut player=Player{preferred_audio:requested,..Default::default()};assert!(player.open_item_audio(&path));assert_eq!(player.audio_track,chosen);assert_eq!(player.audio_tracks.len(),2);}
+        let mut player=Player{no_audio:true,..Default::default()};assert!(!player.open_item_audio(&path));assert!(player.audio.is_none());
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn parallel_vorbis_player_factory_selects_the_second_track() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/vorbis-timestamps-parallel.ogg");
+    let mut stream = ogg_audio_stream(&path, 1).expect("second Vorbis track");
+    assert_eq!(stream.codec(), "A_VORBIS");
+    assert_eq!(stream.audio_tracks().len(), 2);
+    assert_eq!(stream.audio_track_index(), 1);
+    let mut decoder = stream.make_decoder().unwrap();
+    let mut frames = 0;
+    while let Some(step) = stream.next_step().unwrap() { match step {
+        crate::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
+        crate::audio::AudioStep::Encoded(packet) => {
+            if let Some(decoded) = decoder.decode_packet(&packet.data,packet.pts,packet.duration as u64).unwrap() {
+                if let Some(pcm) = stream.present_decoded(decoded.packet,decoded.source_pts).unwrap() { frames += pcm.data.len()/8; }
+            }
+        },
+        _ => panic!("unexpected Vorbis step"),
+    }}
+    assert_eq!(frames,394);
+}
+
+#[cfg(test)]
+#[test]
+fn mixed_ogg_player_catalogue_routes_both_codecs_in_bos_order(){
+    for(name,first)in [("ogg-mixed-opus-first.ogg","A_OPUS"),("ogg-mixed-vorbis-first.ogg","A_VORBIS")]{
+        let path=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors").join(name);
+        for index in 0..2{
+            let mut stream=ogg_audio_stream(&path,index).expect("mixed Ogg track");assert_eq!(stream.audio_tracks().len(),2);assert_eq!(stream.audio_track_index(),index);
+            let expected=if index==0{first}else if first=="A_OPUS"{"A_VORBIS"}else{"A_OPUS"};assert_eq!(stream.codec(),expected);
+            let stride=usize::from(stream.channels())*4;let mut decoder=stream.make_decoder().unwrap();let mut frames=0;
+            while let Some(step)=stream.next_step().unwrap(){match step{
+                crate::audio::AudioStep::ResetDecoder=>stream.reset_decoder(&mut decoder).unwrap(),
+                crate::audio::AudioStep::Encoded(packet)=>{if let Some(decoded)=decoder.decode_packet(&packet.data,packet.pts,packet.duration as u64).unwrap(){if let Some(pcm)=stream.present_decoded(decoded.packet,decoded.source_pts).unwrap(){frames+=pcm.data.len()/stride;}}},
+                _=>panic!("unexpected mixed audio step"),
+            }}assert_eq!(frames,if expected=="A_OPUS"{5311}else{411});
+        }
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn player_automatic_audio_choice_skips_unsupported_default_pcm_width() {
+    for (folder,name,extension) in [
+        ("matroska-pcm-choice","integer-default","mkv"),("matroska-pcm-choice","float-default","mkv"),
+        ("matroska-pcm-choice","opus-missing-setup","mkv"),("matroska-pcm-choice","aac-missing-setup","mkv"),
+        ("matroska-pcm-choice","vorbis-missing-setup","mkv"),
+        ("mp4-pcm-choice","unsupported-movie","mp4"),("mp4-pcm-choice","both-movie","mp4"),
+    ] {
+        let path=Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors").join(folder).join(format!("{name}.{extension}"));
+        let mut player=Player::default();
+        assert!(player.open_item_audio(&path));
+        assert_eq!(player.audio_track,1,"{name}");assert_eq!(player.audio_tracks.len(),2);
+    }
+}
+
+#[cfg(test)]
+mod audio_duration_publication_regressions {
+    use super::*;
+    #[test]
+    fn completed_audio_duration_reaches_the_sound_only_player_timeline() {
+        let path=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/audio-duration-publication/tail.mkv");
+        let source=crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(std::fs::read(path).unwrap()),Default::default()).unwrap();
+        let audio=crate::audio_thread::AudioPlayback::start(Box::new(source),||Box::new(crate::audio::NullBackend::default()));
+        assert_eq!(audio.duration(),Some(Duration::from_millis(60)));
+        let mut player=Player::default();player.duration=audio.duration();player.audio=Some(audio);player.ended=true;
+        player.audio.as_ref().unwrap().play();let deadline=Instant::now()+Duration::from_secs(5);
+        while !player.audio_ended {assert!(Instant::now()<deadline,"audio did not finish");player.poll_audio();std::thread::sleep(Duration::from_millis(1));}
+        assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_millis(20)));
+        assert_eq!(player.duration,Some(Duration::from_millis(20)),"sound timeline retained initial snapshot");
+    }
+}
+
+#[cfg(test)]
+mod audio_restart_preroll_regressions {
+    use super::*;
+    use std::sync::{Arc,Mutex,atomic::{AtomicBool,AtomicUsize,Ordering}};
+    struct Device {pcm:Arc<Mutex<Vec<u8>>>,resumes:Arc<AtomicUsize>,flushed:Arc<AtomicBool>,at:Duration}
+    impl crate::audio::AudioBackend for Device {
+        fn start(&mut self,_:crate::audio::AudioSpec)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn push(&mut self,p:crate::audio::AudioPacket)->Result<(),crate::audio::AudioError>{self.at=p.presentation_time()+Duration::from_nanos(p.data.len() as u64/4*1_000_000_000/8000);self.pcm.lock().unwrap().extend(p.data);Ok(())}
+        fn position(&self)->Duration{self.at}
+        fn flush(&mut self,at:Duration)->Result<(),crate::audio::AudioError>{self.at=at;self.pcm.lock().unwrap().clear();self.flushed.store(true,Ordering::Release);Ok(())}
+        fn pause(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+        fn resume(&mut self)->Result<(),crate::audio::AudioError>{self.resumes.fetch_add(1,Ordering::AcqRel);Ok(())}
+        fn stop(&mut self)->Result<(),crate::audio::AudioError>{Ok(())}
+    }
+    #[test]
+    fn paused_audio_rewind_waits_for_an_explicit_play_command() {
+        let bytes=include_bytes!("../tests/fixtures/playback-errors/audio-restart-preroll/restart.mkv");let expected=include_bytes!("../tests/fixtures/playback-errors/audio-restart-preroll/expected.f32le");
+        let source=crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(bytes.as_slice()),Default::default()).unwrap();
+        let pcm=Arc::new(Mutex::new(Vec::new()));let resumes=Arc::new(AtomicUsize::new(0));let flushed=Arc::new(AtomicBool::new(false));let device=Device{pcm:pcm.clone(),resumes:resumes.clone(),flushed:flushed.clone(),at:Duration::ZERO};
+        let mut audio=crate::audio_thread::AudioPlayback::start(Box::new(source),move||Box::new(device));audio.rewind();
+        let until=Instant::now()+Duration::from_secs(5);while !flushed.load(Ordering::Acquire){assert!(Instant::now()<until);std::thread::sleep(Duration::from_millis(1));}
+        std::thread::sleep(Duration::from_millis(100));assert!(pcm.lock().unwrap().is_empty());assert_eq!(resumes.load(Ordering::Acquire),0);
+        audio.play();let until=Instant::now()+Duration::from_secs(5);
+        loop {assert!(Instant::now()<until);match audio.poll(){Some(crate::audio_thread::AudioEvent::Ended(g)) if g==1=>break,Some(crate::audio_thread::AudioEvent::Error(e))=>panic!("{e}"),_=>{}}std::thread::sleep(Duration::from_millis(1));}
+        assert_eq!(pcm.lock().unwrap().as_slice(),expected);assert_eq!(resumes.load(Ordering::Acquire),1);
+    }
+    #[test]
+    fn restarted_video_holds_audio_until_the_first_picture_is_ready() {
+        for (seek,paused,resume_early) in [(false,false,false),(true,false,false),(true,true,false),(true,true,true)] {
+        let bytes=include_bytes!("../tests/fixtures/playback-errors/audio-restart-preroll/restart.mkv");let expected=include_bytes!("../tests/fixtures/playback-errors/audio-restart-preroll/expected.f32le");
+        let mut reader=NativeReader::software(std::io::Cursor::new(bytes.as_slice()),32<<20).unwrap();
+        for _ in 0..3 {assert!(reader.read_frame_raw().unwrap().is_some());}assert!(reader.read_frame_raw().unwrap().is_none());
+        let mut reader=NativeReader::software(std::io::Cursor::new(bytes.as_slice()),32<<20).unwrap();assert!(reader.read_frame().unwrap());let playback=Playback::start(reader,None);
+        let source=crate::playback_webm_audio::WebmAudioReader::open(std::io::Cursor::new(bytes.as_slice()),Default::default()).unwrap();
+        let pcm=Arc::new(Mutex::new(Vec::new()));let resumes=Arc::new(AtomicUsize::new(0));let flushed=Arc::new(AtomicBool::new(false));let device=Device{pcm:pcm.clone(),resumes:resumes.clone(),flushed:flushed.clone(),at:Duration::ZERO};
+        let audio=crate::audio_thread::AudioPlayback::start(Box::new(source),move||Box::new(device));audio.play();
+        let until=Instant::now()+Duration::from_secs(5);
+        loop {assert!(Instant::now()<until);match audio.poll(){Some(crate::audio_thread::AudioEvent::Ended(_))=>break,Some(crate::audio_thread::AudioEvent::Error(e))=>panic!("{e}"),_=>{}}std::thread::sleep(Duration::from_millis(1));}
+        assert_eq!(pcm.lock().unwrap().as_slice(),expected);assert_eq!(resumes.load(Ordering::Acquire),1);
+        let mut player=Player{audio:Some(audio),playback:Some(playback),ended:true,audio_ended:true,paused,period:Duration::from_millis(20),..Default::default()};if seek {player.seek_time(Duration::from_millis(20));}else{player.restart();}
+        let until=Instant::now()+Duration::from_secs(5);while !flushed.load(Ordering::Acquire){assert!(Instant::now()<until);std::thread::sleep(Duration::from_millis(1));}
+        std::thread::sleep(Duration::from_millis(100));
+        assert!(pcm.lock().unwrap().is_empty(),"navigation decoded audio before video preroll completed: seek={seek}");assert_eq!(resumes.load(Ordering::Acquire),1);assert_eq!(player.audio.as_ref().unwrap().position(),if seek{Duration::from_millis(20)}else{Duration::ZERO});
+        if resume_early {player.toggle_pause();std::thread::sleep(Duration::from_millis(100));assert!(pcm.lock().unwrap().is_empty(),"resume during video preroll released audio early");assert_eq!(resumes.load(Ordering::Acquire),1);}
+        let ctx=egui::Context::default();let until=Instant::now()+Duration::from_secs(5);
+        while player.buffering {assert!(Instant::now()<until);player.present(&ctx);std::thread::sleep(Duration::from_millis(1));}
+        if paused && !resume_early {assert!(player.paused);std::thread::sleep(Duration::from_millis(20));assert!(pcm.lock().unwrap().is_empty());assert_eq!(resumes.load(Ordering::Acquire),1);player.toggle_pause();}
+        let until=Instant::now()+Duration::from_secs(5);let wanted=if seek{&expected[640..]}else{expected.as_slice()};while pcm.lock().unwrap().len()!=wanted.len(){assert!(Instant::now()<until);player.poll_audio();std::thread::sleep(Duration::from_millis(1));}
+        assert_eq!(pcm.lock().unwrap().as_slice(),wanted);assert_eq!(resumes.load(Ordering::Acquire),2);
+        }
+    }
+}
+
+#[cfg(test)]
+mod wav_unsigned8_factory_regressions {
+    use super::*;
+    #[test]
+    fn player_audio_factory_admits_unsigned8_wave_track_geometry() {
+        for (name,rate,channels) in [("mono",8000,1),("stereo",44100,2),("three-channel",48000,3),("extensible",8000,2)] {
+            let path=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/wav-unsigned8").join(format!("{name}.wav"));
+            let mut player=Player::default();assert!(player.open_item_audio(&path),"{name}");
+            assert_eq!(player.audio_tracks.len(),1);assert_eq!((player.audio_tracks[0].sample_rate,player.audio_tracks[0].channels),(rate,channels));
+            assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_millis(20)));
+        }
+    }
+}
+
+#[cfg(test)]
+mod wav_valid_bits_factory_regressions {
+    use super::*;
+    #[test]
+    fn player_factory_admits_left_aligned_extensible_pcm_storage_widths() {
+        for (name,channels) in [("pcm12-in-16",1),("pcm20-in-24",2),("pcm24-in-32",1),("pcm16-in-32",2),("pcm8-in-16",1),("pcm7-in-8",2)] {
+            let path=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/wav-valid-bits").join(format!("{name}.wav"));
+            let mut player=Player::default();assert!(player.open_item_audio(&path),"{name}");
+            assert_eq!(player.audio_tracks[0].channels,channels);assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_millis(20)));
+        }
+    }
+}
+
+#[cfg(test)]
+mod audio_chunk_topology_factory_regressions {
+    use super::*;
+    #[test]
+    fn player_factory_refuses_partial_ambiguous_chunk_payloads_and_keeps_normal_controls() {
+        let base=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/audio-duplicate-chunks");
+        for file in ["wave-split-data.wav","wave-data-plus-wavl.wav","aiff-split-sound.aiff"] {
+            let mut player=Player::default();assert!(!player.open_item_audio(&base.join(file)),"{file} partial source admitted");assert!(player.audio.is_none());
+        }
+        for file in ["wave-control.wav","wave-info-list.wav","aiff-control.aiff"] {
+            let mut player=Player::default();assert!(player.open_item_audio(&base.join(file)),"{file} normal source refused");assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_millis(20)));
+        }
+    }
+}
+
+#[cfg(test)]
+mod pcm_run_alignment_factory_regressions {
+    use super::*;
+    #[test]
+    fn player_factory_does_not_publish_aligned_prefixes_of_malformed_fixed_frame_runs() {
+        let base=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/pcm-run-alignment");
+        for file in ["wav-int16-orphan-1.wav","au-float64-orphan-7.au"] {
+            let mut player=Player::default();assert!(!player.open_item_audio(&base.join(file)),"{file} malformed source admitted");assert!(player.audio.is_none());
+        }
+        for file in ["wav-odd-mono8.wav","au-odd-mono8.au"] {
+            let mut player=Player::default();assert!(player.open_item_audio(&base.join(file)),"{file} padding/annotation control refused");assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_nanos(20_125_000)));
+        }
+    }
+}
+
+#[cfg(test)]
+mod audio_truncated_eof_player_regressions {
+    use super::*;
+    #[test]
+    fn known_incomplete_audio_removes_the_failed_handle_while_healthy_eof_remains_replayable() {
+        let base=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/audio-truncated-eof");
+        for (file,truncated) in [("wav-truncated.wav",true),("au-truncated.au",true),("wav-unknown.wav",false),("au-unknown-zero.au",false),("aiff-truncated.aiff",true),("aiff-prefix.aiff",false),("aiff-zero-claim.aiff",false)] {
+            let bytes=std::fs::read(base.join(file)).unwrap();let source:Box<dyn crate::audio::AudioStream>=if file.starts_with("wav"){Box::new(crate::playback_wav::WavAudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())}else if file.starts_with("aiff"){Box::new(crate::playback_aiff::AiffAudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())}else{Box::new(crate::playback_au::AuAudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap())};
+            let audio=crate::audio_thread::AudioPlayback::start(source,||Box::new(crate::audio::NullBackend::default()));
+            let mut player=Player{audio:Some(audio),ended:true,audio_ended:false,..Default::default()};player.audio.as_ref().unwrap().play();let until=Instant::now()+Duration::from_secs(5);
+            while !player.audio_ended {assert!(Instant::now()<until,"{file} no audio completion");player.poll_audio();std::thread::sleep(Duration::from_millis(1));}
+            assert_eq!(player.audio.is_none(),truncated,"{file} failed versus healthy EOF route");
+        }
+    }
+}
+
+#[cfg(test)]
+mod timeline_release_duration_factory_regressions {
+    use super::*;
+    #[test]
+    fn player_audio_duration_covers_the_complete_synthesized_release() {
+        let root=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+        for (file,millis) in [("midi/two-notes.mid",2200),("xm/two-notes.xm",480)] {
+            let mut player=Player::default();assert!(player.open_item_audio(&root.join(file)),"{file}");
+            assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_millis(millis)));
+        }
     }
 }

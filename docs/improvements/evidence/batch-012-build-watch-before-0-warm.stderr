@@ -1,0 +1,4 @@
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
+    Checking fvid-codecs v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-codecs)
+   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 22.75s

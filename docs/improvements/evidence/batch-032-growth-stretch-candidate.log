@@ -1,0 +1,357 @@
+    Blocking waiting for file lock on build directory
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 10 warnings
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:325:5
+    |
+325 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:502:15
+    |
+502 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:509:15
+    |
+509 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:518:15
+    |
+518 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:42:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+42 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:55:15
+   |
+55 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:76:15
+   |
+76 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:96:15
+   |
+96 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:66:15
+   |
+66 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:22:15
+   |
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports_concat` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:72:15
+   |
+72 | pub(crate) fn supports_concat(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_wave_plan.rs:6:15
+  |
+6 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudness.rs:50:15
+   |
+50 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_adts_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:34:15
+   |
+34 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:33:15
+   |
+33 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:125:8
+    |
+ 75 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+125 |     fn convert(&self, data: &[u8]) -> Vec<u8> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:41:15
+   |
+41 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:109:15
+    |
+109 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:59:15
+   |
+59 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_container_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8728:15
+     |
+8728 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9440:15
+     |
+9440 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:88:15
+   |
+88 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 33 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
+warning: constant `IDF_IGNORE` is never used
+  --> src/codec/wavpack_decoder.rs:92:7
+   |
+92 | const IDF_IGNORE: u8 = 0x20;
+   |       ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `length`, `block_index`, and `total_samples` are never read
+   --> src/codec/wavpack_decoder.rs:178:9
+    |
+176 | pub(crate) struct Block<'a> {
+    |                   ----- fields in this struct
+177 |     /// Bytes from this block's tag to the next block's, so a caller can walk a stream.
+178 |     pub length: usize,
+    |         ^^^^^^
+179 |     /// Where the block sits in the file, in samples.
+180 |     pub block_index: u32,
+    |         ^^^^^^^^^^^
+...
+183 |     pub total_samples: u32,
+    |         ^^^^^^^^^^^^^
+
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+
+warning: `fvid` (lib test) generated 3 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 45.11s
+     Running unittests src/lib.rs (target/debug/deps/fvid-cf026eead2e72753)
+
+running 1 test
+test audio::cpal_backend::ring_growth_admission_regressions::grown_ring_stretch_matches_contiguous_fixture_samples ... FAILED
+
+failures:
+
+---- audio::cpal_backend::ring_growth_admission_regressions::grown_ring_stretch_matches_contiguous_fixture_samples stdout ----
+
+thread 'audio::cpal_backend::ring_growth_admission_regressions::grown_ring_stretch_matches_contiguous_fixture_samples' (635289) panicked at src/audio/cpal_backend.rs:809:13:
+assertion `left == right` failed: grown ring window at24064
+  left: [0.17773438, 0.1788625, 0.17998856, 0.18111257, 0.18223451, 0.18335441, 0.18447222, 0.185588, 0.18670174, 0.18781343, 0.18892306, 0.19003065, 0.1911362, 0.1922397, 0.1933412, 0.19444065, 0.19553807, 0.19663349, 0.19772689, 0.19881827, 0.19990766, 0.20099504, 0.20208044, 0.20316385, 0.20424528, 0.20532474, 0.20640224, 0.2074778, 0.20855138, 0.20962304, 0.21069278, 0.21176058, 0.21282648, 0.21389048, 0.21495257, 0.2160128, 0.21707115, 0.21812764, 0.21918227, 0.22023506, 0.22128603, 0.22233519, 0.22338253, 0.2244281, 0.22547188, 0.22651389, 0.22755416, 0.22859266, 0.22962947, 0.23066454, 0.23169793, 0.23272964, 0.23375967, 0.23478806, 0.2358148, 0.2368399, 0.23786342, 0.23888534, 0.23990569, 0.24092448, 0.2419417, 0.24295744, 0.24397163, 0.24498436, 0.24599561, 0.24700537, 0.24801373, 0.24902067, 0.2500262, 0.25103033, 0.2520331, 0.25303453, 0.25403467, 0.2550335, 0.25603098, 0.25702724, 0.25802225, 0.25901604, 0.2600086, 0.26099998, 0.26199022, 0.2629793, 0.26396728, 0.2649541, 0.26593986, 0.2669246, 0.26790828, 0.26889092, 0.2698726, 0.2708533, 0.27183306, 0.2728119, 0.27378982, 0.27476686, 0.27574304, 0.2767184, 0.2776929, 0.27866668, 0.27963966, 0.28061193, 0.28158346, 0.2825543, 0.28352445, 0.28449398, 0.28546286, 0.2864312, 0.2873989, 0.28836608, 0.28933275, 0.29029888, 0.29126456, 0.2922298, 0.2931946, 0.294159, 0.295123, 0.2960867, 0.29705003, 0.29801303, 0.29897583, 0.29993832, 0.30090064, 0.30186272, 0.30282462, 0.3037864, 0.304748, 0.30570954, 0.30667096, 0.3076324, 0.30859375, 0.3095551, 0.31051654, 0.31147796, 0.3124395, 0.31340113, 0.31436288, 0.31532478, 0.31628686, 0.31724918, 0.31821167, 0.3191744, 0.32013747, 0.32110083, 0.32206446, 0.3230285, 0.3239929, 0.3249577, 0.32592294, 0.32688862, 0.32785475, 0.32882142, 0.3297886, 0.3307563, 0.33172464, 0.33269352, 0.33366305, 0.3346332, 0.33560404, 0.33657557, 0.33754784, 0.3385208, 0.33949456, 0.3404691, 0.34144443, 0.34242064, 0.34339768, 0.3443756, 0.34535444, 0.3463342, 0.3473149, 0.34829655, 0.34927922, 0.3502629, 0.3512476, 0.3522334, 0.35322022, 0.3542082, 0.35519728, 0.35618752, 0.3571789, 0.35817146, 0.35916525, 0.36016026, 0.3611565, 0.362154, 0.3631528, 0.36415294, 0.36515436, 0.36615714, 0.3671613, 0.3681668, 0.36917377, 0.3701821, 0.37119192, 0.37220314, 0.37321585, 0.37423006, 0.37524578, 0.37626302, 0.3772818, 0.37830216, 0.37932408, 0.38034758, 0.38137272, 0.38239944, 0.38342783, 0.3844579, 0.38548958, 0.38652295, 0.38755804, 0.38859484, 0.38963336, 0.3906736, 0.39171565, 0.3927594, 0.39380497, 0.3948523, 0.39590147, 0.39695245, 0.39800525, 0.39905986, 0.40011635, 0.4011747, 0.4022349, 0.40329704, 0.404361, 0.40542692, 0.40649474, 0.40756446, 0.40863612, 0.40970972, 0.41078526, 0.41186276, 0.41294223, 0.41402367, 0.41510704, 0.41619244, 0.41727984, 0.41836923, 0.4194606, 0.420554, 0.4216494, 0.42274684, 0.4238463, 0.4249478, 0.4260513, 0.42715687, 0.42826444, 0.42937407, 0.43048576, 0.4315995, 0.43271527, 0.4338331, 0.434953, 0.43607494, 0.43719894, 0.43832502, 0.43945313, 0.44058225, 0.44171143, 0.4428406, 0.44396973, 0.44509888, 0.446228, 0.44735718, 0.44848633, 0.44961548, 0.45074463, 0.45187378, 0.45300293, 0.45413205, 0.45526123, 0.45639038, 0.45751953, 0.45864868, 0.45977783, 0.46090698, 0.46203613, 0.46316525, 0.46429446, 0.46542358, 0.46655273, 0.46768188, 0.46881104, 0.4699402, 0.47106934, 0.4721985, 0.47332764, 0.4744568, 0.47558594, 0.4767151, 0.47784424, 0.47897342, 0.48010254, 0.4812317, 0.48236084, 0.48349, 0.48461914, 0.48574826, 0.48687744, 0.48800662, 0.48913574, 0.4902649, 0.49139407, 0.49252316, 0.49365234, 0.4947815, 0.4959106, 0.4970398, 0.49816895, 0.4992981, -0.49957275, -0.49844357, -0.49731445, -0.4961853, -0.49505615, -0.493927, -0.49279782, -0.49166873, -0.49053955, -0.4894104, -0.48828125, -0.4871521, -0.48602295, -0.4848938, -0.48376465, -0.4826355, -0.48150635, -0.48037717, -0.47924805, -0.4781189, -0.47698975, -0.4758606, -0.47473145, -0.4736023, -0.47247314, -0.47134396, -0.47021484, -0.4690857, -0.46795654, -0.4668274, -0.46569824, -0.4645691, -0.46343994, -0.4623108, -0.46118164, -0.4600525, -0.45892334, -0.4577942, -0.45666504, -0.4555359, -0.45440674, -0.4532776, -0.45214844, -0.4510193, -0.44989014, -0.448761, -0.44763184, -0.4465027, -0.44537354, -0.44424438, -0.44311523, -0.44198608, -0.44085693, -0.43972778, -0.43859863, -0.43746948, -0.43634033, -0.43521118, -0.43408203, -0.43295288, -0.43182373, -0.43069458, -0.42956543, -0.42843628, -0.42730713, -0.42617798, -0.42504883, -0.42391968, -0.42279053, -0.42166138, -0.42053223, -0.41940308, -0.41827393, -0.41714478, -0.41601563, -0.41488647, -0.41375732, -0.41262817, -0.41149902, -0.41036987, -0.40924072, -0.40811157, -0.40698242, -0.40585327, -0.40472412, -0.40359497, -0.40246582, -0.40133667, -0.40020752, -0.39907837, -0.39794922, -0.39682007, -0.39569092, -0.39456177, -0.39343262, -0.39230347, -0.39117432, -0.39004517, -0.38891602, -0.38778687, -0.3866577, -0.38552856, -0.3843994, -0.38327026, -0.3821411, -0.38101196, -0.3798828, -0.37875366, -0.3776245, -0.37649536, -0.3753662, -0.37423706, -0.3731079, -0.37197876, -0.3708496, -0.36972046, -0.3685913, -0.36746216, -0.366333, -0.36520386, -0.3640747, -0.36294556, -0.3618164, -0.36068726, -0.3595581, -0.35842896, -0.3572998, -0.35617065, -0.3550415, -0.35391235, -0.3527832, -0.35165405, -0.3505249, -0.34939575, -0.3482666, -0.34713745, -0.3460083, -0.34487915, -0.34375, -0.34262085, -0.3414917, -0.34036255, -0.3392334, -0.33810425, -0.3369751, -0.33584595, -0.3347168, -0.33358765, -0.3324585, -0.33132935, -0.3302002, -0.32907104, -0.3279419, -0.32681274, -0.3256836, -0.32455444, -0.3234253, -0.32229614, -0.321167, -0.32003784, -0.3189087, -0.31777954, -0.3166504, -0.31552124, -0.3143921, -0.31326294, -0.3121338, -0.31100464, -0.3098755, -0.30874634, -0.3076172, -0.30648804, -0.3053589, -0.30422974, -0.3031006, -0.30197144, -0.3008423, -0.29971313, -0.29858398, -0.29745483, -0.29632568, -0.29519653, -0.29406738, -0.29293823, -0.29180908, -0.29067993, -0.28955078, -0.28842163, -0.28729248, -0.28616333, -0.28503418, -0.28390503, -0.28277588, -0.28164673, -0.28051758, -0.27938843, -0.27825928, -0.27713013, -0.27600098, -0.27487183, -0.27374268, -0.27261353]
+ right: [0.17773438, 0.17886353, 0.17999268, 0.18112183, 0.18225098, 0.18338014, 0.18450926, 0.18563843, 0.18676758, 0.18789673, 0.18902588, 0.19015503, 0.19128418, 0.19241332, 0.19354248, 0.19467163, 0.19580078, 0.19692993, 0.19805908, 0.19918823, 0.20031738, 0.20144653, 0.20257568, 0.20370483, 0.204834, 0.20596313, 0.20709229, 0.20822144, 0.20935059, 0.21047974, 0.21160889, 0.21273804, 0.21386719, 0.21499634, 0.21612549, 0.21725465, 0.21838379, 0.21951294, 0.22064209, 0.22177124, 0.22290039, 0.22402954, 0.22515868, 0.22628786, 0.22741699, 0.22854614, 0.2296753, 0.23080444, 0.2319336, 0.23306273, 0.2341919, 0.23532104, 0.2364502, 0.23757935, 0.2387085, 0.23983765, 0.2409668, 0.24209595, 0.2432251, 0.24435426, 0.24548338, 0.24661256, 0.2477417, 0.24887085, 0.25, 0.25112915, 0.2522583, 0.25338745, 0.2545166, 0.25564575, 0.2567749, 0.25790405, 0.2590332, 0.26016235, 0.2612915, 0.26242065, 0.2635498, 0.26467896, 0.2658081, 0.26693726, 0.2680664, 0.26919556, 0.2703247, 0.27145386, 0.272583, 0.27371216, 0.2748413, 0.27597046, 0.2770996, 0.27822876, 0.2793579, 0.28048706, 0.2816162, 0.28274536, 0.2838745, 0.28500366, 0.2861328, 0.28726196, 0.2883911, 0.28952026, 0.2906494, 0.29177856, 0.2929077, 0.29403687, 0.29516602, 0.29629517, 0.29742432, 0.29855347, 0.29968262, 0.30081177, 0.30194092, 0.30307007, 0.30419922, 0.30532837, 0.30645752, 0.30758667, 0.30871582, 0.30984497, 0.31097412, 0.31210327, 0.31323242, 0.31436157, 0.31549072, 0.31661987, 0.31774902, 0.31887817, 0.32000732, 0.32113647, 0.32226563, 0.32339478, 0.32452393, 0.32565308, 0.32678223, 0.32791138, 0.32904053, 0.33016968, 0.33129883, 0.33242798, 0.33355713, 0.33468628, 0.33581543, 0.33694458, 0.33807373, 0.33920288, 0.34033203, 0.34146118, 0.34259033, 0.34371948, 0.34484863, 0.34597778, 0.34710693, 0.34823608, 0.34936523, 0.35049438, 0.35162354, 0.3527527, 0.35388184, 0.355011, 0.35614014, 0.3572693, 0.35839844, 0.3595276, 0.36065674, 0.3617859, 0.36291504, 0.3640442, 0.36517334, 0.3663025, 0.36743164, 0.3685608, 0.36968994, 0.3708191, 0.37194824, 0.3730774, 0.37420654, 0.3753357, 0.37646484, 0.377594, 0.37872314, 0.3798523, 0.38098145, 0.3821106, 0.38323975, 0.3843689, 0.38549805, 0.3866272, 0.38775635, 0.3888855, 0.39001465, 0.3911438, 0.39227295, 0.3934021, 0.39453125, 0.3956604, 0.39678955, 0.3979187, 0.39904785, 0.400177, 0.40130615, 0.4024353, 0.40356445, 0.4046936, 0.40582275, 0.4069519, 0.40808105, 0.4092102, 0.41033936, 0.4114685, 0.41259766, 0.4137268, 0.41485596, 0.4159851, 0.41711426, 0.4182434, 0.41937256, 0.4205017, 0.42163086, 0.42276, 0.42388916, 0.4250183, 0.42614746, 0.4272766, 0.42840576, 0.4295349, 0.43066406, 0.4317932, 0.43292236, 0.4340515, 0.43518066, 0.4363098, 0.43743896, 0.43856812, 0.43969727, 0.44082642, 0.44195557, 0.44308472, 0.44421387, 0.44534302, 0.44647217, 0.44760132, 0.44873047, 0.44985962, 0.45098877, 0.45211792, 0.45324707, 0.45437622, 0.45550537, 0.45663452, 0.45776367, 0.45889282, 0.46002197, 0.46115112, 0.46228027, 0.46340942, 0.46453857, 0.46566772, 0.46679688, 0.46792603, 0.46905518, 0.47018436, 0.4713135, 0.47244263, 0.47357175, 0.47470093, 0.47583008, 0.47695923, 0.47808838, 0.47921753, 0.48034668, 0.48147583, 0.48260498, 0.4837341, 0.48486328, 0.48599243, 0.48712158, 0.48825073, 0.48937988, 0.490509, 0.4916382, 0.49276733, 0.49389648, 0.49502563, 0.4961548, 0.49728394, 0.4984131, 0.49954224, -0.4993286, -0.4981995, -0.4970703, -0.49594116, -0.494812, -0.4936829, -0.4925537, -0.49142456, -0.4902954, -0.48916626, -0.48803714, -0.48690796, -0.48577878, -0.4846497, -0.4835205, -0.48239136, -0.4812622, -0.48013306, -0.4790039, -0.47787473, -0.47674558, -0.47561648, -0.4744873, -0.47335815, -0.472229, -0.47109985, -0.4699707, -0.46884155, -0.4677124, -0.46658325, -0.4654541, -0.46432498, -0.4631958, -0.46206665, -0.4609375, -0.45980835, -0.4586792, -0.45755005, -0.4564209, -0.45529175, -0.45416257, -0.45303342, -0.4519043, -0.45077515, -0.44964597, -0.44851685, -0.4473877, -0.44625854, -0.4451294, -0.44400024, -0.4428711, -0.44174194, -0.4406128, -0.43948364, -0.4383545, -0.4372253, -0.4360962, -0.43496704, -0.4338379, -0.43270874, -0.4315796, -0.43045044, -0.4293213, -0.42819214, -0.427063, -0.42593384, -0.4248047, -0.42367554, -0.4225464, -0.42141724, -0.4202881, -0.41915894, -0.4180298, -0.41690063, -0.41577148, -0.41464233, -0.41351318, -0.41238403, -0.41125488, -0.41012573, -0.40899658, -0.40786743, -0.40673828, -0.40560913, -0.40447998, -0.40335083, -0.40222168, -0.40109253, -0.39996338, -0.39883423, -0.39770508, -0.39657593, -0.39544678, -0.39431763, -0.39318848, -0.39205933, -0.39093018, -0.38980103, -0.38867188, -0.38754272, -0.38641357, -0.38528442, -0.38415527, -0.38302612, -0.38189697, -0.38076782, -0.37963867, -0.37850952, -0.37738037, -0.37625122, -0.37512207, -0.37399292, -0.37286377, -0.37173462, -0.37060547, -0.36947632, -0.36834717, -0.36721802, -0.36608887, -0.36495972, -0.36383057, -0.36270142, -0.36157227, -0.36044312, -0.35931396, -0.3581848, -0.35705566, -0.3559265, -0.35479736, -0.3536682, -0.35253906, -0.3514099, -0.35028076, -0.3491516, -0.34802246, -0.3468933, -0.34576416, -0.344635, -0.34350586, -0.3423767, -0.34124756, -0.3401184, -0.33898926, -0.3378601, -0.33673096, -0.3356018, -0.33447266, -0.3333435, -0.33221436, -0.3310852, -0.32995605, -0.3288269, -0.32769775, -0.3265686, -0.32543945, -0.3243103, -0.32318115, -0.322052, -0.32092285, -0.3197937, -0.31866455, -0.3175354, -0.31640625, -0.3152771, -0.31414795, -0.3130188, -0.31188965, -0.3107605, -0.30963135, -0.3085022, -0.30737305, -0.3062439, -0.30511475, -0.3039856, -0.30285645, -0.3017273, -0.30059814, -0.299469, -0.29833984, -0.2972107, -0.29608154, -0.2949524, -0.29382324, -0.2926941, -0.29156494, -0.2904358, -0.28930664, -0.2881775, -0.28704834, -0.2859192, -0.28479004, -0.2836609, -0.28253174, -0.2814026, -0.28027344, -0.2791443, -0.27801514, -0.276886, -0.27575684, -0.2746277, -0.27349854, -0.27236938, -0.27124023, -0.27011108, -0.26898193, -0.26785278, -0.26672363, -0.26559448, -0.26446533, -0.26333618, -0.26220703, -0.26107788, -0.25994873, -0.25881958, -0.25769043, -0.25656128, -0.25543213, -0.25430298, -0.25317383, -0.25204468, -0.25091553, -0.24978638, -0.24865723, -0.24752808, -0.24639893, -0.24526978]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    audio::cpal_backend::ring_growth_admission_regressions::grown_ring_stretch_matches_contiguous_fixture_samples
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 952 filtered out; finished in 0.07s
+
+error: test failed, to rerun pass `--lib`

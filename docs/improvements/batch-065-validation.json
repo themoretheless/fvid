@@ -1,0 +1,57 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0089"
+  ],
+  "checked_at": "2026-10-16T01:38:09.487738+00:00",
+  "before": [
+    "evidence/batch-065-before.log",
+    "evidence/batch-065-mp2-raw-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-065-final-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-065-final-range.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-065-ac3.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-065-flac.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-065-mp3.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-065-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-065-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native FLAC64samples, AC312288samples and MPEG Layer II10368samples replay their last packet for exact-end, end+1 and i64MAX seeks. Independent before runs isolate nine raw cursor failures; the initial Layer II worker also reproduces a nonempty tail after seeking to EOF.",
+    "AC3/FLAC/Layer II now set the cursor past the final frame and return the encoded endpoint. In-range partition search is unchanged and verified at0,1,lastsample with byte-identical encoded packets. Layer I/III reservoir-preroll paths are unchanged.",
+    "Existing short authored synthetic audio references are read in place, hashes verified by fixture reproduction. A separate native VP9/PCM video control is decoded; this targets elementary audio readers, not Matroska demux or compressed video-container acceptance.",
+    "Native full decode forms the baseline for actual worker playback/rewind and empty exact-EOF seek. This checks byte-stable decoding across navigation, not an independent codec accuracy oracle.6 AC3/22 FLAC/12 MPEG tests, four related integrations, explicit range controls, fixture reproduction and player build pass.",
+    "No network, FFmpeg, private input, performance or physical DAC claim."
+  ],
+  "compatibility": "At/beyond EOF seeks now exhaust these readers instead of replaying the final frame; in-range behavior and public signatures remain unchanged.",
+  "counting": "One compressed elementary frame-cursor EOF problem across AC3 FLAC Layer II; variants and controls add no IDs."
+}

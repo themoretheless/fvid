@@ -1,0 +1,39 @@
+{
+  "provenance": "Six authored MIDI sequence-number FF00andtextual sequence/track-name FF03cases. Binary sequence IDs must not become public tracklabels. Independent metadata-free100msnote PCMcontrol andnative VP9companion. No private media/encoder/network.",
+  "cases": [
+    {
+      "file": "plain.mid",
+      "name": "Synthetic score"
+    },
+    {
+      "file": "sequence-before.mid",
+      "name": "Synthetic score"
+    },
+    {
+      "file": "sequence-after.mid",
+      "name": "Synthetic score"
+    },
+    {
+      "file": "sequence-only.mid",
+      "name": ""
+    },
+    {
+      "file": "sequence-extension.mid",
+      "name": "Synthetic score"
+    },
+    {
+      "file": "no-name.mid",
+      "name": ""
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "audio-control.mid": "ec79a8f389cc616977d9db12eddf01e5592dae680f87ae1e8681a9feade8a5c7",
+    "plain.mid": "4a85ab5b9af9611a6940583209a5ef94c56dc7cdcaed27b973bb1b07436d8bca",
+    "sequence-before.mid": "0c3baada34b35dc4f286b71a20f1b6facf46743ebb6d713a0f8d1ef09cc6173a",
+    "sequence-after.mid": "d7c05a846f232bab199d9bb1da55dad5e48c13845426785178431cb7ef41b4f7",
+    "sequence-only.mid": "2c73342c47358e68db6ba75fd20303f167019644988568ea737480e94adf8f81",
+    "sequence-extension.mid": "0b45aed535fffd86098a9a80624ffa4600e9112c63020af2e40530f25191315c",
+    "no-name.mid": "ec79a8f389cc616977d9db12eddf01e5592dae680f87ae1e8681a9feade8a5c7"
+  }
+}

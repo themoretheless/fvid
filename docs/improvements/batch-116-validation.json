@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0098"
+  ],
+  "checked_at": "2026-10-16T07:33:03.383645+00:00",
+  "before": [
+    "evidence/batch-116-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-116-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-116-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-116-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-116-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Zero-ID followup toSMFtopology admission FVID-0098.Format0headerdeclaringtwo tracks was silently merged;single-trackformat0andsimultaneousformat1controls already play correctly.",
+    "Refuseformat0withdeclaredtrackcountotherthan1using specific format0/one-track error. Parserandreaderadmission now refuse theinvalid authored input;twovalidcontrols retain audiblePCM/actualplay/rewind/EOFseek.",
+    "11integrations,17parser units,fixture reproduction andplayerbuild pass. SyntheticrawMIDIplusVP9/PCMcompanion,no encoder/network/private media/performanceclaim.One invalidtopologycontrol adds noacceptedID."
+  ],
+  "sources": [
+    {
+      "url": "https://www.cs.cmu.edu/~music/cmp/archives/cmsip/readings/Standard-MIDI-file-format-updated.pdf",
+      "section": "Header ntrks;format0",
+      "rule": "Format0ntrksis always1."
+    }
+  ],
+  "counting": "Followup existingtopologyadmission;acceptedcount134unchanged."
+}

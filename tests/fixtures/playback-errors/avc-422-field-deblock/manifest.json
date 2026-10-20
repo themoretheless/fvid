@@ -1,0 +1,1730 @@
+[
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m0-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m0-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m0-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m1-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m1-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m1-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m2-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m2-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r0-m2-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m0-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m0-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m0-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m1-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m1-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m1-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m2-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m2-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e0-r1-m2-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m0-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m0-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m0-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m1-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m1-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m1-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m2-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m2-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r0-m2-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m0-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m0-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m0-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m1-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m1-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m1-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m2-vertical",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m2-horizontal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y8-c8-e1-r1-m2-internal",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m0-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m0-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m0-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m1-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m1-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m1-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m2-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m2-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r0-m2-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m0-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m0-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m0-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m1-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m1-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m1-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m2-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m2-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e0-r1-m2-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m0-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m0-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m0-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m1-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m1-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m1-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m2-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m2-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r0-m2-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m0-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m0-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m0-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m1-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m1-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m1-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m2-vertical",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m2-horizontal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y10-c12-e1-r1-m2-internal",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m0-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m0-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m0-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m1-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m1-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m1-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m2-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m2-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r0-m2-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m0-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m0-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m0-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m1-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m1-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m1-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m2-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m2-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e0-r1-m2-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m0-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m0-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m0-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m1-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m1-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m1-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m2-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m2-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r0-m2-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": false,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m0-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m0-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m0-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 0,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m1-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m1-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m1-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 1,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m2-vertical",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "vertical",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m2-horizontal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "horizontal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-field-filter-y14-c8-e1-r1-m2-internal",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "bottom_first": true,
+    "filter_mode": 2,
+    "orientation": "internal",
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+]

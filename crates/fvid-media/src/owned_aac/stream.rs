@@ -91,7 +91,7 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     let config = super::config::AudioSpecificConfig::parse(asc)?;
     config.resolve_output_rate(output_rate)?;
     let mut bytes = decode_admission_bytes(u16::from(config.core.channels))?;
-    if config.core.object_type==4 {
+    if matches!(config.core.object_type, 4 | 19) {
         // One MiB per output/source state additionally reserves the analysis
         // transform/windows, float history, synthesis and source candidates,
         // checkpoints, spectral estimates and transactional scratch. Eighteen
@@ -102,7 +102,7 @@ pub(crate) fn decode_config_admission_bytes(asc: &[u8], output_rate: u32) -> Res
     // Unknown signalling can admit implicit SBR at a fixed core-rate clock.
     // Optional admission must cover that candidate even before the first FIL.
     if config.sbr_present == Some(true) || output_rate != config.core.sample_rate
-        || (config.sbr_present.is_none() && matches!(config.core.object_type,1|2|3|4)) {
+        || (config.sbr_present.is_none() && matches!(config.core.object_type,1|2|3|4|17|19)) {
         let coupling_states = config.program.as_ref().map_or(0, |p| p.coupling.len());
         if config.core.object_type == 3 {
             // Two retained aligned packet descriptors, nested transactional copies,

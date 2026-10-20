@@ -1,0 +1,18 @@
+#![cfg(feature="player")]
+use fvid::audio::{AudioStream,AudioDecode};
+use std::{io::Cursor,path::Path,time::Duration};
+#[path="support/audio_capture.rs"] mod capture;
+fn base()->std::path::PathBuf{Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/midi-pan")}
+fn open(bytes:Vec<u8>)->fvid::playback_smf::SmfAudioReader{fvid::playback_smf::SmfAudioReader::open(Cursor::new(bytes),Default::default()).unwrap()}
+fn render(bytes:Vec<u8>,channels:u16)->Vec<(Duration,Vec<u8>)>{let mut source=open(bytes);let mut decoder=fvid::codec::midi_decoder::MidiDecoder::new(source.sample_rate(),channels).unwrap();let mut out=Vec::new();while let Some(p)=source.next_packet().unwrap(){let f=decoder.decode_packet(&p.data,p.pts,p.duration as u64).unwrap().unwrap();out.push((f.packet.presentation_time(),f.packet.data));}out}
+#[test]
+fn midi_pan_is_supported_and_changes_stereo(){let base=base();let actual=render(std::fs::read(base.join("pan-0.mid")).unwrap(),2);let mono=render(std::fs::read(base.join("pan-0-channel-0.mid")).unwrap(),1);let duplicated=mono.into_iter().map(|(p,b)|(p,b.chunks_exact(4).flat_map(|s|s.iter().chain(s.iter()).copied()).collect::<Vec<_>>())).collect::<Vec<_>>();assert!(actual!=duplicated,"CC10 changes stereo placement");}
+#[test]
+fn midi_pan_acceptance_matches_independent_isolated_mono_voices(){
+ let base=base();let manifest:serde_json::Value=serde_json::from_slice(&std::fs::read(base.join("manifest.json")).unwrap()).unwrap();let mut failures=Vec::new();let mut video=fvid::playback_native::NativeReader::software(Cursor::new(std::fs::read(base.join("video.mkv")).unwrap()),32<<20).unwrap();assert!(video.read_frame_raw().unwrap().is_some());assert!(video.read_frame_raw().unwrap().is_none());
+ for case in manifest["cases"].as_array().unwrap(){let name=case["file"].as_str().unwrap();let bytes=std::fs::read(base.join(name)).unwrap();let voices=case["controls"].as_array().unwrap().iter().map(|v|(v["channel"].as_u64().unwrap(),render(std::fs::read(base.join(v["file"].as_str().unwrap())).unwrap(),1))).collect::<Vec<_>>();let mut expected=Vec::new();let mut dry=Vec::new();
+ for packet in 0..voices[0].1.len(){let pts=voices[0].1[packet].0;let frames=voices[0].1[packet].1.len()/4;let mut stereo=Vec::new();let mut mono=Vec::new();for frame in 0..frames{let sample=(pts.as_nanos()*44100/1_000_000_000)+frame as u128;let(mut left,mut right,mut sum)=(0.0f32,0.0f32,0.0f32);for(ch,packets)in&voices{assert_eq!(packets[packet].0,pts);assert_eq!(packets[packet].1.len(),frames*4);let value=f32::from_le_bytes(packets[packet].1[frame*4..frame*4+4].try_into().unwrap());let mut pan=64u64;for event in case["pan_events"].as_array().unwrap(){if event["channel"].as_u64().unwrap()==*ch&&sample*1_000_000>=u128::from(event["us"].as_u64().unwrap())*44100{pan=event["value"].as_u64().unwrap();}}let(l,r)=if pan<=64{(1.0,pan as f32/64.0)}else{((127-pan)as f32/63.0,1.0)};left+=value*l;right+=value*r;sum+=value;}stereo.extend_from_slice(&left.clamp(-1.0,1.0).to_le_bytes());stereo.extend_from_slice(&right.clamp(-1.0,1.0).to_le_bytes());mono.extend_from_slice(&sum.clamp(-1.0,1.0).to_le_bytes());}expected.push((pts,stereo));dry.push((pts,mono));}
+ assert_eq!(render(bytes.clone(),1),dry,"{name}: mono placement-independent");if render(bytes.clone(),2)!=expected{failures.push(format!("{name}: native stereo differs from isolated-voice balance"));}let end=open(bytes.clone()).duration().unwrap();for target in [Duration::from_millis(100),end]{if std::panic::catch_unwind(std::panic::AssertUnwindSafe(||capture::worker_check_with_seek(Box::new(open(bytes.clone())),&expected,Some(target)))).is_err(){failures.push(format!("{name}: actualCC10playback differs"));}}
+ }
+ assert!(failures.is_empty(),"{}",failures.join("; "));
+}

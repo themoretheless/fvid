@@ -1,0 +1,22 @@
+{
+  "provenance": "Authored held-to-EOF notes versus explicit note-off controls. MIDI same100ms score; XM explicit keyoff row at240ms supplies independent release PCM for held source tail. Repository synthetic looping samples only; separate authored native VP9/PCM video. No encoder/private media/network.",
+  "cases": [
+    {
+      "kind": "midi",
+      "held": "midi-held.mid",
+      "control": "midi-released.mid"
+    },
+    {
+      "kind": "xm",
+      "held": "xm-held.xm",
+      "control": "xm-released.xm"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "midi-held.mid": "fee05f2e4d57bdc67edcca72a1b0652569ab2559facdf9b480e67f0c328be4de",
+    "midi-released.mid": "3379dec1be89d10cfcc1b4aa42d30c9a62052ffb5716f400f01d0ec4817b2f46",
+    "xm-held.xm": "26e2793aa1aec3d0b87d56dd661b6f9748c5226cdb134745380d8cd80dcb3068",
+    "xm-released.xm": "099c43f8808e2ee96690d6fdc83199d615cefad0996741f86b75dea2a1abf06d"
+  }
+}

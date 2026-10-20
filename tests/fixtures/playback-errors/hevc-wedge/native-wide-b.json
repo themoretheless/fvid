@@ -1,0 +1,438 @@
+{
+  "provenance": "Owned mixed-role B pictures, valid signed Golomb camera extremes and scalar color/weight oracle; no external codec or test-time generation.",
+  "precision": 0,
+  "cases": [
+    {
+      "file": "native-wide-b-none-intra-2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        0,
+        1536
+      ]
+    },
+    {
+      "file": "native-wide-b-none-intra--2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "intra",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        3072,
+        4608
+      ]
+    },
+    {
+      "file": "native-wide-b-none-bi-2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        6144,
+        7680
+      ]
+    },
+    {
+      "file": "native-wide-b-none-bi--2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "bi",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        9216,
+        10752
+      ]
+    },
+    {
+      "file": "native-wide-b-none-l0-2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        12288,
+        13824
+      ]
+    },
+    {
+      "file": "native-wide-b-none-l0--2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l0",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        15360,
+        16896
+      ]
+    },
+    {
+      "file": "native-wide-b-none-l1-2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        18432,
+        19968
+      ]
+    },
+    {
+      "file": "native-wide-b-none-l1--2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "l1",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        21504,
+        23040
+      ]
+    },
+    {
+      "file": "native-wide-b-none-amp8-2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        24576,
+        26112
+      ]
+    },
+    {
+      "file": "native-wide-b-none-amp8--2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp8",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        27648,
+        29184
+      ]
+    },
+    {
+      "file": "native-wide-b-none-amp24-2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        30720,
+        32256
+      ]
+    },
+    {
+      "file": "native-wide-b-none-amp24--2147483647.mp4",
+      "enabled": true,
+      "weights": "none",
+      "mode": "amp24",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        33792,
+        35328
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-intra-2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        36864,
+        38400
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-intra--2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "intra",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        39936,
+        41472
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-bi-2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        43008,
+        44544
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-bi--2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "bi",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        46080,
+        47616
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-l0-2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        49152,
+        50688
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-l0--2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l0",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        52224,
+        53760
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-l1-2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        55296,
+        56832
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-l1--2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "l1",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        58368,
+        59904
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-amp8-2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        61440,
+        62976
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-amp8--2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp8",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        64512,
+        66048
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-amp24-2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        67584,
+        69120
+      ]
+    },
+    {
+      "file": "native-wide-b-luma-amp24--2147483647.mp4",
+      "enabled": true,
+      "weights": "luma",
+      "mode": "amp24",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        70656,
+        72192
+      ]
+    },
+    {
+      "file": "native-wide-b-color-intra-2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        73728,
+        75264
+      ]
+    },
+    {
+      "file": "native-wide-b-color-intra--2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "intra",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        76800,
+        78336
+      ]
+    },
+    {
+      "file": "native-wide-b-color-bi-2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        79872,
+        81408
+      ]
+    },
+    {
+      "file": "native-wide-b-color-bi--2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "bi",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        82944,
+        84480
+      ]
+    },
+    {
+      "file": "native-wide-b-color-l0-2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        86016,
+        87552
+      ]
+    },
+    {
+      "file": "native-wide-b-color-l0--2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l0",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        89088,
+        90624
+      ]
+    },
+    {
+      "file": "native-wide-b-color-l1-2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        92160,
+        93696
+      ]
+    },
+    {
+      "file": "native-wide-b-color-l1--2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "l1",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        95232,
+        96768
+      ]
+    },
+    {
+      "file": "native-wide-b-color-amp8-2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        98304,
+        99840
+      ]
+    },
+    {
+      "file": "native-wide-b-color-amp8--2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp8",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        101376,
+        102912
+      ]
+    },
+    {
+      "file": "native-wide-b-color-amp24-2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": 2147483647,
+      "disparity": 4261412862,
+      "offsets": [
+        104448,
+        105984
+      ]
+    },
+    {
+      "file": "native-wide-b-color-amp24--2147483647.mp4",
+      "enabled": true,
+      "weights": "color",
+      "mode": "amp24",
+      "scale": -2147483647,
+      "disparity": -4261412862,
+      "offsets": [
+        107520,
+        109056
+      ]
+    }
+  ]
+}

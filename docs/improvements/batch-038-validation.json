@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0062"
+  ],
+  "checked_at": "2026-10-15T20:13:52.740679+00:00",
+  "before": [
+    "evidence/batch-038-packet-clock-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-038-packet-clock-after.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-038-audio-core.log",
+      "kind": "rust",
+      "passed": 98
+    },
+    {
+      "log": "evidence/batch-038-audio-thread.log",
+      "kind": "rust",
+      "passed": 27
+    },
+    {
+      "log": "evidence/batch-038-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-038-audio-fixtures.log",
+      "kind": "python",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-038-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native60ms video decodes3 frames and all480 PCM samples match. Clock fault injection changes only the valid decoded packet timestamp; this qualifies public packet conversion, not container acceptance of huge timelines.",
+    "Before20000000001seconds wraps to1553255927.290448384seconds. After conversion preserves whole seconds, fractional half second and thirds, handles u64::MAX seconds, saturates overflowing numerator at Duration::MAX and retains denominator-zero compatibility.",
+    "No API signature changes. No physical playback or performance claim. Fixture generation stays separate/offline."
+  ],
+  "counting": "One timestamp-range conversion defect; fraction/boundary cases add no IDs."
+}

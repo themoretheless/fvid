@@ -1,0 +1,27 @@
+{
+  "provenance": "Authored variable20/40/10/20ms Opus DTX packets,90ms BlockDuration, optional20ms Track DefaultDuration and five VP9 frames. No private media, encoder or network.",
+  "starts_ns": [
+    0,
+    20000000,
+    60000000,
+    70000000
+  ],
+  "durations_ns": [
+    20000000,
+    40000000,
+    10000000,
+    20000000
+  ],
+  "sha256": {
+    "xiph-control.mkv": "4ad8eae57212cd6f1ba568c856cf6826046964d96355e181e4071f575746ebc2",
+    "xiph-default.mkv": "7e08e0e89d23f9f1480894d7ed7c726575d1f0c05c096d9c8b151c5d0d4e07fc",
+    "xiph-default-short.mkv": "3517b66faf8710d8e7771dcfd048529bd82e3f498abe3f715ea7824f66be353a",
+    "xiph-default-long.mkv": "95fe09c62535dba2403df88a11aa9814cbf35144c5e176fee49696a0e6922ec5",
+    "xiph-unsupported-head.mkv": "f0b3370c39ba5c42604f89bb7c8afbbbce63de0d8a7caded87be928a743deb8d",
+    "ebml-control.mkv": "3e5de0e8d0e0c5a1cc521d95e1c8bafb44fd671c38afb7743bdb91e30128b146",
+    "ebml-default.mkv": "7d1ba2a55d3e16aefb9d30754be1dddc574ece082f0ffda775a966319288026a",
+    "ebml-default-short.mkv": "35fc8cec57779300bebda0cea2914a2ae6df2e51c821a60491d3cc1407ecbac2",
+    "ebml-default-long.mkv": "6f5e3aeb11a98c8d798ea4f0e4c0206b8a1f259074f998f6f126e57eeac52613",
+    "ebml-unsupported-head.mkv": "dc61c85582d594887e9092fed4428ca5987f96f8cd4d5727daa55d7c04d354bf"
+  }
+}

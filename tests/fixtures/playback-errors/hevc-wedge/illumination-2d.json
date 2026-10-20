@@ -1,0 +1,2405 @@
+{
+  "provenance": "Owned explicit inter-view P MV syntax, PCM/CABAC and independent horizontal luma/chroma interpolation and IC boundary oracle. No external codec or private data.",
+  "cases": [
+    {
+      "file": "illumination-2d-64-0-0-0--7.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 0,
+      "changed_samples": 0,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-64-0-0-0--3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 6144,
+      "changed_samples": 0,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-64-0-0-0--1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 12288,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 18432,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-2.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 24576,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 30720,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-4.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 36864,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-5.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 43008,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-6.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 49152,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-0-0-0-7.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 55296,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-0-0-1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 61440,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-0-0-2-6.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 67584,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-0-0-3-1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 73728,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-0-0-4-4.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 79872,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-0-0-5-7.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 86016,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-0-0-6-2.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 92160,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-0-0-7-5.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 98304,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-0-0--1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 104448,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-0-0-3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 110592,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-0-0--7--5.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 116736,
+      "changed_samples": 0,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-64-0-1-0--7.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 122880,
+      "changed_samples": 4566,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-64-0-1-0--3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 129024,
+      "changed_samples": 4530,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-64-0-1-0--1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 135168,
+      "changed_samples": 4516,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 141312,
+      "changed_samples": 4516,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-2.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 147456,
+      "changed_samples": 4513,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 153600,
+      "changed_samples": 4506,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-4.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 159744,
+      "changed_samples": 4303,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-5.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 165888,
+      "changed_samples": 4256,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-6.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 172032,
+      "changed_samples": 4263,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-0-1-0-7.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 178176,
+      "changed_samples": 4265,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-0-1-1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 184320,
+      "changed_samples": 4547,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-0-1-2-6.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 190464,
+      "changed_samples": 4289,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-0-1-3-1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 196608,
+      "changed_samples": 4485,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-0-1-4-4.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 202752,
+      "changed_samples": 4554,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-0-1-5-7.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 208896,
+      "changed_samples": 4503,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-0-1-6-2.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 215040,
+      "changed_samples": 4541,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-0-1-7-5.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 221184,
+      "changed_samples": 4513,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-0-1--1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 227328,
+      "changed_samples": 4525,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-0-1-3--1.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 233472,
+      "changed_samples": 4503,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-0-1--7--5.mp4",
+      "size": 64,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 239616,
+      "changed_samples": 4573,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-64-1-0-0--7.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 245760,
+      "changed_samples": 0,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-64-1-0-0--3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 251904,
+      "changed_samples": 0,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-64-1-0-0--1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 258048,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 264192,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-2.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 270336,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 276480,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-4.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 282624,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-5.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 288768,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-6.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 294912,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-1-0-0-7.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 301056,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-1-0-1-3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 307200,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-1-0-2-6.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 313344,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-1-0-3-1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 319488,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-1-0-4-4.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 325632,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-1-0-5-7.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 331776,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-1-0-6-2.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 337920,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-1-0-7-5.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 344064,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-1-0--1-3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 350208,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-1-0-3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 356352,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-1-0--7--5.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 362496,
+      "changed_samples": 0,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-64-1-1-0--7.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 368640,
+      "changed_samples": 4566,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-64-1-1-0--3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 374784,
+      "changed_samples": 4530,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-64-1-1-0--1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 380928,
+      "changed_samples": 4516,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 387072,
+      "changed_samples": 4516,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-2.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 393216,
+      "changed_samples": 4513,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 399360,
+      "changed_samples": 4506,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-4.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 405504,
+      "changed_samples": 4303,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-5.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 411648,
+      "changed_samples": 4256,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-6.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 417792,
+      "changed_samples": 4263,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-1-1-0-7.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 423936,
+      "changed_samples": 4265,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-1-1-1-3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 430080,
+      "changed_samples": 4547,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-1-1-2-6.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 436224,
+      "changed_samples": 4289,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-64-1-1-3-1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 442368,
+      "changed_samples": 4485,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-64-1-1-4-4.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 448512,
+      "changed_samples": 4554,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-64-1-1-5-7.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 454656,
+      "changed_samples": 4503,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-64-1-1-6-2.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 460800,
+      "changed_samples": 4541,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-64-1-1-7-5.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 466944,
+      "changed_samples": 4513,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-64-1-1--1-3.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 473088,
+      "changed_samples": 4525,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-64-1-1-3--1.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 479232,
+      "changed_samples": 4503,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-64-1-1--7--5.mp4",
+      "size": 64,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 485376,
+      "changed_samples": 4573,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-128-0-0-0--7.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 491520,
+      "changed_samples": 0,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-128-0-0-0--3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 516096,
+      "changed_samples": 0,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-128-0-0-0--1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 540672,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 565248,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-2.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 589824,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 614400,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-4.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 638976,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-5.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 663552,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-6.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 688128,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-0-0-0-7.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 712704,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-0-0-1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 737280,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-0-0-2-6.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 761856,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-0-0-3-1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 786432,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-0-0-4-4.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 811008,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-0-0-5-7.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 835584,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-0-0-6-2.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 860160,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-0-0-7-5.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 884736,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-0-0--1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 909312,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-0-0-3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 933888,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-0-0--7--5.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 958464,
+      "changed_samples": 0,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-128-0-1-0--7.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 983040,
+      "changed_samples": 22811,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-128-0-1-0--3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1007616,
+      "changed_samples": 22704,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-128-0-1-0--1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1032192,
+      "changed_samples": 22634,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1056768,
+      "changed_samples": 22602,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-2.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1081344,
+      "changed_samples": 22554,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1105920,
+      "changed_samples": 22540,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-4.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1130496,
+      "changed_samples": 22515,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-5.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1155072,
+      "changed_samples": 22319,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-6.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1179648,
+      "changed_samples": 22400,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-0-1-0-7.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1204224,
+      "changed_samples": 22372,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-0-1-1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 1228800,
+      "changed_samples": 22755,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-0-1-2-6.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 1253376,
+      "changed_samples": 22501,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-0-1-3-1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 1277952,
+      "changed_samples": 22459,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-0-1-4-4.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 1302528,
+      "changed_samples": 22779,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-0-1-5-7.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 1327104,
+      "changed_samples": 22521,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-0-1-6-2.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 1351680,
+      "changed_samples": 22762,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-0-1-7-5.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 1376256,
+      "changed_samples": 22589,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-0-1--1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 1400832,
+      "changed_samples": 22621,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-0-1-3--1.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 1425408,
+      "changed_samples": 22539,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-0-1--7--5.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 1449984,
+      "changed_samples": 22840,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-128-1-0-0--7.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1474560,
+      "changed_samples": 0,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-128-1-0-0--3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1499136,
+      "changed_samples": 0,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-128-1-0-0--1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1523712,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1548288,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-2.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1572864,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1597440,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-4.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1622016,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-5.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1646592,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-6.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1671168,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-1-0-0-7.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1695744,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-1-0-1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 1720320,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-1-0-2-6.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 1744896,
+      "changed_samples": 0,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-1-0-3-1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 1769472,
+      "changed_samples": 0,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-1-0-4-4.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 1794048,
+      "changed_samples": 0,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-1-0-5-7.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 1818624,
+      "changed_samples": 0,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-1-0-6-2.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 1843200,
+      "changed_samples": 0,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-1-0-7-5.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 1867776,
+      "changed_samples": 0,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-1-0--1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 1892352,
+      "changed_samples": 0,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-1-0-3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 1916928,
+      "changed_samples": 0,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-1-0--7--5.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 1941504,
+      "changed_samples": 0,
+      "mv_vertical": -5
+    },
+    {
+      "file": "illumination-2d-128-1-1-0--7.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1966080,
+      "changed_samples": 22811,
+      "mv_vertical": -7
+    },
+    {
+      "file": "illumination-2d-128-1-1-0--3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 1990656,
+      "changed_samples": 22704,
+      "mv_vertical": -3
+    },
+    {
+      "file": "illumination-2d-128-1-1-0--1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2015232,
+      "changed_samples": 22634,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2039808,
+      "changed_samples": 22602,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-2.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2064384,
+      "changed_samples": 22554,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2088960,
+      "changed_samples": 22540,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-4.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2113536,
+      "changed_samples": 22515,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-5.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2138112,
+      "changed_samples": 22319,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-6.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2162688,
+      "changed_samples": 22400,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-1-1-0-7.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 0,
+      "oracle_offset": 2187264,
+      "changed_samples": 22372,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-1-1-1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 1,
+      "oracle_offset": 2211840,
+      "changed_samples": 22755,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-1-1-2-6.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 2,
+      "oracle_offset": 2236416,
+      "changed_samples": 22501,
+      "mv_vertical": 6
+    },
+    {
+      "file": "illumination-2d-128-1-1-3-1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 2260992,
+      "changed_samples": 22459,
+      "mv_vertical": 1
+    },
+    {
+      "file": "illumination-2d-128-1-1-4-4.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 4,
+      "oracle_offset": 2285568,
+      "changed_samples": 22779,
+      "mv_vertical": 4
+    },
+    {
+      "file": "illumination-2d-128-1-1-5-7.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 5,
+      "oracle_offset": 2310144,
+      "changed_samples": 22521,
+      "mv_vertical": 7
+    },
+    {
+      "file": "illumination-2d-128-1-1-6-2.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 6,
+      "oracle_offset": 2334720,
+      "changed_samples": 22762,
+      "mv_vertical": 2
+    },
+    {
+      "file": "illumination-2d-128-1-1-7-5.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 7,
+      "oracle_offset": 2359296,
+      "changed_samples": 22589,
+      "mv_vertical": 5
+    },
+    {
+      "file": "illumination-2d-128-1-1--1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -1,
+      "oracle_offset": 2383872,
+      "changed_samples": 22621,
+      "mv_vertical": 3
+    },
+    {
+      "file": "illumination-2d-128-1-1-3--1.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": 3,
+      "oracle_offset": 2408448,
+      "changed_samples": 22539,
+      "mv_vertical": -1
+    },
+    {
+      "file": "illumination-2d-128-1-1--7--5.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "target_luma": [
+        2,
+        1,
+        -40
+      ],
+      "mv_horizontal": -7,
+      "oracle_offset": 2433024,
+      "changed_samples": 22840,
+      "mv_vertical": -5
+    }
+  ]
+}

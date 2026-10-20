@@ -1,0 +1,25 @@
+{
+  "provenance": "Authored31row held-note XM references read in place, published packet boundary seeks at fractional row tempos. Separate authored native VP9/PCM companion. No encoder/private media/network.",
+  "cases": [
+    {
+      "file": "held-125.xm",
+      "source": "../xm-sample-grid/held-125.xm",
+      "sha256": "030e383934c2cb6e210e09dcda6a9b73f9a924646399d10267e9c7ab44eeed65"
+    },
+    {
+      "file": "held-127.xm",
+      "source": "../xm-sample-grid/held-127.xm",
+      "sha256": "5ff1c5f0af1e8416d63df79e84ed3633afe51931615f590a616016fe3aa44285"
+    },
+    {
+      "file": "held-199.xm",
+      "source": "../xm-sample-grid/held-199.xm",
+      "sha256": "3142af020b969367cccd77846165ee4a2abc69487e7abd083428bdce2d38db63"
+    },
+    {
+      "file": "held-255.xm",
+      "source": "../xm-sample-grid/held-255.xm",
+      "sha256": "d67814c23ea08db87222ed3606f179ff85d2249bd1b4882c401309c93ea8e8df"
+    }
+  ]
+}

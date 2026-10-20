@@ -1,0 +1,7 @@
+{
+  "provenance": "Authored1.4s VP9 and two32768-sample48kHz PCM packets. No private media, encoder or network.",
+  "sha256": {
+    "pacing.mkv": "6f2152d79c2872477be9ced609d0c993e5dc7de1e160ce186e81f3574c6d8de3",
+    "expected-packet.f32le": "a4cb545220434dcf3f3d4355d5ed0a952ee50e5c60c232e55b6813af178f2b0e"
+  }
+}

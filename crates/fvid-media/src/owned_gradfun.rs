@@ -6,6 +6,9 @@ use std::cell::RefCell;
 struct Scratch {
     geometry: Option<(usize, usize, u8)>,
     data: Vec<u64>,
+    columns: Vec<u64>,
+    dc: Vec<u64>,
+    initial: Vec<u64>,
 }
 type Result<T> = std::result::Result<T, String>;
 #[derive(Debug)]
@@ -208,24 +211,43 @@ impl GradFun {
             }
         };
         let half = w / 2;
-        let mut columns = Vec::new();
-        columns.try_reserve_exact(half).map_err(|e| e.to_string())?;
+        let bstride = (w + 15) / 16 * 8;
+        let base = bstride + 32;
+        let mask = (1u64 << (depth + 8)) - 1;
+        let mut scratch = self.scratch.borrow_mut();
+        let Scratch {
+            data: memory,
+            columns,
+            dc,
+            initial,
+            ..
+        } = &mut *scratch;
+        columns.clear();
+        if columns.capacity() < half {
+            columns
+                .try_reserve_exact(half - columns.len())
+                .map_err(|e| e.to_string())?;
+        }
         columns.resize(half, 0u64);
         for y in 0..2 * r {
             for (x, sum) in columns.iter_mut().enumerate() {
                 *sum += read(2 * x, y) + read(2 * x + 1, y);
             }
         }
-        let mut dc = Vec::new();
-        dc.try_reserve_exact(half + r).map_err(|e| e.to_string())?;
+        dc.clear();
+        if dc.capacity() < half + r {
+            dc.try_reserve_exact(half + r - dc.len())
+                .map_err(|e| e.to_string())?;
+        }
         dc.resize(half + r, 0u64);
-        let bstride = (w + 15) / 16 * 8;
-        let base = bstride + 32;
-        let mask = (1u64 << (depth + 8)) - 1;
-        let mut scratch = self.scratch.borrow_mut();
-        let memory = &mut scratch.data;
         memory[16..base].fill(0);
-        let mut initial = vec![0u64; half];
+        initial.clear();
+        if initial.capacity() < half {
+            initial
+                .try_reserve_exact(half - initial.len())
+                .map_err(|e| e.to_string())?;
+        }
+        initial.resize(half, 0u64);
         for row in 0..r {
             for x in 0..half {
                 let current = base + row * bstride + x;

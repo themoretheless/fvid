@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0142"
+  ],
+  "checked_at": "2026-10-16T09:55:53.383482+00:00",
+  "before": [
+    "evidence/batch-126-reproduction.log",
+    "evidence/batch-126-before-tolerance.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-126-integration.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-126-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-126-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-126-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twenty-two authored8/16bit XM files versus independent physically trimmed instrument samples. Before correction44mono/stereo classifications report unsupported9xx and32PCM comparisons over16files differ; six zero/no-note/instrument-only controls are healthy. Forced ignored acceptance is explicitly separate from passing unsupported reproduction.",
+    "Apply9xx only when triggering a note, retain last nonzero argument per voice, interpret argument times256 decoded sample frames for both widths, and suppress positions at or beyond sample/active-loop end. A plain note restarts at zero while retaining memory for a future900; no-note/instrument-only9xx does not update memory. Decoder reset clears voices and memory.",
+    "After all44mono/stereo comparisons agree with physically trimmed controls within1e-6 absolute PCM tolerance, with equal packet sizes/PTS/duration and zero ignored effects.44 actual worker midrow/EOF targets also verify complete play and rewind. Worker checks use native PCM after independent fidelity comparison and already pass before correction; no distinct pre-fix seek defect is claimed.",
+    "Eighteen related integration tests,11 decoder units,Python fixture reproducibility and player build pass. Ordinary tests/generation use no encoder,FFmpeg,network or private data. Separate native VP9/PCM companion confirms authored video. No physicalDAC or complete FT2 mixer equivalence claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "triggerNote and getNewNote",
+      "rule": "9xx uses remembered nonzero sampleOffset shifted by8; ordinary trigger resets start position; no-note path does not trigger."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_audio.c",
+      "section": "voiceTrigger",
+      "rule": "Start position counts decoded frames for both widths; position at or beyond sampleEnd disables voice."
+    }
+  ],
+  "compatibility": "Adds supported9xx playback and removes it from ignored-effect counts. Public APIs unchanged;unsupported envelopes/tick effects remain omissions.",
+  "counting": "One missing sample-start effect. Widths,offset bounds,memory controls,worker targets anddocumentation add zero extra IDs."
+}

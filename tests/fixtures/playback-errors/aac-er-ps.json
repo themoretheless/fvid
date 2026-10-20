@@ -1,0 +1,2621 @@
+{
+  "cases": [
+    {
+      "name": "aot17-1024-24000-explicit",
+      "aot": 17,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "explicit",
+      "asc": "eb0b4400",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 276,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 314,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 352,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 628,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 666,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 138,
+          "bytes": 138
+        },
+        {
+          "offset": 295,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        },
+        {
+          "offset": 490,
+          "bytes": 138
+        },
+        {
+          "offset": 647,
+          "bytes": 19
+        },
+        {
+          "offset": 685,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-er-ps-aot17-1024-24000-explicit-synthetic.mp4",
+        "sha256": "373f0690e518274aebed03cad34feee23c952b4bbbbc520402bc304bcb8f9ca3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4400",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-1024-24000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "f81b844e5942de6664fee23b43d29b041efd78527b8d239c257aaec66b8390f2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4400",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "matroska": "aac-er-ps-aot17-1024-24000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-1024-24000-sync",
+      "aot": 17,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "sync",
+      "asc": "8b0815b96d5220",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 276,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 314,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 352,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 628,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 666,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 138,
+          "bytes": 138
+        },
+        {
+          "offset": 295,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        },
+        {
+          "offset": 490,
+          "bytes": 138
+        },
+        {
+          "offset": 647,
+          "bytes": 19
+        },
+        {
+          "offset": 685,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-er-ps-aot17-1024-24000-sync-synthetic.mp4",
+        "sha256": "c627e9b90a57cdf02d9696f4494e97369832cc6e516e28753f5d354f53da0a42",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b96d5220",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-1024-24000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "f94e370cecfa9a1cb5868245ddf32ec5f9bd9a5a4f291f3c7e264089cc353b26",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b96d5220",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "matroska": "aac-er-ps-aot17-1024-24000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot17-1024-24000-implicit",
+      "aot": 17,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "implicit",
+      "asc": "8b0815b96c",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 276,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 314,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 352,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 628,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 666,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 138,
+          "bytes": 138
+        },
+        {
+          "offset": 295,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        },
+        {
+          "offset": 490,
+          "bytes": 138
+        },
+        {
+          "offset": 647,
+          "bytes": 19
+        },
+        {
+          "offset": 685,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-er-ps-aot17-1024-24000-implicit-synthetic.mp4",
+        "sha256": "45687eba1fbf16c075f9221e4fbd6eadcb63dbec671f0a4ca0d35e99e0bd804f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b96c",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-1024-24000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "0705fbf1b7e3ef78e7e59087500c2262bc302a129c00ff082ea003462cf6e209",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b96c",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "matroska": "aac-er-ps-aot17-1024-24000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-1024-48000-explicit",
+      "aot": 17,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "explicit",
+      "asc": "eb09c400",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 276,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 314,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 352,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 628,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 666,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 138,
+          "bytes": 138
+        },
+        {
+          "offset": 295,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        },
+        {
+          "offset": 490,
+          "bytes": 138
+        },
+        {
+          "offset": 647,
+          "bytes": 19
+        },
+        {
+          "offset": 685,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "video": {
+        "file": "aac-er-ps-aot17-1024-48000-explicit-synthetic.mp4",
+        "sha256": "6151b74e8e30faa82609e9430d604099e3d31b357ae1714fc5010154aa2f6418",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09c400",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-1024-48000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "9db6de69b25af6248755edf65ed2f60994643c3d481647f8eafdd9912ae81b6a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09c400",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "matroska": "aac-er-ps-aot17-1024-48000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-1024-48000-sync",
+      "aot": 17,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "sync",
+      "asc": "8b0815b9675220",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 276,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 314,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 352,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 628,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 666,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 138,
+          "bytes": 138
+        },
+        {
+          "offset": 295,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        },
+        {
+          "offset": 490,
+          "bytes": 138
+        },
+        {
+          "offset": 647,
+          "bytes": 19
+        },
+        {
+          "offset": 685,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "video": {
+        "file": "aac-er-ps-aot17-1024-48000-sync-synthetic.mp4",
+        "sha256": "d42bc3a53afeb73045a1a92959dcb8e77da518f65a44567b122c9e60e1e41188",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b9675220",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-1024-48000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "6737004f36c0d16d3b3ea9689489f9619eaf1a6ceb0b387201874d6677c44012",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b9675220",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "matroska": "aac-er-ps-aot17-1024-48000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot17-1024-48000-implicit",
+      "aot": 17,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "implicit",
+      "asc": "8b0815b966",
+      "frames": [
+        {
+          "offset": 0,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 276,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 314,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 352,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 628,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 666,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 138,
+          "bytes": 138
+        },
+        {
+          "offset": 295,
+          "bytes": 19
+        },
+        {
+          "offset": 333,
+          "bytes": 19
+        },
+        {
+          "offset": 490,
+          "bytes": 138
+        },
+        {
+          "offset": 647,
+          "bytes": 19
+        },
+        {
+          "offset": 685,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-1024-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "video": {
+        "file": "aac-er-ps-aot17-1024-48000-implicit-synthetic.mp4",
+        "sha256": "34b07e3553ccccabf36449f7b0aaea6084d74cb172c1f5be3af7c28346c36894",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b966",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-1024-48000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "71a5ca309316da823c32d33d89c091f70c9a344dfe56363fa225420102f8c2c4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0815b966",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "matroska": "aac-er-ps-aot17-1024-48000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-960-24000-explicit",
+      "aot": 17,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "explicit",
+      "asc": "eb0b4600",
+      "frames": [
+        {
+          "offset": 704,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 980,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1018,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1056,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1332,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1370,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 842,
+          "bytes": 138
+        },
+        {
+          "offset": 999,
+          "bytes": 19
+        },
+        {
+          "offset": 1037,
+          "bytes": 19
+        },
+        {
+          "offset": 1194,
+          "bytes": 138
+        },
+        {
+          "offset": 1351,
+          "bytes": 19
+        },
+        {
+          "offset": 1389,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-er-ps-aot17-960-24000-explicit-synthetic.mp4",
+        "sha256": "49f421543658f3e081e8b11ae12411f7b1969578b235fbe2158d8d637228b8e8",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4600",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-960-24000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "3b922e7b20d4cb1826c41976365fe7af1e902176c20518613ccec253ef14a898",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4600",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "matroska": "aac-er-ps-aot17-960-24000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-960-24000-sync",
+      "aot": 17,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "sync",
+      "asc": "8b0c15b96d5220",
+      "frames": [
+        {
+          "offset": 704,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 980,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1018,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1056,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1332,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1370,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 842,
+          "bytes": 138
+        },
+        {
+          "offset": 999,
+          "bytes": 19
+        },
+        {
+          "offset": 1037,
+          "bytes": 19
+        },
+        {
+          "offset": 1194,
+          "bytes": 138
+        },
+        {
+          "offset": 1351,
+          "bytes": 19
+        },
+        {
+          "offset": 1389,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-er-ps-aot17-960-24000-sync-synthetic.mp4",
+        "sha256": "3cc52011174fad0cb506040c1fcf4e05d14588b96a685ead077b0f2ada3475ed",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b96d5220",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-960-24000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "3aca88535f95177bc1839df674c1608ea7513d1f9c38a89c9fb786433e8bd5a3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b96d5220",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "matroska": "aac-er-ps-aot17-960-24000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot17-960-24000-implicit",
+      "aot": 17,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "implicit",
+      "asc": "8b0c15b96c",
+      "frames": [
+        {
+          "offset": 704,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 980,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1018,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1056,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1332,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1370,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 842,
+          "bytes": 138
+        },
+        {
+          "offset": 999,
+          "bytes": 19
+        },
+        {
+          "offset": 1037,
+          "bytes": 19
+        },
+        {
+          "offset": 1194,
+          "bytes": 138
+        },
+        {
+          "offset": 1351,
+          "bytes": 19
+        },
+        {
+          "offset": 1389,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-er-ps-aot17-960-24000-implicit-synthetic.mp4",
+        "sha256": "36ccb4b59165cac80210906986ee737ad645718f2ed789d6828deb472a87b9d0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b96c",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-960-24000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "1ff750eecd6f17a02f96274bab1b7c9ed5a1243aa0ae3e4e2b71fb90644c1094",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b96c",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "matroska": "aac-er-ps-aot17-960-24000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-960-48000-explicit",
+      "aot": 17,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "explicit",
+      "asc": "eb09c600",
+      "frames": [
+        {
+          "offset": 704,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 980,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1018,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1056,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1332,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1370,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 842,
+          "bytes": 138
+        },
+        {
+          "offset": 999,
+          "bytes": 19
+        },
+        {
+          "offset": 1037,
+          "bytes": 19
+        },
+        {
+          "offset": 1194,
+          "bytes": 138
+        },
+        {
+          "offset": 1351,
+          "bytes": 19
+        },
+        {
+          "offset": 1389,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "pcm_offset": 0,
+      "samples": 23040,
+      "video": {
+        "file": "aac-er-ps-aot17-960-48000-explicit-synthetic.mp4",
+        "sha256": "36c2c4db503261469fc3b056aeb7f55206d68f802b5f570e320cebec154e8c24",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09c600",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-960-48000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "db54950225808671ededcdebaaccec0c1e58d5e9df540a996aebfa2911a1f11a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09c600",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "matroska": "aac-er-ps-aot17-960-48000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot17-960-48000-sync",
+      "aot": 17,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "sync",
+      "asc": "8b0c15b9675220",
+      "frames": [
+        {
+          "offset": 704,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 980,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1018,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1056,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1332,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1370,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 842,
+          "bytes": 138
+        },
+        {
+          "offset": 999,
+          "bytes": 19
+        },
+        {
+          "offset": 1037,
+          "bytes": 19
+        },
+        {
+          "offset": 1194,
+          "bytes": 138
+        },
+        {
+          "offset": 1351,
+          "bytes": 19
+        },
+        {
+          "offset": 1389,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "pcm_offset": 0,
+      "samples": 23040,
+      "video": {
+        "file": "aac-er-ps-aot17-960-48000-sync-synthetic.mp4",
+        "sha256": "3e4125f170f229c76e503ba34523edbdfaaaf579094cc496bbb941e3d9d4c184",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b9675220",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-960-48000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "abc03f61c67c2d52b83b307f452a248c06013ad73b2c3635272d51e06efd4516",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b9675220",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "matroska": "aac-er-ps-aot17-960-48000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot17-960-48000-implicit",
+      "aot": 17,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "implicit",
+      "asc": "8b0c15b966",
+      "frames": [
+        {
+          "offset": 704,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 980,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1018,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1056,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1332,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        },
+        {
+          "offset": 1370,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 0,
+          "coefficient": 0
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 842,
+          "bytes": 138
+        },
+        {
+          "offset": 999,
+          "bytes": 19
+        },
+        {
+          "offset": 1037,
+          "bytes": 19
+        },
+        {
+          "offset": 1194,
+          "bytes": 138
+        },
+        {
+          "offset": 1351,
+          "bytes": 19
+        },
+        {
+          "offset": 1389,
+          "bytes": 19
+        }
+      ],
+      "core_reference": "aac-er-ps-aot17-960-core.f32le",
+      "inactive_reference": null,
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "pcm_offset": 0,
+      "samples": 23040,
+      "video": {
+        "file": "aac-er-ps-aot17-960-48000-implicit-synthetic.mp4",
+        "sha256": "3bde05432f5be47b454a7e843c3a0e9232e80494e431a0894ee0446bb8f65388",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b966",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot17-960-48000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "9c54e57c28c055ec161fb57d61d23a71551d9f7ce9580c77c9ebadb7beddc88a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "8b0c15b966",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "matroska": "aac-er-ps-aot17-960-48000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-1024-24000-explicit",
+      "aot": 19,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "explicit",
+      "asc": "eb0b4c00",
+      "frames": [
+        {
+          "offset": 1408,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0
+        },
+        {
+          "offset": 1684,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 1017,
+          "coefficient": 1
+        },
+        {
+          "offset": 1722,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 1010,
+          "coefficient": 2
+        },
+        {
+          "offset": 1760,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 1024,
+          "coefficient": 3
+        },
+        {
+          "offset": 2040,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 1017,
+          "coefficient": 4
+        },
+        {
+          "offset": 2082,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 1010,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1546,
+          "bytes": 138
+        },
+        {
+          "offset": 1703,
+          "bytes": 19
+        },
+        {
+          "offset": 1741,
+          "bytes": 19
+        },
+        {
+          "offset": 1900,
+          "bytes": 140
+        },
+        {
+          "offset": 2061,
+          "bytes": 21
+        },
+        {
+          "offset": 2103,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-1024-inactive.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-er-ps-aot19-1024-24000-explicit-synthetic.mp4",
+        "sha256": "721aa6bc3b96fb484bd38b0046677f47ec1db141a0ded0e8533f4d50d1c5613e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4c00",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-1024-24000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "12ac3d640a38fa7542997e4222a72e344f90de42e90df5a92d8cd57e0d5b0e1c",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4c00",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "matroska": "aac-er-ps-aot19-1024-24000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-1024-24000-sync",
+      "aot": 19,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "sync",
+      "asc": "9b0815b96d5220",
+      "frames": [
+        {
+          "offset": 1408,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0
+        },
+        {
+          "offset": 1684,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 1017,
+          "coefficient": 1
+        },
+        {
+          "offset": 1722,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 1010,
+          "coefficient": 2
+        },
+        {
+          "offset": 1760,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 1024,
+          "coefficient": 3
+        },
+        {
+          "offset": 2040,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 1017,
+          "coefficient": 4
+        },
+        {
+          "offset": 2082,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 1010,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1546,
+          "bytes": 138
+        },
+        {
+          "offset": 1703,
+          "bytes": 19
+        },
+        {
+          "offset": 1741,
+          "bytes": 19
+        },
+        {
+          "offset": 1900,
+          "bytes": 140
+        },
+        {
+          "offset": 2061,
+          "bytes": 21
+        },
+        {
+          "offset": 2103,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-1024-inactive.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-er-ps-aot19-1024-24000-sync-synthetic.mp4",
+        "sha256": "8f203f57d55dbcf9e4b4457a9f230948be0211628287d8617523d02e32f1dce5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b96d5220",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-1024-24000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "5572f215e37198c43819e0acdf9f09da31486019e8dda074f1f564ab39bc0ab1",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b96d5220",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "matroska": "aac-er-ps-aot19-1024-24000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot19-1024-24000-implicit",
+      "aot": 19,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "implicit",
+      "asc": "9b0815b96c",
+      "frames": [
+        {
+          "offset": 1408,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0
+        },
+        {
+          "offset": 1684,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 1017,
+          "coefficient": 1
+        },
+        {
+          "offset": 1722,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 1010,
+          "coefficient": 2
+        },
+        {
+          "offset": 1760,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 1024,
+          "coefficient": 3
+        },
+        {
+          "offset": 2040,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 1017,
+          "coefficient": 4
+        },
+        {
+          "offset": 2082,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 1010,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1546,
+          "bytes": 138
+        },
+        {
+          "offset": 1703,
+          "bytes": 19
+        },
+        {
+          "offset": 1741,
+          "bytes": 19
+        },
+        {
+          "offset": 1900,
+          "bytes": 140
+        },
+        {
+          "offset": 2061,
+          "bytes": 21
+        },
+        {
+          "offset": 2103,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-1024-inactive.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 1024,
+      "pcm_offset": 0,
+      "samples": 12288,
+      "video": {
+        "file": "aac-er-ps-aot19-1024-24000-implicit-synthetic.mp4",
+        "sha256": "a3278ced2ba39003fd4f719765bfa5dfd3019fd3ee1966d394904c07710dada4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b96c",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-1024-24000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "f9905fe4286ce7abf85bb0a5ba14aeb573d344e2a3188ccdf6874cfcca90fdc0",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b96c",
+        "pcm_offset": 0,
+        "samples": 12288
+      },
+      "matroska": "aac-er-ps-aot19-1024-24000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-1024-48000-explicit",
+      "aot": 19,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "explicit",
+      "asc": "eb09cc00",
+      "frames": [
+        {
+          "offset": 1408,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0
+        },
+        {
+          "offset": 1684,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 1017,
+          "coefficient": 1
+        },
+        {
+          "offset": 1722,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 1010,
+          "coefficient": 2
+        },
+        {
+          "offset": 1760,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 1024,
+          "coefficient": 3
+        },
+        {
+          "offset": 2040,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 1017,
+          "coefficient": 4
+        },
+        {
+          "offset": 2082,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 1010,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1546,
+          "bytes": 138
+        },
+        {
+          "offset": 1703,
+          "bytes": 19
+        },
+        {
+          "offset": 1741,
+          "bytes": 19
+        },
+        {
+          "offset": 1900,
+          "bytes": 140
+        },
+        {
+          "offset": 2061,
+          "bytes": 21
+        },
+        {
+          "offset": 2103,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-1024-inactive.f32le",
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "video": {
+        "file": "aac-er-ps-aot19-1024-48000-explicit-synthetic.mp4",
+        "sha256": "550fbd0f82a6e05351fde92d97fc8f7812c6ca2071bd17374167d67364ec9ea7",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09cc00",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-1024-48000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "ba06f5afd37e904da34fc94d3bd1308e43453843f71b77376a3157ccb39bdd69",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09cc00",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "matroska": "aac-er-ps-aot19-1024-48000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-1024-48000-sync",
+      "aot": 19,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "sync",
+      "asc": "9b0815b9675220",
+      "frames": [
+        {
+          "offset": 1408,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0
+        },
+        {
+          "offset": 1684,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 1017,
+          "coefficient": 1
+        },
+        {
+          "offset": 1722,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 1010,
+          "coefficient": 2
+        },
+        {
+          "offset": 1760,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 1024,
+          "coefficient": 3
+        },
+        {
+          "offset": 2040,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 1017,
+          "coefficient": 4
+        },
+        {
+          "offset": 2082,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 1010,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1546,
+          "bytes": 138
+        },
+        {
+          "offset": 1703,
+          "bytes": 19
+        },
+        {
+          "offset": 1741,
+          "bytes": 19
+        },
+        {
+          "offset": 1900,
+          "bytes": 140
+        },
+        {
+          "offset": 2061,
+          "bytes": 21
+        },
+        {
+          "offset": 2103,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-1024-inactive.f32le",
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "video": {
+        "file": "aac-er-ps-aot19-1024-48000-sync-synthetic.mp4",
+        "sha256": "d64fde3e2933a644d2d988462c386e2fdc4cbf8e19af59ad554eafdb1854133e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b9675220",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-1024-48000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "5cf8516b5eb0433b0f4bdc292ed7d40a600a235a30f3c22b95454913df24cf01",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b9675220",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "matroska": "aac-er-ps-aot19-1024-48000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot19-1024-48000-implicit",
+      "aot": 19,
+      "slots": 16,
+      "frame_samples": 1024,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "implicit",
+      "asc": "9b0815b966",
+      "frames": [
+        {
+          "offset": 1408,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 1024,
+          "coefficient": 0
+        },
+        {
+          "offset": 1684,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 1017,
+          "coefficient": 1
+        },
+        {
+          "offset": 1722,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 1010,
+          "coefficient": 2
+        },
+        {
+          "offset": 1760,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 1024,
+          "coefficient": 3
+        },
+        {
+          "offset": 2040,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 1017,
+          "coefficient": 4
+        },
+        {
+          "offset": 2082,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 1010,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 1546,
+          "bytes": 138
+        },
+        {
+          "offset": 1703,
+          "bytes": 19
+        },
+        {
+          "offset": 1741,
+          "bytes": 19
+        },
+        {
+          "offset": 1900,
+          "bytes": 140
+        },
+        {
+          "offset": 2061,
+          "bytes": 21
+        },
+        {
+          "offset": 2103,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-1024-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-1024-inactive.f32le",
+      "container_rate": 48000,
+      "container_frame_samples": 2048,
+      "pcm_offset": 0,
+      "samples": 24576,
+      "video": {
+        "file": "aac-er-ps-aot19-1024-48000-implicit-synthetic.mp4",
+        "sha256": "79c2c12f7e793932118b9824e72b1a5c3d0d685360b2df17ff948fbad41e6c07",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b966",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-1024-48000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "c5fa9b0cbe14dcdb44807ad840c7fab27cd4d1e97840d02a43acf412373028a5",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0815b966",
+        "pcm_offset": 0,
+        "samples": 24576
+      },
+      "matroska": "aac-er-ps-aot19-1024-48000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-960-24000-explicit",
+      "aot": 19,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "explicit",
+      "asc": "eb0b4e00",
+      "frames": [
+        {
+          "offset": 2124,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 960,
+          "coefficient": 0
+        },
+        {
+          "offset": 2400,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 953,
+          "coefficient": 1
+        },
+        {
+          "offset": 2438,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 946,
+          "coefficient": 2
+        },
+        {
+          "offset": 2476,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 960,
+          "coefficient": 3
+        },
+        {
+          "offset": 2756,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 953,
+          "coefficient": 4
+        },
+        {
+          "offset": 2798,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 946,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2262,
+          "bytes": 138
+        },
+        {
+          "offset": 2419,
+          "bytes": 19
+        },
+        {
+          "offset": 2457,
+          "bytes": 19
+        },
+        {
+          "offset": 2616,
+          "bytes": 140
+        },
+        {
+          "offset": 2777,
+          "bytes": 21
+        },
+        {
+          "offset": 2819,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-960-inactive.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-er-ps-aot19-960-24000-explicit-synthetic.mp4",
+        "sha256": "b80c4c6b8566f9122425962ec15253e22b6ff97f25ead329a4722226b524daf4",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4e00",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-960-24000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "f01a92bb6c539cf44615cfc6616de32b820dafd7bdd4d82aa56b1ac417861069",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb0b4e00",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "matroska": "aac-er-ps-aot19-960-24000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-960-24000-sync",
+      "aot": 19,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "sync",
+      "asc": "9b0c15b96d5220",
+      "frames": [
+        {
+          "offset": 2124,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 960,
+          "coefficient": 0
+        },
+        {
+          "offset": 2400,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 953,
+          "coefficient": 1
+        },
+        {
+          "offset": 2438,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 946,
+          "coefficient": 2
+        },
+        {
+          "offset": 2476,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 960,
+          "coefficient": 3
+        },
+        {
+          "offset": 2756,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 953,
+          "coefficient": 4
+        },
+        {
+          "offset": 2798,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 946,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2262,
+          "bytes": 138
+        },
+        {
+          "offset": 2419,
+          "bytes": 19
+        },
+        {
+          "offset": 2457,
+          "bytes": 19
+        },
+        {
+          "offset": 2616,
+          "bytes": 140
+        },
+        {
+          "offset": 2777,
+          "bytes": 21
+        },
+        {
+          "offset": 2819,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-960-inactive.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-er-ps-aot19-960-24000-sync-synthetic.mp4",
+        "sha256": "9022a599cedf758276ba71c14ff5ee8c94679a3bbd7e3528a1227d5a66b93247",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b96d5220",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-960-24000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "2e3f78b17e9d9451ac26f5239df9da02e0ef999a4a64e6b72732612ec255508e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b96d5220",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "matroska": "aac-er-ps-aot19-960-24000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot19-960-24000-implicit",
+      "aot": 19,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 24000,
+      "bands": 32,
+      "signal": "implicit",
+      "asc": "9b0c15b96c",
+      "frames": [
+        {
+          "offset": 2124,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 960,
+          "coefficient": 0
+        },
+        {
+          "offset": 2400,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 953,
+          "coefficient": 1
+        },
+        {
+          "offset": 2438,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 946,
+          "coefficient": 2
+        },
+        {
+          "offset": 2476,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 960,
+          "coefficient": 3
+        },
+        {
+          "offset": 2756,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 953,
+          "coefficient": 4
+        },
+        {
+          "offset": 2798,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 946,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2262,
+          "bytes": 138
+        },
+        {
+          "offset": 2419,
+          "bytes": 19
+        },
+        {
+          "offset": 2457,
+          "bytes": 19
+        },
+        {
+          "offset": 2616,
+          "bytes": 140
+        },
+        {
+          "offset": 2777,
+          "bytes": 21
+        },
+        {
+          "offset": 2819,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-960-inactive.f32le",
+      "container_rate": 24000,
+      "container_frame_samples": 960,
+      "pcm_offset": 0,
+      "samples": 11520,
+      "video": {
+        "file": "aac-er-ps-aot19-960-24000-implicit-synthetic.mp4",
+        "sha256": "0e345253f6a66e7bd18dfa49a428ce1976cac55f82d889f0ba6802f7567158cd",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b96c",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-960-24000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "46976f221d50f886b4b6c3be5441554438678ff24d79c2339a39f5354c7d191f",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b96c",
+        "pcm_offset": 0,
+        "samples": 11520
+      },
+      "matroska": "aac-er-ps-aot19-960-24000-implicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-960-48000-explicit",
+      "aot": 19,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "explicit",
+      "asc": "eb09ce00",
+      "frames": [
+        {
+          "offset": 2124,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 960,
+          "coefficient": 0
+        },
+        {
+          "offset": 2400,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 953,
+          "coefficient": 1
+        },
+        {
+          "offset": 2438,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 946,
+          "coefficient": 2
+        },
+        {
+          "offset": 2476,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 960,
+          "coefficient": 3
+        },
+        {
+          "offset": 2756,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 953,
+          "coefficient": 4
+        },
+        {
+          "offset": 2798,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 946,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2262,
+          "bytes": 138
+        },
+        {
+          "offset": 2419,
+          "bytes": 19
+        },
+        {
+          "offset": 2457,
+          "bytes": 19
+        },
+        {
+          "offset": 2616,
+          "bytes": 140
+        },
+        {
+          "offset": 2777,
+          "bytes": 21
+        },
+        {
+          "offset": 2819,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-960-inactive.f32le",
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "pcm_offset": 0,
+      "samples": 23040,
+      "video": {
+        "file": "aac-er-ps-aot19-960-48000-explicit-synthetic.mp4",
+        "sha256": "aafc1d7e6ab103fbf0ac0890b42cb5a0d1700b99cf8cb26ba20ecdd7b821680e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09ce00",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-960-48000-explicit-crc-malformed-synthetic.mp4",
+        "sha256": "4c4297677e1b6261d62f4b0380b3f3c6a333f10741da12ea6c465ed0936f14e2",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "eb09ce00",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "matroska": "aac-er-ps-aot19-960-48000-explicit-synthetic.mka"
+    },
+    {
+      "name": "aot19-960-48000-sync",
+      "aot": 19,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "sync",
+      "asc": "9b0c15b9675220",
+      "frames": [
+        {
+          "offset": 2124,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 960,
+          "coefficient": 0
+        },
+        {
+          "offset": 2400,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 953,
+          "coefficient": 1
+        },
+        {
+          "offset": 2438,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 946,
+          "coefficient": 2
+        },
+        {
+          "offset": 2476,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 960,
+          "coefficient": 3
+        },
+        {
+          "offset": 2756,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 953,
+          "coefficient": 4
+        },
+        {
+          "offset": 2798,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 946,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2262,
+          "bytes": 138
+        },
+        {
+          "offset": 2419,
+          "bytes": 19
+        },
+        {
+          "offset": 2457,
+          "bytes": 19
+        },
+        {
+          "offset": 2616,
+          "bytes": 140
+        },
+        {
+          "offset": 2777,
+          "bytes": 21
+        },
+        {
+          "offset": 2819,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-960-inactive.f32le",
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "pcm_offset": 0,
+      "samples": 23040,
+      "video": {
+        "file": "aac-er-ps-aot19-960-48000-sync-synthetic.mp4",
+        "sha256": "5c04e53d10254842af15bdc652bc9323f1caaeaab82fde7cba38b05f3b7823b3",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b9675220",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-960-48000-sync-crc-malformed-synthetic.mp4",
+        "sha256": "c2edce687c49f626d49cee04f1640cd50f0a483de47920c9c87f6f0e52270f2e",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b9675220",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "matroska": "aac-er-ps-aot19-960-48000-sync-synthetic.mka"
+    },
+    {
+      "name": "aot19-960-48000-implicit",
+      "aot": 19,
+      "slots": 15,
+      "frame_samples": 960,
+      "rate": 48000,
+      "bands": 64,
+      "signal": "implicit",
+      "asc": "9b0c15b966",
+      "frames": [
+        {
+          "offset": 2124,
+          "bytes": 138,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": false,
+          "lag": 960,
+          "coefficient": 0
+        },
+        {
+          "offset": 2400,
+          "bytes": 19,
+          "payload": "d0380000000052ccc087fc",
+          "active": false,
+          "lag": 953,
+          "coefficient": 1
+        },
+        {
+          "offset": 2438,
+          "bytes": 19,
+          "payload": "d0380000000052ccc097fc",
+          "active": false,
+          "lag": 946,
+          "coefficient": 2
+        },
+        {
+          "offset": 2476,
+          "bytes": 140,
+          "payload": "d88c182b04010000000077d9accd3fee739cfffef39ce7fff79ce73fffbce739ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff9ffdffbff7feffff93fdfbfdfbf7fbf7eff7eff7efdfefdfbfdfbfcfbf7fbf7fbf7eff7efdfefdfefdfbfdfbf7fbf785151111111111739ce739ce73a000000000000e739ce739ce73fc0",
+          "active": true,
+          "lag": 960,
+          "coefficient": 3
+        },
+        {
+          "offset": 2756,
+          "bytes": 21,
+          "payload": "d0380000000052ccc087fc",
+          "active": true,
+          "lag": 953,
+          "coefficient": 4
+        },
+        {
+          "offset": 2798,
+          "bytes": 21,
+          "payload": "d0380000000052ccc097fc",
+          "active": true,
+          "lag": 946,
+          "coefficient": 5
+        }
+      ],
+      "bad_frames": [
+        {
+          "offset": 2262,
+          "bytes": 138
+        },
+        {
+          "offset": 2419,
+          "bytes": 19
+        },
+        {
+          "offset": 2457,
+          "bytes": 19
+        },
+        {
+          "offset": 2616,
+          "bytes": 140
+        },
+        {
+          "offset": 2777,
+          "bytes": 21
+        },
+        {
+          "offset": 2819,
+          "bytes": 21
+        }
+      ],
+      "core_reference": "aac-er-ps-aot19-960-core.f32le",
+      "inactive_reference": "aac-er-ps-aot19-960-inactive.f32le",
+      "container_rate": 48000,
+      "container_frame_samples": 1920,
+      "pcm_offset": 0,
+      "samples": 23040,
+      "video": {
+        "file": "aac-er-ps-aot19-960-48000-implicit-synthetic.mp4",
+        "sha256": "9934c14045cac39e96319e03e14196da13bb1d4ecd3a59e03b6a9feac803298a",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b966",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "bad_video": {
+        "file": "aac-er-ps-aot19-960-48000-implicit-crc-malformed-synthetic.mp4",
+        "sha256": "22dea5c10241b94e25ea3e87d17a34c67f6b38a343921310d3ff59ee8b6bbe77",
+        "video_seed_sha256": "4bdc51284bac3ff70fce92ba6a3eafe6f7ba82cc9822e52b350cbd49fb08a823",
+        "asc": "9b0c15b966",
+        "pcm_offset": 0,
+        "samples": 23040
+      },
+      "matroska": "aac-er-ps-aot19-960-48000-implicit-synthetic.mka"
+    }
+  ],
+  "provenance": "Own sparse nonzero ER AAC-LC (AOT 17) and ER AAC-LTP (AOT 19) mono cores with authored SBR/PS extensions (no CRC), across 960/1024 frame lengths, 24/48 kHz output rates, and explicit/sync/implicit signalling. Independent scalar core/LTP oracle + PS QMF/decorrelation reference. No private media, foreign codec, FFmpeg, or network."
+}

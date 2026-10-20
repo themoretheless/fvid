@@ -1,0 +1,7 @@
+{
+  "provenance": "Authored60ms VP9/PCM; device resume, gain and rate failures injected after exact playback. No private media, encoder or network.",
+  "sha256": {
+    "control.mkv": "f836a3b388dd73e5523842aa04810ccbca1ec089406d673536c09c6b1a33c36a",
+    "expected.f32le": "9cc1df2c95816e96424cdab2d6afd8cfb8e0826bd3f25209395684c24560a07e"
+  }
+}

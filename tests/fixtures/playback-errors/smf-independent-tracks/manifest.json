@@ -1,0 +1,11 @@
+{
+  "provenance": "Authored100/200ms independent notes, format1 simultaneous control and format2 independent-track topology. Single-track format0/1/2 controls. Separate short VP9/PCM video. No encoder/network/private media.",
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "single0.mid": "3379dec1be89d10cfcc1b4aa42d30c9a62052ffb5716f400f01d0ec4817b2f46",
+    "single1.mid": "11c3dcca9493b84963255245aba24fd53d073495c14988474691abd11dfd0b52",
+    "single2.mid": "e5a3e30d3baeac4e5d7069f22ff3c1e015a4f9ae4eeb904932a3a080013625b4",
+    "simultaneous.mid": "89dd57e3315b05578fe857538cd2be8f11fd00742fda834858c8606e43b1f29f",
+    "independent.mid": "9ce07c379149957a32c5e1e0951d317ec18c53252e009bd6d1ad0e6c00549b7a"
+  }
+}

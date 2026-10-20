@@ -1,0 +1,53 @@
+{
+  "provenance": "Authored100ms note with isolated MIDI system message width probes and correct one/two-byte controls. These adapter-supported messages are skipped; their transport/device meaning is not implemented. Short native VP9/PCM video. No private input/encoder/network.",
+  "cases": [
+    {
+      "name": "control",
+      "file": "control.mid"
+    },
+    {
+      "name": "tune-request",
+      "file": "tune-request.mid"
+    },
+    {
+      "name": "continue",
+      "file": "continue.mid"
+    },
+    {
+      "name": "stop",
+      "file": "stop.mid"
+    },
+    {
+      "name": "clock",
+      "file": "clock.mid"
+    },
+    {
+      "name": "start",
+      "file": "start.mid"
+    },
+    {
+      "name": "active-sensing",
+      "file": "active-sensing.mid"
+    },
+    {
+      "name": "song-position",
+      "file": "song-position.mid"
+    },
+    {
+      "name": "song-select",
+      "file": "song-select.mid"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "control.mid": "3379dec1be89d10cfcc1b4aa42d30c9a62052ffb5716f400f01d0ec4817b2f46",
+    "tune-request.mid": "ed64e092ab0b5bead0999df5bc0bcffacd31a505ad5907d22733836653b3643f",
+    "continue.mid": "7143580726b192c63474a757fd2a32fda360ed8116163cf9950e97b5b94c3812",
+    "stop.mid": "0a876b1d2d69a073432b29d136b9e905e4ea9e0c9b6ad09f368b9eec484773d1",
+    "clock.mid": "2024dc6c43c1f9e7b0f931c09f6f838530777f8f8c76b1b7eedf4d74aba79184",
+    "start.mid": "e0099e6054c35c1aa5707dd5faa39f54d6fddcab04a6dd69d4f3068a08c91973",
+    "active-sensing.mid": "fcf337da6dbe28000ebf0f2d3c0583399e94b2cba104f9431ac68e8c0aa3dabb",
+    "song-position.mid": "bbc3ed19823159573a71ce8c1e0b7c660983a57de0518de7fecd9ad665fcab0b",
+    "song-select.mid": "27323582953941338c2a121c4e394695a7ba28e85896387f6848fd26b9ceebac"
+  }
+}

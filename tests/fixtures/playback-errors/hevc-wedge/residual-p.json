@@ -1,0 +1,1829 @@
+{
+  "provenance": "Owned PCM/CABAC, SPS and MP4; synthetic patterns only; offline generator.",
+  "cases": [
+    {
+      "file": "residual-p-64-0-0.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-0-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-0-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-0-ic.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-0-ic-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-0-ic-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-1.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-1-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-1-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-1-ic.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-1-ic-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-1-ic-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-2.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-2-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-2-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-2-ic.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-2-ic-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-2-ic-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-mixed-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-mixed-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-0-mixed-ic.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-0-mixed-ic-bias-80.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-0-mixed-ic-bias200.mp4",
+      "size": 64,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-0.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-0-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-0-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-0-ic.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-0-ic-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-0-ic-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-1.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-1-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-1-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-1-ic.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-1-ic-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-1-ic-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-2.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-2-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-2-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-2-ic.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-2-ic-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-2-ic-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-mixed-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-mixed-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-64-1-mixed-ic.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-64-1-mixed-ic-bias-80.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-64-1-mixed-ic-bias200.mp4",
+      "size": 64,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-0.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-0-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-0-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-0-ic.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-0-ic-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-0-ic-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-1.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-1-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-1-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-1-ic.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-1-ic-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-1-ic-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-2.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-2-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-2-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-2-ic.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-2-ic-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-2-ic-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-mixed-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-mixed-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-0-mixed-ic.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-0-mixed-ic-bias-80.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-0-mixed-ic-bias200.mp4",
+      "size": 128,
+      "direct": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-0.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-0-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-0-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-0-ic.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-0-ic-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-0-ic-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-1.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-1-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-1-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-1-ic.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-1-ic-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-1-ic-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-2.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-2-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-2-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-2-ic.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-2-ic-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-2-ic-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "ic": true,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-mixed-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-mixed-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": false,
+      "source_bias": 200
+    },
+    {
+      "file": "residual-p-128-1-mixed-ic.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 20
+    },
+    {
+      "file": "residual-p-128-1-mixed-ic-bias-80.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": -80
+    },
+    {
+      "file": "residual-p-128-1-mixed-ic-bias200.mp4",
+      "size": 128,
+      "direct": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "ic": true,
+      "source_bias": 200
+    }
+  ]
+}

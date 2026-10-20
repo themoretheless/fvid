@@ -1,0 +1,50 @@
+{
+  "status": "accepted",
+  "accepted_ids": [],
+  "followup_ids": [
+    "FVID-0063"
+  ],
+  "checked_at": "2026-10-16T10:22:08.261990+00:00",
+  "before": [
+    "evidence/batch-128-before-clock.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-128-integration.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-128-reader.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-128-clock-verified.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-128-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-128-independent-reference.json",
+      "kind": "external-reference",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-128-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six authored mono AAC-LC ADTS silence inputs. Four public durations round1ns above exact sample endpoint; two are healthy. All six native zeroPCM and fullplay/rewind controls pass before fix; four actual generation2EOFseek clocks fail. Independent FFmpeg confirms full sample counts andzeroPCM for allsix.",
+    "Use exact integer sample_duration at core AAC sample clock, preserving core/output SBR ratio. After allsix controls check each encoded/decoded PTS independently,completezeroPCM,exactduration,directEOF andactual publicEOFseek. Native silence contains positive/negative IEEEzero: initial byte-equality oracle wrongly rejects782negative-zero samples despite everyfloat beingzero. Corrected numerical silence oracle andbaseline rerun are separate;no new decoder defect claimed.",
+    "15related integration tests include exactLC/SBR/PSseek(134.51s),scaledAACclocks(75.71s),multielementSBR(139.10s),multiblockADTS,AVI andfourformat clocks.11AAC reader units,explicitPTSregression,Python reproducibility andplayerbuildpass. Ordinarytests/generationneed noFFmpeg/network/private media.",
+    "Qualification covers authored monoLC duration boundaries plus relatedexistingSBR/PS/multiblock cases. No physicalDAC,fullAACprofileorperformance claim. Oggfloating duration adapters remain under audit."
+  ],
+  "counting": "Zero-IDcontinuation of FVID-0063 exact audio clocks. Accepted count remains143."
+}

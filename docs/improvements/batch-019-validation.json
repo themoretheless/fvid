@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0041"
+  ],
+  "checked_at": "2026-10-15T09:38:00.331113+00:00",
+  "before": "Each independent PCM macroblock allocates/copies complete prediction planes and scans neighborhood readiness; actual128-square frame probe observes274 allocations/3_320_590 cumulative requested bytes.",
+  "result": "Validate all plane geometry/readiness before direct PCM publication. Preserve frame/field footprints, component samples and readiness.",
+  "measurements": "mbaff-pcm-memory-measurements.json",
+  "replay": "benchmark-mbaff-pcm-memory.py",
+  "qualification": [
+    "Six alternating paired actual decoder probes at64/128/256 squares and frame/field layouts. Each tracked picture matches independent author arrays. Counts, cumulative bytes and peak requested live deltas repeat exactly.",
+    "128-square frame:274\u219218 allocations,3_320_590\u2192109_326 cumulative requested bytes,132_331\u219282_155 peak requested live increase.",
+    "256-square frame:1_042\u219218 allocations,51_812_686\u2192432_462 cumulative requested bytes,525_739\u2192325_035 peak requested live increase. This is allocator storage/churn, not RSS.",
+    "The probe links a debug decoder and optimized wrapper. Timing is retained only as diagnostic; acceptance claims no release throughput ratio. Allocation deltas equal four removed allocations and one complete view per PCM macroblock.",
+    "Six new40ms size-series videos verify exact native components, clocks, seek, rewind and EOF.32 added PCM\u2192DC neighbor variants extend the earlier component fixture family to160 cases; an immutable before decoder independently verifies the8/10-bit frame/field neighbor controls.",
+    "Unit checks cover footprints, all-component readiness, invalid plane and pair-mode atomicity; original MBAFF independent JM and precision/export regressions pass.",
+    "Memory admission remains conservative for mixed-mode pictures; this change does not relax requested decoder budgets. Ordinary tests use saved data without encoder/network."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-019-mbaff-pcm-memory-kernel-after.log",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-019-mbaff-pcm-memory-root-after.log",
+      "passed": 35,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-019-mbaff-pcm-memory-regressions-final.log",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-019-mbaff-pcm-memory-fixtures.log",
+      "python_passed": 1
+    },
+    {
+      "log": "evidence/batch-019-mbaff-pcm-neighbor-fixtures.log",
+      "python_passed": 1
+    },
+    {
+      "log": "evidence/batch-019-mbaff-pcm-memory-player-check.log",
+      "status": "passed"
+    }
+  ],
+  "distinct_rust_tests_passed": 41,
+  "distinct_python_tests_passed": 2,
+  "remaining": [],
+  "counting": "One measured whole-picture PCM scratch elimination. Size/layout probes,32 neighbor variants and test infrastructure add no IDs."
+}

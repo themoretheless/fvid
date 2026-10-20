@@ -215,6 +215,26 @@ Feature `media` пока включает legacy backend для ещё не пе
   пересобирают позицию с начала, а всё, о чём ряд просит и что этот профиль не
   играет, считается в `Ignored` и не исчезает молча.
   (`XmAudioReader`, `every_thing_a_row_asks_for_that_is_not_played_is_counted`)
+  MIDI поддерживает PPQ с картой темпа и деление SMPTE: 24, 25, 30 и
+  30000/1001 кадров/с для кода −29. При SMPTE события темпа не меняют часы;
+  дробные тики сохраняются до публикации абсолютной микросекундной метки.
+  `SmfFile::time_division` явно описывает оба вида часов; прежнее поле
+  `ticks_per_quarter` сохраняет PPQ-значение, а для SMPTE равно нулю.
+  Мета-событие SMPTE Offset (FF54) этот профиль по-прежнему не применяет.
+  Проверка: `smf_smpte`, независимые PPQ-контроли и фактический аудиопоток.
+  Нативный MIDI-синтезатор применяет CC10 как линейный стереобаланс:
+  0 — слева, 64 — прежний уровень в обоих каналах, 127 — справа.
+  CC121 сохраняет панораму; полный сброс декодера возвращает центр.
+  Моно и прежний многоканальный выход сохраняют сухой микс, LSB-панорама CC42
+  не применяется. Это профиль собственного синусного инструмента, а не
+  обещание полного General MIDI или совпадения закона панорамы внешнего синтезатора.
+  RPN0 задаёт диапазон Pitch Bend через Data Entry MSB/LSB в полутонах/центах;
+  изменения применяются к звучащим и будущим нотам своего канала. Выбор NRPN
+  отключает применение RPN-данных, сохраняя прежний выбор RPN для возврата.
+  CC121 обнуляет выбор параметра и сам bend, сохраняя настроенный диапазон;
+  сброс декодера возвращает ±2 полутона. Другие RPN и Data Increment/Decrement
+  этот профиль не применяет. Фаза осциллятора остаётся ограниченной и при
+  диапазонах, поднимающих частоту выше частоты дискретизации.
 - G.711 в том же конверте читается теперь тоже: `src/playback_wav.rs` принимает форматные
   числа `0x0006` (A-law) и `0x0007` (μ-law) и отдаёт ряд теми же окнами; ряд называется
   `pcm_alaw` и `pcm_mulaw` — словами, которыми его зовёт FFmpeg, потому что Matroska прячет
@@ -452,20 +472,21 @@ Feature `media` пока включает legacy backend для ещё не пе
   Побитового совпадения с FFmpeg здесь нет и не заявляется — у lossy-ряда отвечает за строку
   целость пакетов (11520 отсчётов своих против 9600 обрезанных у FFmpeg; у слоя II 10368 — ровно
   столько же). (`Mp3::parse`, `header`, `info_tag_at`)
-- Голый FLAC (`flac`) читается своим кодом до того же декодера, что уже играл FLAC из Matroska:
-  `make_audio_decoder` отвечает на тэг `A_FLAC`, а голый файл не открывался, потому что ни один его
-  кадр не несёт ни длины, ни числа отсчётов. `src/playback_flac.rs` берёт геометрию из блока
-  `STREAMINFO` и ищет конец кадра по его собственному CRC-16: граница считается найденной, только
-  когда сумма сошлась с байтами кадра до неё, а следующий за ней заголовок держит свою CRC-8 —
-  поэтому заголовок то шесть, то восемь байт (короткий последний кадр называет свой размер блока
-  сам), и поэтому четыре байта, похожие на синхрослово, кадром не становятся. Три числа того же
-  блока — общее число отсчётов и наименьший и наибольший размер кадра — пересверяются с рядом, и
-  расхождение есть отказ. Разбор обходит metadata-блок, которому формат разрешает стоять между
-  кадрами: демуксер этой сборки FFmpeg такой блок подмешивает в предыдущий пакет и на целом файле
-  пишет `invalid sync code`, так что эталон здесь — формат, а не инструмент. Побитовое совпадение
-  с FFmpeg заявлено как у несжатых рядов: на четырёх фикстурах (48 кГц моно, 44.1 стерео, 24 бита,
-  8 кГц) `audio_probe --pcm` сошёлся с `ffmpeg -f f32le` байт в байт, а списки пакетов — с ffprobe.
-  (`Flac::parse`, `frame_header`, `crc16`)
+- Голый FLAC (`flac`) читает собственный парсер с геометрией из `STREAMINFO`.
+  `fvid_codecs::flac::frame_size` определяет длину по структуре подкадров и
+  остаточных кодов Rice, затем проверяет CRC заголовка и кадра. При индексировании
+  PCM не восстанавливается: совпавший CRC внутри обычных сэмплов, ложное синхрослово
+  или похожие на metadata байты больше не разрезают аудио. Сохраняется прежняя
+  совместимость со вставленными metadata-блоками между кадрами.
+  Число отсчётов и заявленные границы размеров кадров сверяются с индексом.
+  Полный `decode` по-прежнему требует ровно один пакет; новый `frame_size`
+  возвращает длину первого кадра из префикса с последующими данными. Ошибки
+  индексирования теперь включают смещение кадра и конкретную причину структуры/CRC.
+  Три коротких образца с коллизиями сверены с независимым libFLAC и буквальным PCM;
+  FFmpeg сам ошибается на варианте с ложным кадром. Матрица1460 профилей проверяет
+  границы, строгий пакетный декодер, повреждённые хвосты и CRC.
+  (`Flac::parse`, `flac::frame_size`, `flac_boundary_collision`, `flac_frame_layout`)
+
 - Голый Dolby Digital (`ac3`) читается своим кодом до того же декодера, что принимает `A_AC3` и
   `ac-3` из контейнеров: ни числа отсчётов, ни длины файла формат впереди не объявляет, а длина
   самого кадра в байтах не записана нигде — шестибитный `frmsizecod` индексирует слово Таблицы 5.18,
@@ -528,9 +549,9 @@ Feature `media` пока включает legacy backend для ещё не пе
   кладут их по-разному: MP4-запись `alac` ставит перед ними четырёхбайтную версию, а `CodecPrivate`
   Matroska начинается с них самих (замер обоих байтов). Выравнивания ни один отсчёт не просит —
   последний остаток кадра может кончиться в середине байта, и пакет просто там обрывается.
-  Собственный читатель берёт моно и стерео на 16/20/24/32 бита и на кадр до 4096 отсчётов; трек
-  с больше чем двумя каналами отвергается, а не расставляется наугад, потому что порядок элементов
-  в surround-кадре не совпадает с порядком каналов. Кадр, который читает дальше своих байт, не
+  Собственный читатель принимает 1–8 каналов на 16/20/24/32 бита и кадры до 4096 отсчётов.
+  Блок cookie `chan` задаёт именованную раскладку; без него каналы выше stereo остаются
+  без назначенных ролей. Подробная квалификация multichannel приведена ниже. Кадр, который читает дальше своих байт, не
   дошёл до стоп-тега или объявил разное число отсчётов в двух элементах, отказывается целиком, и
   аудиопуть считает такой отказ, а не подставляет тишину. Побитовое совпадение с FFmpeg заявлено
   как у несжатых рядов: на восьми фикстурах (16 и 24 бита, моно и стерео, синус, белый шум,
@@ -2556,7 +2577,7 @@ rematrix requests fail before publication; identity/gain requests succeed.
 
 The existing FVid ALAC decoder is now available without the `player` feature
 and shares the owned MP4 audio timeline with AAC. `media decode-audio`, its
-plan and public media API can export supported mono/stereo ALAC MP4 inputs
+plan and public media API can export supported ALAC MP4 inputs
 to float PCM/WAV, including interval selection, gain, mono/stereo conversion
 and resampling. The mix/merge paths accept these inputs as well. Compressed
 packets are read individually from the MP4 sample index; the complete media
@@ -2564,10 +2585,10 @@ payload is not loaded into memory. The packet-to-PCM adapter validates ALAC
 cookie rate/channel geometry before output publication.
 
 The AAC-specific export functions still reject non-AAC tracks. Unsupported
-ALAC profiles/layouts and ambiguous default ALAC audio selection retain the
-legacy adapter. Matroska ALAC now uses the same owned packet decoder and
-sample timeline, including interval selection and container trimming. Player
-support is unchanged. This does not remove the remaining `media` dependency.
+ALAC profiles/layouts are refused by the owned implementation when unsupported;
+there is no production FFmpeg fallback. Matroska ALAC uses the same owned packet
+decoder and sample timeline, including interval selection and container trimming.
+The multichannel acceptance scope is specified below.
 
 `tests/native_alac_media.rs` compares seven MP4 fixtures (mono/stereo, 16/24-bit,
 tones, noise and silence) byte-for-byte with the optional independent decoder.
@@ -4370,7 +4391,6279 @@ reset and the full MP4/seek/rewind/forced-flip FFV1 export path pass for all
 882 intra/P-skip/axial-motion movies. The focused existing AVC unit gate also
 passes 200 tests after the component-precision changes.
 
-Diagonal fractional motion, B pictures, weighted/nonzero transformed residual
-bitstreams and field/MBAFF mixed-depth streams still require their own
+`generate_avc_component_weights.py` adds 882 authored CAVLC weighted-P
+movies: 49 depth pairs, six pred_weight_table variants and P-skip/horizontal
+quarter/negative vertical quarter modes. Separate luma/chroma denominators,
+negative/zero/extreme weights, extreme offsets, rounding and saturation are
+checked against independent integer arrays. Both absent weight flags infer
+128 at denominator seven; separate flag variants check luma-only and
+chroma-only syntax. Offsets scale by each source component depth before
+clipping. The earlier primitive checks are now complemented by these actual
+weighted-P bitstreams. All 1764 intra/P-skip/axial/weighted-P movies pass exact
+software MP4 decode, reset, seek/rewind and forced-flip FFV1 export, including
+packet PTS/duration; ordinary tests use no FFmpeg or network.
+
+`generate_avc_component_bipred.py` adds 686 three-frame reordered CAVLC
+B_Bi_16x16 movies. For all 49 depth pairs, seven variants cover ordinary
+averaging, symmetric/asymmetric implicit weights, explicit mixed/extreme/default
+weights and independent list/component flags. Integer and fractional reference
+vectors use distinct authored past/future I_PCM arrays. The scalar oracle applies
+component-specific interpolation, bi-weight rounding and the average of scaled
+offsets before clipping. Decode order is [0,2,1] while display order is [0,1,2].
+All 2450 intra/P/weighted-P/B movies pass source-depth decode/reset, software MP4
+presentation order, forward/backward seek including the last frame, rewind and
+forced-flip FFV1 export. Export checks each sample and unchanged PTS/duration.
+These acceptance tests require no FFmpeg, network or fixture regeneration.
+
+`generate_avc_component_residual.py` adds 2352 authored three-frame CAVLC
+movies: all depth pairs 8..14, QP 24..30 and 51, luma-only/chroma-only/combined
+DC impulses and both polarities. Flat-16 scaling has a closed-form independent
+oracle: a normal 4x4 block DC impulse yields a constant residual, while a 2x2
+chroma DC impulse passes through the separate Hadamard/scale step. All six
+normalization rows and nonlinear chroma-QP boundaries are exercised. Every
+fixture contains a nonzero reconstructed delta and changes actual source
+samples; per-plane clipping retains the correct source precision.
+
+The third P-skip frame repeats the reconstructed second frame, qualifying stored
+reference samples after residual rather than only the immediate output. Exact
+decode/reset, MP4 rewind/forward/backward seek and forced-flip FFV1 export pass
+for all 2352 movies, including all three packet intervals and every sample.
+The tests share playback/export helpers with the preceding matrices, use
+separate temporary output namespaces and do not require FFmpeg or generation.
+This is signed DC acceptance with deblocking disabled, not arbitrary AC/8x8,
+transform-bypass bitstream or active-deblocking qualification.
+
+`generate_avc_component_ac.py` adds 6174 three-frame CAVLC 4x4 AC movies.
+Every depth pair 8..14, polarity and luma/chroma/combined mode covers all fifteen
+non-DC scan positions. QP rows 24..29 are distributed across basis/depth pairs;
+representatives of all three normalization categories also cover QP 30 and 51.
+A separate rational inverse-transform matrix computes the oracle without the
+production butterfly. Flat-16 scaling and these QPs make intermediate half
+shifts exact; this matrix is not a low-QP/custom-scaling rounding claim.
+
+Exact source-depth decode/reset, reconstructed-reference P-skip echo, MP4
+seek/rewind and forced-flip FFV1 export pass for every AC fixture. Export checks
+all samples and the three original packet intervals. Hashes, coefficient-position
+coverage, actual changed source samples and reference echoes are separately
+verified. These are single ±1 AC impulses with disabled deblocking; arbitrary
+multi-coefficient levels and other residual modes are not established by this
+matrix. Ordinary tests read authored fixtures without FFmpeg or network access.
+
+`generate_avc_component_transform8.py` adds 6272 three-frame CAVLC
+transform8 movies: all 64 basis positions, every depth pair 8..14 and both signs.
+Signed level two is interleaved into the four CAVLC streams per 8x8 region.
+QP 46..51 is distributed across positions/depth pairs and covers all six
+normalization rows. An independent rational 8x8 matrix computes every residual;
+these flat-16 cases make intermediate shifts exact. This is not an arbitrary
+low-QP/custom-scaling rounding claim. Chroma is retained at its own precision.
+
+All 6272 movies pass exact decode/reset, reconstructed-reference P-skip echo,
+software MP4 seek/rewind and forced-flip FFV1 export, with every sample and
+three packet intervals checked. Hashes, complete basis/depth/sign coverage,
+actual luma changes, unchanged chroma and reference echoes are independently
+verified. Ordinary tests read authored fixtures without FFmpeg or generation.
+The precision-carrying player paths also pass
+`cargo check --locked --offline --no-default-features --features player`;
+this is a feature-build gate, not live hardware playback qualification.
+
+Diagonal fractional motion, other B direct/partition modes, bypass residual
+bitstreams, other coefficient/rounding/scaling/intra-residual cases, active
+mixed-depth deblocking, CABAC and field/MBAFF streams still require their own
 qualification and remaining implementation. Full mixed-component-depth support
 remains unfinished.
+
+### Matroska HEVC presentation preserves source chroma geometry
+
+The software Matroska HEVC branch now uses the common packed HEVC presentation
+path instead of wrapping every decoded picture in the 4:2:0-shaped AVC payload.
+The exact old failure was reproduced on authored 4:4:4 PCM: RGB differed from
+the independently sample-qualified MP4 path at byte 3 (the second pixel).
+The shared private picture variant is now named `Packed` and serves HEVC and
+FFV1 without changing codec identity. HEVC monochrome state is retained.
+
+`generate_hevc_matroska_formats.py` rewraps only existing authored HEVC PCM
+packets and their saved synthetic HM sample oracles. It executes no encoder or
+decoder. Its 112 short movies cover mono/420/422/444 at 8/10/12 bits plus 444
+at 14/16 bits, four quarter rotations and zero/asymmetric stored crop. Independent
+Python per-plane display arrays qualify sample geometry without RGB conversion.
+The MP4 controls first match the saved exact samples; Matroska then matches both
+those source samples and the qualified RGB. Raw metadata, display dimensions,
+swapped chroma axes, every crop/rotation sample, rewind/seek and packet intervals
+are checked. Legacy RGB reads retain correctly rotated coded pixels; stored crop
+remains exposed as insets for callers, preserving the existing reader contract.
+
+The focused gate passed 24 tests including all native FFV1/alpha and deep-PCM
+HEVC regressions. The player feature also passes
+`cargo check --locked --offline --no-default-features --features player`.
+This is software presentation/sample acceptance and a feature-build check, not
+live hardware playback qualification or coverage of every HEVC profile/tool.
+
+### HEVC identity RGB sample and range presentation
+
+Native software MP4 (including the layered frame adapter) and Matroska dispatch
+HEVC VUI matrix 0 as identity GBR, requiring 4:4:4, and interleave R/G/B without
+YUV conversion. Conformance cropping and exact component-depth lifting precede
+packing. Source RGB codes remain unchanged; explicit limited RGB state applies
+16..235 scaling only when producing RGB8/RGBA, and survives source-depth rotation
+and display/user geometry. Existing FFV1/AV1/VP9 RGB full-code behavior is unchanged.
+
+`generate_hevc_identity_rgb.py` patches only VUI in already authored PCM SPSs;
+the owned SPS helper compares all non-VUI parsed fields. No external decoder,
+private data, or network is used. Its 80-case matrix covers 8/10/12/14/16 bits,
+full/limited range, four orientations and two crops, with independent integer
+RGB and display oracles. `hevc_identity_rgb` checks both containers, exact raw
+codes, RGB8, geometry, rewind and seek. Ordinary tests only read saved fixtures.
+The old playback failed specifically with the matrix-not-implemented error.
+
+The MP4 owned media bridge also dispatches identity HEVC as RGB, includes RGB
+in spool/bridge format-change checks, and exports exact source codes to RGB FFV1.
+The lossless export regression forces a horizontal flip on all ten source
+(depth, range) combinations, independently checks FFV1 codes, depth, colour
+range and timestamps, and opens/seeks the resulting file through native playback.
+Matroska retains explicit Range separately from an absent range; this enables
+limited RGB normalization while keeping untagged FFV1 RGB full-code behavior.
+
+This qualifies software playback and MP4 lossless export sample/range handling;
+it does not establish hardware RGB decode, all HEVC coding tools, arbitrary
+colour filters, or HDR identity transfer presentation.
+
+### HEVC in the Matroska media pipeline
+
+The shared owned Matroska decoder and single-video FFV1 export now admit
+`V_MPEGH/ISO/HEVC`, retaining VUI colour/range, HDR metadata, conformance crop,
+component precision and actual chroma geometry. RGB uses the same exact GBR
+packing as MP4 export. The shared pipeline retains explicit limited RGB range
+rather than forcing all RGB to full range; untagged FFV1 RGB retains its existing
+full-code interpretation. HEVC uses the existing presentation-duration index
+when duration inference is needed.
+
+`hevc_matroska_export` forces decode/filter/encode through a horizontal flip for
+192 authored cases: the 80 identity-RGB cases plus 112 mono/420/422/444 cases.
+It checks output size, depth, exact independently stored crop/rotation codes,
+packet count and timestamps; RGB additionally checks exported native RGB8
+presentation and range. The pre-fix test refused the codec at export admission.
+Ordinary tests read the saved synthetic fixtures without external codecs.
+The PCM matrix alone does not qualify every HEVC coding tool; reordered
+I/P/B coverage is described separately below.
+
+### HEVC companion audio and inferred Matroska durations
+
+The owned multitrack exporter admits HEVC with selected AAC/Opus companions.
+Stored crop and rotation use the existing shared video normalization rather
+than rejecting all oriented multitrack files; audio packets retain their own
+clock and are scheduled alongside the normalized video.
+
+`generate_hevc_matroska_timeline.py` writes 256 short finite-EBML fixtures using
+only authored PCM HEVC and existing synthetic AAC/Opus packets. Eight source
+format/depth/range combinations cross all quarter turns, two crops, timed vs
+untimed video, and single-video vs companion-track containers. Untimed files
+have irregular 37/54/55 ms intervals and an explicit Segment end, independently
+specified in the manifest. The selected short audio prefix fits within the 146 ms Segment boundary.
+Audio clusters keep their original nanosecond
+TimestampScale, timestamps, block data and track descriptions.
+`hevc_matroska_timeline` checks every exported frame against independent display
+codes after a forced horizontal flip, exact video PTS/duration, and audio
+packet bytes, PTS/duration, discard padding, configuration, codec delay, rate
+and channel count. The old admission failures are reproduced by the same saved
+synthetic files. Tests do not generate fixtures or require external codecs.
+
+The PCM matrix proves adjacent visible timestamp inference and an explicit
+Segment end. Companion-track interval trimming remains separate qualification.
+
+### HEVC I/P/B presentation before media transforms
+
+The shared Matroska video pipeline decodes access units in packet order and
+holds decoded pictures until the suffix minimum of remaining visible packet
+PTS proves each can be presented. A queued picture retains its own monochrome,
+colour/range and HDR binding; later decoded sequence state cannot relabel it.
+Filtering, interval selection, frame indexing and temporal transforms then see
+presentation order. Existing FFV1 pre-read interval and packet-limit behavior
+is retained. Missing-duration inference sorts visible pictures by PTS before
+using the next visible timestamp or the final positive interval.
+
+`generate_hevc_matroska_reorder.py` wraps the existing authored Main/Main10
+I/P/B streams and saved synthetic YUV references without running any codecs.
+Sixteen fixtures cross 8/10 bit, default vs irregular inferred duration,
+Segment end present/absent, and AAC/Opus companions present/absent. MP4 CTTS
+establishes the original display order; packet decode order is retained.
+`hevc_matroska_reorder` requires real B slices, first qualifies all wrapper
+pixels through native software playback against saved references, and then
+checks every forced-flip export frame and exact PTS/duration. Single-video
+variants also check an interval starting between frames. Before the fix the
+second exported picture was at 160 ms instead of the expected 40 ms.
+Final duration without Segment end uses the last positive display interval;
+this matrix does not qualify every HEVC tool/profile. Companion interval
+qualification is described below.
+
+### Compressed AAC/Opus companion windows
+
+Owned multitrack export now admits intervals with contiguous AAC/Opus audio.
+Its read-only admission phase computes the retained compressed prefix, using
+ceil sample boundaries and the resolved AAC output clock or each Opus packet's
+duration. Original prefix packets are retained for decoder state. CodecDelay
+skips the selected leading samples and final DiscardPadding removes the tail;
+encoded packet bytes are unchanged. OpusHead pre-skip is updated consistently
+with CodecDelay, while the other identification-header fields remain unchanged,
+following the [Matroska Opus mapping](https://www.matroska.org/technical/codec_specs.html).
+The exporter reports removed audio sample frames and rebases video independently
+through the existing presentation/filter path.
+
+`generate_hevc_audio_interval.py` saves eight dedicated short synthetic I/P/B
+sources with AAC/Opus companions; `hevc_audio_interval` crosses three windows
+(24 exports), including boundaries between samples and coded frames. It checks
+all selected video samples/PTS/durations, compressed audio prefix bytes, and
+bit-exact decoded AAC/Opus PCM against the independently decoded source window.
+Ordinary tests only read saved fixtures and require no FFmpeg or network.
+
+The compressed-copy path classifies discontinuous clocks, interior signed
+padding and Opus preroll beyond the 16-bit header field as owned PCM windows.
+These tracks are decoded through the existing source presentation scheduler
+into a private float32 disk stage, then packetized as `A_PCM/FLOAT/IEEE` inside
+the final MKV. Applicable AAC/Opus tracks retain their compressed prefix. PCM
+stage packets are bounded by the caller's packet limit, carry zero codec delay,
+and preserve any leading audio offset relative to the selected video window.
+The temporary directory registers and removes both raw and Matroska PCM stages
+on successful completion and on errors. PCM audio can increase output size.
+
+`generate_hevc_complex_audio_windows.py` authors six more reproducers: Main and
+Main10 I/P/B, each with a long interval starting at 1.700123 seconds, a 37 ms
+audio gap, or +/-1 ms interior padding. Every old fixture-specific refusal was
+verified before enabling acceptance. `hevc_complex_audio_windows` compares
+selected PCM bytes with independently decoded original windows, checks removed
+sample counts against the full original presentation, validates video samples
+and timestamps, and requires cleanup of private stages. All six acceptance
+cases pass. These fixtures do not qualify every audio layout or codec profile;
+other companion codecs and format combinations remain separate requirements.
+
+### Matroska frame compression
+
+The native reader supports one frame-scoped zlib (`ContentCompAlgo=0`) or header-stripping (`ContentCompAlgo=3`) transform (`ContentEncodingScope=1`). It restores codec input before decoding and Opus lace timing. Header stripping also supports fully stripped frames. Codec-private transforms, transform chains, nonempty zlib settings, other compression algorithms and encryption retain explicit unsupported results.
+
+Prefix settings are capped at 256 KiB and the packet limit. Retained prefix
+capacity participates in index admission; restored bytes participate in packet,
+audio and subtitle allocation limits. `Packet.offset` and `Packet.size` describe
+the stored source span, while `read_packet`/`read_packet_into` return restored
+codec input bytes. The additive `packet_payload_size(index)` query provides the
+restored length without changing stored-span semantics.
+
+Synthetic regression generation lives in
+`scripts/generate_matroska_header_stripping_regressions.py`; ordinary Rust
+regressions consume saved fixtures without FFmpeg or network access.
+
+Zlib frame input and output are independently bounded by the packet limit. The inflater verifies the checksum and complete stream, using fallible output growth and a one-byte overflow sentinel. Indexing records restored lengths; `packet_payload_size` reports them, while stored packet offsets/sizes retain source-span semantics. `packet_read_overhead` exposes compressed-input and inflater scratch storage for controlled audio admission. Synthetic zlib fixtures are generated separately by `scripts/generate_matroska_zlib_regressions.py`; runtime tests need neither FFmpeg nor network.
+
+### Opus multistream identification during owned export
+
+Matroska transport now reads channel count and pre-skip through the same owned
+`fvid_opus::OpusHead` parser as the decoders, instead of requiring a 19-byte
+version-1 mono/stereo header. Original CodecPrivate and compressed packet bytes
+remain unchanged. Header unit tests cover standard family-1 layouts for 1..8
+channels, family-0 mono/stereo, truncation, zero channels and compatible minor
+versions. Library validation passed 496 tests with one pre-existing ignored
+integer/float RGB acceptance gap.
+
+`generate_hevc_opus_surround.py` wraps three authored HEVC PCM frames with six
+saved synthetic six-channel family-1 Opus packets. Minimal authored track
+metadata and explicit 20 ms audio durations isolate the identification-header
+failure. The original native six-channel decoder succeeds; the old export
+fails specifically with the mono/stereo mapping-family-0 transport error.
+`fvid-media`'s `hevc_opus_surround_export` acceptance now passes, preserving
+Opus configuration, delay, timestamps and every packet, with bit-exact decoded
+audio and independently saved flipped HEVC pixels. This establishes this
+six-channel export path, not every multistream framing/timeline combination or
+all Opus mapping families in native decoding.
+
+`hevc_pcm_stage_cleanup` also passes cancellation after preparing complex PCM
+windows: it verifies that neither a final output nor private PCM stages remain.
+
+### Opus elementary-stream boundaries and durations
+
+The surround generator now also saves an audio-duration-free variant and a
+variant with seven padding octets in the first elementary stream. The former
+reproduced the single-stream CBR-length refusal on a valid 1482-byte packet;
+the latter reproduced a native multistream duration-disagreement error because
+the following stream started at padding instead of its own TOC.
+
+The shared Opus packet splitter now includes padding in its consumed byte
+count. `multistream_packet_samples` validates every elementary packet and
+requires common duration at 48 kHz. Matroska duration inference and compressed
+window/sample-count planning use this header-aware framing path. This follows
+[RFC 6716 self-delimiting framing](https://www.rfc-editor.org/rfc/rfc6716.html#appendix-B).
+All 153 Opus library tests pass, as do 496 media library tests (one
+pre-existing ignored RGB acceptance) and all three surround media fixtures.
+All eight root Opus playback tests pass, including bit-exact playback and seek
+for all three surround timing/padding variants. The pre-existing integer/float RGB pipeline acceptance remains
+an open gap; it is not cleared by these Opus changes.
+
+### Explicit Opus channel-map decoder construction
+
+`OpusMSDecoder::with_layout` accepts an explicit map and validates output count,
+stream/coupled counts, map length and every non-silent index before constructing
+stream decoders. The existing standard-layout constructor delegates to it.
+Two focused tests pass: invalid layout admission and six synthetic surround
+packets decoded with reordered, duplicated and silent output channels. Expected
+PCM is independently indexed from standard-layout decode, sample for sample.
+The offline surround generator also saves a short HEVC/Opus family-255 movie
+and the six length-prefixed authored audio packets used by the core test.
+Family-255 playback/export adapter acceptance remains pending; the new core
+constructor alone does not establish player support. Mapping semantics follow
+[RFC 7845](https://www.rfc-editor.org/rfc/rfc7845.html#section-5.1.1).
+
+`OpusHead::decoding_layout` now shares layout validation between
+media decode and root playback. Families 0, 1 and 255 are admitted; family 1
+retains its 1..8 speaker semantics but no longer requires the encoder's common
+stream map. Family 255 preserves discrete output order. Other registered
+families still require their own interpretation and remain unsupported.
+Native decode applies family-1-to-WAVE ordering only to family 1, not to
+unidentified discrete channels. This validates PCM transport/extraction; it does
+not assign speakers or establish arbitrary hardware output layouts.
+The six-channel discrete movie reproduced the old mapping-family refusal.
+All five focused export tests pass after the fix, including the explicit
+family-1 map. The full media library gate passes 496 tests with the existing
+ignored integer/float RGB acceptance. All eight root playback tests pass;
+the mapped videos preserve six-channel PCM and exact seek suffixes.
+
+
+### Discrete Opus WAVE export metadata
+
+The synthetic six-channel family-255 movie reproduced an incorrect WAVE
+speaker mask of 63: its unidentified discrete channels were labeled as standard
+surround. Export now derives the mask from the Opus mapping family, retaining
+zero for discrete channels and the standard WAVE mask for family 0/1.
+The regression checks both discrete and remapped family-1 movies, including
+bit-exact float32 PCM and preserved channel order. All six focused export tests pass, including the expanded standard/discrete
+mask comparison. The full media library gate passes 496 tests with one
+pre-existing ignored integer/float RGB acceptance. Geometry probing now validates the header and admission estimate
+without constructing all elementary decoders solely to obtain rate/channels.
+
+### Opus discrete output beyond eight channels
+
+The offline surround generator saves nine- and 255-output-channel movies using
+the same six authored packets, with periodic reordered/duplicated/silent maps.
+Native presentation decode succeeds for both. The 255-channel movie reproduced
+a WAVE export refusal caused by the old 64-channel PCM header limit.
+WAVE float/integer header and file writing, PCM input admission, float32/float64
+sinc workspaces, output request validation and controlled-memory estimation now
+admit 1..255 channels. Sinc queue accounting uses the actual 255-channel slot
+width. Speaker rematrixing remains restricted to defined standard layouts;
+unchanged discrete channels retain their declaration and a zero speaker mask.
+The focused wide export acceptance passes, comparing every PCM channel to the
+six-channel independently indexed baseline. All 496 media library tests pass (one pre-existing ignored RGB acceptance),
+as do all eight surround export tests, including the 24 kHz resampling
+comparison. All nine root Opus playback tests pass, including exact channel
+comparison and seek suffixes for both wide discrete movies.
+This establishes decoded/extracted channels, not 255-channel physical output.
+
+### Opus identification decoded-channel limit
+
+The common OpusHead parser now rejects a stream count plus coupled count above
+255, independently of the number of output channels. The synthetic
+`hevc-opus-invalid-decoded-count.mkv` declares 254 streams and two coupled
+streams, while retaining six output channels. The transport regression first
+reproduced successful identification of this invalid header and now checks the
+specific decoded-channel-limit error before payload processing. This is a
+malformed-header refusal test, not acceptance of the invalid movie.
+Core boundary tests accept valid sums of 255 and reject sums of 256 or 510.
+All 156 Opus library tests and all nine surrounding media integration tests
+pass offline without FFmpeg. Existing valid nine/255-output-channel movies
+continue to pass decode, WAVE export and resampling acceptance.
+
+### Native discrete Opus encoding
+
+`ChannelLayout::surround(channels, 255)` now creates 1..255 independent mono
+streams in declared channel order. Both native multistream constructors use
+this layout; family 0/1 behavior is unchanged. This closes the previous
+unsupported-mapping-family error in native family-255 encoder construction.
+The offline generator saves a short HEVC/float32 PCM source movie and its
+identical authored 440 Hz PCM samples. Encoding acceptance exercises 1, 9 and
+255 streams over three 20 ms packets, with three distinct amplitude groups.
+Every elementary packet is bit-exact against a corresponding separately
+stateful mono encoder; framing durations and all decoded channel samples are
+also checked against separate mono decoders. All 157 core tests pass.
+All ten surrounding media integration tests pass, including exact equality
+between decoded source-movie PCM and the authored encoder input.
+This qualifies the native encoding API, not a general file-to-Opus export
+workflow or spatial interpretation of discrete channels.
+
+### Ogg Opus multistream packet admission
+
+The Ogg writer now records stream count from a validated serialized OpusHead.
+Automatic packet duration checks every elementary stream rather than inspecting
+only the first TOC. Explicit-duration multistream writes also verify common
+coded duration before flushing or appending container bytes; explicit final
+trim remains available. A regression reproduced acceptance of an invalid
+four-stream packet whose last stream declared a different duration. It now
+checks the specific refusal, unchanged granule/sink and byte-identical final
+output after continuing with valid packets. The offline generator also saves
+`hevc-opus-invalid-stream-duration.mkv` reproducing that framing failure.
+Native discrete encoding tests now mux/read all generated packets through Ogg
+at 1, 9 and 255 streams, checking exact headers, packet bytes, EOS and final
+coded granule 2880. All 158 core tests and all eleven surrounding media integration tests pass,
+including the synthetic-video transport refusal. This verifies coded packet clocks, not a new arbitrary file-to-Opus
+export API or lossless reconstruction of the original lossy-encoded input.
+
+### Ogg Opus explicit duration and terminal trim
+
+Explicit packet duration now validates framing for single and multiple streams
+and cannot claim more samples than the packet codes. A shorter duration marks
+the last audio packet; subsequent audio is refused until the writer is finished.
+The regression first reproduced accepting 961 samples for a 960-sample packet.
+It now verifies rejection without mutation, valid terminal trimming and the EOS
+granule, for both mono and synthetic six-channel packets. Ogg page-boundary and
+size-cap tests retain their exact packet lengths using valid 20 ms framing and
+padding instead of random TOCs. All 159 core tests and all twelve surrounding media integration tests pass,
+including explicit-duration qualification using the synthetic-video packet.
+
+### Native Ogg Opus playback
+
+The player now dispatches Ogg Opus to `OggOpusAudioReader` and the existing
+owned Opus decoder. Vorbis dispatch remains available. The new reader validates
+OpusHead/OpusTags, elementary durations and page granules, applies header
+pre-skip and final granule trimming, and prerolls from the start for exact
+sample seek. Rewind restores the original presentation window.
+The offline generator saves ordinary and padded-stream Ogg variants using the
+same six-channel packets as the short HEVC/Opus video. The old Vorbis-only arm
+reproduced its missing-Opus refusal; the enabled acceptance compares exact PCM
+against the video's decoded audio, with 137 final samples removed, then checks
+seek at sample 1782 and rewind. All ten root Opus playback tests pass.
+The initial acceptance qualified one logical Opus bitstream. Compatible chained streams and Opus-only parallel track selection are covered
+below; mixed-codec selection and combining unidentified with speaker-mapped channels
+remain open. This does not establish a general audio export workflow.
+
+
+### Chained Ogg Opus presentation
+
+Ogg chains now expose their inclusive page spans, allowing playback to distinguish
+sequential chains from parallel logical streams. Compatible Opus chains share a
+48 kHz output layout and gain while retaining each segment's own pre-skip,
+packet clock and final granule. `next_step` emits a decoder reset at the boundary;
+`next_packet` refuses a boundary that has not received that reset step. Seek
+prerolls only the selected segment and clips at the requested global sample.
+The authored two-segment fixture reproduces the former single-bitstream refusal.
+Its segments use pre-skips 312/648 and tail trims 137/211, with padding in the
+second segment. Twelve root Opus tests pass, including bit-exact concatenated
+PCM, sample 5311 boundary, seek immediately before/after it, end seek and rewind.
+The parallel fixture initially reproduced the track-selection refusal; its
+enabled multi-track acceptance is documented below. All 18 focused root
+Ogg/Vorbis library checks passed for the compatible-chain milestone.
+Changing stream maps or gain with a stable output layout is covered below.
+Known-speaker channel-count/family transitions are qualified below. Mixing
+unidentified and speaker-mapped channel semantics remains open.
+
+
+### Parallel Ogg Opus track selection
+
+`OggOpusAudioReader::open_track` selects a decoded Opus track in BOS order.
+Overlapping page spans form a multiplexed link; subsequent non-overlapping
+links form the selected track's sequential program. The reader lists supported
+tracks using first-link OpusTags TITLE/LANGUAGE and follows the same track
+position through subsequent links. Missing tracks are refused explicitly.
+The player's Ogg factory now forwards the selected track index.
+The former parallel refusal fixture now drives acceptance for both tracks,
+whose different pre-skips produce distinct sample windows. A second fixture
+chains two multiplexed links with different per-track trims and pre-skips.
+All twelve root Opus playback tests pass, comparing exact PCM and seek suffixes
+on both tracks and links, metadata and track bounds. All nineteen focused
+Ogg/Vorbis library checks pass, including actual player factory dispatch for
+both track indices and refusal of an absent third track.
+Mixed-codec track numbering remains open; stream-map/gain reconfiguration and
+output-layout normalization are covered below.
+
+
+### Opus decoder reconfiguration on chained boundaries and navigation
+
+`AudioStream::reset_decoder` retains the default history reset and lets a
+container replace its decoder when setup changes. The audio worker uses it
+for explicit reset steps, seek and rewind, retaining the existing checkpoint
+restoration path. Ogg Opus exposes the active segment's header and rebuilds
+only when it differs from the cached decoder configuration. Stable output
+channel count and mapping family now permit changing coded stream maps,
+and output gain across segments. Stream-count changes are admitted by the
+header/decoder dispatch; this acceptance qualifies map and gain changes.
+The authored paired video/Ogg fixture reproduces the former configuration-change
+refusal: segment two changes the family-1 map, pre-skip to 648 and gain to +6 dB.
+All thirteen Opus playback tests pass against independently decoded video PCM,
+including seeks immediately around the boundary and backward to segment one.
+All 23 audio-worker tests pass, including captured exact PCM through the real
+worker scheduling path and its seek/rewind commands, plus AAC checkpoint and
+preroll regressions. All twenty focused Ogg library checks also pass. Known-speaker output channel-count/family changes are normalized below.
+Combining discrete and speaker-mapped channel semantics remains refused.
+
+### Opus quad speaker semantics during WAVE export
+
+Opus family 1 with four output channels is FL/FR/rear-left/rear-right. It is not
+the generic four-channel FL/FR/FC/back-center layout used by some PCM workflows.
+`OpusHead::wave_channel_mask` now owns family-0/1 speaker masks; Matroska Opus
+WAVE export uses it and keeps discrete-family masks unassigned. In particular
+quad uses 0x33 rather than the previous 0x107. This follows
+[RFC 7845 channel meanings](https://www.rfc-editor.org/rfc/rfc7845.html#section-5.1.1.2)
+and [WAVE speaker flags/order](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ksmedia/ns-ksmedia-waveformatextensible).
+The offline generator saves a short HEVC/quad Opus movie by retaining the first
+two authored coupled streams and converting the second to regular framing.
+Its regression first qualified bit-exact PCM against six-channel source indices
+0/1/4/5, then reproduced the wrong mask. All 160 Opus library tests pass, as do all thirteen surround media integration
+tests and 497 media library tests (one pre-existing ignored RGB acceptance).
+Changing named-speaker source channel counts between Ogg segments is qualified
+below using a stable output layout. Quad-to-stereo/mono rematrix admission is qualified below with the correct
+quad mask.
+
+### Quad rematrix admission and precision
+
+The corrected Opus quad mask initially reproduced a public stereo/mono export
+refusal: generic WAVE DSP admitted only its different four-channel standard
+layout. `PcmGain::with_mask` now distinguishes quad FL/FR/BL/BR from the generic
+FL/FR/FC/back-centre order in both float32 and float64 paths. Quad rear-left
+feeds left and rear-right feeds right at the existing -3 dB surround gain;
+mono averages those outputs. Unknown four-channel masks remain refused.
+WAVE admission and actual export use the same speaker-layout qualifier and
+pass source masks into the DSP; standard-layout constructors retain their
+existing behavior. The synthetic Opus/video acceptance passes exact full PCM
+comparison for both stereo and mono outputs. Added saved float32/float64 quad
+WAVE fixtures qualify both precision paths independently, with impulse tests
+checking rear channel isolation across partial input frames. All 499 media library tests pass (one pre-existing ignored RGB acceptance),
+as do all fifteen surround integration tests, including the full float32 and
+float64 file export checks. Ordinary tests need neither FFmpeg nor network.
+
+
+### Stable output for changing Opus channel counts
+
+Before playback starts, the selected Opus program negotiates the union of its
+named WAVE speaker positions. Each segment's decoder still uses its actual
+header channel count; presentation first trims in source frames and then copies
+sample bytes into the agreed output positions, filling absent speakers with
+zero. Identity layouts retain their existing no-remap path. The public output
+mask and track metadata describe the negotiated format. Discrete-only programs
+retain channel-index semantics with the maximum declared count; mixing discrete
+and named layouts remains refused rather than assigning unknown speakers.
+The authored 6-to-quad and quad-to-6 Ogg fixtures first reproduced the former
+output-layout refusal. Both now compare exact PCM against their paired short
+HEVC/Opus videos, preserving rear pairs and inserting silence only for absent
+centre/LFE channels. All fifteen playback tests pass, including mono/quad transitions between
+family 0 and family 1 with a fixed FL/FR/FC/BL/BR output. All 24 audio
+worker tests pass, including both transitions, boundary seek/rewind, constant
+six-channel frames and exactly one backend start. All 21 focused Ogg library
+checks also pass. Changing discrete-only counts is admitted structurally but
+not qualified by these named-speaker transition fixtures.
+This qualifies the native presentation/queue contract, not every physical
+hardware output layout or mixing unidentified channels with speaker layouts.
+
+### Library ownership of Ogg framing
+
+The bounded Ogg parser now lives in `fvid-media::owned_ogg`. Root
+`container::ogg` re-exports its public types, preserving the same shared
+`fvid_control::error` contract. No parser implementation is duplicated in the
+player. All seven framing tests moved with the owner and run without player
+features, FFmpeg or network. The full media library gate passes 506 tests with
+one pre-existing ignored RGB acceptance; the fifteen prior surround integration
+tests and a new direct library API acceptance also pass. That acceptance checks
+exact packets against the paired HEVC/Opus movie, granules, page spans, chained
+and parallel streams, and both file/packet limits.
+During migration, the root CRC resealing helper reproduced skipping the final
+page when its end equalled the input length. The boundary is corrected; the
+saved synthetic Ogg regression verifies the intended granule change reaches
+the parser instead of failing CRC first. All fifteen focused root Ogg/Vorbis
+checks pass, including the last-page CRC regression. All fifteen Opus playback
+tests also pass after the library migration.
+The common parser is now available to file operations in the library; general
+Ogg Opus PCM extraction/export dispatch is still pending and is not claimed by
+this ownership migration.
+
+### Library-owned Ogg Opus programs and PCM extraction
+
+`fvid-media::owned_ogg_opus::Program` now owns track/link indexing, granule and
+pre-skip interpretation, source packet clocks, seek/rewind and lossless routing
+into a stable output layout. The player reader delegates to it and retains only
+the audio-thread adapter and decoder-reset cache. The timeline implementation
+is not duplicated between the library and player.
+`Program::decode_pcm` rebuilds history from the configured seek segment and
+streams packed float32 PCM into a caller-owned writer, returning shared native
+audio totals. It follows segment reconfiguration and reports writer I/O errors;
+a failed sink may contain partial PCM, as documented. Input/index bounds come
+from explicit `owned_ogg::Limits`; this low-level API does not claim the general
+file-operation CopyOptions admission/progress/publication contract.
+Without player features, all 507 media library tests pass (one existing ignored
+RGB acceptance), as do all eighteen surround integration tests. Direct library
+acceptance compares exact PCM to the authored video companions for ordinary and
+padded Ogg, selected parallel tracks, gain/map reconfiguration, changing channel
+counts, exact seek and rewind. Writer-error propagation and reuse after rewind
+also pass. All fifteen Opus playback tests pass through the thin player adapter;
+all fifteen focused audio-worker/Ogg adapter tests also pass.
+General `decode_audio` and `decode_audio_transformed` now dispatch Ogg Opus to
+this shared engine, then the owned WAVE DSP/publication pipeline. File operations
+select first-link source BOS indices, require an explicit choice for multiple
+Opus tracks, admit index/decoder storage before allocation and enforce packet,
+cancellation and RSS controls. Private PCM staging precedes atomic publication;
+existing destinations remain untouched and completion is emitted only once.
+OpusTags common fields map to RIFF INFO. INFO survives float32 output even when
+channels are discrete (mask zero), and its storage is charged to the WAVE budget.
+The authored discrete-tag fixture reproduces the previous lost-title failure;
+its audio packets also accompany the synthetic HEVC video, never private media.
+All 507 media unit tests pass (one existing ignored RGB acceptance), and all
+22 surround/export integration tests pass. These include cancellation before
+and during decode, packet/memory bounds, limited packet prefixes, source track
+selection, intervals crossing reconfiguration, source tags and metadata edits.
+Resampling at 32/44.1/96 kHz with stereo rematrix and gain matches exporting the
+fully decoded WAVE baseline byte-for-byte for PCM and INFO. This qualifies the
+Ogg Opus file workflow, not Ogg Vorbis file export or all codec profiles.
+
+### Owned Vorbis decoder foundation (incomplete)
+
+`fvid-codecs::vorbis` starts the independent Vorbis I implementation with an
+LSB-first packet reader and identification-header parser, following Xiph's
+Vorbis I specification sections 2 and 4.2.2. Reads are transactional on
+truncation, including zero-bit and 32-bit reads. Identification admits all
+nonzero 8-bit channel counts and valid short/long block exponents, preserves
+signed advisory bitrate hints, and validates signature, version, rate and
+framing bit. Padding bits/bytes are not mistaken for required zero fields.
+This foundation does not decode audio and does not replace the existing
+Symphonia playback decoder. Setup codebooks, floors, residue, coupling, MDCT,
+overlap and granule-qualified library export remain unfinished.
+
+The initial three Vorbis primitive tests passed. `CodewordLengths` additionally
+reads unordered, sparse and ordered length runs with caller-supplied entry
+admission, fallible allocation and bounded 32-bit lengths. It deliberately stops
+before lookup decoding and does not claim a validated Huffman tree. The packet
+reader now latches end-of-packet (including subsequent zero-bit reads), as
+required by sections 2.1.8–2.1.9; the failed read still preserves its cursor.
+
+All six identification/bitpacking/length tests passed through Cargo.
+`HuffmanBook` now assigns the leftmost available codeword in entry order,
+retains sparse indices, rejects incomplete/overspecified trees and enforces an
+explicit node budget with fallible allocation. The single-active-entry erratum
+is implemented: length must be one, either bit returns that entry, and one bit
+is consumed. Eight module tests passed in an isolated rustc harness of the
+actual source (minimal error adapter); the corresponding Cargo run is pending.
+This adds scalar entropy decoding, not vector lookup or audio synthesis.
+
+The eight Huffman-stage tests subsequently passed through Cargo. `Codebook`
+now combines packed lengths, validated Huffman decode and lookup types 0/1/2.
+Vector lookup retains packed multiplicands instead of pre-expanding every
+vector, supports sequence accumulation, and fills caller storage. Type-one
+lattice roots use exact integer comparisons; Vorbis float unpacking uses the
+specified signed mantissa/exponent representation. Entry, node and multiplicand
+budgets are explicit. Eleven tests passed in the isolated source harness,
+including both vector formats, truncations, lookup budget rejection and complete
+scalar/vector book decoding; Cargo verification of this stage is pending.
+
+All eleven codebook/lookup tests subsequently passed through Cargo. The owned
+mapping/mode parsers now read coupling pairs, up to sixteen submaps, per-channel
+mux and floor/residue references, validating channel/reference ranges and
+reserved fields. The unused time byte is discarded rather than incorrectly
+required to be zero. `PacketMode` reads ilog(mode_count-1) bits and long-window
+flags, avoiding the assumption that bit one alone selects a block size.
+Thirteen source-harness tests pass, including mappings for channels 1–255,
+three-channel coupling, submap selection and non-power-of-two mode counts.
+These parsers await integration with complete floor/residue setup and synthesis;
+they do not change the existing player timeline yet.
+
+`Mapping::propagate_nonzero` now propagates residue participation in coding
+order, independently of original floor presence. `inverse_coupling` reconstructs
+spectral channel vectors in reverse coupling order using the four square-polar
+sign cases. It validates every route and vector length before mutation. Fifteen
+module tests passed in the isolated harness, covering sign/zero boundaries,
+reversed channel indices, dependent coupling steps and failure atomicity. The
+prior thirteen-test Cargo run is still pending; no audio-output acceptance is
+claimed for these separate spectral primitives.
+
+All thirteen mapping-stage tests passed through Cargo. `Residue::parse` now
+reads types 0/1/2, begin/end, partition size and sparse eight-pass cascade books.
+Setup validates classbook bounds, classification-space capacity, vector book
+references and required lookup presence. Seventeen module tests passed in the
+isolated harness, including every byte truncation of authored residue headers,
+reserved types and scalar-only vector references. This is residue configuration
+qualification; packet residue reconstruction and floor/synthesis remain open.
+
+`Floor::parse` adds floor-zero configuration and floor-one partition/class,
+master/subclass book and X-position setup. Scalar book references are checked;
+implicit endpoints, unique X positions and the specification's 65-point maximum
+are enforced. Nineteen source-harness tests pass, including both floor types,
+empty partitions, all byte truncations and invalid books/duplicate/excess points.
+This qualifies header primitives only; floor packet decode/curve synthesis,
+complete setup integration, residue packets and audio synthesis remain open.
+
+The residue-stage Cargo run completed with nineteen passing Vorbis tests,
+including the floor setup additions captured before compilation. `Setup::parse`
+now connects codebooks, time placeholders, floors, residues, mappings and modes,
+checks packet signature and final framing, and applies aggregate entry/node/
+multiplicand admission across every book. Twenty source-harness tests pass,
+including a complete authored setup, truncations and cumulative budget refusal.
+The added `vorbis_setup` integration test uses the existing synthetic Ogg tone
+and the owned Ogg parser to qualify its full setup and every packet mode; its
+Cargo run is pending. This is header acceptance, not decoded PCM acceptance.
+
+`Floor1::decode_y` now reads packet floor presence, initial amplitude points and
+master/subclass Huffman selections. Missing subclass books produce zero
+corrections; nominal end-of-packet returns an unused floor, while configuration
+and allocation errors remain errors. Twenty-two source-harness tests pass,
+including all four floor multipliers, selected/no subclass books, packet
+truncations and exact consumed-bit counts. Floor prediction/curve rendering is
+still pending; encoded Y values are not yet a synthesized spectral envelope.
+
+Full setup and every packet mode of the saved synthetic Ogg tone passed Cargo
+integration; twenty-two module tests also passed in that run. Floor-one
+prediction now unwraps corrections using prior X neighbors and tracks active
+curve points. `curve_indices` renders sorted active segments with integer
+rounding, clipping and a constant tail into caller-owned output. Twenty-four
+isolated module tests pass, covering low/high room, odd/even/zero corrections,
+reactivated neighbors, decreasing/increasing lines and shorter output vectors.
+The integration test now additionally reads and renders the first channel's
+floor in every tone packet; this expanded Cargo check is pending. Integer dB
+indices still need inverse-dB substitution before spectral multiplication.
+
+`Floor0::decode_lsp` now decodes amplitude and vector-book LSP coefficients,
+accumulates the preceding vector's final value, consumes the final complete
+vector and retains exactly the configured order. Its caller supplies a combined
+coefficient/scratch value budget. Amplitude fields up to the format's 63 bits
+are retained in u64 rather than truncated to the 32-bit packet reader width.
+Twenty-six isolated module tests pass, including a five-coefficient/three-value
+book case, nominal truncations, invalid book selection, workspace refusal and
+wide amplitudes. Floor-zero Bark/LSP curve computation remains unfinished.
+
+The expanded Cargo run completed with twenty-six passing module tests and the
+synthetic Ogg setup/packet/first-channel floor integration test passing.
+`Floor0::curve` now builds the Bark-bin LSP envelope for even and odd orders in
+caller-owned storage, reusing each repeated Bark-bin value and using f64 product
+arithmetic. Twenty-eight isolated tests pass, including analytic constant-floor
+checks for order one, the closed-form order-two zero bin, zero amplitude and
+unchanged output on invalid coefficient input. This is component qualification;
+reference PCM accuracy and complete packet synthesis are still unverified.
+
+`Floor1::curve` now substitutes the normative 256-entry inverse-dB table from
+Xiph Vorbis I section 10.1 (numeric specification data, source URL recorded in
+`vorbis_inverse_db.rs`). Spectral output and byte scratch belong to the caller;
+no expanded frame workspace is allocated by this substitution. Twenty-nine
+isolated tests pass, including every index, monotonic amplitude/logarithmic
+scale checks and scratch mismatch atomicity. The synthetic tone integration
+check now also verifies finite positive linear floor envelopes. Its expanded
+Cargo run has not yet been executed; the preceding floor-curve run remains live.
+
+`Residue::decode` now reconstructs types 0/1/2 with grouped classifications,
+eight passes, vector placement, skipped channels and type-two interleaving.
+Workspace admission covers classifications, vector scratch and flattened type-two
+storage. Packet exhaustion retains completed additions. Thirty-two isolated
+module tests pass, including exact authored partition layouts, pass accumulation,
+channel skipping and partial packet output. The preceding Cargo run failed to
+compile its integration test because that test was edited to call the newly
+added floor method after the library snapshot compiled. A fresh run of the
+current coherent source state is required; no green Cargo claim is made here.
+
+`vorbis_synthesis` adds the owned Vorbis window, including hybrid short/long
+slopes, and a per-channel overlap state. The first frame primes history;
+subsequent frames emit previous_size/4 + current_size/4 samples. Reset drops
+history and invalid frames preserve it. Four isolated synthesis tests pass,
+including complementary squared windows across every legal 64–8192 block pair,
+transition zero/plateau geometry, short/long output spans and reset behavior.
+These are time-domain primitives; inverse MDCT and full packet-to-PCM acceptance
+remain unfinished.
+
+The window/overlap Cargo gate completed: thirty-six Vorbis tests and the saved
+synthetic setup/floor integration test passed. `vorbis_imdct::inverse` now
+provides independent FFT-based inverse MDCT with caller-owned complex scratch
+and no external transform dependency. It uses f64 FFT arithmetic and produces
+float32 samples. Two isolated transform tests pass: direct cosine comparisons
+at every legal 64–8192 block size (every output for small blocks, selected
+positions for larger blocks), impulse basis, zero input and scratch refusal.
+This proves the implemented transform equation, not decoded Vorbis PCM accuracy;
+normalization and full packet synthesis still require end-to-end acceptance.
+
+The IMDCT Cargo gate completed: thirty-eight component tests and setup/floor
+integration passed. `vorbis_audio::Decoder` now connects floor 0/1, residue
+0/1/2, inverse coupling, spectral multiplication, IMDCT, window and overlap into
+interleaved float32 PCM in Vorbis channel order. Packet workspace admission is
+explicit; clocks/granule trimming remain the container adapter's responsibility.
+An isolated decode of the saved authored stereo tone returned 178176 finite
+sample values (RMS 0.06219269); reset reproduced every float exactly. A permanent
+integration test adds first-packet priming, tone-frequency and reset assertions.
+This is initial decoder acceptance; reference PCM accuracy, transport clocks,
+profile/configuration breadth and replacing Symphonia playback remain open.
+
+The packet-to-PCM Cargo gate completed with thirty-eight component tests and
+both synthetic setup/floor and PCM-frequency/reset integrations passing. An
+explicit FFmpeg reference experiment on the authored stereo tone measured max
+absolute error 2.98023224e-8, RMSE 6.11652634e-9 and SNR 140.1854 dB over its
+reference samples. Raw owned output contains overlap tail; EOS granule 88256
+frames qualifies the 176512 interleaved output values, matching reference size.
+`cargo bench -p fvid-codecs --bench ffmpeg_vorbis_reference` preserves this
+comparison as an opt-in reference benchmark; ordinary tests do not invoke it.
+The benchmark uses this fixture's zero-origin timeline and does not qualify
+arbitrary Ogg initial offsets, chained programs or general export dispatch.
+
+The explicit FFmpeg reference benchmark passed: EOS-granule-trimmed owned and
+reference output both contain 176512 values, with max error 2.98023224e-8,
+RMSE 6.11652634e-9 and SNR 140.1854 dB. This remains benchmark-only.
+The root `VorbisDecoder` adapter now delegates to `fvid-codecs::vorbis_audio`
+instead of Symphonia, checks track/header geometry and derives frame workspace
+from source channel/block/book geometry. Library `configuration_headers` splits
+concatenated or Xiph-laced identification/comment/setup headers by lengths.
+An added configuration test includes a fake setup marker in a long comment to
+exercise length-based splitting; that test is pending. Root Vorbis player
+regressions are running. Symphonia remains used by other root audio codecs;
+full Ogg timeline/export migration is not completed by this adapter change.
+
+### Vorbis Ogg presentation clock correction
+
+The Ogg reader now parses mode selection from setup, primes the first block
+without invented duration and stamps following PCM by (previous+current)/4.
+Page granules anchor the initial offset; negative initial samples and EOS tail
+are clipped after decode. Chained programs start at the preceding presentation
+end and reset codec history. Seek returns the exact clamped target, prerolls
+from the selected chain start and suppresses PCM until that target.
+`scripts/generate_vorbis_timestamps.py` writes authored three-mode silent Vorbis
+with short/long transitions, negative/positive initial offsets, EOS trim and
+two chains, plus a short HEVC/Vorbis companion. It runs offline without codecs.
+The old reader's actual duration helper reproduced 32 samples where this
+synthetic mixed-mode overlap needs 80. Initial acceptance also reproduced
+second-chain priming leaking across its start; clipping now uses the current
+chain boundary. The timestamp acceptance test passes across all four saved Ogg
+variants and seeks before, inside and beyond the presentation end. Updated
+all nine focused root Ogg regressions pass; this does not qualify WebM timestamp changes
+or reconfigured Vorbis chains with different identification/setup headers.
+
+Vorbis chaining now allows different valid setup and identification block sizes
+while the output channel count/rate stays fixed. Every chain is indexed with
+its own modes/block geometry and keeps its own decoder configuration. Crossing
+the boundary emits a reset that rebuilds the decoder; seeking into a later
+chain selects that configuration before preroll. Direct packet reads refuse a
+boundary that requires the explicit reset step.
+The authored reconfigured-mode fixture reproduced the former `coded differently`
+refusal. Both reordered-mode and changing-long-block fixtures now pass the exact
+sample/seek timestamp acceptance, including seeks at and inside the second chain.
+They have matching short authored HEVC companions. All nine focused root Ogg
+regressions also pass. The subsequent linked-program sections qualify channel-count and rate changes.
+
+### Vorbis WebM timestamp and sample-window correction
+
+The authored HEVC/Vorbis companion reproduced WebM PCM retaining nanosecond
+PTS but labeling it with an 8000 Hz sample timebase. Vorbis presentation now
+labels its timestamps as nanoseconds, applies signed DiscardPadding, trims
+negative/CodecDelay samples and seeks by full decoder preroll plus exact sample
+clipping. An owned mode/overlap clock supplies packet durations, snaps tick
+quantization to cumulative sample positions and preserves larger source gaps.
+The audio worker advances its Vorbis frontier from the presented PCM span.
+The offline timestamp generator additionally writes short video companions for
+positive tail padding, negative head padding and CodecDelay. All three timestamp
+acceptance tests pass, covering Ogg chains and WebM seek/padding/delay sample
+counts. All nineteen focused WebM audio regressions pass, including other codec
+paths. Vorbis remains owned; no production FFmpeg invocation was added.
+
+### Library-owned Ogg Vorbis programs
+
+Ogg Vorbis indexing, chain configurations, granule-qualified presentation,
+reset boundaries and exact seek/preroll now live in
+`fvid-media::owned_ogg_vorbis::Program`. The root player reader is a thin adapter;
+it no longer duplicates the timeline implementation. `Program::decode_pcm`
+streams interleaved float32 PCM to a caller writer from the configured target,
+rebuilding decoder state per chain and retaining the presentation clock.
+All three direct library tests pass without player features: six authored
+mode/trim/origin/chain configurations across exact seeks and rewind, synthetic
+tone PCM equality to the native decoder trimmed at EOS, writer error propagation
+and recovery, and an unbounded input-limit regression. The latter reproduced
+`cap + 1` overflow at usize::MAX and now uses a saturating read bound.
+All nine focused player adapter regressions and all three Ogg/WebM timestamp
+acceptance tests pass after this migration. General CopyOptions-controlled
+Ogg Vorbis WAVE export/publication is still open; this low-level writer API does
+not claim that workflow's budgets, progress, cancellation or atomic publication.
+
+### Vorbis setup preflight for controlled export
+
+`fvid-codecs::vorbis_admission::inspect` walks codebook headers without building
+length arrays, Huffman trees or VQ tables. It returns aggregate entry/node/value
+limits, largest dimension and a conservative storage estimate before decode
+allocation. Active sparse entries determine the tree size; compact ordered
+length runs still charge their expanded tree. A fixed reserve covers all
+format-bounded floor/residue/mapping/mode setup lists and temporary structures.
+Both admission integration tests pass: saved authored tone/reconfigured setups
+parse within the preflight limits, reduced entry/node limits reject, and
+4096-entry ordered versus sparse books correctly require 8191 versus 3 nodes.
+This is a prerequisite for CopyOptions-controlled Ogg Vorbis export; dispatch,
+cancellation, atomic WAVE publication and use of this estimate in that workflow
+are not yet implemented by this preflight API.
+
+### Controlled Ogg Vorbis WAVE export
+
+`decode_audio`/`decode_audio_transformed` now recognize Ogg Vorbis separately
+from Opus and use the library program, private PCM spool and shared WAVE DSP /
+publication pipeline. The previous dispatch reproduced `Ogg file has no Opus
+bitstream` on the authored Vorbis video companion. Input/index preflight and
+allocation-free setup admission run before expanded codec tables are allocated;
+the reserve includes two decoder states, frame workspace and transport buffers.
+Packet limits, cancellation, RSS policy and progress apply throughout decode.
+Positive presentation gaps become silence, including intervals wholly inside an
+initial gap. EOS/chain trims and changed setup/block geometry remain canonical.
+Vorbis channel order is permuted to WAVE speaker order, with defined masks for
+1–8 channels and no invented mask for wider discrete layouts. Common comment
+fields map to RIFF INFO through the shared metadata editor. Final DSP applies
+requested metadata mutations and publishes atomically without overwrite.
+All five Vorbis program/export integrations pass: exact nonzero tone PCM,
+authored chain/origin/trim intervals, memory/packet controls, cancellation before
+and during decode, limited packet prefixes, exactly-once completion, destination
+preservation and DSP equality against the decoded WAVE baseline at 32/48 kHz
+with mono rematrix and gain. The combined gate passed 508 media unit tests (one existing ignored RGB
+acceptance), 22 Opus integrations and all 5 Vorbis integrations.
+Subsequent sections qualify mixed-codec multiplex selection and Vorbis linked
+rate/channel reconfiguration. Wider profile fixture breadth remains unfinished;
+this workflow does not claim universal codec coverage.
+
+### Parallel Vorbis programs
+
+Ogg Vorbis selection now groups overlapping logical-stream page spans into
+multiplexed links, including non-Vorbis spans, and follows the selected Vorbis
+ordinal through successive links. `open_track` selects supported Vorbis order;
+`open_source_track` selects the first-link source BOS index. An unspecified file
+selection requires exactly one Vorbis track. Only selected chains undergo codec
+setup admission, indexing and decode. Source comments come from the selected
+track. Direct library metadata reports all first-link Vorbis tracks and the
+active track index; the player factory now attempts every Vorbis ordinal.
+The authored two-track Ogg and its Skeleton-leading variant reproduce the prior
+second-stream refusal. Both selected-source WAVE exports pass with the second
+track's exact 394-sample presentation, while the first remains 411 samples.
+All six initial library/export tests pass; an additional direct selection/seek
+regression and the player factory check are pending. The streams reuse the
+matching authored HEVC companions for their respective setup configurations.
+This does not yet unify Vorbis and Opus into one player track catalogue or admit
+codec changes between linked programs.
+
+The parallel-selection player factory test passed, as did all seven Vorbis
+library/export tests and twenty-two Opus regressions. Explicit library selection
+also checks both tracks' exact seek and end positions and rejects ambiguous
+unspecified source selection. The generator now adds two successive multiplexed
+links with fresh serials. Both extended parallel tests passed after the shared
+build-directory lock cleared, including second-link continuation, source-stream
+WAVE export and exact seeks at and beyond the selected program boundary.
+
+### Unified Ogg audio catalogue
+
+`owned_ogg_audio_catalog` lists supported Vorbis and Opus tracks in first-link
+BOS order, retaining source indices, codec-specific ordinals and source metadata.
+Its direct catalogue test passes for authored Opus-first and Vorbis-first
+multiplexed files. The generator pairs these with the respective short HEVC
+companions and records hashes; no private media or parameters are used.
+The player now wraps the selected native reader while exposing the combined
+catalogue and global active index. All sixteen focused root Ogg regressions
+passed. File export uses the same catalogue to dispatch the selected source
+codec, including Opus-first files selecting Vorbis. Both catalogue/export tests,
+seven Vorbis program tests and twenty-two Opus export regressions passed offline.
+Ambiguous default selection is rejected rather than silently choosing a codec.
+
+### WebM Vorbis endpoint and rewind
+
+Two synthetic regressions reproduce endpoint errors independently of codec
+support: the tail-padded authored video previously lost its 51.375 ms duration
+on rewind, and a 1 ns DiscardPadding previously reported 55.999999 ms although
+presentation removed one whole sample and ended at 55.875 ms. The reader now
+stores the EOF endpoint independently of the resettable overlap clock. Before
+EOF it uses declared container duration when available, otherwise leaves the
+endpoint unknown. Positive padding uses the same upward sample rounding as PCM
+presentation and converts the resulting cumulative sample boundary to ns.
+The generator records the short synthetic video fixtures and their hashes;
+ordinary tests do not run the generator, FFmpeg or network operations.
+
+Validation: both new tests failed on their specific old endpoints before the
+fix. All five Vorbis timestamp integration tests and all sixty-three focused
+WebM unit regressions passed with locked offline Cargo and the native player
+feature. This is focused timestamp coverage, not qualification of every codec
+profile or of the entire workspace.
+
+### Vorbis discrete channel counts through native workflows
+
+The Ogg program no longer refuses identification headers merely because their
+channel count exceeds 32. The core decoder already accepts the nonzero 8-bit
+Vorbis channel field; the transport now retains the full 1..255 range. WAVE
+export retains source order and uses mask zero for layouts beyond the standard
+Vorbis speaker assignments instead of inventing speaker identities.
+
+The offline generator authors silent 1-, 9-, 33- and 255-channel Ogg files and
+matching short HEVC/Matroska videos, recording hashes for both. Before the fix the
+new library regression reached the exact 33-channel geometry refusal. After the
+fix all eight Vorbis program/export tests and all six player timestamp tests
+passed. The new acceptance checks exact frame counts, PCM byte strides, seeks
+and rewind in both Ogg and Matroska, plus WAVE channel counts and masks. These
+silent fixtures qualify channel geometry and presentation; they do not establish
+independent nonzero signal correctness for every channel. Chained channel
+reconfiguration and linked rate conversion are qualified in the following sections.
+
+The sixteen focused root Ogg unit regressions also passed after widening the
+transport geometry, including malformed-header refusals and Opus worker resets.
+
+### Vorbis channel changes between linked programs
+
+Ogg Vorbis now negotiates one output channel set across selected links instead
+of refusing changing channel counts. Known Vorbis layouts use the union of
+speaker identities; existing Vorbis order is retained when the union matches a
+defined layout, otherwise speakers use WAVE order. When any link has more than
+eight channels, the program preserves codec channel indices with a stable
+maximum channel count and no assigned speaker mask. Missing output positions
+are zero-filled. Native decoders still use each link's identification channels,
+then the presentation layer trims and routes their PCM into the stable output.
+The player adapter builds each replacement decoder using source identification
+geometry, while file export uses the negotiated mask and WAVE permutation.
+
+Seven authored two-link cases cover mono/stereo in both directions, quad to
+5.1, 6.1 to 7.1 (nine-speaker union), discrete 9/33 in both directions, and
+stereo to 255 discrete channels. The generator records the Ogg hashes and the
+matching authored HEVC companions for each link. The initial test reproduced
+the explicit chained channel/rate refusal. All eleven library/export tests
+passed after the change. Coverage includes exact seeks around the boundary,
+full and crossing-range WAVE export, source-byte routing with distinct NaN
+payloads and silence exclusively in absent output positions. Sample-rate
+changes between links are qualified by the resampling work below.
+
+All seven player timestamp integration tests passed with the source-channel
+decoder override, including exact navigation across each new channel boundary.
+
+All seventeen focused Ogg unit regressions passed, including a new worker
+acceptance that verifies continuous PCM timestamps and one backend start across
+all seven channel-change cases, boundary seeks and rewind. No FFmpeg or network
+access is required by these ordinary tests.
+
+### Vorbis linked sample-rate changes
+
+Selected Vorbis links now retain their native identification rate for decoding
+and share the first link's output sample clock. A checked rational clock carries
+fractional link durations rather than summing rounded per-link lengths. The
+owned streaming windowed-sinc engine accepts an absolute source origin and a
+fractional output phase, preserving exact sample boundaries after initial trims,
+positive offsets and later rate changes. Seek rebuilds codec and filter history
+from the selected link before trimming on the common output clock. A link's EOS
+releases its filter tail before the next decoder configuration is installed.
+
+Six short authored cases cover 8/12 kHz and 44.1/48 kHz in both directions plus
+negative initial trim and positive origin. A three-link 12/8/8 kHz case detects
+the one-sample error from rounding link lengths separately. Public synthetic
+440 Hz packets are repaged offline at 44.1/32 kHz in both directions, with fresh
+serials and matching authored HEVC/Matroska tone companions. No private media,
+frames, audio or codec parameters are used, and no encoder is invoked.
+
+All seventeen library/program/export tests passed. Nonzero tone PCM matches the
+independently decoded link PCM and native sinc workflow, including exact seeks
+and WAVE ranges crossing the configuration boundary. Packet-limited export had
+initially lost 44 buffered samples; its reproduction now passes after explicitly
+finalizing the already decoded prefix without reading another packet. File
+admission includes rate-dependent sinc history and converted-packet storage.
+The complete media unit gate passed 510 tests; its one existing ignored integer
+RGB acceptance remains unqualified. New unit checks cover fractional filter
+phase, write-chunk independence and carried rational-clock rounding.
+
+The combined mono 8 kHz to stereo 12 kHz case also passes library decode,
+exact seeks and full/cross-boundary WAVE export with the negotiated three-speaker
+mask. Packet PTS and duration now both use the program's output timescale;
+source overlap sample counts remain separate for decoder validation. A dedicated
+reproduction caught raw 12 kHz durations alongside 8 kHz PTS before this fix.
+Both mixed Ogg catalogue/export tests and all twenty-two Opus export regressions
+also pass after the linked-rate changes.
+
+The final player gate passes all nine integration tests, including exact PCM
+agreement between both retimed synthetic tone videos and their Ogg versions.
+All eighteen focused Ogg unit tests pass, including stable backend sample rate
+and channel geometry across linked configurations, seek and rewind.
+
+### Linked Ogg audio codec changes
+
+`owned_ogg_audio_program::Program` follows supported first-link BOS order through
+all successive links, including Vorbis/Opus codec changes. Link grouping includes
+all overlapping Ogg streams; codec filtering never erases a selected link. The
+previous Vorbis-first route refused the later Opus link, while the Opus-only
+route could omit Vorbis links. The new file-export reproducer reached the exact
+missing-Vorbis-link refusal before the fix.
+
+Already validated logical chains move into isolated native codec programs
+without serializing or copying a second compressed file. Only one codec decoder
+and one streaming sinc filter are active. Each source keeps its native overlap,
+pre-skip, granule trimming and channel routing. Presentation normalizes PCM to
+WAVE speaker order, negotiates the speaker union (or discrete channel indices),
+and carries rational phase on the first selected link's sample clock. Seek
+rebuilds the selected link's codec/filter history before exact output clipping.
+Filter tails are drained at each link boundary and at a packet-limited stop.
+PCM is emitted incrementally rather than retaining a whole decoded link.
+
+The player catalogue dispatches these programs through direct PCM steps, while
+homogeneous programs retain their existing encoded readers. Track metadata
+reports negotiated output geometry; the viewer labels combined coding as
+Vorbis/Opus. File export uses the same native program and the existing private
+WAVE spool/DSP/atomic publication workflow. Admission includes selected codec
+setup, multistream Opus state, sinc history and converted transport buffers;
+packet sizes/counts, cancellation, RSS checks and progress remain controlled.
+
+Ten authored Ogg cases cover both codec orders, three-link sequences,
+discrete channels, multiplexed BOS swaps, initial trim and positive origin.
+The offline generator records hashes and matching short synthetic HEVC video
+companions. The two additional origin companions reproduce the exact native
+PCM windows using CodecDelay/DiscardPadding and a 125 microsecond container
+clock. No private content/parameters, encoders, FFmpeg or network calls are
+needed to generate or execute these regressions.
+
+Validation passed all 510 media unit tests (one existing ignored integer RGB
+acceptance), seven linked-codec library/export tests, seventeen Vorbis program
+tests, twenty-two Opus export regressions and two shared catalogue tests. The
+new acceptance compares nonzero PCM against separately decoded/resampled native
+sources, checks boundary seeks and writer-error recovery, source selection,
+cross-boundary WAVE ranges, exact packet-limited prefixes, cancellation before
+and during either codec, one completion event and existing-output preservation.
+Both new player integration tests and all nine Vorbis timestamp integrations
+pass, including exact PCM equality for the synthetic origin video companions.
+This qualifies linked Vorbis/Opus audio, not every Ogg codec or every codec
+profile/tool in the repository.
+
+A final two-way 44.1/48 kHz acceptance uses nonzero synthetic PCM in both codecs,
+comparing complete and boundary-seek output against independently decoded and
+resampled sources. All seven linked-codec tests pass. All nineteen focused Ogg
+unit tests pass, including one backend start and exact captured PCM across codec
+changes, seek and rewind; the viewer's friendly codec-label regression also
+passes. The overall codec-completeness goal remains open.
+
+### Vorbis player setup capacity
+
+The player decoder and WebM/Vorbis clock setup no longer impose copied quotas
+of 1,000,000 entries/lookup values and 2,000,000 Huffman nodes. Both use the same
+allocation-free setup admission as the native library, then retain the actual
+parser validation and geometry-derived decoder workspace. This admits sparse
+setups whose declared entry/value counts exceed those arbitrary quotas while
+the required tables remain modest; it does not disable configured file-export
+memory admission or input/packet limits.
+
+Two authored setups contain either 1,000,001 declared entries with one active
+codeword, or 1,081,344 lookup-type-2 multiplicands (33 entries, 32,768 dimensions).
+Each has one active one-bit codeword, which the [Vorbis I single-entry erratum](https://xiph.org/vorbis/doc/Vorbis_I_spec.html) explicitly permits for sparse
+books. `generate_vorbis_large_setup.py` generates continued Ogg setup packets
+and short matching HEVC/Matroska videos offline, plus a SHA-256 manifest. No
+private media, codec parameters, encoder, FFmpeg or network is used by generation
+or ordinary tests. These silent fixtures qualify setup capacity, continuation
+framing and exact presentation, not every large-book entropy configuration.
+
+Before the fix both player cases reached their specific entry/value-budget
+errors after native library parsing/PCM had succeeded. The video-container
+reproduction independently reached those same errors with only its old setup
+quota restored temporarily; the final source restores native admission. Both
+Ogg and Matroska acceptance tests now pass exact 411-frame decode, seeks and
+rewind. The library export test passes under 64 MiB configured admission and
+correctly refuses 512 KiB without publishing an output. Both new setup tests,
+both linked-codec player integrations, all nine timestamp integrations, all
+nineteen Ogg unit tests and all sixty-three WebM unit regressions passed offline.
+
+### G.711 container sample clocks
+
+G.711 A-law and mu-law packets use one coded byte per channel sample, including
+AIFC files whose COMM sample size describes the 16-bit reconstructed signal.
+Packet durations, frame counts and seek offsets use the coded geometry rather
+than that reconstructed width. G.711 WAV, AU, AIFC and AVI readers retain exact
+sample positions on seek, clamp at EOF, and clear partial-packet offsets on rewind.
+
+`tests/g711_native.rs` checks both laws in mono and stereo against saved PCM,
+including packet PTS/durations, seeks across AVI record boundaries, EOF, out-of-range
+positions and rewind. The AIFC fixture reproduced a duration of 512 samples for
+1024 decoded samples before the coded block-width fix. Fixtures are generated
+separately by `scripts/generate_g711_fixtures.py`, without FFmpeg or private media.
+
+The native G.711 RIFF/WAVE exporter is covered by
+`crates/fvid-media/tests/g711_wave_export.rs`: exhaustive saved-code PCM in mono
+and stereo, bounded input windows, existing-output protection, controlled-memory
+refusal and cancellation from the progress callback before publication. Interval,
+gain, channel conversion and resampling outputs match the same operations on the
+fully decoded float WAVE. These tests use saved synthetic fixtures, without
+FFmpeg or network access. This evidence does not qualify other G.711 containers
+for export or imply that all remaining codecs/profiles are complete.
+
+AIFC G.711 also accepts the SGI uppercase compression identifiers `ALAW` and
+`ULAW`. The saved `g711-*-uppercase.aifc` fixtures differ only in the compression
+identifier from the lowercase fixtures; the generator records their hashes.
+Before the fix, the acceptance test failed specifically with `AIFF compression
+ALAW is not supported PCM, G.711 or MACE`. Both identifiers now use the same
+native decoder and sample geometry as their lowercase counterparts; mixed-case
+or unrelated identifiers are not silently treated as G.711.
+
+### Native AIFC floating-point PCM
+
+AIFC `fl32`/`FL32` and `fl64`/`FL64` now select the owned float decoder with
+big-endian samples. The COMM width must agree with the codec (32 or 64 bits),
+while integer PCM keeps its existing width validation. Float seek addresses the
+exact sample, clamps at EOF and clears its partial-packet offset on rewind.
+
+`scripts/generate_aifc_float_fixtures.py` writes authored mono/stereo float runs,
+saved independent float32 output, hashes and references to authored AVI video
+companions. Before implementation, `tests/aifc_float_native.rs` reproduced the
+specific unsupported `fl32` error. Acceptance compares PCM bytes, including signed
+zero, small finite values and values beyond full scale, and checks timestamps
+across both 2048-sample packet boundaries. A separate refusal test checks
+contradictory COMM width rather than calling that refusal successful playback.
+
+### AU signed 8-bit and IEEE PCM
+
+AU file encoding 2 is signed 8-bit PCM, and encodings 6/7 are big-endian
+float32/float64. These identifiers are unrelated to the kernel audio-device
+encoding table. The player now accepts all three via its owned PCM decoder;
+newly supported runs use exact sample seek, EOF clamping and clean rewind.
+The prior refusal of slot 2 was based on conflating device and file identifiers.
+
+`scripts/generate_au_pcm_fixtures.py` creates saved mono/stereo cases for all three
+codings, including all signed 8-bit levels and finite float values with signed
+zero. `tests/au_pcm_native.rs` compares decoded PCM bytes, packet timestamps and
+durations, and seeks across the 2048/4096 boundaries. Its first run reproduced
+`AU encoding 2 is not supported PCM or G.711` before implementation. The old
+refusal test now covers unsupported encodings 0, 8, 9 and 10 instead of requiring
+valid PCM8/float input to fail. Ordinary tests require neither FFmpeg nor network.
+
+### AIFF signed8 player decoder selection
+
+AIFF/AIFC signed 8-bit samples now reach the owned decoder through the parsed
+`PcmFormat`, preserving signedness instead of reinterpreting a descriptive PCM
+tag using Matroska's unsigned8 convention. This direct construction also preserves
+integer byte order and explicitly selects big-endian float for AIFC. Compressed
+AIFF codecs keep their own dispatch. Signed8 seek uses exact sample positions,
+EOF clamping and rewind offset reset.
+
+`scripts/generate_aiff_signed8_fixtures.py` writes six saved mono/stereo cases for
+AIFF and AIFC NONE/sowt, all 256 signed values, expected PCM and video companion
+references. `tests/aiff_signed8_native.rs` first failed specifically with a PCM
+mismatch through `make_decoder()` at sample zero; earlier unit tests constructed
+the signed decoder directly and therefore did not cover this dispatch error.
+The acceptance checks the player decoder, PCM bytes, packet PTS/durations, seek
+across two packet boundaries, EOF and rewind without external executables.
+
+### Owned FLAC frame reconstruction
+
+`crates/fvid-codecs/src/flac.rs` reconstructs FLAC frames directly from RFC 9639:
+constant/verbatim subframes, fixed predictors 0..4, LPC orders 1..32, partitioned
+Rice with 4/5-bit parameters, escaped residuals, wasted bits, independent channels
+and left-side/right-side/mid-side stereo. It checks frame/header CRC, padding,
+reserved syntax, frame geometry, predictor arithmetic and output ranges.
+The player A_FLAC dispatch now uses `src/codec/flac_decoder.rs`, not Symphonia;
+other remaining Symphonia codec dispatches are not implied to be removed.
+
+`scripts/generate_flac_native_fixtures.py` authors 1460 saved frames and complete
+FLAC files with independent integer PCM oracles. The cases span 4/8/12/16/20/24/32
+bit PCM, mono/stereo/eight channels, all stereo assignments and predictor/residual
+combinations. They refer to an authored raw-video AVI companion; no private
+source or external encoder is used. Core tests compare exact signed PCM and
+reject every truncation and single-bit flip of a selected coded frame. Root
+`tests/flac_native_owned.rs` exercises file parsing, the actual player factory,
+float PCM, packet PTS/durations, EOF and rewind for all cases. This is a defined
+synthetic matrix, not proof of every legal FLAC stream or remaining container
+export workflow; further interoperability and container coverage remain required.
+
+The FLAC matrix now contains 1460 cases, adding every channel count 1..8,
+LPC coefficients at the signed 15-bit extremes, arithmetic shifts 0/3/15,
+Rice parameters 0/15/30, and zero-width escaped residual partitions.
+Nine separately saved invalid frames retain correct CRCs and test semantic
+refusals: subframe padding/type, wasted width, LPC precision/shift, residual
+method/partition geometry, footer padding and trailing payload. Thus these
+checks reach the relevant parser instead of passing due to unrelated CRC errors.
+
+Symphonia default features are disabled; only `opt-simd`, `adpcm`, `mp3` and
+`mp2` remain explicitly enabled for the still-used decoders. FLAC, Vorbis, PCM
+and format-reader backend features are no longer selected implicitly by that
+dependency. This does not remove the remaining compressed-codec backend gap.
+
+### Owned ADPCM player dispatch and edit scheduling
+
+The player block adapter now reuses the FVid-owned Microsoft ADPCM, IMA WAV and
+Apple IMA4 decoders already used by native media operations. It retains block
+splitting and container duration trimming; decoding errors propagate instead of
+silently returning no PCM. The Symphonia ADPCM backend feature is disabled;
+only its MPEG layer II/III decoders remain enabled.
+
+`tests/adpcm_player_owned.rs` exercises the actual MP4 reader/player factory on
+authored IMA4, stereo IMA WAV and stereo Microsoft ADPCM MOV fixtures. Independent
+ramp PCM expectations include two silent frames and a repeated source range,
+plus exact seek at every segment boundary and EOF. The first run reproduced
+IMA4 duration 64 samples instead of 128 because the MP4 player applied complex
+edits only to AAC. ADPCM now uses the shared edit timeline, preserving source
+block resets, PCM trimming and presentation sample positions. Fixture generation
+remains separate, offline, and records hashes plus an authored video companion.
+
+The ADPCM edit generator also writes `*-edits-video.mov` variants containing
+independently authored 32x32 AVC complementary PCM fields in the same container.
+The regression verifies native video decoding before checking the audio timeline,
+so an unrelated unsupported video track cannot masquerade as an audio reproducer.
+Both audio-only and audio/video variants compare exact expected PCM after seeks.
+
+### MPEG native decoder foundation: polyphase synthesis
+
+`crates/fvid-codecs/src/mpeg_synthesis.rs` owns the persistent 32-band synthesis
+filter shared by MPEG Layer II and Layer III. It computes the ISO/IEC 11172-3
+Annex A.2 matrix, history permutation, standard window and PCM accumulation;
+reset clears per-channel history. Non-finite input/matrix results are rejected
+before history mutation. The numerical coefficients in `mpeg_synthesis_window.rs`
+represent Table B.3 in exact units of 1/65536. They were cross-checked against the
+public MPEG coefficient table; no external decoder algorithm is embedded.
+
+`scripts/generate_mpeg_synthesis_fixtures.py` saves subband input and independently
+computed float64 finite-convolution PCM for 32 individual-band impulses and two
+changing sequences. Tests compare all output samples and repeat after reset;
+failed non-finite inputs must leave subsequent output unchanged. This is one
+required reconstruction component, not an MP2/MP3 decoder or acceptance proof
+for compressed MPEG playback. Bit allocation, scalefactors, grouped quantization,
+CRC and Layer III entropy/hybrid reconstruction still need native completion;
+the existing MPEG backend stays selected until end-to-end evidence supports
+replacement. Ordinary fixture tests invoke no encoder, FFmpeg or network.
+
+Primary specification: ISO/IEC 11172-3:1993, Annex A.2 and Table B.3.
+Published specification copy:
+https://previewnorm.com/iec/ISO%20IEC%2011172-3-1993%20PDF.pdf
+Numerical cross-check (reference data only):
+https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/mpegaudiodsp_data.c
+
+### Owned MPEG Layer II decoding
+
+`crates/fvid-codecs/src/mp2.rs` now parses MPEG Layer II frames, selects allocation
+layouts, reconstructs grouped/ungrouped quantizers and scalefactors (all four
+scfsi patterns), validates protected-field CRC, and synthesizes 1152 samples per
+channel. Stereo, dual channel and joint stereo preserve separate scale factors;
+all parsing finishes before synthesis history is committed. The reserved
+scalefactor index 63 retains the previous backend's zero-scale compatibility
+behavior. Free-format bitrate remains explicitly unsupported and is an open gap.
+
+`src/codec/mp2_decoder.rs` is selected by the player for `A_MPEG/L2`; production
+Layer II reconstruction no longer calls the Symphonia decoder. The MP2 feature
+in that dependency remains for explicit reference comparisons; Layer III still
+requires its decoder. This does not claim full MPEG codec/profile completion.
+
+`scripts/generate_mp2_native_fixtures.py` writes 174 authored two-frame streams,
+covering allocation families, quantizer levels, scfsi, CRC/no CRC and MPEG version
+rate families. Expected nonzero PCM is computed by a separate finite-convolution
+oracle. Core tests verify output, reset, and transactional failure. The player
+regression checks all saved files through the actual reader/factory with packet
+PTS, durations, PCM and rewind. No test invokes FFmpeg or network.
+
+On the existing saved synthetic MPEG Layer II tone, independent comparison with
+the previous backend covered 10368 samples: peak PCM difference
+5.21540641784668e-8 and RMS difference 1.2961010817467242e-8.
+These figures qualify that fixture, not every legal MPEG stream.
+
+### Free-format MPEG Layer II
+
+Free-format Layer II packets now decode natively. MPEG-1 uses the explicitly
+specified free-format allocation layouts (Table B.2a at 48 kHz, B.2b at 44.1/32
+kHz), rather than deriving that choice from an approximate bitrate. Packet
+length supplies the frame boundary; the decoder validates a constant base
+length plus the header's padding bit, transactionally, and reset admits a new
+stream length. Indexed-bitrate decoding is unchanged.
+
+The bare MPEG audio reader now infers free-format MP2 boundaries using a
+compatible header chain, independently decoding candidate frames and accounting
+for each padding bit. A single complete frame can use the file boundary.
+Length-derived bitrate is only a diagnostic estimate. Confirmed but damaged
+chains cannot be hidden by folding adjacent frames into larger candidates or
+by treating the rest of the file as ancillary data.
+
+The fixture generator writes 57 authored four-frame free-format streams with
+nonzero PCM, valid accumulated padding, protected/unprotected frames, different
+sample-rate families, and a false compatible sync word in ancillary bytes. Each
+has a full Matroska video variant with authored AVC PCM fields. Tests validate
+native video playback before comparing audio PCM through both container paths,
+and cover rewind, a single frame, changed-length refusal and reset. A separate
+saved damaged-CRC MP2/Matroska pair reproduced the frame-folding bug before its
+fix; the Matroska test confirms that the second audio frame fails specifically
+with a CRC mismatch while the video remains decodable. This replaces the prior
+explicit free-format MP2 refusal; it does not qualify Layer III decoding.
+
+The ordinary tests use saved fixtures only, without FFmpeg or network. Primary
+free-format allocation and padding rules: ISO/IEC 11172-3:1993, Tables B.2a/B.2b
+and clauses 2.4.2.3 / 2.4.3.3.
+
+### Owned Layer III hybrid synthesis
+
+`crates/fvid-codecs/src/mp3_hybrid.rs` reconstructs one channel's 576-sample
+Layer III granule from requantized, reordered spectral input. It owns alias
+butterflies, 18-point/6-point IMDCT, normal/start/short/stop windows, mixed long
+prefixes, absolute frequency inversion, overlap history and the shared MPEG
+polyphase filter. Short coefficients use explicitly documented frequency/window
+interleaving. State changes are committed only after the entire output validates;
+reset clears both overlap and polyphase history.
+
+`scripts/generate_mp3_hybrid_fixtures.py` saves 803 authored basis/transition
+cases. The independent oracle adds transform contributions onto an absolute
+subband timeline, then applies finite convolution, rather than copying the
+implementation's overlap state or delay-line operations. Cases cover each
+subband, every spectral position in selected boundary/interior bands, all four
+windows, mixed prefixes and nonzero window transitions. Tests compare every
+float64 PCM sample, repeat after reset, and verify that rejected non-finite,
+overflowed or invalid-layout input preserves subsequent output exactly.
+
+This component accepts spectral data, not compressed MP3 packets. Layer III
+Huffman/scalefactor decoding, bit-reservoir handling and their integration remain
+open; the player still uses the previous Layer III decoder. Passing these tests
+is not compressed MP3 playback acceptance. Ordinary tests read saved fixtures
+without FFmpeg, network or external codec executables.
+
+Primary reference: ISO/IEC 11172-3:1993, clause 2.4.3.4.10 and Tables B.3/B.9.
+
+### Owned Layer III frame structure and reservoir
+
+`crates/fvid-codecs/src/mp3_frame.rs` parses bounded MPEG-1/2/2.5 Layer III
+packets, header geometry, CRC-protected side information, scfsi, granule bit
+lengths, big_values, gains, window/mixed flags, Huffman selections and region
+counts. Reserved Huffman tables, invalid switched-normal windows, oversized
+pair counts and inconsistent region counts are refused explicitly. LSF preflag
+is left for its later scalefactor-compress derivation rather than guessed here.
+
+The reservoir prepares only the bytes needed by the granule bit ranges, borrowing
+prior main-data bytes across frame boundaries without including headers/side
+information. It retains at most 511 history bytes. Preparing does not advance
+state; commit is separate and rejects stale transactions, while reset invalidates
+pending transactions. Missing history and insufficient coded bits remain errors.
+An ancillary-heavy packet does not cause its entire payload to be copied into
+staging; the required main-data window is bounded by the side-info bit lengths.
+
+`scripts/generate_mp3_side_fixtures.py` writes 168 authored header/side-info
+cases and four semantic refusal cases with correct CRCs. Tests check every
+saved field, CRC/truncation, staged ranges, backward pointers, bounded copying,
+commit/reset and stale transactions. The existing saved synthetic MP3 tone also
+passes structure parsing and real reservoir assembly across its frames.
+
+These fixtures contain marker main-data bytes and qualify parsing/state assembly
+only. They do not assert that Huffman payloads decode or that the owned MP3
+player is complete. Entropy/scalefactor decoding, requantization/stereo processing
+and integration remain open; the current Layer III player backend is unchanged.
+No ordinary test runs fixture generation, FFmpeg or network access.
+
+### Owned Layer III Huffman reconstruction
+
+`crates/fvid-codecs/src/mp3_huffman.rs` owns bounded bit reading, prefix-tree
+construction, signed pair decoding, linbits escapes, count1 quadruples and
+reconstruction of 576 quantized spectral lines across three regions. Failed
+pairs/granules preserve the caller's cursor. A partial count1 suffix is handled
+as stuffing without reading into the next granule, and the spectral limit never
+permits an out-of-bounds quadruple. Static trees are checked for prefix conflicts
+and completeness before use. Table 0 consumes no bits; reserved selections fail.
+
+`mp3_codebooks.rs` stores numerical ISO/IEC 11172-3 Table B.7 assignments. The
+1410 assignments in 17 distinct trees were independently cross-checked using
+public LAME symbol matrices and FFmpeg's canonical length/symbol representation.
+Only numerical standard data was transcribed; tree construction, cursor logic,
+escape/sign handling and granule reconstruction are FVid implementations. No
+encoder/decoder backend or executable is linked by this component.
+
+The offline generator reads saved independent canonical data and writes 22744
+signed vectors, covering all pair table IDs, both count1 books, every symbol,
+escape endpoints, sign combinations and varied starting alignment. Tests compare
+values and exact bit consumption and try every shorter bit limit. Six additional
+granule plans cover region selection, maximum escapes, 576-line saturation,
+zero tables and incomplete stuffing. Marker/granule vectors are entropy-stage
+qualification, not compressed MP3 PCM playback acceptance.
+
+Scalefactor decoding, requantization/reordering, stereo processing and full
+Layer III decoder integration remain open. The production MP3 backend remains
+unchanged until that complete path has independent PCM validation.
+
+Numerical references:
+https://github.com/lameproject/lame/blob/master/libmp3lame/tables.c
+https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/mpegaudiodec_common.c
+
+### Matroska cached presentation intervals (2026-10-16)
+
+Cached video intervals now clamp an explicit BlockDuration at the following
+presentation timestamp, matching decoded playback. Short explicit durations
+still preserve gaps, and the final frame keeps its explicit duration. Previously
+the cache could claim 200 ms for a picture actually displayed for 20 ms.
+
+The offline tail generator adds two authored neutral VP9 companions with a
+nonzero origin, an overlapping duration and a genuine gap, with and without
+declared Segment Duration. The new acceptance test failed before the fix with
+200000000 vs 20000000 ns, then passed after it. Coverage compares the cache
+before/after playback and alternating forward/backward seeks; the existing
+paired controls check decoded pixels, intervals, rewind and EOF. Fixture
+generation remains separate from ordinary tests and requires neither FFmpeg
+nor network access.
+
+### Owned Layer III scalefactor fields (2026-10-16)
+
+`mp3_scalefactors.rs` reads MPEG-1 long/short/mixed scalefactors, SCFSI reuse,
+MPEG-2/2.5 LSF partitions, derived preflag and intensity-channel layouts. It
+retains transmitted widths for later intensity stereo processing; an implicit
+zero-width field has position zero, not the all-ones escape marker. The reader
+commits its bit cursor only after complete success, including semantic checks.
+
+The offline generator enumerates inverse encoder parameter tuples for all 512
+LSF compress values and authors 16960 field vectors across versions, layouts,
+granules, SCFSI groups and starting alignments. The test compares every field,
+width and consumed bit, and tries every shorter bit limit. A separate integration
+reads scalefactors from the saved synthetic compressed MP3 tone using actual
+side information, reservoir assembly and transmitted SCFSI reuse. All 13 tests
+across MP3 frame, Huffman, hybrid and scalefactor suites pass without FFmpeg or
+network access. The saved corpus SHA-256 matches its manifest.
+
+This qualifies the scalefactor stage, not full owned MP3 PCM playback.
+Requantization, band reordering, stereo processing and full decoder integration
+still need implementation and independent end-to-end PCM validation. Production
+Layer III dispatch remains unchanged. Other codec/profile gaps are not declared
+closed by this component milestone.
+
+### Owned Layer III spectrum and short-window order (2026-10-16)
+
+`mp3_spectral.rs` reconstructs all 576 spectral coefficients from Huffman
+integers, global gain, scalefactor scale, preemphasis and per-window subblock
+gains, then reorders short bands into the hybrid filter's interleaved frequency
+layout. Long, start, short, stop and mixed windows are covered at all nine MPEG
+sample rates. The 8 kHz mixed prefix occupies four long subbands; other mixed
+prefixes occupy two. Invalid magnitudes, sample rates and public parameters
+return an error before exposing output.
+
+Numerical band widths were checked against independently tabulated start
+boundaries saved in `mp3-spectral/bands.json`. Only numerical facts were
+transcribed. The offline generator authors 393 spectral cases with 60-digit
+Decimal formula evaluation and inverse output-to-input indexing; it does not
+reuse the Rust cbrt/exponent implementation or its source-to-output traversal.
+Every representable Huffman magnitude (0 through 8206) is exercised, along with
+signs, gain endpoints, scale flags, preemphasis, window gains and layouts.
+Comparison checks all coefficients with relative tolerance 2e-14 and exact zero.
+Corpus hashes and all nine independent boundary tables were verified.
+
+This is spectral-stage qualification, not full compressed MP3 playback. Stereo
+processing and end-to-end decoder integration remain required before replacing
+the current Layer III player backend.
+
+Formula and numerical references:
+https://previewnorm.com/iec/ISO%20IEC%2011172-3-1993%20PDF.pdf
+https://github.com/lameproject/lame/blob/master/libmp3lame/quantize_pvt.c
+https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/mpegaudiodec_common.c
+
+Validation: all 15 tests across MP3 frame, Huffman, hybrid, scalefactor and
+spectral suites passed with `--locked --offline`; no test invokes FFmpeg,
+network access or fixture generation.
+
+### Owned Layer III joint stereo (2026-10-16)
+
+`mp3_stereo.rs` reconstructs independent, MS, intensity and combined joint
+stereo from reordered spectra. Intensity bounds are derived separately for
+short windows; mixed long prefixes remain outside intensity if any short
+coefficient is nonzero. Position/width inheritance for the uncoded final band,
+MPEG-1 position 7, LSF per-partition all-ones markers and implicit zero-width
+position zero are handled explicitly. The caller's arrays remain untouched on
+invalid parameters, non-finite input, incompatible MS windows or output overflow.
+
+The separate offline generator saves 630 authored spectral vectors spanning all
+nine sample rates, long/start/short/stop/mixed layouts, sparse nonzero bounds,
+IS and IS+MS, and both LSF intensity scales. It derives eligibility independently
+per output line from higher right-channel coefficients; sine/cosine panning and
+60-digit decimal attenuation/MS arithmetic provide comparison values. Every
+output coefficient matches within 3e-14 relative plus 1e-14 absolute tolerance.
+Additional tests cover independent stereo, MS energy preservation and errors.
+The corpus SHA-256 matches its manifest; ordinary tests need no generation,
+FFmpeg or network access.
+
+This qualifies stereo processing, not full owned compressed MP3 playback.
+The remaining work includes assembling region selection, frame/state decoding,
+end-to-end PCM qualification and production dispatch. No broader codec/profile
+coverage claim follows from these component tests.
+
+Stereo equations: ISO/IEC 11172-3 sections 2.4.3.4.9.1-3 and
+ISO/IEC 13818-3 low-sampling-frequency changes to intensity stereo:
+https://previewnorm.com/iec/ISO%20IEC%2011172-3-1993%20PDF.pdf
+https://ossrs.io/lts/zh-cn/assets/files/ISO_IEC_13818-3-MP3-1997-8bbd47f7cd4e0325f23b9473f6932fa1.pdf
+
+Validation: all 18 tests across the six owned MP3 component suites passed with
+`--locked --offline` after adding stereo processing.
+
+### Owned Layer III frame assembly (2026-10-16)
+
+`crates/fvid-codecs/src/mp3.rs` joins side information, staged main-data
+reservoir, scalefactors, Huffman region selection, requantization/reorder, stereo,
+hybrid synthesis and interleaved f32 PCM. Hybrid histories are cloned for the
+pending frame and committed with reservoir history only after both channels and
+all granules succeed. Reset clears geometry and both signal/reservoir histories.
+A geometry change without reset is refused explicitly. Mixed start/stop blocks
+keep their lower subbands on normal windows as specified in ISO 11172-3.
+
+The saved synthetic tone's 11520 PCM samples match the independent Rust MP3
+reference with peak error 1.043081283569336e-7 and RMS 3.037873968898564e-8.
+Reset reproduces the same PCM exactly. No FFmpeg is invoked by this check.
+
+`scripts/generate_mp3_decoder_fixtures.py` adds six authored protected compressed
+chains and neutral video companions, covering mono/MS stereo at 48, 24 and 8 kHz,
+padding and mixed normal/start/short/stop transitions. Their independent PCM
+oracle uses absolute subband timelines and direct convolution, shared with the
+existing hybrid fixture generator. Saved basis/transition oracle outputs were
+checked byte-for-byte after this factoring. All eighteen new media/PCM fixture
+hashes match the manifest. Acceptance test results are recorded separately below.
+
+Production Layer III dispatch is not switched by this assembly change. Seek
+preroll, broader compressed acceptance (including intensity/SCFSI/reservoir
+combinations), and complete player/media integration remain required before
+claiming all MP3 workflows use the owned decoder.
+
+Frame-assembly acceptance results: all six authored chains match the saved
+independent f32 PCM byte values exactly (zero peak/RMS difference), including
+mixed start/stop and the 8 kHz four-subband prefix. The decoder test also tries
+every truncated prefix of every saved synthetic tone frame between successful
+frames, proving that refused input preserves live reservoir/synthesis history;
+reset reproduces complete PCM. Both root integration tests pass: the independent
+Rust tone comparison and all six Matroska companions, each with four neutral
+VP9 frames, rewind and complete owned Layer III PCM decode. These root tests
+call the new decoder explicitly; they do not imply production factory dispatch
+has changed.
+
+Final gate for this assembly milestone: all 21 tests in seven MP3 core/component
+suites and both root PCM/video integration tests pass offline without FFmpeg.
+
+### Owned MP3 player dispatch and exact seek (2026-10-16)
+
+The production `A_MPEG/L3` factory now selects `mp3_decoder::Mp3Decoder`, which
+validates selected track geometry before decoding. Output allocation is reserved
+before advancing codec history. Symphonia MPEG-2/3 codec features moved from the
+normal dependency to dev-dependencies for independent tests. The production
+player dependency graph (`cargo tree -e no-dev`) has no `symphonia-bundle-mp3`;
+the normal player binary check passes with those codecs disabled.
+
+Raw Layer III seek rebuilds reservoir and synthesis history from the beginning,
+then trims PCM to the exact requested sample (clamped at EOF). Layer II retains
+its existing packet-boundary seek behavior. Matroska Layer III also rebuilds
+history and normalizes packet timestamps from accumulated sample counts when
+source PTS differs only within the container tick. Larger discontinuities reset
+the clock origin. Seek trimming uses absolute sample coordinates beneath the
+quantized clock, avoiding a one-sample error from subtracting rounded packet PTS.
+
+The offline compressed-chain generator now has twelve authored cases: mono/MS
+at 48/24/8/44.1/22.05/11.025 kHz, with 36 MP3/Matroska/PCM files whose hashes
+match the manifest. Factory acceptance compares complete PCM and nonmonotonic
+seek suffixes at boundaries, inside frames, before/end/beyond EOF, followed by
+rewind. Captured worker playback/rewind and packet-boundary worker seeks match
+expected packets. A cold jump into the authored mixed-window chain specifically
+reproduces wrong PCM from lost synthesis overlap; the accepted seek rebuilds
+history and matches the saved suffix. The saved real-encoded synthetic tone
+exercises reservoir and SCFSI across the same raw-reader path.
+
+All 12 raw MPEG reader and 19 Matroska audio unit regressions pass. The six root
+integration suites pass 16 tests, covering owned MP3 seek/reference/video,
+Matroska clocks and existing MP2 paths. No ordinary test calls FFmpeg or generates
+fixtures. This switch does not establish universal MP3 conformance: raw free
+format, broader compressed intensity combinations, gapless encoder metadata and
+seek-performance qualification remain separate work. Preroll currently rebuilds
+from the beginning, so this is correctness qualification, not fast-seek proof.
+
+Final integration gate: 68 focused tests pass (21 MP3 core/component, 31 raw
+MPEG/Matroska audio unit, 16 root integration), and the normal player binary
+check passes offline with MPEG reference decoder features excluded.
+
+### Owned free-format Layer III framing (2026-10-16)
+
+The raw MPEG reader now recognizes free-format Layer III headers, infers a
+constant base length with padding, and validates candidate frames through the
+owned factory. Scanning is bounded at the 640 kbit/s Layer III extension (the
+Layer II 384 kbit/s bound is unchanged). MPEG-2/2.5 length/bitrate calculations
+use the 72-byte coefficient rather than MPEG-1's 144. Longer header chains keep
+corrupt frames from being absorbed as ancillary data at a larger frame spacing.
+An apparent terminal two-header chain may instead be a single EOF-bounded
+Layer III frame with a fake ancillary header; that case is validated at EOF.
+The decoder also rejects changed free-format base lengths or free/indexed mode
+changes without reset, before committing signal/reservoir history.
+
+`scripts/generate_mp3_free_fixtures.py` authors 27 variants of saved owned MP3
+chains: MPEG-1/2/2.5 mono/MS at six rates, original and 640 kbit/s spacing,
+alternating padding, fake sync words outside all granule data, and three
+EOF-bounded singles. Every case has a neutral VP9 Matroska companion and the
+independent PCM oracle inherited from its authored source. All 83 saved hashes
+match; the complete corpus regenerates byte-for-byte offline.
+
+The first acceptance run specifically reproduced refusal of the valid
+48 kHz single frame with a midpoint fake header. The framing correction enables
+that same acceptance without deleting or weakening the fixture. Both free-format
+player tests now pass all cases: exact frame sizes, nonzero PCM equality, seek
+suffixes, rewind, video decoding, and refusal of the saved four-frame chain with
+corrupt second CRC. Raw refusal prevents folding; the bounded Matroska path
+identifies the second packet's CRC error. Existing MP2 free-format and owned
+MP3 navigation/reference gates also pass (10 root tests total). No ordinary
+test invokes generation, an encoder, FFmpeg or network access.
+
+Free-format range reference (numeric encoder extension only; no encoder used):
+https://github.com/lameproject/lame/blob/master/USAGE
+
+The fake-sync fixture is also checked directly with the owned frame parser:
+each inserted header specifically fails CRC, while decoding the complete
+surrounding frame succeeds. All 22 MP3 core/component tests pass, including
+free spacing/mode-error rollback and reset. The root free-format, navigation,
+reference and MP2-free suites pass 10 tests after this change.
+
+Nine-rate expansion: the authored source corpus now contains eighteen compressed
+chains, including 32/16/12 kHz. Free-format acceptance now covers 39 cases at
+all nine MP3 rates, and all 119 hashes plus complete offline regeneration were
+verified. Production factory raw/Matroska PCM, video companions, worker playback
+and seek tests pass across the expanded rate set.
+
+Final free-format gate: 44 focused tests pass (22 MP3 core/component, 12 raw
+MPEG unit and 10 root integration). The nine-rate frame suite and expanded
+free-format/navigation/video suites pass on the current fixtures. The normal
+player binary check also passes offline, with MPEG references remaining test-only.
+
+### MP3 decoder and sample-clock checkpoints (2026-10-16)
+
+The player adapter can now save and restore complete owned Layer III state:
+reservoir bytes/generation, geometry/free-format spacing, hybrid overlap and
+polyphase synthesis history. Checkpoints retain selected track geometry and
+refuse incompatible restores. Raw MP3 advertises checkpoint coordinates during
+normal playback and resumes only at an exact encoded packet boundary at or
+before the requested presentation target.
+
+Matroska pairs the worker's decoder checkpoints with its own pre-packet sample
+clock and global packet index. Both caches follow the existing 32-entry,
+one-per-second policy. Rewind preserves saved points while resetting the live
+clock; seek keeps presentation trim and restores both histories together.
+Fractional 44.1 kHz clocks resume at normalized sample PTS, rather than trying to
+match those values against rounded millisecond block timestamps. A backwards
+source-clock discontinuity disables timestamp-keyed restoration for that reader;
+full owned replay retains every presented occurrence of the requested time.
+
+`scripts/generate_mp3_checkpoint_fixtures.py` saves 160-frame authored chains
+with neutral VP9 companions at 48 and 44.1 kHz, plus a backwards-audio-clock
+variant with monotonic video. These qualify navigation/state restoration against
+uninterrupted PCM, not a new independent codec reconstruction oracle. Their
+hashes and complete offline regeneration match exactly. Existing compressed
+chain and independent stage PCM oracles remain the codec correctness evidence.
+
+All three checkpoint acceptance tests pass. Captured worker playback, rewind
+and seek produce identical PCM/packet timing. A warm 2.4-second seek in the
+48 kHz raw/Matroska chain reads 76 packets instead of all 160; the corresponding
+44.1 kHz Matroska seek reads 83. These are packet-count reductions, not a wall
+clock benchmark or a claim about cold/unvisited seeks. Saved synthetic encoded
+tone checkpoints preserve actual reservoir/SCFSI history at every packet start;
+wrong geometry is refused. The backwards-clock regression keeps full replay and
+matches independently selected/trimmed occurrences from continuous playback.
+The five focused root integration suites pass 16 tests, including existing MP3
+free-format, exact seeks, reference PCM, video and Matroska sample clocks.
+
+The discontinuity fixture includes a forward jump followed by a backwards jump,
+so a later low-PTS checkpoint would skip an earlier high-PTS episode. The test
+explicitly reproduces that incorrect shortcut through low-level packet seek and
+shows that it loses exactly 40 frames (40*1152 mono samples). Accepted full
+replay retains the episode. Checkpoint restore is also checked for free-format
+spacing state, foreign AAC/MP3 snapshot rejection, and preservation of valid
+MP3 history after a rejected restore. The nine existing AAC/SBR/worker checkpoint
+regressions pass, and the library check without the player feature passes.
+
+Final checkpoint gate: 37 focused tests pass (16 root integrations, 9 shared
+AAC/SBR/worker checkpoint regressions, 12 raw MPEG reader units). Both offline
+checks pass: the library without player and the normal player binary. No FFmpeg
+or fixture generation is part of ordinary test execution. The current shared
+codec overview now identifies the owned MP3 player route and its remaining
+qualification boundaries.
+
+### Integer video clocks and fractional Vorbis padding (2026-10-16)
+
+Native MP4 cache intervals now convert integer ticks directly into seconds and
+nanoseconds, avoiding floating-point rounding of presentation endpoints. Declared
+video durations use the same split conversion instead of requiring the entire
+nanosecond count to fit u64. The authored twelve-picture `native-video-clock`
+fixture reproduces the old missing-duration failure and checks exact cache
+endpoints, complete frame decoding, and rewind stability.
+
+Vorbis DiscardPadding again rounds fractional removed time intervals up to
+complete samples, while preserving nonzero whole-sample counts quantized to
+either adjacent nanosecond. The shared nearest-sample policy remains for codecs whose padding is a
+quantized sample count. Existing authored one-nanosecond tail regressions verify
+447 presented samples and the exact 55.875 ms endpoint, including seek windows.
+
+Timestamp validation: 48 focused integration tests pass across audio packet and
+stream clocks, MP4 audio clocks, Matroska track/empty/sample clocks, native video
+cache clocks, Vorbis timestamps/lacing, and Opus playback. The new native video
+fixture regenerates byte-for-byte offline. These checks qualify the listed
+clock/seek regressions, not universal codec coverage or a full repository suite.
+Both offline build checks pass: the production player binary and the library
+without the player feature. Existing unrelated compiler warnings remain.
+
+### Owned MP3 gapless metadata and Info history (2026-10-16)
+
+The shared codec crate now parses bounded Xing/Info field layouts and revision-zero
+LAME delay/padding. Both fixed-side and CRC-aware protected tag offsets are
+accepted. Trusted trim requires a valid tag checksum, a consistent declared
+frame count when present, and a bounded presentation window. Lavc/Lavf fixed
+190-byte checksum compatibility is covered by saved synthetic data. Unknown
+revision, bad checksum/count and impossible windows preserve full coded PCM.
+Encoder delay plus the 529-sample decoder latency trims the head; padding above
+that latency trims the tail. Indexed coded sample counts remain unchanged while
+presentation durations, packet PTS and seeks use the audible window.
+
+History-only Info frames retain reservoir payload without configuring placeholder
+geometry or advancing synthesis. The first actual audio frame may borrow these
+bytes, including indexed Info followed by free-format audio. Reset and decoder
+checkpoints retain the primed history. The player stores large decoder histories
+on the heap, avoiding the reproduced default-test-thread stack overflow.
+
+The authored `mp3-gapless` corpus has 115 raw cases and neutral VP9 video
+companions, plus 864 metadata layout vectors. Captured worker playback, rewind
+and partial-packet seeks compare exact PCM windows with independent source
+oracles. Header-only streams are refused; an audio frame with the first Huffman
+bytes `Info` remains audio. Its complete mixed-window chain is checked against
+an absolute-timeline/convolution PCM oracle, with the first normal frame also
+checked against the dev-only reference decoder. Symphonia's reference loses the
+mixed flag on start/stop blocks, so it is not the oracle for those later frames.
+MPEG-1 section 2.4.2.7 specifies normal windows in the lowest two mixed subbands:
+https://ossrs.net/lts/zh-cn/assets/files/ISO_IEC_11172-3-MP3-1993-7e218e3ec360c25149d36152c4e02f08.pdf
+
+Twenty root integration tests pass across gapless, checkpoints, free-format,
+reference PCM, owned seek and Matroska sample clocks. Ordinary tests use saved
+fixtures and run no generator, external codec process or network operation.
+
+Final gapless gate: 25 shared MP3 component tests, 20 root integration tests,
+12 raw MPEG reader units and 9 shared AAC/SBR/worker checkpoint regressions pass
+(66 tests). Both offline checks pass: production player and library without
+player. All 230 manifest artifact hashes and complete 231-file offline
+regeneration, including the manifest, match byte-for-byte. Gapless qualification
+does not close the broader remaining codec/profile and media-export gaps.
+
+### Shared owned MP3 core reaches Matroska library export (2026-10-16)
+
+The standalone `fvid-media` Matroska audio timeline now admits `A_MPEG/L3` and
+uses the same owned decoder as the player. Read-only planning reports MP3 and
+float32 source precision. Public WAVE export/DSP uses the established private
+spool and atomic publication pipeline. Conservative allocation admission adds
+live/transactional decoder storage, PCM, bounded reservoir staging and the
+numerical Huffman-tree allocations to container/packet accounting.
+
+`crates/fvid-media/tests/matroska_mp3_export.rs` passes all 110 applicable authored
+Matroska gapless cases and ceil-rounded 40–60 ms intervals at nine rates, mono/MS,
+indexed/free format and Info-history priming. Public primed-free WAVE export
+matches 4001 expected sample frames; WAVE-reference resampling/channel/gain DSP
+is byte-identical. A two-packet limit includes the Info prefix and produces
+616 audible frames. Tiny aggregate/packet limits and cancellation prevent output
+publication; cancellation after the second packet emits no completion event.
+Coded `Info` markers retain all 4608 audio frames and match the independent
+mixed-window PCM oracle. No fixture generator or external decoder is executed
+by these ordinary tests.
+
+Final standalone Matroska MP3 gate: 3 new integration tests, 8 shared Matroska
+unit tests, 9 public audio-export regressions and 10 shared MP3 core tests pass
+(30 tests). The standalone media check and production player binary check pass
+offline. This closes the Matroska MP3 decode/WAVE-export route only; raw MP3 file
+library export and broader unqualified codec tools remain active work.
+
+### Canonical bare MPEG parser and raw MP3 library export (2026-10-16)
+
+The player and standalone media library share `owned_mpeg_audio` for Layer II/III
+headers, tags, free-format frame inference, geometry checks and trusted gapless
+coordinates. Player parser types are reexported unchanged. Native free-frame
+qualification no longer depends on an AudioDecode factory. Consuming parsing
+retains input storage without cloning the whole file; parser/index allocations
+are fallible and controlled admission accounts them alongside decoder staging.
+
+`owned_raw_mp3` feeds the existing owned private-WAVE spool/export/DSP pipeline.
+115 gapless cases and 39 pure free-format cases match independent PCM, with
+ceil-rounded 40–60 ms sample windows. Primed-free public export produces 4001
+frames and byte-identical WAVE-reference resampling/channel/gain DSP. A two-packet
+limit includes the Info prefix and yields 616 audible frames. Existing output,
+input/index budget rejection and cancellation after packet two never publish a
+new file or completion event. The coded `Info` audio marker retains all samples;
+Info-only data is a specific no-audio refusal.
+
+A further encoded-byte admission regression uses the saved authored 640 kbit/s
+free-format video/audio pair: a 1921-byte maximum accepts padded packets, while
+1920 refuses before PCM output. Candidate free-format payload probes now respect
+that cap, and a candidate exactly at the byte boundary remains eligible.
+
+Final raw MP3 gate: 14 MP3 player integrations, 12 MPEG reader units, 5 MP2 player
+regressions, 7 standalone raw/Matroska MP3 export tests and 9 shared public audio
+export regressions pass (47 tests). The final framing rerun includes both MP2
+and MP3 free-format plus gapless. Production player and library-without-player
+checks pass offline. This qualifies raw MP3 library decode/export; remaining
+codec tools/profiles and Layer I are not marked complete.
+
+### Owned Layer I, MPEG library export/probe and sample projection (2026-10-16)
+
+The shared codec crate now owns MPEG Layer I reconstruction. Allocation and
+scalefactors feed independent-channel/intensity-stereo requantization and the
+existing owned polyphase filter. CRC covers the protected header/allocation
+fields. Geometry, reserved allocation, CRC, truncation and free-spacing errors
+commit neither decoder history nor spacing state. The bare reader now sizes
+Layer I four-byte slots instead of refusing the layer; its old header-only
+refusal test now checks incomplete input, while complete-frame acceptance is
+qualified with real authored bitstreams.
+
+The authored generator `generate_mp1_native_fixtures.py` saves 258 indexed/free
+cases and neutral VP9 companions. All 32 subbands, 64 scalefactors, fourteen
+nonzero allocation classes, all channel modes/joint boundaries, nine rates and
+six dense cases are exercised. Independent signed-fraction requantization and
+absolute convolution supply PCM. Dense-case validation caught a generator error
+where a false sync header overwrote coded samples; insertion now asserts it is
+strictly after the actual payload. The PCM tolerance was not widened.
+
+A real false ancillary header reproduced the shorter-spacing parse error
+(`frames run to byte 676 of a stream ending at 3148`). Four-header confirmation
+now rejects that candidate. EOF-bounded single protected free frames remain
+accepted. A smaller valid free-spacing control and a one-byte second-frame CRC
+corruption verify that a doubled candidate cannot silently hide damaged audio.
+Saved bad-CRC, reserved-allocation, truncated and changed-spacing video fixtures
+reproduce their specific errors through the owned player and public export.
+Failure/cancellation emits no publication completion and leaves no destination.
+
+Layer I raw/Matroska playback and exact seeks/rewinds match independent PCM.
+Known sample clocks fix the 44.1 kHz container-duration regression: the authored
+2688-frame clip is 60.95238 ms, instead of the old rounded-block 60 ms estimate.
+Presentation PTS use cumulative sample coordinates rather than sums of separately
+rounded packet and trim durations. Bare MPEG durations now use the same integer
+projection as packet/stream time; the old MP3 gapless test's nearest-float
+expectation was replaced by the exact rational-floor oracle, without a tolerance.
+
+Thirty-six additional timed videos qualify floor/ceil CodecDelay and tail-padding
+representations at all nine rates. The old floor-delay path reproduced 7.645834 ms
+instead of 7.645833 ms, and ceil delay could discard an extra sample. Layer I now
+restores whole-sample delay before projection. Full PCM, exact PTS/duration, seek,
+rewind and library intervals match audible oracle windows. Captured workers also
+verify the nine ceil-delay/tail cases; 36 baseline worker cases cover mono/joint,
+indexed/free at every rate. Video companions actually decode in the tests.
+
+Shared library workflows now expose raw/Matroska Layers I/II/III through owned
+kernels. Public WAVE/DSP, read-only plans, resource limits, packet-prefix output
+and cancellation are qualified. Layer II library decode reuses 174 indexed and
+57 free-format source oracles. Public MPEG probes agree with canonical indexes
+for 258 Layer I, 231 Layer II and 115 Layer III cases. Probe success remains
+container/index evidence, not independent compressed-payload acceptance. The
+production dependency tree contains no Symphonia MPEG bundle; its Layer I/II/III
+features are dev-only references. Ordinary tests invoke neither FFmpeg nor
+fixture generators/network operations.
+
+Final gate: 91 focused tests pass (3 Layer I core, 31 MPEG/clock player
+integrations, 13 standalone MPEG library integrations, 12 raw-reader units,
+9 shared AAC/SBR checkpoints, 8 shared Matroska units, 9 public audio-export
+regressions and 6 shared probe regressions). Production player and library
+without player checks pass offline. All 1084 manifest artifact hashes and
+complete 1085-file regeneration match byte-for-byte. Other codec/profile and
+workflow gaps remain active; no universal codec or performance completion is claimed.
+
+### Exact Layer II/III timestamps and seek (2026-10-16)
+
+Layer II now rebuilds synthesis state before an exact sample seek. The previous
+packet-boundary landing and rounded Matroska metadata drift have saved synthetic
+reproductions and enabled acceptance tests. All three MPEG layers project
+presentation timestamps from integer sample coordinates after delay/padding
+normalization. Full playback, rewind, partial seek, EOF, duration and library
+intervals are checked at nine rates against independent saved PCM.
+
+The focused MPEG/clock gate passes 59 tests: 33 player integrations, 14 library
+integrations and 12 raw-reader units. A further 17 shared checkpoint/Matroska
+unit tests pass. The new corpus has 109 deterministically
+regenerated files and 108 verified artifact hashes. This qualification does not
+cover all codec profiles or establish 60 fps; Layer II seek still replays from
+the beginning to preserve synthesis history.
+
+### Owned FLAC Matroska library path (2026-10-16)
+
+The shared Matroska audio timeline now accepts `A_FLAC` through the owned
+`fvid-codecs::flac` kernel. `owned_matroska_flac::decode_matroska_flac_pcm`
+exposes float32 output and audible interval decoding. Public audio plans,
+WAVE export and shared DSP use this route without a player dependency.
+STREAMINFO geometry must agree with the track. Codec and presentation storage
+use conservative aggregate admission; packet/index bytes are charged separately.
+Cancellation and tiny-budget refusal leave no published file.
+
+The saved authored corpus supplies 1460 short FLAC/neutral VP9 Matroska videos,
+covering 1–8 channels and 4/8/12/16/20/24/32-bit source samples. Full and 2–6 ms
+interval PCM match independent saved integer oracles exactly. Video companions
+are actually decoded in the player regression. Public DSP agrees with a WAVE
+control. Four-channel export uses the quad speaker mask from RFC 9639 section
+9.1.3 rather than the generic four-channel FC/BC layout. Complete 1461-file
+regeneration is deterministic; ordinary tests never run the generator.
+
+This closes the Matroska FLAC library dispatch gap, not every FLAC container,
+metadata-layout override, encoder or codec profile. Bare FLAC library export
+and other remaining codec/workflow gaps still need separate qualification.
+Reference: https://www.rfc-editor.org/rfc/rfc9639.html#section-9.1.3
+
+FLAC milestone verification: 3 FLAC library tests, 7 MPEG integration controls,
+8 shared Matroska unit tests and 1 companion-video test pass offline. Player and
+standalone media-library checks pass; all 1460 saved artifact hashes agree.
+
+### Bare FLAC library workflows (2026-10-16)
+
+The player and library now share `owned_flac::Flac`, the canonical STREAMINFO
+and CRC-delimited frame index. The library can consume an owned input buffer
+without making a second encoded-file copy. Index/input/decoder admission and
+encoded packet caps are applied before reconstruction. Existing parser and
+player tests continue to exercise the same implementation through the adapter.
+
+`owned_raw_flac::decode_raw_flac_pcm` supplies full and ceil-rounded sample
+interval output. Bare `.flac` now reaches public audio plans, atomic WAVE export,
+shared DSP and signature/hinted metadata inspection. Previously a public plan
+failed in the WAVE parser; the saved authored corpus now enables acceptance.
+All 1460 authored cases match independent integer-to-float PCM oracles for full
+and 2–6 ms windows. Metadata inspection is checked against their sample counts.
+Public workflows cover all eight channel counts, including the FLAC quad mask;
+DSP matches a WAVE control. Tiny allocation budgets, encoded packet caps,
+invalid stream selection and cancellation do not publish an output.
+
+The existing `flac-matroska` corpus supplies the matching short neutral VP9
+video companions; tests decode those pictures and never generate fixtures or
+invoke FFmpeg/network operations. Default FLAC channel layouts are qualified;
+metadata channel-layout overrides and other container/profile/workflow gaps
+remain separate work. This is not a claim that the overall codec goal is done.
+
+### FLAC comment speaker masks (2026-10-16)
+
+The canonical bare FLAC index and library Matroska FLAC adapter now parse
+`WAVEFORMATEXTENSIBLE_CHANNEL_MASK` from Vorbis comments. Field names and hex
+values are case insensitive; padded hex, zero and partial masks retain their
+meaning. Length/UTF-8/syntax/overflow and conflicting-mask checks use borrowed
+metadata slices. Public plans and WAVE export preserve the selected assignment
+rather than silently applying the default FLAC layout. WAVE inspection and
+writers accept partial masks, retaining unassigned trailing channels.
+
+Six authored examples reproduce missing LFE, FC/BC, height, center-only,
+unassigned and stereo-prefix layouts. Each has a saved neutral VP9 Matroska
+companion. Bare and Matroska WAVE output masks agree exactly, and all interleaved
+PCM samples match the pre-existing independent integer oracles. The generator
+requires no external encoder/network; all 13 files regenerate identically and
+all 12 artifact hashes match. Existing default-layout FLAC cases remain enabled.
+
+This qualifies layout preservation in library export. General spatial downmix
+for nonstandard/height/partial masks and speaker-aware device playback remain
+open; acceptance here must not be read as those runtime features being complete.
+References: https://www.rfc-editor.org/rfc/rfc9639.html#section-8.6.2 and
+https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ksmedia/ns-ksmedia-waveformatextensible
+
+### Explicit speaker-mask downmix (2026-10-16)
+
+The shared float32/float64 PCM mixers now use bounded source/destination
+coefficient matrices instead of inferring speaker positions from channel count.
+All 18 named mask positions are supported, with partial masks omitting trailing
+unassigned channels. The defined fold policy keeps FL/FR at unity, folds other
+named positions by lateral side at -3 dB, and omits LFE/unassigned channels.
+A single center source retains the established unity dual-mono behavior. Mono
+output averages the stereo fold. Expansion routes matching speakers first and
+folds absent positions to available fronts; it does not invent surround/bass.
+Equal channel geometry retains interleaved PCM and its original mask.
+
+Explicit DirectOut mask zero is distinct from classic mono/stereo WAVE without
+an explicit layout. WAVE inspection records this distinction and the exporter
+normalizes only the implicit classic layout before mixing. Explicit zero remains
+unassigned, including one/two-channel FLAC cases. Default-layout control tests
+and older quad/surround tests continue to pass in both precisions.
+
+The authored layout corpus now has 26 raw FLAC files and 26 neutral VP9
+companions: all 18 individual named positions plus compound, partial and zero
+layouts. Public raw/Matroska plans and 2–6 ms mono/stereo exports agree with
+independent integer PCM plus an explicit speaker-weight oracle. Floating error
+bounds scale with source amplitude, so low-level 32-bit fixtures still detect
+incorrect routing. Direct impulse tests cover both precisions, fragmented frames,
+partial/zero masks and speaker-preserving expansion. All 53 generated files
+reproduce identically; all 52 artifact hashes match. Ordinary tests invoke no
+FFmpeg, fixture generation or network operation.
+
+This closes shared-library spatial fold admission for these layouts. Device
+playback still needs explicit source/destination speaker negotiation; this gate
+must not be presented as device routing, all codec profiles or performance proof.
+
+### FLAC source layout through device playback (2026-10-16)
+
+`AudioStream::speaker_mask` now carries a fallible explicit source assignment,
+and the worker passes it through `AudioBackend::start_with_layout`. Existing
+non-spatial backends retain their original stream contract. Bare and Matroska
+FLAC expose both normative defaults and explicit comment masks, including zero.
+Matroska setup now strips exactly the 34-byte STREAMINFO body: the previous
+unbounded suffix accidentally included comments and reproduced `FLAC requires
+STREAMINFO` before playback. The matching saved video corpus is acceptance.
+
+CPAL routes explicit FLAC assignments to a known FL/FR stereo output before its
+ring, using the owned bounded `StereoRouter`. It admits output bytes before
+allocation and rejects partial/nonfinite PCM. Equal source/destination channel
+counts still route rear-only or unassigned stereo correctly, rather than taking
+file-export's layout-preserving identity shortcut. The packet sample-frame count,
+PTS and output clock remain unchanged. Flush clears queued samples without
+losing the stateless source routing assignment.
+
+Captured workers exercise raw/Matroska playback and rewind for all 27 authored
+layouts. Independent integer PCM plus literal speaker-weight oracles check
+actual CPAL push, ring and callback output, including flush at a one-second base.
+Core router controls cover same-count routing, bounded admission and malformed
+PCM. Existing CPAL, worker and Matroska suites remain enabled. Every neutral VP9
+companion actually decodes; all 55 generated files and 54 artifact hashes match.
+Ordinary tests require no hardware, FFmpeg, generator or network access.
+
+A separately invoked ignored hardware smoke test successfully opened the default
+physical output at 48 kHz in a paused state for a six-channel source folded to
+two output channels, then closed it. It emitted no sound. This proves the local
+paused-open path, not audible end-to-end output, mono-only devices, native
+multichannel-device layouts or every codec/profile. Explicit device routing for
+other codec families and the broader codec/workflow goal remain open.
+
+### AAC device routing and exact seek boundaries (2026-10-16)
+
+AAC ADTS, MP4 and Matroska readers now negotiate an owned `StereoRouter` through
+`AudioStream` and `AudioBackend`. CPAL receives coefficients in emitted PCM order,
+not merely a channel count or a WAVE mask. The AAC helper retains explicit PCE
+height/position/group descriptions, including bottom layers, repeated positions
+and layouts whose WAVE mask is zero. Indexed layouts retain their declared mask;
+explicit/negotiated PS uses FL/FR. The bounded router accepts up to 64 explicit
+coefficients, with actual compressed ten-channel PCE acceptance beyond the old
+eight-channel matrix limit. This is not a claim of compressed 64-channel coverage.
+
+The defined PCE fold uses -3 dB for vertical/side/back groups, omits LFE, and
+routes the final normal-front pair at unity. A lone normal-front center keeps
+dual-mono unity. This is an explicit rendering policy, not a reconstruction of
+spatial geometry or a claim of every possible PCE mixdown instruction.
+
+Seek acceptance exposed old packet-boundary landing in both MP4 and Matroska
+AAC. They now retain complete decoder preroll and trim to the requested sample.
+Positive MP4 edits add priming once; MP4 EOF/beyond-end requests clamp to the audible
+endpoint. Nanosecond packet rounding no longer discards an extra sample: the
+saved 50 ms request previously landed at 50.020832 ms. Quantized source points
+are recovered on their sample grid, while a request 1 ns beyond a boundary still
+uses strict ceil. Whole-sample CodecDelay rounding is restored where identifiable;
+coarse/off-grid packet timestamps retain their declared timing. This does not
+claim a general rewrite of every coarse/discontinuous Matroska clock.
+
+`aac-device-layout` contains 18 authored layouts, 36 MP4/Matroska companions and
+two extra videos with a 48-sample positive edit and two floor/ceil CodecDelay
+companions. Original independent cosine PCM
+oracles supply literal-weight stereo oracles. All 54 raw/container combinations
+pass full audio decode; all 40 companion videos are actually decoded. Captured workers verify full/rewind,
+2 ms and 50 ms seeks with exact PCM/sample-clock assertions; positive-edit tests
+also cover partial/last samples, EOF and beyond EOF. Actual CPAL push/ring/callback
+code matches the independent oracles. Existing packet-boundary assertions were
+replaced with exact PCM suffix acceptance; no timestamp tolerance was widened.
+Floor/ceil CodecDelay videos preserve exactly 17 trimmed samples and exact
+0/2/50 ms boundaries. All 77 generated files reproduce identically and all
+76 artifact hashes match.
+Previous height artifacts remain byte-identical; only the authored ten-channel
+case was added. Ordinary tests invoke no generators, FFmpeg, network or hardware.
+
+Additional metadata admission covers all 72 saved ER-AAC/SBR indexed layouts.
+Existing LD, LTP, PS, MP4, Matroska, worker and CPAL regressions remain enabled.
+Separately invoked ignored physical smoke tests successfully opened and closed
+paused default output for both six-channel mask FLAC and ten-channel explicit
+AAC PCE at 48 kHz; neither emitted sound. Production player and standalone media
+library compile offline. Audible hardware playback, arbitrary midstream layout
+renegotiation, PCE-aware library spatial export and other codec/workflow gaps
+remain separate work; the overall codec goal remains active.
+
+### Quantized AAC Matroska timestamps (2026-10-16)
+
+Decoded AAC now tracks cumulative output samples within each Matroska clock
+epoch. Packet timestamps within one container tick of the predicted sample time
+use that exact sample time; larger forward or backward jumps begin a new epoch.
+The clock advances before seek trimming, includes preroll, resets on rewind,
+and follows decoded output timestamps for delayed PS frames. CodecDelay still
+uses its independent whole-sample projection. This closes the earlier coarse
+AAC packet-clock limitation for fixed-rate decoded output; it does not claim
+arbitrary midstream rate/layout renegotiation or correction of malformed clocks.
+
+Saved authored VP9/AAC videos reproduce the former 21 ms versus 21.333333 ms
+second-packet error. Acceptance checks retain PCM, real discontinuities, and
+strict sample selection at 50 ms and 50 ms + 1 ns without FFmpeg or generation
+at test time.
+
+The AAC endpoint now comes from complete decoded output, including the maximum
+end across clock epochs, and remains stable after rewind. A completed six-packet
+coarse fixture reports 128 ms instead of the former 127 ms estimate. Before a
+complete decoded traversal, container/packet duration remains provisional.
+
+AAC seek checkpoints now retain the paired sample-clock state and decoded-output
+count beside the decoder checkpoint. The saved 1.536 s coarse video reproduces
+warm seek selecting the wrong PCM suffix despite a correct first PTS; restoring
+the clock pair preserves byte-exact PCM at 1.3 s. The bounded cache follows the
+worker's one-checkpoint-per-second/32-entry policy. A backwards source-clock
+jump disables timestamp-keyed restoration because PTS cannot identify repeated
+occurrences; complete decoder preroll remains available.
+
+AAC Matroska `DiscardPadding` is now applied to its decoded source AU, rather
+than ignored or read from a later lookahead packet. A retained metadata cursor
+advances in decoded-source order and is included in the paired seek snapshot;
+this also handles duplicate PTS without a timestamp lookup. Full coded PCM still
+advances the sample clock before the audible window is cropped. Excess padding
+is an explicit error. Acceptance covers an authored 13-sample LC tail and both
+immediate/late Main-PS with distinct 7/13-sample penultimate/final tails, EOF
+draining and rewind. The malformed 1025-sample trim on a 1024-sample AU has a
+separate refusal test. The existing worker pacing check now measures actual
+trimmed PCM instead of assuming every presented packet lasts 1024 samples.
+Signed leading-padding behavior across arbitrary gaps remains a separate
+qualification; these tail tests do not prove every Matroska edit combination.
+
+### AAC signed windows and container-time export (2026-10-16)
+
+The shared AAC Matroska export scheduler now resolves the full coded sample
+clock before applying signed padding. Explicit head/tail windows are no longer
+absorbed into the container tick tolerance, and AAC exports retain the container
+origin. A 17-sample initial head trim previously shifted the entire exported
+track 17 samples earlier. It now leaves the later sample positions unchanged;
+WAVE represents the missing interval as silence. Positive initial timestamps
+likewise retain their leading silence. Negative source preroll is decoded for
+history and cropped at presentation zero, matching the player rather than being
+shifted into audible output. AAC interval arguments now address this container
+presentation timeline, not a silently rebased first-packet sequence.
+
+Five additional authored VP9/ten-channel AAC videos qualify initial/interior
+negative padding, a complete discarded first AU, an explicit 50 ms source offset,
+and a forward clock gap combined with head and final-tail padding. Independent
+cosine PCM oracles verify the raw library export and public WAVE path. Reader
+acceptance covers exact and sub-sample seeks, duration and rewind. A software
+CPAL test runs actual routing, ring and callback code against independently
+saved stereo oracles at zero and 50 ms anchors, without opening hardware.
+
+The existing 18 PS export videos are byte-identical. Their scalar PCM oracles
+are unchanged; only placement metadata and acceptance expectations now follow
+the declared -10/40/90 ms source points, including the 480-sample negative
+preroll crop. Tests independently inspect the demuxed PTS before comparing PCM.
+The earlier first-packet rebasing expectations are superseded by these checks.
+This follows Matroska's timestamp rules: CodecDelay is subtracted from block
+time and negative presentation data must be decoded but not played. References:
+https://www.matroska.org/technical/notes.html#timestamps and
+https://www.matroska.org/technical/elements.html#DiscardPadding.
+
+An additional six-frame video reproduces a real 1 ms gap at the exact 64 ms
+coded boundary. A blanket one-tick tolerance lost its 48 silent samples in both
+player and export. `fvid-media::owned_matroska_sample_clock` now tests the two
+adjacent quantized tick points, with bounded integer-ns rounding allowance;
+the player uses the same helper. The 65 ms point cannot represent rounding of
+64 ms, while 21/22 ms can both represent the fractional 21.333333 ms point.
+Three focused helper units cover floor/ceil, delay offsets, integer-ns rounding,
+invalid geometry and extreme argument bounds.
+
+Qualification remains for fixed-rate AAC at the saved container tick scales.
+Arbitrary midstream rate/layout renegotiation, non-unit TrackTimestampScale
+sample-clock inference, signed-window alignment in other codecs and the broader
+codec/profile/workflow goal remain separate work.
+
+### AAC TrackTimestampScale clock recovery (2026-10-16)
+
+Scaled AAC packets now retain their original Matroska block grid rather than
+trying to infer it from rounded nanosecond PTS. The owned reader keeps compact
+block ranges only for non-unit AAC tracks, exposes cluster/relative coordinates
+and the integer-ns displacement of a lace frame, and charges the retained vector
+capacity in its existing index memory estimate. Ordinary unit-scale AAC allocates
+no retained grid records. Incremental scans preserve already indexed grids.
+
+`owned_matroska_grid_clock` compares the declared grid with cumulative coded
+samples using bounded integer limbs and the exact IEEE mantissa/exponent of
+TrackTimestampScale. Cluster ticks remain on the segment clock; only relative
+block ticks use the factor. This avoids rounding a fractional quantum, including
+factors near one, shifted cluster origins and laced frames. The root reader and
+shared library scheduler use the same helper. Delayed PS keeps the original
+packet index through lookahead/EOF so its grid belongs to the emitted source AU.
+AAC seek snapshots retain the grid epoch with the decoder/sample-clock pair.
+
+The original seven scaled videos reproduced wrong PTS and PCM seek suffixes;
+for factor 2, seeking to 50 ms discarded 64 extra samples. The accepted corpus
+now has 12 authored VP9/AAC videos plus one authored ADTS warm-seek control.
+LC/PCE cases cover 2, 0.5, the exact IEEE value of 1/3, a factor just above one,
+shifted cluster origins, lacing, and genuine 2 ms gaps with and without lacing.
+Two Main/PS cases cover immediate/late PS on a shifted, fractional, laced grid.
+A 1.536 s ten-channel case checks byte-exact warm seek at 1.3 s and one ns later.
+Every companion video is actually decoded; the nine prior videos are unchanged.
+
+Library acceptance covers full and interval PCM, an interval starting inside a
+gap, public stereo WAVE export, packet-prefix limits and controlled-budget
+refusal without publication. LC uses independent authored cosine PCM; PS and
+the long repeated stream use their saved authored ADTS transport controls for
+clock/seek consistency, not as new codec-kernel conformance proofs. A shortened
+late-PS ADTS prefix is not equivalent to explicit PS signalling in Matroska:
+the prefix control therefore configures the owned PS decoder explicitly before
+decoding/draining exactly two source AUs.
+
+Five math units cover signed/lace offsets, wide cancellation, near-unit factors,
+subnormal/maximal finite IEEE values, and 41,472 comparisons with an independent
+bounded i128 rational oracle. A separate reader test verifies retained allocation
+charging and absence of extra grid storage for unit-scale AAC. The focused
+126-test gate passes offline across new cases, previous AAC/PS and interval
+regressions, workers/readers, and neighbouring FLAC/MPEG exports. No generator,
+network, FFmpeg, or physical device is required by these ordinary tests.
+
+This qualifies the saved LC/Main-PS combinations; it does not prove every AAC
+profile, arbitrary midstream geometry change, or scaled-clock handling in the
+other codecs. The overall codec goal remains active.
+
+### PCM Matroska sample clocks and metadata-only seek (2026-10-16)
+
+PCM now uses the same owned coded-window clock as AAC before signed trimming
+and interval selection. Export preserves container origin, leading silence,
+explicit head/tail padding, CodecDelay and real gaps. The former PCM scheduler
+rebased a 50 ms offset and removed leading padding from all later positions:
+the authored offset case exported only 354 frames instead of its 2771-frame
+presentation timeline. Original scaled block grids are now retained for scaled
+audio tracks generally, while only the independently qualified consumers use
+them for sample-clock recovery. The retained capacity remains charged.
+
+The player resolves PCM packet frames from indexed restored payload lengths and
+the decoder's canonical encoded frame stride. Exact seek selects the first
+remaining audible window and restores its clock state without decoding earlier
+PCM. An instrumented uncompressed float64 source verifies zero PCM payload reads
+during seek, then verifies payload reading resumes at the selected packet. Seek
+errors are deferred through the next packet result, so malformed geometry cannot
+be hidden by seeking beyond EOF. Duration is derived from the indexed audible
+windows, independently of packet rounding and of the current seek position.
+Direct sample coordinates avoid reconstructing PCM indices from rounded ns.
+
+Library Matroska PCM now honors the player's existing compatibility defaults
+when BitDepth is absent: integer16/float32. This is a compatibility policy, not
+proof that every omitted-width file has the same actual data interpretation.
+A shared `encoded_frame_bytes` method supplies stride without decoding payload.
+
+The new PCM corpus has 49 authored VP9/PCM videos: 48 acceptance combinations
+and one explicit incomplete-frame refusal. Formats cover unsigned8, signed
+16/24/32 in both byte orders, float32/64, absent integer/float widths and stereo.
+Timelines cover a positive offset with head/tail padding, an interior head/gap,
+a scaled genuine gap, and CodecDelay with signed padding. Scaled legacy cases
+use v3 without v4 padding; signed-padding cases use v4 with unit track scale.
+All videos are actually decoded. Independent dyadic ramp oracles verify exact
+packet PTS/PCM, strict 1 ns seek boundaries, duration, f32/f64 library intervals,
+public WAVE payloads and planning. Invalid stride is a refusal, not acceptance.
+The earlier packet-admission test now accepts the same specific refusal from
+reader or decoder because geometry is checked before coded-clock advancement.
+
+Two additional Main/PS videos compose negative source preroll with fractional,
+shifted, laced grids. Their ADTS control PCM is cropped by exactly 480 samples;
+cold/strict seeks, delayed EOF output, prefix controls and public export pass.
+The scaled AAC corpus now has 14 videos plus its authored ADTS warm control;
+all prior artifacts remain unchanged. The 136-test offline gate covers the new
+PCM path and prior PCM/AAC/PS, worker, reader, FLAC/MPEG and interval regressions.
+No FFmpeg, fixture generation, network or physical device is required by these
+ordinary tests. Other codec timing policies and the overall codec goal remain
+separate work.
+
+MPEG Matroska one-tick gaps are now preserved by both player and library sample
+clocks. Authored Layer II/III 48 kHz videos place packet two at 25 ms after a
+24 ms packet. The old player tolerance projected it to 24 ms; the library omitted
+48 silence frames. The regression checks actual companion video/audio decode,
+packet presentation timestamps, full library PCM, a 24–26 ms interval and public
+WAVE output against saved independent MPEG PCM plus exactly 48 zero frames.
+MPEG joins AAC/PCM in the shared coded-sample timeline, with delay and padding
+applied after coded-clock recovery. Scaled MPEG Layer II/III player grids are qualified at 44.1 kHz for factors 2
+and 1/3, including shifted cluster origins. Saved source PCM is compared after
+strict cold seeks, with matching exact packet timestamps and duration.
+
+FLAC joins the shared exact coded-sample scheduler. Positive Matroska audio
+origins remain absolute, so a 50 ms audio offset exports with 50 ms of silence
+instead of shifting sound to zero. Saved synthetic offset companions cover all
+existing FLAC format/kernel cases with full and crossing-interval PCM oracles.
+The player also trims FLAC after seek to the requested sample rather than
+presenting the entire containing packet. A decoded VP9/FLAC regression checks
+51 ms and 51 ms plus 1 ns against independent integer source PCM. Multi-packet FLAC timing now uses validated header sample counts and retained
+block grids. Two four-packet 44.1 kHz companions qualify unit and 1/3 scales
+against literal independent PCM levels and exact sample timestamps. Full FLAC
+duration indexing and broader compressed-audio timing remain separate work.
+
+After FLAC EOF, duration is now the exact latest audible sample endpoint rather
+than an estimate from packet spacing. The endpoint survives rewind and seek.
+Synthetic 44.1 kHz unit/third-scale cases reproduce the old 6 ms estimate for
+256 samples (actual 5,804,988 ns). Two additional v4 cases trim 13 final samples
+or discard the entire last 64-sample packet; both duration and decoded PCM are
+checked. Pre-decode duration is established by the encoded-packet pass described below.
+
+FLAC duration is also established at open by one encoded-packet/header pass.
+The existing indexed reader and coded sample clock calculate the audible end,
+then rewind restores the playback cursor while retaining the endpoint. No PCM
+reconstruction or duplicate index is required. Unit/third-scale and final-padding
+regressions assert exact duration before any decoder is created. Opening large
+FLAC-in-Matroska files now includes this full encoded I/O pass; startup latency
+has not been benchmarked.
+
+Opus unit-scale clocks preserve real one-tick source gaps and positive origins.
+Authored DTX/VP9 companions reproduce 21 ms being shifted to 20 ms by a blanket
+1 ms tolerance. Adjacent quantization bounds now determine continuity and initial
+rounding, with encoder preskip still applied. New actual video/audio regressions
+cover 0/21/41 ms and 1/21/41 ms sequences. Existing Opus playback, priming, mapping,
+chaining, multichannel and seek regressions pass. Fractional Opus source grids
+and equivalent library export windows remain separate qualification work.
+
+Opus now participates in the shared exact coded-sample timeline for library
+exports. The authored unit-scale gap/origin movies qualify full PCM, a crossing
+19–22 ms interval and public float32 WAVE against direct packet PCM plus exactly
+48 timeline silence samples. A broader 22-test surround-export run passed 20
+checks but exposed two exact-byte quad-to-mono rematrix failures, including a
+WAVE-only control; these remain unresolved and are not a green full gate.
+
+The two quad-to-mono exact-byte failures are resolved. Streaming f32/f64 PCM
+rematrixing now defines mono as the average of the speaker-aware stereo fold,
+with the same arithmetic order as stereo followed by mono. The existing authored
+HEVC/Opus quad companion and float32/float64 quad WAVE controls reproduce the
+old discrepancy and now pass unchanged. All 22 surround-export checks plus the
+Opus gap/origin export acceptance pass without FFmpeg. This establishes the
+rematrix contract; it does not qualify all remaining codec tools or profiles.
+
+Opus short-packet fractional clocks now use retained source grids in playback
+and indexed duration. A four-packet 2.5 ms CELT DTX video with factor 1/3
+reproduced 2,333,333 ns instead of 2,500,000 ns. Packet PCM geometry, exact
+0/2.5/5/7.5 ms presentation and the 10 ms endpoint pass; encoder preskip and
+existing mode/layout/seek regressions remain intact. Shifted/laced fractional
+Opus, arbitrary discontinuities and additional timing combinations remain
+separate qualification work.
+
+Fractional Opus qualification additionally covers shifted clusters and Xiph
+lacing of two 2.5 ms packets per block. Saved synthetic companions pass actual
+video decode, source PCM comparison, exact packet presentation and cold seeks
+at 3 ms/3 ms+1 ns/7.5 ms+1 ns. These cases preserve the 10 ms endpoint. This is
+bounded acceptance coverage; negative preroll, preskip/padding combinations and
+other lacing/timing geometries remain separate qualification work.
+
+Rounded Opus delay now uses the exact coded-sample coordinates for seek
+trimming, packet presentation and audible endpoint calculation. Two synthetic
+v4 videos combine 17-sample preskip/CodecDelay (354167 ns), a 13-sample tail and
+an optional interior 9-sample head trim. They reproduced 9,374,999 ns instead of
+9,375,000 ns. Strict seeks at 1 ms and 1 ms+1 ns compare exact source PCM slices
+and timestamps. Existing positive-first priming, SILK/CELT/hybrid, mapping,
+multichannel, chained and seek playback regressions remain accepted. These unit
+track-scale cases do not qualify every fractional-delay/padding combination.
+
+ALAC joins the exact shared Matroska sample timeline. Two authored ramp/VP9
+companions qualify a 50 ms origin, a real 1 ms gap, strict seek boundaries and
+full/interval export. The old library rebased 512 samples to zero instead of
+preserving 2400 leading silence samples; the player also exposed microsecond
+packet quantization. Playback derives its clock from actual decoded frame
+counts, without reconstructing each packet twice. ALAC seeks rebuild timing from encoded headers before the selected packet. Existing negative-padding oracles now
+preserve silent presentation windows rather than shifting later samples earlier.
+Duration indexing and further ALAC timing geometries remain separate work.
+
+Fixture conformance separates legacy TrackTimestampScale (Matroska v1–v3) from
+v4 CodecDelay/DiscardPadding; see the official element version table:
+https://www.matroska.org/technical/elements.html . A mixed-version synthetic
+input is not counted as proof of required standards-compliant playback.
+
+ALAC post-EOF duration now retains the exact absolute audible sample endpoint,
+including source offset, CodecDelay, signed padding and a fully discarded last
+packet. It remains stable after rewind and seek. The old estimate rebased the
+50 ms offset case to 10.667 ms instead of its actual 60.666666 ms endpoint.
+The cached endpoint is admitted only after all selected packets have provided
+decoded geometry, preventing a partial seek/output clock from claiming completion.
+Two additional v4 synthetic companions qualify rounded 17-sample delay with
+13-sample tail trim and a completely discarded final packet. ALAC seek header traversal and pre-decode duration are covered below.
+
+ALAC duration is now established at open from encoded element headers. A shared
+header parser supplies sample count to both reconstruction and the metadata-only
+pass; the latter allocates no decoder scratch/PCM and retains no duplicate index.
+The existing coded sample clock computes the absolute audible endpoint before
+rewinding the packet cursor. Full body, channel-element consistency and stop-tag
+checks remain in decode; a header count is not whole-packet validation. Four
+synthetic ramp/video cases require exact duration before decoder creation and
+across seek/rewind. Existing mono/stereo packets compare header count to actual
+reconstructed geometry, and truncated prefixes must refuse. Opening ALAC now
+includes a full encoded-packet I/O pass; startup latency has not been benchmarked.
+Seek uses a header walk as described below; large-file I/O latency remains unmeasured.
+
+ALAC seek now walks encoded headers to restore the coded clock before the first
+requested audible packet. It does not reconstruct PCM for prior packets, keeps
+no duplicate index and restores paired clock/cursor state before decoding the
+selected packet. On the four-packet ramp regression, seek at 56 ms+1 ns needs
+only two packet decodes rather than four; a request beyond EOF needs none.
+Source PCM suffixes, exact timestamps, delay/tail trimming and cached duration
+remain accepted across all four synthetic companions. The header walk still
+performs encoded I/O from the start; large-file latency has not been measured.
+
+### Owned ALAC multichannel qualification
+
+The shared decoder now admits 1–8 channels. Optional 24-byte `chan` layout info
+is validated and maps the documented Apple source order to WAVE speaker order.
+Absent `chan`, channels above stereo retain discrete order and mask zero; no
+surround roles are guessed. Named AAC 6.1 uses back surrounds/back centre
+(mask 0x13f), and MPEG 7.1 B uses front-wide channels (mask 0xff). Source details:
+https://raw.githubusercontent.com/macosforge/alac/master/ALACMagicCookieDescription.txt
+and https://developer.apple.com/documentation/coreaudiotypes/kaudiochannellabel_leftsurround .
+
+The authored corpus covers 56 raw SCE/CPE/LFE cases: 2–8 channels, 16/20/24/32-bit
+samples, with discrete or named layouts. Each has a two-frame VP9/Matroska video
+and paired M4A control. Matroska software PCM, strict seeks, actual companion
+frames, full/interval library PCM, MP4 PCM and public WAVE speaker masks/orders
+are compared against independent literal per-channel ramps. Three malformed
+layout videos are specific refusal controls. A raw stereo32 packet/control
+cookie reproduces the former 33-bit-residual refusal independently of the old
+multichannel rejection; uncompressed pairs now use their actual sample width.
+
+Discrete multichannel stereo preview formerly emitted all zeroes. Its explicit
+policy now averages all unnamed channels into both sinks; the stored source
+mask stays zero. Public mono/stereo conversion shares that rule. Partial known
+speaker masks retain their assigned-speaker routing. Existing named surround,
+quad, f32/f64 gain and mono/stereo decoder/export regressions remain accepted.
+The initial raw-focused 51-test gate passed without FFmpeg or generation during tests.
+Compressed qualification is expanded below; neither gate proves every ALAC tool,
+custom layout, large frame geometry, edit sequence or physical device route.
+
+### Compressed ALAC multi-element qualification
+
+The authored corpus now contains 336 variants: 56 raw plus 56 each with ordinary
+Rice, first-order coding, terminal zero runs, an adaptive one-coefficient filter,
+and resumed zero runs. All span 2–8 channels, four bit depths and named/discrete
+cookies, with paired VP9/Matroska videos and M4A controls. Both ordinary Rice
+quotients/remainders and Rice escapes occur; compressed elements have raw-escape
+flag zero. At 24/32 bits an independent low byte is carried alongside residuals,
+and CPE mid/difference unmixing is nonzero. Tests explicitly check compression,
+predictor type/order, source PCM, Matroska strict seek, MP4 PCM, WAVE masks and
+interval export. Existing media bytes remain unchanged as cases are added.
+
+Adaptive order-1 uses literal linear target ramps: an initially zero coefficient
+must advance through 0,1,2,3,4 (quantization 1) before residuals settle at zero.
+The fixture's residual prefix is closed-form, not produced by running FVid's
+decoder/adaptation loop. A common high-sample step at sample 80 forces nonterminal
+zero runs to resume into nonzero coded residuals, checking the Rice modifier.
+The adaptive arithmetic was checked against Apple's public predictor reference:
+https://github.com/macosforge/alac/blob/master/codec/dp_dec.c .
+
+All 7 focused test families pass on the saved corpus without FFmpeg/network or
+fixture generation during ordinary tests. This proves these compressed tools;
+it does not qualify arbitrary higher-order adaptive filters, every coefficient
+wrap/mix geometry, fill/data elements, large frame sizes or all codec profiles.
+
+The compressed fixture syntax was additionally checked with Apple's independent
+ALAC decoder in an isolated `/tmp` harness. All 672 packets (two for each of
+336 cases) matched exact authored integer PCM in source order, including packed
+20/24-bit output and 16/32-bit output. Packets were verified byte-identical to
+the saved M4A payload before reference decoding. This is manual reference
+validation, not a production or ordinary-test dependency; no FFmpeg was used.
+The local report preserves reference source/compiler and input SHA256 evidence:
+`/tmp/fvid-alac-apple-reference-20261016/report.json`. It proves packet
+reconstruction, not an external qualification of container parsing, WAVE layout,
+physical devices or performance.
+
+ALAC FIL/DSE ancillary elements now work in the shared owned decoder and the
+allocation-free packet sample-count scan, including extended lengths and optional DSE
+byte alignment. The authored multichannel corpus contains 672 paired MKV/M4A
+variants; expected PCM and seek checks cover ancillary elements between channel
+elements. Truncated ancillary elements are refused before reading beyond the
+packet. Manual isolated Apple-reference verification matched 1,344 packet PCM
+outputs; this does not establish all ALAC tools/profiles or performance targets.
+
+ALAC predictor mode 31 now bypasses the ordinary predictor-window length guard:
+it denotes first-order integration, so valid 16-sample packets are accepted.
+The regression corpus additionally qualifies asymmetric fixed predictors of
+orders 2/4/8/16/30 over 2–8 channels and 16/20/24/32-bit samples. Its 1,008
+container pairs matched authored PCM and an isolated Apple-reference decoder
+(2,016 packets). Arbitrary multi-coefficient adaptation remains unqualified.
+
+ALAC multi-coefficient adaptation is now qualified for authored ramp-plus-step
+cases at orders 2/4/8/16/30, across 2–8 channels and four supported bit depths.
+All 280 added cases change at least two coefficient positions; multichannel
+cases cover both residual signs. Expected PCM is authored independently of
+decoding, with isolated Apple-reference confirmation (2,576 packets across the
+1,288-case corpus). Coefficient extremes and arithmetic overflow boundaries
+still need dedicated qualification.
+
+The owned ALAC predictor now adds its rounding bias in the wrapping 32-bit
+accumulator before the arithmetic shift. Previously widening that addition
+changed the sign near `i32::MAX` and corrupted PCM plus subsequent predictions.
+A standalone authored 24-bit stereo regression (extreme coefficient 32767,
+quantization 15) covers this boundary in decoder, Matroska seek, MP4 playback
+and public WAVE exports, with independent Apple-reference integer-PCM validation.
+This fixes the demonstrated rounding boundary; it does not qualify every
+coefficient, quantization or codec profile.
+
+ALAC coefficient-free modes 0 and 31 accept zero quantization: copy/integration
+returns before coefficient scaling, also when preliminary integration is selected. The authored acceptance corpus now has
+1,512 container pairs; 224 new cases reproduce the prior unconditional refusal.
+Tests inspect coded headers and compare full/sought PCM plus interval/WAVE
+exports. Isolated Apple-reference validation matched all 3,024 packets. Ordinary coefficient filters are qualified separately in the later q0 section.
+
+ALAC sample-rate consistency is enforced in the shared decoder setup validation,
+including packet count scans, channel-mask lookup and memory admission. Player
+and library API callers cannot now stamp decoded ALAC using a rate that disagrees
+with the cookie. Two authored video regressions cover zero/mismatched cookie
+rates; valid matching 44.1/48/96 kHz controls continue to work. These are refusal
+tests for contradictory metadata, not additional codec-profile acceptance.
+
+ALAC no longer treats the default 4,096-sample frame length as a codec maximum.
+Channel scratch is allocated fallibly for actual packet counts, and construction
+does not allocate the cookie's maximum. Authored acceptance covers raw/Rice
+4,097/8,192/16,384/65,536-sample packets, plus a u32::MAX cookie with 16-sample
+packets, in playback, seek and public WAVE exports. Raw/extra-bit byte bounds
+avoid overflowing count multiplications; an enormous truncated raw declaration
+refuses before sample allocation. Controlled-export admission retains its
+conservative cookie-based estimate. This does not claim that arbitrarily large
+actual frames fit available memory or that every frame length has been tested.
+
+The owned ALAC decoder accepts opaque compatibility cookies containing optional
+`frma`, a checked `alac` atom and optional terminator, while preserving the
+24-byte core config and optional channel layout. This follows the compatibility
+form described in Apple's ALACMagicCookieDescription. Normalization is shared
+by setup, header-count scanning, channel mapping and memory admission; library
+Matroska/MP4 and native export paths defer rate validation to that shared code.
+The acceptance corpus has 560 container pairs, plus malformed wrapper, version
+and geometry controls. Playback/seek and public WAVE/native PCM exports match literal
+PCM; an isolated Apple reference matched all 1,120 packet outputs. This does not
+establish CAF container support or support for unknown cookie extensions.
+
+Owned ALAC Rice reconstruction now retains the history-derived zero-run suffix
+width while masking its divisor with the cookie limit, derives width 8 at zero
+history, clears the post-run modifier at a run of 65,535, and applies the history
+clamp to the coded magnitude before that modifier. These rules match Apple's
+adaptive Golomb reference and fix valid streams that previously produced wrong
+PCM or lost packet alignment. Nine authored video regressions cover distinct
+boundaries, including standard-parameter multiple long zero runs, playback,
+seek, WAVE and native PCM export. The independent reference matched all 18
+packet outputs; ordinary tests and generation remain FFmpeg-free. This does not
+claim complete qualification of every Rice tuning parameter or codec profile.
+
+The ALAC stereo matrix coefficient is now read as signed8 rather than unsigned8;
+negative weights previously reconstructed incorrect left/right PCM. Authored
+acceptance covers 198 container pairs spanning negative/positive coefficient
+extremes, alternating sample signs, shift boundaries, four sample depths and
+24/32-bit low-byte reconstruction paths. Playback/seek and WAVE/native PCM
+exports match literal targets; an isolated Apple decoder matched all 396 packet
+outputs. Zero weight still bypasses matrix shifting; nonzero weights refuse
+shifts above 31. This qualifies the tested matrix cases, not every codec profile.
+
+ALAC setup validation now requires compatibleVersion=0 after normalization,
+matching the published ALACSpecificConfig contract. Canonical and legacy-wrapped
+versions 1/255 produce an explicit unsupported-version error consistently across
+frontend/library construction, header scanning, layout and memory admission.
+Four authored video regressions preserve valid packet bodies to isolate this
+metadata failure. This is explicit refusal of unknown versions, not support for
+an invented future ALAC version.
+
+ALAC element parsing now checks that its twelve reserved header bits are zero
+and that the shifted-byte code is not the reserved value 3, for both mono and
+stereo, raw and compressed elements. Header count scanning and reconstruction
+share this validation, preventing malformed packets from being admitted into
+the presentation timeline. Twelve isolated video regressions require explicit
+refusal, with four unchanged MKV/M4A controls for exact PCM/seek acceptance.
+Independent Apple-reference verification matched all eight valid packets and
+refused all twelve mutations. This is error-handling coverage, not new codec
+profile support; ordinary tests remain independent of that reference and FFmpeg.
+
+Ordinary ALAC coefficient predictors now accept quantization zero: coefficients
+have unity scaling and use zero rounding bias, avoiding a shift by -1. The
+acceptance corpus adds 1,344 fixed/adaptive cases at orders 1/2/4/8/16/30, with
+or without preliminary integration, for all supported source bit depths and
+2–8 channels. Playback/seek and native interval/WAVE exports match authored PCM.
+An isolated unmodified Apple decoder matched all 5,712 packet outputs across the
+2,856-case corpus, but its ordinary q0 path shifts by a negative exponent.
+Those matches do not establish portable standard interoperability. Ordinary q0
+is a deterministic FVid extension, not a qualified standard codec profile;
+full-width 32-bit q0 remains independently unqualified. Existing
+positive-quantization, coefficient-free and malformed controls remain covered
+without FFmpeg in generation or ordinary tests.
+
+The additive `decode_pcm_i32` ALAC API returns signed PCM left-aligned to
+32 bits without a float intermediate. `alac-integer-output` contains authored
+full-width mono raw, Rice/order-zero and q9/order-one streams in paired MP4 and
+Matroska. Integer tests preserve adjacent high-magnitude words and i32 extrema;
+ordinary float output cannot distinguish the adjacent words. All six
+`owned_alac_decoder` tests pass offline with the integer checks enabled.
+The isolated unmodified Apple reference matches both raw packets and both
+q9/order-one packets exactly. Its Rice decoder differs on i32::MIN: unsigned
+`ndecode + 1` wraps before the sign unfolding in ag_dec.c. The literal PCM test
+retains this boundary; it is not reported as Apple-reference agreement.
+These checks do not qualify every predictor order, adaptive full-width stream,
+channel layout or codec profile.
+
+Integer-output corpus validation now checks all 2,856 authored multichannel
+cases against literal source PCM shifted by `32 - source_depth`, independently
+of float decoding. Both public decoder implementations preserve canonical
+channel order and exact left alignment at 16/20/24/32 bits, for named and
+discrete 2–8-channel layouts. All seven `owned_alac_decoder` integration tests
+pass offline. Ordinary q0 cases in this corpus remain extension tests as noted
+above; counting them here does not establish standard interoperability. The
+32-bit multichannel corpus uses shifted low-byte transport and does not replace
+full-width residual/predictor qualification.
+
+Full-width adaptive ALAC validation adds 12 mono cases at 32 bits, q1 and
+orders 1/2/4/8/16/30. Positive/negative authored ramps include a jump at sample 80
+and start with zero coefficients, exercising adaptation without shifted-byte
+transport. Own exact integer reconstruction passes; the isolated unmodified
+Apple reference also matches all 24 packet outputs. This closes the tested
+full-width mono adaptive cases, not every quantization, coefficient boundary,
+stereo matrix or multichannel full-width combination.
+
+Exact stereo integer validation adds 16 cases at 32-bit source depth with
+varying low-byte transport and large alternating signed planes. Signed matrix
+weights -128/-127/-64/-1/0/1/64/127 and shifts 7/31 preserve all authored source
+bits through MP4 packet decoding. Matroska synthetic video also decodes. The
+unmodified isolated Apple reference matches all 32 packets exactly; all nine
+`owned_alac_decoder` tests pass offline. These cases code 25-bit residuals
+plus low bytes, and do not qualify the currently refused 33-bit residual path.
+
+The stereo integer corpus now also covers separately transported low 16 bits
+(17-bit residual planes), alongside low 8 (25-bit planes), for 32 paired cases.
+The unmodified Apple reference matches all 64 packets exactly. Apple's own
+ALACEncoder.cpp shifts off two bytes for 32-bit stereo specifically to avoid
+33-bit matrix residuals. A refused 33-bit combination therefore is not, on its
+own, evidence that ordinary Apple-encoded 32-bit stereo is unsupported; no claim
+that this combination is a standard profile gap is made without more evidence.
+Source: https://raw.githubusercontent.com/macosforge/alac/master/codec/ALACEncoder.cpp
+
+Indexed AAC ASC now accepts a confirming in-band PCE without rebuilding decoder
+histories. Adoption requires identical object type, sample rate, channel count,
+speaker mask, PCM permutation and ordered element kinds. Initial PCE coupling
+rosters use the existing CCE decoder. Subsequent PCEs keep the existing layout
+checks. Fixed optional CCE slots are reserved from construction so adopting a
+program does not change the history address domain. Twelve authored Main/LC/SSR
+mono/stereo videos, including Main coupling at points 0/1/3, reproduce the original explicit-program refusal and compare
+against independent PCM; profile/rate mismatches and truncated PCE state
+rollback remain regression requirements.
+
+An older HE-AAC regression still expected a refusal when an in-band PCE changed
+only the CCE roster from independent to dependent. Existing roster support
+already accepts this transition with unchanged PCM geometry. The expectation
+now verifies the authored scalar-core/SBR reference and checkpoint replay;
+layout/profile/rate changes remain refusal cases.
+
+Validation: all 31 tests across `aac_indexed_pce`, `aac_pce_profiles`,
+`native_aac_pce`, `he_aac_dependent_coupling` and `aac_ssr_cce_absence` pass
+offline without FFmpeg. The final indexed-PCE rerun additionally verifies all
+24 mismatch videos through MP4 decoding, as well as both direct decoder APIs.
+Generation is deterministic for all 12 acceptance and 24 mismatch videos.
+
+The indexed-PCE corpus now has 36 acceptance videos: Main/LC/SSR mono/stereo
+also use nonzero element tags 3/15, with either startup PCE or first adoption
+late in the stream. Structural test assertions parse the actual packets to
+verify the tag and PCE placement. Independent nonzero PCM remains unchanged
+through both decoder paths; truncated-PCE rollback is checked before every
+packet. Both indexed-PCE tests pass with all 36 acceptance and 24 profile/rate
+refusal videos. The expanded generator output is deterministic and remains
+offline, independent of FFmpeg. These cases do not establish all AAC profiles.
+
+HE-AAC parametric-stereo probing and decoding now also admit a confirming
+in-band PCE when ASC uses indexed mono configuration. Adoption requires the
+same core profile/rate and sole normal front mono SCE with unchanged PCM
+layout; existing program checks remain strict. The decoder keeps established
+core/QMF/PS and CCE histories, and its packet transaction commits the program
+only after success. Twelve authored videos cover LC/SBR/PS signalling,
+960/1024-sample cores and both 24/48 kHz output clocks. Twenty-four synthetic
+profile/rate mutations retain refusal requirements. This is a specific PCE
+adoption fix, not a claim of all-profile AAC support.
+
+Validation of indexed PS-PCE adoption passes all 34 tests across seven suites:
+`aac_ps_indexed_pce`, `he_aac_ps_pce`, `he_aac_ps_coupling`,
+`aac_ssr_ps_coupling`, `he_aac_ps_native`, `aac_ltp_ps` and
+`aac_main_ps_independent`. The new cases match scalar stereo PCM through direct
+and MP4 decoding, preserve checkpoint/truncation transactions, and reject all
+24 profile/rate mutation videos through their intended PCE checks. All 12
+acceptance and 24 refusal videos reproduce deterministically offline without
+FFmpeg, external encoders or private source media.
+
+HEVC PPS parsing now consumes an inactive 3D extension in the proper extension
+order: range, multilayer, 3D, SCC, then future data. A zero dlts_present_flag
+introduces no depth tables, so base pictures decode normally. Two authored
+synthetic videos preserve I/P/B planes, clocks and rewind against the control;
+active depth tables remain an explicit unsupported case, and a missing flag is
+an invalid/truncated extension. This does not implement active 3D depth tools,
+active 3D SPS reconstruction tools or every multilayer/view profile.
+Syntax reference: ITU-T H.265 (08/2021), I.7.3.2.3.7.
+Validation: all 10 tests in `hevc_extension_tails` and
+`hevc_inactive_3d_pps` pass offline. Both acceptance videos preserve all 17
+frames through two playback passes; active/truncated controls retain specific
+PPS-level refusals. All four newly authored fixtures regenerate identically.
+The container decoder now preserves PPS parsing causes: it selects the declared
+SPS identifier before parsing PPS tools instead of discarding every parse error
+while trying SPS candidates. Unknown SPS references retain their binding error.
+
+The same binding is used for hvcC, in-band PPS and rebuilding pairs after SPS
+updates. Four new in-band synthetic variants exercise acceptance/refusal and
+rewind alongside the original hvcC controls; coded pictures and clocks remain
+unchanged. Active depth tables are still unsupported, now reported accurately.
+Validation of PPS error propagation passes all 23 tests across
+`hevc_inactive_3d_pps`, `hevc_extension_tails`, `hevc_parameter_updates`,
+`hevc_active_parameters` and `hevc_dpb_parameters`, offline without FFmpeg.
+All eight hvcC/in-band 3D-PPS fixtures regenerate identically. Parameter updates,
+SPS rebinding, reset, rewind and picture/reference behavior retain their checks;
+this improves diagnosis and does not claim active depth-tool implementation.
+
+The owned `hevc_depth_tables` component implements PPS DLT field parsing and
+lookup under caller-supplied SPS depth/VPS depth-layer identity context. It
+supports flags, delta lists and prediction from the first depth layer via
+symmetric difference, including empty/repeated delta entries and 8–16-bit
+samples. It checks declared context, bounded syntax, allocation admission
+(including live prediction scratch), and leaves the caller's bit position
+unchanged on error. The parser now binds to layered PPS with a validated VPS depth-layer graph;
+table-aware depth-picture reconstruction remains unimplemented.
+Normative source: ITU-T H.265 (08/2021), I.7.3.2.3.7–8 and I.7.4.3.3.7–8,
+https://ossrs.io/lts/zh-cn/assets/files/ITU-T-H.265-2021-c45943bf35462dd9b8a9c5afc19df5da.pdf
+DLT component validation: all 15 tests across `hevc_depth_tables`,
+`hevc_inactive_3d_pps` and `hevc_parameter_updates` pass offline without FFmpeg.
+All 24 authored component cases regenerate identically. Passing parser tests
+and the active-playback refusal test must not be reported as active 3D playback
+support; Complete Annex I VPS/SPS tools and depth reconstruction remain required work.
+
+Layered PPS now binds DLT metadata to depth-layer IDs derived from VPS
+scalability dimension0 (F-3/I-13), preserving normative VPS order. Context
+validates boolean depth roles, layer identity, SPS bit depth and declared depth
+count; reserved layer63 is rejected. Immutable PPS ownership retains tables
+through Arc and includes their vector/control storage in activation admission.
+The resolved depth PPS cannot enter ordinary reconstruction: it refuses until
+table-aware prediction/reconstruction is implemented. Texture PPS may carry
+tables for other layers without applying them to texture samples.
+The authored `hevc-depth-pps-binding` corpus tests metadata binding and future
+tails, and a complete synthetic base-texture MP4 carries other-layer DLTs.
+Explicit OLS0 decoding preserves all17 I/P/B control pictures and POCs across
+two passes/reset. This qualifies base-texture compatibility only; it does not
+qualify decoding the depth layer, camera/view tools or the full 3D profile.
+Validation: the seven-suite layered metadata/reconstruction gate passed51 tests;
+the expanded DLT/base-playback gate passed26 tests across
+`hevc_depth_pps_binding`, `hevc_depth_tables`, `hevc_inactive_3d_pps` and
+`hevc_layered_playback`, offline without FFmpeg. All14 PPS cases and the base
+texture video regenerate identically. Active depth reconstruction remains a
+refusal requirement, not a passing depth-playback acceptance test.
+
+Owned DLT reconstruction primitives now implement nearest depth-index selection
+(upper entry on midpoint ties), I-55 zero padding to the full sample domain,
+I-93/94 DC prediction and I-95..97 strided DC-offset assignment before filtering.
+Non-DLT predictions remain signed/unclipped until reconstruction. Active DLT
+indices clip to BitDepthY, not the signalled table length; unused indices map
+to zero. Empty tables cannot supply an inverse prediction. Geometry and all
+input sample ranges are checked before in-place block assignment, so invalid
+input publishes no partial block change. These primitives are still not wired
+to 3D entropy modes or complete depth-picture reconstruction.
+Validation: all 10 tests across `hevc_depth_reconstruction`, `hevc_depth_tables`
+and `hevc_depth_pps_binding` pass offline without FFmpeg. All21 reconstruction
+cases regenerate identically; 144,896 inverse sample results match independent
+scalar search. This does not change the active-depth playback refusal gate.
+Normative source: H.265 (08/2021), I.8.3.3 and I.8.4.4.2–3.
+
+Owned SPS3D syntax now parses all14 texture/depth feature flags and both
+sub-block sizes with coding-block-relative bounds and transactional cursor
+handling. SPS retains these fields. Admission uses the actual VPS depth role:
+unsupported tools for the current role still refuse; unused other-role flags
+no longer block texture pictures. Base NAL layer0 is texture per F-3. Known
+extension order remains range/multilayer/3D/SCC/future, including SCC palette
+metadata after a complete inactive 3D extension.
+Eight authored Main/Main10 videos preserve all17 I/P/B pictures and clocks
+through rewind; six malformed/current-role-active videos retain specific errors.
+Eighteen component cases check every feature flag and all short truncations.
+Legacy three-d fixtures without an extension body now report truncation rather
+than claiming a valid unsupported tool. Active role-specific reconstruction,
+camera/view tools and complete 3D picture decoding remain required work.
+Validation: all29 tests across `hevc_3d_sps`, `hevc_multilayer_sps`,
+`hevc_depth_pps_binding`, `hevc_layered_sps`, `hevc_extension_tails` and
+`hevc_parameter_updates` pass offline without FFmpeg. The final renamed-fixture
+rerun passes all five SPS3D tests; all14 videos regenerate identically.
+Normative source: H.265 (08/2021), I.7.3.2.2.5 / I.7.4.3.2.5 and F-3.
+
+Base HEVC now distinguishes reconstruction parameters from unused SPS3D
+metadata when deciding whether a new random-access picture is required.
+Admitted inactive/other-role 3D changes preserve references/POC; all other SPS
+fields retain exact comparison. Normal pictures take the direct comparison
+path; SPS vector ownership is cloned only for an actual metadata transition.
+Known SPS identity still updates, and no-update SEI rejects known metadata
+changes even when reconstruction-equivalent. Active current-role tools remain
+unsupported. The metadata tests alone do not qualify opaque parameter identity;
+the separate raw-identity coverage below exercises that behavior.
+Twelve authored Main/Main10 update videos reproduce the former unnecessary
+random-access refusal and check8 accepting/4 refusing paths, including allowed
+versus forbidden SEI guidance. All22 tests in `hevc_3d_sps`,
+`hevc_parameter_updates`, `hevc_active_parameters` and `hevc_multilayer_sps`
+pass offline without FFmpeg; all12 update fixtures regenerate identically.
+
+### HEVC encoded parameter identity within a CVS
+
+The base decoder retains encoded VPS/SPS identities alongside the existing raw
+PPS bank. Within an established CVS, active-parameter no-update guidance rejects
+same-ID overwrites even when only opaque future extension bits differ. Identical
+repeats remain admissible. Overwrite history survives A-to-B-to-A transitions;
+a late no-update declaration checks earlier overwrites, and a later declaration
+with the flag cleared does not revoke an existing promise. Parameter-only packets
+use the same checks, including parameters primed before the first picture.
+
+Initial and current VPS/SPS banks share immutable encoded bytes. Checked storage
+admission accounts for retained raw identities, vector storage and queued updates
+before copying new bytes. This bounds the added raw-identity ownership; it is not
+a claim about total decoder RSS or every existing metadata allocation.
+
+`generate_hevc_raw_parameter_identity.py` independently generates 56 synthetic
+Main/Main10 movies offline: 20 acceptance cases preserve all 17 control pictures
+and clocks, and 36 refusal cases require the specific no-update error. Rewind,
+parameter-only updates, latest priming and oversized raw configuration admission
+are also checked. All 71 generated files regenerate byte-for-byte. All 30 tests
+across `hevc_raw_parameter_identity`, `hevc_3d_sps`, `hevc_active_parameters`,
+`hevc_parameter_updates` and `hevc_extension_tails` pass offline without FFmpeg.
+Cross-CVS initialization semantics, layered decoder coverage and active 3D
+reconstruction still require qualification; this is not full HEVC conformance.
+
+Multiple active-parameter declarations pending before one picture now retain
+an earlier no-update promise when a subsequent declaration clears the flag.
+Six additional Main/Main10 VPS/SPS/PPS movies reproduce this same-packet bypass:
+the unpatched decoder accepts the forbidden overwrite; the fixed decoder rejects
+it with the specific no-update error. The corpus now contains 62 movies
+(20 acceptance, 42 refusal), with all 77 generated files byte-identical on
+regeneration. All seven tests in `hevc_raw_parameter_identity` and
+`hevc_active_parameters` pass offline without FFmpeg after this fix.
+An additional transport regression splits the two authored SEI units into
+separate picture-free packets before delivering the first coded picture. It
+checks all six Main/Main10 and VPS/SPS/PPS combinations twice through reset,
+verifies the retained declaration, and requires the subsequent overwrite to
+fail. All 31 tests across the five raw-identity, active-parameter, parameter-update,
+SPS3D and extension-tail suites pass offline with this coverage.
+
+### HEVC 3D depth DC entropy primitives
+
+`hevc_depth_dc::read_offsets` implements Annex I.7.3.8.5.3 / I-51 for one
+eligible prediction block: optional intra DC-only presence, one/two segments,
+three context-coded truncated-unary magnitude bins followed by bypass EG0,
+and conditional bypass signs. Absent syntax retains the specified inferred
+values (including the one-segment +1 offset). Ineligible blocks and unbounded
+magnitudes fail explicitly. Depth DC CABAC banks follow tables I.10/I.13/I.14,
+participate in slice initialization including P/B swapping, and travel with
+saved substream contexts.
+
+Scripted-bin tests cover all intra/DC-only/DIM combinations, magnitudes 0..1023,
+65535, 2^20 and 2^30-1, both signs, absent syntax and overflow. These are entropy
+component tests, not encoded 3D movie acceptance. Coding-unit selection,
+DIM segment prediction and integration with depth lookup reconstruction remain
+unfinished; the existing active-depth playback refusal stays in place.
+Validation: ten depth DC/reconstruction/table integration tests and all seven
+selected CABAC unit tests pass offline, including depth-context initialization
+and checkpoint restoration. The integration tests here exercise components;
+they do not establish active 3D playback acceptance.
+`generate_hevc_depth_dc.py` additionally authors 15 real arithmetic-coded
+component streams using an arbitrary-precision interval encoder. They cover
+I/P/B initialization, both P/B swaps and QP 0/26/51. The decoder checks all
+2100 block offsets and final CABAC termination against the generated literal
+expectations. All 16 files regenerate identically; all three depth-DC tests
+pass offline. This verifies the arithmetic transport as well as the scripted
+bin calls, but still does not replace a complete coded 3D picture fixture.
+
+`read_dc_only` implements the conditional flag branch of I.7.3.8.5.2:
+skipped, skip-intra, non-2Nx2N and disabled-tool coding units infer zero without
+consuming bins; eligible intra/inter units select the corresponding enable flag
+and decode the table I.10 context. Exhaustive eligibility tests cover all 64
+input combinations with both signalled values. The 15 arithmetic streams now
+carry 2100 dc_only flags before their DC syntax, exercising the independent
+flag context together with magnitude/presence adaptation. This is still a
+coding-unit syntax component pending connection to full picture reconstruction.
+
+`read_cu_offsets` implements the depth_dcs coding-unit selection and raster
+iteration. Intra NxN units visit four prediction blocks; other partitions use
+one. Only DIM/DC-only blocks consume offsets, while unavailable depth_dcs
+syntax consumes no bins. Invalid NxN/inter/DC-only and skip-intra/DC-only
+combinations fail before entropy consumption. All 16 four-block DIM masks are
+checked both with scripted bins and in each arithmetic stream (240 additional
+coding units across the 15 streams). All five depth-DC tests pass offline and
+the 16 fixture files regenerate identically. Full picture integration remains
+unfinished; these component checks do not establish 3D playback acceptance.
+
+`hevc_depth_prediction::predict` implements I.8.4.4.2.5 (I-82..94): edge flags,
+two boundary-derived DC predictors, segment-specific offsets and optional DLT
+mapping. It consumes an already-derived partition mask and substituted top/left
+neighbours, writes signed i128 samples without premature clipping, and performs
+all geometry/sample/lookup checks before modifying output. No temporary vector
+is allocated. Tests cover every edge-flag pair, both pattern polarities,
+8/10/12/16-bit depths, identity/active lookup, extreme signed offsets,
+horizontal/vertical boundary strengths and their tie. Three prediction tests
+plus five entropy and three reconstruction tests pass offline. Wedge/contour
+mask derivation, neighbour availability and full picture integration remain
+required; this is a reconstruction component, not 3D movie acceptance.
+
+`contour_pattern` implements I-79..80 from the corresponding reconstructed
+texture block: a truncated four-corner mean and strict greater-than threshold.
+It supports a strided texture plane and nonzero block origin, checks geometry
+and texture sample depth before writing, and allocates no scratch vectors.
+Tests cover sizes 4..64, 8/10/12/16-bit texture, a corner sum distinguishing
+truncation from rounded mean, strict equality, invalid/overflowing geometry,
+unchanged output on failure and unchanged source texture. A component chain
+checks texture-to-mask-to-two-segment prediction with identity and active DLT.
+All five depth-prediction tests pass offline. TexturePic selection, full
+neighbour availability, wedge-table derivation and picture integration remain
+unfinished; this does not enable complete INTRA_CONTOUR playback yet.
+
+`hevc_wedge::pattern` implements candidate line rasterization and left-side fill
+from I.6.6.1, using half-sample endpoints for sizes 4/8 and integer endpoints
+for size 16. The normative orientation-zero/four endpoint families are checked
+before output mutation. Tests compare all enumerated endpoints against an
+independent closed-form rational rounding reference, check a literal diagonal
+mask and invalid-input preservation, and connect a candidate mask to depth DC
+prediction. All three wedge tests and five depth-prediction tests pass offline.
+This does not assign wedge_full_tab_idx: rotated candidates, uniform/duplicate/
+inverse exclusion, final table index order and 32x32 upsampling remain required
+before enabling full indexed wedge decoding or claiming picture acceptance.
+
+`hevc_wedge::Table` now builds the indexed candidate domain: orientations 0..5,
+inverse quarter-turns, uniform/duplicate/inverse-mask exclusion and 32x32
+replication of 16x16 entries. Retained masks use four u64 words per entry;
+fallible reservations and capacity checks enforce the supplied heap budget.
+Invalid retrieval preserves output. The authored Python reference uses
+closed-form rational line rounding and a set-based insertion implementation;
+all indexed masks and order match native output for sizes 4/8/16/32. All four
+wedge tests pass offline; five generated reference files regenerate identically.
+These two owned implementations are component evidence, not independent
+interoperability proof. External index-order qualification, entropy decoding
+of wedge_full_tab_idx and full picture integration remain unfinished.
+
+`Table::read_index` / `read_pattern` now decode wedge_full_tab_idx using the
+MSB-first fixed-length bypass syntax of table I.15 / 9.3.3.5. Unused integer
+codes above the candidate count are rejected before output mutation. Eight
+authored arithmetic streams cover every index in the four owned table domains
+(1908 selected masks), final termination and one out-of-domain code per size.
+All five wedge tests pass offline and the eight CABAC files regenerate
+identically. This closes the component entropy transport gap; external table
+index-order qualification and full picture integration remain required.
+
+External wedge index-order qualification now passes against unchanged HTM
+sources from `listenlink/3D-HEVC` revision
+`d2eb41773f9ab091b8400f76a85c40339458d715`. The optional
+`scripts/validate_hevc_wedge_reference.py` compiles the external `TComRom.cpp`
+and `TComWedgelet.cpp` with an FVid-owned harness, compares every indexed mask,
+and verifies that the external library checkout has no tracked modifications.
+All 86/802/510/510 masks for sizes 4/8/16/32 match the authored fixtures
+byte-for-byte, including HTM's own 32x32 scaling. Source and output SHA-256
+digests are retained in `docs/validation/hevc-wedge-htm-reference.json`.
+The check takes an existing checkout, performs no downloads and is separate
+from ordinary offline tests. This qualifies the wedge tables and their index
+order against that external implementation; full 3D picture decoding remains
+unfinished and is not implied by this result.
+
+`hevc_depth_dc::read_intra_mode` implements intra_mode_ext selection:
+no_dim_flag, conditional depth_intra_mode_idx_flag, inferred single-tool mode,
+and indexed wedge selection. Disabled tools and 64x64 blocks infer ordinary
+prediction without consuming bins. Contour is rejected for BLA/IDR NAL types
+16..20, while CRA may select it. Wedge selection requires a table matching
+the prediction block size. New CABAC banks follow tables I.6/I.7.
+Fifteen authored arithmetic streams cover 540 mode selections across I/P/B,
+P/B swaps, QP 0/26/51 and sizes 4..64. All 12 tests across depth modes, depth DC
+and wedge pass offline; the 16 mode-fixture files regenerate identically.
+The later coding-unit constraint relating DIM to maximum transform size is
+still a caller responsibility. Full picture integration remains unfinished.
+
+Skip-intra entropy components now implement the early conditional
+skip_intra_flag and later skip_intra_mode_idx TR(cMax=3,k=0), using tables
+I.5/I.8. Modes 0/1 identify angular 26/10; modes 2/3 select single-left/top.
+`hevc_depth_prediction::single` implements I.8.4.4.2.4: the selected midpoint
+neighbour supplies the whole prediction block; an unavailable selected sample
+uses 2^(BitDepthY-1), without ordinary neighbour substitution. Validation
+precedes output modification.
+Fifteen authored CABAC streams check 1800 skipped/disabled/active selections
+with I/P/B, swaps and QP 0/26/51. Single prediction checks sizes 4..64,
+depths 8/10/12/16, both sides, availability and invalid-input preservation.
+All nine tests across skip, modes and prediction pass offline; all 16 new
+fixture files regenerate identically. These are components; wiring them into
+coding-unit decoding and proving full skip-intra picture acceptance remain.
+
+Resolved `Sps` now retains `depth_layer`, derived from the active VPS layer
+graph rather than inferred from the mere presence of SPS3D flags. Ordinary
+base parsing remains texture. The role also survives when no 3D extension is
+present, and participates in exact SPS comparison so a layer-role change cannot
+be normalized as unused metadata. Authored depth/texture context fixtures check
+this distinction, including `depth-no-three-d.sps`. All 14 tests across SPS3D,
+depth PPS binding and layered SPS pass offline; the focused eight-test SPS3D
+rerun also passes with the extension-free fixture. Active 3D tool admission is
+unchanged: this carries required context toward picture integration, not an
+active-depth playback acceptance claim.
+
+`Plane::reconstruct_single` now writes INTRA_SINGLE into the real sample and
+readiness storage. It checks aligned block geometry and overlap before writes,
+selects the midpoint neighbour only when reconstructed and admitted by the
+caller’s slice/tile/constrained-intra predicate, and uses the same fallback
+scalar as the standalone predictor. It supports 4..64 blocks without temporary
+prediction vectors and marks the reconstructed samples ready. Tests check both
+directions, unavailable/unready neighbours, overlap preservation, shared-plane
+copy-on-write and a full 64x64 16-bit fallback block. The focused plane test
+passes offline. Coding-unit dispatch, angular skip modes, filter metadata and
+complete coded depth-picture acceptance remain required before tool admission.
+
+The picture coding-unit visitor now dispatches admitted depth-role skip-intra
+flags to INTRA_SINGLE modes 2/3 for monochrome planes, updates CU readiness and
+boundaries, and supports both direct and queued row reconstruction. Neighbour
+eligibility carries slice/tile/constrained-intra restrictions into the plane
+operation. Angular/chroma skip paths still refuse explicitly; active SPS3D
+parameter admission remains guarded.
+Four authored entropy payloads reconstruct complete 64x64 and 128x128 sample
+planes with one/four CTUs and valid CABAC termination. The larger case exercises
+the background reconstruction path. All 11 tests across single-picture, SPS3D
+and depth-skip pass offline; all four payload files regenerate identically.
+These tests supply resolved SPS/PPS/header structures directly, so they qualify
+picture reconstruction dispatch, not parsed full-file 3D playback. Parameter
+admission, angular/chroma support, mixed coding modes and independent complete
+bitstream qualification remain required.
+
+Angular skip modes 0/1 now reconstruct through `Plane::reconstruct_skip_angular`
+and the coding-unit visitor, including 64x64 blocks. The depth-specific reference
+constructor permits size 64 without broadening the ordinary intra constructor.
+Ordinary reference substitution and the angular 26/10 boundary rules apply;
+queued reconstruction retains a compact eligibility mask for top/left/corner
+references so slice/tile/constrained-intra decisions survive worker handoff.
+Plane tests check all sizes 4..64, depths 8/10/12/16, both directions,
+boundary enable/disable, denied neighbours, overlap and clone preservation.
+Eight authored one/four-CTU entropy payloads now cover all four skip modes in
+direct and background picture reconstruction; they regenerate identically.
+The plane test and all three skip/single-picture integration tests pass offline.
+Chroma skip reconstruction and active parameter/full-file admission remain
+unfinished; resolved structures in these picture tests are supplied directly.
+
+Parsed skip-intra depth-picture acceptance is now enabled when the VPS resolves
+a monochrome depth layer and skip_intra is its only active Annex I tool.
+`generate_hevc_skip_picture.py` authors VPS, base/depth SPS, PPS and eight IDR
+slice NALs for all four modes at 64x64/128x128. The test parses each parameter
+and slice through the layered APIs, then reconstructs complete pictures through
+`decode_layered`; it no longer supplies modified resolved structures. All pixels
+match the authored constant reference and CABAC termination is checked by the
+picture decoder. All 18 tests across parsed skip picture, single picture,
+SPS3D, depth skip, depth PPS binding and layered SPS pass offline. All 13 new
+files regenerate identically; existing SPS3D fixtures retain their bytes.
+This qualifies the parsed layered picture API, not full-file player output or
+complete Annex I support. AU/DPB scheduling, mixed/residual pictures, chroma,
+other active tools and external full-bitstream qualification remain required.
+
+Mixed PCM/skip-intra picture qualification now covers eight parsed 10-bit IDR
+NALs with a nonconstant 32x32 PCM gradient and three neighbouring skip CTUs.
+PCM terminates and restarts the arithmetic engine while preserving adapted
+context banks. Left/top single modes seed distinct predictions; the final CTU
+exercises each angular/single mode. Literal sample references distinguish left
+and top routing, availability and 10-bit preservation, including gradients
+offset by 300 so samples exceed the 8-bit range. Every reconstructed sample
+matches its authored little-endian reference. Both parsed-picture tests pass
+offline, all 19 mixed-fixture files regenerate identically, and existing SPS3D
+fixtures retain their bytes after adding optional PCM block bounds to the
+generator. This checks mixed PCM/skip picture reconstruction, not inter-frame
+DPB scheduling, residual-coded mixtures or full-file player output.
+
+Full-container acceptance now covers four owned one-AU MP4s with a real coded
+base texture picture and the 10-bit PCM/skip depth picture. The fixtures assign
+distinct global SPS/PPS IDs and preserve the base picture's PTL/representation.
+`LayeredMp4VideoReader` exercises demux, OLS extraction, access-unit parsing,
+DPB reconstruction, output queuing and EOF drain. Both layer identities and
+presentation clocks are checked; base pixels match the saved authored PCM
+reference and every depth sample matches the high-range mixed reference.
+All four files pass again after rewind. All 20 tests across layered playback,
+skip playback, parsed skip pictures and single pictures pass offline; the
+focused base-pixel rerun passes too. The four MP4s regenerate identically.
+This qualifies the indexed layered-reader API for these IDR fixtures, not GUI
+operation-point selection, multi-AU inter prediction or complete Annex I tools.
+
+`hevc_intra_syntax::read_depth_luma` now reads mixed ordinary/wedge/contour
+prediction-block syntax in the Annex I.7.3.8.5 order. Each PB extension precedes
+its optional prev_intra_luma_pred_flag; only after all flags are read does the
+ordinary MPM/remainder pass run. The ordinary and depth readers share the value
+reader. Invalid PB/CU sizes fail before entropy consumption. Fifteen authored
+CABAC streams check 240 NxN coding units / 960 PBs across sizes 4..32, I/P/B,
+P/B swaps and QP 0/26/51, including disabled 3D tools. Both new tests pass
+offline; all 16 files regenerate identically. These are syntax components:
+mixed wedge/contour coding-unit reconstruction is still required and remains
+guarded at parameter admission.
+
+`Plane::reconstruct_depth_partition` now connects a DIM mask and two DC offsets
+to reconstructed sample/readiness storage. It validates block geometry, overlap,
+sample depth and residual ownership, applies ordinary neighbour substitution
+without smoothing, derives signed prediction through the owned DLT component,
+then adds residual before clipping final samples. This preserves cases where
+negative prediction plus positive residual becomes a valid nonzero pixel.
+The focused plane test checks identity/active DLT, distinct segment routing,
+denied-neighbour substitution, unknown-layer failure without pixel mutation,
+overlap preservation and copy-on-write. It passes offline. This is the DIM
+plane reconstruction operation; coding-unit dispatch and active wedge/contour
+parameter admission remain unfinished.
+
+Monochrome depth coding units now dispatch full-partition DC-only wedge mode
+through the indexed table, depth DC entropy reader and plane reconstruction.
+SPS admission permits intra_dc_wedge for this role; unsupported residual-coded
+DIM, ordinary DC-only and mixed NxN forms remain explicit reconstruction
+refusals, and contour/other tools retain their parameter guards. Wedge candidate
+storage is bounded by a 32768-byte table budget. Neighbour eligibility is carried
+into both direct and queued reconstruction commands.
+An authored 32x32 IDR with encoded VPS/SPS/PPS, wedge index zero and signed
+offsets -10/+10 parses through the layered APIs and reconstructs exactly the
+two expected 118/138-valued segments. All five fixture files regenerate
+identically. All 21 tests across parsed pictures, SPS3D, mixed depth-luma modes,
+mode selection, wedge and skip MP4 playback pass offline. This qualifies that
+parsed wedge picture path; queued multi-CTU wedge, full-container wedge output,
+active DLT, residual DIM and independent complete-bitstream checks remain.
+
+`wedge-playback.mp4` now qualifies full-container wedge/DC-only output through
+`LayeredMp4VideoReader`: a coded 64x64 base texture picture and coded 32x32 depth
+picture use distinct global parameter IDs and VPS representations. The test
+checks layer identities, depth dimensions, presentation clock, complete plane
+readiness and all 118/138-valued samples, then repeats after rewind. All 21
+tests across layered playback, depth skip/wedge MP4 playback and parsed depth
+pictures pass offline. All five skip/wedge MP4 fixtures regenerate byte-for-byte.
+This qualifies the one-AU indexed layered-reader path; queued multi-CTU wedge
+reconstruction, residual DIM, active DLT and GUI layer selection remain open.
+
+Active PPS DLT now reaches wedge/DC-only plane reconstruction for an explicitly
+resolved nonbase depth layer. Direct and queued commands use the bound PPS
+table instead of constructing an identity mapping. Unresolved/base entry points
+continue to refuse, with the more precise `requires a resolved depth layer`
+diagnostic and updated refusal expectations. Parsed depth acceptance uses a
+32-entry [0,8,..248] lookup: the same -10/+10 coded offsets now produce 48/208
+segments rather than identity-path 118/138 pixels. `wedge-dlt-playback.mp4`
+checks those exact samples through demux, DPB/output queue and rewind.
+All 31 tests across skip/wedge playback, parsed pictures, DLT binding/tables,
+depth reconstruction and layered playback pass offline. Seven wedge picture
+files and six skip/wedge MP4s regenerate identically; existing skip header
+fixtures retain their bytes. Other DC-only/residual DIM forms, queued multi-CTU
+DLT qualification, contour and complete Annex I interoperability remain open.
+
+Ordinary intra DC-only coding units now reconstruct prediction without a
+transform tree and apply I-95..97 using the bound PPS DLT (or identity mapping).
+The plane operation computes into scratch before publishing pixels/readiness,
+so lookup errors do not leave a partially reconstructed block. CU dispatch and
+queued commands preserve ordinary mode derivation, boundary/reference filters
+and neighbour eligibility. Blocks requiring forced transform-size splitting
+remain an explicit refusal.
+Two authored ordinary-DC NALs check signalled offset +10 and absent DC syntax
+(inferred +1). Exact outputs are 138/129 without DLT and 208/136 with DLT.
+Four corresponding MP4 fixtures exercise demux, reconstruction, output queuing
+and rewind. All 24 tests across depth reconstruction, layered playback, parsed
+depth pictures and skip/wedge/ordinary-DC MP4 playback pass offline. All 13
+picture files and ten MP4 files regenerate identically. Other ordinary modes,
+forced splits, multi-CTU ordinary-DC worker qualification, residual DIM and
+contour still require further acceptance coverage.
+
+Forced ordinary DC-only splitting is now implemented for CU sizes through 64.
+The prediction subtree follows recursive quadrant order down to MaxTbLog2SizeY;
+completed children supply unadjusted prediction references to later children.
+Only after the entire CU is predicted does one I-95..97 offset assignment run
+over the original CU, including its original four-corner DLT predictor.
+Lookup binding and external samples are checked before child reconstruction.
+Eight authored MP4s check a 64x64 CU with maximum TB sizes 4/8/16/32, with and
+without active DLT, then rewind. Exact whole-CU values 129/136 distinguish the
+required final assignment from incorrect per-child offset accumulation.
+A plane test with nonconstant neighbours additionally checks quadrant values,
+internal reference availability and global DLT adjustment. All 25 integration
+tests across forced split, skip/DC/wedge playback, parsed pictures, depth
+reconstruction and layered playback pass offline; the new plane test passes.
+Thirteen split-picture files and all 18 MP4s regenerate identically, with
+existing SPS3D fixtures unchanged. Other ordinary modes, multi-CTU worker
+qualification, residual DIM, contour and complete Annex I coverage remain open.
+
+Annex I reference-list role filtering is now corrected. I-8 excludes opposite
+depth/texture roles from NumRefListLayers while preserving all direct VPS
+dependencies for AU scheduling and inter-component tools. The layered slice
+reader uses this filtered domain for reference syntax and reference-dependent
+admission, retaining the unfiltered dependency count for other Annex F syntax.
+The earlier owned depth generators had emitted an extra inter-layer flag to
+match the old reader; all affected skip/DC/wedge headers and 18 MP4 fixtures
+now omit it when the filtered domain is empty. Before the fix these normative
+headers reproduced `missing HEVC header alignment bit`; after the fix exact
+pixels and rewind pass. Parsed tests additionally require absent inter-layer
+flag syntax, not a coded disabled flag. This replaces the earlier header
+qualification with corrected streams rather than treating prior agreement as
+independent conformance evidence.
+
+VPS `view_component_layer` also implements I-9 same-view component selection,
+excluding nonzero DependencyId/AuxId variants and distinguishing view order
+from view_id_val. Component tests preserve dependencies, exercise both role
+directions and reject malformed reference graphs. This supplies TexturePic
+identity only; current-AU availability and contour integration remain required.
+All corrected fixtures regenerate identically and the seven focused header,
+playback, parsed-picture and component suites pass offline.
+
+The layered header now preserves optional in_comp_pred_flag and derives its
+presence using I-17/I-18: enabled SPS tools, same-view opposite-role components,
+direct dependencies, component sublayers and max_tid_il_ref_pics_plus1. The bit
+is consumed after inter-layer references and before SAO; absent syntax infers
+disabled prediction. Header/context validation checks its presence again.
+Contour SPS parameters can now be retained while this slice flag is disabled;
+active contour reconstruction remains an explicit refusal. The old blanket
+contour-SPS refusal test is updated to parameter acceptance, with a separate
+authored texture-motion SPS retaining the unsupported-tool refusal.
+Three authored SPS/NAL files and two MP4s distinguish disabled-contour playback
+acceptance from active-contour refusal, each repeated through rewind. Temporal
+tests use legal non-IRAP headers and cover component sublayer/limit gating.
+All 35 tests across gate, SPS3D, layered slices/playback, depth playback/parsed
+pictures and view components pass offline. The three gate files and all 20
+MP4 fixtures regenerate identically. This qualifies syntax/control admission;
+it does not qualify contour mask reconstruction or current-AU TexturePic use.
+
+`select_texture_picture` now binds the I-9 texture component from the completed
+picture list of the current AU. It validates the layered header, selected layer
+status, matching derived POC/AU identity, uniqueness, complete luma storage and
+coverage of the depth picture. Disabled component prediction requires no
+picture. The layered DPB invokes this selection before reconstruction and never
+searches retained temporal references for TexturePic. The returned Arc shares
+immutable picture storage without copying pixels; completed-picture ownership
+is already accounted for by the DPB.
+Tests use real parsed AU plans and decoded synthetic texture pictures. They
+check pointer sharing, missing/duplicate/stale/wrong-POC identities, invalid
+status and incomplete pixels, plus disabled selection without a source picture.
+All 29 tests across TexturePic, component gate, layered playback/slices, parsed
+depth pictures, depth playback and view components pass offline. Active contour
+still reaches its explicit reconstruction refusal after TexturePic validation;
+passing this selection stage is not contour playback acceptance.
+
+The selected TexturePic is now retained through layered reconstruction rather
+than discarded after validation. `decode_layered_with_texture` borrows its
+immutable luma storage; the original entry point explicitly refuses active
+contour without a supplied current-AU component. Actual CU mode admission uses
+both the raw wedge flag and the slice-gated contour flag. A selected full-CU,
+DC-only contour mode derives its mask from TexturePic via I-79/I-80 and reuses
+the signed two-segment prediction/offset and optional DLT reconstruction.
+This supersedes the blanket active-contour refusal described above. Residual-
+coded DIM and mixed NxN DIM reconstruction remain explicit refusals.
+
+`generate_hevc_contour_picture.py` authors the contour CABAC payload and an
+independent pixel oracle from the existing synthetic 64x64 PCM texture. The MP4
+generator wraps it in a depth CRA with both DIM flags enabled and in_comp_pred=1.
+The texture IDR and depth CRA signal the same full POC reset (period zero), as
+required for this mixed-IRAP AU. Both identity and active-DLT MP4s reproduce
+exact 32x32 masks/pixels across rewind: segment values 118/138 and 48/208,
+respectively. This is coded contour/DC-only playback acceptance, unlike the
+component-gate skip-only witness, which now also plays when the flag is on.
+The six new fixture files regenerate identically without FFmpeg or network.
+This does not qualify residual-coded contour, every CU size, queued contour
+reconstruction, arbitrary multiview camera configurations, or full Annex I.
+
+The contour gate passes 39 tests across nine HEVC suites offline with player
+features and no default features. This includes the real contour acceptance,
+TexturePic handoff/refusal, component gate, SPS3D, layered slice/playback,
+parsed depth pictures, depth playback and view-component suites.
+
+Full-partition residual-coded DIM now consumes the ordinary transform-tree,
+luma CBF, optional CU QP delta and coefficient syntax, using the existing owned
+scaling/inverse-transform implementation. I.7.4.9.8 still signals a split flag
+when the ordinary tree rules require one, but forbids splitting this DIM PB;
+violations and DIM transforms exceeding MaxTbLog2SizeY are rejected explicitly.
+DIM uses intra scaling, diagonal scan and the intra 4x4 transform choice without
+angular RDPCM. The reconstructed signed residual is added to the DIM predictor
+before sample-domain clipping. The queued reconstruction command retains the
+coefficients and uses the same residual construction before plane assignment.
+The earlier blanket residual-coded DIM refusal is superseded for full PBs;
+mixed NxN DIM is still an unsupported reconstruction path.
+
+The contour generator now also authors wedge/contour residual streams. Twenty
+valid 32x32 MP4 variants cover CBF=0, positive/negative DC coefficient magnitude
+64, identity/DLT prediction and extreme offsets +/-150, repeated through rewind.
+Independent integer DC-DCT calculations at QP26 predict uniform residuals +26
+and -25 (including signed rounding). Identity clipping cases distinguish adding
+the residual before clipping from clipping the predictor first. DLT cases retain
+the normative 8-bit index-domain clipping and inferred-zero unpopulated entries;
+clipping the index to the populated table length would be incorrect. Two fully
+signalled split-TU variants are semantic-refusal tests, not acceptance tests.
+The initial unmodified decoder failed the acceptance witness specifically with
+"HEVC residual-coded DIM reconstruction is not implemented". All 54 new CABAC,
+oracle and MP4 files regenerate identically offline. These fixtures qualify
+32x32 single-TU DC residual playback, not all coefficient patterns, all sizes,
+transform-skip/bypass combinations, or actual queued DIM picture playback.
+
+The residual DIM gate passes 41 tests across ten HEVC suites offline with player
+features and no default features, including the previous 39-test contour gate.
+
+Mixed NxN depth intra CUs now retain each PB's ordinary/wedge/contour selection,
+offsets and shared wedge table through normal transform traversal. Ordinary
+mode derivation publishes DIM neighbours as the mandated DC candidate (I.8.4.2).
+Each DIM PB consumes one unsplit transform at depth one, obtains its own mask at
+its actual picture origin, and reconstructs in the same Z order as ordinary
+PBs. The existing coefficient/scaling/transform path supplies signed residuals;
+DLT prediction still precedes residual addition and final sample clipping.
+Queued reconstruction preserves the same command order and masks. The earlier
+blanket mixed-NxN refusal is superseded; splitting a DIM PB's transform remains
+a bitstream-conformance error, while ordinary PBs retain normal tree traversal.
+
+`generate_hevc_nxn_dim.py` authors four schedules (`owco`, `cowo`, `wocw`,
+`wcwc`) with minimum CU32/PB16 and minimum CU8/PB4. Its separate scalar oracle
+substitutes only already reconstructed neighbour samples, applies ordinary DC
+boundary filtering or I-79..94 DIM prediction, and adds independent DC-DCT or
+4x4 DST impulse results. Zero-CBF and signed residual schedules, each with and
+without DLT, produce 32 valid MP4 witnesses and are compared exactly through
+rewind. The 4x4 oracle uses the normative DST basis [29,55,74,84], not a uniform
+DCT approximation. Two complete syntactic NxN split-TU variants verify the
+specific semantic refusal before any output picture is published. The accepted
+fixture first reproduced "HEVC mixed NxN DIM reconstruction is not implemented"
+with the unmodified decoder; its 3D sub-block sizes are explicitly consistent
+with the minimum coding-block size. All 86 new raw SPS/CABAC, pixel-oracle and
+MP4 files regenerate identically offline without FFmpeg or network access.
+These witnesses qualify ordinary-DC/DIM mixtures at PB4/PB16 and wedge index
+zero. They do not qualify every angular mixture, ordinary-PB transform split,
+coefficient pattern, wedge index, actual queued DIM picture, or all Annex I tools.
+
+The NxN DIM gate passes 44 tests across twelve HEVC suites offline with player
+features and no default features, including prior contour/residual gates and
+the ordinary DC-only forced-split playback suite.
+
+`generate_hevc_nxn_ordinary.py` extends the mixed-NxN playback qualification with
+60 additional MP4s. The ordinary PB can use DC or the axis angular modes 10/26;
+its transform can stay at 16x16 or split into four 8x8 TUs while adjacent DIM
+PBs remain unsplit. Three mixed schedules, zero/signed-DC residuals, active or
+identity DLT and rewind are compared against an independent sample oracle.
+The generator derives MPM/remainder codes from already published PB modes,
+normalizing DIM neighbours to DC; separate 8x8 last-position and transform-split
+contexts persist correctly across leaves. The oracle predicts each ordinary
+transform leaf only after preceding leaves are reconstructed, including axis
+boundary filtering and independent signed inverse-quant/DCT calculations.
+
+All 60 cases pass native indexed playback exactly, twice through rewind. No
+production decoder change was needed for these combinations. The focused gate
+passes three tests across `hevc_nxn_ordinary` and `hevc_nxn_dim`, including the
+previous 32 accepted mixtures and the two forbidden DIM-split refusals. The 150
+new CABAC/oracle/MP4 files regenerate identically, and all 86 earlier NxN files
+remain byte-identical under the extended generators. Ordinary test execution
+reads the saved fixtures and does not invoke generation, FFmpeg or the network.
+This qualifies axis-angular and ordinary-transform-split mixtures at PB16/TU8;
+it does not qualify every angular mode, AC coefficient pattern, actual queued
+DIM reconstruction, or the remaining Annex I tools.
+
+Actual queued DIM reconstruction is now qualified by owned 128x96 pictures,
+not inferred only from the worker-size threshold. `generate_hevc_queued_dim.py`
+authors twelve CTUs in one CRA depth picture, using the existing synthetic
+128x96 PCM texture as a matching current-AU CRA. Its original PCM/entropy bytes
+are unchanged; only the explicit POC/empty-RPS header is added. The source's
+native metadata and header prefix are checked, and decoded texture pixels are
+compared with the saved synthetic YUV. Empty base header-extension syntax
+infers an absent MSB-cycle value under F.7.4.7.1, while the aligned dependent
+CRA explicitly signals cycle-present=false.
+
+Twenty MP4 variants cover NxN PB16, full PB32 and full DC-only wedge/contour,
+zero or signed DC residuals where applicable, identity or active DLT, and
+rewind. Each queued case has an authored constrained-intra PPS control that
+selects direct reconstruction; all prediction neighbours are intra, so this
+changes scheduling without changing the intended samples. A separate scalar
+oracle follows CTU/PB order across row boundaries and uses full-stride texture
+coordinates. All queued and direct outputs match it exactly.
+
+A `cfg(test)`-only picture/decoder counter records DIM commands sent to the
+worker. Pictures expose that evidence internally only after the worker has
+successfully drained/joined and all planes are complete. The native DPB unit
+test confirms 48 queued commands for each NxN case, twelve for full/DC-only,
+and zero for every direct control, together with exact pixels. There is no
+production statistics field or runtime counter cost. Counter preservation
+through test-only picture translation/colour-plane helpers is explicit.
+
+All 35 new CABAC/oracle/MP4 files regenerate identically offline; all 236 prior
+NxN/ordinary-mixture files remain byte-identical with the extended rectangular
+oracle and optional PPS constrained-intra generator argument. The focused
+integration gate passes four tests across queued DIM, NxN DIM and ordinary
+mixtures. The broader owned-codec HEVC unit gate passes 223 tests; one explicit
+long-term fixture-regeneration helper remains intentionally ignored, separate
+from ordinary test execution. Both gates run offline without default features,
+with player support and no FFmpeg dependency. This qualifies the exercised
+queue paths, not every 3D tool, parameter/profile combination or coefficient
+pattern; inter_dc_only and other active Annex I tools still require work.
+
+Monochrome depth SPS admission now enables `inter_dc_only`. The CU extension
+reads `dc_only_flag` only for a non-skipped full inter partition. When set,
+`depth_dcs` supplies one signed offset (absolute value plus one, with no intra
+presence bin), and root-CBF/transform syntax is absent. I.8.5.4 specifies a
+constant residual in sample space, independent of DLT; this is not the intra
+DLT/DC-offset assignment process. The offset is applied after motion prediction
+and before the CU becomes an output/reference picture. Queue commands preserve
+that order. With the flag clear, ordinary root-CBF/coefficient syntax is retained;
+skipped and non-full partitions consume no DC-only flag at all.
+
+`Plane::add_dc_residual` handles aligned coding blocks through 64x64. It checks
+complete prediction over the entire CU before any mutation, adds in a wide signed
+domain and clips to the plane bit depth, preserving immutable shared references.
+Unit tests cover 16-bit clipping, extreme signed helper inputs, COW ownership,
+invalid geometry and an incomplete lower CU half without partial upper-half edits.
+
+`generate_hevc_inter_dc.py` authors three-picture PCM/P/B depth streams using
+only a deterministic gradient and unchanged synthetic base-layer pictures.
+Ninety-six MP4 variants exercise merge and explicit zero-motion prediction,
+offsets +/-1, +/-10 and +/-150, CU32/CU64, active/identity DLT, direct/queued
+reconstruction and rewind. Controls cover skip, a clear DC-only flag with zero
+root CBF, two horizontal PUs where the flag is absent, and full merge with a
+clear flag plus ordinary nonzero DCT coefficients and inferred root-CBF=1.
+The scalar oracle applies each P/B offset or normal DCT residual to the preceding
+reconstructed picture, including clipping between pictures. The full-merge
+coefficient control uses normative P/B log32 last-position context initializers
+110/125; its initially mis-authored initializer was corrected before acceptance.
+The initial unmodified decoder reproduced the specific active-3D-SPS refusal.
+All 96 final variants now match exact native output pixels and POC sequence
+across rewind. This supersedes that refusal for the enabled inter-DC-only tool.
+
+A test-only queued-inter-DC counter proves four actual DC commands per P/B
+picture in each 128x128 queued case and zero for the authored direct, skip,
+non-full and clear-flag controls. This evidence is returned only after successful
+worker completion and plane reconstruction. All 207 new CABAC/oracle/MP4 files
+regenerate identically offline. The optional PCM-depth generator field preserves
+its previous 10-bit default; all 290 checked earlier PCM/NxN/queue files remain
+byte-identical. Ordinary tests do not generate fixtures or invoke FFmpeg/network.
+This qualifies the exercised 8-bit streams plus the 16-bit plane primitive, not
+all coded bit depths, CU sizes, motions, profiles or remaining Annex I tools.
+
+The inter-DC gate passes 225 owned-codec HEVC unit tests (one explicit long-term
+fixture-regeneration helper intentionally ignored) and 26 tests across four
+integration suites: inter DC, queued DIM, SPS3D and layered playback. Both gates
+run offline without default features, with player support and no FFmpeg.
+
+Monochrome depth now admits `coding_tree_partition` and implements the effective
+CQT gate of I-28: in-component prediction enabled, a non-I slice and a NAL type
+outside 16..23. I-slice syntax can still carry in_comp_pred_flag without requiring
+TexturePic for CQT. Direct layered calls refuse an enabled CQT slice without its
+current-AU texture or complete coded-CU metadata; AU-owner selection validates
+matching layer, POC, AU identity and completion, with no temporal-image fallback.
+
+Every real owned HEVC reconstruction now retains a validated immutable CU map:
+one packed byte per 8x8 luma cell records the absolute CU log2 size and full
+partition type. Absolute sizes are necessary when texture and depth use different
+CTU sizes. Intra NxN records its parent CU and Quarters partition, not four fake
+CUs; full, symmetric and all four AMP modes retain their original CU identity.
+`Picture::coding_unit_at` exposes geometry at coded-picture coordinates before
+cropping. Arc storage is shared by POC translations and exact identity references.
+Processed/resampled reference representations explicitly drop coded-CU metadata
+rather than inventing geometry for their derived sample grid.
+
+I.7.4.9.4 suppresses the split bin and infers unsplit when the depth block is no
+larger than its colocated texture CU. Otherwise normal coded/edge-inferred splits
+apply. The default coding-tree visitor retains ordinary behavior for all callers;
+the predicted visitor explicitly refuses an oversized inferred boundary leaf.
+I.7.4.9.5 and Table I.16 infer full partitions for equal-size full texture CUs or
+use the reduced horizontal/vertical/AMP syntax. Exact context/bypass-bin unit
+checks cover both orientation IDCs, minimum-size/AMP restrictions and bin-free
+full inference. Tiles, WPP and independent-slice traversal use the same hook.
+
+The saved-map allocation peak is included in reconstruction accounting, including
+temporary Vec storage and aligned retained Arc storage. Additional-reference
+accounting subtracts shared CU-map allocations just like shared planes. A broad
+unit gate caught and fixed initial double charging of this shared map. The tiled
+combined-budget regression now uses the same reconstruction-peak calculation,
+so its zero remaining layout budget still reaches the intended specific refusal.
+Identity reference metadata is preserved; a valid unequal-window resampling
+control verifies that processed references expose no coded-CU map.
+
+`generate_hevc_cqt.py` independently authors texture and depth PCM/P/B streams
+from deterministic gradients. The 196 regular MP4s cover full, horizontal,
+vertical and all four AMP texture partitions, differing CTU sizes, depth CUs
+larger than their texture counterparts, active/inactive component flags, skip,
+inter-DC-only/DLT composition, direct/queued reconstruction and rewind. Acceptance
+checks both exact pixels and CU size/partition metadata at every 8x8 position;
+flat zero-motion pixels alone do not prove partition inference. Component tests
+also cover all eight saved partition codes, shared ownership, map consistency,
+missing-source/map refusals and I/IRAP gating. Decoded NxN witnesses verify the
+saved Quarters geometry at CU8/CU32. This is not an exhaustive profile certificate
+or full coded texture-Quarters/CQT combination qualification.
+
+Two additional MP4s reproduce mixed independent I/P slices in one depth picture.
+The initial owner chose TexturePic solely from the first slice, incorrectly
+rejecting an enabled later P slice with "HEVC coding-tree prediction requires
+current-AU TexturePic". The owner now selects a slice where CQT is actually active;
+the on/off fixtures both compare exactly through rewind. The initial pre-CQT
+implementation separately refused the raw CQT SPS even for an inactive slice.
+All 319 new MP4/oracle files regenerate identically offline; 497 checked earlier
+PCM/DIM/inter-DC files remain byte-identical under the optional AMP generator
+argument. Ordinary tests read fixtures without generation, FFmpeg or network.
+Other active Annex I tools, including texture_motion, remain unfinished.
+
+The CQT gate passes 230 owned-codec HEVC unit tests (one explicit long-term
+fixture-regeneration helper intentionally ignored) and 35 tests across nine
+integration suites, offline without default features and with player support.
+
+
+Annex I texture-motion derivation now has owned component primitives in
+`hevc_texture_motion.rs` (I.8.5.3.2.9 and I.8.5.3.2.11): aligned 8x8 texture
+lookup, same-list POC/ViewIdx reference matching, first matching active index,
+signed quarter-to-integer sample rounding, default central sub-block selection,
+and raster sub-block fallback only when both prediction lists are inactive.
+Integer depth vectors use a distinct type to prevent accidental quarter-sample
+interpretation. Geometry and reference-list bounds are checked before use.
+These are component primitives, not compressed playback acceptance: texture_mc
+SPS admission remains refused until exact texture PB motion/owning slice lists,
+extended merge ordering, and sub-block reconstruction are connected and a
+synthetic video acceptance fixture passes. The existing 16x16 collocated temporal
+map cannot substitute for the exact texture PB lookup required by this tool.
+
+The texture-motion component gate passes five new unit tests; the broader owned
+HEVC gate passes 235 tests with one explicit regeneration helper ignored, offline
+with player support and default features disabled. This is not yet a texture-motion
+bitstream/playback acceptance result.
+
+
+Exact texture motion is now published on an immutable 8x8 grid with the coded CU
+map. Single-slice and multi-slice reconstruction capture native PB motion after
+reference canonicalization, independently of the coarser temporal 16x16 map.
+The map is shared across identity preparation and POC translation, counted once
+in retained storage, and included (temporary plus retained allocation) in decode
+peak admission. Nonidentity reference processing still discards original coded
+metadata instead of treating resampled motion as the current-AU texture source.
+`Picture::texture_merge_candidate_at` resolves saved layer/POC identities through
+an explicit layer-to-ViewIdx resolver before invoking the owned component rule.
+
+The new offline-authored `cqt-exact-texture-motion.mp4` uses flat texture PCM and
+an AMP P CU with +1 quarter-sample vertical motion over the first eight rows and
+-1 over the remaining rows. Its exact motion check distinguishes the row-8 PB
+boundary that a 16x16 temporal map cannot retain; texture and depth pixels,
+reference view matching, bounds and rewind are also checked. This tests decoded
+source metadata and candidate derivation, not admission/playback of tex_mc itself.
+All 320 current CQT generator outputs reproduce byte-for-byte without FFmpeg.
+Extended merge-list insertion and actual depth sub-block reconstruction remain
+unfinished, so the SPS tool is still explicitly refused.
+
+Exact texture-motion metadata validation passes 236 owned HEVC unit tests
+(one explicit regeneration helper ignored) and 36 tests across nine integration
+suites, offline with player enabled and default features disabled.
+
+
+The ordinary merge list now retains A1/B1/B0/A0/B2 identities alongside its
+motions instead of losing that information before Annex I extension. Its native
+selection order, duplicate rules, temporal/combined candidates and zero padding
+are unchanged, with the same single candidate allocation. The owned texture
+extension order primitive implements I-135/I-136 for a depth picture with other
+inter-view tools disabled: T precedes surviving spatial candidates; only A1/B1
+are pruned against T; B0/A0/B2 retain duplicates against T; nonspatial entries
+keep initial order and identity. Component tests cover all 32 spatial subsets,
+all five merge-list maxima, duplicate motions and invalid list identities.
+The primitive is not yet called for active tex_mc: admission remains refused
+until selecting T leads to actual depth sub-block reconstruction. No compressed
+tex_mc playback acceptance is claimed by the list tests.
+
+The tagged initial-list refactor and extension-order component tests pass
+238 owned HEVC unit tests (one regeneration helper ignored) and 36 integration
+tests across nine suites, offline with player and without default features.
+
+
+`Spatial::resolve_with_texture` now consumes the tagged initial merge list and
+selects either ordinary motion or an explicit `Resolved::Texture` result. The
+caller keeps the texture sub-block arrays instead of flattening them into a CU
+vector. Explicit prediction and unavailable T preserve the ordinary path;
+original 4x8/8x4 PBs bypass T even when parallel merging derives a shared 8x8 CU.
+Tests use a parsed authored P header plus controlled spatial neighbours to check
+T selection, retained equal B0, max index bounds and explicit prediction. These
+are resolver component tests, not an active tex_mc bitstream acceptance gate.
+
+This exposed an ordinary B-picture bug: shared parallel-CU derivation returned
+both L0/L1 without reapplying the original tiny PB's L1 restriction. Four new
+own-authored movies cover vertical/horizontal 8x8 CUs split into 4x8/8x4 PBs,
+parallel merge log2 2 controls and log2 3 reproduction. Before the fix the vertical
+log2 3 movie failed specifically with "tiny PB incorrectly keeps L1 at0,0" after
+successful decoding and exact pixels; the log2 2 control passed. The shared
+resolver now restores the original-PB restriction after recursion. All four
+movies check exact pixels, exact saved L0/L1 motion and rewind. Generation stays
+separate and offline; all 324 CQT/texture/tiny-merge outputs are byte-identical.
+Active tex_mc reconstruction itself remains unfinished and SPS admission refused.
+
+Final selection/tiny-PB gate: 240 owned HEVC unit tests passed (one explicit
+regeneration helper ignored), plus 37 tests across nine integration suites,
+offline with player enabled and default features disabled.
+
+
+Owned integer depth sample prediction is implemented by
+`hevc_motion::texture::predict`. It uses integer vectors directly, including the
++8192 sample component produced by rounding a maximum positive texture vector;
+converting that value to a quarter-sample i16 would overflow. The primitive uses
+wide sample-domain weighting for L0-only, L1-only and bidirectional prediction,
+edge extension, signed offsets, denominator and high-precision-offset handling.
+It checks reference completion/geometry/depth, active indices and the normative
+64-sample CU bound before allocating its bounded output. A current-picture
+reference is explicitly refused here pending an availability-validated owner
+path; no temporal or current-picture source is silently substituted.
+
+Component tests compare this path with the existing ordinary integer-motion
+prediction over depths 8 through 16, zero/interior/edge/extreme motions, every
+active-list mask and multiple weights/offset modes. Independent corner-pixel
+checks cover full integer range and the +8192 rounded texture extreme. Invalid
+or incomplete source/weight/geometry cases refuse before output prediction.
+
+The offline-authored `cqt-integer-texture-motion.mp4` supplies a real coded AMP
+texture P CU with +4 and -4 quarter-sample vertical vectors on the row-8 boundary.
+The integration test derives its 8x8 texture sub-block candidates, predicts depth
+samples from the decoded previous depth picture, and compares each sample with
+an independently defined shifted gradient; rewind repeats the entire check.
+This is a coded-source component prediction gate. The movie does not enable
+tex_mc and does not establish active-tool playback acceptance. Full decoder
+connection, reference-view binding and motion publication remain unfinished.
+All 325 CQT/texture/tiny-merge generator outputs reproduce byte-for-byte offline.
+
+Integer-depth component gate: 243 owned HEVC unit tests passed (one explicit
+regeneration helper ignored) and 38 tests across nine integration suites,
+offline with player enabled and default features disabled.
+
+
+`derive_texture_subblocks` now binds decoded texture motion to the active depth
+reference identities through the real VPS scalability graph. `view_index` returns
+ViewOrderIdx (scalability dimension 1, I.7.4.7.1), independently of nuh_layer_id
+and view_id_val. The binding checks monochrome depth context, complete coded
+texture coverage, the slice active-list counts, known layer identities and depth
+component roles before deriving the exact sub-block candidate arrays. A missing
+POC match makes T unavailable rather than substituting another reference.
+
+The existing own integer-texture fixture now exercises this binding with parsed
+VPS/SPS/PPS and a real P header, a decoded source TexturePic and previous depth
+picture. Texture layer 0 and depth layer 3 correctly match one ViewIdx, and all
+predicted sub-block samples match the independently shifted gradient. Unknown
+layers, wrong reference counts and opposite component roles refuse. A graph
+component test separates sparse ViewOrderIdx values from unrelated or equal
+view_id_val values. These remain binding/component gates: active tex_mc SPS
+admission and its reconstruction/motion-publication owner are still unfinished.
+
+The VPS view-binding gate passes 244 owned HEVC unit tests (one explicit
+regeneration helper ignored) and 39 tests across nine integration suites,
+offline with player support and default features disabled.
+
+
+Decoder motion storage now uses signed 32-bit quarter-sample components so
+integer depth motion can be published without wrapping: +8192 samples remains
++32768 quarter samples, and the full signed integer-depth range maps losslessly
+to [-131072,131068]. `quarter_motion` and `integer_motion` provide checked domain
+conversion; a fractional or oversized depth publication refuses, while texture
+candidate derivation still enforces the coded signed-16-bit texture MV domain.
+The ordinary MVD addition, temporal scaling and inter-layer resampling rules
+retain their prior signed-16-bit wrap/clip semantics; wider storage does not
+claim to widen those coded domains. Motion metadata/reference allocation counts
+use the actual type size, and the conservative reconstruction allowance rises
+by one byte per luma sample for the wider CU cell state, plus the separately
+charged exact-motion-map allocation peak.
+
+Component tests exhaustively roundtrip all signed-16-bit integer depth values,
+check the positive texture-rounding extreme and reject fractional/oversized or
+wrong-domain values. Wide publication is also fed through native luma prediction
+and compared with direct integer prediction at both image corners. Existing
+inter-layer JSON fixtures keep the same values and expectations; their Rust
+loaders now use the expanded internal storage type. Active tex_mc admission,
+depth-specific temporal/resampled motion semantics and the reconstruction owner
+still require qualification before this tool is claimed as playback support.
+
+The next depth-motion connection must respect Annex I.8.5.3.2.1 integer-domain
+MVD wrapping and I.8.5.3.3 left shift only at sample prediction. Existing
+zero-motion depth witnesses do not prove nonzero depth-MVD/AMVP semantics.
+
+Wide-motion storage gate: 245 owned HEVC unit tests passed (one explicit
+regeneration helper ignored) and 42 tests across twelve integration suites,
+including reference-sample and motion resampling, offline with player enabled
+and default features disabled.
+
+
+Nonzero depth MVD reconstruction now uses the Annex I integer motion domain:
+I-110..I-113 signed-16-bit wrap occurs before multiplying by four for the
+internal quarter-sample publication used by pixel prediction. Ordinary texture
+and SCC integer-MV behavior keep their separate original rules. Spatial scaled
+AMVP and temporal reference prediction convert depth vectors to integer units
+before clipping/scaling and republish losslessly, preserving full integer-depth
+range instead of clipping it prematurely as quarter-sample signed-16-bit motion.
+
+The new own-authored depth-MVD MP4s explicitly reproduce the prior failure:
+`depth-mvd-right` decoded successfully but POC1 gave fractional interpolation
+instead of an exact one-sample shift. The zero control passed before the fix.
+Twenty-one short movies (32/64/128 sizes, zero, four directions and both signed
+limits) now compare every luma sample and published CU motion through rewind.
+Only the first CU carries nonzero P MVD; larger pictures inherit it through
+spatial AMVP, while the following B picture explicitly selects L0 with zero
+MVD. Thus the test checks native source indexing/edge extension and metadata,
+not merely a vector helper or a refusal. Unit tests independently exhaust all
+MVD values for multiple boundary predictors and check integer-domain reference
+scaling, clipping and long-term classification. These are monochrome 8-bit
+coded witnesses, not full profile or coded temporal-MVP conformance proof.
+All 367 CQT/texture/tiny-merge/depth-MVD generator outputs reproduce identically
+offline; ordinary tests still require neither generation nor FFmpeg/network.
+Active tex_mc admission, sub-block owner integration and depth-specific
+inter-layer motion resampling remain unfinished.
+
+The integer depth-MVD gate passes 247 owned HEVC unit tests (one explicit
+regeneration helper ignored) and 43 tests across twelve integration suites,
+offline with player enabled and default features disabled.
+
+
+Native tex_mc playback is now connected for monochrome depth. The layered owner
+passes its validated VPS binding into reconstruction, selects the completed
+current-AU texture picture, derives active depth references by POC/ViewIdx and
+invokes the tagged extended merge selector. Selecting T reconstructs each
+rectangular sub-block with its own exact published motion; ordinary candidates
+retain the old path. Reconstruction uses the existing native direct/worker
+pixel path, with CU/DC-only/residual processing afterward. Only original PU
+edges are published for filtering, while each underlying 4x4 cell retains its
+sub-block motion for deblocking and later reference maps. No vector is flattened
+into the default central sub-block, and unavailable T uses the normative initial
+merge list rather than another codec backend.
+
+The initial own MP4 witness reproduced the old SPS tool refusal. The old
+`depth-unsupported-motion.sps` expectation is now parameter acceptance; a new
+inter-view-motion SPS preserves the refusal for that still-unimplemented tool.
+The separate full playback gate covers 96 authored I/P/B movies, sizes 32/128,
+T enabled/disabled, CQT enabled/disabled, skip and depth DC-only (+10/-10),
+intra TexturePic with unavailable T, direct reconstruction controls and maximum
+positive texture rounding (+8192 integer depth samples). Every decoded texture
+and depth pixel and every 8x8 published depth motion is checked through rewind.
+The B output references a previously reconstructed T picture, so the expected
+image is computed recursively from the preceding depth image, not merely from
+an unchanged seed. The internal worker witness confirms 256 queued T blocks in
+each active 128 P/B picture; disabled and direct controls enqueue none.
+All 463 CQT/texture/depth outputs and the 3D SPS generator reproduce offline.
+
+This qualifies native L0-derived T reconstruction in monochrome eight-bit coded
+P/B witnesses, including the listed combinations. It does not establish complete
+Annex I/profile conformance, coded bidirectional T/weighted-T or enabled-filter
+conformance. Depth-specific inter-layer motion resampling and the remaining
+inter-view/disparity/view-synthesis tools still require work and qualification.
+
+Native tex_mc gate: 248 owned HEVC unit tests passed (one explicit regeneration
+helper ignored) and 44 tests across twelve integration suites, offline with
+player enabled and default features disabled.
+
+
+Depth reference motion resampling now operates in integer units before
+rounding/clipping, then republishes in the decoder quarter-sample domain.
+`MotionResampling` and the composed sample/motion `Resampling` path carry the
+same depth-role domain. Ordinary texture motion keeps its fractional semantics.
+The complete depth source grid is validated before output allocation, including
+identity processing and source vectors not selected by destination sampling;
+fractional or oversized depth publication refuses instead of becoming a latent
+invalid reference. Active list indices and caller source grids remain unchanged.
+
+A dedicated own I/P/B source movie (`depth-mvd-resampling.mp4`) decodes a one-pixel
+P vector followed by both signed depth-MV extrema. The regression first verifies
+native source pixels and metadata, then resamples that decoded grid at identity,
+1.5x, 2x and anisotropic scales through both APIs and repeats after rewind.
+Before the fix the 1.5x P result was [0,6] quarter units instead of the required
+integer-depth [0,4]. The B checks distinguish full integer-range clipping from
+ordinary quarter-sample clipping. Separate unit controls preserve texture [0,6]
+style fractional motion and verify depth preflight refusals before allocation.
+All 465 CQT/texture/depth fixture outputs reproduce identically offline.
+This is coded-source plus resampling-component acceptance; it does not establish
+a full coded inter-layer resampling/AU/profile conformance result.
+
+Depth-domain resampling gate: 250 owned HEVC unit tests passed (one explicit
+regeneration helper ignored) and 45 tests across thirteen integration suites,
+offline with player enabled and default features disabled.
+
+
+Correction to the earlier depth-resampling qualification TODO: Annex I.3.2
+requires DependencyId/AuxId zero for a depth layer, and I.11.1.1 restricts 3D Main
+to zero scalability dimensions other than depth/view. For depth layers it also
+requires num_ref_loc_offsets zero and coded dimensions equal to every reference
+layer. A spatially resampled depth-layer stream therefore cannot establish 3D
+Main playback conformance. The prior depth-domain utility/component tests remain
+valid API tests; such a coded profile combination is not a missing 3D Main
+playback requirement. The experimental backend-only depth stream was not kept
+as a standards playback acceptance witness.
+
+The new coded scalable witness instead signals Scalable Main 4:4:4 with the
+Table H.4 eight-bit constraint flags and carries monochrome enhancement layers;
+its ordinary Main base is kept separate. The VPS uses only dependency scalability
+with strictly increasing IDs 0/1/2, no depth or 3D tool signalling. The test checks
+these resolved profile/constraint/role values rather than assuming profile
+conformance from successful decoding. Six short original three-layer movies
+cover 1.5x and 2x reference regions and both signed quarter-MV limits. The first
+predicted target picture selects temporal MVP from the actually prepared source
+layer but samples its own previous target picture. The next picture explicitly
+selects the prepared source's resampled sample planes. Every target pixel,
+selected reference index, published motion and all-layer output ordering is
+checked through rewind. Expected pixels come from independent rational FIR and
+quarter-sample interpolation oracles, not from the native decoder. Generation is
+fully offline and separate from ordinary tests. This is native coded AU/DPB/
+reference-preparation acceptance for the listed scalable cases, not external
+certification or complete profile/tool conformance.
+
+The coded scalable gate passes all six authored movies and 20 integration tests
+across five related suites, offline with player and without default features.
+Codec production sources were unchanged in this qualification step; the previous
+component depth-domain gate remains separate from standard profile claims.
+
+
+The 96 active texture-motion witnesses now explicitly declare a 3D Main
+enhancement PTL (profile_idc 8 with I.11.1.1 max-12/max-10/max-8/max-422/max-420
+and lower-bit-rate indications). The Main base retains a separate PTL and ordinary
+SPS/PPS without unnecessary extension signalling. The optional generator PTL
+argument leaves all earlier non-T fixtures unchanged. The test inspects the
+resolved enhancement profile and constraint bits, matching texture/depth coded
+sizes, 4:2:0/monochrome eight-bit formats, no reference-location offsets, no
+non-depth/view scalability dimensions, consecutive same-view texture/depth
+layers, prohibited active range/SCC tool fields, transform-skip/QP/colour-mapping
+constraints and the CTU bound before checking actual pictures.
+
+A common-entry regression additionally opens four of these 3D Main-signalled
+movies through Mp4VideoReader, verifies highest-layer selection, exact packed Y
+and neutral renderer chroma through rewind, then opens NativeReader, seeks exactly
+to 40 ms and compares the returned P picture before exercising RGBA conversion.
+This extends the raw layered decoder gate to the software player entry and
+presentation path. These checks qualify only the listed native tool subset. Explicit
+PTL/parameter checks and these acceptance witnesses do not certify all Annex I/profile/level tools, coded bi/weighted-T or enabled-filter
+combinations.
+
+The explicit 3D Main PTL/player-entry gate passes 250 owned HEVC unit tests
+(one explicit regeneration helper ignored) and 47 tests across fourteen
+integration suites, offline with player and without default features.
+
+
+### Distinct-reference bidirectional texture motion
+
+`texture-motion-bi-distinct.mp4` is an owned 32×32 3D Main-signalled
+texture/depth witness. Decode order I0/I2/B1 uses signed MP4 composition offsets.
+The two PCM depth references have independently authored gradients differing by
+97 modulo 256. Texture B1 explicitly codes L0/L1 AMP motion: the first eight rows
+use +4/-8 quarter samples, the remaining rows -4/+8. Depth B1 selects T and
+averages the independently clamped integer reference samples. The regression
+checks every pixel on both layers, both published motion lists and their POC/view
+identity matching, and repeats after rewind. It cannot pass with only one list or
+a substituted common reference. This qualifies unweighted coded bi-T; weighted
+prediction, enabled filtering and other unqualified Annex I tools remain open.
+
+The ten `hevc_cqt` integration tests pass offline without FFmpeg. All 466 files
+returned by the owned CQT generator match their committed-worktree fixture bytes;
+ordinary tests read the fixtures and never invoke the generator.
+
+
+### Coded weighted bidirectional T
+
+Three independently generated `texture-motion-bi-distinct-weighted-{0,1,7}.mp4`
+witnesses retain the distinct past/future references and AMP source vectors,
+with a weighted depth PPS and explicit prediction tables in the coded B slice.
+The denominator/weight/offset tuples are:
+
+- 0: L0 (-3, -7), L1 (5, 11).
+- 1: L0 (3, 9), L1 (-1, -5).
+- 7: L0 (1, -127), L1 (255, 127).
+
+The pixel oracle independently evaluates signed weighted sample arithmetic,
+offset rounding, arithmetic shift and final 8-bit clipping. The denominator-0
+case exercises both clipping directions; denominator 1 includes negative
+intermediate outputs. Both layers, both motion lists, POC/view matching and
+rewind remain checked. This is actual coded weighted bi-T acceptance, not only
+prediction-table parsing or a component comparison. It does not qualify weighted
+uni-T, all block geometries or filtering combinations. The 11 CQT tests pass
+offline without FFmpeg, and all 469 generated files match the fixture bytes.
+
+The expanded weighted-T gate passes 49 tests across fourteen HEVC integration
+suites, offline with player and without default features. No production decoder
+change was necessary for these newly qualified weighted bi-T cases.
+
+
+### Coded weighted unidirectional T
+
+Twenty-four owned two-AU movies (`texture-motion*-weighted-*.mp4`, without the
+`bi-distinct` prefix) enable weighted P prediction on the depth PPS, retaining an
+unweighted Main texture layer. Their luma (denominator, weight, offset) tuples
+are (0, -3, 127), (0, 5, -7), (1, 3, 9), and (7, 255, -127). Each uses per-AMP
++4/-4 quarter texture motion and derived +1/-1 integer depth motion. Geometries
+are 32×32, 128×128 queued reconstruction, and 128×128 direct reconstruction;
+each is tested with skip and with a +10 CU DC-only residual.
+
+The regression independently computes every luma pixel on both layers, signed
+rounding, edge extension, prediction clipping, then residual addition and output
+clipping. It checks exact L0 motion publication and absent L1 in each 8-row band,
+requires all four layer/POC outputs and repeats after rewind. Negative and large
+positive weights exercise both clipping directions; denominator 1 exercises
+nonzero rounding. No production decoder modification was necessary. All twelve
+CQT tests pass offline without FFmpeg, and all 493 generator outputs match the
+worktree fixture bytes. Enabled-filter T combinations and other Annex I tools
+remain unqualified; these witnesses do not certify complete 3D Main support.
+
+
+### Deblocking true prediction edges with sub-block T motion
+
+Four owned `texture-motion-128-on*-deblock-{on,off}.mp4` witnesses use
+unweighted P prediction, direct/queued reconstruction and a PCM depth reference
+with constant columns and ramp `y + 37`. PCM loop filtering is disabled in the
+SPS. The predicted depth picture uses integer +1/-1 vertical motion in the
+8-row/24-row source AMP bands, while each depth CU has one full prediction block.
+The depth PPS enables deblocking only in the `on` controls; the texture PPS and
+SAO remain disabled. QP 26 with zero beta/tC offsets yields beta 16, tC 1 and
+boundary strength 1 where true CU/PB boundaries separate the opposite motions.
+
+At rows 32, 64 and 96 the first-order ramp and the two-pixel motion discontinuity
+select weak filtering: delta is exactly +1 on the last p row and -1 on the first
+q row; second samples remain unchanged because tC>>1 is zero. Strong filtering
+is excluded by the ramp's p3/q3 distance. The regression compares every pixel of
+both layers against this closed-form oracle, including the internal row-8 AMP
+transition, which must not become an extra depth prediction/transform edge.
+Both enabled controls visibly differ from disabled controls at the true edges;
+both repeat after rewind. This checks a real filtering effect and suppression of
+spurious T-subblock edges. It does not qualify SAO, weighted/filter combinations,
+strong filtering or every boundary configuration. No decoder changes were needed.
+All 497 CQT-generator outputs match their fixture bytes without FFmpeg.
+
+The deblocking-T gate passes 51 tests across fourteen HEVC integration suites,
+offline with player and without default features.
+
+
+### SAO band filtering with texture motion and reference reuse
+
+Eighteen owned `texture-motion*-sao-{0,8,31}.mp4` movies enable luma SAO in
+the depth P/B slice headers while retaining disabled SAO on texture and the PCM
+reference. The first CTU explicitly codes band mode, position 0/8/31 and offsets
+[+7,-3,+2,-7]. All subsequent CTUs merge left when available, otherwise up. The
+8-bit offset magnitude of seven exercises truncated unary syntax at its limit.
+Position 31 wraps through bands 0/1/2 and exercises both saturation directions.
+
+Each geometry (32×32, 128×128 queued, 128×128 direct) has skip and DC-only cases.
+The regression independently predicts from the previous depth samples, adds and
+clips the +10 P / -10 B DC residual when present, classifies the reconstructed
+sample band, adds the signed SAO offset and clips again. The resulting filtered
+P frame becomes the B-frame oracle reference, so retaining an unfiltered DPB
+reference cannot pass. Every pixel on both layers, all six layer/POC outputs and
+rewind are checked. All 515 CQT-generator outputs match fixture bytes; ordinary
+tests never invoke generation. These cases qualify SAO band mode with native T,
+not SAO edge mode, weighted/filter combinations or full Annex I conformance.
+No production decoder change was required for these acceptance cases.
+
+The SAO-band T gate passes all fourteen CQT integration tests offline with
+player and without default features or FFmpeg.
+
+
+### SAO edge filtering with native texture motion
+
+Twenty-four owned `texture-motion*-sao-edge-{0,1,2,3}.mp4` movies explicitly
+code all four edge classes with inferred-sign offsets [+7,+3,-2,-7]. The first
+CTU codes parameters; subsequent CTUs merge left or up. Geometries are 32×32,
+128×128 queued and 128×128 direct, each with skip or DC-only residuals. SAO is
+active on depth P/B frames only, with disabled deblocking. Texture remains flat
+128 and the authored initial depth is the wrapped spatial gradient used by the
+other T witnesses. No private material or external codec is involved.
+
+The pixel oracle first reconstructs the complete pre-SAO plane from the previous
+filtered reference and optional residual. It then classifies each sample using
+both immutable pre-SAO neighbours for the selected direction, applies the signed
+offset and clips to eight bits. Missing picture-edge neighbours suppress edge
+filtering; CTU borders inside the single slice remain available. The test checks
+all five categories occur, each filtered depth frame actually changes pixels,
+every pixel on both layers, all six layer/POC outputs and rewind. P's filtered
+output is the oracle reference for B. This catches classification based on
+already-filtered neighbours, wrong direction, missing boundary suppression,
+incorrect merging and retaining an unfiltered reference.
+
+All fifteen CQT integration tests pass offline without FFmpeg, and all 539 owned
+generator outputs match fixture bytes. No production decoder changes were needed
+for this newly qualified subset. Weighted/filter combinations, strong deblocking
+and other Annex I tools remain unqualified; this does not certify full codec or
+3D Main profile conformance.
+
+
+### Weighted P prediction combined with SAO
+
+One hundred sixty-eight additional owned two-AU movies combine the four weighted
+P tables with band positions 0/8/31 or each of the four SAO edge directions.
+Every combination has skip/DC-only variants at 32×32, 128×128 queued, and
+128×128 direct reconstruction. Each depth P slice explicitly codes weights and
+SAO activation together; texture remains unweighted with disabled SAO. Existing
+parameter and CABAC writers are reused without changing production decoding.
+
+The independent oracle applies integer T motion, signed weighting and rounding,
+clips prediction, adds/clips the optional DC residual, then classifies and filters
+SAO samples from the complete immutable reconstructed plane. Each combination
+must change at least one pixel under SAO, ruling out accidentally inert filtering
+as qualification. Every pixel of both layers, all four layer/POC outputs and
+rewind are checked. All 168 combinations pass; all 707 owned CQT-generator
+outputs match their fixture bytes. This establishes the named weighted P/SAO
+combinations only. Weighted B/filter combinations, strong deblocking, additional
+boundary arrangements and other unimplemented Annex I tools remain open.
+
+The combined weighted-P/SAO gate passes 54 tests across fourteen HEVC integration
+suites offline with player and without default features or FFmpeg.
+
+
+### Weighted B prediction combined with SAO, including queued reconstruction
+
+Seventy-one further owned I0/I2/B1 movies extend the distinct-reference witness:
+63 weight/SAO combinations (three tables × seven SAO modes × three geometries)
+and eight unfiltered 128×128 controls (unweighted or three weighted tables,
+direct or queued). The geometries are 32×32, 128×128 queued and 128×128 direct.
+For 128×128 texture pictures the owned CABAC writer independently models spatial
+AMVP in each list and codes different past/future POCs, preserving +4/-8 quarter
+motion in the first eight rows of every CU and -4/+8 in the remaining 24 rows.
+The resulting depth T motion is +1/-2 or -1/+2 integer samples.
+
+The SAO movies use distinct authored PCM reference gradients with bias 0 and
+37 modulo 256. The earlier unfiltered controls retain biases 0 and 97. Bias 37
+ensures all selected band modes see affected samples even under saturating
+signed weights; the first synthetic bias-97 attempt was rejected by the oracle's
+observable-effect assertion for band 8. This was a fixture observability failure,
+not a decoder failure. The assertion remains mandatory for every SAO case.
+
+The regression independently combines samples from both depth references,
+applies signed weighted rounding/offsets and clipping, then applies SAO from the
+immutable reconstructed plane. It compares every pixel, both saved motion lists,
+POC/view matching and rewind for every case. All seventeen CQT tests pass offline
+without FFmpeg; all 778 owned generator outputs match fixture bytes. No production
+decoder change was necessary. The new B/SAO witnesses use skip prediction;
+strong deblocking, more boundary/residual combinations and other unimplemented
+Annex I tools remain open. This is qualification of the named subset, not full
+codec/profile conformance.
+
+
+### Inter-view temporal MV scaling arithmetic foundation (not playback admission)
+
+Source inspection confirms remaining active Annex I SPS refusals for inter-view
+motion tools. The owned `hevc_motion::inter_view` component now implements
+I.8.5.3.2.6 / equations I-125..I-134: short-term candidates use POC differences,
+long-term candidates use numeric view-identifier differences when scaling is
+active, mismatched classifications return unavailable, and equal/zero source or
+target differences copy the vector before distance clipping. Remaining cases use
+the signed scale-factor rounding and clipping already owned by the native core.
+Depth vectors are validated and converted to integer-sample signed-16 units,
+scaled/clipped there, then published losslessly in quarter-sample storage.
+Texture input remains in the coded signed-16 quarter-sample domain. Invalid
+fractional depth motion and out-of-domain view differences are rejected.
+
+`LayerDependencyPrefix::view_id_value` resolves I-11 through the layer's
+scalability dimension 1, bounds-checks the identifier table and refuses values
+above 32767: `view_id_len` is u(4), so coded identifiers have at most 15 bits.
+Equal identifiers remain valid and produce zero view distance. NAL layer IDs,
+ViewIdx and numeric view identifiers are not interchangeable.
+
+Six new unit tests cover signed reversal, distance clipping, round-to-nearest
+cases, saturation, zero/equal distances, scaling-disabled long-term transfer,
+short-term scaling independent of the flag, classification mismatch, full depth
+publication range, fractional/oversized vectors, unrelated/equal view IDs and
+missing/oversized identifier entries. The 256 owned HEVC unit tests pass offline
+(one explicit regeneration helper ignored). This is an arithmetic/API foundation
+only: native temporal candidate derivation does not call it yet and SPS admission
+has not been relaxed. Next required work is layered-context integration and an
+owned coded multiview witness exercising actual temporal reference selection;
+component tests do not establish playback support for this tool.
+
+The unchanged SPS-admission/playback boundary also passes eight `hevc_3d_sps`
+and seventeen `hevc_cqt` integration tests offline without FFmpeg.
+
+
+### Layered context connected to temporal inter-view prediction (admission still closed)
+
+`Spatial::resolve_layered` now binds the current layered SPS/VPS context through
+native temporal merge derivation, preserving it through parallel/shared-CU
+recursion. Explicit AMVP retains base 8.5.3.2.9 collocated prediction. The picture owner calls this route whenever it has
+layered bindings. Context construction returns ordinary semantics for Annex F
+bindings without a 3D extension; plain Annex A callers continue using existing
+entry points unchanged. Annex I bindings select numeric view-distance scaling
+for merge only when the current depth/texture flag is enabled and ViewIdx is nonzero.
+The collocated picture's origin layer and saved canonical reference layer,
+current layer and target reference layer all remain available at derivation.
+
+The bound predictor validates layer identities, computes numeric view differences
+for long-term references and keeps POC differences for short-term references.
+Current-layer mismatch is refused. A regression augments the existing authored
+video-backed temporal test with collocated/current layers 3/5, ViewIdx 1/2 and
+numeric view identifiers 100/102/108. Source/target view distances 2/8 yield
+[256,-128] from [64,-32], which neither NAL IDs nor ViewIdx distances produce.
+The same test exercises fallback past a mismatched reference classification and
+actual explicit AMVP selection, whose long-term output remains [64,-32];
+only the merge-specific bound predictor produces [256,-128].
+Additional context tests cover disabled scaling, base ViewIdx zero, equal IDs,
+sign reversal and invalid identities. All 257 owned HEVC unit tests pass offline
+(one explicit regeneration helper ignored).
+
+SPS admission is deliberately unchanged: an active `iv_mv_scal_enabled_flag`
+remains refused. The new code is connected infrastructure, not claimed playback
+support for that flag. An owned coded multiview temporal witness and acceptance
+checks against the specific old refusal are still required before opening it.
+
+The connected-context gate passes 55 integration tests across fourteen HEVC
+suites offline with player and without default features or FFmpeg.
+
+
+### Coded three-view temporal MV scaling admitted
+
+`generate_hevc_inter_view_scaling.py` independently authors 32 short MP4 movies
+and a provenance/case manifest. Layers 0/3/5 have ViewIdx 0/1/2, identical 32×32
+4:2:0 eight-bit formats, a Main base and 3D Main-signalled enhancements. No depth
+layers, reference-location offsets, spatial resampling or camera-dependent tools
+are involved. The VPS explicitly writes extension2, its aligned 3D extension,
+cp_precision=0, zero camera pairs for both non-base views, and extension3=0.
+The generic VPS reader retains this extension tail as future metadata; these
+witnesses do not establish general camera-parameter parsing or reconstruction.
+
+AU0 has independent PCM I pictures. In AU1 the base again has an authored I
+picture, layer 3 explicitly codes vertical motion against current-AU base layer 0,
+and layer 5 selects layer 3 as its collocated temporal picture while predicting
+against layer 0. Both inter-layer references are long-term-classified. Layer 5
+uses either explicit zero-MVD AMVP or skip/temporal merge. The matching disabled
+controls transfer the source vector unchanged. Enabled merge cases use numeric
+view identifier distances, not layer IDs or view indices. Explicit AMVP copies
+the long-term source vector regardless of the inter-view scaling flag.
+
+The eight cases (each on/off and AMVP/merge) cover the following enabled-merge
+outputs; AMVP controls retain the source motion in every case:
+
+- IDs 100/102/108: source quarter MV 4 scales to 16.
+- IDs 100/102/96: source 4 scales to -8.
+- Equal IDs 7/7/7: zero distances transfer 4 unchanged.
+- IDs 100/100/108: zero source distance transfers 4 unchanged.
+- IDs 100/102/100: zero target distance transfers 4 unchanged.
+- IDs 100/102/108 with source 32767 or -32768: scaled output clips to the signed MV limit.
+- IDs 0/1/32767: clipped temporal scale factor maps source 4 to output 64.
+
+The independent pixel oracle evaluates integer displacement and edge extension.
+For signed-limit vectors every fractional interpolation tap lies beyond one
+picture edge, so the edge-sample oracle remains exact. The test also checks source
+and target saved motion and canonical POC/view reference matching, graph/profile/
+geometry/tool metadata, all six layer/POC outputs and rewind. All 32 movies run
+through the ordinary software entry with highest-layer selection, exact packed Y,
+neutral chroma, rewind and a native seek to 40 ms.
+
+Before admission, the valid active fixture reproduced exactly `HEVC active 3D SPS
+tools are not implemented` on first-frame binding, while the disabled control
+played exactly (`/tmp/fvid-inter-view-coded-reproduction-v2.log`). The refusal test
+was then replaced with enabled coded acceptance, and SPS admission now clears
+only the current role's inter-view-MV-scaling refusal. The legacy depth scaling
+parameter witness now expects acceptance; a newly authored disparity SPS retains
+the specific refusal for the still-unimplemented disparity tool. No FFmpeg or
+network is used in generation or tests. Both generators reproduce their fixtures
+byte for byte; ordinary tests do not invoke them.
+
+The matrix qualifies coded texture-view temporal scaling in these named cases.
+Depth-view coded scaling, other geometries, camera-dependent tools and full
+Annex I/profile conformance remain open. The arithmetic still supports validated
+integer depth vectors with separate component checks; that is not coded depth
+playback proof.
+
+The admitted coded inter-view-scaling gate passes 257 HEVC unit tests
+(one explicit regeneration helper ignored) and 57 integration tests across
+fifteen suites, offline with player and without default features or FFmpeg.
+
+
+### Coded depth-view temporal scaling, full integer MV range and queued reconstruction
+
+`generate_hevc_depth_view_scaling.py` authors 120 short movies and a provenance
+manifest without external codecs, private media or network. Layers 0/3/5/8 have
+DepthFlag 0/1/1/1 and ViewIdx 0/0/1/2. The ordinary Main texture base is flat 128;
+all three 3D Main-signalled depth layers carry the independent modulo-256 gradient
+`7*x + 11*y + 37`. The graph uses only depth/view scalability dimensions, with
+same-view texture/depth adjacency for view zero. Other views in this subset have
+depth components only. In-component/camera-dependent tools are disabled. The VPS
+explicitly authors its 3D extension with zero camera pairs. There are no reference
+location offsets or spatial resampling, and each reference matches current
+geometry as required by I.11.1.1.
+
+The depth view-zero layer 3 depends on texture layer 0 for AU ordering, but I-8
+excludes that opposite-role dependency from its prediction reference list.
+Layer 5 predicts from current-AU depth layer 3; layer 8 temporally derives its
+predictor from layer 5 while predicting from layer 3. Tests explicitly check the
+role-filtered graph lists: empty for layer 3, [3] for layer 5, [3,5] for layer 8.
+Depth MVDs are authored in integer pixels, not quarter samples.
+
+Each of ten cases has scaling on/off, explicit AMVP/skip temporal merge and
+three geometries: 32×32, 128×128 queued, 128×128 direct. The constrained-intra PPS
+flag selects the existing direct-control path; the unconstrained 128×128 path
+crosses the native worker threshold. Source MVD is coded in the first CU; later
+CUs use spatial AMVP with zero difference. Enabled merge cases cover +4/-2 scale
+from a one-pixel source vector; explicit AMVP retains the source vector. Other
+merge cases cover equal/zero numeric view distances, both signed-16 integer
+limits, clipped scale factor, and positive/negative 2/3 rounding of one pixel.
+The last cases must remain ±1 integer pixels rather than ±3 quarter samples.
+
+The scalar oracle checks every output pixel against independent integer edge
+extension, and every 8×8 saved motion entry in both predictive depth layers must
+have reference zero, no L1 and vector equal to the expected integer result times
+four. In particular, +32767/-32768 depth pixels must publish +131068/-131072 in
+shared quarter storage. The metadata checks bind profile, depth roles, numeric
+views, geometry, offsets and direct controls. All eight layer/POC outputs repeat
+after rewind. Ordinary software player entry must select layer 8, return exact
+packed Y with neutral chroma and repeat after rewind; native seek to 40 ms must
+return the exact predicted depth picture for all 120 movies.
+
+The two depth-view integration tests pass across the entire matrix, and all 121
+generator outputs match fixture bytes. Ordinary tests read the files and never
+invoke generation or FFmpeg. No production decoder changes were needed for these
+newly qualified depth cases. This still does not certify complete Annex I/profile
+conformance, other geometries, camera-dependent tools or remaining codecs.
+
+The expanded depth-view gate passes 59 integration tests across sixteen HEVC
+suites offline with player and without default features or FFmpeg.
+
+
+### VPS 3D camera metadata parsing and specific malformed-media rejection
+
+Source inspection found that vps_extension2 tails were retained only as opaque
+future bits. An owned two-AU three-view movie with cp_precision=6 reproduced
+silent acceptance (`/tmp/fvid-camera-precision-reproduction.log`), despite the
+I.7.4.3.1.7 bound 0..5. The authored fixture was verified to finish decoding before
+the fix; the same regression now requires the specific precision error.
+
+`LayeredVps::three_d_extension` now stores an owned bounded `ThreeDExtension`
+for VPSs advertising profile 8 or compatibility in HEVC profile space zero.
+The parser reads the 3D presence/alignment, camera payload and extension3/trailing
+syntax. Other profiles/namespaces keep their previous opaque extension behavior;
+a separate raw VPS with profile ID 8 in another namespace checks this boundary.
+The public `future_extension` field continues to mean the coded extension2 flag.
+Legacy absent 3D extensions remain absent metadata, not profile conformance proof.
+
+The camera reader retains precision, sparse view indices in ViewOIdxList order,
+num_cp pairs, slice-header deferral and four signed coded parameter values per
+static pair: scale, offset, inverse-scale-plus-scale and inverse-offset-plus-offset.
+It validates precision 0..5, references 0..65535, uniqueness per view, Golomb
+bounds and every payload read against the RBSP stop boundary. A reference is not
+assumed to index a dense array or to exist in the current sparse view list: the
+syntax permits the full 16-bit reference range. Deferred pairs retain their
+reference identities with no invented static values. Both camera ownership and
+nested Vec capacities count toward VPS metadata budgets before allocation.
+
+`generate_hevc_camera_parameters.py` authors 24 outputs: raw VPSs, bounded raw
+payloads, six short movie variants and provenance metadata. Valid cases include
+empty, static, deferred and sparse camera data; deferred/sparse cases are parameter
+acceptance only. The sparse case retains reference 65535 and signed 32-bit limits
+while using less than 1 KiB of camera ownership. Malformed precision, duplicate
+pairs, out-of-range references and truncated values each have a specific raw VPS
+and MP4 refusal test, rather than an unrelated decoding failure. A static-camera
+movie with camera-dependent SPS tools disabled must preserve every layer's pixel
+planes, POC, PTS/duration and rewind relative to the empty-camera movie.
+
+Component regressions test every truncation of both an empty and a static payload,
+nonzero caller cursor rollback, exact retained-byte budget acceptance and one-byte
+under-budget rejection. The four camera integration tests pass; all 24 generator
+outputs reproduce their fixture bytes without FFmpeg or network. Ordinary tests
+read the committed-worktree bytes and never invoke generation.
+
+This closes the opaque VPS camera-syntax gap for the stated Annex I metadata
+route. Per-slice camera values and camera-dependent disparity/view-synthesis
+reconstruction remain separate unfinished work; reading their metadata is not
+playback acceptance. Complete codec/profile coverage is still not established.
+
+The parsed-camera gate passes 259 HEVC unit tests (one explicit regeneration
+helper ignored) and 63 integration tests across seventeen suites, offline with
+player and without default features or FFmpeg.
+
+
+### Annex I slice cameras, IC flag grammar and six texture merge candidates
+
+A standards audit of I.7.3.6.1 found three connected header issues. Camera values
+belong before entry points/header extensions, disabled illumination compensation
+still has a coded flag for inter texture slices with configured reference-list
+layers, and I-35/I-36 permits six candidates with TexMcEnabledFlag. The prior
+owned fixture writers mirrored the old five-candidate/omitted-IC assumptions, so
+passing those earlier comparisons did not establish normative header support.
+Both the parser and the owned authors are now corrected.
+
+`LayeredSliceSyntax::camera` retains precision, current view index and sparse
+reference-view/coded-value tuples. Static values are inferred from VPS without
+consuming bits; deferred values read four signed Golomb fields per VPS pair.
+Camera reads occur after the loop-filter flag and before entry-point/extension
+syntax, independent of whether a header extension is present. Reading uses a
+cloned cursor committed only on success, budget checks precede the bounded Vec
+allocation and nested camera capacity is included in SliceHeader::storage_bytes.
+Dependent headers inherit the camera snapshot through the existing header clone
+path; this stage does not add a coded dependent-camera acceptance witness.
+
+`generate_hevc_slice_camera.py` authors three short I-only movies (empty-camera
+control, deferred values and signed limits), two bounded raw CP payloads and a
+manifest. All pictures are PCM, isolating CP parsing from inter/merge grammar.
+The valid deferred movie reproduced `missing HEVC header alignment bit` before
+the fix (`/tmp/fvid-slice-camera-reproduction.log`). It now preserves exact bound
+values, every Y sample, PTS/duration, all six layer/POC outputs and rewind. Camera
+parameters are constant within these witnesses. Component checks cover nonzero
+cursor rollback, exact/under-budget limits, malformed input rollback and static
+inference without reading bits. General per-view camera consistency/state and
+camera-dependent prediction remain separate unfinished work.
+
+The IC flag is now read for Annex I texture inter slices with configured same-role
+reference layers when a weight table is absent. A disabled flag is retained;
+active illumination compensation is specifically refused until reconstruction is
+implemented. Ordinary Annex A/F contexts keep their existing grammar.
+
+The max-merge count now equals 5 + NumExtraMergeCand minus the coded value. The
+currently admitted extra tool is texture motion. Thus a one-candidate active-T
+slice codes five_minus_max_num_merge_cand=5, and a six-candidate slice codes zero.
+Header/native bounds and the extended texture merge ordering admit 1..6. Twelve
+owned movies check 32×32 and 128×128 direct/queued controls, selected indices 0/5,
+and both coded motion and intra-only/unavailable texture sources. Every pixel,
+all saved 8×8 motion entries, header counts, AU/POC sequence and rewind are checked.
+The sixth-candidate cases preserve ordinary zero prediction, distinct from T.
+
+A controlled legacy-grammar replay verified the IC-only omission produces
+`HEVC slice value exceeds range` and the old count reads five instead of six on
+the proper new movies (`/tmp/fvid-annex-i-legacy-grammar-reproduction.log`). The
+replay restored the current parser automatically before the passing gates. The
+single-view 3D Main VPS author now explicitly writes its aligned 3D extension,
+cp_precision=0 and extension3=0. CQT, texture-view and camera fixtures were
+regenerated for the corrected header grammar. Ordinary tests do not generate
+fixtures or require FFmpeg/network.
+
+All 790 CQT outputs, 33 texture-view outputs, 24 camera-VPS outputs and six
+slice-camera outputs match their owned offline generators. The final gate passes
+261 HEVC unit tests (one explicit regeneration helper ignored) and 65 integration
+tests across nineteen suites. Complete Annex I/profile/codec coverage is still
+not established; active IC and camera-dependent tools remain open.
+
+
+### Owned camera depth-to-disparity transform (component and header binding)
+
+The `hevc_motion::disparity` component now implements equations I-37..I-43.
+`CameraTransform::new` accepts the four coded signed parameters, precision 0..5
+and an arithmetic/API luma depth in 8..16. It widens before inverse-plus-forward
+subtraction, scales offsets and rounds by adding half the divisor before signed
+arithmetic shifting. Neither intermediate subtraction nor normative output is
+narrowed to i32. The admitted input ranges bound all intermediates below 2^50.
+Tests explicitly preserve backward -4294967294 and forward 8589934588 rather than
+wrapping/clipping them. Positive and negative ties have independent expected values.
+
+`sample` is allocation-free and rejects out-of-domain depth values. `table` is
+optional, preflights the full Vec-header/sample ownership, uses fallible exact
+reservation and rejects one-byte-under-budget allocations. The 16-bit arithmetic
+case builds 65536 entries under its exact explicit budget. These wider-depth tests
+are mathematical/API stress coverage; actual 3D Main coded witnesses remain
+8-bit and this does not admit additional profiles.
+
+`SliceCamera::disparity_transform` binds an explicit reference view to its parsed
+precision and coded values, refusing missing or duplicate selected references.
+The authored I-only camera movies verify this bridge with independent normal
+and signed-limit expectations, including precision 5 and inverse terms exceeding
+the i32 intermediate range. B and F are symbolic tables at the same numeric index:
+actual prediction must choose reference-view depth for B and current-view depth
+for F. Consumer-specific vector clipping is intentionally separate from this
+unclipped arithmetic result.
+
+`generate_hevc_disparity_oracles.py` uses Python arbitrary-precision Fraction,
+addition of 1/2 and floor, independently of the Rust shift implementation. It
+produces 30 full eight-bit two-direction tables plus a manifest containing 270
+cases (five parameter sets × nine arithmetic depths × six precisions). Tests
+compare every eight-bit table value and direct result, selected wider-depth points,
+and the allocated 16-bit table's boundary/interior oracle points. The 31 outputs
+reproduce their committed-worktree bytes offline; tests never generate them or
+invoke FFmpeg/network.
+
+The final gate passes 263 HEVC unit tests (one explicit regeneration helper
+ignored) and 66 integration tests across twenty suites. Camera-driven disparity/
+view-synthesis prediction, camera-state consistency and full codec/profile
+coverage remain unfinished. The arithmetic/header bridge alone does not prove
+camera-dependent playback acceptance or open those SPS refusals.
+
+
+### Native depth inter-view merge acceptance
+
+The owned native decoder now admits monochrome depth iv_di_mc and reconstructs
+its selected merge candidate through ordinary depth sample prediction. Source
+binding uses current-AU active references validated by the AU owner, static
+camera midpoint disparity, exact source motion and current-list POC remapping.
+Preparation is once per slice with fixed-size scratch. The existing T merge
+route remains enabled; a native-selector unit checks combined T/IV precedence.
+Texture IV/DI acceptance is described below; VSP remains unfinished.
+
+Twenty-six synthetic P-slice playback scenarios cover enabled/disabled IV,
+merge indices 0/1/2/4, unavailable intra source, 32/128 geometries, direct/queued
+reconstruction, packed normal-player output, rewind and native seek. An AMP
+source with opposite left/right motion makes changing the camera offset choose
+opposite target motion and pixels. A separate malformed movie refuses absent
+required camera parameters. Fixture generation is owned and offline, separate
+from tests, with no FFmpeg or private media. All 28 outputs are byte-reproducible.
+Final validation passes 283 HEVC unit tests (one regeneration helper ignored)
+and 46 integration tests in 12 suites. Full Annex I/profile conformance and
+arbitrary tool combinations are not established by this matrix.
+
+The additional `hevc_depth_iv_b` acceptance matrix covers 64 owned coded
+movies with B sources using both lists or L0/L1 alone, opposite-list POC
+remapping, enabled/disabled IV, merge indices 0/1/2, intra-source absence,
+weighted/unweighted target prediction, and queued/direct reconstruction at
+32/128 geometry. Independent scalar oracles check every source/target sample;
+the test checks every saved 8x8 motion entry and reference index. MP4 sample
+tables explicitly retain decode POC order 0/2/1 while layered and normal-player
+output is 0/1/2. Rewind and eight successive forward/backward/repeated seeks
+on one native reader verify pixels across state resets. All 66 artifacts
+regenerate byte-identically offline; ordinary tests use the saved artifacts.
+The focused gate passes 13 tests across `hevc_3d_sps`, `hevc_depth_iv`,
+`hevc_depth_iv_b`, and `hevc_inter_view_candidate` without FFmpeg or network.
+Temporal MVP and texture IV/DI/VSP dispatch are outside this B-slice matrix.
+
+### Alternative temporal merge target references
+
+The decoder now selects the first active reference of the opposite short/
+long-term class when required by Annex I temporal merge (I.8.3.4 and
+I.8.5.3.2.6). The alternative index is applied only when the temporal candidate
+itself wins, preserving the initial combination indices. Explicit AMVP never
+changes its coded reference. Twelve owned synthetic movies cover default and
+swapped mixed short-term/inter-view long-term lists, merge and explicit AMVP,
+32/128 geometry, queued/direct prediction and rewind, checking exact target
+pixels and saved motion/reference indices. The swapped merge control failed
+before the fix at pixel (0,0), 91 instead of 97; its default-list control passed.
+All thirteen artifacts regenerate byte-identically offline. These cases do not
+establish all alternate-list/combined-candidate arrangements or full Annex I
+coverage; the texture IV/DI matrix below has its own narrower scope, and VSP remains unfinished.
+
+Fifteen further `temporal-alt-combined-*` movies exercise a probe CU with A1,
+Col, both A1/Col combined orders, and Zero0. Selected Col publishes [1,1],
+whereas combined candidates retain [1,0]/[0,1]. Scalar sample oracles and saved
+motion checks cover both the spatial source CU and probe; explicit oracle
+witnesses distinguish premature publication from missing publication. The
+64/128 queued/direct matrix also checks presentation order, rewind and repeated
+native seeks. Sixteen saved artifacts regenerate byte-identically offline.
+Other initial-list/extended-tool combinations remain outside this matrix.
+
+
+### Native texture IV/DI playback acceptance
+
+The native decoder now admits 8-bit 4:2:0 texture iv_di_mc and reconstructs
+IV subblocks plus IVShift, DI and DIShift candidates through the shared merge
+selector. CU disparity uses prepared temporal references, native spatial
+availability and saved IV fallback state. The AU owner supplies canonical
+completed view components independently of active RPL membership. Selected IV
+state is retained in the budgeted immutable motion map.
+
+Thirty owned 32x32 movies cover IV on/off, inter/intra sources, five merge
+indices and 8/24 versus 24/8 AMP source rows. All enabled cases now check actual
+layered and common software playback, exact luma, saved motion/reference/state,
+neutral chroma, rewind and repeated seek. The previous SPS refusal test is
+replaced with parameter admission and enabled native acceptance. IVShift is
+selected in the second AMP layout; equal-but-available IVShift in the first
+layout still suppresses DIShift. All 32 artifacts regenerate byte-identically,
+offline and separately from ordinary tests.
+
+Raw base-layer IV flags with no reference layers remain inert, including
+8/10-bit mid-GOP SPS changes; no-update SEI restrictions remain strict. Final
+gates pass 287 HEVC unit tests (one regeneration helper ignored) and 44
+integration tests in ten suites without FFmpeg/network. This initial matrix
+qualifies single-CU P slices with neutral chroma. Texture B/multi-CU/nonconstant
+chroma combinations beyond the matrix below, depth-reference refinement and VSP still require further
+work and qualification; full codec coverage is not established.
+
+### Texture IV B lists, weights and six-candidate acceptance
+
+Eighty-eight additional owned 32x32 movies qualify texture-IV B sources using
+bi/L0-only/L1-only motion or intra, enabled/disabled IV, weighted/unweighted
+target prediction, and both same-list and opposite-list POC remapping. Scalar
+oracles check every source/target luma sample and saved target motion/reference/
+IV state. The test distinguishes encoded DTS/PTS order 0/2/1 from displayed
+0/1/2, checks standard software playback, rewind and repeated backward/forward
+native seeks. Eight cases explicitly parse max_merge_candidates=6 and select
+the sixth candidate. All 90 saved artifacts regenerate byte-identically offline.
+
+Native I-35/I-36 handling now includes IV/DI in NumExtraMergeCand, in addition
+to depth T. The pre-fix parameter witness reads four candidates instead of five.
+Fixture headers for texture/depth IV were corrected to use the normative
+5+NumExtra offset; image oracles remain unchanged. This B matrix has neutral
+chroma, a single CU and temporal MVP disabled. Queued/multi-CU texture IV,
+nonconstant chroma, refinement/VSP and full codec coverage remain open.
+
+### Colored texture IV B prediction
+
+The additional 132 colored B movies qualify exact Y/Cb/Cr reconstruction,
+full packed software-player output and repeated seek. Source/target views have
+different color patterns. Independent four-tap filter, rounding/clipping and
+weight equations cover active/default IV/DI, opposite-list remapping, phases
+0/4 along each chroma axis, picture boundaries and six-candidate cases.
+Forty-four cases also signal distinct signed Cb/Cr weights and offsets, checked
+in parsed headers and final pixels; 240 source positions distinguish premature
+per-predictor rounding/clipping from the required combined result. All 134
+artifacts regenerate offline without FFmpeg or test-time generation. This
+single-CU 8-bit 4:2:0 matrix does not establish arbitrary two-axis phase pairs,
+multi-CU/queued behavior, refinement/VSP or complete codec coverage.
+
+### Texture depth-refinement binding prerequisite
+
+`texture-depth-refinement-control.mp4` is an owned two-frame mixed-role control:
+layer 0 texture view 0, layer 3 depth view 0, layer 5 texture view 1. Its static
+camera and representation metadata, every reconstructed Y/Cb/Cr sample and PTS
+are checked without FFmpeg or test-time generation. The companion VPS and
+movie regenerate byte-identically with `generate_hevc_texture_depth_refinement.py`.
+`ViewComponentPool::refine_disparity` selects the depth by the base disparity's
+reference view and camera direction from the current slice, validates pool
+ownership and CU bounds, and preserves the base vector. Component tests check
+an independently computed corner maximum, stale AU, wrong role/view/camera,
+and memory refusal.
+
+Native 8-bit 4:2:0 texture reconstruction now receives a separately bound depth
+pool from the access-unit owner. With SPS depth reference, in-component
+prediction and camera availability enabled, each CU refines its selected base
+disparity using that reference view's depth, preserving the base vector.
+Pool metadata is deducted from the reconstruction budget; sample derivation
+uses the existing bounded scratch allowance. The paired `-on`/`-off` movies
+exercise a coded DI skip block, with exact luma/neutral-chroma acceptance on
+two rewind passes, plus common software output and repeated native seeks. Corner depths 37/254/122/83 and camera scale 4 derive
+8 quarter-pels, translating the predictors by two luma pixels with edge extension;
+the disabled control retains zero disparity. A separate camera-absent coded
+control verifies that SPS depth reference and in-component prediction alone
+do not enable refinement: I-24 requires camera parameters for every active
+reference view. These single-CU DI witnesses do
+not qualify general refined IV, colored fractional phases, wide motion,
+multi-CU/queued refinement or VSP. Full codec coverage remains open.
+
+### Signed camera and refined texture IV acceptance
+
+The refinement author additionally produces 33 DI movies spanning camera
+precision 0/2/5, signed scale/offset, zero and extreme edge extension. Exact
+luma is checked against an independent scalar eight-tap oracle, with coverage
+assertions for all four quarter-luma phases and negative/zero/positive disparity.
+Neutral chroma remains exact. Twenty further movies use vertical 8/24 or 24/8
+AMP in the reference-view texture, with opposing vertical vectors. Refinement
+moves the 8x8 source-motion lookup horizontally; exact target pixels and saved
+base/refined disparity prove that the changed source vector is actually used.
+The IV matrix includes refinement-disabled, zero, signed and edge-clamped
+controls, two layered/common-software rewind passes and repeated native seeks.
+The generalized AMP author preserves all twelve existing size/POC/cut outputs
+byte-identically. All 60 refinement artifacts regenerate offline byte-identically.
+This matrix remains 8-bit 4:2:0, single-CU P prediction with neutral chroma;
+refined B prediction, colored fractional chroma, multi-CU/queued refinement,
+wide native DI motion and VSP remain unqualified.
+
+### Colored depth-refinement acceptance
+
+Thirty-nine additional DI movies qualify exact Y/Cb/Cr against independent
+8-tap luma and 4-tap chroma scalar oracles. All eight eighth-chroma phases are
+asserted, including negative floor division, rounding/clipping and both picture
+edges. Source-view and current-view PCM chroma differ, so reading the wrong
+reference picture cannot pass by copying the target's original color.
+Twenty colored IV movies add vertical 8/24 and 24/8 AMP source motion, signed
+refinement and disabled controls. The independent source-grid oracle chooses
+the vertical vector, then filters the current view's own reference chroma at
+positive/negative half-sample positions; the reference-view color differs.
+Both colored matrices check every output plane, full common-software packed
+output, two rewind passes and repeated native seeks. All 121 refinement
+artifacts regenerate byte-identically, offline and without FFmpeg. These are
+single-CU P witnesses; refined B, multiblock/queued execution, arbitrary joint
+horizontal/vertical chroma phases, wide native motion and VSP remain open.
+
+### B-picture texture depth-refinement acceptance
+
+`generate_hevc_refinement_b.py` authors 120 mixed-role B movies with texture
+view 0 / depth view 0 / texture view 1. Eighty exercise DI with intra, L0, L1
+or bidirectional source texture; forty use vertical 8/24 or 24/8 B-AMP source
+motion and select IV. Signed camera scale, enabled/disabled refinement and
+explicit luma bi-weights are crossed. DTS/PTS are exactly (0,0)/(1,2)/(2,1),
+and all layers display in POC order 0/1/2. Independent scalar pixels check
+source reconstruction, depth-shifted 8x8 motion lookup, reference mapping,
+DI interpolation and weighted prediction without premature rounding.
+Coverage witnesses prove that refinement changes source-vector selection and
+that rounding each predictor early changes weighted output. Native saved
+motion checks both L0/L1 references/vectors and separate base/refined disparity.
+Every case passes two layered/common-software rewind runs and repeated native
+seeks to 40/80/0/40/40 ms. All 121 B artifacts regenerate byte-identically
+without FFmpeg, network or test-time generation. Existing B-AMP author output
+at 32/64/128 pixels is unchanged. This matrix has neutral chroma, one CU and
+8-bit 4:2:0 pictures; colored refined B, multislice/multi-CU/queued refinement,
+wide native DI motion and VSP remain open.
+
+### Colored B-picture refinement acceptance
+
+`generate_hevc_refinement_b_colored.py` adds 396 mixed-role B movies crossing
+intra/L0/L1/bi and two vertical AMP source layouts, refinement on/off, signed
+camera scale and three weight modes (none, luma, explicit luma/Cb/Cr). Camera
+precision 2 covers every eighth-chroma phase. Source and current texture views
+have distinct chroma; past/future pictures also differ. An independent scalar
+oracle reconstructs the source B picture first, then derives source-motion
+lookup, DI/IV reference prediction and final weighted output at filter precision.
+Premature per-predictor rounding is distinguished by recorded witnesses.
+Tests compare every Y/Cb/Cr sample of both texture views, full common-software
+output, POC order 0/1/2, two rewind passes and repeated 40/80/0/40/40 ms native
+seeks. The 398 artifacts (396 movies, packed u16 oracle and manifest) regenerate
+offline without FFmpeg; the 121 preceding neutral-B artifacts remain unchanged.
+This qualifies colored single-CU B refinement for these prediction/weight
+cases, not arbitrary profile/bit-depth, multi-CU/multislice/queued reconstruction,
+wide native DI motion, VSP or full codec coverage.
+
+### Wide-vector pixel prediction and native DI
+
+The shared HEVC interpolator now retains signed 64-bit vector coordinates in
+uni/bi pixel prediction; ordinary coded motion widens into the same core.
+Fractional phases are retained and edge extension happens after coordinate
+addition, without a narrowing cast. Bounds checks precede conversion to an
+index, including on 32-bit hosts. The public component entry
+`predict_wide_with_chroma_format` accepts unclipped camera vectors. Tests use
+owned reconstructed color planes and check both signs beyond i32, all chroma
+phases at the edges, i64 extrema on both axes, and two-reference averaging.
+
+Native CU/PB, exact 8x8 and temporal 16x16 motion maps now retain i64, as do
+spatial candidates and selected DI/DIShift. The two valid coded wide-camera
+movies now have enabled native pixel and saved-vector acceptance, replacing
+the conversion-refusal expectation. Both signs exceed i32; two layered/common
+software rewind passes and repeated native seeks preserve exact source-edge
+pixels and full camera vectors. The negative camera is -2147483647, within
+the signed Golomb parameter domain.
+
+Ordinary explicit MVD retains signed-16-bit wrapping, and integer depth motion
+retains its separate sampling domain. Unscaled temporal motion transfers wide
+values unchanged; actual temporal/resampling products use i128 before normative
+clipping. Deblocking compares motion differences in i128. Reconstruction bounds
+include larger CU cells and queued Inter ownership; retained motion/Arc storage
+uses actual type sizes, and tile metadata receives the remaining bound.
+Wide multiblock/queued acceptance and interactions with texture-to-depth tools
+still need dedicated coded qualification; this is not complete Annex I coverage.
+
+### Native wide DI and refined-IV B acceptance
+
+Thirty-six additional colored B movies use valid positive/negative camera scale
+extremes, deriving DI/refined disparity outside i32. Intra/L0/L1/bi and vertical
+8/24 or 24/8 AMP sources cross default, luma and explicit chroma bi-weights.
+Exact source/target Y/Cb/Cr, both saved DI reference indices and full i64 vectors,
+separate base/refined IV state, POC display order, common software output,
+two rewind runs and repeated 40/80/0/40/40 ms native seeks are accepted.
+`generate_hevc_native_wide_b.py` regenerates all 38 artifacts byte-identically
+without FFmpeg/network; ordinary tests only consume the saved files. This is
+single-CU native P/B wide-vector qualification; multi-CU/multislice/queued wide
+motion and texture-to-depth interactions still require dedicated coverage.
+
+### Multi-CTU wide P DI and worker reconstruction
+
+`generate_hevc_multicu_wide.py` adds twenty 64x64/128x128 mixed-role movies.
+Zero camera scale isolates constant signed disparity from valid camera offsets:
+zero, +/-one luma pixel and both signs beyond i32. Targets contain four or
+sixteen skipped CUs. Every output luma sample, neutral chroma, exact 8x8 saved
+motion and inter-layer reference index are checked across CU/CTU boundaries.
+Two layered/common-software rewind runs and repeated native seek are exact.
+
+A test-only Inter-job counter verifies the actual reconstruction path: each
+128x128 predicted target submits sixteen Inter jobs and returns complete exact
+pixels after worker join; constrained-intra direct controls and smaller pictures
+submit none. The counter is absent from production builds. The 21 artifacts
+regenerate offline byte-identically; 123 preceding refinement and 121 neutral-B
+artifacts remain unchanged after generalizing the author size/constraint inputs.
+This qualifies constant-disparity multi-CTU P DI/worker ownership. Spatially
+varying depth, multi-CU refined IV/B prediction, multislice/WPP combinations,
+texture-to-depth interactions and VSP remain open.
+
+### Variable-depth multi-CU refinement and neighbour propagation
+
+Thirty-two additional 64x64/128x128 P movies use spatially varying depth and
+signed camera scale/offset. An independent scalar oracle derives the base DV
+from the prior left/top CU, samples the shifted four depth corners, derives
+refined disparity and applies eight-tap luma interpolation. All four quarter-luma
+phases are exercised. In 146 CUs, using a zero base DV would derive a different
+result; the test independently recomputes those witnesses and checks actual
+saved reference indices/vectors and pixels at every 8x8 map position.
+
+The author signals per-CU merge indices after accounting for A1/B1/B0 ordering
+and DI pruning; blindly coding index zero would select a neighbour instead of
+new DI. Both direct and queued reconstruction are checked, including explicit
+Inter-job counts, worker completion, two layered/common-software rewind passes
+and repeated native seeks. Source depth samples themselves are checked against
+the authored formula. All 34 artifacts regenerate byte-identically offline;
+the preceding 21 constant-disparity artifacts remain unchanged. These are
+single-slice P DI cases with intra source texture; temporal-source competition,
+multi-CU refined IV/B, colored variable-depth prediction, multislice/WPP and
+VSP still require qualification.
+
+### Colored variable-depth multi-CU refinement
+
+Thirty-two 64x64/128x128 P movies extend the variable-depth matrix with distinct
+source/current-view Cb/Cr PCM. Each CU retains its independently derived
+left/top base disparity, shifted corner-depth maximum and selected DI merge
+index. Independent four-tap chroma oracles cover every eighth-chroma phase,
+negative floor division, edge extension and rounding/clipping; luma retains the
+separate eight-tap oracle. Tests check every sample of both texture views,
+actual 8x8 reference/vector maps, timing, full common-software output, two
+rewind runs and repeated native seek. Plane dimensions/lengths are explicit.
+
+The owner test covers both neutral and colored matrices: 128x128 queued targets
+submit sixteen Inter jobs and return exact Y/Cb/Cr after worker join; direct
+controls and smaller pictures submit none. The generalized PCM author retains
+all 123 earlier refinement artifacts byte-identically. All 34 new artifacts
+regenerate offline without FFmpeg or test-time generation. This qualifies
+colored single-slice multi-CU P DI with intra source texture. Multi-CU IV/B,
+temporal-source competition, multislice/WPP combinations and VSP remain open.
+
+### Multi-CU refined IV and saved skip disparity
+
+Forty-eight colored 64x64/128x128 P movies use repeated vertical 8/24 or 24/8
+AMP in the reference-view texture and independently derived depth refinement.
+The current view uses its own past texture pixels. The scalar oracle carries
+A1's saved refined disparity across CUs, resets the base at CTU-row starts
+where B1's saved skip fallback is unavailable, samples shifted depth corners,
+then selects source motion on the aligned 8x8 grid. Tests require witnesses
+where refinement changes actual source-vector selection and where a nonzero
+B1 state must not carry to the next row. Every saved base/refined vector,
+skip flag, reference index and exact source/target Y/Cb/Cr sample is checked.
+
+Owner tests prove actual worker execution through Inter-job counts and complete
+pixels: 128x128 source/target predicted pictures enqueue 32/256 blocks, while
+direct controls and smaller pictures enqueue none. Both reconstruction modes,
+two layered/common-software rewind runs and repeated native seeks are exact.
+All 50 artifacts regenerate offline byte-identically; the preceding 34 colored
+DI artifacts remain unchanged. This qualifies colored single-slice multi-CU P IV
+with saved skip fallback and no available temporal disparity. Multi-CU B,
+temporal/direct disparity competition, multislice/WPP combinations and VSP
+remain open.
+
+### Native HEVC VSP: coded P-picture acceptance matrix
+
+`tests/hevc_native_vsp.rs` checks 144 owned synthetic mixed texture/depth
+movies against independent saved pixel and motion oracles. The matrix covers
+32/64/128-pixel pictures, both 8x4 and 4x8 VSP subblocks, signed camera scales,
+zero/integer displacement, raw IV enabled/disabled, depth refinement
+enabled/disabled, and direct/queued reconstruction controls. Selected A1 VSP
+neighbours rederive the current prediction block; VSP depth lookup uses the
+base disparity rather than the refined disparity. These are actual decoding
+acceptance tests, not unsupported-tool refusal tests.
+
+The same cases run through software player layer selection, repeated reading,
+rewind and repeated forward/backward seek with exact packed output checks.
+A separate no-camera control verifies temporal prediction when VSP is disabled.
+Fixture generation is offline in `scripts/generate_hevc_native_vsp.py`; normal
+tests read checked-in synthetic files without FFmpeg or network access.
+
+This matrix does not establish complete VSP support: B-list competition,
+non-skip residual combinations, in-loop filtering at VSP subblock boundaries,
+multislice/WPP interactions and additional chroma/bit-depth profiles remain
+unqualified. The older VSP limitations above describe the preceding matrices;
+this section records the narrower new coded P-picture evidence.
+
+The first coded B-slice VSP matrix adds ten 32x32 synthetic movies
+(`native-vsp-b.json`, `generate_hevc_native_vsp_b.py`): five signed/zero camera
+scales, each with weighted prediction enabled and disabled. Both lists contain
+the source view; acceptance checks that VSP chooses L0[1] alone, derives exact
+subblock motion, reconstructs all three planes and returns presentation POCs
+0,1,2 from decode order 0,2,1. The scalar weighted oracle clips after applying
+the uni offset, preserving interpolation overshoot until that step.
+This qualifies L0 preference with L1 competition; L1-only VSP, non-neutral
+weighted chroma, multiple CUs and non-skip residual B combinations remain open.
+
+The L1-only extension (`native-vsp-b-l1.json`) adds ten coded B movies with
+explicit L0 list modification `[0,2,0]`: the reference view is absent in L0 and
+VSP must choose L1[2]. Tests check the inactive L0 vector, exact L1 motion and
+all plane samples. The weighted control uses L1[2]'s zero luma weight and offset
+9; unweighted cases retain spatially varying pixels. Both the L0-preference
+and L1-only matrices also compare exact software-player output after repeated
+40ms/0ms/40ms seeks. The prior 121 refinement-B and 12 VSP-L0 artifacts remain
+byte-reproducible after extending the owned slice-header author.
+
+`native-vsp-residual.json` adds twenty non-skip full-merge B movies with ordinary
+32x32 luma DC coefficients +64/-64 at QP26. Each signed/zero camera scale is
+covered with L0 preference and L1-only references. The independent oracle adds
+the inverse-transform residual (+26/-25 after signed rounding) to the clipped
+VSP prediction, then clips the reconstructed sample. Cb/Cr remain uncoded and
+neutral. Tests verify all pixels, non-skip metadata, exact motion, presentation
+order and repeated software-player seeks. This qualifies ordinary luma DC
+residual following VSP, not AC/chroma residuals, queued residual combinations
+or complete VSP support.
+
+`native-vsp-residual-chroma.json` adds forty colored non-skip B movies with
+joint signed Y/Cb/Cr DC residuals and chroma-only residuals, for both L0 and
+L1-only VSP and five camera scales. Source and target chroma patterns differ;
+the oracle interpolates the source view's varying Cb/Cr before adding signed
+16x16 chroma DC residuals (+51/-51 at QP26). Tests compare every reconstructed
+sample including saturation, motion and non-skip metadata, presentation order,
+and repeated forward/backward software seeks. Chroma-only cases leave luma
+CBF zero. This closes the neutral-chroma limitation for this DC matrix; AC,
+queued residuals and in-loop-filter combinations remain unqualified.
+
+`native-vsp-ac.json` adds forty colored non-skip VSP B movies with a single
+vertical AC coefficient at (0,1), signed magnitude 64, in 32x32 Y and 16x16
+Cb/Cr transforms. Both active-list routes and chroma-only CBF combinations
+are exercised. The saved oracle uses independent normative first-frequency
+DCT basis constants, QP26 dequantization, signed rounding at both inverse
+passes, and clipping after addition to the VSP prediction. Acceptance compares
+every sample, motion, non-skip metadata, presentation order and repeated
+software seeks. `generate_hevc_native_vsp_ac.py` is separate from ordinary tests.
+This is single-frequency AC evidence; arbitrary coefficient sets, horizontal
+frequencies, transform splits and queued residual/filter combinations remain
+unqualified. Prior 88 B/DC artifacts reproduce byte-for-byte with the extended
+author.
+
+### Illumination compensation implementation in progress
+
+`hevc_motion::illumination` now owns allocation-free boundary regression for
+Annex I equations I-216..I-231 and the gain-before-offset operation I-201.
+It subsamples complete boundary arrays at even indices, uses wide signed
+accumulators, validates geometry/sample depth, derives luma gain through the
+Table I.3 reciprocal values, and fixes chroma gain at Q5 unity. Unit tests cover
+signed chroma offsets, zero-reference regression, gain clipping before offset,
+and high-depth boundary accumulation. A negative regression denominator is
+currently a checked error and needs further high-depth conformance review.
+
+This is arithmetic infrastructure only. The slice-level illumination-enabled
+refusal remains until pre-deblocking neighbour collection, reconstruction-worker
+dependencies, list-specific compensation and full synthetic movie acceptance
+are connected. Passing these units does not establish illumination playback.
+
+Illumination boundary collection is now implemented in `derive_boundary`
+(I-204..I-215). It consumes current-CU geometry and caller-resolved above/left
+availability, reads only reconstructed pre-deblocking current samples, rounds
+signed quarter/eighth motion using wide arithmetic, extends reference samples
+at image edges, and derives parameters on stack-backed boundary arrays. Tests
+cover individual/both boundary sides, same-view disable, absent neighbours,
+unreconstructed current boundaries, extreme i64 motion and 4:2:0 component
+coordinates. This helper is not yet dispatched by the picture reconstructor;
+illumination-enabled slice playback remains refused.
+
+The CU illumination syntax reader now implements I.7.3.8.5.2 and I-48/I-49:
+full inter partition, slice enable, merge-zero disable, active cross-view
+references for explicit motion, and suppression by inter-view residual
+prediction. `illu_comp_flag` has its own CABAC context (Table I.12, init 154),
+including probability snapshots used by WPP. Presence tests check both flag
+values and that inferred-zero cases consume no entropy. This is not yet called
+from CU reconstruction; slice-level refusal is still retained until the pixel
+prediction dispatch and synthetic acceptance movie are connected.
+
+### First native illumination playback acceptance
+
+Illumination is now dispatched from full inter-CU syntax into both direct and
+queued reconstruction. CU commands carry geometry, already resolved neighbour
+availability and reference-view identities; boundary pixels and parameters are
+resolved at command execution, after preceding PCM/intra/residual commands.
+Compensation follows per-list interpolation. The VSP candidate is suppressed by
+the actual CU illumination flag rather than by the slice enable alone. The
+former unconditional illumination-enabled slice refusal has been removed.
+
+`generate_hevc_illumination.py` authors six colored P-picture movies at
+32/64/128, with IC CU flags off/on, and saved independent CU boundary/pixel
+oracles. The first 32x32 CU in larger targets uses own temporal texture; later
+CUs select source-view texture and inherit the preceding reconstructed chroma
+boundary. Acceptance checks every plane sample, actual motion/reference
+selection, a nonzero count of IC-changed samples, repeated reading and repeated
+forward/backward software-player seek. The original refusal was reproduced on
+these fixtures before dispatch was enabled. Prior 148 VSP P artifacts remain
+byte-reproducible after extending the author.
+
+This first matrix qualifies colored P-CU IC with zero motion and does not prove
+complete illumination support. Non-unity luma gains, fractional motion, B-list
+combinations, merge-zero-disable, IC/VSP coexistence, residual/filter and
+multislice/WPP interactions still require coded acceptance. Earlier in-progress
+notes above describe intermediate implementation states superseded by this
+section; their high-depth denominator caveat remains unresolved.
+
+`illumination-gain.json` adds twenty-four colored P movies at 64/128 with
+three initial target-luma mappings: brighter/clipped (2x-40), darker (x/2+30),
+and constant 200. IC flags off/on and direct/queued controls are paired. The
+independent CU boundary regression records non-unity gain witnesses and compares
+every reconstructed sample, reference motion, repeated reading and software
+seek. `generate_hevc_illumination_gain.py` remains separate from ordinary tests.
+This qualifies non-unity luma gain and clipping for these zero-motion P cases;
+fractional motion, B combinations and the other first-matrix limitations remain
+open. The original six IC and 144 VSP P movies retain their default authoring
+semantics.
+
+`illumination-fractional.json` adds 88 colored P movies at 64/128 with explicit
+signed horizontal inter-view motion in the second CU, followed by spatial merge
+inheritance (B0 at the next row's first CU, then A1). IC off/on and direct/queued
+controls are paired. The selected MVs cover every nonzero eighth-sample chroma
+phase and every quarter-sample luma phase; the zero-motion matrices supply phase
+zero. The independent oracle filters source-view pixels, rounds the reference
+boundary location separately, derives IC parameters from already reconstructed
+current boundaries, and applies gain/offset/clipping. Tests compare every
+sample, exact retained motion, explicit-vs-skip metadata, repeated reading and
+forward/backward software seek. The initial oracle incorrectly assumed zero
+motion after the first row; selection of the available B0 merge candidate
+corrected that assumption. No decoder change was needed for this extension.
+
+This qualifies horizontal fractional IC in these P-CU matrices. Vertical and
+two-dimensional fractional filtering, B-list IC, merge-zero-disable and the
+remaining residual/filter/slice interactions still need coded acceptance.
+
+`illumination-2d.json` extends coded IC acceptance with 160 vertical/two-axis
+fractional P movies (64/128, direct/queued, IC off/on). Twenty signed vector
+pairs cover every nonzero vertical eighth-sample phase and all horizontal
+phases, including pure vertical motion and opposing signs. The independent
+oracle uses separable luma/chroma FIR passes without clipping or reducing to
+8-bit samples between passes, then performs boundary regression and IC.
+Acceptance verifies all samples, retained two-axis motion, explicit/skip
+metadata and repeated software-player seeks. The prior 124 baseline/gain/
+horizontal IC artifacts remain byte-identical after factoring the scalar
+interpolator. This qualifies these vertical/two-axis P cases; B-list IC,
+merge-zero-disable, IC/VSP coexistence and residual/filter/slice interactions
+remain open.
+
+`illumination-b.json` adds 96 colored zero-motion B movies at 64/128, with
+IC off/on, direct/queued controls and two target-luma gain mappings. Six list
+modes cover both source-view references, past+source, source+future, L0-only,
+L1-only and temporal-only prediction. The first CU seeds reconstructed target
+boundaries by averaging distinct target past/future pictures. Subsequent CUs
+compensate only cross-view inputs and combine the active lists. The independent
+oracle checks per-list compensation before averaging, all samples, reference
+indices, presentation order 0/1/2, repeated reading and seeks between I0/B1/I2.
+Temporal-only explicit CUs infer IC off without an entropy bin; merged temporal
+controls may carry an IC flag but derive no cross-view compensation.
+
+The initial temporal-control author used a merge index whose duplicate-pruned
+list selected DI at the next CTU row; selecting the surviving temporal candidate
+corrected that fixture. Prior 121 refinement-B artifacts remain byte-identical
+after extending the slice-header author. This qualifies these zero-motion B
+combinations, not fractional B IC or full Annex I support.
+
+`illumination-b-fractional.json` adds 144 mixed-list B movies at 64/128 with
+three distinct two-axis vector pairs, including opposing list directions.
+Direct/queued and IC off/on controls cover all six B-list modes. The scalar
+oracle retains Q6 interpolated reference samples for ordinary bipred and rounds
+only after combining them; IC-on paths first produce per-list sample-domain
+predictions, derive separate boundary parameters for each source-view vector,
+compensate and combine. Saved precision witnesses establish that premature
+per-list rounding changes actual pixels in this matrix. Acceptance checks all
+samples, both retained vectors/reference indices, presentation order and
+repeated I0/B1/I2 seeks. The prior 98 zero-motion B and 162 P-2D artifacts remain
+byte-identical after factoring the internal-precision oracle.
+
+This qualifies these fractional B combinations; merge-zero-disable, IC/VSP
+coexistence, residual/filter interactions and multislice/WPP combinations still
+require coded acceptance. It is not proof of complete codec/profile coverage.
+
+`illumination-merge-zero-p.json` and `illumination-merge-zero-b.json` add
+32 P and 192 B movies pairing `slice_ic_disabled_merge_zero_idx_flag` off/on,
+IC CU flags off/on, direct/queued controls and zero/fractional motion. The
+owned author omits `illu_comp_flag` entirely for merge index zero when the
+slice disable flag is set; explicit cross-view motion and nonzero merge
+indices retain their bins. Independent gated oracles include nonzero sample
+suppression witnesses and compare every pixel, both vectors/reference indices,
+repeated reading and software seeks. Previous 8 P baseline, 98 B baseline and
+146 fractional-B artifacts reproduce byte-for-byte after the syntax extension.
+This qualifies merge-zero-disable in these P/B cases; IC/VSP coexistence,
+residual/filter and multislice/WPP combinations remain open.
+
+`illumination-vsp.json` adds 32 within-picture VSP/IC/VSP transition movies at
+64/128, signed camera scales and depth refinement off/on, each with direct and
+queued controls. The second CU uses explicit source-view MV (3,-3) and IC with
+MVP index 1; other CUs use VSP, including A1 VSP inheritance and rederivation.
+The independent oracle reconstructs VSP subblock vectors, both coordinates of
+base disparity after the IC neighbour, source interpolation and IC parameters
+from the preceding VSP boundary. Acceptance checks every plane sample, retained
+motion at 8-aligned points, CU skip metadata, absence of saved IV disparity,
+repeated reading and software seek. Raw VSP is not disabled slice-wide by IC;
+only the CU illumination flag suppresses its merge candidate. Prior 148 VSP and
+90 horizontal IC artifacts remain byte-identical after the author extension.
+This qualifies these P transitions; B IC/VSP interactions, residual/filter and
+multislice/WPP combinations remain open.
+
+### IC chroma correction for eight-sample prediction blocks
+
+Annex I I.8.5.3.3.1 step 4 selects ordinary chroma prediction when the luma PB
+width is at most eight, even with `IlluCompFlag=1`. The native IC predictor now
+routes those Cb/Cr blocks through the ordinary predictor, preserving its
+combined-list internal precision instead of compensating chroma or rounding
+lists independently.
+
+`generate_hevc_illumination_small.py` authors a 32x32 layered movie whose target
+P picture contains sixteen 8x8 CUs in Z order. A temporal first CU seeds distinct
+chroma boundaries; following explicit source-view CUs use IC. The independent
+saved oracle applies luma IC and ordinary chroma. Before the fix, the exact
+reproducer decoded Cb sample 4 as 152 instead of 81; after the fix,
+`hevc_illumination_small` checks all plane samples, retained references/motion,
+rewind and repeated software seek. Ordinary tests read the saved synthetic
+movie without FFmpeg or network access. The new coded reproducer is P-only;
+small-B fractional precision still needs dedicated movie acceptance.
+
+### Inter-view residual prediction implementation in progress
+
+`hevc_motion::inter_view_residual` now owns the arithmetic for Annex I
+I-234..I-259. `bilinear` applies two-tap quarter/eighth interpolation with
+independent reference edge extension, signed wide-coordinate handling and
+HEVC internal precision for 8..16-bit planes. It preserves the horizontal
+intermediate before the vertical pass, checks decoded reference availability
+and the caller's output budget. `add_residual` adds full/half reference-view
+differences without sample-domain clipping, uses arithmetic signed shifts,
+retains the small-chroma width gate, and validates overflow before modifying
+any destination sample.
+
+Units cover all quarter/eighth phases, mixed-axis fractional precision,
+10/12/16-bit rounding, extreme signed motion, unavailable references, budget
+refusal, unclipped signed residuals and failure atomicity. This is arithmetic
+infrastructure, not coded playback admission: the active SPS tool refusal
+remains until reference-picture binding, CU syntax/weight contexts and native
+reconstruction dispatch have synthetic movie acceptance.
+
+Inter-view residual weight syntax now has its own three-context CABAC bank
+(Table I.11: 162/153/162) and WPP snapshot preservation. `read_weight` implements
+full inter-CU/tool/reference-availability presence, inferred zero without
+entropy consumption, left-neighbour context selection for the first bin and
+context 2 for the second truncated-unary bin. Units cover all values 0/1/2,
+available/unavailable left weights, presence gates and probability adaptation /
+restore. The IC syntax binding now rejects residual weight index 3 (the maximum
+is 2). These helpers are not yet dispatched by picture reconstruction; active
+inter-view residual prediction still remains an SPS refusal pending reference
+binding and coded acceptance.
+
+Residual reference metadata selection now implements I.8.3.5 (I-58..I-61):
+first nearest non-current POC under the strict 32767 distance bound, independent
+L0/L1 targets, disparity-dependent syntax availability and per-view matching
+against a caller-supplied current-RPS lookup. Fixed-capacity metadata supports
+sparse view identities without treating them as bit positions. Syntax
+availability intentionally does not require a matching source RPS; that flag
+separately gates actual residual prediction. The callback contract requires the
+named current-AU source picture's current short/long-term RPS, not any matching
+picture in the DPB or only its active reference-list entries.
+
+`scale_motion` adds I-260..I-264 with wide POC subtraction, signed scaling and
+mandatory signed-16 clipping even at equal distances (the generic MVP identity
+shortcut is inappropriate here). Units cover nearest/tied/bounded POCs,
+disparity absence, per-view/list lookups, malformed metadata, wide vectors and
+signed half-scale rounding. This is metadata/scaling infrastructure: the actual
+retained-RPS/picture adapter, reference-block motion derivation and coded native
+dispatch remain unconnected, and active-tool SPS refusal is retained.
+
+`CurrentRps::bind` now adapts a parsed native layered source slice and its bound
+DPB to a frozen snapshot of current short/long-term RPS identities and kinds.
+It reuses `temporal_reference_groups`, validates identity/decoded-source
+consistency, checks metadata/scratch budget and pins the source activation and
+AU status. It stores no decoded-picture owners, avoiding recursive frame
+history retention. `resolve` accepts only snapshot members, preserves temporal
+classification and resolves exact identities to existing DPB picture owners;
+a matching POC in another layer or mere DPB presence is insufficient.
+
+`hevc_residual_current_rps` exercises this against an existing owned coded
+B-movie. The source I1 has empty active lists but used temporal RPS entries I0
+and I2; both are captured and resolve to the original picture Arcs. Tests check
+unchanged decoded-picture owner counts after snapshot creation, pinned
+activation, absent/malformed/duplicate source identities, missing-member errors
+and rejection of the newly decoded current picture even while it is present in
+the DPB. The selected L0/L1 residual targets use this actual RPS adapter rather
+than a synthetic availability callback. This validates the adapter, not native
+residual playback: the picture-pool/reconstruction dispatch remains unconnected
+and active-tool SPS refusal remains in force.
+
+Reference-block residual motion derivation now implements I-265..I-268 and
+I.8.5.3.3.3.5. It rounds the wide disparity, aligns the displaced PB centre to
+8x8 before clipping to reference edges, reads exact retained prediction motion
+and resolves its canonical saved layer/POC identity. Current-POC inter-view
+references are ineligible; the first list with an eligible temporal vector and
+residual target wins, with residual-specific scaling. Missing/corrupt saved
+identity maps are errors rather than guessed motion. No reference-block motion
+returns `None`; the outer process still owns its specified zero-vector fallback
+and final reference-view gate.
+
+`hevc_residual_reference_motion` exercises actual decoded AMP and B pictures:
+a one-quarter change crosses the aligned AMP selection boundary, extreme signed
+disparity extends to edges, exact POCs determine scaling, and L0/L1 temporal
+eligibility selects the saved source reference. Intra sources yield no motion.
+This qualifies motion derivation against native decoded metadata, not coded
+inter-view residual playback; reference-picture pool and reconstruction dispatch
+remain unconnected and active-tool SPS refusal remains retained.
+
+`prepare_prediction` now joins residual target selection with native decoded
+picture owners for temporal and inter-view branches of I.8.5.3.3.3.1. It handles
+base-reference replacement/scaling, mixed opposite temporal lists, reference-
+block motion, the specified zero-vector fallback, both-inter-view L0 lookup,
+and per-view RPS availability. `PreparedPrediction::predict` produces internal
+bilinear samples plus full/half residual; small chroma omits the residual,
+buffer budget is checked before allocation, and a prepared block cannot be
+retargeted to a different rectangle. Providers must enforce current-AU/view
+ownership and exact current-RPS membership; arbitrary DPB lookup is invalid.
+
+`hevc_residual_prepared_prediction` uses actual I/B source pictures and real
+`CurrentRps` resolution from owned coded movies. Independent integer-position
+sample expressions check temporal base/MV replacement, signed residual weights,
+inter-view zero fallback versus decoded-block temporal motion, mixed-list and
+L1-only selection, both-IV equivalence, small chroma, unavailable-view gates,
+budget/rectangle refusal and invalid current-POC temporal targets. This is
+composed predictor acceptance against decoded owners, not bitstream admission
+for the residual tool. Source-pool validation/collection and CU reconstruction
+wiring remain unconnected; the active SPS-tool refusal remains retained until
+coded residual movies exercise that complete route.
+
+`inter_view_residual::predict_prepared` now finishes prepared L0/L1 residual
+predictions at output precision, including default uni/bi prediction and explicit
+slice weights. Weight indices remain those of the original prediction lists,
+even when the residual process replaces a temporal base reference. Signed
+intermediates use i64 for weighted products/sums and are clipped only after list
+combination; retained list buffers, subsequent prediction scratch and final
+output share one allocation budget. Representation disagreement, missing weights
+and invalid denominators fail before sample prediction. The decoded-owner
+acceptance test checks uni-L0, uni-L1 and biprediction for full/half residual,
+negative weights, nonzero offsets and insufficient budgets. This is an output
+stage for prepared predictors; normal CU syntax/source-pool wiring and coded
+residual-tool admission remain incomplete.
+
+`BoundSources` now pairs a validated current-AU texture component pool with one
+first-slice `CurrentRps` per source. Binding checks current reconstruction
+identity, source role/activation, source AU/POC, unique picture-level snapshots
+and availability/classification of their used DPB entries. Lookups borrow the
+AU/DPB and return shared picture owners; a current-POC DPB entry absent from the
+source's used RPS remains unavailable. No recursive picture ownership or new
+sample allocations are introduced. The prepared-prediction acceptance route now
+uses this adapter for temporal lookup and target availability; it also checks
+missing/duplicate snapshots, stale AU identity, absent views and missing DPB
+members. Native CU invocation and automatic AU snapshot collection still need
+wiring before the active residual SPS tool can be admitted.
+
+Verification: `hevc_residual_bound_sources`, `hevc_residual_current_rps`,
+`hevc_residual_prepared_prediction`, and `hevc_residual_reference_motion` pass
+(seven tests total, offline owned fixtures). The two-source test also accepts
+reordered snapshot storage and rejects duplicate identities with unchanged
+snapshot count, plus source snapshots from the wrong AU.
+
+The native layered AU path now collects first-slice used-RPS snapshots before
+reconstructing canonical texture components and publishes each snapshot to later
+layers only after successful picture reconstruction. Snapshots remain local to
+one transactional AU; their vector storage and retained identity entries are
+charged alongside reconstruction allocations. Auxiliary/dependency variants
+are excluded using the VPS component graph. Existing texture-IV/VSP AU paths
+exercise this collection/binding route before residual SPS admission is enabled.
+A new layered reconstruction entry carries `BoundSources` through single-slice
+and multi-slice Decoder construction, validates its POC/current binding, and
+requires it at the residual-enabled inter-CU entry. Residual weight entropy and
+actual CU predictor selection are still pending; the active-tool SPS refusal
+continues to protect unsupported coded residual playback.
+
+AU wiring verification: `hevc_illumination`, `hevc_illumination_b`,
+`hevc_illumination_small`, `hevc_illumination_vsp`, `hevc_native_vsp`,
+`hevc_residual_bound_sources`, `hevc_residual_prepared_prediction`, and
+`hevc_view_component` pass (28 tests total). These exercise normal layered AU
+collection plus exact existing IV/VSP/IC pixels/motion. They do not yet prove
+coded residual-weight playback acceptance.
+
+Native texture residual prediction is now wired into full inter-CUs: disparity
+and temporal target availability precede the residual-weight CABAC syntax, the
+left CU supplies its weight context through the existing slice/tile/z-scan
+availability gate, and a nonzero weight suppresses the IC flag and VSP candidate.
+Prepared source owners are carried in queued reconstruction commands and direct
+reconstruction uses the same predictor. Original coded motion is retained in
+CU metadata; weighted output uses the original list index after base replacement.
+Command payloads are boxed, and their retained storage plus concurrent ordinary
+and residual interpolation scratch are included in the reconstruction budget.
+Per-CU identity/view metadata uses bounded stack arrays rather than heap vectors.
+
+The SPS admission gate now admits the residual tool for same-resolution 8-bit
+4:2:0 texture (alongside the already admitted Annex I texture tools). With no
+reference layers the flag is inert, including standalone Main/Main10 movies.
+Other active tools/representations retain their separate refusals.
+
+`scripts/generate_hevc_residual_prediction.py` authors 96 short own PCM/CABAC/MP4
+movies: 64/128 dimensions, direct/worker routes, weights 0/1/2/mixed, slice IC
+off/on, and source biases +20/-80/+200. `hevc_residual_playback` has been changed
+from the verified active-SPS refusal reproduction to full coded playback
+acceptance: it checks every Y/Cb/Cr sample against independent temporal versus
+inter-view formulas, internal half-weight rounding, clipping witnesses, negative
+differences, exact AU output identities and rewind. Test execution never invokes
+the generator or FFmpeg. Additional coded B-list/weighted and fractional-motion
+residual matrices remain to be qualified; passing these P movies does not prove
+complete Annex I residual-tool conformance.
+
+Coded residual verification: the final P playback/rewind acceptance covers all
+96 manifest cases with explicit negative-difference and clipping witnesses;
+the eight `hevc_3d_sps` tests also pass, including new inert base Main/Main10
+residual metadata. All 325 selected HEVC unit tests pass (one pre-existing
+ignored test), including `residual_prediction_owner_tests` proving 16 actual
+worker Inter jobs for the 128x128 queued variants and zero jobs for direct
+controls. The broader IC/VSP/3D-SPS/coded-residual integration run passed 27
+tests. No FFmpeg, network, or private-media input is used by these tests.
+
+`scripts/generate_hevc_residual_fractional.py` adds 528 coded P movies and a
+standalone scalar bilinear oracle: temporal versus current-AU inter-view
+references, both residual weights, all nonzero chroma phases, negative/vertical
+motion, source biases -80/+20/+200, and direct/queued 64/128 variants. The
+inter-view oracle filters current-view samples at the coded MV and subtracts
+the corresponding source-past samples; the temporal oracle filters the own-past
+base while current source samples use the derived disparity. Both keep internal
+precision through the residual operation. Their formulas are separate from
+native predictor implementation and are compared against every Y/Cb/Cr sample.
+
+`coded_fractional_residual_matches_two_tap_oracle_and_saved_motion` accepts all
+528 cases twice across rewind, checks exact output layer/POC identities and the
+stored reference/MV for every coded CU. The oracle records positive witnesses
+against eight-tap interpolation only in blocks where fractional motion actually
+applies, and against early rounding for half residual. The earlier 96 integer
+P cases remain passing in the same offline integration run. This qualifies
+fractional P prediction; coded B-list and explicit weighted residual combinations
+still require their own acceptance matrices.
+
+Worker ownership verification also passes for 32 selected fractional variants
+(temporal/inter-view, signed/vertical/two-axis MV, weights 1/2, direct/queued),
+with 16 actual queued Inter jobs for the queued 128x128 target P picture and zero
+for direct controls. Both residual owner tests pass; no external codec is used.
+
+`scripts/generate_hevc_residual_b.py` adds 224 coded zero-MV B cases: seven
+reference combinations (both inter-view, mixed past/current and current/future,
+L0-only, L1-only, temporal-only, and reversed future/past temporal references),
+weights 0/1/2/mixed, 64/128 direct/queued controls, and default versus explicit
+luma/chroma weighted prediction. Source-current I pictures keep both source
+past/future pictures in their used RPS; coded output is reordered from decode
+POCs 0/2/1 to presentation POCs 0/1/2.
+
+The independent integer oracle chooses the residual source/temporal list per
+branch before combining signed internal predictions. Explicit weighting uses
+the original coded reference index, not the temporal target substituted inside
+the residual process; reversed future/past references exercise that distinction
+with negative luma and chroma weights and nonzero offsets. Manifest witnesses
+separately prove observable late-clipping differences and original-weight-index
+differences specifically after temporal base replacement.
+
+`hevc_residual_b` checks every Y/Cb/Cr sample of all three target pictures,
+original stored references/MVs, presentation order, two playback/rewind passes,
+and seeks to 40/0/80/40/40 ms against independent expected pixels. Native owner
+tests also accept all 224 B cases with exact actual worker enqueue counts
+(16 Inter jobs for queued 128x128 B, zero for direct controls). Shared legacy
+integer/fractional B-IC generator defaults remain byte-identical. These are
+coded zero-MV B acceptances; fractional B motion, scaling and inter-CU disparity
+interactions need additional matrices rather than being inferred from P cases.
+
+`scripts/generate_hevc_residual_b_temporal_fractional.py` adds 96 coded B
+acceptances for fractional temporal motion: ordinary and reversed future/past
+reference indices, distinct signed two-axis MVs in L0/L1, residual weights 1/2,
+default/explicit weighting, and 64/128 direct/queued variants. The scalar oracle
+selects the per-list temporal target by POC, reverses the MV sign when replacing
+the opposite-POC reference, independently bilinearly filters own-target/source-
+target planes, adds the current-source difference at internal precision, then
+applies the original slice weights. Positive scaling witnesses separately cover
+default and explicit combination; using the unscaled coded MV changes output.
+
+The B playback test now passes both the previous 224 zero-MV cases and these
+96 fractional temporal cases, checking all Y/Cb/Cr pixels, original saved MVs,
+presentation order, rewind and 40/0/80/40/40 ms seeks. All four residual owner
+tests also pass; actual enqueue counts validate direct/worker ownership for
+all new cases. Shared legacy fractional B-IC generation remains byte-identical.
+Mixed fractional temporal/inter-view references with inter-CU disparity and
+coded reference-block temporal motion remain separate qualification work;
+these all-temporal cases do not establish those paths.
+
+`scripts/generate_hevc_residual_b_mixed_fractional.py` adds 240 coded B
+acceptances for mixed fractional motion: both-IV, past/current, current/future,
+L0-only and L1-only references, distinct signed two-axis list MVs, weights 1/2,
+default/explicit combination and 64/128 direct/queued controls. Its scalar oracle
+uses the Annex I A1/B1 positions and L0-before-L1 current-POC selection to derive
+the CU disparity from authored neighbour motion. Earlier reference pictures are
+intra, so temporal disparity and inter-view skip fallback are deliberately
+absent. Temporal predictors sample current source at disparity and source RPS
+at temporal-MV plus disparity; IV predictors use the opposite temporal MV or
+the specified source-intra zero fallback. All samples stay internal precision
+until residual and original-index weighted list combination complete.
+
+The manifest records 107250 observable disparity-versus-zero differences,
+including 17418 in B1-only CUs across CTU rows. The latter protect the distinction
+between allowed direct spatial IV motion and the separately restricted temporal
+skip fallback. B playback acceptance now checks original motion at every 8x8
+position, all pixels, presentation order, rewind and seeks for the full 560-case
+B corpus (224 integer, 96 temporal-fractional, 240 mixed-fractional). These three
+integration tests pass. All five residual native-owner tests pass, including
+actual queued/direct enqueue counts for every mixed case. Source-reference-block
+motion is still the intra-source zero fallback here; coded inter-source motion
+and variable neighbour-MV priority require separate witnesses.
+
+`scripts/generate_hevc_residual_b_reference_motion.py` adds 288 coded cases with
+an actual inter-coded AMP B source. Its 8/24 partitions retain L0 vertical MV
++4/-4 and L1 -8/+8. An independent standard source-prediction oracle reconstructs
+all source pixels (integer luma / fractional four-tap chroma and bipred rounding)
+before a separate bilinear residual oracle uses the aligned reference-block
+lookup. MVs 29/30 and -35/-34 probe the AMP lookup boundary, and +/-135 exercise
+reference padding/clamping. Both-IV, L0-only and L1-only targets, weights 1/2,
+default/explicit weighted combination, 64/128 and direct/queued cases qualify
+source-L0 preference even when the target CU activates only L1. Positive manifest
+witnesses distinguish real source motion from zero fallback and from using the
+source L1 motion. Texture IV merge is disabled here to isolate that lookup from
+IPMVC subblock selection.
+
+`scripts/generate_hevc_residual_b_variable_neighbour.py` adds 64 mixed-reference
+cases with two explicitly coded MV sets. The second explicit CU codes its MVD
+relative to the above-right AMVP candidate. Later CUs have distinct A1/B1 IV MVs;
+the independent oracle chooses A1 and records 18292 observable differences from
+wrongly preferring B1. The B playback helper verifies every saved 8x8 MV/reference,
+every source/target pixel, presentation order, rewind and seeks. For the coded
+AMP source, source motion and pixels are independently checked rather than using
+native source reconstruction as the target oracle.
+
+All five B integration tests pass (912 cases total), and all seven native
+residual ownership tests pass. The new source-path check observes 32 actual
+queued AMP-source Inter jobs and 16 target jobs for queued 128x128, versus zero
+for direct controls. Legacy fractional B-IC authoring remains byte-identical.
+This closes these residual qualification milestones; it does not establish
+complete codec/profile conformance. The active `depth_based_partition` SPS flag
+is still left in `remaining` and rejected by the native SPS admission gate;
+DBBP is the next confirmed unimplemented Annex I tool.
+
+DBBP implementation has started in `hevc_motion::dbbp`. The native CABAC symbol
+`DepthBasedPartition` has one init-154 context and is included in all 49-bank
+initialization/WPP snapshots. Its syntax reader consumes a single context-zero
+bin only for enabled, disparity-available, non-skipped inter CUs larger than
+8x8 with Horizontal/Vertical half partitioning.
+
+`Contour::from_depth` builds I-276/I-277 from a complete padded partIdc=1 depth
+array: widened corner sum, truncated mean and strict greater-than labels.
+`Contour::compose` combines two full-CU component predictors with part zero
+normalized to the top-left contour label, uses top-left chroma decimation, and
+performs the orientation-specific 1/2/1 boundary filter from immutable combined
+samples. Next contour sites clamp in luma coordinates, including the last odd
+depth site beyond the final chroma top-left sample. Geometry, checked allocation
+and retained contour/component-buffer budgets are explicit; sample filtering is
+wide enough for u16 predictors.
+
+Five new DBBP unit tests pass (syntax presence, CABAC/WPP restoration, widened
+threshold/strict tie semantics, normalized selection/immutable filter values,
+and the odd-depth/chroma boundary). The full selected HEVC unit run passes
+336 tests with one pre-existing ignored test. Shared depth-refinement fixture
+authoring defaults remain byte-identical.
+
+`scripts/generate_hevc_dbbp.py` authors twelve short owned two-PU P movies
+(horizontal/vertical, DBBP CU flag 0/1) with current-AU depth and distinct view
+luma/chroma. `hevc_dbbp` now verifies all pixels of all three target components
+against an independent scalar contour/filter oracle. DBBP is the sole active
+3D SPS tool in these fixtures. The former parameter-refusal expectation has
+been replaced by coded playback acceptance for this matrix.
+
+The CU path stages both PU syntax records before reading cu_extension, retains
+geometric motion publication for AMVP, predicts both motions over the complete
+CU and composes them using the bound current-AU depth plane. DBBP disables VSP
+and uses default IV motion instead of IV subblocks; merged bi-prediction is
+reduced to L0 while explicit bi-prediction is rejected. Direct reconstruction
+and queued reconstruction both carry a single full-CU DBBP prediction before
+the common transform/residual path. Admission is restricted to the existing
+8-bit 4:2:0 texture representation (or inert no-reference metadata).
+
+Qualification remains partial: the coded matrix covers 32x32 CUs within
+32x32 and 128x128 pictures, explicit unidirectional zero-motion predictors,
+both orientations and both flag values. The pixel oracle checks both direct
+and worker-eligible pictures. Merged/IV defaults, weighted motion, larger CUs,
+combined tools and nonzero residuals require additional coded witnesses.
+
+DBBP integration checks: all 337 selected HEVC unit tests passed (one existing
+ignored); the focused DBBP run passed seven tests, including actual direct/
+worker command ownership and padded depth-plane sampling with signed quarter-
+pel rounding, extreme disparities and insufficient storage. Worker-enabled
+128x128 movies enqueue 16 full-CU commands with DBBP and 32 geometric PU
+commands without DBBP; constrained direct movies enqueue none.
+
+`scripts/generate_hevc_dbbp_fractional.py` adds sixteen owned 32x32 movies:
+two orientations, both DBBP flag values and four distinct pairs of fractional
+PU vectors, including negative vectors and picture-border extension. An
+independent scalar separable 8-tap luma/4-tap chroma convolution oracle models
+both complete-CU predictors before contour composition. The fixture manifest
+counts 21,065 samples differing from zero-motion prediction. The test checks
+all Y/Cb/Cr samples and geometric 8x8 saved reference indices/vectors, then
+rewinds and repeats. Both root DBBP tests pass, covering the original twelve
+movies and these sixteen; fixture generation is offline and separate from test
+execution. Regenerating the original twelve movies after adding the optional
+motion parameter preserves their bytes and manifest exactly. This qualifies
+explicit unidirectional fractional prediction in these 32x32 CU cases; it does
+not qualify weighted, merge/IV, nonzero-residual or larger-CU combinations.
+
+The DBBP motion author now also generates eight `dbbp-merge-*.mp4` movies and
+`dbbp-merge.json`/`.y16`: first PU explicit fractional [1,3], second PU merged
+with zero-vector candidate index 0 or 1, selecting own-past or current-source
+reference respectively. Both orientations and both DBBP flag values are
+covered. The same independent interpolation/composition oracle checks every
+sample, saved geometric reference/vector and rewind; all root DBBP checks
+pass (36 movies total). The merge matrix has 4,768 samples differing from
+zero-motion-only prediction. Regenerating the prior sixteen fractional
+movies and pixel oracle with the preserved previous author proves byte
+identity. This qualifies ordinary uni merge candidates in these boundary-CU
+cases; IV-default merge, B bi-merge reduction, weighted prediction, nonzero
+residuals and larger CUs remain separate qualification work.
+
+`scripts/generate_hevc_dbbp_iv.py` adds ten owned inter-view merge witnesses:
+eight IV-default/subblock cases (source vertical AMP cut at 8 or 24, both
+orientations, both DBBP flags), plus two horizontal cut-24 IVShift cases.
+The source P picture publishes +4/-4 vertical quarter-pel vectors. For IV,
+DBBP must use PU1's default candidate over the full CU, while flag zero keeps
+ordinary IV subblocks. IVShift selects the shifted source lookup and keeps
+its single motion with either flag. The independent scalar oracle checks all
+components and the saved 8x8 reference/motion map, including repeated rewind.
+The ten-case manifest has 10,549 samples differing from zero motion and 1,315
+samples distinguishing selected default/shifted motion from ordinary subblock
+motion before boundary filtering. Both root DBBP tests pass, covering 46
+movies total without FFmpeg or generator execution during tests. These cases
+qualify unidirectional P IV/IVShift with zero disparity and the authored source
+AMP layouts; B bi-merge reduction, weighted prediction, nonzero residuals,
+nonzero-disparity combinations and larger CUs remain unqualified.
+
+The DBBP scalar-motion author now emits sixteen `dbbp-weighted-*.mp4`
+fixtures and `dbbp-weighted.json`/`.y16`. The target PPS enables explicit P
+weighting; the slice writes two reference entries with denominator 1 and
+different luma/Cb/Cr coefficients and offsets, including negative weights.
+The oracle convolves unrounded reference pixels, applies the coded reference's
+weight/offset to the internal interpolated value, clips that predictor, then
+performs DBBP selection/filtering. It counts 4,107 samples distinguishing this
+order from weighting an already rounded/clipped interpolated pixel, and
+10,764 samples distinguishing weighted fractional from weighted zero motion.
+All root DBBP tests pass (62 movies total), including exact saved reference/
+motion and repeated rewind. Regeneration preserves all prior twelve base and
+ten IV/IVShift movie bytes. Qualification is explicit uni P weighting with
+this denominator and coefficient set on 32x32 CUs; it is not proof of every
+weight denominator, weighted merge/IV, B bi-merge, nonzero residual or larger
+CU combination. No production decoder change was necessary for these cases.
+
+`scripts/generate_hevc_dbbp_residual.py` adds thirty-two owned transform-
+residual movies: both half-partition orientations, both DBBP flags, weighted
+and unweighted P prediction, and signed all-component/chroma-only DC levels
+(64,64,-64), (-64,-64,64), (0,64,64), (0,-64,-64). The CU authors actual
+rqt_root_cbf and transform/chroma/luma-CBF/coefficient CABAC after DBBP syntax;
+these are ordinary DCT coefficients, not the separate 3D inter-DC-only tool.
+The scalar oracle performs interpolation, optional weighting, contour
+selection and boundary filtering before adding the signed inverse-DCT result
+(Y +26/-25, C +51/-51 at QP26) and clipping. There are 28,341 nonzero-residual
+sample witnesses and 1,530 samples distinguishing the required order from
+clipping residual into each predictor before contour filtering. All root
+DBBP checks pass, covering 94 movies with exact pixels, saved motion/reference
+and repeated rewind. Regeneration preserves all 62 earlier movie bytes.
+Qualification covers unsplit 32x32 luma / 16x16 chroma transforms with these
+DC levels; AC, transform splitting/skip, other QPs, B bi-merge and larger CU
+combinations remain unqualified. No production decoder patch was needed.
+
+The DBBP residual author additionally emits thirty-two `dbbp-ac-vertical-*`
+and thirty-two `dbbp-ac-horizontal-*` movies, each with a separate `.json`/
+`.y16` oracle. The coefficient is at (0,1) or (1,0), abs level64, with DC
+explicitly insignificant; horizontal AC also codes the preceding diagonal
+scan position insignificant. The P CABAC significance models are distinct
+for luma/chroma. Both coefficient signs, chroma-only/all-component residuals,
+weighted/unweighted fractional prediction, half-partition orientations and
+DBBP flag values are exercised. The scalar two-pass inverse DCT uses the
+normative first-frequency 32/16-point integer basis, signed dequantization
+and both rounding stages. These are independent authored calculations, not
+decoder-produced pixel references. Vertical and horizontal sets respectively
+contain 1,832 and 1,661 sample witnesses against residual addition before
+contour filtering. All root DBBP acceptance checks pass (158 movies total),
+including exact output samples, saved geometric reference/motion and rewind.
+This qualifies these first-frequency AC cases on unsplit 32/16 transforms at
+QP26; arbitrary coefficient patterns, transform splits/skip, other QPs,
+B bi-merge and larger CUs remain unqualified. No production patch was needed.
+
+`scripts/generate_hevc_dbbp_cu64.py` adds twelve movies with real 64x64
+DBBP CUs, both partition orientations and both CU flag values, in 64x64 and
+128x128 pictures. The source and initial target pictures retain authored
+32x32 PCM leaves inside correctly split 64x64 CTUs; target P pictures code
+unsplit CU64. The author preserves CTU scan order, split-context adaptation
+and end-of-CTU termination across PCM restart boundaries. Existing author
+defaults preserve all 158 earlier DBBP movie bytes after regeneration.
+The scalar acceptance helper uses 64x64 depth corners, component decimation,
+full-CU predictors and boundary filtering, and repeats after rewind. Actual
+ownership checks confirm four full-CU DBBP commands versus eight ordinary PU
+commands for worker-enabled 128x128 pictures, and no queued commands in the
+constrained direct variant. The complete selected HEVC unit run passes 339
+tests with one pre-existing ignored test. Root pixel/rewind checks pass with
+170 movies total. Qualification of CU64 here is zero-motion explicit uni
+8-bit 4:2:0 prediction; fractional/weighted/merge/residual CU64 combinations,
+CU16 and B bi-merge still need their own coded witnesses.
+
+The CU-size author now also writes twelve `dbbp-cu16-*.mp4` movies and
+`dbbp-cu16.json`, covering the minimum DBBP CU size. Each CTU32 target splits
+into four CU16 leaves in coding-tree order, with root neighbour-context
+adaptation and termination only at the CTU boundary. PCM source pictures
+remain unchanged. Both orientations/DBBP flags and 32x32/128x128 pictures,
+including constrained direct reconstruction, are covered. The common scalar
+oracle now checks CU16, CU32 and CU64 contour geometry and all saved 8x8
+reference/vector entries, and repeats after rewind. Both root DBBP acceptance
+tests pass, covering 182 movies total. Regeneration proves all 170 earlier
+movie bytes unchanged. This qualifies zero-motion explicit uni 8-bit 4:2:0
+CU16 prediction; fractional/weighted/merge/residual CU16 combinations and B
+bi-merge still need coded qualification.
+
+The focused DBBP unit run passes all nine tests. In particular, the CU16
+worker-enabled cases enqueue 64 complete-CU commands with DBBP, versus 128
+ordinary PU commands without DBBP; constrained direct cases enqueue none.
+CU32 and CU64 ownership regressions also pass in the same run.
+
+`scripts/generate_hevc_dbbp_b.py` adds thirty-four accepted B-picture movies
+and two conformance-refusal movies, with `dbbp-b.json`/`.y16`. The first PU
+is explicit L0 and the second selects an initial bi-zero merge candidate.
+At DBBP flag one, Annex I merge derivation must drop L1 before full-CU
+prediction; at flag zero, both directions remain active. Distinct own-past/
+own-future PCM patterns, two luma gains and an independent uni/bi plus contour
+oracle distinguish these paths. Explicit B weighting uses denominator one
+and distinct L0/L1 luma coefficients/offsets; chroma weights are default.
+Sixteen cases use 128x128 pictures with both direct and worker-eligible
+reconstruction; saved geometric reference/vector/L1-use checks cover every
+8x8 cell and pixel/rewind acceptance covers all three components. The scalar
+manifest records 126,877 sample witnesses against retaining L1 with DBBP.
+
+Two additional accepted controls explicitly code PRED_BI with DBBP off.
+Their DBBP-on counterparts must refuse specifically with `HEVC DBBP explicit
+predictor is bidirectional`, as required by I.7.4.9.6. Passing these refusal
+checks is not playback acceptance for invalid explicit-bi DBBP streams.
+All four root DBBP tests pass: 216 accepted movies and two specific refusal
+movies. The original eighteen B acceptance movies, two refusal movies and
+scalar pixel-oracle prefix remain byte-identical after extending worker
+coverage. Qualification is zero-motion temporal reference-index-zero B merge
+on CU32, including the authored luma weights; fractional B motion, B IV merge,
+other list indices/weights and combined residual/CU16/CU64 cases remain open.
+
+All ten focused DBBP unit tests pass. The new B ownership test confirms 16
+queued full-CU commands with DBBP and 32 ordinary PU commands without DBBP
+for worker-enabled 128x128 pictures, including explicit B weights; constrained
+direct variants enqueue none. Existing CU16/32/64 ownership checks also pass.
+
+`scripts/generate_hevc_dbbp_b_iv.py` adds 76 accepted B IV/IVShift movies
+with an independent scalar separable 8-tap luma/4-tap chroma internal-precision
+oracle. The source B picture uses vertical AMP strips (cut 8 or 24) with
+L0/L1 motion amplitude pairs (4,-8), (1,-3), (-7,5). Target DBBP compares
+full-CU default L0 against normal per-8x8 IV bi-prediction; twelve CU32 cases
+also select IVShift. Explicit luma weights/default chroma weights, both CU
+flags and partition orientations, signed fractional phases and border padding
+are covered. Sixteen 128x128 cases test multiple CU32s and direct/worker paths;
+interpolation crosses CU boundaries using full reference planes, while contour
+filtering remains local to each CU. All component samples, exact 8x8 reference/
+vector/L1-use maps and repeated rewind are checked. The manifest has 149,004
+sample witnesses against ordinary subblocks and 149,206 against retaining L1.
+
+The first multi-CU attempt exposed an authoring error: zero MVD let PU0 inherit
+fractional AMVP from a preceding IV PU, contradicting the planned zero motion.
+The author now independently models ready L0 neighbour cells and writes the
+opposite MVD (240 nonzero cancellations across the sixteen multi-CU cases).
+The planned scalar pixel oracle was retained; decoded PU0 zero motion is also
+asserted before pixel comparison. This required an author correction, not a
+production decoder patch. All sixty earlier B IV/IVShift movie bytes and their
+scalar-oracle prefix remain unchanged after the correction. The shared B AMP
+author's default byte stream also matches its previous fixed-amplitude form
+in twelve size/cut/orientation combinations.
+
+All five root DBBP tests pass: 292 accepted movies and two specific conformance
+refusals. All eleven focused unit tests pass, including actual B IV command
+ownership: worker-enabled 128x128 pictures enqueue 16 full-CU DBBP commands
+versus 144 ordinary commands (one explicit PU plus eight IV subblocks per CU),
+and the source B AMP picture enqueues 32 commands; constrained direct variants
+enqueue none. Qualification remains this CU32, zero-disparity, reference-slot-
+zero matrix. L1-only IV fallback, nonzero disparity, IVShift in multi-CU worker
+pictures, other list indices and combined B residual/CU16/CU64 cases remain open.
+
+The B IV author now additionally writes 76 `dbbp-b-iv-l1-*` acceptance
+movies and `dbbp-b-iv-l1.json`/`.y16`. Source AMP PUs explicitly use only L1;
+target L0 list modification repeats own-past POC0, so the source's future POC2
+cannot project into L0. Target L1 contains the matching future POC at slot0.
+Thus IV/IVShift is genuinely L1-only before DBBP selection: DBBP must retain
+L1 rather than applying bi-merge's L1-removal rule to a uni candidate.
+Signed fractional L1 amplitudes -8, -3, 5, both orientations/flags, cuts 8/24,
+IVShift and explicit L1 luma weighting (default chroma) are covered. The scalar
+oracle selects L1's own weight/offset and future-reference samples, with
+143,812 sample witnesses against losing L1 and 50,464 against subblock motion.
+
+The sixteen 128x128 cases additionally code PU0 explicitly as L1, so both
+complete-CU predictors use that list. Their MVD author uses same-POC L1-ready
+neighbour motion to cancel AMVP and retain the planned zero PU0 vector. CU32
+cases retain the explicit L0 PU0 control. Tests check every Y/Cb/Cr sample,
+reference/vector/list-use maps and rewind against independent scalar output.
+All six root DBBP tests pass: 368 accepted movies plus two specific
+conformance-refusal movies. All twelve focused unit tests pass. L1-only worker
+ownership confirms 16 full-CU commands with DBBP versus 144 ordinary commands
+without it, 32 source AMP commands and none queued in constrained direct mode.
+The previous 76 B IV movies/full oracle and first sixty L1-only movies/oracle
+prefix remain byte-identical after extending multi-CU coverage. This required
+no production decoder patch. Nonzero disparity, L1-only IVShift in multi-CU
+worker pictures, other reference slots/denominators and combined B residual/
+CU16/CU64 cases remain unqualified.
+
+`scripts/generate_hevc_dbbp_disparity.py` adds 160 accepted P-picture
+movies with both depth-reference refinement and DBBP enabled in SPS. CU16,
+CU32 and CU64 use signed camera scales/offsets, precision zero/one, both
+orientations/DBBP flags and sixteen-CU 128x128 direct/worker pictures. The
+independent oracle finds the unshifted depth-corner maximum, applies widened
+camera arithmetic to derive DispRefVec, rounds to the depth-sample address,
+pads the source plane, derives the shifted contour and composes/filters the
+two explicit zero-motion predictions. There are 279,318 sample witnesses
+against using zero disparity, 208 actively padded DBBP contours and 228
+active negative depth offsets. Every output sample, explicit geometric motion
+and rewind is checked: refinement must not replace the coded zero PU vectors.
+
+`scripts/generate_hevc_dbbp_base_disparity.py` separately adds 72 accepted
+CU32 P movies with a coded cross-view PU vector seeding spatial DispVec for
+later CUs. Six signed 2D vectors include fractional phases and large border
+padding; the first CU uses inferred zero disparity, later CUs use same-POC
+cross-view neighbour motion, including direct B1 across CTU rows. The oracle
+independently interpolates the current-view past and current-AU other-view
+reference planes, and separately shifts depth in both axes for contour
+selection. It records 260,885 samples distinguishing nonzero base disparity
+and 188 actively padded contours. All saved motion/reference cells are
+asserted before pixels to separate fixture MVD errors from rendering defects.
+
+This caught an authoring error on the second CTU row: temporal ref0 is
+short-term while inter-layer ref1 is long-term, so the temporal PU cannot
+supply a scaled AMVP for ref1. PU1 instead inherits matching ref1 motion from
+above (vertical partition) or left (horizontal partition). The author now
+codes the planned cross-view vector only on the first row/column and zero
+MVD where matching AMVP already supplies it. Expected pixel and motion plans
+were retained; no production decoder patch was necessary. Earlier sixteen
+fractional P movie bytes and their scalar oracle remain identical after
+extending the shared author and predictor helper.
+
+All eight root DBBP tests pass: 600 accepted movies and two specific
+conformance refusals. All fourteen focused unit tests pass, including both
+new disparity ownership matrices: worker-enabled 128x128 targets enqueue
+16 full-CU DBBP commands versus 32 ordinary PU commands, and constrained
+direct variants enqueue none. Qualification here separates base-zero camera
+refinement on CU16/32/64 from unrefined nonzero spatial DispVec on CU32.
+Their joint nonzero-base/refinement path, varying A1/B1 priorities, B/L1-only
+nonzero disparity, other formats/depths and remaining residual/transform
+combinations still require coded witnesses.
+
+The base-disparity author now also emits 216 `dbbp-base-refined-*` accepted
+movies and `dbbp-base-refined.json`/`.y16`. The three signed fractional
+cross-view vectors (1,3), (-7,-5), (9,-11) seed spatial DispVec on later CU32s.
+Six signed camera scale/offset/precision sets refine that vector using the
+maximum of depth corners sampled at the rounded, padded base-vector address.
+The contour then uses the replacement horizontal DispRefVec, with its vertical
+component reset to zero; coded PU motion remains unchanged. Both orientations/
+DBBP flags, 64x64 and direct/worker 128x128 pictures are covered.
+
+Independent scalar alternatives record 190,129 sample witnesses against
+ignoring the base vector during depth-corner sampling, and 478,363 against
+retaining base vertical displacement in the refined contour vector. The test
+checks all Y/Cb/Cr samples and saved geometric reference/vector entries before
+rewinding and repeating. All nine root DBBP tests pass: 816 accepted movies
+plus two specific conformance-refusal movies. The full fifteen-test focused
+DBBP unit run passes, including actual joint-path worker ownership: 16 full-CU
+commands with DBBP, 32 ordinary PU commands without it, none queued by the
+constrained direct variant. The earlier 72 unrefined base-disparity movie
+bytes, manifest and scalar oracle are preserved exactly. A memoized read-only
+scalar reference-plane helper avoids repeating identical offline convolution;
+it does not change the production decoder or test execution dependencies.
+
+This qualifies the joint path on explicit P CU32, fixed cross-view motion per
+picture and the authored 8-bit 4:2:0 camera sets. Unequal A1/B1 candidate
+priorities, B/L1-only nonzero disparity, CU16/CU64 joint cases, other camera/
+weight/format combinations and remaining transform/residual cases are not
+proved by this matrix. No production decoder patch was needed.
+
+AVC native non-4:2:0 PCM foundation: `scripts/generate_avc_pcm_formats.py`
+authors 18 short two-frame streams with monochrome, 4:2:2 and 4:4:4 planes,
+8/8, 10/12 and 14/8 component precision, with and without cropping. These
+reproduced `AVC scaling reconstruction requires 4:2:0` before the fix.
+`tests/avc_pcm_formats.rs` now accepts them and compares every coded sample,
+visible planar output, native MP4 packed geometry/precision and rewind/reset.
+It also checks the exact decoded-reference memory admission boundary.
+Monochrome cropping has no chroma alignment constraint: presentation creates
+neutral chroma only after cropping the luma plane.
+
+This path currently covers progressive single-group CAVLC I_PCM I slices with
+deblocking disabled. Non-PCM macroblocks, CABAC, inter prediction, field coding
+and separate colour planes in these formats remain unconnected. This is not
+full High 4:2:2 / High 4:4:4 profile qualification. Generation and ordinary tests
+need neither FFmpeg nor network access.
+
+Monochrome progressive CAVLC intra now also routes compressed macroblocks
+through the existing luma reader and reconstruction engine. Chroma prediction
+syntax is absent, CBP uses the monochrome table, PCM reads only luma, and empty
+chroma planes are excluded from reconstruction/filtering and plane storage.
+The PCM-only fast path retains its existing memory admission boundary; a mixed
+slice releases the probe planes before allocating full intra context.
+`scripts/generate_avc_monochrome_intra.py` authors six PCM-to-I16-horizontal /
+I4-DC witnesses at 8/10/14 bits, with a separate scalar prediction oracle.
+`tests/avc_monochrome_intra.rs` compares all coded samples, component geometry,
+MP4 packed data and reset/rewind. The authored compressed blocks have zero
+residual; nonzero residual, other prediction modes and transforms still need
+additional monochrome witnesses. This does not connect non-PCM 4:2:2/4:4:4,
+monochrome CABAC/inter/field coding, or enable monochrome deblocking.
+
+The next monochrome admission now connects progressive single-group CABAC I
+slices with deblocking disabled to that same component reconstruction engine.
+CABAC skips absent chroma prediction and CBP syntax; PCM reads only its 256
+luma samples before restarting arithmetic decoding. Existing 4:2:0 PCM API
+behavior is preserved. The offline `generate_avc_monochrome_cabac.py` author
+provides 15 two-slice movies at 8/10/14 bits: I16 DC with zero/positive/negative
+residual, I4 DC with CBP0, and patterned PCM. Signed residual cases use opposite
+DC levels in the two macroblocks; expectations come from scalar flat-matrix
+inverse-DC arithmetic. `tests/avc_monochrome_cabac.rs` checks every coded sample,
+empty chroma storage, precision, MP4 packed output, reset and rewind.
+These witnesses do not qualify CABAC mixed macroblock contexts within a slice,
+other transforms/prediction modes, deblocking, inter/field coding or non-PCM
+4:2:2/4:4:4. Earlier CAVLC-only restrictions above describe the preceding step.
+
+Progressive monochrome intra now admits deblocking modes 0 and 2 through the
+shared luma-only reconstruction/filter pipeline, for both CAVLC and CABAC.
+The unfiltered CAVLC PCM fast path remains unchanged. The owned offline author
+`scripts/generate_avc_monochrome_deblock.py` provides 18 two-slice movies:
+8/10/14-bit CAVLC/CABAC I16 DC with opposite signed level4 residuals and each
+disable_deblocking_filter_idc value. A scalar short bS4-filter oracle checks
+the exact boundary samples for mode0; modes1/2 retain the separate-slice edge.
+Mode0 must differ from the unfiltered samples in every depth/entropy case.
+`tests/avc_monochrome_deblock.rs` checks all decoded samples, empty chroma,
+native MP4 data, precision, reset and rewind. Before admission, modes0/2
+reproduced the deblocking-disabled refusal while mode1 already decoded.
+This matrix qualifies the short vertical cross-slice intra filter; it does
+not qualify all strong/internal/horizontal edges, slice offsets, mixed
+intra-slice contexts, inter or field coding, or non-PCM 4:2:2/4:4:4.
+
+Progressive monochrome inter reconstruction now uses native luma-only reference
+views and empty decoded chroma planes. Motion compensation never samples a
+synthetic chroma source; the shared fixed-size prediction scratch retains unused
+chroma slots. Row workers handle empty chroma bands and deblocking excludes
+absent planes. Reference admission checks component geometry; plane memory
+accounting uses the actual format. CAVLC inter syntax and coefficient admission
+use monochrome CBP rather than forcing 4:2:0.
+`scripts/generate_avc_monochrome_inter.py` authors twelve two-frame movies at
+8/10/14 bits: patterned PCM IDR followed by CAVLC P-skip, integer motion in
+either horizontal direction, or CABAC P-skip. Scalar source indexing with edge
+extension supplies the expected P samples. `tests/avc_monochrome_inter.rs`
+checks every coded and native MP4 packed sample, empty chroma, precision,
+decoder reset and playback rewind. The first nine streams reproduced the
+inter-picture tools refusal after successfully decoding their IDR.
+This matrix does not qualify fractional motion, B/direct prediction, explicit
+weights, inter residuals, inter deblocking, field coding or non-PCM 4:2:2/4:4:4.
+
+Monochrome progressive CAVLC P fractional motion and explicit luma weighting
+have a separate 384-movie qualification in `avc-monochrome-fractional/`.
+`scripts/generate_avc_monochrome_fractional.py` authors all signed vectors
+(-4..3 quarter-luma units) on each axis at 8/10/14 bits, both unweighted and
+with denominator1/weight3/offset-5. The independent scalar oracle uses six-tap
+horizontal/vertical half samples, unrounded separable diagonal convolution,
+quarter-phase averages, replicated borders and depth-scaled/clipped weights.
+The authored high-contrast references exercise edge extension and clipping.
+There are 91,611 sample witnesses against replacing fractional prediction with
+integer sampling, and 96,745 against ignoring explicit weights.
+`tests/avc_monochrome_fractional.rs` checks complete unique matrix coverage,
+every decoded/MP4 packed sample, precision, empty chroma, reset and rewind.
+This qualification required no production decoder patch. It covers CAVLC
+P16x16 zero-residual/no-deblock motion with one reference; B/direct, other
+partitions/reference lists, inter residual/filter, CABAC coded motion and fields
+remain outside this matrix, as does non-PCM 4:2:2/4:4:4.
+
+Progressive unfiltered CAVLC 4:2:2 intra now has native chroma reconstruction.
+Macroblocks carry optional 2x4 DC / eight AC-block storage and 8x16 PCM planes;
+the existing 4:2:0 fields and CABAC structures retain their old shapes. CAVLC
+uses chroma DC nC=-2, the rectangular DC scan and eight-block neighbour
+contexts. Chroma prediction implements DC/horizontal/vertical/plane on 8x16
+samples; inverse DC uses H.264 8.5.11's Hadamard and qP_DC=qP+3 scaling.
+Decoded planes, temporary chroma coefficients and larger context grids are
+charged to the budget. The four-block count API explicitly refuses 4:2:2
+instead of returning incomplete contexts.
+
+`scripts/generate_avc_422_intra.py` authors 144 profile244-signalled movies
+using three PCM neighbours and one compressed I4/I16 macroblock. All four
+chroma modes, negative/zero/positive first-position DC, optional alternating
+signed first-AC in all eight blocks, and depth pairs 8/8, 10/12 and 14/8 have
+independent scalar expected samples. The first 72 reproduced the old non-PCM
+refusal. `tests/avc_422_intra.rs` accepts exact coded Y/Cb/Cr and native MP4
+packed data, format/precision and reset/rewind. This does not qualify all DC
+scan positions, other AC positions, 8x8/bypass/custom-scaling combinations,
+crop, FMO, other profile signalling, CABAC, deblocking, fields or inter 4:2:2.
+Non-PCM 4:4:4 remains unconnected.
+
+Progressive unfiltered CABAC 4:2:2 intra now feeds the same native 8x16 chroma
+reconstructor. PCM reads 128 samples per chroma component before restarting
+arithmetic decoding; context models survive the restart. Chroma DC selects
+the eight-coefficient CABAC process and rectangular inverse scan. Chroma AC
+stores eight flags per component and derives neighbours using 2x4 geometry.
+The legacy four-block inter-context API explicitly refuses 4:2:2.
+`scripts/generate_avc_422_cabac.py` independently authors entropy for the same
+144 scalar-oracle cases from `avc-422-intra/`, including three PCM macroblocks
+and one compressed macroblock within one slice. It adds six mixed coded/zero
+AC-mask cases covering all four neighbour-context increments across upper and
+lower chroma cells. Their expected samples use separate first-AC arithmetic;
+the first 144 streams/oracles are byte-preserved when adding these controls.
+`tests/avc_422_cabac.rs` checks all 150 movies, coded/planar/native MP4 samples,
+format/depth, reset and rewind. The initial 144 reproduced CABAC admission's
+CAVLC-only refusal. Generator execution stays separate from offline tests and
+uses only owned synthetic fixtures. This matrix still leaves other coefficient
+positions, transforms/bypass, crop, custom scaling/profiles, deblocking, fields
+and inter 4:2:2 unqualified; non-PCM 4:4:4 remains unconnected.
+
+Progressive intra 4:2:2 now admits deblocking modes0/2 in CAVLC and CABAC.
+The shared progressive walker takes explicit component subsampling: 8x16
+chroma has two vertical and four horizontal edges, with strength segments
+mapped independently along each axis. Luma transform8 does not suppress
+4:2:2 horizontal chroma edges. The previous 4:2:0 and luma wrappers preserve
+their geometry and filtering API.
+`scripts/generate_avc_422_deblock.py` authors 54 short movies with four separate
+I16 slices, entropy CAVLC/CABAC, depth pairs8/8,10/12,14/8 and filter modes0/1/2.
+The first36 have vertical/horizontal cross-slice DC steps; the added18 use
+DC scan position3 to create internal y=4/y=12 steps. A scalar QP26 chroma
+oracle walks both axes in macroblock order, including intersection effects
+and depth-scaled thresholds/tC. Mode1 preserves samples, mode2 suppresses
+cross-slice edges while filtering internal ones. The first36 streams and
+oracles remain byte-identical after adding internal-edge cases.
+`tests/avc_422_deblock.rs` checks coded, planar and native MP4 data, precision,
+reset and rewind; the initial36 reproduced the deblocking-disabled refusal.
+A focused unit checks horizontal four-sample edges with luma transform8 at
+8/10/12/14 bits. This matrix does not qualify all QPs/offsets, mixed slice
+disable flags, PCM filtering, fields or inter 4:2:2, nor non-PCM 4:4:4.
+
+Progressive unfiltered 4:2:2 P prediction now uses native full-height chroma
+references and inline 8x16 prediction scratch. The legacy `Prediction420`
+arrays remain 4:2:0 storage; `chroma_planes`/`chroma_subsampling` expose actual
+geometry. Partition assembly, uni/bi weighting and row copies use that geometry.
+For 4:2:2, vertical luma-quarter motion is doubled before eighth-chroma bilinear
+sampling. Empty chroma contexts are represented as eight zero counts; retained
+wide intra payloads and larger CAVLC contexts are charged to the budget.
+
+`scripts/generate_avc_422_inter.py` authors 51 positive two-frame movies at
+8/8,10/12,14/8: CAVLC P-skip and signed axial/diagonal fractional P16x16 motion,
+each with/without distinct Y/Cb/Cr explicit weights, plus CABAC P-skip. Scalar
+six-tap luma, rectangular bilinear chroma, edge extension, weighting and clipping
+provide expected samples. The first27 streams/oracles are byte-preserved.
+`tests/avc_422_inter.rs` checks all coded/planar/native MP4 samples, geometry,
+component depths and reset/rewind. The initial27 reproduced inter admission's
+tools refusal after a correctly decoded PCM IDR.
+
+At the P-motion milestone, chroma residuals still had a specific refusal and a
+disabled acceptance test. `422-p-chroma-dc-pending` is now accepted: the test is
+enabled, the refusal expectation removed, and the stream joins the positive
+manifest (now 52 movies). `unsupported.json` is empty. Inter 4:2:2 still lacks
+B/direct, inter deblocking and fields; general prediction/transform/profile
+combinations need further qualification. Non-PCM 4:4:4 remains unconnected.
+
+Native inter chroma residuals now retain 2x4 DC, eight AC blocks and eight CAVLC
+counts per component. Rectangular contexts are allocated only for 4:2:2; legacy
+4:2:0 count storage keeps its shape. Bit cursors and counts commit together after
+complete residual parsing. Mixed PCM/intra/P CAVLC dispatch publishes the full
+eight-block state, including PCM counts 16. Both CAVLC and CABAC feed the shared
+2x4 DC scaling and eight-block residual reconstruction after motion prediction.
+CABAC coded P no longer refuses this path. Retained wide coefficients are charged
+to the reconstruction budget; zero chroma patterns avoid extra coefficient boxes.
+
+`generate_avc_422_inter_residual.py` authors 27 two-frame CAVLC movies with mixed
+PCM/P16x16 macroblocks, signed/zero DC and none/full/masked signed first-AC at
+8/8,10/12,14/8. Changed PCM samples distinguish current intra data from the
+earlier reference picture; high PCM neighbour counts select different CAVLC
+tables along all four chroma rows. Scalar DC/AC arithmetic supplies the oracle.
+`generate_avc_422_inter_residual_cabac.py` separately authors 27 CABAC counterparts
+with arithmetic restart, P skip/type/MVD syntax and rectangular coded contexts;
+it reuses those independently calculated samples. The CABAC movies reproduced
+the coded-inter refusal before connection. Their acceptance tests compare every
+coded, planar and MP4 sample, precision and reset/rewind. A unit additionally
+checks nonuniform left/top counts and cross-slice unavailability in a 2x4 grid.
+The authored residual matrix has zero motion, default scaling, QP26 and disabled
+deblocking. It does not qualify every coefficient position, weight+residual or
+transform/bypass combination, B/direct, fields, inter filtering or non-PCM 4:4:4.
+
+### Progressive AVC 4:2:2 B prediction qualification
+
+The format admission gates now connect progressive 4:2:2 B slices to the native
+inter and CABAC reconstruction paths. `avc_422_b` accepts 108 three-picture
+movies: CAVLC/CABAC, component depths 8/8, 10/12, 14/8, L0/L1/bi prediction,
+spatial/temporal direct and skip, and default/explicit/implicit weighting.
+POCs 0/6/2 distinguish decode order from presentation order. The implicit
+weight witness is asymmetric (43/21), rather than a midpoint average.
+`avc_422_b_motion` adds 144 movies with a moving P reference: colocated vectors
+(8,-4) and (-7,5), temporal scaling, spatial direct, temporal skip and explicit
+bi equivalents. Its scalar oracle interpolates the decoded future reference
+separately, preserving the second interpolation's rounding and clipping.
+Both suites check every coded/planar/packed MP4 sample and reset/rewind.
+These are bounded prediction matrices, not full B-tool/profile coverage.
+Earlier B/direct exclusions above describe the earlier P-only milestones;
+fields, inter deblocking and non-PCM 4:4:4 still remain outside these paths.
+
+`generate_avc_422_b_residual.py` adds 405 CAVLC movies with a changed PCM
+macroblock followed by L0/L1/bi/spatial-direct/temporal-direct prediction with
+signed/zero 2x4 chroma DC and none/full/masked signed AC residuals. The matrix
+crosses the three depth pairs and three weight modes. Residual scalar arithmetic
+is applied after the weighted prediction's clipping; PCM neighbours exercise
+all four rows of rectangular chroma contexts. `avc_422_b_residual` accepts the
+exact coded, planar and MP4 output, reset and rewind. All three B suites also
+assert exact PTS 0/40/80 ms, 40 ms frame durations and source sample order 0/2/1.
+This does not qualify CABAC B residuals, moving B residuals, arbitrary scaling
+matrices, luma residuals or all partition and reference-list combinations.
+
+`generate_avc_422_b_residual_cabac.py` independently authors CABAC entropy for
+all 405 B residual cases above. The first B macroblock enters embedded I_PCM,
+restarts arithmetic decoding while retaining contexts, then the second codes
+L0/L1/bi/spatial/temporal prediction and full rectangular chroma residuals.
+The exact sample oracle is shared with the separately calculated CAVLC suite,
+not derived by decoding the new CABAC streams. The acceptance suite verifies
+coded/planar/MP4 data, mixed component precision, reset, rewind, PTS, duration
+and source sample indices. All 405 cases pass without a further decoder change.
+Thus the earlier unqualified CABAC B-residual combination is now qualified for
+this explicit zero-motion, QP26, default-scaling, filtering-disabled matrix.
+Moving B residuals, arbitrary scaling, luma residuals, partitions, fields and
+inter filtering still need separate coverage and implementation where missing.
+
+### Moving-reference AVC 4:2:2 B residual matrix
+
+`generate_avc_422_b_motion_residual.py` extends the independent moving-reference
+oracle with 486 CAVLC and 486 separately authored CABAC movies. It uses both
+colocated vectors (8,-4)/(-7,5), temporal direct, spatial direct and explicit bi,
+three component-depth pairs and all three weight modes, with signed/zero DC
+and none/full/masked signed AC. A changed PCM first macroblock followed by a
+residual-bearing B macroblock exercises mixed intra/inter syntax and rectangular
+chroma neighbour contexts. In explicit bi the second macroblock codes actual
+motion differences from the unavailable PCM motion predictor, rather than
+reusing the zero MVD valid after an inter neighbour. The future P picture and
+both B predictions are calculated by scalar interpolation, then weighted and
+clipped before the scalar residual is added and clipped again.
+The two acceptance suites compare every coded, planar and packed MP4 sample,
+component precision, reset/rewind, exact PTS/duration and sample indices.
+The old zero-motion B residual fixture sets remain byte-identical after sharing
+the entropy authors. This bounded matrix does not qualify inter filtering,
+fields, arbitrary scaling/QP, luma residuals or all partition/reference tools.
+
+### Progressive AVC 4:2:2 inter deblocking admission
+
+The progressive 4:2:2 inter admission gate no longer rejects deblocking modes
+0 and 2. Inter reconstruction already dispatches full-height chroma to
+`inter_plane_subsampled` with [2,1], preserving horizontal 4x4 edges. The native
+filter consumes the existing component-QP and motion/residual boundary grid.
+`scripts/generate_avc_422_inter_deblock.py` authors 72 two-frame movies with a
+PCM IDR and four independently sliced P16x16 macroblocks, CAVLC/CABAC,
+component depths 8/8, 10/12, 14/8, vertical/horizontal edges and filter modes
+0/1/2. A quarter-luma MV difference of four creates bS=1 while constant luma
+and shallow Cb/Cr steps isolate weak chroma filtering. A separate scalar border
+formula calculates the clipped delta, including high-depth tc0 scaling plus
+the unscaled chroma +1. Mode 1 and cross-slice mode 2 must preserve the edge;
+36 equal-motion bS=0 controls preserve the same visible edge even in mode 0.
+The original 24 mode-0/2 movies reproduced the exact inter-tools refusal after
+correct PCM IDR decoding; the original 12 mode-1 controls already decoded.
+The enabled acceptance suite compares exact coded/planar/packed MP4 samples,
+depths, reset/rewind and exact PTS/duration. This supersedes earlier blanket
+statements that progressive 4:2:2 inter filtering is disconnected. It does not
+prove all strengths/QPs/offsets, residual/internal-edge combinations, B-specific
+boundary rules, same-slice mode-2 boundaries, fields or MBAFF.
+
+### Same-slice and B-list 4:2:2 weak filtering qualification
+
+`generate_avc_422_inter_deblock_single.py` independently authors one P slice
+for the 72 cross-slice scalar border cases. CAVLC motion differences and CABAC
+skip/type/MVD/CBP contexts now have real left/top neighbours across a 2x2 MB
+grid. The mode-2 oracle uses mode-0 filtering inside the common slice; the mode-1
+and equal-motion bS=0 controls remain unchanged. All 72 movies pass exact coded,
+planar and MP4 output, depth, timing and reset/rewind acceptance.
+
+`generate_avc_422_b_deblock.py` authors 144 three-picture B bi movies. The two
+reference pictures have identical sample data but distinct picture identities;
+changing either L0 or L1 motion independently causes bS=1, whereas matching
+motions cause bS=0. Positive motion stays within each constant side of the step,
+so the independent scalar border oracle isolates filtering from prediction.
+The B picture has four separate slices; modes 1/2 preserve their external edge.
+`generate_avc_422_b_deblock_single.py` authors the corresponding 144 movies in
+one common B slice, with persistent arithmetic contexts and median motion
+prediction. There mode 2 must filter like mode 0. Both suites retain POC-based
+reordering, exact PTS/duration and source sample identity checks, as well as
+sample-by-sample planar/coded/MP4, precision and reset/rewind checks.
+These extend bS=0/1 coverage only: same-reference swapped-list pairing,
+bS=2/3/4 residual/intra edges, other QPs/offsets, internal partitions and field
+filtering still require separate qualification.
+
+### Residual and embedded-intra 4:2:2 inter strengths
+
+`generate_avc_422_p_intra_deblock.py` authors 54 P movies with embedded I16
+macroblocks and full-height chroma DC. CAVLC P skip/type syntax and CABAC P
+initialization/embedded-intra suffix are authored separately from the earlier
+IDR fixture syntax. The independently calculated intra filtering samples remain
+the oracle: external bS=4 edges and internal bS=3 edges, including horizontal
+chroma y=4/12 steps, modes 0/1/2, three depth pairs and both entropy modes.
+All 54 pass exact coded/planar/MP4, precision, timing and reset/rewind checks.
+
+`generate_avc_422_p_luma_deblock.py` authors 36 P movies with signed luma4 DC
+coefficients in all 16 blocks per macroblock, zero motion and no chroma
+residual. QP32 gives luma tc0=2 and chroma QP31 tc0=2 for bS=2, distinct from
+bS=1 tc0=1. A scalar inverse-quantized DC calculation and raster-order weak
+filter oracle calculate all Y/Cb/Cr samples, including p1/q1 updates and later
+internal-edge propagation. Every mode-0 luma oracle is asserted different from
+both its unfiltered samples and a bS=1 oracle. Modes 1/2 retain the cross-slice
+step. `generate_avc_422_b_luma_deblock.py` adds 36 B bi counterparts with two
+pixel-identical but distinct reference pictures and reordered PTS. CABAC entropy
+is independently authored; expected samples are shared scalar calculations,
+never decoder output. Both suites pass every coded/planar/packed MP4 sample,
+precision, reset/rewind and exact presentation timing/source sample indices.
+These matrices qualify bounded bS=2/3/4 behavior, not all QPs/offsets, mixed
+slice policies, residual bases/partitions, B swapped-list rules, fields or MBAFF.
+
+### Component-aware complementary PCM fields
+
+Native CAVLC PCM field decoding now reads monochrome, 4:2:2 and non-separated
+4:4:4 component geometry, alongside existing 4:2:0. Compact chroma macroblocks
+are 8x16 for 4:2:2 and 16x16 for 4:4:4; monochrome consumes no chroma syntax or
+storage. Complementary weaving and full-frame splitting derive subsampling
+from validated plane lengths rather than assuming quarter-size chroma.
+Decoder field reservations, canonical reference-pair views and output weaving
+use actual component sample storage, avoiding the old 3-byte-per-luma estimate
+for formats with larger or absent chroma planes.
+
+`scripts/generate_avc_component_fields.py` independently authors 36 short
+movies: formats 0/2/3, depth pairs 8/8,10/12,14/8, top/bottom-first order and
+cropped/uncropped output. The full woven-plane scalar pattern is generated
+before extracting each field parity. Before the change all 36 reproduced the
+specific I-field configuration refusal. Enabled acceptance checks exact coded
+planes, native cropped planar bytes and depth-normalized packed MP4 samples,
+including synthesized monochrome neutral chroma; pending-pair state, reset,
+rewind, PTS and combined field duration are also checked. The existing 420
+complementary PCM/JM-oracle regression still passes without invoking JM.
+A new unit checks split/weave at all formats/depth pairs in both orders and
+exact byte-budget boundaries; all 212 focused AVC units pass. This is the PCM
+field foundation, not compressed/filtered non-420 I/P/B fields, CABAC non-420
+fields, FMO non-420 fields, separate colour planes or MBAFF acceptance.
+
+### CABAC component PCM fields
+
+The compact PCM field path now accepts CABAC for monochrome/4:2:2/4:4:4.
+It decodes the I_PCM type with slice-local left/top type contexts, reads native
+component sample counts (0/128/256 chroma samples per macroblock respectively),
+restarts arithmetic decoding after raw PCM without resetting contexts, and
+validates the end-of-slice terminal/zero-word syntax. Slice coverage remains
+contiguous after the normal header ordering pass. A compressed macroblock
+still returns a probe refusal so existing 420 reconstruction can decode the
+whole slice independently; filtered/compressed non-420 fields remain refused.
+
+`generate_avc_component_fields_cabac.py` authors 108 movies from the independent
+36 spatial/parity sample patterns, crossing a single two-macroblock slice,
+separate one-macroblock slices and reversed NAL/slice order. Entropy syntax is
+authored independently of the decoder. Before connection all 108 reproduced
+the non-420 field refusal. Enabled acceptance checks all coded/planar/normalized
+MP4 samples, mixed precision, crop, field order/state, reset/rewind and exact
+pair timing. The 36 CAVLC fixtures remain byte-identical. The existing CABAC
+compressed I-field/ASO/JM-oracle acceptance also passes without invoking JM.
+This supersedes the earlier CABAC PCM-field exclusion only; non-PCM fields,
+filtered PCM, FMO and MBAFF are not proved by these movies.
+
+### Compressed monochrome/4:2:2 I fields
+
+The field I dispatcher now connects unfiltered monochrome and 4:2:2 compressed
+slices to shared component reconstruction in compact field coordinates. The
+CAVLC and CABAC 4:2:2 macroblock readers admit field syntax and preserve field
+coefficient scans; implicit/explicit MBAFF remains excluded. The 4:2:2 chroma
+path reconstructs 8x16 components in field coordinates before complementary
+weaving. Filtered non-420 fields and compressed non-separated 4:4:4 fields still
+have explicit dispatcher refusals.
+
+`generate_avc_component_field_intra.py` authors 600 movies: 576 4:2:2 cases
+cross depths 8/8,10/12,14/8, CAVLC/CABAC, top/bottom-first, I4/I16, four chroma
+prediction modes, signed/zero DC and absent/present signed AC; 24 monochrome
+cases cover the shared luma I4/I16 path without chroma syntax. Each field has
+three PCM neighbours and one compressed macroblock in a 2x2 compact grid.
+The two field parities have different spatial samples. Independent compact
+prediction and scalar residual calculations are woven to expected full planes.
+Field AC scan coefficient1 gives a vertical basis; generation asserts that
+every AC case differs from a frame-scan oracle after clipping, and both field
+parities differ in samples. All 600 reproduced the precise non-420 field
+refusal before connection, then passed exact coded/planar/packed MP4 samples,
+precision, reset/rewind, pending-pair state and exact PTS/duration acceptance.
+Regeneration preserves all 3001 fixture files byte-for-byte. This does not
+qualify all luma residual bases, scaling matrices, QPs, FMO, filtered fields,
+P/B fields, separate colour planes or MBAFF.
+
+### 4:2:2 I-field deblocking
+
+The compact I-field dispatcher now admits 4:2:2 deblocking modes 0/2. The
+shared intra filter already derives external horizontal field strength bS=3
+and external vertical strength bS=4 from `field_pic`, and full-height chroma
+keeps all horizontal 4x4 edges. Monochrome filtered fields retain their explicit
+refusal pending their own acceptance; compressed 4:4:4 fields remain excluded.
+
+`generate_avc_422_field_deblock.py` authors 108 movies at three depth pairs,
+both entropy modes, both field orders, modes 0/1/2 and vertical/horizontal/
+internal chroma steps. Compact fields have four separate I16 slices. Signed
+chroma DC level6 produces a step that distinguishes horizontal field bS=3 from
+frame bS=4 even at eight bits; generation asserts that distinction after
+filtering, as well as distinct field-parity samples and unfiltered controls.
+The independent scalar chroma filter walks macroblock order and both axes;
+internal y=4/12 edges survive mode2 while cross-slice boundaries do not.
+Before connection 72 mode0/2 streams reproduced the exact field-filter refusal;
+36 mode1 controls decoded. Enabled acceptance now passes all coded/native/
+normalized MP4 samples, depths, field state, exact timing and reset/rewind.
+The progressive scalar author's default output stays byte-identical. This
+matrix does not prove luma-residual field filtering, every offset/QP, mixed
+slice policies, inter fields, FMO or MBAFF.
+
+### Monochrome I-field deblocking
+
+The remaining monochrome I-field filter admission restriction is removed.
+Component reconstruction filters only the Y plane; synthesized display chroma
+remains neutral and is not a coded/filterable plane. The shared compact field
+filter uses horizontal bS=3, vertical bS=4 and internal bS=3 before weaving.
+
+`generate_avc_mono_field_deblock.py` authors 72 movies: depths 8/10/14,
+CAVLC/CABAC, top/bottom-first, filter modes0/1/2 and vertical/horizontal steps.
+Four separately sliced I16 macroblocks per field carry signed luma DC level4
+at QP26. A scalar Hadamard/dequantized DC calculation and full raster luma
+filter oracle include p1/q1 updates, strong/short selection and propagation to
+later internal edges. Mode0 horizontal oracles are asserted different from
+incorrect frame bS=4 results at every depth and field parity. Both fields have
+different samples. Before connection all 48 mode0/2 cases reproduced the exact
+monochrome-filter refusal; 24 mode1 controls decoded. The enabled acceptance
+now passes every coded/native-planar/packed MP4 sample (including synthesized
+neutral chroma), precision, field state, reset/rewind and exact pair timing.
+All 361 fixture files regenerate byte-identically. This is bounded QP26/DC4
+I-field coverage, not every basis/QP/offset, mixed slice policy, inter field,
+FMO or MBAFF. Compressed non-separated 4:4:4 fields still remain disconnected.
+
+### Native monochrome P fields
+
+The field skip-copy and general inter paths now accept monochrome alongside
+420. Reference lists validate component format in addition to dimensions,
+crop and precision; decoded working storage uses actual component sizes.
+Motion prediction, residual copy-in/out and filtering skip absent chroma
+planes. CAVLC field inter headers now use the SPS chroma-array type, so
+monochrome CBP and weight syntax contain no phantom chroma fields. Mixed
+intra/inter and residual scratch retain their existing typed arrays, but no
+coded monochrome chroma data is read or emitted.
+
+`generate_avc_mono_field_p.py` authors 96 four-field/two-frame movies at depth
+pairs 8/8,10/12,14/8, CAVLC/CABAC, both parity orders, motion (0,0),(1,1),
+(-3,-1),(4,-4), with/without distinct explicit luma weights. The first pair
+is separately authored PCM; P list modification explicitly selects the
+previous frame's matching-parity field for both current parities. Scalar
+six-tap quarter-pixel prediction operates on compact reference samples,
+followed by weight normalization/clipping, then scalar parity weaving.
+All 96 reproduced their exact reference-configuration/skip refusal before
+connection. Enabled acceptance passes coded Y, empty coded Cb/Cr, native
+bytes, packed MP4 Y plus neutral display chroma, exact two-pair PTS/duration,
+source sample indices, pending-field state, reset and rewind. All 673 files
+regenerate identically; the configuration extension preserves 744 earlier
+field configurations. Existing 420 skip, CABAC fractional P and B direct/skip
+field acceptance tests also pass. This matrix does not qualify nonzero luma
+residuals, opposite-parity references, every partition, filtered P fields,
+monochrome B fields, 422 inter fields or MBAFF.
+
+### Monochrome P-field residual qualification
+
+`generate_avc_mono_field_p_residual.py` adds 192 four-field movies over the
+96 scalar weighted quarter-pixel P-field cases. Each coded P macroblock has
+CBP15 and signed luma coefficients in all 16 4x4 blocks, either DC or first
+field-scanned AC. CAVLC uses the monochrome CBP table and CABAC independently
+authors coded/significance/last/level contexts with field scan positions and
+left/top coded neighbours. A scalar inverse quantization/4x4 basis calculation
+adds residuals to the already clipped weighted prediction, then clips again.
+AC generation asserts a visible distinction from incorrect frame scan.
+
+All 192 pass exact coded Y, absent coded chroma, native bytes, packed MP4 with
+neutral display chroma, exact PTS/duration/sample indices, pending-pair state,
+reset and rewind. No further decoder change was needed after the monochrome
+field connection. The original 673 P prediction fixture files remain unchanged;
+all 1345 new residual files regenerate identically. These are QP26, flat-scaling,
+4x4 residual cases, not transform8/bypass, arbitrary bases/masks/scaling/QPs,
+filtered or opposite-parity residual P fields, B fields, 422 inter or MBAFF.
+
+### Monochrome B-field qualification
+
+`generate_avc_mono_field_b.py` authors 216 six-field/three-frame movies at three
+precision pairs, CAVLC/CABAC, both field orders, L0/L1/bi, spatial/temporal direct
+and temporal skip, and default/explicit/implicit weights. Two PCM reference
+pairs have distinct pixel data. Explicit list modification selects matching
+parities from past and future pairs. POCs 0/1,6/7,2/3 give implicit weights
+43/21 for both parities; MP4 presentation timestamps remain consecutive field
+slots in order 0/1,4/5,2/3. Scalar uni/bi weighting/clipping is the oracle.
+
+`generate_avc_mono_field_b_motion.py` adds 432 movies with moving future P
+fields, colocated vectors (8,-4)/(-7,5), temporal scaling85, explicit bi
+counterparts and spatial zero-motion controls. Its independent scalar oracle
+first reconstructs the future P samples, then interpolates those decoded samples
+for B L1, retaining both rounding/clipping stages. Temporal default-weight
+cases must differ from zero-motion prediction. Both suites accept every coded
+Y, empty coded chroma, native bytes and packed MP4 with neutral display chroma,
+precision, pending-pair state, reset/rewind, exact PTS/duration and source sample
+order 0/4/2. All 648 movies pass without another decoder change. The shared
+writer defaults preserve all 3963 earlier P/residual/basic-B fixture files;
+3889 moving-B files regenerate byte-identically. These are unfiltered,
+zero-B-residual, matching-parity 16x16/direct cases: residuals, opposite parity,
+other partition/QP/scaling combinations, 422 inter and MBAFF remain separate.
+
+### Native 4:2:2 inter-field component geometry
+
+The compact field skip-copy and general inter paths now admit 4:2:2 references
+with validated component layout. Chroma output is half luma width and full
+compact-field height. Motion compensation scales vertical chroma vectors to
+quarter-field-row rather than eighth-row units; the 420-specific opposite-
+parity chroma correction is restricted to 420. Per-component weights preserve
+mixed precision. Field deblocking dispatches 422 chroma with [2,1]. Actual
+component storage and additional rectangular residual/context storage are
+included in working reservations.
+
+CAVLC field residual parsing now has a field-aware 422 variant: Y and all eight
+chroma AC blocks use field scan, while rectangular DC retains its 2x4 mapping.
+Wide slice-local coefficient counts are published for skipped/coded/mixed-intra
+macroblocks. CABAC uses its native rectangular residual payload. Reconstruction
+loads/stores native planar geometry, applies luma residuals, then the eight-block
+422 chroma residual rather than truncating to legacy four-block arrays. Existing
+progressive callers retain the original frame-scan wrapper.
+
+`generate_avc_422_field_p.py` authors 96 four-field movies: three depth pairs,
+CAVLC/CABAC, both parity orders, four signed/fractional motion vectors and
+unweighted/distinct Y/Cb/Cr weights. Matching-parity references are explicitly
+selected. All 96 reproduced the reference/skip configuration refusal before
+connection, then pass exact coded/native/packed MP4 samples and pair timing,
+field state and reset/rewind. `generate_avc_422_field_p_residual.py` adds 864
+counterparts crossing signed/zero 2x4 DC and absent/full/masked field AC in all
+eight blocks; scalar residuals are added after clipped weighted prediction.
+Field AC must differ from a frame-scan oracle after clipping. All 864 pass the
+same acceptance. A unit isolates the vertical field scan and atomic failure on
+truncated rectangular syntax; all 213 AVC units pass. All 6722 new files
+regenerate identically and 576 earlier monochrome P/residual packets remain
+unchanged. This qualifies bounded matching-parity P prediction and chroma
+residuals, not opposite-parity interpolation, B fields, luma residual/transform8
+matrices, every filter/QP/offset, mixed slice policy, FMO or MBAFF.
+
+### 4:2:2 B-field prediction qualification
+
+`generate_avc_422_field_b.py` authors 216 six-field movies crossing CAVLC/CABAC,
+three mixed depth pairs, both parity orders, L0/L1/bi/spatial/temporal/skip and
+default/explicit/implicit weights. The two PCM reference pairs have distinct
+Y/Cb/Cr samples. Explicit weights use separate luma/chroma denominators and
+different signed weights/offsets per component/list. POCs 0/1,6/7,2/3 provide
+asymmetric implicit weights43/21; reference lists explicitly select matching
+parities. Scalar component weighting and clipping provide expected samples.
+
+`generate_avc_422_field_b_motion.py` adds 432 counterparts with a moving future
+P pair, colocated vectors (8,-4)/(-7,5), temporal scaling85 and explicit bi
+vectors. The scalar oracle first reconstructs each future component, then
+performs the second luma six-tap/chroma bilinear interpolation over those
+already rounded/clipped samples. Every component's temporal default-weight
+oracle must differ from zero motion. All 648 accept exact coded/native/packed
+samples and precision, pending-pair state, reset/rewind, exact PTS/duration and
+source sample order0/4/2 without a further decoder change. Reauthoring confirms
+all 5834 prior monochrome-B files are preserved and 5834 new 422 files are
+stable. This qualifies matching-parity, unfiltered, zero-B-residual 16x16/direct
+prediction; B residuals, opposite-parity references, other partitions, filtering,
+scaling/QPs and MBAFF remain separate work.
+
+### Opposite-parity monochrome/4:2:2 P fields
+
+`generate_avc_opposite_field_p.py` authors 96 monochrome and 96 422 movies by
+explicitly selecting PicNum0, the previous opposite-parity field, rather than
+matching-parity PicNum1. Both entropy modes, both parity orders, three precision
+pairs, four motion vectors and distinct component weights are crossed. Scalar
+prediction uses the opposite field's compact samples; generation requires a
+visible difference from the corresponding matching-parity movie. Every 422
+chroma oracle additionally differs from incorrectly applying the 420 parity
+phase. Unweighted zero-motion CAVLC skip deliberately bypasses the same-parity
+copy optimization and exercises general field prediction.
+
+`generate_avc_opposite_field_p_residual.py` adds 192 monochrome DC/field-AC and
+864 422 signed/zero rectangular-DC, absent/full/masked field-AC movies using the
+same independent residual arithmetic over opposite-parity prediction. All
+1248 movies pass exact coded/native/packed samples, precision, exact pair
+PTS/duration/source indices, field state, reset and rewind without another
+decoder change. The existing 8740 matching-parity files remain unchanged; all
+8740 opposite-parity files regenerate identically. This qualifies bounded
+matching/opposite P-field cases, not B mixed-parity direct/reference mapping,
+all luma bases/scaling/QPs, filtered P fields, arbitrary partitions, FMO or MBAFF.
+
+### Non-420 MBAFF PCM foundation and monochrome format fix
+
+The old MBAFF intra path allocated quarter-size chroma regardless of SPS format.
+The new 192-movie reproducer confirmed that monochrome PCM silently emerged as
+420 with zero chroma, while 422 stopped at entropy admission. A component-aware
+PCM path now publishes empty monochrome chroma or full-height 422 chroma using
+MBAFF pair layout. Frame pairs write contiguous macroblock rows; field pairs
+write alternating rows. Existing typed CAVLC/CABAC readers retain pair flags,
+slice-local contexts, PCM restarts and pair-end syntax. Compressed 422 syntax
+and non-420 compressed reconstruction still return explicit Unsupported;
+filtered/FMO non-420 MBAFF is not admitted by this PCM foundation.
+
+Frame-to-field canonicalization and migrated-frame reservations now use actual
+component storage, including 422's larger planes, rather than 3 bytes per luma
+sample. The PCM path reserves output plus bounded entropy/header/PCM scratch
+and checks actual output capacities. A focused unit tests one-byte-below and
+exact working-storage limits for monochrome CAVLC and mixed-pair 422 CABAC.
+
+`generate_avc_component_mbaff_pcm.py` authors 192 two-frame movies: formats0/2,
+three precision pairs, CAVLC/CABAC, frame/field/column/checker pair modes, normal/
+reversed slice order and crop/no-crop. Independent physical sample coordinates
+supply the oracle before packets are written. Enabled acceptance checks every
+coded/native/cropped/packed sample, absent/synthesized monochrome chroma,
+precision, exact PTS/duration, state, reset and rewind. The eight separately authored
+compressed first-pair streams now have split expectations: four monochrome
+cases are accepted, while four 422 cases retain explicit refusal tests. The
+later monochrome I4/I16 milestone supersedes the original blanket refusal. The original 986-file milestone regenerated identically; the new SPS
+option preserves 744 prior field configurations. Existing 420 MBAFF PCM/FMO
+acceptance passes. Non-PCM I/P/B MBAFF, non-420 filtering/FMO, compressed444 and
+other unqualified codec tools remain unfinished.
+
+### Compressed monochrome MBAFF intra
+
+Monochrome MBAFF I pictures now use the shared intra reconstruction path with
+native Y-only output and prediction views. Component validation/publication
+skips absent chroma in PCM and compressed blocks; empty planes do not enter
+deblocking. Working reservations derive from actual component storage for the
+output and temporary view, preserving 420's previous reservation. Pair-local
+physical readiness and frame/field row publication remain the existing native
+MBAFF implementation. The 422 PCM path remains separate; non-PCM 422 still
+has its explicit syntax refusal.
+
+`generate_avc_mono_mbaff_intra.py` authors 288 two-frame movies at 8/10/14 bits,
+CAVLC/CABAC, frame/field/column/checker pairs, ASO, crop/no-crop and three luma
+forms: I16 signed DC4, I4 signed DC1, I4 signed AC1. An independent scalar
+physical-pixel availability/prediction calculation follows standard block order,
+then inverse-quantized DC/AC bases. Field AC is vertical and frame AC horizontal;
+generation asserts a post-clipping difference from the wrong orientation.
+All 288 reproduced the exact old compressed-MBAFF refusal, then pass every
+coded/native/cropped/packed sample, neutral display chroma, precision, PTS,
+state and reset/rewind. Four earlier neutral I16 first-pair fixtures move from
+refusal to sample acceptance; four 422 counterparts retain exact refusal tests.
+The previous 192 PCM movies still pass through the new shared monochrome path.
+This does not qualify transform8/bypass, all prediction modes/QPs/scaling,
+filtered or FMO monochrome MBAFF, mixed/inter P/B MBAFF or compressed422/444.

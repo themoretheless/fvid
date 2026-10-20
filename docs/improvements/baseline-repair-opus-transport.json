@@ -1,0 +1,18 @@
+{
+  "count_as_new_improvement": false,
+  "checked_at": "2026-10-15T11:05:13.791953+00:00",
+  "source": "src/container/opus_packet.rs",
+  "trigger": "An in-session change to the shared Opus header parser began using the owned native OpusHead parser. The root transport include could not resolve its optional player dependency in a minimal build.",
+  "before": "Two related root builds fail E0433 at owned_opus_packet_impl.rs:4; codec qualification had otherwise passed.",
+  "result": "Delegate the three root transport functions to the media owner, retaining root error shape and preserving the changed native parser. No dependency/feature expansion or concurrent-work rollback.",
+  "checks": [
+    "3 root packet/identification/preskip tests passed",
+    "2 owner native header/version/channel-layout tests passed",
+    "Related no-player integration retry passed; final minimal/player configurations are recorded with batch020."
+  ],
+  "evidence": [
+    "evidence/baseline-opus-bridge-mbaff-inter-components-related-mbaff.log",
+    "evidence/baseline-opus-bridge-opus-transport-bridge-root.log",
+    "evidence/baseline-opus-bridge-opus-transport-bridge-owner.log"
+  ]
+}

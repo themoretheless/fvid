@@ -1,0 +1,11 @@
+{
+  "provenance": "Authored three VP9 keyframes,55ms. Empty clock fields use schema defaults, explicit-zero and malformed-width cases are distinct refusals. No encoder, private media or network.",
+  "files": {
+    "control.mkv": "da16b35b8e8a0944116129678973b7b30c1449e084937a415baaf3d5d28ec5d4",
+    "segment.mkv": "588ea1eb90db8e5b114ad0b675abf7d76f2bd9a66bef7b8bd35f85e8e625f7e6",
+    "track.mkv": "09fdb5081f073083ca354b55f5a2cc174eb076644ad4fa7661149ede96f6871f",
+    "both.mkv": "f8e4073070cbde00321722b9d627454969dccf98af6b93d3ffcfa416e961e6fa",
+    "zero-segment.mkv": "e0df1d72508412b8dd0fe0cc81082dd0041fd381b7ebfbde85c38b55607906ae",
+    "invalid-track-width.mkv": "971abfd56bd788e7393b644ce5dd88d7c30337164fe405d3f57bc7b2110b633a"
+  }
+}

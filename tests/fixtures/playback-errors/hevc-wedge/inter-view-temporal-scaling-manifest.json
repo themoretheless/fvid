@@ -1,0 +1,165 @@
+{
+  "provenance": "Owned PCM, CABAC, VPS/SPS/PPS and MP4 authors. No external codec, private material or network. Tests do not generate fixtures.",
+  "layers": [
+    0,
+    3,
+    5
+  ],
+  "view_indices": [
+    0,
+    1,
+    2
+  ],
+  "profile": [
+    1,
+    8,
+    8
+  ],
+  "size": [
+    32,
+    32
+  ],
+  "chroma": 1,
+  "depth": 8,
+  "vps_3d_extension": true,
+  "cp_precision": 0,
+  "num_cp": [
+    0,
+    0
+  ],
+  "modes": [
+    "explicit AMVP",
+    "skip temporal merge"
+  ],
+  "scaling_applies_to": "skip temporal merge only; explicit AMVP copies long-term motion",
+  "cases": [
+    {
+      "label": "",
+      "view_ids": [
+        100,
+        102,
+        108
+      ],
+      "source_mv": [
+        0,
+        4
+      ],
+      "scaled_mv": [
+        0,
+        16
+      ]
+    },
+    {
+      "label": "negative",
+      "view_ids": [
+        100,
+        102,
+        96
+      ],
+      "source_mv": [
+        0,
+        4
+      ],
+      "scaled_mv": [
+        0,
+        -8
+      ]
+    },
+    {
+      "label": "equal",
+      "view_ids": [
+        7,
+        7,
+        7
+      ],
+      "source_mv": [
+        0,
+        4
+      ],
+      "scaled_mv": [
+        0,
+        4
+      ]
+    },
+    {
+      "label": "zero-source",
+      "view_ids": [
+        100,
+        100,
+        108
+      ],
+      "source_mv": [
+        0,
+        4
+      ],
+      "scaled_mv": [
+        0,
+        4
+      ]
+    },
+    {
+      "label": "zero-target",
+      "view_ids": [
+        100,
+        102,
+        100
+      ],
+      "source_mv": [
+        0,
+        4
+      ],
+      "scaled_mv": [
+        0,
+        4
+      ]
+    },
+    {
+      "label": "positive-limit",
+      "view_ids": [
+        100,
+        102,
+        108
+      ],
+      "source_mv": [
+        0,
+        32767
+      ],
+      "scaled_mv": [
+        0,
+        32767
+      ]
+    },
+    {
+      "label": "negative-limit",
+      "view_ids": [
+        100,
+        102,
+        108
+      ],
+      "source_mv": [
+        0,
+        -32768
+      ],
+      "scaled_mv": [
+        0,
+        -32768
+      ]
+    },
+    {
+      "label": "factor-clip",
+      "view_ids": [
+        0,
+        1,
+        32767
+      ],
+      "source_mv": [
+        0,
+        4
+      ],
+      "scaled_mv": [
+        0,
+        64
+      ]
+    }
+  ]
+}

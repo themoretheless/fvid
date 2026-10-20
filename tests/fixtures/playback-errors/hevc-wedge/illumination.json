@@ -1,0 +1,47 @@
+{
+  "provenance": "Owned synthetic PCM/CABAC layered P movies and independent Annex I boundary regression and sample oracle. No private data, external codecs or test-time generation.",
+  "cases": [
+    {
+      "file": "illumination-32-0.mp4",
+      "size": 32,
+      "enabled": false,
+      "oracle_offset": 0,
+      "changed_samples": 0
+    },
+    {
+      "file": "illumination-32-1.mp4",
+      "size": 32,
+      "enabled": true,
+      "oracle_offset": 1536,
+      "changed_samples": 0
+    },
+    {
+      "file": "illumination-64-0.mp4",
+      "size": 64,
+      "enabled": false,
+      "oracle_offset": 3072,
+      "changed_samples": 0
+    },
+    {
+      "file": "illumination-64-1.mp4",
+      "size": 64,
+      "enabled": true,
+      "oracle_offset": 9216,
+      "changed_samples": 1530
+    },
+    {
+      "file": "illumination-128-0.mp4",
+      "size": 128,
+      "enabled": false,
+      "oracle_offset": 15360,
+      "changed_samples": 0
+    },
+    {
+      "file": "illumination-128-1.mp4",
+      "size": 128,
+      "enabled": true,
+      "oracle_offset": 39936,
+      "changed_samples": 7651
+    }
+  ]
+}

@@ -1,0 +1,7783 @@
+{
+  "provenance": "Owned AMP B source and coded residual B targets; independent standard source interpolation, aligned source-motion lookup and bilinear residual oracle; offline.",
+  "zero_witnesses": 2408726,
+  "l0_witnesses": 2914460,
+  "cases": [
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 0,
+      "oracle_offset": 6144,
+      "zero_witnesses": 3119,
+      "l0_witnesses": 4507
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 12288,
+      "oracle_offset": 18432,
+      "zero_witnesses": 3125,
+      "l0_witnesses": 4509
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 24576,
+      "oracle_offset": 30720,
+      "zero_witnesses": 2718,
+      "l0_witnesses": 4219
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 36864,
+      "oracle_offset": 43008,
+      "zero_witnesses": 3197,
+      "l0_witnesses": 3890
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 49152,
+      "oracle_offset": 55296,
+      "zero_witnesses": 3207,
+      "l0_witnesses": 3899
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 61440,
+      "oracle_offset": 67584,
+      "zero_witnesses": 3167,
+      "l0_witnesses": 4002
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 73728,
+      "oracle_offset": 79872,
+      "zero_witnesses": 3376,
+      "l0_witnesses": 4512
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 86016,
+      "oracle_offset": 92160,
+      "zero_witnesses": 3382,
+      "l0_witnesses": 4504
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 98304,
+      "oracle_offset": 104448,
+      "zero_witnesses": 3298,
+      "l0_witnesses": 4224
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 110592,
+      "oracle_offset": 116736,
+      "zero_witnesses": 3199,
+      "l0_witnesses": 3841
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 122880,
+      "oracle_offset": 129024,
+      "zero_witnesses": 3173,
+      "l0_witnesses": 3852
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-both-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 135168,
+      "oracle_offset": 141312,
+      "zero_witnesses": 3132,
+      "l0_witnesses": 3968
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 147456,
+      "oracle_offset": 153600,
+      "zero_witnesses": 3021,
+      "l0_witnesses": 3843
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 159744,
+      "oracle_offset": 165888,
+      "zero_witnesses": 3024,
+      "l0_witnesses": 3847
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 172032,
+      "oracle_offset": 178176,
+      "zero_witnesses": 2600,
+      "l0_witnesses": 3993
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 184320,
+      "oracle_offset": 190464,
+      "zero_witnesses": 2917,
+      "l0_witnesses": 3341
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 196608,
+      "oracle_offset": 202752,
+      "zero_witnesses": 2919,
+      "l0_witnesses": 3344
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 208896,
+      "oracle_offset": 215040,
+      "zero_witnesses": 2559,
+      "l0_witnesses": 3545
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 221184,
+      "oracle_offset": 227328,
+      "zero_witnesses": 3306,
+      "l0_witnesses": 3857
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 233472,
+      "oracle_offset": 239616,
+      "zero_witnesses": 3312,
+      "l0_witnesses": 3827
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 245760,
+      "oracle_offset": 251904,
+      "zero_witnesses": 3099,
+      "l0_witnesses": 3985
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 258048,
+      "oracle_offset": 264192,
+      "zero_witnesses": 3175,
+      "l0_witnesses": 3352
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 270336,
+      "oracle_offset": 276480,
+      "zero_witnesses": 3181,
+      "l0_witnesses": 3322
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l0-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 282624,
+      "oracle_offset": 288768,
+      "zero_witnesses": 3065,
+      "l0_witnesses": 3537
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 294912,
+      "oracle_offset": 301056,
+      "zero_witnesses": 4259,
+      "l0_witnesses": 4208
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 307200,
+      "oracle_offset": 313344,
+      "zero_witnesses": 4295,
+      "l0_witnesses": 4347
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 319488,
+      "oracle_offset": 325632,
+      "zero_witnesses": 3850,
+      "l0_witnesses": 3856
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 331776,
+      "oracle_offset": 337920,
+      "zero_witnesses": 553,
+      "l0_witnesses": 535
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 344064,
+      "oracle_offset": 350208,
+      "zero_witnesses": 557,
+      "l0_witnesses": 569
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 356352,
+      "oracle_offset": 362496,
+      "zero_witnesses": 441,
+      "l0_witnesses": 453
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 368640,
+      "oracle_offset": 374784,
+      "zero_witnesses": 4213,
+      "l0_witnesses": 4201
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 380928,
+      "oracle_offset": 387072,
+      "zero_witnesses": 4255,
+      "l0_witnesses": 4348
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 393216,
+      "oracle_offset": 399360,
+      "zero_witnesses": 3834,
+      "l0_witnesses": 3857
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 405504,
+      "oracle_offset": 411648,
+      "zero_witnesses": 550,
+      "l0_witnesses": 531
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 417792,
+      "oracle_offset": 423936,
+      "zero_witnesses": 557,
+      "l0_witnesses": 563
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-8-l1-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 430080,
+      "oracle_offset": 436224,
+      "zero_witnesses": 437,
+      "l0_witnesses": 449
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 442368,
+      "oracle_offset": 448512,
+      "zero_witnesses": 2893,
+      "l0_witnesses": 4455
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 454656,
+      "oracle_offset": 460800,
+      "zero_witnesses": 3017,
+      "l0_witnesses": 4432
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 466944,
+      "oracle_offset": 473088,
+      "zero_witnesses": 2761,
+      "l0_witnesses": 4169
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 479232,
+      "oracle_offset": 485376,
+      "zero_witnesses": 3143,
+      "l0_witnesses": 3845
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 491520,
+      "oracle_offset": 497664,
+      "zero_witnesses": 3201,
+      "l0_witnesses": 3901
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 503808,
+      "oracle_offset": 509952,
+      "zero_witnesses": 3198,
+      "l0_witnesses": 3952
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 516096,
+      "oracle_offset": 522240,
+      "zero_witnesses": 3276,
+      "l0_witnesses": 4445
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 528384,
+      "oracle_offset": 534528,
+      "zero_witnesses": 3386,
+      "l0_witnesses": 4496
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 540672,
+      "oracle_offset": 546816,
+      "zero_witnesses": 3331,
+      "l0_witnesses": 4184
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 552960,
+      "oracle_offset": 559104,
+      "zero_witnesses": 3092,
+      "l0_witnesses": 3826
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 565248,
+      "oracle_offset": 571392,
+      "zero_witnesses": 3184,
+      "l0_witnesses": 3850
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-both-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 577536,
+      "oracle_offset": 583680,
+      "zero_witnesses": 3163,
+      "l0_witnesses": 3922
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 589824,
+      "oracle_offset": 595968,
+      "zero_witnesses": 2780,
+      "l0_witnesses": 3821
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 602112,
+      "oracle_offset": 608256,
+      "zero_witnesses": 2964,
+      "l0_witnesses": 3784
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 614400,
+      "oracle_offset": 620544,
+      "zero_witnesses": 2687,
+      "l0_witnesses": 3925
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 626688,
+      "oracle_offset": 632832,
+      "zero_witnesses": 2738,
+      "l0_witnesses": 3331
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 638976,
+      "oracle_offset": 645120,
+      "zero_witnesses": 2877,
+      "l0_witnesses": 3291
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 651264,
+      "oracle_offset": 657408,
+      "zero_witnesses": 2632,
+      "l0_witnesses": 3502
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 663552,
+      "oracle_offset": 669696,
+      "zero_witnesses": 3043,
+      "l0_witnesses": 3797
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 675840,
+      "oracle_offset": 681984,
+      "zero_witnesses": 3313,
+      "l0_witnesses": 3826
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 688128,
+      "oracle_offset": 694272,
+      "zero_witnesses": 3153,
+      "l0_witnesses": 3920
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 700416,
+      "oracle_offset": 706560,
+      "zero_witnesses": 2991,
+      "l0_witnesses": 3307
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 712704,
+      "oracle_offset": 718848,
+      "zero_witnesses": 3182,
+      "l0_witnesses": 3321
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l0-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 724992,
+      "oracle_offset": 731136,
+      "zero_witnesses": 3092,
+      "l0_witnesses": 3497
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 737280,
+      "oracle_offset": 743424,
+      "zero_witnesses": 4267,
+      "l0_witnesses": 4213
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 749568,
+      "oracle_offset": 755712,
+      "zero_witnesses": 4267,
+      "l0_witnesses": 4213
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 761856,
+      "oracle_offset": 768000,
+      "zero_witnesses": 3831,
+      "l0_witnesses": 3859
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 774144,
+      "oracle_offset": 780288,
+      "zero_witnesses": 553,
+      "l0_witnesses": 534
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 786432,
+      "oracle_offset": 792576,
+      "zero_witnesses": 553,
+      "l0_witnesses": 534
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 798720,
+      "oracle_offset": 804864,
+      "zero_witnesses": 434,
+      "l0_witnesses": 449
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 811008,
+      "oracle_offset": 817152,
+      "zero_witnesses": 4222,
+      "l0_witnesses": 4207
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 823296,
+      "oracle_offset": 829440,
+      "zero_witnesses": 4255,
+      "l0_witnesses": 4169
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 835584,
+      "oracle_offset": 841728,
+      "zero_witnesses": 3814,
+      "l0_witnesses": 3846
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 847872,
+      "oracle_offset": 854016,
+      "zero_witnesses": 546,
+      "l0_witnesses": 528
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 860160,
+      "oracle_offset": 866304,
+      "zero_witnesses": 548,
+      "l0_witnesses": 527
+    },
+    {
+      "file": "residual-b-reference-motion-64-0-24-l1-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 872448,
+      "oracle_offset": 878592,
+      "zero_witnesses": 430,
+      "l0_witnesses": 445
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 884736,
+      "oracle_offset": 890880,
+      "zero_witnesses": 3119,
+      "l0_witnesses": 4507
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 897024,
+      "oracle_offset": 903168,
+      "zero_witnesses": 3125,
+      "l0_witnesses": 4509
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 909312,
+      "oracle_offset": 915456,
+      "zero_witnesses": 2718,
+      "l0_witnesses": 4219
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 921600,
+      "oracle_offset": 927744,
+      "zero_witnesses": 3197,
+      "l0_witnesses": 3890
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 933888,
+      "oracle_offset": 940032,
+      "zero_witnesses": 3207,
+      "l0_witnesses": 3899
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 946176,
+      "oracle_offset": 952320,
+      "zero_witnesses": 3167,
+      "l0_witnesses": 4002
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 958464,
+      "oracle_offset": 964608,
+      "zero_witnesses": 3376,
+      "l0_witnesses": 4512
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 970752,
+      "oracle_offset": 976896,
+      "zero_witnesses": 3382,
+      "l0_witnesses": 4504
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 983040,
+      "oracle_offset": 989184,
+      "zero_witnesses": 3298,
+      "l0_witnesses": 4224
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 995328,
+      "oracle_offset": 1001472,
+      "zero_witnesses": 3199,
+      "l0_witnesses": 3841
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1007616,
+      "oracle_offset": 1013760,
+      "zero_witnesses": 3173,
+      "l0_witnesses": 3852
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-both-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1019904,
+      "oracle_offset": 1026048,
+      "zero_witnesses": 3132,
+      "l0_witnesses": 3968
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1032192,
+      "oracle_offset": 1038336,
+      "zero_witnesses": 3021,
+      "l0_witnesses": 3843
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1044480,
+      "oracle_offset": 1050624,
+      "zero_witnesses": 3024,
+      "l0_witnesses": 3847
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1056768,
+      "oracle_offset": 1062912,
+      "zero_witnesses": 2600,
+      "l0_witnesses": 3993
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1069056,
+      "oracle_offset": 1075200,
+      "zero_witnesses": 2917,
+      "l0_witnesses": 3341
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1081344,
+      "oracle_offset": 1087488,
+      "zero_witnesses": 2919,
+      "l0_witnesses": 3344
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1093632,
+      "oracle_offset": 1099776,
+      "zero_witnesses": 2559,
+      "l0_witnesses": 3545
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1105920,
+      "oracle_offset": 1112064,
+      "zero_witnesses": 3306,
+      "l0_witnesses": 3857
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1118208,
+      "oracle_offset": 1124352,
+      "zero_witnesses": 3312,
+      "l0_witnesses": 3827
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1130496,
+      "oracle_offset": 1136640,
+      "zero_witnesses": 3099,
+      "l0_witnesses": 3985
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1142784,
+      "oracle_offset": 1148928,
+      "zero_witnesses": 3175,
+      "l0_witnesses": 3352
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1155072,
+      "oracle_offset": 1161216,
+      "zero_witnesses": 3181,
+      "l0_witnesses": 3322
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l0-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1167360,
+      "oracle_offset": 1173504,
+      "zero_witnesses": 3065,
+      "l0_witnesses": 3537
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1179648,
+      "oracle_offset": 1185792,
+      "zero_witnesses": 4259,
+      "l0_witnesses": 4208
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1191936,
+      "oracle_offset": 1198080,
+      "zero_witnesses": 4295,
+      "l0_witnesses": 4347
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1204224,
+      "oracle_offset": 1210368,
+      "zero_witnesses": 3850,
+      "l0_witnesses": 3856
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1216512,
+      "oracle_offset": 1222656,
+      "zero_witnesses": 553,
+      "l0_witnesses": 535
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1228800,
+      "oracle_offset": 1234944,
+      "zero_witnesses": 557,
+      "l0_witnesses": 569
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1241088,
+      "oracle_offset": 1247232,
+      "zero_witnesses": 441,
+      "l0_witnesses": 453
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1253376,
+      "oracle_offset": 1259520,
+      "zero_witnesses": 4213,
+      "l0_witnesses": 4201
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1265664,
+      "oracle_offset": 1271808,
+      "zero_witnesses": 4255,
+      "l0_witnesses": 4348
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1277952,
+      "oracle_offset": 1284096,
+      "zero_witnesses": 3834,
+      "l0_witnesses": 3857
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1290240,
+      "oracle_offset": 1296384,
+      "zero_witnesses": 550,
+      "l0_witnesses": 531
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1302528,
+      "oracle_offset": 1308672,
+      "zero_witnesses": 557,
+      "l0_witnesses": 563
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-8-l1-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1314816,
+      "oracle_offset": 1320960,
+      "zero_witnesses": 437,
+      "l0_witnesses": 449
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1327104,
+      "oracle_offset": 1333248,
+      "zero_witnesses": 2893,
+      "l0_witnesses": 4455
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1339392,
+      "oracle_offset": 1345536,
+      "zero_witnesses": 3017,
+      "l0_witnesses": 4432
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1351680,
+      "oracle_offset": 1357824,
+      "zero_witnesses": 2761,
+      "l0_witnesses": 4169
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1363968,
+      "oracle_offset": 1370112,
+      "zero_witnesses": 3143,
+      "l0_witnesses": 3845
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1376256,
+      "oracle_offset": 1382400,
+      "zero_witnesses": 3201,
+      "l0_witnesses": 3901
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1388544,
+      "oracle_offset": 1394688,
+      "zero_witnesses": 3198,
+      "l0_witnesses": 3952
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1400832,
+      "oracle_offset": 1406976,
+      "zero_witnesses": 3276,
+      "l0_witnesses": 4445
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1413120,
+      "oracle_offset": 1419264,
+      "zero_witnesses": 3386,
+      "l0_witnesses": 4496
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1425408,
+      "oracle_offset": 1431552,
+      "zero_witnesses": 3331,
+      "l0_witnesses": 4184
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1437696,
+      "oracle_offset": 1443840,
+      "zero_witnesses": 3092,
+      "l0_witnesses": 3826
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1449984,
+      "oracle_offset": 1456128,
+      "zero_witnesses": 3184,
+      "l0_witnesses": 3850
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-both-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1462272,
+      "oracle_offset": 1468416,
+      "zero_witnesses": 3163,
+      "l0_witnesses": 3922
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1474560,
+      "oracle_offset": 1480704,
+      "zero_witnesses": 2780,
+      "l0_witnesses": 3821
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1486848,
+      "oracle_offset": 1492992,
+      "zero_witnesses": 2964,
+      "l0_witnesses": 3784
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1499136,
+      "oracle_offset": 1505280,
+      "zero_witnesses": 2687,
+      "l0_witnesses": 3925
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1511424,
+      "oracle_offset": 1517568,
+      "zero_witnesses": 2738,
+      "l0_witnesses": 3331
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1523712,
+      "oracle_offset": 1529856,
+      "zero_witnesses": 2877,
+      "l0_witnesses": 3291
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1536000,
+      "oracle_offset": 1542144,
+      "zero_witnesses": 2632,
+      "l0_witnesses": 3502
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1548288,
+      "oracle_offset": 1554432,
+      "zero_witnesses": 3043,
+      "l0_witnesses": 3797
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1560576,
+      "oracle_offset": 1566720,
+      "zero_witnesses": 3313,
+      "l0_witnesses": 3826
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1572864,
+      "oracle_offset": 1579008,
+      "zero_witnesses": 3153,
+      "l0_witnesses": 3920
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1585152,
+      "oracle_offset": 1591296,
+      "zero_witnesses": 2991,
+      "l0_witnesses": 3307
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1597440,
+      "oracle_offset": 1603584,
+      "zero_witnesses": 3182,
+      "l0_witnesses": 3321
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l0-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 1609728,
+      "oracle_offset": 1615872,
+      "zero_witnesses": 3092,
+      "l0_witnesses": 3497
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-1-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1622016,
+      "oracle_offset": 1628160,
+      "zero_witnesses": 4267,
+      "l0_witnesses": 4213
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-1-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1634304,
+      "oracle_offset": 1640448,
+      "zero_witnesses": 4267,
+      "l0_witnesses": 4213
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-1-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1646592,
+      "oracle_offset": 1652736,
+      "zero_witnesses": 3831,
+      "l0_witnesses": 3859
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-1-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1658880,
+      "oracle_offset": 1665024,
+      "zero_witnesses": 553,
+      "l0_witnesses": 534
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-1-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1671168,
+      "oracle_offset": 1677312,
+      "zero_witnesses": 553,
+      "l0_witnesses": 534
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-1-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1683456,
+      "oracle_offset": 1689600,
+      "zero_witnesses": 434,
+      "l0_witnesses": 449
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-2-0-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1695744,
+      "oracle_offset": 1701888,
+      "zero_witnesses": 4222,
+      "l0_witnesses": 4207
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-2-0-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1708032,
+      "oracle_offset": 1714176,
+      "zero_witnesses": 4255,
+      "l0_witnesses": 4169
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-2-0-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1720320,
+      "oracle_offset": 1726464,
+      "zero_witnesses": 3814,
+      "l0_witnesses": 3846
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-2-1-29-3--35--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1732608,
+      "oracle_offset": 1738752,
+      "zero_witnesses": 546,
+      "l0_witnesses": 528
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-2-1-30-3--34--1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1744896,
+      "oracle_offset": 1751040,
+      "zero_witnesses": 548,
+      "l0_witnesses": 527
+    },
+    {
+      "file": "residual-b-reference-motion-64-1-24-l1-2-1-135--3--135-5.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 1757184,
+      "oracle_offset": 1763328,
+      "zero_witnesses": 430,
+      "l0_witnesses": 445
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1769472,
+      "oracle_offset": 1794048,
+      "zero_witnesses": 15482,
+      "l0_witnesses": 22477
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1818624,
+      "oracle_offset": 1843200,
+      "zero_witnesses": 15511,
+      "l0_witnesses": 22488
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1867776,
+      "oracle_offset": 1892352,
+      "zero_witnesses": 10945,
+      "l0_witnesses": 22005
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1916928,
+      "oracle_offset": 1941504,
+      "zero_witnesses": 15971,
+      "l0_witnesses": 19261
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 1966080,
+      "oracle_offset": 1990656,
+      "zero_witnesses": 16003,
+      "l0_witnesses": 19316
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2015232,
+      "oracle_offset": 2039808,
+      "zero_witnesses": 15777,
+      "l0_witnesses": 20696
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2064384,
+      "oracle_offset": 2088960,
+      "zero_witnesses": 16775,
+      "l0_witnesses": 22549
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2113536,
+      "oracle_offset": 2138112,
+      "zero_witnesses": 16799,
+      "l0_witnesses": 22503
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2162688,
+      "oracle_offset": 2187264,
+      "zero_witnesses": 16326,
+      "l0_witnesses": 22001
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2211840,
+      "oracle_offset": 2236416,
+      "zero_witnesses": 15960,
+      "l0_witnesses": 19039
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2260992,
+      "oracle_offset": 2285568,
+      "zero_witnesses": 15885,
+      "l0_witnesses": 19148
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-both-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 2310144,
+      "oracle_offset": 2334720,
+      "zero_witnesses": 15649,
+      "l0_witnesses": 20623
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2359296,
+      "oracle_offset": 2383872,
+      "zero_witnesses": 14962,
+      "l0_witnesses": 18868
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2408448,
+      "oracle_offset": 2433024,
+      "zero_witnesses": 14990,
+      "l0_witnesses": 18898
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2457600,
+      "oracle_offset": 2482176,
+      "zero_witnesses": 11161,
+      "l0_witnesses": 21284
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2506752,
+      "oracle_offset": 2531328,
+      "zero_witnesses": 14442,
+      "l0_witnesses": 16473
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2555904,
+      "oracle_offset": 2580480,
+      "zero_witnesses": 14460,
+      "l0_witnesses": 16493
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2605056,
+      "oracle_offset": 2629632,
+      "zero_witnesses": 10813,
+      "l0_witnesses": 18392
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2654208,
+      "oracle_offset": 2678784,
+      "zero_witnesses": 16372,
+      "l0_witnesses": 19003
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2703360,
+      "oracle_offset": 2727936,
+      "zero_witnesses": 16434,
+      "l0_witnesses": 18811
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2752512,
+      "oracle_offset": 2777088,
+      "zero_witnesses": 15656,
+      "l0_witnesses": 21269
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2801664,
+      "oracle_offset": 2826240,
+      "zero_witnesses": 15778,
+      "l0_witnesses": 16580
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2850816,
+      "oracle_offset": 2875392,
+      "zero_witnesses": 15840,
+      "l0_witnesses": 16388
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l0-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 2899968,
+      "oracle_offset": 2924544,
+      "zero_witnesses": 15370,
+      "l0_witnesses": 18377
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 2949120,
+      "oracle_offset": 2973696,
+      "zero_witnesses": 21272,
+      "l0_witnesses": 20979
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 2998272,
+      "oracle_offset": 3022848,
+      "zero_witnesses": 21467,
+      "l0_witnesses": 21706
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3047424,
+      "oracle_offset": 3072000,
+      "zero_witnesses": 18919,
+      "l0_witnesses": 18863
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3096576,
+      "oracle_offset": 3121152,
+      "zero_witnesses": 2798,
+      "l0_witnesses": 2697
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3145728,
+      "oracle_offset": 3170304,
+      "zero_witnesses": 2819,
+      "l0_witnesses": 2842
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3194880,
+      "oracle_offset": 3219456,
+      "zero_witnesses": 2269,
+      "l0_witnesses": 2285
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3244032,
+      "oracle_offset": 3268608,
+      "zero_witnesses": 21048,
+      "l0_witnesses": 20959
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3293184,
+      "oracle_offset": 3317760,
+      "zero_witnesses": 21258,
+      "l0_witnesses": 21684
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3342336,
+      "oracle_offset": 3366912,
+      "zero_witnesses": 18918,
+      "l0_witnesses": 18954
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3391488,
+      "oracle_offset": 3416064,
+      "zero_witnesses": 2798,
+      "l0_witnesses": 2690
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3440640,
+      "oracle_offset": 3465216,
+      "zero_witnesses": 2819,
+      "l0_witnesses": 2841
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-8-l1-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 3489792,
+      "oracle_offset": 3514368,
+      "zero_witnesses": 2260,
+      "l0_witnesses": 2278
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3538944,
+      "oracle_offset": 3563520,
+      "zero_witnesses": 14586,
+      "l0_witnesses": 22301
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3588096,
+      "oracle_offset": 3612672,
+      "zero_witnesses": 14894,
+      "l0_witnesses": 22004
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3637248,
+      "oracle_offset": 3661824,
+      "zero_witnesses": 11474,
+      "l0_witnesses": 21481
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3686400,
+      "oracle_offset": 3710976,
+      "zero_witnesses": 15914,
+      "l0_witnesses": 19184
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3735552,
+      "oracle_offset": 3760128,
+      "zero_witnesses": 15981,
+      "l0_witnesses": 19319
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3784704,
+      "oracle_offset": 3809280,
+      "zero_witnesses": 16146,
+      "l0_witnesses": 20248
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3833856,
+      "oracle_offset": 3858432,
+      "zero_witnesses": 16548,
+      "l0_witnesses": 22240
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3883008,
+      "oracle_offset": 3907584,
+      "zero_witnesses": 16808,
+      "l0_witnesses": 22461
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3932160,
+      "oracle_offset": 3956736,
+      "zero_witnesses": 16812,
+      "l0_witnesses": 21634
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 3981312,
+      "oracle_offset": 4005888,
+      "zero_witnesses": 15763,
+      "l0_witnesses": 19099
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 4030464,
+      "oracle_offset": 4055040,
+      "zero_witnesses": 15944,
+      "l0_witnesses": 19149
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-both-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 4079616,
+      "oracle_offset": 4104192,
+      "zero_witnesses": 15978,
+      "l0_witnesses": 20186
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4128768,
+      "oracle_offset": 4153344,
+      "zero_witnesses": 14005,
+      "l0_witnesses": 18949
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4177920,
+      "oracle_offset": 4202496,
+      "zero_witnesses": 14598,
+      "l0_witnesses": 18501
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4227072,
+      "oracle_offset": 4251648,
+      "zero_witnesses": 11782,
+      "l0_witnesses": 20493
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4276224,
+      "oracle_offset": 4300800,
+      "zero_witnesses": 13754,
+      "l0_witnesses": 16555
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4325376,
+      "oracle_offset": 4349952,
+      "zero_witnesses": 14182,
+      "l0_witnesses": 16158
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4374528,
+      "oracle_offset": 4399104,
+      "zero_witnesses": 11300,
+      "l0_witnesses": 17887
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4423680,
+      "oracle_offset": 4448256,
+      "zero_witnesses": 15551,
+      "l0_witnesses": 18835
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4472832,
+      "oracle_offset": 4497408,
+      "zero_witnesses": 16438,
+      "l0_witnesses": 18811
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4521984,
+      "oracle_offset": 4546560,
+      "zero_witnesses": 16090,
+      "l0_witnesses": 20560
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4571136,
+      "oracle_offset": 4595712,
+      "zero_witnesses": 15248,
+      "l0_witnesses": 16440
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4620288,
+      "oracle_offset": 4644864,
+      "zero_witnesses": 15844,
+      "l0_witnesses": 16388
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l0-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 4669440,
+      "oracle_offset": 4694016,
+      "zero_witnesses": 15591,
+      "l0_witnesses": 17933
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 4718592,
+      "oracle_offset": 4743168,
+      "zero_witnesses": 21284,
+      "l0_witnesses": 20979
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 4767744,
+      "oracle_offset": 4792320,
+      "zero_witnesses": 21281,
+      "l0_witnesses": 20977
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 4816896,
+      "oracle_offset": 4841472,
+      "zero_witnesses": 18825,
+      "l0_witnesses": 18845
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 4866048,
+      "oracle_offset": 4890624,
+      "zero_witnesses": 2797,
+      "l0_witnesses": 2694
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 4915200,
+      "oracle_offset": 4939776,
+      "zero_witnesses": 2798,
+      "l0_witnesses": 2695
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 4964352,
+      "oracle_offset": 4988928,
+      "zero_witnesses": 2240,
+      "l0_witnesses": 2274
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 5013504,
+      "oracle_offset": 5038080,
+      "zero_witnesses": 21058,
+      "l0_witnesses": 20958
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 5062656,
+      "oracle_offset": 5087232,
+      "zero_witnesses": 21243,
+      "l0_witnesses": 20765
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 5111808,
+      "oracle_offset": 5136384,
+      "zero_witnesses": 18887,
+      "l0_witnesses": 18898
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 5160960,
+      "oracle_offset": 5185536,
+      "zero_witnesses": 2793,
+      "l0_witnesses": 2692
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 5210112,
+      "oracle_offset": 5234688,
+      "zero_witnesses": 2796,
+      "l0_witnesses": 2687
+    },
+    {
+      "file": "residual-b-reference-motion-128-0-24-l1-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 5259264,
+      "oracle_offset": 5283840,
+      "zero_witnesses": 2235,
+      "l0_witnesses": 2270
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5308416,
+      "oracle_offset": 5332992,
+      "zero_witnesses": 15482,
+      "l0_witnesses": 22477
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5357568,
+      "oracle_offset": 5382144,
+      "zero_witnesses": 15511,
+      "l0_witnesses": 22488
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5406720,
+      "oracle_offset": 5431296,
+      "zero_witnesses": 10945,
+      "l0_witnesses": 22005
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5455872,
+      "oracle_offset": 5480448,
+      "zero_witnesses": 15971,
+      "l0_witnesses": 19261
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5505024,
+      "oracle_offset": 5529600,
+      "zero_witnesses": 16003,
+      "l0_witnesses": 19316
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5554176,
+      "oracle_offset": 5578752,
+      "zero_witnesses": 15777,
+      "l0_witnesses": 20696
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5603328,
+      "oracle_offset": 5627904,
+      "zero_witnesses": 16775,
+      "l0_witnesses": 22549
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5652480,
+      "oracle_offset": 5677056,
+      "zero_witnesses": 16799,
+      "l0_witnesses": 22503
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5701632,
+      "oracle_offset": 5726208,
+      "zero_witnesses": 16326,
+      "l0_witnesses": 22001
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5750784,
+      "oracle_offset": 5775360,
+      "zero_witnesses": 15960,
+      "l0_witnesses": 19039
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5799936,
+      "oracle_offset": 5824512,
+      "zero_witnesses": 15885,
+      "l0_witnesses": 19148
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-both-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 5849088,
+      "oracle_offset": 5873664,
+      "zero_witnesses": 15649,
+      "l0_witnesses": 20623
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 5898240,
+      "oracle_offset": 5922816,
+      "zero_witnesses": 14962,
+      "l0_witnesses": 18868
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 5947392,
+      "oracle_offset": 5971968,
+      "zero_witnesses": 14990,
+      "l0_witnesses": 18898
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 5996544,
+      "oracle_offset": 6021120,
+      "zero_witnesses": 11161,
+      "l0_witnesses": 21284
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6045696,
+      "oracle_offset": 6070272,
+      "zero_witnesses": 14442,
+      "l0_witnesses": 16473
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6094848,
+      "oracle_offset": 6119424,
+      "zero_witnesses": 14460,
+      "l0_witnesses": 16493
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6144000,
+      "oracle_offset": 6168576,
+      "zero_witnesses": 10813,
+      "l0_witnesses": 18392
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6193152,
+      "oracle_offset": 6217728,
+      "zero_witnesses": 16372,
+      "l0_witnesses": 19003
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6242304,
+      "oracle_offset": 6266880,
+      "zero_witnesses": 16434,
+      "l0_witnesses": 18811
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6291456,
+      "oracle_offset": 6316032,
+      "zero_witnesses": 15656,
+      "l0_witnesses": 21269
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6340608,
+      "oracle_offset": 6365184,
+      "zero_witnesses": 15778,
+      "l0_witnesses": 16580
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6389760,
+      "oracle_offset": 6414336,
+      "zero_witnesses": 15840,
+      "l0_witnesses": 16388
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l0-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 6438912,
+      "oracle_offset": 6463488,
+      "zero_witnesses": 15370,
+      "l0_witnesses": 18377
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6488064,
+      "oracle_offset": 6512640,
+      "zero_witnesses": 21272,
+      "l0_witnesses": 20979
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6537216,
+      "oracle_offset": 6561792,
+      "zero_witnesses": 21467,
+      "l0_witnesses": 21706
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6586368,
+      "oracle_offset": 6610944,
+      "zero_witnesses": 18919,
+      "l0_witnesses": 18863
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6635520,
+      "oracle_offset": 6660096,
+      "zero_witnesses": 2798,
+      "l0_witnesses": 2697
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6684672,
+      "oracle_offset": 6709248,
+      "zero_witnesses": 2819,
+      "l0_witnesses": 2842
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6733824,
+      "oracle_offset": 6758400,
+      "zero_witnesses": 2269,
+      "l0_witnesses": 2285
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6782976,
+      "oracle_offset": 6807552,
+      "zero_witnesses": 21048,
+      "l0_witnesses": 20959
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6832128,
+      "oracle_offset": 6856704,
+      "zero_witnesses": 21258,
+      "l0_witnesses": 21684
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6881280,
+      "oracle_offset": 6905856,
+      "zero_witnesses": 18918,
+      "l0_witnesses": 18954
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6930432,
+      "oracle_offset": 6955008,
+      "zero_witnesses": 2798,
+      "l0_witnesses": 2690
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 6979584,
+      "oracle_offset": 7004160,
+      "zero_witnesses": 2819,
+      "l0_witnesses": 2841
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-8-l1-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 8,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 7028736,
+      "oracle_offset": 7053312,
+      "zero_witnesses": 2260,
+      "l0_witnesses": 2278
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7077888,
+      "oracle_offset": 7102464,
+      "zero_witnesses": 14586,
+      "l0_witnesses": 22301
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7127040,
+      "oracle_offset": 7151616,
+      "zero_witnesses": 14894,
+      "l0_witnesses": 22004
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7176192,
+      "oracle_offset": 7200768,
+      "zero_witnesses": 11474,
+      "l0_witnesses": 21481
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7225344,
+      "oracle_offset": 7249920,
+      "zero_witnesses": 15914,
+      "l0_witnesses": 19184
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7274496,
+      "oracle_offset": 7299072,
+      "zero_witnesses": 15981,
+      "l0_witnesses": 19319
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7323648,
+      "oracle_offset": 7348224,
+      "zero_witnesses": 16146,
+      "l0_witnesses": 20248
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7372800,
+      "oracle_offset": 7397376,
+      "zero_witnesses": 16548,
+      "l0_witnesses": 22240
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7421952,
+      "oracle_offset": 7446528,
+      "zero_witnesses": 16808,
+      "l0_witnesses": 22461
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7471104,
+      "oracle_offset": 7495680,
+      "zero_witnesses": 16812,
+      "l0_witnesses": 21634
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7520256,
+      "oracle_offset": 7544832,
+      "zero_witnesses": 15763,
+      "l0_witnesses": 19099
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7569408,
+      "oracle_offset": 7593984,
+      "zero_witnesses": 15944,
+      "l0_witnesses": 19149
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-both-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "source_oracle_offset": 7618560,
+      "oracle_offset": 7643136,
+      "zero_witnesses": 15978,
+      "l0_witnesses": 20186
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7667712,
+      "oracle_offset": 7692288,
+      "zero_witnesses": 14005,
+      "l0_witnesses": 18949
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7716864,
+      "oracle_offset": 7741440,
+      "zero_witnesses": 14598,
+      "l0_witnesses": 18501
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7766016,
+      "oracle_offset": 7790592,
+      "zero_witnesses": 11782,
+      "l0_witnesses": 20493
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7815168,
+      "oracle_offset": 7839744,
+      "zero_witnesses": 13754,
+      "l0_witnesses": 16555
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7864320,
+      "oracle_offset": 7888896,
+      "zero_witnesses": 14182,
+      "l0_witnesses": 16158
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7913472,
+      "oracle_offset": 7938048,
+      "zero_witnesses": 11300,
+      "l0_witnesses": 17887
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 7962624,
+      "oracle_offset": 7987200,
+      "zero_witnesses": 15551,
+      "l0_witnesses": 18835
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 8011776,
+      "oracle_offset": 8036352,
+      "zero_witnesses": 16438,
+      "l0_witnesses": 18811
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 8060928,
+      "oracle_offset": 8085504,
+      "zero_witnesses": 16090,
+      "l0_witnesses": 20560
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 8110080,
+      "oracle_offset": 8134656,
+      "zero_witnesses": 15248,
+      "l0_witnesses": 16440
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 8159232,
+      "oracle_offset": 8183808,
+      "zero_witnesses": 15844,
+      "l0_witnesses": 16388
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l0-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "source_oracle_offset": 8208384,
+      "oracle_offset": 8232960,
+      "zero_witnesses": 15591,
+      "l0_witnesses": 17933
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-1-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8257536,
+      "oracle_offset": 8282112,
+      "zero_witnesses": 21284,
+      "l0_witnesses": 20979
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-1-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8306688,
+      "oracle_offset": 8331264,
+      "zero_witnesses": 21281,
+      "l0_witnesses": 20977
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-1-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8355840,
+      "oracle_offset": 8380416,
+      "zero_witnesses": 18825,
+      "l0_witnesses": 18845
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-1-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8404992,
+      "oracle_offset": 8429568,
+      "zero_witnesses": 2797,
+      "l0_witnesses": 2694
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-1-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8454144,
+      "oracle_offset": 8478720,
+      "zero_witnesses": 2798,
+      "l0_witnesses": 2695
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-1-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 1,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8503296,
+      "oracle_offset": 8527872,
+      "zero_witnesses": 2240,
+      "l0_witnesses": 2274
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-2-0-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8552448,
+      "oracle_offset": 8577024,
+      "zero_witnesses": 21058,
+      "l0_witnesses": 20958
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-2-0-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8601600,
+      "oracle_offset": 8626176,
+      "zero_witnesses": 21243,
+      "l0_witnesses": 20765
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-2-0-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": false,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8650752,
+      "oracle_offset": 8675328,
+      "zero_witnesses": 18887,
+      "l0_witnesses": 18898
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-2-1-29-3--35--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          29,
+          3
+        ],
+        [
+          -35,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8699904,
+      "oracle_offset": 8724480,
+      "zero_witnesses": 2793,
+      "l0_witnesses": 2692
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-2-1-30-3--34--1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          30,
+          3
+        ],
+        [
+          -34,
+          -1
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8749056,
+      "oracle_offset": 8773632,
+      "zero_witnesses": 2796,
+      "l0_witnesses": 2687
+    },
+    {
+      "file": "residual-b-reference-motion-128-1-24-l1-2-1-135--3--135-5.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "cut": 24,
+      "weight": 2,
+      "weighted": true,
+      "mvs": [
+        [
+          135,
+          -3
+        ],
+        [
+          -135,
+          5
+        ]
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "source_oracle_offset": 8798208,
+      "oracle_offset": 8822784,
+      "zero_witnesses": 2235,
+      "l0_witnesses": 2270
+    }
+  ]
+}

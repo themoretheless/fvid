@@ -1,0 +1,37 @@
+{
+  "scope": "Explicit local reference only. libFLAC confirms all authored PCM; FFmpeg has its own frame-marker collision limitation, not counted as Fvid improvement.",
+  "flac_version": "flac 1.5.0",
+  "ffmpeg_version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "cases": [
+    {
+      "file": "clean.flac",
+      "bytes": 512,
+      "libflac_matches": true,
+      "libflac_stderr": "clean.flac: WARNING, cannot check MD5 signature since it was unset in the STREAMINFO\n",
+      "sha256": "bb3f63ba4855be35f1f5642093ad9a454adf7198276f1298d9596a98a0b5567f",
+      "ffmpeg_matches": true,
+      "ffmpeg_returncode": 0,
+      "ffmpeg_stderr": ""
+    },
+    {
+      "file": "metadata-marker.flac",
+      "bytes": 512,
+      "libflac_matches": true,
+      "libflac_stderr": "metadata-marker.flac: WARNING, cannot check MD5 signature since it was unset in the STREAMINFO\n",
+      "sha256": "b9d4513b084348096d44df93074a0946f32b2fdfc8259472e894dfef423a4c95",
+      "ffmpeg_matches": true,
+      "ffmpeg_returncode": 0,
+      "ffmpeg_stderr": ""
+    },
+    {
+      "file": "frame-marker.flac",
+      "bytes": 512,
+      "libflac_matches": true,
+      "libflac_stderr": "frame-marker.flac: WARNING, cannot check MD5 signature since it was unset in the STREAMINFO\n",
+      "sha256": "fa1e2d99de8441ba96656af23a1e7eac91daeaf5c0782d0f2229b8ceb9fc541c",
+      "ffmpeg_matches": false,
+      "ffmpeg_returncode": 0,
+      "ffmpeg_stderr": "[flac @ 0xbb5058380] sample/frame number mismatch in adjacent frames\n[flac @ 0xbb5058380] overread: 1\n[flac @ 0xbb5059180] overread: 1\n[aist#0:0/flac @ 0xbb4c1c180] [dec:flac @ 0xbb4c24280] Decoding error: Invalid data found when processing input\n[flac @ 0xbb5059500] invalid sync code\n[flac @ 0xbb5059500] invalid frame header\n[flac @ 0xbb5059500] decode_frame() failed\n[aist#0:0/flac @ 0xbb4c1c180] [dec:flac @ 0xbb4c24280] Decoding error: Invalid data found when processing input\n"
+    }
+  ]
+}

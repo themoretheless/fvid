@@ -40,7 +40,7 @@ def representation(f):
             f'{f["depth"][0]-8:04b}{f["depth"][1]-8:04b}' + '1' + ''.join(ue(v) for v in f['crop']))
 
 
-def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None, layer_id=3):
+def vps(target, independent=False, one_format=False, bad_geometry=False, wide=False, dpb=6, short_temporal=False, base_buffers=16, base_latency=0, base_format=None, dependency_type=2, poc_absent=False, output_highest=False, alternative_output=False, ordering_rows=None, layer_id=3, depth_layer=False, enhancement_profile=None):
     if not 1 <= layer_id <= 62:
         raise ValueError("enhancement layer ID must be in 1..62")
     if bad_geometry:
@@ -52,7 +52,9 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
     b += '0' + ue(base_buffers-1) + ue(2) + ue(base_latency)
     b += f'{layer_id:06b}' + ue(1) + '1' + '0'*(layer_id-1) + '1' + '0' + '1'
     b += '1' * ((-len(b)) % 8)
-    b += ptl(False, level=90) + '0' + '0'*16 + '1' + f'{layer_id:06b}' + '0000'
+    b += ptl(False, level=120 if enhancement_profile is not None else 90) + '0' + ('1'+'0'*15 if depth_layer else '0'*16)
+    if depth_layer:b += '000'  # one-bit depth scalability dimension
+    b += '1' + f'{layer_id:06b}' + ('1'if depth_layer else '') + '0000'
     b += '0' if independent else '1'
     if independent:
         b += ue(0)  # no additional layer sets for the two independent roots
@@ -60,7 +62,14 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
     if output_highest and independent:
         raise ValueError('highest-only fixture requires a dependent layer')
     # Both layers remain necessary in the dependent highest-output operation.
-    b += ue(1) + ue(0) + ('01' if output_highest else '00') + '11'
+    if enhancement_profile is None:
+        b += ue(1) + ue(0) + ('01' if output_highest else '00') + '11'
+    else:
+        profile_id, constraints = enhancement_profile
+        assert 0 <= profile_id < 32 and 0 <= constraints < (1 << 48)
+        extra = f'{profile_id:08b}' + '0'*32 + f'{constraints:048b}' + f'{120:08b}' + '0'*16
+        # PTL0/1 retain Main base semantics; PTL2 describes the enhancement.
+        b += ue(2) + '1' + extra + ue(0) + ('01' if output_highest else '00') + '01' + '10'
     if output_highest:
         b += str(int(alternative_output))
     b += ue(len(formats)-1) + ''.join(representation(f) for f in formats)
@@ -81,7 +90,14 @@ def vps(target, independent=False, one_format=False, bad_geometry=False, wide=Fa
             counts, reorder, latency = ordering_rows[tid]
         b += ''.join(ue(v-1) for v in counts) + ue(reorder) + ue(latency)
         rows.append([counts[1], reorder, latency])
-    b += ue(0) + '1' + f'{dependency_type:02b}' + ue(0) + '0' + '0' + '1'
+    b += ue(0) + '1' + f'{dependency_type:02b}' + ue(0) + '0'
+    if enhancement_profile is not None and enhancement_profile[0]==8:
+        # I.7.4.3.1: the single-view 3D Main VPS has explicit 3D syntax.
+        b += '11'
+        b += '1'*((-len(b))%8)
+        b += ue(0)+'0'+'1' # cp_precision=0, no non-base views, extension3=0
+    else:
+        b += '0'+'1'
     return b'\x40\x01' + escape(packed(b)), formats, rows
 
 
@@ -91,11 +107,11 @@ def scaling_data():
 
 
 def sps(multilayer=True, independent=False, update=None, scaling='disabled',
-        reference=0, rps=0, pcm=False, scc=False, bad_vps=False, sub=2, nesting=True, buffers=16, reorder=2, latency=0, coded_depth=(8, 8), coded_size=(128, 128), coded_chroma=1):
+        reference=0, rps=0, pcm=False, scc=False, bad_vps=False, sub=2, nesting=True, buffers=16, reorder=2, latency=0, coded_depth=(8, 8), coded_size=(128, 128), coded_chroma=1, sps_id=0, three_d=None, coding_blocks=(3,5), pcm_blocks=(3,4), transform_blocks=(2,5), pcm_depth=(10,10), amp=False):
     b = ('0001' if bad_vps else '0000') + ('111' if multilayer else f'{sub:03b}')
     if not multilayer:
         b += str(int(nesting)) + ptl(True, sub=sub)
-    b += ue(0)
+    b += ue(sps_id)
     if multilayer:
         b += '0' if update is None else '1' + f'{update:08b}'
     else:
@@ -103,7 +119,7 @@ def sps(multilayer=True, independent=False, update=None, scaling='disabled',
     b += ue(4)  # eight POC LSB bits
     if not multilayer:
         b += '0' + ue(buffers-1) + ue(reorder) + ue(latency)
-    b += ue(0) + ue(2) + ue(0) + ue(3) + ue(2) + ue(2)
+    b += ue(coding_blocks[0]-3) + ue(coding_blocks[1]-coding_blocks[0]) + ue(transform_blocks[0]-2) + ue(transform_blocks[1]-transform_blocks[0]) + ue(2) + ue(2)
     b += str(int(scaling != 'disabled'))
     if scaling != 'disabled':
         if multilayer:
@@ -114,22 +130,24 @@ def sps(multilayer=True, independent=False, update=None, scaling='disabled',
             b += str(int(scaling == 'explicit'))
             if scaling == 'explicit':
                 b += scaling_data()
-    b += '01' + str(int(pcm))  # AMP=0, SAO=1, optional PCM
+    b += str(int(amp))+'1'+str(int(pcm))  # SAO=1, optional AMP/PCM
     if pcm:
-        b += '10011001' + ue(0) + ue(1) + '1'
+        b += f'{pcm_depth[0]-1:04b}{pcm_depth[1]-1:04b}' + ue(pcm_blocks[0]-3) + ue(pcm_blocks[1]-pcm_blocks[0]) + '1'
     b += ue(int(rps != 0))
     if rps:
         b += ue(rps) + ue(0) + (ue(0)+'1')*rps
     b += '1' + ue(2) + f'{1:08b}'+'1'+f'{7:08b}'+'0'  # two long-term entries
     b += '110'  # temporal MVP, strong smoothing, no VUI
     if scc:
-        b += '1' + '11010001' + '0'*9 + '1'
+        b += '1' + ('11110001'if three_d is not None else '11010001') + '0'*9 + '1'
+        if three_d is not None:b += three_d
         b += '01' + ue(2) + ue(1) + '1' + ue(1)
         for values, depth in [([3, 9], 16), ([4, 10], 12), ([5, 11], 12)]:
             b += ''.join(f'{v:0{depth}b}' for v in values)
         b += '00' + '0' + '010101'
     else:
-        b += '1' + '01000000' + '1'
+        b += '1' + ('01100000'if three_d is not None else '01000000') + '1'
+        if three_d is not None:b += three_d
     b += '1'
     layer = 0 if independent else 3
     return ((33 << 9) | (layer << 3) | 1).to_bytes(2, 'big') + escape(packed(b))

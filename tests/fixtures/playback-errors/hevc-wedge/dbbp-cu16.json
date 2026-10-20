@@ -1,0 +1,89 @@
+{
+  "provenance": "Owned 16x16 CU DBBP and 32x32 PCM source leaves, offline; no external codec or private media.",
+  "cases": [
+    {
+      "file": "dbbp-cu16-32-0-0-0.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": false,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-cu16-32-0-0-1.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": false,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-cu16-32-0-1-0.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": true,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-cu16-32-0-1-1.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": true,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-cu16-128-0-0-0.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-cu16-128-0-0-1.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-cu16-128-0-1-0.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-cu16-128-0-1-1.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-cu16-128-1-0-0.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-cu16-128-1-0-1.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-cu16-128-1-1-0.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-cu16-128-1-1-1.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true
+    }
+  ]
+}

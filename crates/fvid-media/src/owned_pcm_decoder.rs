@@ -33,16 +33,12 @@ impl PcmDecoder {
             return Err(invalid("PCM channels must be 1..64"));
         }
         let bits = u8::try_from(track.bit_depth).map_err(|_| invalid("PCM bit depth overflow"))?;
-        let format = match track.codec.as_str() {
-            "A_PCM/FLOAT/IEEE" => PcmFormat::Float { bits },
-            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" if bits == 8 => PcmFormat::Unsigned8,
-            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" => PcmFormat::Int {
-                bits,
-                big_endian: track.codec == "A_PCM/INT/BIG",
-            },
-            _ => return Err(invalid("selected Matroska audio stream is not PCM")),
-        };
-        Self::new(format, rate, channels)
+        match track.codec.as_str() {
+            "A_PCM/FLOAT/IEEE" => Self::float(u16::from(bits),rate,channels),
+            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" if bits == 8 => Self::new(PcmFormat::Unsigned8,rate,channels),
+            "A_PCM/INT/LIT" | "A_PCM/INT/BIG" => Self::int(u16::from(bits),track.codec=="A_PCM/INT/BIG",rate,channels),
+            _ => Err(invalid("selected Matroska audio stream is not PCM")),
+        }
     }
 }
 
@@ -110,6 +106,24 @@ mod precision_tests {
                 .decode_pcm_f64(&packet)
                 .unwrap();
             assert_eq!(actual, values);
+        }
+    }
+}
+
+#[cfg(test)]
+mod constructor_width_regressions {
+    use super::PcmDecoder;
+    #[test]
+    fn public_width_constructors_keep_defaults_and_refuse_narrowing() {
+        for bits in [0,8,16,24,32] {assert!(PcmDecoder::int(bits,false,8000,1).is_ok());}
+        for bits in [0,32,64] {assert!(PcmDecoder::float(bits,8000,1).is_ok());}
+        for bits in [256,264,272,280,288,512,u16::MAX] {
+            let error=PcmDecoder::int(bits,false,8000,1).err().expect("unsupported integer width accepted");
+            assert!(error.to_string().contains(&bits.to_string()));
+        }
+        for bits in [288,320,544,576,u16::MAX] {
+            let error=PcmDecoder::float(bits,8000,1).err().expect("unsupported float width accepted");
+            assert!(error.to_string().contains(&bits.to_string()));
         }
     }
 }

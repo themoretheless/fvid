@@ -18,8 +18,9 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
         Default::default(),
     )
     .map_err(|e| e.to_string())?;
+    let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
     Ok(reader.tracks.iter().enumerate().any(|(index, t)| {
-        (options.streams.is_empty() || options.streams.contains(&index))
+        ((options.streams.is_empty() && preferred.contains(&t.number)) || options.streams.contains(&index))
             && t.kind == 2
             && t.codec == "A_AAC"
     }))
@@ -56,6 +57,7 @@ pub(crate) fn supports(
     result.is_ok_and(|stats| {
         transform.channels.is_none_or(|channels| {
             channels == i32::from(stats.channels)
+                || (matches!(channels,1|2)&&crate::owned_aac_export_routing::router(source,stats.sample_rate,stats.channels,options).is_ok_and(|r|r.is_some()))
                 || (((stats.channels <= 2 && (1..=8).contains(&channels))
                     || (stats.channels <= 8 && matches!(channels, 1 | 2)))
                     && crate::owned_pcm_channels::standard_mask(stats.channels)
@@ -92,7 +94,7 @@ pub(crate) fn apply(
             .map_err(|e| e.to_string())
         },
     )?;
-    crate::owned_adts_export::export_spool(spool, destination, transform, options)
+    crate::owned_aac_export_routing::export(source,spool,destination,transform,options)
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
@@ -105,11 +107,12 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let index = match options.streams.as_slice() {
         [index] => *index,
         [] => {
+            let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
             let indices: Vec<_> = reader
                 .tracks
                 .iter()
                 .enumerate()
-                .filter_map(|(i, t)| (t.kind == 2).then_some(i))
+                .filter_map(|(i, t)| (t.kind == 2 && preferred.contains(&t.number)).then_some(i))
                 .collect();
             if indices.len() != 1 {
                 return Err("select exactly one audio stream".into());

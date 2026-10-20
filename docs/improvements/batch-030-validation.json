@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0053"
+  ],
+  "checked_at": "2026-10-15T17:35:46.378732+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-030-audio-workers-final.log",
+      "kind": "rust",
+      "passed": 24
+    },
+    {
+      "log": "evidence/batch-030-padding-seek-worker-final.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-030-webm-audio-unit.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-030-fixtures.log",
+      "kind": "python",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-030-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 43,
+  "distinct_python_tests_passed": 13,
+  "before": [
+    "evidence/batch-030-audio-padding-before.log"
+  ],
+  "qualification": [
+    "Unpadded control passes before the fix; seven failed regressions isolate ignored signed padding/whole-tail discard/oversized-padding refusal.",
+    "Seven authored60ms PCM videos verify exact decoded sample windows, padding ceil rounding, head/tail trimming and overlap with negative presentation. Explicit source block durations produce history-independent padded endpoints, including a fully discarded tail.",
+    "Native video controls show3 valid frames. Normal playback, rewind and direct seek preserve expected sample bytes and packet PTS. Actual capture workers separately verify playback/replay/seek, including a seek landing on a fully discarded tail.",
+    "Malformed21ms padding on a20ms decoded block refuses specifically before any backend PCM is emitted. This is a refusal test, separate from valid playback acceptance.",
+    "Six compressed codec clock/worker controls and PCM/MP4 clock regressions pass. Shared test capture infrastructure adds no IDs.",
+    "Normal tests use saved authored samples without FFmpeg/network. Player binary and19 root audio tests pass."
+  ],
+  "remaining": [
+    "This change covers generic non-AAC/Opus/Vorbis presentation. Specialized AAC padding remains an unqualified audit candidate; existing Opus/Vorbis handling is preserved.",
+    "Tracks without explicit/default block duration retain prior metadata inference.",
+    "Software capture only; no physical device or hardware/output latency claim."
+  ],
+  "counting": "One ignored signed discard-padding attribute through generic sample windows and declared endpoints. Sample variants, test infrastructure and metadata integration add no IDs."
+}

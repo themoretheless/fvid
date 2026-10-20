@@ -1,0 +1,812 @@
+{
+  "cases": [
+    {
+      "name": "free-0-0-1-48000",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        391,
+        392,
+        391,
+        392
+      ],
+      "sha256": "359c8d8671bfa84f46e9406c36069c5118f887e832e5d7f99a8e988054990b6b",
+      "pcm_sha256": "0320243f26ac5a7ca71c09da25d73a78f5d0526e4b0e97ee9db7455cccdc8bc5",
+      "video_sha256": "a4c7b2497788d17c8cf24a895577d036251d76e82b2d0ab09430923efb15c1db"
+    },
+    {
+      "name": "free-0-0-3-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "fe938e3b656003ef925426743bcdff8fb490261d46e4e4b7810e3f07ddfb5c8b",
+      "pcm_sha256": "704583f38462fb8f849c2542cdfcfcc047b8c62cded83921ee6cec603de57250",
+      "video_sha256": "ef7b0869de1b5dbadc643eb6e31c88e66b617c7bf444aaacdc48b8cb002d69f7"
+    },
+    {
+      "name": "free-0-0-7-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "56286bb807b2e487ecf16c56af54bde475b3e7d6cb57135ae46d795b245de34a",
+      "pcm_sha256": "e98fe64b387f0fb4cc46b9c661f76f648d3b766bad9d9a4f9e5e1507b3a9c1ed",
+      "video_sha256": "5dfc1c0b0f2db673a87b7006223fecec1dd0b50d03b32a1af2334281f6bd49ad"
+    },
+    {
+      "name": "free-0-0-15-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "56e74b2c0c5b56478a97f3c6136c419b3d77828edc14848a2b8746dbe164f09d",
+      "pcm_sha256": "4583e0b181fcba66080e177c69d9c63514f0d94517b6d472db6f0a7f79fccb77",
+      "video_sha256": "0b30de2b47e7d830ed203fca3e2425005fcb81053b372af5fbfde7110bfdcde6"
+    },
+    {
+      "name": "free-0-3-1-48000",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        391,
+        392,
+        391,
+        392
+      ],
+      "sha256": "12a62dcfcb1958d28dc4109a7eb845d82d8f476c3a73bb0fd90fc76a1a550184",
+      "pcm_sha256": "fe424459c45b5401a2ee3d65b0611115bd987610acef5f606948f772030a2e64",
+      "video_sha256": "b9c53b5dc21eee5b88eaf5987a4bf6dfadb6c1f38a00c246769118479cb722a1"
+    },
+    {
+      "name": "free-0-3-3-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "13a0f12487c2c2a26ee402a9414aedc47c794173f10c59593b45db638a10837a",
+      "pcm_sha256": "de4ef192d5ca3dee34386d9d5afa7d2931c957fca738297270bec3c8efda3c93",
+      "video_sha256": "05606109d1e7e7b9648a6c016c5995903149606d7c34e15ab14cb9cfdd71ef00"
+    },
+    {
+      "name": "free-0-3-7-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "9f92ebbfa889747af1a1c3562ea32f20d0e0a6021366c1baae2a21aff6776c47",
+      "pcm_sha256": "a8dfd105a783c6ded95c2cfb14eafb9450fcdee939b8b850916cf79e192dfc31",
+      "video_sha256": "4d350c998f358e41ec3d8827f01a45f0deedf380a6d2590c2bdedcaa5ffd576f"
+    },
+    {
+      "name": "free-0-3-15-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "e28605f9e8527aff49aca02dcf249486365f45e2db58793b4a9a4c2ea3c67697",
+      "pcm_sha256": "77bd2986992500b220d892d5d499dd4ccb3fa9dc3bf331fb98639cc3f795b23c",
+      "video_sha256": "7b18ca320c6739cb5db943a57f567dc7425b24db31fff0c0c08bf87ee91c95ab"
+    },
+    {
+      "name": "free-0-11-1-48000",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        391,
+        392,
+        391,
+        392
+      ],
+      "sha256": "2c0f76bfddba81533bc30b97a0810556229d4b365baa0105352ed46b23eef68c",
+      "pcm_sha256": "434867a7552e55278af30dabb56b7e9399ccc51a6a0b95435f576b74ef845008",
+      "video_sha256": "42046571f13a011f957893f69d4a249416a2247937b80de02bf567fa15140ca9"
+    },
+    {
+      "name": "free-0-11-3-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "d8cb7d3c5eae8b57a5074264450713f55e3f19f2d154cbf19e136194c38d2911",
+      "pcm_sha256": "28553d35f3ee27a340fdd846a9c924759573dd1682fb0de92c87c90729cb3f19",
+      "video_sha256": "d70ab2416802097a15879b617d46435b8fbcd0c00abfbe1f2c3c334e78b4279e"
+    },
+    {
+      "name": "free-0-11-7-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "420bb614d56a1a84c491633cad645ed0064c489ab392c34b5b1f7b9539274d4e",
+      "pcm_sha256": "aa9ef291bfdb43f6457395d403bdfde39a0fb779a82398ac702139e34c7d188e",
+      "video_sha256": "aea478c28a25580812dc5e96eb9a5b0dfb71c0361ad2c1c6807f58aa44ba1e69"
+    },
+    {
+      "name": "free-0-23-1-48000",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        391,
+        392,
+        391,
+        392
+      ],
+      "sha256": "ab93b2682e4492ac1aabd3ba7b4db9c89f93b8a3c2d6b7eb28364b2e95619c8d",
+      "pcm_sha256": "86a5873cafc8f920b2de449ad4b6cd257404d834179980760ecf67ec65e9c0c5",
+      "video_sha256": "24145474b23717f831f523983b3318c0abca18ba1d368e98643fdbbafc1e3887"
+    },
+    {
+      "name": "free-0-23-3-48000",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        199,
+        200,
+        199,
+        200
+      ],
+      "sha256": "af89395fda36dd700ba34866c3a9a5731923824f983fd47c32de6e4b32c19590",
+      "pcm_sha256": "9589b844263ffc2cad79f3eb6e2fef6f95d96817ab62e1743bc010ea6df24240",
+      "video_sha256": "ddda0852ace2b029f82ec644b3b6362e345418bf35457877e05fbf40240b3f9a"
+    },
+    {
+      "name": "free-1-0-1-44100",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "cc2b7d9a377443c75770595cc7b8f98512f14a249b5647c13ed263a7d3d17186",
+      "pcm_sha256": "0320243f26ac5a7ca71c09da25d73a78f5d0526e4b0e97ee9db7455cccdc8bc5",
+      "video_sha256": "56d8fbb0ec2bac49700d2fed823d5ad456ff80ed9be3e317c5beb60dc751f777"
+    },
+    {
+      "name": "free-1-0-1-32000",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "d8c49137ef4b00c6fc108617191605b01a7230ed452c2868805bbfc004817b35",
+      "pcm_sha256": "0320243f26ac5a7ca71c09da25d73a78f5d0526e4b0e97ee9db7455cccdc8bc5",
+      "video_sha256": "e541ff76e77ec63f947ce06d1f77729f5a7be72afefd38bfa0c2f81d59c7dbcd"
+    },
+    {
+      "name": "free-1-0-3-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "20ba76ea6d908461383aefd807d3253beefb9f47154216a0d3eea4e84f3e68de",
+      "pcm_sha256": "704583f38462fb8f849c2542cdfcfcc047b8c62cded83921ee6cec603de57250",
+      "video_sha256": "8c52bb26c358e0faf79a7d07f3fb84fdb1a496d72faae83946438b6ae2485db6"
+    },
+    {
+      "name": "free-1-0-3-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "96b0d417c4d5575dfb27a03f447a23fbdeae43ad9fa2579e578f6510cba16e21",
+      "pcm_sha256": "704583f38462fb8f849c2542cdfcfcc047b8c62cded83921ee6cec603de57250",
+      "video_sha256": "1b3ca2ed266db1edc22112b335e73bab1983a0b0fcd79bf6726d842ef8348eb0"
+    },
+    {
+      "name": "free-1-0-7-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "852a53b2aa0f22c677068d67c2204946d1a6eae614c66d46856fb2c60c3bfa4b",
+      "pcm_sha256": "e98fe64b387f0fb4cc46b9c661f76f648d3b766bad9d9a4f9e5e1507b3a9c1ed",
+      "video_sha256": "3f0422cb59685086608883b4ccb52d35c5cec203374ba82c849f564b528db135"
+    },
+    {
+      "name": "free-1-0-7-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "986b6e05b634d38473205e5edaa5ccdc2cd112c09fb57a707cc10c1529658258",
+      "pcm_sha256": "e98fe64b387f0fb4cc46b9c661f76f648d3b766bad9d9a4f9e5e1507b3a9c1ed",
+      "video_sha256": "4e781e488ae847e6f22d8733251a71ff5890a558d9d5e0e0f4584a289e898eaa"
+    },
+    {
+      "name": "free-1-0-15-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "19d5b5b09d09407e468a09b0f66a2777b014688bba98574dc80d19691bb22dc6",
+      "pcm_sha256": "4583e0b181fcba66080e177c69d9c63514f0d94517b6d472db6f0a7f79fccb77",
+      "video_sha256": "d874dbae03624aecc4cd3b9bd4e326ce9f34acc31c260cc26368119f95f17d0b"
+    },
+    {
+      "name": "free-1-0-15-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "af71b2b7b555d993c066bdf596d247b08b2be772c9365912c4f83f54fb5a64ad",
+      "pcm_sha256": "4583e0b181fcba66080e177c69d9c63514f0d94517b6d472db6f0a7f79fccb77",
+      "video_sha256": "212ebefdcb290edb1caaf3189587722c022e7a685b568164886905a8f7ba9e49"
+    },
+    {
+      "name": "free-1-3-1-44100",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "d9935edb945872513226bba75d975f8377690cfed8edd1f8a0b2c4df49d291c3",
+      "pcm_sha256": "fe424459c45b5401a2ee3d65b0611115bd987610acef5f606948f772030a2e64",
+      "video_sha256": "4f10220e5efd72ef9b0a1f22d5a46871d0a3b60b10e0c244638e14ccf45e2d42"
+    },
+    {
+      "name": "free-1-3-1-32000",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "1d3db3f9e8f9802579a3348c731a705ffcb29b0b2a1710f0919d3d008342f60e",
+      "pcm_sha256": "fe424459c45b5401a2ee3d65b0611115bd987610acef5f606948f772030a2e64",
+      "video_sha256": "8a0e61e063e51189a2f15b110a44ce4a2971830a0cd290189b70c6cb3983d137"
+    },
+    {
+      "name": "free-1-3-3-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "149d56f0c3e8b07f95f0fef8ebcedf11231ea5e10899c754f378e949355692f4",
+      "pcm_sha256": "de4ef192d5ca3dee34386d9d5afa7d2931c957fca738297270bec3c8efda3c93",
+      "video_sha256": "ab88eb38131933deb4b3a9541d25d974809e3cb359110334dd203516e8b9e548"
+    },
+    {
+      "name": "free-1-3-3-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "02b804252a9032f9ab122f27cbdee3b73bbf3cc6b938d64f33d68ba4df53a535",
+      "pcm_sha256": "de4ef192d5ca3dee34386d9d5afa7d2931c957fca738297270bec3c8efda3c93",
+      "video_sha256": "2be3014e773c52a0430f519d2bcca9db0bcd2834ecf204185c43b384b4248184"
+    },
+    {
+      "name": "free-1-3-7-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "be3c5ac5724c87fe881d91187aea73bbdbcf3db8d5e8912bbb4121b8c57850d0",
+      "pcm_sha256": "a8dfd105a783c6ded95c2cfb14eafb9450fcdee939b8b850916cf79e192dfc31",
+      "video_sha256": "96314ec670ba2a886e3106fc86ef8d738b0efce0efc2cb79ec28319c4054bce6"
+    },
+    {
+      "name": "free-1-3-7-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "e83148884e072072556e9fae13cda7148f1e39e63e7df4279db17c8a1ddd980f",
+      "pcm_sha256": "a8dfd105a783c6ded95c2cfb14eafb9450fcdee939b8b850916cf79e192dfc31",
+      "video_sha256": "6f4b0a335ff7939233178a53c13300a877bb9f52591eef859d815b0836b8ce16"
+    },
+    {
+      "name": "free-1-3-15-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "e304c9aa9b9cd4b9e5bf310847f219c1f62b663a7724d6ab156a36b5f2c72825",
+      "pcm_sha256": "77bd2986992500b220d892d5d499dd4ccb3fa9dc3bf331fb98639cc3f795b23c",
+      "video_sha256": "ab3784fdf21236fe0c935b4e2b032f71ca0e26fabd23630d13c7bddaab5a0d05"
+    },
+    {
+      "name": "free-1-3-15-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "84213e9e9efaa4ba36f0e84dfe952a40adf5f87c14f70076545210d1d8fdbf7c",
+      "pcm_sha256": "77bd2986992500b220d892d5d499dd4ccb3fa9dc3bf331fb98639cc3f795b23c",
+      "video_sha256": "e1b7288ed2d60c6abc68caa16db671e3731ad247fe4da821b9abaa47489ff4d8"
+    },
+    {
+      "name": "free-1-11-1-44100",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "81ffbf6553ed38256abce146daa597262dbc7600f2c2acbfa1924a9822c349ae",
+      "pcm_sha256": "434867a7552e55278af30dabb56b7e9399ccc51a6a0b95435f576b74ef845008",
+      "video_sha256": "5c42fd57676386d9c0e9cf9f491d2ad6db08bf27aeb5f8df5e0316ad9e413aae"
+    },
+    {
+      "name": "free-1-11-1-32000",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "91f47221d64a9514cdfef2d56f6c076a69fdd8b5151524f8dff333686e4a2b3f",
+      "pcm_sha256": "434867a7552e55278af30dabb56b7e9399ccc51a6a0b95435f576b74ef845008",
+      "video_sha256": "37345ef5d4b5bbb4230a57f00499a6915c25bd68d91963f08af0cb313c7de0c7"
+    },
+    {
+      "name": "free-1-11-3-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "1bf97b5c8060c3f29ec837b9afc68f4284107307cde2d66c58ae76e99996fbc5",
+      "pcm_sha256": "28553d35f3ee27a340fdd846a9c924759573dd1682fb0de92c87c90729cb3f19",
+      "video_sha256": "326c78980e261a13ef6c6349a6ba3e3b86ce80f264c4d1cbd2a0f9de40624bec"
+    },
+    {
+      "name": "free-1-11-3-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "34647c3387e840f1db8455136c4f893a5badc85e257a2b7c32f940b03b72067f",
+      "pcm_sha256": "28553d35f3ee27a340fdd846a9c924759573dd1682fb0de92c87c90729cb3f19",
+      "video_sha256": "137d2ddfd9f6e78323afa496ec6f19b20a50363d1c8405a3538eb248d1cbc038"
+    },
+    {
+      "name": "free-1-11-7-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "3023964b75b72478a6968b4e0d3a57a6575ef5757219dd68214446cf90b42af1",
+      "pcm_sha256": "aa9ef291bfdb43f6457395d403bdfde39a0fb779a82398ac702139e34c7d188e",
+      "video_sha256": "78c4d230257fbbcaf9d9fd90b274f96d86ed588c33d3b2f5cb194b687ef113d1"
+    },
+    {
+      "name": "free-1-11-7-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "5e3c013c45e61159ef476a156de6060d38d300fdf234bd5a916437d77bffeaf4",
+      "pcm_sha256": "aa9ef291bfdb43f6457395d403bdfde39a0fb779a82398ac702139e34c7d188e",
+      "video_sha256": "5d9ed7fa4d6316cbf320bf971aae10ff9e618f7d1da97888302714b8319fec7a"
+    },
+    {
+      "name": "free-1-23-1-44100",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "a9447ae8be298fa7735ac03cf8f2c9095bd6e518b8f19ac1c0e00f47dade4eaa",
+      "pcm_sha256": "86a5873cafc8f920b2de449ad4b6cd257404d834179980760ecf67ec65e9c0c5",
+      "video_sha256": "788554402b63752371678d832cff0542a5c915656df699dbc8348b6b58def63c"
+    },
+    {
+      "name": "free-1-23-1-32000",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        633,
+        634,
+        633,
+        634
+      ],
+      "sha256": "ca928c2d6ef60936e35fbd6ef4c56686a9a81b710e8b9517814624d3494e2161",
+      "pcm_sha256": "86a5873cafc8f920b2de449ad4b6cd257404d834179980760ecf67ec65e9c0c5",
+      "video_sha256": "6712010c261c25d01b9e7fb734873f21fcf987f68a1c431aff391a748333455c"
+    },
+    {
+      "name": "free-1-23-3-44100",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "6b3bd62de2ef90fc1662750f24dc05e5f8fc1f416764e42013761f128707bc46",
+      "pcm_sha256": "9589b844263ffc2cad79f3eb6e2fef6f95d96817ab62e1743bc010ea6df24240",
+      "video_sha256": "f6392e1c3da138ed60449ea2c9d78c5763fe98a9eac716eeaa337f3a74f753f6"
+    },
+    {
+      "name": "free-1-23-3-32000",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        320,
+        321,
+        320,
+        321
+      ],
+      "sha256": "1bcda314e270bc43d6090aed9c1c37d2b6033c3eca6015b7435e95855b22b80b",
+      "pcm_sha256": "9589b844263ffc2cad79f3eb6e2fef6f95d96817ab62e1743bc010ea6df24240",
+      "video_sha256": "4fa6ed7db641658b8e61b27827abbbd4261f044aa455e707af75f9e41c6daff9"
+    },
+    {
+      "name": "free-4-0-1-22050",
+      "rate": 22050,
+      "channels": 2,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "dd4575b4c472210fdf679603d7ef7f53c757aacc28dc960b51886a391fd9357e",
+      "pcm_sha256": "0320243f26ac5a7ca71c09da25d73a78f5d0526e4b0e97ee9db7455cccdc8bc5",
+      "video_sha256": "2f37acaaf74b059b8f88b28508cab6487bc6bccaf54a128850b5d2fffd02998a"
+    },
+    {
+      "name": "free-4-0-3-22050",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        215,
+        216,
+        215,
+        216
+      ],
+      "sha256": "e40a31c1edb435b6fc679a9dff0f46bcea0b4ec4beb781d4b2e3d74c2ad9532f",
+      "pcm_sha256": "e2bb7512df2f3f872498357d61092ff91df9f2991c5d4ed1bcb481211154f9c6",
+      "video_sha256": "17813f94e61e29b253a7dedafaff74344d2634f1e073a496a84d0d10ed293e87"
+    },
+    {
+      "name": "free-4-0-7-22050",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        215,
+        216,
+        215,
+        216
+      ],
+      "sha256": "43565c010049c36223e1e9db01563ad66b386d4e7ca22eaa03eb174e60d9b1c1",
+      "pcm_sha256": "09ec44dbb4264f82927892dbde4496d735862f479fdd0759d41b1eee6917b101",
+      "video_sha256": "0aa880568ee3980d48479b1fcd7864ad61e3ce07e329fbdc74655149b5e322cb"
+    },
+    {
+      "name": "free-4-0-15-22050",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        215,
+        216,
+        215,
+        216
+      ],
+      "sha256": "08d2c1059db08dbe8d7fd5e94b757a6a60de03f8c4d83c3706b04c48628fc321",
+      "pcm_sha256": "f0fd866905283e7121a97c5d9a9c87b4bafdb509fac2089b28741f811d0354db",
+      "video_sha256": "3fc34a2038c176b466cad655b40068682e5f06abf80e078a875a03f01a9ef0d4"
+    },
+    {
+      "name": "free-4-4-1-22050",
+      "rate": 22050,
+      "channels": 2,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "fa4b00217cef8cdee74d91a2d0c9552fd704eb3b68aed6607a062e84b416f4d9",
+      "pcm_sha256": "4dde013a24cb9b248a9116e6a1f2ac4e43aab6d2c71310349bb8bf0afa77c0c2",
+      "video_sha256": "0387f05eaad19b234ec649ba444eb04a4e6e9726d1faede0559be5095d568f7d"
+    },
+    {
+      "name": "free-4-4-3-22050",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        215,
+        216,
+        215,
+        216
+      ],
+      "sha256": "33461d8fb35d32559aa12d66dc04b8e5d1e8a70024ac557164d4f443d0aa4c3d",
+      "pcm_sha256": "f728911bc9f5948bb3538c2179ba00b15ed1a2b9803968613450ecc7c9ab2ca9",
+      "video_sha256": "75e81e4d0eeed226619365ebbc4bb23250095df1ce21d5d94371695b08ac568a"
+    },
+    {
+      "name": "free-4-4-7-22050",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        215,
+        216,
+        215,
+        216
+      ],
+      "sha256": "c868a15ce39b299a86096387e79fef25d06c5856261ee76d2dea9f667ce9e473",
+      "pcm_sha256": "e35b1d1f02526b9ea39817b8360a0229f92e7d5ebccfe635a2374e8baff1b79c",
+      "video_sha256": "41c76597fc5856ff0a314eb668c34ec93fbb94aa579bba7e7d47c4deddf8f7d1"
+    },
+    {
+      "name": "free-4-11-1-22050",
+      "rate": 22050,
+      "channels": 2,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "18db53276fc3b62532f7a2018d0995afe374d6a23216cc647ba6ee79d195fc3d",
+      "pcm_sha256": "434867a7552e55278af30dabb56b7e9399ccc51a6a0b95435f576b74ef845008",
+      "video_sha256": "2867dc72cc7cf2a839d8059757eafda48b798eba362c5c39f55c549c57303922"
+    },
+    {
+      "name": "free-4-11-3-22050",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        215,
+        216,
+        215,
+        216
+      ],
+      "sha256": "30c9a74a113e2324056c78b1fbcf5e0202fc9d4d030044409fcee859a5da57b4",
+      "pcm_sha256": "f8f39a65d0ca04b8f4581a7b46130b24c38e75fe32dd8e53dd6e381628c389b7",
+      "video_sha256": "76f1c2f5751315f5aeb37c4dcaf1ec552fe44eba66bb4523e8fd9ea136c8f6e5"
+    },
+    {
+      "name": "free-5-0-1-11025",
+      "rate": 11025,
+      "channels": 2,
+      "sizes": [
+        842,
+        843,
+        842,
+        843
+      ],
+      "sha256": "2aa8327e4cc49f6f5e6955864cfe2f06e5cfea6499a0d648b50520b60ba04113",
+      "pcm_sha256": "0320243f26ac5a7ca71c09da25d73a78f5d0526e4b0e97ee9db7455cccdc8bc5",
+      "video_sha256": "39f49db2b06dc546038a57c406284f7b60982349388a632820b04cc1cfd31170"
+    },
+    {
+      "name": "free-5-0-3-11025",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "71add568faaddd106e196a9555fe9279fc2820d38501de712dea80f9100538d5",
+      "pcm_sha256": "e2bb7512df2f3f872498357d61092ff91df9f2991c5d4ed1bcb481211154f9c6",
+      "video_sha256": "2131174e538515dff9a84cf92346d9ac682fd1d857f7cb5ba3ded0b9878ea972"
+    },
+    {
+      "name": "free-5-0-7-11025",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "7dfc2b9f23eeee052d8e62487957355d8e74ad4dff308862c656940f531b1cd7",
+      "pcm_sha256": "09ec44dbb4264f82927892dbde4496d735862f479fdd0759d41b1eee6917b101",
+      "video_sha256": "8bcfab031be1e01e41a173763e4c4556b7176e9535011709b3e368e329bcea9a"
+    },
+    {
+      "name": "free-5-0-15-11025",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "f09cc66e55b4d03b3fe97b2e8ba3751fc737cca95adfd039bb0ccdfedd9a9c9a",
+      "pcm_sha256": "f0fd866905283e7121a97c5d9a9c87b4bafdb509fac2089b28741f811d0354db",
+      "video_sha256": "7c24025ac418d4f660c6ff3c260df87753ea3c6ad7c576c01182b41ab0b0dd25"
+    },
+    {
+      "name": "free-5-4-1-11025",
+      "rate": 11025,
+      "channels": 2,
+      "sizes": [
+        842,
+        843,
+        842,
+        843
+      ],
+      "sha256": "da03af5d82545610087b7e4c4dc15d100ca29eed7d24b70331b28a0b69c25834",
+      "pcm_sha256": "4dde013a24cb9b248a9116e6a1f2ac4e43aab6d2c71310349bb8bf0afa77c0c2",
+      "video_sha256": "4839b0f1ce4092ed66a94c6bbf0bb1e1cc17b3cfc95f618c7aedcd720a612837"
+    },
+    {
+      "name": "free-5-4-3-11025",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "79b963f1ec5dbc70c37fdee9bf8a64ffc3799c4a8acd05a4fbbc0862fb4215cc",
+      "pcm_sha256": "f728911bc9f5948bb3538c2179ba00b15ed1a2b9803968613450ecc7c9ab2ca9",
+      "video_sha256": "4a0fa6748f58ccf0e023603ab50182dba586d7df3cbc144a089cbb908fce10da"
+    },
+    {
+      "name": "free-5-4-7-11025",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "70a32f8e89da491acf6ea49375b4b80042570e5c292edb4067d9403c0f2390ce",
+      "pcm_sha256": "e35b1d1f02526b9ea39817b8360a0229f92e7d5ebccfe635a2374e8baff1b79c",
+      "video_sha256": "41a3d2776384d95df3e6fe516a2ec995a483042b6252f55ce7674748adb2b980"
+    },
+    {
+      "name": "free-5-11-1-11025",
+      "rate": 11025,
+      "channels": 2,
+      "sizes": [
+        842,
+        843,
+        842,
+        843
+      ],
+      "sha256": "101e6170aca93bb056a752d7e7ab072d336f275b5b132d905d23af1ec134dc64",
+      "pcm_sha256": "434867a7552e55278af30dabb56b7e9399ccc51a6a0b95435f576b74ef845008",
+      "video_sha256": "c0410798f4014993f31b3f0683cee08d1e3125ed32ab54feb636703352a8245b"
+    },
+    {
+      "name": "free-5-11-3-11025",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        424,
+        425,
+        424,
+        425
+      ],
+      "sha256": "a253d22641e91f2c6452284ff36a3ba2f0add6a9238f9d92280c82630243725a",
+      "pcm_sha256": "f8f39a65d0ca04b8f4581a7b46130b24c38e75fe32dd8e53dd6e381628c389b7",
+      "video_sha256": "840b202795ae4c5d09a39b8094a128352644e3583ce52d9af4dd08a3fe56aa39"
+    }
+  ],
+  "invalid_cases": [
+    {
+      "file": "free-second-crc-damaged.mp2",
+      "sha256": "e28b1883f82e062e6ca16e5a47aa6ddae022f25f1c0059a743d419b0beceab48"
+    },
+    {
+      "file": "free-second-crc-damaged.mkv",
+      "sha256": "83da2aa606c45d65cdf8e1173cb18d19a61afdf01563dcb072a1e10772861a85"
+    }
+  ]
+}

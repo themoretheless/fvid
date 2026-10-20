@@ -20,7 +20,7 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
     if input.tracks.len() != 1 || !input.metadata_complete {
         return false;
     }
-    if matches!(input.tracks[0].codec.as_str(),"V_VP9"|"V_AV1") {
+    if matches!(input.tracks[0].codec.as_str(),"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC") {
         match crate::owned_webm_codec::presentation_durations(&mut input,None) {
             Ok(None) => return false,
             // Corrupt admitted packets must fail execution atomically.
@@ -37,7 +37,7 @@ pub(crate) fn supports(source: &Path, transform: &DecodeTransform) -> bool {
         return false;
     }
     if track.kind != 1
-        || !matches!(track.codec.as_str(),"V_FFV1"|"V_VP9"|"V_AV1")
+        || !matches!(track.codec.as_str(),"V_FFV1"|"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC")
         || input.packets.iter().any(|p| {
             (p.invisible && track.codec=="V_FFV1")
                 || p.pts_ns < 0
@@ -58,13 +58,13 @@ fn aspect(
     height: u32,
 ) -> Result<(u32, u32)> {
     let (n, d) = track.pixel_aspect();
-    let (mut n, mut d) = (u128::from(n), u128::from(d));
+    let (mut n, mut d) = (u64::from(n), u64::from(d));
     let (mut visible_w,mut visible_h)=track.visible();
     if matches!(track.rotation,90|270) {std::mem::swap(&mut n,&mut d);std::mem::swap(&mut visible_w,&mut visible_h);}
     let (mut w, mut h) = transform
         .crop
-        .map_or((u128::from(visible_w), u128::from(visible_h)), |c| {
-            (c.width as u128, c.height as u128)
+        .map_or((u64::from(visible_w), u64::from(visible_h)), |c| {
+            (c.width as u64, c.height as u64)
         });
     if transform.transpose.is_some() {
         std::mem::swap(&mut n, &mut d);
@@ -72,25 +72,51 @@ fn aspect(
     }
     if let Some(angle) = transform.rotate {
         let (rw, rh) = angle.size(u32::try_from(w).map_err(|_| "rotation width overflow")?, u32::try_from(h).map_err(|_| "rotation height overflow")?);
-        (w, h) = (u128::from(rw), u128::from(rh));
+        (w, h) = (u64::from(rw), u64::from(rh));
     }
     if let Some(p) = transform.pad {
-        (w, h) = (u128::from(p.width), u128::from(p.height));
+        (w, h) = (u64::from(p.width), u64::from(p.height));
     }
+    let gcd = |mut a: u64, mut b: u64| -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    };
+    let g0 = gcd(n, d);
+    if g0 == 0 {
+        return Err("invalid pixel aspect".into());
+    }
+    n /= g0;
+    d /= g0;
     if transform.scale.is_some() {
+        let g1 = gcd(w, h);
+        if g1 == 0 {
+            return Err("invalid pixel aspect".into());
+        }
+        let (w, h) = (w / g1, h / g1);
+        let (mut oh, mut ow) = (u64::from(height), u64::from(width));
+        let g2 = gcd(oh, ow);
+        if g2 == 0 {
+            return Err("invalid pixel aspect".into());
+        }
+        oh /= g2;
+        ow /= g2;
         n = n
             .checked_mul(w)
-            .and_then(|v| v.checked_mul(u128::from(height)))
             .ok_or("pixel aspect overflow")?;
         d = d
             .checked_mul(h)
-            .and_then(|v| v.checked_mul(u128::from(width)))
+            .ok_or("pixel aspect overflow")?;
+        let g3 = gcd(n, d);
+        n = (n / g3)
+            .checked_mul(oh)
+            .ok_or("pixel aspect overflow")?;
+        d = (d / g3)
+            .checked_mul(ow)
             .ok_or("pixel aspect overflow")?;
     }
-    let (mut a, mut b) = (n, d);
-    while b != 0 {
-        (a, b) = (b, a % b);
-    }
+    let a = gcd(n, d);
     if a == 0 {
         return Err("invalid pixel aspect".into());
     }

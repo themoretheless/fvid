@@ -16,25 +16,44 @@ pub struct Resampler<W> {
     channels: usize,
     radius: i64,
     cutoff: f64,
-    queue: VecDeque<[f32; 64]>,
+    queue: VecDeque<[f32; 255]>,
     base: u64,
     count: u64,
     emitted: u64,
-    first: [f32; 64],
-    last: [f32; 64],
-    frame: [f32; 64],
+    first: [f32; 255],
+    last: [f32; 255],
+    frame: [f32; 255],
     filled: usize,
+    start: u64,
+    phase: (u128, u128),
 }
 impl<W: Write> Resampler<W> {
     pub fn new(output: W, input_rate: u32, output_rate: u32, channels: u16) -> io::Result<Self> {
-        if input_rate == 0 || output_rate == 0 || !(1..=64).contains(&channels) {
+        Self::new_with_origin(output, input_rate, output_rate, channels, 0, (0, 1))
+    }
+    /// Start at an absolute source sample and a fractional output-clock origin.
+    /// This retains rational phase across trims and linked rate changes.
+    pub fn new_with_origin(
+        output: W,
+        input_rate: u32,
+        output_rate: u32,
+        channels: u16,
+        source_origin: u64,
+        phase: (u128, u128),
+    ) -> io::Result<Self> {
+        if input_rate == 0
+            || output_rate == 0
+            || !(1..=255).contains(&channels)
+            || phase.1 == 0
+            || phase.0 >= phase.1
+        {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "invalid resampler geometry",
             ));
         }
         let ratio = (f64::from(output_rate) / f64::from(input_rate)).min(1.0);
-        Ok(Self {
+        let mut result = Self {
             output,
             input_rate,
             output_rate,
@@ -42,28 +61,67 @@ impl<W: Write> Resampler<W> {
             radius: input_radius(input_rate, output_rate) as i64,
             cutoff: 0.94 * ratio,
             queue: VecDeque::new(),
-            base: 0,
-            count: 0,
+            base: source_origin,
+            count: source_origin,
             emitted: 0,
-            first: [0.0; 64],
-            last: [0.0; 64],
-            frame: [0.0; 64],
+            first: [0.0; 255],
+            last: [0.0; 255],
+            frame: [0.0; 255],
             filled: 0,
-        })
+            start: source_origin,
+            phase,
+        };
+        result.emitted = u64::try_from(result.output_end()?)
+            .map_err(|_| io::Error::other("resampler clock overflow"))?;
+        Ok(result)
+    }
+    /// Next output sample index on the local rational clock.
+    pub fn output_position(&self) -> u64 {
+        self.emitted
+    }
+    fn passthrough(&self) -> bool {
+        self.input_rate == self.output_rate && self.phase.0 == 0
+    }
+    fn output_end(&self) -> io::Result<u128> {
+        let numerator = u128::from(self.count)
+            .checked_mul(u128::from(self.output_rate))
+            .and_then(|n| n.checked_mul(self.phase.1))
+            .and_then(|n| {
+                self.phase
+                    .0
+                    .checked_mul(u128::from(self.input_rate))
+                    .and_then(|p| n.checked_add(p))
+            })
+            .ok_or_else(|| io::Error::other("resampler clock overflow"))?;
+        let denominator = u128::from(self.input_rate)
+            .checked_mul(self.phase.1)
+            .ok_or_else(|| io::Error::other("resampler clock overflow"))?;
+        Ok(numerator.div_ceil(denominator))
+    }
+    fn position(&self) -> io::Result<(i64, f64)> {
+        let numerator = u128::from(self.emitted)
+            .checked_mul(self.phase.1)
+            .and_then(|n| n.checked_sub(self.phase.0))
+            .and_then(|n| n.checked_mul(u128::from(self.input_rate)))
+            .ok_or_else(|| io::Error::other("resampler phase overflow"))?;
+        let denominator = u128::from(self.output_rate)
+            .checked_mul(self.phase.1)
+            .ok_or_else(|| io::Error::other("resampler phase overflow"))?;
+        let center = i64::try_from(numerator / denominator)
+            .map_err(|_| io::Error::other("resampler clock overflow"))?;
+        Ok((
+            center,
+            (numerator % denominator) as f64 / denominator as f64,
+        ))
     }
     fn emit(&mut self, finalizing: bool) -> io::Result<()> {
-        let total = (u128::from(self.count) * u128::from(self.output_rate))
-            .div_ceil(u128::from(self.input_rate));
+        let total = self.output_end()?;
         while u128::from(self.emitted) < total {
-            let position = u128::from(self.emitted) * u128::from(self.input_rate);
-            let center = i64::try_from(position / u128::from(self.output_rate))
-                .map_err(|_| io::Error::other("resampler clock overflow"))?;
+            let (center, fraction) = self.position()?;
             if !finalizing && center + self.radius >= self.count as i64 {
                 break;
             }
-            let fraction =
-                (position % u128::from(self.output_rate)) as f64 / f64::from(self.output_rate);
-            let mut sum = [0.0f64; 64];
+            let mut sum = [0.0f64; 255];
             let mut normalization = 0.0;
             for offset in -self.radius..=self.radius {
                 let distance = offset as f64 - fraction;
@@ -80,7 +138,7 @@ impl<W: Write> Resampler<W> {
                 };
                 let weight = self.cutoff * sinc * window;
                 let index = center + offset;
-                let sample = if index < 0 {
+                let sample = if index < 0 || (index as u64) < self.start {
                     &self.first
                 } else if index as u64 >= self.count {
                     &self.last
@@ -102,8 +160,7 @@ impl<W: Write> Resampler<W> {
                 self.output.write_all(&value.to_le_bytes())?;
             }
             self.emitted += 1;
-            let next = (u128::from(self.emitted) * u128::from(self.input_rate)
-                / u128::from(self.output_rate)) as u64;
+            let next = self.position()?.0 as u64;
             let keep = next.saturating_sub(self.radius as u64);
             while self.base < keep && !self.queue.is_empty() {
                 self.queue.pop_front();
@@ -116,7 +173,7 @@ impl<W: Write> Resampler<W> {
         if self.filled != 0 {
             return Err(io::Error::other("partial resampler channel frame"));
         }
-        if self.input_rate != self.output_rate {
+        if !self.passthrough() {
             self.emit(true)?;
         }
         self.output.flush()?;
@@ -143,21 +200,24 @@ impl<W: Write> Write for Resampler<W> {
             self.frame[self.filled] = sample;
             self.filled += 1;
             if self.filled == self.channels {
-                if self.input_rate == self.output_rate {
+                if self.passthrough() {
                     for value in &self.frame[..self.channels] {
                         self.output.write_all(&value.to_le_bytes())?;
                     }
                     self.emitted += 1;
                 } else {
-                    if self.count == 0 {
+                    if self.count == self.start {
                         self.first = self.frame;
                     }
                     self.last = self.frame;
+                    self.queue
+                        .try_reserve(1)
+                        .map_err(|_| io::Error::other("cannot allocate resampler history"))?;
                     self.queue.push_back(self.frame);
                 }
                 self.count += 1;
                 self.filled = 0;
-                if self.input_rate != self.output_rate {
+                if !self.passthrough() {
                     self.emit(false)?;
                 }
             }
@@ -227,7 +287,43 @@ mod tests {
 impl Resampler<Vec<u8>> {
     pub(crate) fn retained_storage_bytes(&self) -> usize {
         std::mem::size_of_val(self)
-            + self.queue.capacity() * std::mem::size_of::<[f32; 64]>()
+            + self.queue.capacity() * std::mem::size_of::<[f32; 255]>()
             + self.output.capacity()
+    }
+}
+
+#[cfg(test)]
+mod phase_tests {
+    use super::*;
+    #[test]
+    fn fractional_origin_preserves_rational_phase_and_chunk_independence() {
+        let input: Vec<u8> = (17..1017)
+            .flat_map(|i| (i as f32 / 1000.).to_le_bytes())
+            .collect();
+        let mut baseline = None;
+        for chunk in [4, 68, 2000] {
+            let mut engine =
+                Resampler::new_with_origin(Vec::new(), 48000, 32000, 1, 17, (1, 2)).unwrap();
+            assert_eq!(engine.output_position(), 12);
+            for bytes in input.chunks(chunk) {
+                engine.write_all(bytes).unwrap();
+            }
+            assert_eq!(engine.finish().unwrap(), 679);
+            let pcm = engine.take_output();
+            assert_eq!(pcm.len(), (679 - 12) * 4);
+            for (i, bytes) in pcm.chunks_exact(4).enumerate().skip(80).take(500) {
+                let expected = ((i + 12) as f64 - 0.5) * 1.5 / 1000.;
+                let actual = f64::from(f32::from_le_bytes(bytes.try_into().unwrap()));
+                assert!(
+                    (actual - expected).abs() < 1e-5,
+                    "sample {i}: {actual} vs {expected}"
+                );
+            }
+            if let Some(previous) = &baseline {
+                assert_eq!(&pcm, previous);
+            } else {
+                baseline = Some(pcm);
+            }
+        }
     }
 }

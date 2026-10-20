@@ -1,0 +1,42 @@
+{
+  "scope": "Explicit local independent decoder reference only; ordinary tests/generation do not invoke FFmpeg.",
+  "cases": [
+    {
+      "file": "escape-256.flac",
+      "bytes": 2048,
+      "sha256": "381a08a142dcdd6b9b31754bda1f7dd0179232322b264c8f0cf74cc6dcb0d29b",
+      "stderr": ""
+    },
+    {
+      "file": "code13.flac",
+      "bytes": 65536,
+      "sha256": "ea0862f1296e8f7fbf63bdc435a60e899054dde67a24ea4f23b870168f7e626f",
+      "stderr": ""
+    },
+    {
+      "file": "code14.flac",
+      "bytes": 131072,
+      "sha256": "7b5e38b66b27e3c5c329cf035f2920986c20f481e809e9e4c3be3245c74409bd",
+      "stderr": ""
+    },
+    {
+      "file": "code12.flac",
+      "bytes": 32768,
+      "sha256": "821211d1a8ff9078f33f05240502e29560f69052cba9a707db5b88aae58dd034",
+      "stderr": ""
+    },
+    {
+      "file": "code15.flac",
+      "bytes": 262144,
+      "sha256": "636bf7cc03d37a71a53b97d056b1528aef1e7476748b4883d7e3532cbe405101",
+      "stderr": ""
+    },
+    {
+      "file": "maximum65535.flac",
+      "bytes": 262140,
+      "sha256": "7a64a8954bb641fe244c0c3be1faf4141434849bce26d904463cfd30f3167c12",
+      "stderr": ""
+    }
+  ],
+  "ffmpeg_version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers"
+}

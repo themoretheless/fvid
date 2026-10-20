@@ -1,0 +1,12 @@
+{
+  "source": "https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c",
+  "retrieved_source_sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "scope": "Primary player implementation; semantic inspection only,no code copied into fvid.",
+  "observations": [
+    "patternLoop stores a per-channel start marker on E60; E6n initializes or decrements the per-channel repeat counter and requests a jump while it is nonzero.",
+    "Loop starts and counters are initialized for playback,not reset at every order transition. Multiple channels retain independent counters.",
+    "getNextPos applies pattern-loop row changes before position jumps. All flow commands share pBreakPos; later channel commands determine the final resume row.",
+    "FT2 explicitly retains the last loop break row until order transition,which can start the next pattern at that row. It resets an out-of-range actual destination row to0.",
+    "Finite local row loops are distinct from the existing native one-pass global order-entry policy. The implementation will retain the latter and apply row budgets to every expanded row."
+  ]
+}

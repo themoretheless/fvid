@@ -1,0 +1,12 @@
+{
+  "video": "hevc-opus-discrete-encoder-source.mkv",
+  "audio": "opus-discrete-encoder-source.f32",
+  "sample_rate": 48000,
+  "channels": 1,
+  "sample_frames": 2880,
+  "audio_packets": 3,
+  "video_frames": 3,
+  "video_sha256": "f9039b25286b4685251356c5cfd43d11d36ee1f15429d170d9c0349f7f09f9f9",
+  "audio_sha256": "beea9a06f88ef6b98964ba0ca5cfd8c8a21eea0b8e61fbdb2b985ce8ef2ad555",
+  "provenance": "Authored 440 Hz sine float32 and owned HEVC PCM frames; no private media or external codecs."
+}

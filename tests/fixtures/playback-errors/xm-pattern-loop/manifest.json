@@ -1,0 +1,610 @@
+{
+  "provenance": "Authored E6x finite loops with literal expected traces and independent flattened scores. Marker/default starts,1/2/15repeats,channel-local counters,FT2next-pattern-row quirk and short fallback,position-jump precedence,global one-pass policy,tempo replay and cross-order counter lifetime. Signed16loop and VP9/PCM companion. No external encoder,network or private media.",
+  "cases": [
+    {
+      "name": "start-zero-one",
+      "file": "start-zero-one.xm",
+      "control": "start-zero-one-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "start-one-two",
+      "file": "start-one-two.xm",
+      "control": "start-one-two-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "implicit-start",
+      "file": "implicit-start.xm",
+      "control": "implicit-start-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "maximum-repeat",
+      "file": "maximum-repeat.xm",
+      "control": "maximum-repeat-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "marker-only",
+      "file": "marker-only.xm",
+      "control": "marker-only-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "before_failure": false,
+      "has_loop": true
+    },
+    {
+      "name": "next-pattern-row-quirk",
+      "file": "next-pattern-row-quirk.xm",
+      "control": "next-pattern-row-quirk-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "next-short-fallback",
+      "file": "next-short-fallback.xm",
+      "control": "next-short-fallback-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "jump-overrides-loop",
+      "file": "jump-overrides-loop.xm",
+      "control": "jump-overrides-loop-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": false,
+      "has_loop": true
+    },
+    {
+      "name": "loop-after-jump",
+      "file": "loop-after-jump.xm",
+      "control": "loop-after-jump-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          1
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "channel-local-counters",
+      "file": "channel-local-counters.xm",
+      "control": "channel-local-counters-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "global-backward-jump",
+      "file": "global-backward-jump.xm",
+      "control": "global-backward-jump-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "tempo-inside-loop",
+      "file": "tempo-inside-loop.xm",
+      "control": "tempo-inside-loop-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "counter-persists-across-orders",
+      "file": "counter-persists-across-orders.xm",
+      "control": "counter-persists-across-orders-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "before_failure": true,
+      "has_loop": true
+    },
+    {
+      "name": "no-loop-control",
+      "file": "no-loop-control.xm",
+      "control": "no-loop-control-expanded.xm",
+      "timeline": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "before_failure": false,
+      "has_loop": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "start-zero-one.xm": "5ff1cbb0d2ac45d5089fa1d11104bd028401d0548b621e4a1dd48e57d6b1e15e",
+    "start-zero-one-expanded.xm": "47b80f06768fbf471ba9ab28c1fea1e50aaa837dcd2b134b50c8a35111529160",
+    "start-one-two.xm": "490d69ee8d51cae87804bb29208a0b5ae151591051238331c7c2aef274cad13d",
+    "start-one-two-expanded.xm": "ec3d80e8b2f7376647cba4eb47dd8ded0f8b5ebaade4a0edf556aa2597b6d875",
+    "implicit-start.xm": "71a5406f36f94754bfc3dbd8121365bc4ee1cffece333224a2d07a5e80963353",
+    "implicit-start-expanded.xm": "f5a1b0d2ca9b76b53e7cf46d1611e815a3045d812dfc42bc12669c089755b498",
+    "maximum-repeat.xm": "60d25507d9435b7fd4035618c404747c8d68e3a968dfc97b2ed71f1cd835e7f3",
+    "maximum-repeat-expanded.xm": "b2308bb655f57f921f0c47993bd65d10d26833464a9aabb6528d3af721c28982",
+    "marker-only.xm": "540017e3023ca0857491e2cd3e7861e232a4824c9d4c045c88add5f94e6662c6",
+    "marker-only-expanded.xm": "dcc13906a892ead346993405517d4d0768b4aa64c58487bdb09a0916c8e8d6e5",
+    "next-pattern-row-quirk.xm": "bc30a073ffe9b14a85daf1f8616f496dfb94ef48b1b0c28f0f248ccedb524bf0",
+    "next-pattern-row-quirk-expanded.xm": "a35ee19c93fd6254d8be2ef224a201fc9a1a550bd4a91bfe294b66d65a4983c2",
+    "next-short-fallback.xm": "68da6f6b54b283b703ccf1fe72b9ac21a0671e5582f2a4fa278293f9b8b93247",
+    "next-short-fallback-expanded.xm": "08fd7fca252613aa943a0f966a7a227ac6dc10e3baebc62e7a34f4cb4caf990d",
+    "jump-overrides-loop.xm": "2bcd43859758f705c3fd89a5b6129a68fe39f383f79c6b0fd1be1b4a4813dddf",
+    "jump-overrides-loop-expanded.xm": "76d3602cd6bd70ddc90d76885e117fd8b7020c96778e910ce33961ab96bad7ed",
+    "loop-after-jump.xm": "c7b0723ace52b360387d82efa2ac7d9cddefa0fe35d61a9ff5d1aba9b3175c86",
+    "loop-after-jump-expanded.xm": "15df090d71cfb0b08647bdb7fd819558a94075eb1a7fe319c10c28344c956e23",
+    "channel-local-counters.xm": "f401db42f19e195d416a217dd453f6f243da4815d506a0f612c5671d6b928415",
+    "channel-local-counters-expanded.xm": "82f2a4844b43714a61bcbb369e4046324fe095e6244554220cff36726e65722d",
+    "global-backward-jump.xm": "9aa19905ff8396ea1f7c42d2112be32d6e4a2f49ca30c5d824f2190a3ea97a83",
+    "global-backward-jump-expanded.xm": "47b80f06768fbf471ba9ab28c1fea1e50aaa837dcd2b134b50c8a35111529160",
+    "tempo-inside-loop.xm": "68d76258452ea95673c103b241912a52b1ef3fe3b181940604d942f9b4c1abd5",
+    "tempo-inside-loop-expanded.xm": "8f4f9dbe034dff4a6d75c4f47dfa6a4abf6ac4570c16bdce59b5b4361cd27a5c",
+    "counter-persists-across-orders.xm": "392b8db797879f910b115f1b28f905aef1d8b505aa5b42dddddd95becba0f763",
+    "counter-persists-across-orders-expanded.xm": "af53b9fff12d759620a0eab3ef7d4f55202b940b0e9b7d202aee9d2e81770d91",
+    "no-loop-control.xm": "1c064618d8afafce4df70bd10e129d406ca46b605348ea2c95949875e1817d77",
+    "no-loop-control-expanded.xm": "1c064618d8afafce4df70bd10e129d406ca46b605348ea2c95949875e1817d77"
+  }
+}

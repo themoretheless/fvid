@@ -28,6 +28,14 @@ pub struct Picture {
     // disabled segmentation and update_map=false must preserve the old map.
     segment_map: Vec<u8>,
 }
+impl Picture {
+    pub fn storage_bytes(&self) -> usize {
+        self.planes.iter().fold(0usize, |sum, plane|
+            sum.saturating_add(plane.samples.capacity().saturating_mul(2)))
+            .saturating_add(self.blocks.capacity().saturating_mul(std::mem::size_of::<Block>()))
+            .saturating_add(self.segment_map.capacity())
+    }
+}
 #[derive(Clone, Copy, Default, Debug)]
 struct Block {
     skip: bool,

@@ -1,0 +1,74 @@
+{
+  "provenance": "Authored100ms MIDI note,5meta/sysex cancellation barriers with missing versus explicit status, ordinary running control. Separate authored native VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "text-explicit-status",
+      "file": "text-explicit-status.mid",
+      "bad": false
+    },
+    {
+      "name": "text-missing-status",
+      "file": "text-missing-status.mid",
+      "bad": true
+    },
+    {
+      "name": "tempo-explicit-status",
+      "file": "tempo-explicit-status.mid",
+      "bad": false
+    },
+    {
+      "name": "tempo-missing-status",
+      "file": "tempo-missing-status.mid",
+      "bad": true
+    },
+    {
+      "name": "unknown-meta-explicit-status",
+      "file": "unknown-meta-explicit-status.mid",
+      "bad": false
+    },
+    {
+      "name": "unknown-meta-missing-status",
+      "file": "unknown-meta-missing-status.mid",
+      "bad": true
+    },
+    {
+      "name": "sysex-explicit-status",
+      "file": "sysex-explicit-status.mid",
+      "bad": false
+    },
+    {
+      "name": "sysex-missing-status",
+      "file": "sysex-missing-status.mid",
+      "bad": true
+    },
+    {
+      "name": "escape-explicit-status",
+      "file": "escape-explicit-status.mid",
+      "bad": false
+    },
+    {
+      "name": "escape-missing-status",
+      "file": "escape-missing-status.mid",
+      "bad": true
+    },
+    {
+      "name": "ordinary-running",
+      "file": "ordinary-running.mid",
+      "bad": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "text-explicit-status.mid": "eda01e083130a027d4e9ce139707c0eada62e793b7ab83d5df3100a684e74295",
+    "text-missing-status.mid": "b8f16a988952d57d492f53f27dd26ba5d40179a48d0d152def138217a169f09f",
+    "tempo-explicit-status.mid": "90506f239b0948a6f7250a731113040337c8ed02cc34c11f7e9682adbc4cb786",
+    "tempo-missing-status.mid": "93f53c637b1c3eec7b4b98e7c912596fb938dddf41cf66f6bf12b40bbd8c04cc",
+    "unknown-meta-explicit-status.mid": "2b482c613edf2648d08fae2b2cce8297e5d1f67456f4caefe1cc41bbeb9f2210",
+    "unknown-meta-missing-status.mid": "06a4c40edd680a8ea704c7c4d53932700cec6d3b286eb309caf227fd3b029144",
+    "sysex-explicit-status.mid": "a8f0d24e693c6db76ca27ec76e9d4fbd521965072e82dab487b16d8d281916e6",
+    "sysex-missing-status.mid": "bccf98667f8089d4b620db19b7df3c7c4f4b4d26bbb3e8db4cb71973d8da46b4",
+    "escape-explicit-status.mid": "5a0f63f1678869317df56da6f325292d89cc8011c48c7eaa9999a597ea21fdbe",
+    "escape-missing-status.mid": "3309d667fd8fd603049e431cc24d8d0662217ca4bff2587c064e47333dc8ec85",
+    "ordinary-running.mid": "f4d3e6f148027444a2a6ae38d64f7555e400210f251844ba10cf8eb2304e1783"
+  }
+}

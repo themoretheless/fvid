@@ -1,0 +1,28 @@
+running 3 tests
+
+thread 'representable_upper_duration_is_accepted' (16631310) panicked at crates/fvid-media/tests/matroska_duration_regressions.rs:16:81:
+called `Result::unwrap()` on an `Err` value: Error { message: "WebM Duration overflow", unsupported: false }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'integral_duration_keeps_the_full_scaled_product' (16631308) panicked at crates/fvid-media/tests/matroska_duration_regressions.rs:17:9:
+assertion `left == right` failed: "integer-product.mkv"
+  left: Some(27021597764222972)
+ right: Some(27021597764222973)
+
+thread 'ordinary_duration_avoids_double_rounding' (16631309) panicked at crates/fvid-media/tests/matroska_duration_regressions.rs:17:9:
+assertion `left == right` failed: "double-rounding.mkv"
+  left: Some(55000001)
+ right: Some(55000000)
+test representable_upper_duration_is_accepted ... FAILED
+test ordinary_duration_avoids_double_rounding ... FAILED
+test integral_duration_keeps_the_full_scaled_product ... FAILED
+
+failures:
+
+failures:
+    integral_duration_keeps_the_full_scaled_product
+    ordinary_duration_avoids_double_rounding
+    representable_upper_duration_is_accepted
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

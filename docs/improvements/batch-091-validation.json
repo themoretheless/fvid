@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0111"
+  ],
+  "checked_at": "2026-10-16T04:31:14.254701+00:00",
+  "before": [
+    "evidence/batch-091-grouped-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-091-final-integration.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-091-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-091-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-091-final-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-091-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-091-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four31row authored held-note runs including integer125BPM control. At127/199/255BPM,70individual one-sample short rows lose25/17/28total samples and85packet start timestamps are off the absolute PCM grid. Grouped one-call held-note rendering proves three cumulative-length differences.",
+    "Frames now equal floor((sourcePTS+duration)*rate/1000)-floor(sourcePTS*rate/1000), with u128 intermediates, checked narrowing/count and fallible allocation before voice-state mutation. PCM PTS uses the same absolute sample boundary and sample-rate timebase. Encoded source timestamps remain milliseconds.",
+    "Four native row-split versus one-call results match every PCM byte and total frame count. Actual workers pass fullplay,rewind,nonzero row-interior seek andEOF, including rebuilt synthesis history.11decoder/6reader tests,related timeline integrations,fixture reproduction and current player build pass.",
+    "Initial fixture retained a short unlooped sample, so its first timing-only failure log is superseded by looped/grouped-before. Fixture explicitly enables the authored sample existing full-length loop; nonsilent control passes. Old unit timebase1000oracles are updated to PCM rate.",
+    "An exact published-boundary seek probe exposed a separate reader row-selection defect: floor-millisecond target can precede actual microsecond row start. That remains unclaimed here and is reproduced separately in batch092. Final nonzero seek uses published start+1ms inside the intended row. No reference-synth quality, physical output or performance claim."
+  ],
+  "compatibility": "Decoded XM packet PTS/timebase now use PCM sample units; presentation_time remains equivalent at integral boundaries and rounds to the sample grid otherwise. Source encoded millisecond timeline and API signatures remain unchanged.",
+  "counting": "One per-row PCM rounding/clock consistency problem; three tempos,70short rows,85PTS observations,fixtures and oracle corrections add noIDs."
+}

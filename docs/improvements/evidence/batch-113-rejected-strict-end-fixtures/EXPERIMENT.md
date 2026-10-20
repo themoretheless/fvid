@@ -1,0 +1,1 @@
+Rejected experiment; zero accepted IDs. The original malformed labels were an incorrect interpretation of FF2Ffixed syntax. The generic SMFmeta-event extension rule requires ignoring unknown trailing bytes. Production strict-EOTlength patch was reverted before implementing extended-tempo acceptance. These authored bytes/logs are preserved only as audit evidence.

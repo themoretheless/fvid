@@ -1,0 +1,37 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0092"
+  ],
+  "checked_at": "2026-10-16T06:51:26.839003+00:00",
+  "before": [
+    "evidence/batch-104-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-104-integration.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-104-reader-verified.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-104-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-104-player-build-recheck.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Zero-ID followup to FVID-0092: calculate last packet duration from rounded absolute endpoint minus published start, rather than separately flooring tail length.",
+    "Six authored tempos:32and255 previously lost1ms/44PCM frames; four controls healthy. Direct EOF and last-millisecond seeks independently reproduce premature EOF. Pre-fix worker checks fail at generation0 full playback, not a separately reached seek.",
+    "Twelve direct boundary targets and twelve actual worker targets pass after correction, with independent silent-tail sample-count oracle. No FFmpeg/network/private data. Initial reader/build attempts hit a concurrent missing AAC helper; current rechecks pass. An incorrect reader filter selected zero tests; the verified playback_xm filter runs six."
+  ]
+}

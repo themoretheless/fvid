@@ -1,0 +1,50 @@
+{
+  "provenance": "Six authored mono AAC-LC/ADTS silence streams,max_sfb0,long windows,no prediction/tools. Independent all-zero PCM and integer endpoints. Separate nativeVP9/PCMcompanion,no encoder/network/private media.",
+  "cases": [
+    {
+      "file": "lc-44100-3.aac",
+      "rate": 44100,
+      "samples": 3072,
+      "end_ns": 69659863
+    },
+    {
+      "file": "lc-44100-1.aac",
+      "rate": 44100,
+      "samples": 1024,
+      "end_ns": 23219954
+    },
+    {
+      "file": "lc-48000-2.aac",
+      "rate": 48000,
+      "samples": 2048,
+      "end_ns": 42666666
+    },
+    {
+      "file": "lc-48000-1.aac",
+      "rate": 48000,
+      "samples": 1024,
+      "end_ns": 21333333
+    },
+    {
+      "file": "lc-96000-1.aac",
+      "rate": 96000,
+      "samples": 1024,
+      "end_ns": 10666666
+    },
+    {
+      "file": "lc-8000-3.aac",
+      "rate": 8000,
+      "samples": 3072,
+      "end_ns": 384000000
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "lc-44100-3.aac": "385a78cff3c79685c288c7013a24723ea58d915956b35f154b36d77523298283",
+    "lc-44100-1.aac": "dc2f3bcc04b89eecf5d6ed47d9e25c2ee80b9296b11039e2d239e47ed127aa5e",
+    "lc-48000-2.aac": "68bd7fd1b5fe780971e5a41791595aa0753cbe30e2fcc660cebbd25ac0315bea",
+    "lc-48000-1.aac": "cf20be8229f99427075fc3651ac3650d506fa6a85758e2a026748ed2f3f8791f",
+    "lc-96000-1.aac": "826622d70a3d5304dc4e4f7ea5e577c542e82878b3db4710bbfc283fba21f511",
+    "lc-8000-3.aac": "2a15f776f355b4db2435b5c2a38ff44d6d626a2e1080b5426d4510c9fa7923d0"
+  }
+}

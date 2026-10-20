@@ -1,0 +1,26 @@
+{
+  "video_companion": "g711-alaw-2ch.avi",
+  "cases": [
+    {
+      "file": "ima4-ramp-edits.mov",
+      "sha256": "bb56167a054e279543d5b64f660b6b9999e84059d93df6af766e21567287bf9a",
+      "presentation_frames": 128,
+      "video_file": "ima4-ramp-edits-video.mov",
+      "video_sha256": "11ac5aaa8cabef69f2f73dc6c41828ceba3d3e976bac843cdda5855482f9c993"
+    },
+    {
+      "file": "ima-wav-stereo-edits.mov",
+      "sha256": "78e607db8f492683a213988753c74aa48ad10def3380ff3f479430538f1d029d",
+      "presentation_frames": 18,
+      "video_file": "ima-wav-stereo-edits-video.mov",
+      "video_sha256": "893ca041de63b56a727156ba84c3b04641045d8b1f7e89359c30214b632d224e"
+    },
+    {
+      "file": "ms-adpcm-stereo-edits.mov",
+      "sha256": "2fcc8c94cbffca17c260a49793eea10d453f3572fa98cf456c35acd613059c73",
+      "presentation_frames": 12,
+      "video_file": "ms-adpcm-stereo-edits-video.mov",
+      "video_sha256": "bc98f647a23c2703a5ce17ef77bfcb8325d3301a4dcf9a913caf425bbaa24741"
+    }
+  ]
+}

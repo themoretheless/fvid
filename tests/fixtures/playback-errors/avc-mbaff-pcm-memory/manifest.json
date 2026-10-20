@@ -1,0 +1,187 @@
+{
+  "provenance": "Six40ms authored 64/128/256-square MBAFF I_PCM clips,8-bit luma/10-bit chroma, frame/field pairs. Exact independently placed arrays. No encoder/private media/network.",
+  "cases": [
+    {
+      "file": "64-frame.mp4",
+      "configuration": "64-frame.avcc",
+      "size": 64,
+      "field": false,
+      "frames": [
+        {
+          "packet": "64-frame-0.packet",
+          "y": "64-frame-0.y",
+          "cb": "64-frame-0.cb",
+          "cr": "64-frame-0.cr"
+        },
+        {
+          "packet": "64-frame-1.packet",
+          "y": "64-frame-1.y",
+          "cb": "64-frame-1.cb",
+          "cr": "64-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "64-field.mp4",
+      "configuration": "64-field.avcc",
+      "size": 64,
+      "field": true,
+      "frames": [
+        {
+          "packet": "64-field-0.packet",
+          "y": "64-field-0.y",
+          "cb": "64-field-0.cb",
+          "cr": "64-field-0.cr"
+        },
+        {
+          "packet": "64-field-1.packet",
+          "y": "64-field-1.y",
+          "cb": "64-field-1.cb",
+          "cr": "64-field-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "128-frame.mp4",
+      "configuration": "128-frame.avcc",
+      "size": 128,
+      "field": false,
+      "frames": [
+        {
+          "packet": "128-frame-0.packet",
+          "y": "128-frame-0.y",
+          "cb": "128-frame-0.cb",
+          "cr": "128-frame-0.cr"
+        },
+        {
+          "packet": "128-frame-1.packet",
+          "y": "128-frame-1.y",
+          "cb": "128-frame-1.cb",
+          "cr": "128-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "128-field.mp4",
+      "configuration": "128-field.avcc",
+      "size": 128,
+      "field": true,
+      "frames": [
+        {
+          "packet": "128-field-0.packet",
+          "y": "128-field-0.y",
+          "cb": "128-field-0.cb",
+          "cr": "128-field-0.cr"
+        },
+        {
+          "packet": "128-field-1.packet",
+          "y": "128-field-1.y",
+          "cb": "128-field-1.cb",
+          "cr": "128-field-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "256-frame.mp4",
+      "configuration": "256-frame.avcc",
+      "size": 256,
+      "field": false,
+      "frames": [
+        {
+          "packet": "256-frame-0.packet",
+          "y": "256-frame-0.y",
+          "cb": "256-frame-0.cb",
+          "cr": "256-frame-0.cr"
+        },
+        {
+          "packet": "256-frame-1.packet",
+          "y": "256-frame-1.y",
+          "cb": "256-frame-1.cb",
+          "cr": "256-frame-1.cr"
+        }
+      ]
+    },
+    {
+      "file": "256-field.mp4",
+      "configuration": "256-field.avcc",
+      "size": 256,
+      "field": true,
+      "frames": [
+        {
+          "packet": "256-field-0.packet",
+          "y": "256-field-0.y",
+          "cb": "256-field-0.cb",
+          "cr": "256-field-0.cr"
+        },
+        {
+          "packet": "256-field-1.packet",
+          "y": "256-field-1.y",
+          "cb": "256-field-1.cb",
+          "cr": "256-field-1.cr"
+        }
+      ]
+    }
+  ],
+  "files": {
+    "64-frame.avcc": "5ee84c715ea9fcfedaa48ebdd30b7af8e357afa1133c0bd9d937e47fb65684b7",
+    "64-frame-0.packet": "ece8e519e49c23e070dc5062250d242ed2bfd0a522505af16bb8e83c52e7409e",
+    "64-frame-0.y": "3e12564070834ba0cbb5cb9931efb4aabed819a48f18ec5876bbdb41ffb50ebc",
+    "64-frame-0.cb": "b6a1ffccb3b9412191c2ebdcbbd5ef1350622a0fe8a62102c99448bf16931709",
+    "64-frame-0.cr": "783ba954389cf84a2933fc0a777f4a7193c04aed0ff7ff23f6b2adcbaaf97b08",
+    "64-frame-1.packet": "cf7bfecd1376721710c7cd6a7aa53a93e1ccb8306da41a423393076e1ce9e53e",
+    "64-frame-1.y": "1a9a255893af30249f3c954bd0baf47210f183f0d2ce5e9a976e92acd25d84a5",
+    "64-frame-1.cb": "e04fe7a3c1f46749b41d8b5aa8a3ef60d8bd24d8cbdb3038f6fd136f259ed599",
+    "64-frame-1.cr": "8a784e20d9d75f57c6f1a786594a01160b687dcfd6f42eeddaeb25199be85aab",
+    "64-frame.mp4": "a4224448eca6bafb4cdf03a4e9d96fb875c4bbb3f69e8147c8eafa46bbf826fd",
+    "64-field.avcc": "5ee84c715ea9fcfedaa48ebdd30b7af8e357afa1133c0bd9d937e47fb65684b7",
+    "64-field-0.packet": "45ef14c1ed859c60b5fe16fc768cc54e69746f4eccb1ec55078ce582a87bb85d",
+    "64-field-0.y": "3e12564070834ba0cbb5cb9931efb4aabed819a48f18ec5876bbdb41ffb50ebc",
+    "64-field-0.cb": "b6a1ffccb3b9412191c2ebdcbbd5ef1350622a0fe8a62102c99448bf16931709",
+    "64-field-0.cr": "783ba954389cf84a2933fc0a777f4a7193c04aed0ff7ff23f6b2adcbaaf97b08",
+    "64-field-1.packet": "5683084861d7185d0074ade680cae9dc563fbe556718c9aa68f3efc56ad6fa6e",
+    "64-field-1.y": "1a9a255893af30249f3c954bd0baf47210f183f0d2ce5e9a976e92acd25d84a5",
+    "64-field-1.cb": "e04fe7a3c1f46749b41d8b5aa8a3ef60d8bd24d8cbdb3038f6fd136f259ed599",
+    "64-field-1.cr": "8a784e20d9d75f57c6f1a786594a01160b687dcfd6f42eeddaeb25199be85aab",
+    "64-field.mp4": "203250c7c403909a74eea1a95bbfdbbc87ac60b7f6fb4efd94dce6fe6e3cb0a7",
+    "128-frame.avcc": "763f5ee0135e395cf2cf795b377342ab53b2b050cc35ed0915cc182394f13c47",
+    "128-frame-0.packet": "fd719d387b1033fad65ab341cc0079561720af454b67de0a5c0deaf82e7c9f0e",
+    "128-frame-0.y": "e96384e85237e955b2f998e109afda9299c15b948c201fb301ade8fbf7a33759",
+    "128-frame-0.cb": "d9bf810ac3050a9a71bba3aa70185133f72ac5622542ee8559168d7b86b49e04",
+    "128-frame-0.cr": "c0f38ef59d1bd7746a2d26cbfce185831c089c73f540b4a9bb8b3120331187aa",
+    "128-frame-1.packet": "72b7b21ca070d6e8187a263b2aec12ecb7ad5e6ea821a8dc271c5c5970a73140",
+    "128-frame-1.y": "87c4761bff3f5e36b0dfdc2b1313bfb26ac0812eca071272dc20412d3c1cfda5",
+    "128-frame-1.cb": "27a0132763f2b07eb19c185dc5807189846c61050f7ba8694ad95c8e1a20ae31",
+    "128-frame-1.cr": "6160ea1123a932cc2e8afeddcdf8298f3ef209aebae9b0825e95feef0eab6928",
+    "128-frame.mp4": "2101f396da53e51112fdaf1237c090f4e795f36f31a988156841b6d6b6e07d81",
+    "128-field.avcc": "763f5ee0135e395cf2cf795b377342ab53b2b050cc35ed0915cc182394f13c47",
+    "128-field-0.packet": "b9f1247d3251efcb121470500bd30ee66fd114b905f5c24c71acb6b132e263d6",
+    "128-field-0.y": "e96384e85237e955b2f998e109afda9299c15b948c201fb301ade8fbf7a33759",
+    "128-field-0.cb": "d9bf810ac3050a9a71bba3aa70185133f72ac5622542ee8559168d7b86b49e04",
+    "128-field-0.cr": "c0f38ef59d1bd7746a2d26cbfce185831c089c73f540b4a9bb8b3120331187aa",
+    "128-field-1.packet": "8d185005354c97234df64a193d5e0cb17edaa52e15f92bc6140077f98fef64a1",
+    "128-field-1.y": "87c4761bff3f5e36b0dfdc2b1313bfb26ac0812eca071272dc20412d3c1cfda5",
+    "128-field-1.cb": "27a0132763f2b07eb19c185dc5807189846c61050f7ba8694ad95c8e1a20ae31",
+    "128-field-1.cr": "6160ea1123a932cc2e8afeddcdf8298f3ef209aebae9b0825e95feef0eab6928",
+    "128-field.mp4": "0f4f4dd8dc6f48b3a6e9e0fb38749435f1076fd8738759739581d1363ae3d548",
+    "256-frame.avcc": "bdb248ff795c069276ea602c4229667c7977b17da25177e3668e8e3b0cee909f",
+    "256-frame-0.packet": "6522d5f26df29d0dfee6a415361392b7a7a66b561421319f7aa07d34b70b66f6",
+    "256-frame-0.y": "c446f2f90496973f16b5a49609a9919625466da305602912e0373054f3f254c5",
+    "256-frame-0.cb": "6bd0e61d178bda8855f17366980ff52180432f4408b7ebddfadf8b4e63c0266d",
+    "256-frame-0.cr": "b2b57545c981d75f5924bca4e1495144a742078527384111257184031b141a2c",
+    "256-frame-1.packet": "64ed1e1da5a423b32d3449a075e3a521148ec47a81fb7f0f6b097095052b46d7",
+    "256-frame-1.y": "e3e854f2c90a07690b170831db578236fbd1a839790b606caf6d4e4edeebf3ff",
+    "256-frame-1.cb": "7c3b5122c4e32b5c7ab5a67a82ffbe993dd0de316d33a3a6530546a19a8a8f32",
+    "256-frame-1.cr": "0cfa7774bcf8dfd4f6d95be28c4299421571ffe21ddcdc87ce7b80b39227415b",
+    "256-frame.mp4": "8c78d09b6b78f1ded477105541cbea378ca5a79ba68062e0e81ed2f12fcdbd6d",
+    "256-field.avcc": "bdb248ff795c069276ea602c4229667c7977b17da25177e3668e8e3b0cee909f",
+    "256-field-0.packet": "5d2ec12d8ba1ca7617b318ffc591adc8e7a4cac3c8acd268cf30d4d8ea86a7d7",
+    "256-field-0.y": "c446f2f90496973f16b5a49609a9919625466da305602912e0373054f3f254c5",
+    "256-field-0.cb": "6bd0e61d178bda8855f17366980ff52180432f4408b7ebddfadf8b4e63c0266d",
+    "256-field-0.cr": "b2b57545c981d75f5924bca4e1495144a742078527384111257184031b141a2c",
+    "256-field-1.packet": "2c3a04dcf11b7621f033ca3cbad6016934e95f9eb0d858acfc108143d34db57b",
+    "256-field-1.y": "e3e854f2c90a07690b170831db578236fbd1a839790b606caf6d4e4edeebf3ff",
+    "256-field-1.cb": "7c3b5122c4e32b5c7ab5a67a82ffbe993dd0de316d33a3a6530546a19a8a8f32",
+    "256-field-1.cr": "0cfa7774bcf8dfd4f6d95be28c4299421571ffe21ddcdc87ce7b80b39227415b",
+    "256-field.mp4": "5befb9b11144ed19a185d5bd871e193e2dbae407e7a48c8691f64130889d6a6a"
+  }
+}

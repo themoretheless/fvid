@@ -1,0 +1,20 @@
+    Blocking waiting for file lock on build directory
+   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-codecs)
+error[E0433]: cannot find `hevc_depth_tables` in `super`
+  --> crates/fvid-codecs/src/../../../src/codec/hevc_parameters.rs:45:57
+   |
+45 |         n = n.saturating_add(std::mem::size_of::<super::hevc_depth_tables::Tables>())
+   |                                                         ^^^^^^^^^^^^^^^^^ could not find `hevc_depth_tables` in `super`
+   |
+help: consider importing this module
+   |
+ 2 + use crate::codec::hevc_depth_tables;
+   |
+help: if you import `hevc_depth_tables`, refer to it directly
+   |
+45 -         n = n.saturating_add(std::mem::size_of::<super::hevc_depth_tables::Tables>())
+45 +         n = n.saturating_add(std::mem::size_of::<hevc_depth_tables::Tables>())
+   |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `fvid-codecs` (lib) due to 1 previous error

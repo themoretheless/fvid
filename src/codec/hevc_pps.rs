@@ -126,6 +126,9 @@ pub struct Pps {
     /// Retained even when poc_reset_info_present_flag is zero.
     pub multilayer_extension: bool,
     pub scc_extension: bool,
+    pub depth_tables: Option<std::sync::Arc<super::hevc_depth_tables::Tables>>,
+    /// The resolved PPS layer needs table-aware reconstruction, not ordinary HEVC.
+    pub depth_lookup_active: bool,
     /// None inherits the SPS; Some(empty) explicitly clears initial entries.
     pub palette_initial: Option<Vec<[u16; 3]>>,
     pub current_picture_reference: bool,
@@ -134,6 +137,16 @@ pub struct Pps {
     pub act_qp_offsets: [i8; 3],
 }
 impl Pps {
+    pub(crate) fn referenced_sps_id(nal: &[u8], budget: usize) -> Result<u8> {
+        let rbsp = NalRbsp::parse(nal, budget)?;
+        rbsp.header.require_base_layer()?;
+        if rbsp.header.unit_type != 34 {
+            return Err(invalid("expected HEVC PPS NAL"));
+        }
+        let b = &mut BitReader::new(&rbsp.bytes);
+        ue(b, 63)?;
+        Ok(ue(b, 15)? as u8)
+    }
     pub fn parse(nal: &[u8], sps: &Sps, budget: usize) -> Result<Self> {
         Ok(Self::parse_internal(nal, sps, budget, None)?.pps)
     }
@@ -247,6 +260,7 @@ impl Pps {
         let mut scaling_list_reference = None;
         let mut reference_locations = Vec::new();
         let mut colour_mapping = None;
+        let mut depth_tables = None;
         if b.bit()? {
             let range = b.bit()?;
             let multilayer = b.bit()?;
@@ -254,11 +268,6 @@ impl Pps {
             let three_d = b.bit()?;
             scc_extension = b.bit()?;
             future_extension = b.read(4)? != 0;
-            if three_d {
-                return Err(crate::unsupported(
-                    "HEVC 3D PPS extension is not implemented",
-                ));
-            }
             if range {
                 if transform_skip {
                     transform_skip_max_log2 =
@@ -303,6 +312,34 @@ impl Pps {
                     colour_mapping = extension.colour_mapping;
                 } else {
                     poc_reset_info_present = read_base_multilayer_extension(b)?;
+                }
+            }
+            if three_d {
+                // H.265 I.7.3.2.3.7: dlts_present_flag zero carries no tables.
+                // Consume it in extension order, before SCC/future syntax.
+                if !b.more_rbsp_data() {
+                    return Err(invalid("truncated HEVC PPS 3D extension"));
+                }
+                if b.clone().bit()? {
+                    let c = context.ok_or_else(|| crate::unsupported(
+                        "HEVC active depth lookup tables are not implemented"))?;
+                    let graph = &c.vps.extension.as_ref().ok_or_else(|| invalid(
+                        "HEVC depth tables require a VPS depth-layer graph"))?.graph;
+                    let mut ids = [0u8; 63];
+                    let mut count = 0;
+                    for id in graph.depth_layer_ids()? { ids[count] = id; count += 1; }
+                    let (last, byte) = rbsp.bytes.iter().enumerate().rev().find(|(_,v)| **v != 0)
+                        .ok_or_else(|| invalid("missing HEVC PPS RBSP stop bit"))?;
+                    let end = last * 8 + 7 - byte.trailing_zeros() as usize;
+                    let overhead = std::mem::size_of::<super::hevc_depth_tables::Tables>()
+                        + 2 * std::mem::size_of::<usize>();
+                    let available = budget.checked_sub(rbsp.bytes.capacity())
+                        .and_then(|n|n.checked_sub(overhead))
+                        .ok_or_else(||invalid("HEVC DLT allocation exceeds budget"))?;
+                    depth_tables = super::hevc_depth_tables::Tables::read(
+                        b, end, sps.depth[0], &ids[..count], available)?.map(std::sync::Arc::new);
+                } else {
+                    b.bit()?;
                 }
             }
             if scc_extension {
@@ -379,6 +416,8 @@ impl Pps {
         }
         b.finish_rbsp()?;
         let effective_scaling_lists = scaling_lists.as_ref().unwrap_or(&sps.scaling_lists).clone();
+        let depth_lookup_active = context.is_some_and(|c| depth_tables.as_ref()
+            .is_some_and(|t|t.layers.iter().any(|l|l.id == c.sps.layer_id && l.values.is_some())));
         let pps = Self {
             id,
             sps_id,
@@ -414,6 +453,8 @@ impl Pps {
             poc_reset_info_present,
             multilayer_extension,
             scc_extension,
+            depth_tables,
+            depth_lookup_active,
             palette_initial,
             current_picture_reference,
             adaptive_colour_transform,

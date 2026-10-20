@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0131"
+  ],
+  "checked_at": "2026-10-16T07:15:00.988392+00:00",
+  "before": [
+    "evidence/batch-112-before-final.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-112-integration-recheck.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-112-decoder-recheck.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-112-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-112-player-build-recheck.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six authored pattern-note/sample-relative-tone inputs covertotal96healthy,97/108/119valid high registers and0/120unsupported bounds. Independent linear pitch/ramp oracle andexplicit unsupported-note statistics. Before three valid high inputs are silent withunexpected unplayable-note counters.",
+    "Pattern note byte97is key-off,buttransposed sounding pitch97is valid. Keep public note_steps pattern-byte range/signature unchanged;validate sounding total1..119privately andcompute semitone steps there. Illegal0/120stay silent withone reported unsupported note.",
+    "After valid waveform maximum error3.7252903e-9,under predeclared1e-6;all counters match. Twelve actual native-self worker row/EOF targets plusfullplay/rewind preserve PCM. These self-consistency checks also pass beforefix,so no workerseek defect is claimed. Two unsupported controls are correct-silent refusal tests,not playback acceptance forout-of-range notes.",
+    "11integrations,11decoder units,fixture reproduction andcurrent player build pass. First checks hit a concurrent Matroska Packettype path unavailable when included fromroot;external work replaced it withcontext-independent type inference before recheck. No additional edit/ID for that recovery.",
+    "Authored raw XM/VP9companion,no private media/encoder/network/performance/physical output orfull FT2mixer claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/danielepiccone/xm_file/main/xm.txt",
+      "section": "Periods andfrequencies;PatternNote/RelativeTone/RealNote",
+      "rule": "Pattern notes1..96plus signed sample transposition extend the real pitch through A#9."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "triggerNote;getSampleC4Hz",
+      "rule": "Select sample frompattern note first,then add relative note;upper total is below120."
+    }
+  ],
+  "compatibility": "Previously silent valid high transpositions now render;pattern key-off byte/public helpers/out-of-range policy unchanged.",
+  "counting": "One confusion between pattern-note andtransposed-pitch ranges;six variants andtwo refusal guards add noextra IDs."
+}

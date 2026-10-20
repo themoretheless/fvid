@@ -580,6 +580,63 @@
           "sha256": "77fe6f3f7d898b3aad6ad4d44d47cfd79114c9ff8f68640421081cf769ec2750"
         }
       }
+    },
+    "normal-ten": {
+      "order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "mask": 0,
+      "elements": [
+        [
+          "front",
+          true,
+          0,
+          0
+        ],
+        [
+          "front",
+          true,
+          1,
+          0
+        ],
+        [
+          "front",
+          true,
+          2,
+          0
+        ],
+        [
+          "front",
+          true,
+          3,
+          0
+        ],
+        [
+          "front",
+          true,
+          4,
+          0
+        ]
+      ],
+      "artifacts": {
+        ".aac": {
+          "file": "aac-height-normal-ten.aac",
+          "sha256": "5a6a6aaf21f4027c6a95c3b85e488cd5702372232a6cc1a4e625d5a3319884b4"
+        },
+        ".f32le": {
+          "file": "aac-height-normal-ten.f32le",
+          "sha256": "0d54aac1eb4f129d17c895682dab7800217d33a426d299c05492ba99f7244324"
+        }
+      }
     }
   },
   "video": {

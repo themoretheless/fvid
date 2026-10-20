@@ -1,0 +1,65 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0048"
+  ],
+  "checked_at": "2026-10-15T12:32:51.178916+00:00",
+  "before": "Disabled16px preview is selected before enabled64px movie track; owned PCM refuses two audio tracks despite a single enabled movie stream. Equal-priority and legacy-zero controls pass.",
+  "result": "Retain tkhd flags separately and prefer enabled movie then enabled tracks for default video/audio opening and owned extraction. Preserve manual lists, explicit indices and legacy fallback.",
+  "sources": [
+    "https://developer.apple.com/documentation/quicktime-file-format/Track_header_atom/Flags"
+  ],
+  "qualification": [
+    "Ten authored60ms VP9 MP4 pairs cover enabled/in-movie/preview priorities, enabled-only and legacy all-zero fallbacks, v0/v1 headers and faststart. Exact RGB, dimensions, clocks, seek/rewind/EOF and transformed decode dispatch pass.",
+    "Authored video+PCM+subtitle file verifies default enabled audio, independent exact samples and full/interval WAVE output. Explicit disabled video/audio inspection, complete manual audio/subtitle lists and subtitle cues remain available.",
+    "Raw root/owned readers retain all tracks, flags and exact samples. Sample/packet/controlled-memory limits remain active; private flag-vector capacity is included in owned retained-index admission.",
+    "Seven intermediate legacy player test failures revealed manual selection must not be pruned. Restored manual list/open_at semantics;22 related player tests pass. This is one implementation repair, not another ID.",
+    "Concurrent Ogg error-type transition briefly blocked final player compilation; external work unified the shared error type and final retry passes. See baseline-ogg-error-transition.json, count0.",
+    "Public Track structure and existing signatures unchanged; additive header-flags inspection and automatic-candidate methods support the new selection contract."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-before.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-audio-before.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-player-qualified-retry.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-player-unit-final.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-parser-unit.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-owner-unit.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-026-mp4-enabled-tracks-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 66,
+  "distinct_python_tests_passed": 1,
+  "remaining": [
+    "When no indexed enabled candidate exists, retain historical file-order fallback; this is compatibility behavior, not a strict all-disabled refusal.",
+    "Manual subtitle selection is unchanged; no new automatic subtitle policy is claimed.",
+    "Cross-container re-mux preservation of original track flags is not qualified here."
+  ],
+  "counting": "One ignored MP4 track-header selection attribute across default video/audio paths; variants, compatibility repair and concurrent baseline work add no IDs."
+}

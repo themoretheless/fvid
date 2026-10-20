@@ -40,10 +40,7 @@ pub(crate) fn decode_presented(
         Err(error) if error.is_unsupported() => return Ok(None),
         Err(error) => return Err(error.to_string()),
     };
-    let Some(index) = reader
-        .tracks()
-        .iter()
-        .position(|track| track.handler == *b"vide")
+    let Some(index) = reader.automatic_track_indices(&[*b"vide"]).first().copied()
     else {
         return Ok(None);
     };
@@ -137,22 +134,43 @@ pub(crate) fn decode_presented(
             }
             if let Some(picture) = decoded {
                 let (width, height) = picture.dimensions();
+                let chroma = picture.chroma_format().map_err(|e| e.to_string())?;
+                let vui = decoder.active_vui().or_else(|| decoder.recorded_vui());
+                let rgb = vui
+                    .and_then(|v| v.video_signal)
+                    .and_then(|(_, _, c)| c)
+                    .is_some_and(|c| c[2] == 0);
+                if rgb && chroma != 3 {
+                    return Err("AVC identity RGB requires 4:4:4".into());
+                }
+                let sub = match chroma {
+                    0 | 3 => [false, false],
+                    1 => [true, true],
+                    2 => [true, false],
+                    _ => return Err("invalid AVC chroma format".into()),
+                };
+                let output_depth = if chroma == 0 {
+                    picture.bit_depth
+                } else {
+                    picture.bit_depth.max(picture.chroma_bit_depth)
+                };
                 if let Some(spool) = spool.as_mut() {
                     let current = (
                         [width as u32, height as u32],
-                        picture.bit_depth.max(picture.chroma_bit_depth),
-                        [true, true],
-                        false,
+                        output_depth,
+                        sub,
+                        chroma == 0,
+                        rgb,
                     );
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
                     }
                     storage_format = Some(current);
-                    pixels = pack_avc(&picture)?;
+                    pixels = pack_avc_format(&picture, rgb)?;
                     spool.push(&pixels, 0, 0)?;
                 }
                 let mut colour = container_colour;
-                if let Some((_, full, codes)) = decoder.active_vui().and_then(|v| v.video_signal) {
+                if let Some((_, full, codes)) = vui.and_then(|v| v.video_signal) {
                     colour.full_range = full;
                     if let Some([primaries, transfer, matrix]) = codes {
                         colour.primaries = primaries;
@@ -171,10 +189,10 @@ pub(crate) fn decode_presented(
                         u32::try_from(width).map_err(|_| "AVC width overflow")?,
                         u32::try_from(height).map_err(|_| "AVC height overflow")?,
                     ],
-                    depth: picture.bit_depth.max(picture.chroma_bit_depth),
-                    sub: [true, true],
-                    mono: false,
-                    rgb: false,
+                    depth: output_depth,
+                    sub,
+                    mono: chroma == 0,
+                    rgb,
                 });
                 spool_count += 1;
             }
@@ -214,6 +232,7 @@ pub(crate) fn decode_presented(
                     picture.depth,
                     decoded.color.subsampling,
                     decoded.color.monochrome,
+                    rgb,
                 );
                 if storage_format.is_some_and(|previous| previous != current) {
                     return Ok(None);
@@ -289,7 +308,7 @@ pub(crate) fn decode_presented(
                 let p = &decoded.picture;
                 let rgb = format.color_space == 7;
                 if let Some(spool) = spool.as_mut() {
-                    let current = (p.size, p.depth, p.subsampling, false);
+                    let current = (p.size, p.depth, p.subsampling, false, rgb);
                     if storage_format.is_some_and(|previous| previous != current) { return Ok(None); }
                     storage_format = Some(current);
                     let planes = p.planes.each_ref().map(|p| (p.width, p.height, p.samples.as_slice()));
@@ -338,6 +357,11 @@ pub(crate) fn decode_presented(
                         .ok_or("HEVC crop exceeds height")?,
                 ];
                 let chroma = decoder.parameters().0.chroma_format;
+                let rgb = decoder.parameters().0.vui.as_ref()
+                    .and_then(|v| v.signal.as_ref()).and_then(|s| s.colour)
+                    .is_some_and(|c| c[2] == 0);
+                if rgb && chroma != 3 { return Err("HEVC identity RGB requires 4:4:4".into()); }
+
                 let sub = match chroma {
                     0 | 3 => [false, false],
                     1 => [true, true],
@@ -350,12 +374,12 @@ pub(crate) fn decode_presented(
                     picture.depth[0].max(picture.depth[1])
                 };
                 if let Some(spool) = spool.as_mut() {
-                    let current = (size, output_depth, sub, chroma == 0);
+                    let current = (size, output_depth, sub, chroma == 0, rgb);
                     if storage_format.is_some_and(|previous| previous != current) {
                         return Ok(None);
                     }
                     storage_format = Some(current);
-                    pixels = pack_hevc(picture, sub, chroma == 0)?;
+                    pixels = pack_hevc(picture, sub, chroma == 0, rgb)?;
                     spool.push(&pixels, 0, 0)?;
                 }
                 let mut colour = container_colour;
@@ -386,7 +410,7 @@ pub(crate) fn decode_presented(
                     depth: output_depth,
                     sub,
                     mono: chroma == 0,
-                    rgb: false,
+                    rgb,
                 });
                 spool_count += 1;
             }
@@ -1079,29 +1103,70 @@ fn emit(
     }
     Ok(())
 }
-fn pack_avc(p: &fvid_codecs::codec::avc_picture::IntraPicture) -> Result<Vec<u8>> {
-    pack_cropped(
+pub(crate) fn pack_avc_format(
+    p: &fvid_codecs::codec::avc_picture::IntraPicture,
+    rgb: bool,
+) -> Result<Vec<u8>> {
+    let format = p.chroma_format().map_err(|e| e.to_string())?;
+    let mono = format == 0;
+    let sub = match format {
+        0 | 1 => [true, true],
+        2 => [true, false],
+        3 => [false, false],
+        _ => return Err("invalid AVC chroma format".into()),
+    };
+    let planar = pack_cropped(
         [p.coded_width, p.coded_height],
         p.crop,
         p.component_depths(),
-        [true, true],
-        false,
+        sub,
+        mono,
         [&p.y, &p.cb, &p.cr],
-    )
+    )?;
+    if !rgb {
+        return Ok(planar);
+    }
+    if mono || sub != [false, false] {
+        return Err("AVC identity RGB requires 4:4:4".into());
+    }
+    let bytes = if p.bit_depth.max(p.chroma_bit_depth) == 8 { 1 } else { 2 };
+    let plane_length = planar.len() / 3;
+    let mut output = crate::owned_frame::buffer(planar.len())?;
+    for (index, pixel) in output.chunks_exact_mut(3 * bytes).enumerate() {
+        for (channel, plane) in [2, 0, 1].into_iter().enumerate() {
+            let offset = plane * plane_length + index * bytes;
+            pixel[channel * bytes..(channel + 1) * bytes]
+                .copy_from_slice(&planar[offset..offset + bytes]);
+        }
+    }
+    Ok(output)
 }
-fn pack_hevc(
+pub(crate) fn pack_hevc(
     p: &fvid_codecs::codec::hevc_picture::Picture,
     sub: [bool; 2],
     mono: bool,
+    rgb: bool,
 ) -> Result<Vec<u8>> {
-    pack_cropped(
+    let planar = pack_cropped(
         p.dimensions.map(|v| v as usize),
         p.crop.map(|v| v as usize),
         [p.depth[0], p.depth[1], p.depth[1]],
         sub,
         mono,
         p.planes.each_ref().map(|plane| plane.samples()),
-    )
+    )?;
+    if !rgb { return Ok(planar); }
+    if mono || sub != [false, false] { return Err("invalid HEVC RGB planes".into()); }
+    let bytes = if p.depth[0].max(p.depth[1]) == 8 { 1 } else { 2 };
+    let plane_length = planar.len() / 3;
+    let mut output = crate::owned_frame::buffer(planar.len())?;
+    for (index, pixel) in output.chunks_exact_mut(3 * bytes).enumerate() {
+        for (channel, plane) in [2, 0, 1].into_iter().enumerate() {
+            let offset = plane * plane_length + index * bytes;
+            pixel[channel * bytes..(channel + 1) * bytes].copy_from_slice(&planar[offset..offset + bytes]);
+        }
+    }
+    Ok(output)
 }
 fn pack_cropped(
     coded: [usize; 2],

@@ -49,6 +49,16 @@ pub enum Syntax {
     PaletteRun,
     PaletteCopyAbove,
     PaletteTranspose,
+    DepthDcPresent,
+    DepthDcAbs,
+    DepthDcOnly,
+    DepthNoDim,
+    DepthIntraMode,
+    DepthSkipIntra,
+    DepthSkipMode,
+    Illumination,
+    InterViewResidualWeight,
+    DepthBasedPartition,
 }
 fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
     use super::hevc_cabac_tables::*;
@@ -123,6 +133,14 @@ fn values(syntax: Syntax, init: usize) -> Result<Vec<u8>> {
         | Syntax::PaletteCopyAbove
         | Syntax::PaletteTranspose => &[154],
         Syntax::PaletteRun => &[154; 8],
+        Syntax::DepthDcPresent => &[[0, 0, 64][init]],
+        Syntax::DepthDcAbs | Syntax::DepthDcOnly | Syntax::DepthIntraMode => &[154],
+        Syntax::DepthNoDim => &[[154, 141, 155][init]],
+        Syntax::DepthSkipIntra => &[185],
+        Syntax::DepthSkipMode => &[137],
+        Syntax::Illumination => &[154],
+        Syntax::InterViewResidualWeight => &[162, 153, 162],
+        Syntax::DepthBasedPartition => &[154],
         Syntax::TransquantBypass | Syntax::ChromaQpOffsetFlag | Syntax::ChromaQpOffsetIndex => {
             &[154]
         }
@@ -198,7 +216,7 @@ impl std::ops::Index<usize> for Bank {
 pub struct HevcCabac<'a> {
     rbsp: &'a [u8],
     arithmetic: Cabac<'a>,
-    contexts: [Bank; 39],
+    contexts: [Bank; 49],
     pub(crate) rice_statistics: [super::hevc_residual::PersistentRiceStatistic; 4],
     failed: bool,
 }
@@ -243,12 +261,22 @@ fn index(s: Syntax) -> usize {
         Syntax::PaletteRun => 36,
         Syntax::PaletteCopyAbove => 37,
         Syntax::PaletteTranspose => 38,
+        Syntax::DepthDcPresent => 39,
+        Syntax::DepthDcAbs => 40,
+        Syntax::DepthDcOnly => 41,
+        Syntax::DepthNoDim => 42,
+        Syntax::DepthIntraMode => 43,
+        Syntax::DepthSkipIntra => 44,
+        Syntax::DepthSkipMode => 45,
+        Syntax::Illumination => 46,
+        Syntax::InterViewResidualWeight => 47,
+        Syntax::DepthBasedPartition => 48,
     }
 }
 /// Probability states transferred at the second CTU of a WPP row.
 #[derive(Clone, Copy)]
 pub struct Contexts(
-    [Bank; 39],
+    [Bank; 49],
     [super::hevc_residual::PersistentRiceStatistic; 4],
 );
 impl<'a> HevcCabac<'a> {
@@ -267,7 +295,7 @@ impl<'a> HevcCabac<'a> {
             (SliceType::P, false) | (SliceType::B, true) => 1,
             _ => 2,
         };
-        let mut contexts = [Bank::empty(); 39];
+        let mut contexts = [Bank::empty(); 49];
         for s in [
             Syntax::SaoMerge,
             Syntax::SaoType,
@@ -308,6 +336,16 @@ impl<'a> HevcCabac<'a> {
             Syntax::PaletteRun,
             Syntax::PaletteCopyAbove,
             Syntax::PaletteTranspose,
+            Syntax::DepthDcPresent,
+            Syntax::DepthDcAbs,
+            Syntax::DepthDcOnly,
+            Syntax::DepthNoDim,
+            Syntax::DepthIntraMode,
+            Syntax::DepthSkipIntra,
+            Syntax::DepthSkipMode,
+            Syntax::Illumination,
+            Syntax::InterViewResidualWeight,
+            Syntax::DepthBasedPartition,
         ] {
             if let Ok(entries) = values(s, init) {
                 contexts[index(s)] = Bank::initialized(&entries, qp)?;
@@ -482,6 +520,25 @@ mod tests {
         assert_eq!(fresh.rice_statistics[3].parameter(), 0);
         fresh.restore_contexts(&saved);
         assert_eq!(fresh.rice_statistics, original.rice_statistics);
+    }
+    #[test]
+    fn depth_dc_banks_follow_annex_i_and_restore() {
+        let data = [0; 64];
+        for (slice, swap, init) in [
+            (SliceType::I, false, 0), (SliceType::P, false, 1),
+            (SliceType::B, false, 2), (SliceType::P, true, 2),
+            (SliceType::B, true, 1),
+        ] {
+            let mut bins = HevcCabac::new(&data, 0, slice, swap, 33).unwrap();
+            for (syntax, value) in [(Syntax::DepthDcPresent, [0, 0, 64][init]), (Syntax::DepthDcAbs, 154), (Syntax::DepthDcOnly, 154), (Syntax::DepthNoDim, [154, 141, 155][init]), (Syntax::DepthIntraMode, 154), (Syntax::DepthSkipIntra, 185), (Syntax::DepthSkipMode, 137), (Syntax::Illumination, 154)] {
+                assert_eq!(bins.contexts[index(syntax)].len(), 1);
+                assert_eq!(bins.contexts[index(syntax)][0], Context::hevc(value, 33));
+                bins.decision(syntax, 0).unwrap();
+            }
+            let saved = bins.contexts().unwrap();
+            let restored = HevcCabac::from_contexts(&data, 0, &saved).unwrap();
+            assert_eq!(restored.contexts, bins.contexts);
+        }
     }
     #[test]
     fn residual_bank_layout_and_xy_adaptation_are_independent() {
@@ -755,6 +812,44 @@ mod palette_context_tests {
                     resumed.contexts[index(syntax)]
                 );
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod inter_view_residual_context_tests {
+    use super::*;
+    #[test]
+    fn residual_weight_contexts_initialize_adapt_and_survive_wpp_snapshots() {
+        let data=[0u8;64];
+        for (slice,swap) in [(SliceType::I,false),(SliceType::P,false),(SliceType::B,false),(SliceType::P,true),(SliceType::B,true)] {
+            let mut bins=HevcCabac::new(&data,0,slice,swap,33).unwrap();
+            let bank=index(Syntax::InterViewResidualWeight);
+            assert_eq!(bins.contexts[bank].len(),3);
+            for (i,value) in [162,153,162].into_iter().enumerate() {
+                assert_eq!(bins.contexts[bank][i],Context::hevc(value,33));
+            }
+            bins.decision(Syntax::InterViewResidualWeight,1).unwrap();
+            assert_eq!(bins.contexts[bank][0],Context::hevc(162,33));
+            assert_eq!(bins.contexts[bank][2],Context::hevc(162,33));
+            let saved=bins.contexts().unwrap();
+            let restored=HevcCabac::from_contexts(&data,0,&saved).unwrap();
+            assert_eq!(restored.contexts,bins.contexts);
+        }
+    }
+}
+
+#[cfg(test)]
+mod dbbp_context_tests {
+    use super::*;
+    #[test]
+    fn dbbp_context_initializes_adapts_and_survives_wpp_snapshot() {
+        let data=[0u8;64];
+        for (slice,swap)in [(SliceType::I,false),(SliceType::P,false),(SliceType::B,false),(SliceType::P,true),(SliceType::B,true)] {
+            let mut bins=HevcCabac::new(&data,0,slice,swap,33).unwrap();let bank=index(Syntax::DepthBasedPartition);
+            assert_eq!(bins.contexts[bank].len(),1);assert_eq!(bins.contexts[bank][0],Context::hevc(154,33));
+            bins.decision(Syntax::DepthBasedPartition,0).unwrap();let saved=bins.contexts().unwrap();
+            let restored=HevcCabac::from_contexts(&data,0,&saved).unwrap();assert_eq!(restored.contexts,bins.contexts);
         }
     }
 }

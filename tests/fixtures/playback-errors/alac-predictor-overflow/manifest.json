@@ -1,0 +1,28 @@
+{
+  "provenance": "Authored neutral VP9 and 24-bit stereo ALAC; quant=15 coefficient=32767, first product 2147483646 crosses signed32 rounding boundary. Own inversion of literal target PCM. No private media or foreign codecs.",
+  "target": [
+    0,
+    65538,
+    65540,
+    65542,
+    65544,
+    65546,
+    65548,
+    65550,
+    65552,
+    65554,
+    65556,
+    65558,
+    65560,
+    65562,
+    65564,
+    65566
+  ],
+  "crossings": 1,
+  "files": {
+    "rounding.mkv": "200eae0e1c2b1c47d33b250352dbc4de8f6a6a6c95eb649f5f95319c02624f45",
+    "rounding.m4a": "3231c232230f48700b72f62e7ef22f9533c0ccd5d2620abfe5752723046c99d3",
+    "cookie.bin": "ff17798d46341e75e79553b65de66c1eb6b96aa6164bbd568cda6ef0a8b49169",
+    "packet.bin": "cb5e1b66c12caa4cd47dbf07eb26b674598b0d26322d1996a86b17ba3f1cc751"
+  }
+}

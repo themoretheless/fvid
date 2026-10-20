@@ -9,6 +9,21 @@ use super::{
 };
 use crate::{Result, invalid};
 use std::io::Write;
+#[path = "avc_pcm_picture.rs"]
+mod pcm_formats;
+#[path = "avc_separate_pcm_picture.rs"]
+mod separate_pcm;
+#[path="avc_chroma422_picture.rs"]
+mod chroma422;
+pub(super) fn chroma_dc_422(levels:&[i32;8],qp:u8,depth:u8,weight:u8)->Result<[i32;8]> {chroma422::transform_dc(levels,qp,depth,weight)}
+
+pub(super) fn decoded_storage(sps:&Sps,w:usize,h:usize)->Result<usize> {
+    let y=w.checked_mul(h).ok_or_else(||invalid("AVC plane geometry overflow"))?;
+    let chroma=match sps.chroma_format {0=>Some(0),1=>w.div_ceil(2).checked_mul(h.div_ceil(2)),2=>w.div_ceil(2).checked_mul(h),3=>Some(y),_=>None};
+    let chroma=if sps.chroma_format==0 {0}else{chroma.ok_or_else(||invalid("invalid AVC plane geometry"))?};
+    chroma.checked_mul(2).and_then(|c|y.checked_add(c)).and_then(|n|n.checked_mul(2)).ok_or_else(||invalid("AVC plane storage overflow"))
+}
+
 #[derive(Debug)]
 pub struct IntraPicture {
     pub coded_width: usize,
@@ -32,26 +47,35 @@ impl IntraPicture {
     pub fn component_depths(&self) -> [u8;3] {
         [self.bit_depth,self.chroma_bit_depth,self.chroma_bit_depth]
     }
-    /// Visible planar YUV420; each plane uses bytes at 8 bits, LE words above it.
-    pub fn write_planar<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let (w, h) = self.dimensions();
-        for (plane, shift, depth) in [(&self.y, 0,self.bit_depth), (&self.cb, 1,self.chroma_bit_depth), (&self.cr, 1,self.chroma_bit_depth)] {
-            let stride = self.coded_width >> shift;
-            let x = self.crop[0] >> shift;
-            let y = self.crop[2] >> shift;
-            for row in 0..h >> shift {
-                for &sample in &plane[(y + row) * stride + x..(y + row) * stride + x + (w >> shift)]
-                {
-                    if depth == 8 {
-                        writer.write_all(&[sample as u8])?;
-                    } else {
-                        writer.write_all(&sample.to_le_bytes())?;
-                    }
-                }
-            }
+    /// Infer the coded planar layout without changing the legacy picture struct.
+    pub fn chroma_format(&self)->Result<u8> {
+        let n=self.coded_width.checked_mul(self.coded_height).filter(|&v|v>0).ok_or_else(||invalid("invalid AVC picture geometry"))?;
+        if self.y.len()!=n || self.cb.len()!=self.cr.len() {return Err(invalid("invalid AVC component storage"));}
+        let cw=self.coded_width.div_ceil(2);
+        let c420=cw.checked_mul(self.coded_height.div_ceil(2)).ok_or_else(||invalid("AVC chroma geometry overflow"))?;
+        let c422=cw.checked_mul(self.coded_height).ok_or_else(||invalid("AVC chroma geometry overflow"))?;
+        match self.cb.len() {0=>Ok(0),c if c==c420=>Ok(1),c if c==c422=>Ok(2),c if c==n=>Ok(3),_=>Err(invalid("invalid AVC chroma storage"))}
+    }
+    /// Visible native Y/Cb/Cr planes; bytes at eight bits, LE words above it.
+    /// Monochrome has only Y. Each present component retains its own precision.
+    pub fn write_planar<W:Write>(&self,writer:&mut W)->Result<()> {
+        let format=self.chroma_format()?;
+        let sub=match format {1=>[2,2],2=>[2,1],_=>[1,1]};
+        let width=self.coded_width.checked_sub(self.crop[0].checked_add(self.crop[1]).ok_or_else(||invalid("AVC crop overflow"))?).filter(|&v|v>0).ok_or_else(||invalid("invalid AVC crop width"))?;
+        let height=self.coded_height.checked_sub(self.crop[2].checked_add(self.crop[3]).ok_or_else(||invalid("AVC crop overflow"))?).filter(|&v|v>0).ok_or_else(||invalid("invalid AVC crop height"))?;
+        for (component,plane)in [&self.y,&self.cb,&self.cr].into_iter().enumerate() {
+            if component!=0 && format==0 {continue;}
+            let [sx,sy]=if component==0 {[1,1]}else{sub};
+            if self.crop[0]%sx!=0 || self.crop[2]%sy!=0 {return Err(invalid("unaligned AVC component crop"));}
+            let stride=self.coded_width.div_ceil(sx);let x=self.crop[0]/sx;let y=self.crop[2]/sy;
+            let depth=if component==0 {self.bit_depth}else{self.chroma_bit_depth};
+            for row in 0..height.div_ceil(sy) {for &sample in &plane[(y+row)*stride+x..(y+row)*stride+x+width.div_ceil(sx)] {
+                if depth==8 {writer.write_all(&[sample as u8])?;}else{writer.write_all(&sample.to_le_bytes())?;}
+            }}
         }
         Ok(())
     }
+
 }
 fn put<const N: usize>(
     plane: &mut [u16],
@@ -109,8 +133,8 @@ pub fn decode_intra_slices(
     let header = *headers
         .first()
         .ok_or_else(|| invalid("missing intra slices"))?;
-    if header.first_mb != 0 {
-        return Err(invalid("intra picture must begin at zero"));
+    if sps.separate_colour_plane {
+        return separate_pcm::decode(headers, sps, pps, memory_limit);
     }
     if headers.iter().any(|slice| {
         !matches!(
@@ -123,7 +147,25 @@ pub fn decode_intra_slices(
     if sps.mb_adaptive_frame_field && !header.field_pic {
         return super::avc_mbaff_picture::decode_intra_slices(headers, sps, pps, memory_limit);
     }
+    if sps.chroma_format!=1 || sps.separate_colour_plane {
+        return pcm_formats::decode(headers,sps,pps,memory_limit);
+    }
+    if header.first_mb != 0 && !headers.iter().any(|h| h.first_mb == 0) {
+        return Err(invalid("intra picture must begin at zero"));
+    }
+    decode_component_intra_slices(headers,sps,pps,memory_limit)
+}
+
+pub(super) fn decode_component_intra_slices(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,memory_limit:usize)->Result<IntraPicture> {
     let scaling = super::avc_scaling::ScalingMatrices::new(sps, pps)?;
+    decode_component_intra_slices_scaled(headers, sps, pps, memory_limit, scaling)
+}
+
+pub(super) fn decode_component_intra_slices_scaled(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,memory_limit:usize,scaling:super::avc_scaling::ScalingMatrices)->Result<IntraPicture> {
+    let header=headers[0];
+    if sps.mb_adaptive_frame_field && !header.field_pic {
+        return super::avc_mbaff_picture::decode_intra_slices_scaled(headers, sps, pps, memory_limit, scaling);
+    }
     let (w, h) = sps.coded_dimensions();
     let (w, h) = (
         w as usize,
@@ -133,18 +175,15 @@ pub fn decode_intra_slices(
         .checked_mul(h)
         .ok_or_else(|| invalid("picture dimensions overflow"))?;
     let count = pixels / 256;
-    let bytes = pixels
-        .checked_mul(3)
-        .and_then(|n| {
-            count
+    let plane_bytes=decoded_storage(sps,w,h)?.checked_add(if sps.chroma_format==2 {std::mem::size_of::<super::avc_macroblock::Chroma422>()}else{0}).ok_or_else(||invalid("AVC 422 scratch budget overflow"))?;
+    let bytes = count
                 .checked_mul(
-                    (if pps.cabac { 76 } else { 69 })
+                    (if pps.cabac { 76 } else { 69 }) + if sps.chroma_format==2 {8}else{0}
                         + std::mem::size_of::<super::avc_deblock::MacroblockEdges>()
                         + std::mem::size_of::<usize>()
                         + 2,
                 )
-                .and_then(|c| n.checked_add(c))
-        })
+                .and_then(|c| plane_bytes.checked_add(c))
         .ok_or_else(|| invalid("picture budget overflow"))?;
     if bytes > memory_limit {
         return Err(invalid("decoded picture exceeds memory budget"));
@@ -168,8 +207,8 @@ pub fn decode_intra_slices(
         bit_depth: sps.bit_depth_luma,
         chroma_bit_depth: sps.bit_depth_chroma,
         y: alloc(pixels)?,
-        cb: alloc(pixels / 4)?,
-        cr: alloc(pixels / 4)?,
+        cb: alloc(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels / 4})?,
+        cr: alloc(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels / 4})?,
     };
     let mut ready = crate::buffer(count * 16)?;
     let mut eight = crate::buffer(count)?;
@@ -248,28 +287,28 @@ pub fn decode_intra_slices(
             &eight,
             Some(&owners),
         )?;
-        super::avc_deblock::intra_plane_owned(
+        if matches!(sps.chroma_format,1|2) {super::avc_deblock::intra_plane_owned_subsampled(
             &mut picture.cb,
             w / 2,
-            h / 2,
+            h / if sps.chroma_format==2 {1}else{2},
             &qps[1],
             sps.bit_depth_chroma,
             headers,
-            true,
+            if sps.chroma_format==2 {[2,1]}else{[2,2]},
             &eight,
             Some(&owners),
         )?;
-        super::avc_deblock::intra_plane_owned(
+        super::avc_deblock::intra_plane_owned_subsampled(
             &mut picture.cr,
             w / 2,
-            h / 2,
+            h / if sps.chroma_format==2 {1}else{2},
             &qps[2],
             sps.bit_depth_chroma,
             headers,
-            true,
+            if sps.chroma_format==2 {[2,1]}else{[2,2]},
             &eight,
             Some(&owners),
-        )?;
+        )?;}
     }
     Ok(picture)
 }
@@ -494,15 +533,17 @@ pub(super) fn reconstruct_macroblock(
                 put(&mut picture.y, w, x, y, 8, &reconstructed)?;
                 for by in 0..2 {
                     for bx in 0..2 {
-                        ready[(y / 4 + by) * (w / 4) + x / 4 + bx] = 1;
+                        ready[(y / 4 + by) * (w / 4) + x / 4 + bx] = ready_value;
                     }
                 }
             }
         }
         IntraLuma::Pcm { y, cb, cr } => {
             put(&mut picture.y, w, mx * 16, my * 16, 16, y)?;
-            put(&mut picture.cb, w / 2, mx * 8, my * 8, 8, cb)?;
-            put(&mut picture.cr, w / 2, mx * 8, my * 8, 8, cr)?;
+            if sps.chroma_format==1 {
+                put(&mut picture.cb, w / 2, mx * 8, my * 8, 8, cb)?;
+                put(&mut picture.cr, w / 2, mx * 8, my * 8, 8, cr)?;
+            }
         }
         IntraLuma::Block16(mode) => {
             let direction = super::avc_bypass::luma_direction(*mode);
@@ -591,7 +632,8 @@ pub(super) fn reconstruct_macroblock(
             }
         }
     }
-    if !matches!(mb.luma, IntraLuma::Pcm { .. }) {
+    if sps.chroma_format==2 {chroma422::reconstruct(picture,mb,sps,pps,scaling,ready)?;}
+    if sps.chroma_format==1 && !matches!(mb.luma, IntraLuma::Pcm { .. }) {
         for component in 0..2 {
             let plane = if component == 0 {
                 &mut picture.cb

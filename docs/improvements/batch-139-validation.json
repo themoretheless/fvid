@@ -1,0 +1,43 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0148"
+  ],
+  "checked_at": "2026-10-16T14:55:06.642112+00:00",
+  "before": [
+    "evidence/batch-139-before.log",
+    "evidence/batch-139-acceptance-before.log",
+    "evidence/batch-139-xm-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-139-integration-verified.log",
+      "passed": 20
+    },
+    {
+      "log": "evidence/batch-139-decoder.log",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-139-after-verified.log",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-139-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-139-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native XM now schedules delayed Kxx key-off at nonzero row ticks. The existing K00 precedence is preserved. FT2 masks delayed parameters to five bits; masked zero and ticks outside row speed have no action. Primary implementation inspection is recorded in evidence/batch-139-reference.json.",
+    "Before: all 11 Kxx cases reported an ignored effect; five active-tick cases differed from independent note97 controls, while six out-of-row/masked-zero controls already matched. Forced intended acceptance failed before the fix. After: all 44 combinations of 11 cases, mono/stereo and 11025/44100 Hz match control PCM exactly, including fractional sample boundaries.",
+    "Independent controls split a row at the required tick, apply note97, then restore the original speed. Comparisons flatten PCM across differing packet boundaries. Actual worker tests resegment independent control bytes on the admitted source sample grid; 22 targets exercise full playback, rewind, midpoint seek and EOF. Authored VP9/PCM companion decodes.",
+    "Tick deadlines use the existing absolute XM sample grid. No per-row deadline allocation or per-sample cell scan is added: scan cells only to select and dispatch deadlines. Endpoint dispatch also handles ticks sharing a rounded row endpoint. This is a capability/correctness change; no performance gain is claimed.",
+    "Ordinary tests and generation require no FFmpeg, network or private media. Envelope/fadeout synthesis remains outside the native renderer profile; this accepts timing of the existing no-envelope note-off behavior, not full FT2 audio fidelity.",
+    "Initial post-fix integration compilation exposed i64 packet PTS in the new worker oracle; conversion was corrected and all requested checks rerun. Failed logs remain separate from passing verified logs."
+  ],
+  "counting": "One delayed key-off timing capability. K00 already counted under FVID-0128; parameter masks, controls, sample rates and worker targets add zero extra IDs."
+}

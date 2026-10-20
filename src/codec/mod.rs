@@ -3,6 +3,12 @@
 pub use fvid_codecs::codec::*;
 // Audio configuration and factory tests keep their original frontend home.
 pub mod config;
+#[cfg(feature = "player")]
+pub mod flac_decoder;
+#[cfg(feature = "player")]
+pub mod mp2_decoder;
+#[cfg(feature = "player")]
+pub mod mp1_decoder;
 
 pub mod aac_decoder;
 #[cfg(feature = "player")]
@@ -28,6 +34,8 @@ pub mod pcm_decoder;
 #[cfg(feature = "player")]
 pub mod symphonia_decoder;
 #[cfg(feature = "player")]
+pub mod mp3_decoder;
+#[cfg(feature = "player")]
 pub mod opus_decoder;
 #[cfg(feature = "player")]
 pub mod truespeech_decoder;
@@ -51,10 +59,8 @@ pub fn make_audio_decoder(
     bits_per_sample: u16,
 ) -> crate::Result<Box<dyn crate::audio::AudioDecode>> {
     use symphonia::core::codecs::audio::well_known::{
-        CODEC_ID_ADPCM_IMA_QT, CODEC_ID_ADPCM_IMA_WAV, CODEC_ID_ADPCM_MS, CODEC_ID_FLAC,
-        CODEC_ID_MP2, CODEC_ID_MP3, CODEC_ID_PCM_ALAW, CODEC_ID_PCM_MULAW,
+        CODEC_ID_ADPCM_IMA_QT, CODEC_ID_ADPCM_IMA_WAV, CODEC_ID_ADPCM_MS,
     };
-    use symphonia_decoder::SymphoniaDecoder;
     let decoder: Box<dyn crate::audio::AudioDecode> = match codec {
         "mp4a" => {
             let asc=config::aac_specific_config(extra_data)?;
@@ -69,29 +75,12 @@ pub fn make_audio_decoder(
             channels,
         )?),
         // MPEG audio as a bare `.mp3`/`.mp2` file names it, and as Matroska does:
-        // the frames describe themselves, so there is no setup block and one
-        // symphonia wrapper covers both layers this reader sizes.
-        "A_MPEG/L3" => Box::new(SymphoniaDecoder::new(
-            "MP3",
-            CODEC_ID_MP3,
-            extra_data,
-            sample_rate,
-            channels,
-        )?),
-        "A_MPEG/L2" => Box::new(SymphoniaDecoder::new(
-            "MP2",
-            CODEC_ID_MP2,
-            extra_data,
-            sample_rate,
-            channels,
-        )?),
-        "A_FLAC" => Box::new(SymphoniaDecoder::new(
-            "FLAC",
-            CODEC_ID_FLAC,
-            extra_data,
-            sample_rate,
-            channels,
-        )?),
+        // the frames describe themselves, so there is no setup block. Layer II
+        // and Layer III reconstruction are both owned.
+        "A_MPEG/L3" => Box::new(mp3_decoder::Mp3Decoder::new(sample_rate, channels)?),
+        "A_MPEG/L1" => Box::new(mp1_decoder::Mp1Decoder::new(sample_rate, channels)?),
+        "A_MPEG/L2" => Box::new(mp2_decoder::Mp2Decoder::new(sample_rate, channels)?),
+        "A_FLAC" => Box::new(flac_decoder::FlacDecoder::new(extra_data, sample_rate, channels)?),
         // Apple Lossless, named as each container spells it: the fourcc in an ISO
         // BMFF sample entry, the codec ID in a Matroska track. Both put the magic
         // cookie's fields in the setup data, and the coding has no arm in the
@@ -106,6 +95,11 @@ pub fn make_audio_decoder(
         // block is empty here, and the bundled decoder has no arm for the coding -
         // this one is fvid's own, transcribed from the public standard.
         "A_AC3" | "ac-3" => Box::new(ac3_decoder::Ac3Decoder::new(
+            extra_data,
+            sample_rate,
+            channels,
+        )?),
+        "A_EAC3" | "ec-3" => Box::new(eac3_decoder::Eac3Decoder::new(
             extra_data,
             sample_rate,
             channels,
@@ -137,20 +131,8 @@ pub fn make_audio_decoder(
         // neither container hands over a name this dispatch could match on. Each code
         // is one byte wide whatever the track's stated width, so there is no geometry
         // here beyond the rate and the channel count.
-        "pcm_alaw" => Box::new(SymphoniaDecoder::new(
-            "PCM A-law",
-            CODEC_ID_PCM_ALAW,
-            extra_data,
-            sample_rate,
-            channels,
-        )?),
-        "pcm_mulaw" => Box::new(SymphoniaDecoder::new(
-            "PCM Mu-law",
-            CODEC_ID_PCM_MULAW,
-            extra_data,
-            sample_rate,
-            channels,
-        )?),
+        "pcm_alaw" => Box::new(pcm_decoder::PcmDecoder::new(pcm_decoder::PcmFormat::ALaw,sample_rate,channels)?),
+        "pcm_mulaw" => Box::new(pcm_decoder::PcmDecoder::new(pcm_decoder::PcmFormat::MuLaw,sample_rate,channels)?),
         "fl32" | "fl64" | "A_PCM/FLOAT/IEEE" => {
             let mut decoder = pcm_decoder::PcmDecoder::float(
             match codec {

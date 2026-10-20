@@ -1,9 +1,11 @@
-//! Frame/field 4:2:0 partition prediction from deblocked reference pictures.
+//! Frame/field 4:2:0 and progressive 4:2:2 prediction from decoded references.
 use super::avc_motion::{ReferencePlane, Scratch, bipred_block, weight_block};
 use crate::{Result, invalid};
 
 pub struct Reference420<'a> {
     planes: Option<[ReferencePlane<'a>; 3]>,
+    monochrome: Option<ReferencePlane<'a>>,
+    chroma_sy: usize,
     depth: u8,
     chroma_depth: u8,
 }
@@ -22,14 +24,17 @@ impl Default for ComponentWeight {
         }
     }
 }
-/// Packed samples occupy width*height (luma) and width*height/4 (chroma).
-/// Remaining array entries are zero. No per-partition heap allocation is needed.
+/// Fixed prediction scratch; 4:2:2 uses additional inline storage, with no
+/// per-partition heap allocation. Use `chroma_planes` for format-aware access.
 pub struct Prediction420 {
     width: usize,
     height: usize,
     pub y: [u16; 256],
+    /// Legacy 4:2:0 scratch. For 4:2:2, use `chroma_planes`.
     pub cb: [u16; 64],
+    /// Legacy 4:2:0 scratch. For 4:2:2, use `chroma_planes`.
     pub cr: [u16; 64],
+    chroma422: Option<[[u16;128];2]>,
     depth: u8,
     chroma_depth: u8,
 }
@@ -48,19 +53,32 @@ impl<'a> Reference420<'a> {
             },
             depth: self.depth,
             chroma_depth: self.chroma_depth,
+            monochrome: self.monochrome.as_ref().map(|plane|plane.field_view(bottom)).transpose()?,
+            chroma_sy:self.chroma_sy,
         })
     }
     /// A non-existing DPB slot carries no pixels. It may remain unused in an
     /// active list, but every attempt to sample it is a bitstream error.
     pub(crate) fn unavailable(depth: u8) -> Result<Self> {
-        if !(8..=14).contains(&depth) {
+        Self::unavailable_components([depth; 2])
+    }
+    pub(crate) fn unavailable_components(depths: [u8; 2]) -> Result<Self> {
+        if depths.iter().any(|depth| !(8..=14).contains(depth)) {
             return Err(invalid("invalid unavailable AVC reference depth"));
         }
-        Ok(Self {
-            planes: None,
-            depth,
-            chroma_depth: depth,
-        })
+        Ok(Self { planes: None, monochrome:None, chroma_sy:2, depth: depths[0], chroma_depth: depths[1] })
+    }
+    /// Native monochrome reference: no chroma storage or synthetic source planes.
+    pub(crate) fn new_monochrome(samples: &'a [u16], width: usize, height: usize, depths: [u8; 2]) -> Result<Self> {
+        if depths.iter().any(|depth| !(8..=14).contains(depth)) {
+            return Err(invalid("invalid AVC monochrome reference depth"));
+        }
+        Ok(Self { planes: None, monochrome: Some(ReferencePlane::new(samples, width, height, width, depths[0])?),
+            depth: depths[0], chroma_depth: depths[1], chroma_sy: 2 })
+    }
+    /// Native decoder-owned monochrome samples have already been validated.
+    pub(crate) fn from_decoded_monochrome(samples:&'a [u16],width:usize,height:usize,depths:[u8;2])->Result<Self> {
+        Ok(Self {planes:None,monochrome:Some(ReferencePlane::from_decoded(samples,width,height,width,depths[0])?),depth:depths[0],chroma_depth:depths[1],chroma_sy:2})
     }
     /// Plane strides are in samples. Construct once per reference frame, since
     /// validation inspects the sample values in all three planes.
@@ -92,6 +110,8 @@ impl<'a> Reference420<'a> {
             ]),
             depth,
             chroma_depth: depths[1],
+            monochrome:None,
+            chroma_sy:2,
         })
     }
     /// `new` for planes this decoder reconstructed: skips the full-picture
@@ -124,7 +144,26 @@ impl<'a> Reference420<'a> {
             ]),
             depth,
             chroma_depth: depths[1],
+            monochrome:None,
+            chroma_sy:2,
         })
+    }
+    pub(crate) fn chroma_subsampling(&self)->[usize;2] {[2,self.chroma_sy]}
+    pub(crate) fn new_components_422(planes:[&'a [u16];3],width:usize,height:usize,depths:[u8;2])->Result<Self> {
+        if width%2!=0 {return Err(invalid("invalid AVC 422 reference width"));}
+        Ok(Self {planes:Some([
+            ReferencePlane::new(planes[0],width,height,width,depths[0])?,
+            ReferencePlane::new(planes[1],width/2,height,width/2,depths[1])?,
+            ReferencePlane::new(planes[2],width/2,height,width/2,depths[1])?,
+        ]),monochrome:None,chroma_sy:1,depth:depths[0],chroma_depth:depths[1]})
+    }
+    pub(crate) fn from_decoded_422(planes:[&'a [u16];3],width:usize,height:usize,depths:[u8;2])->Result<Self> {
+        if width%2!=0 {return Err(invalid("invalid AVC 422 reference width"));}
+        Ok(Self {planes:Some([
+            ReferencePlane::from_decoded(planes[0],width,height,width,depths[0])?,
+            ReferencePlane::from_decoded(planes[1],width/2,height,width/2,depths[1])?,
+            ReferencePlane::from_decoded(planes[2],width/2,height,width/2,depths[1])?,
+        ]),monochrome:None,chroma_sy:1,depth:depths[0],chroma_depth:depths[1]})
     }
     /// Origin and size are in luma samples, vector in quarter-luma units.
     pub fn predict(
@@ -158,6 +197,18 @@ impl<'a> Reference420<'a> {
         out: &mut Prediction420,
         scratch: &mut Scratch,
     ) -> Result<()> {
+        if let Some(plane)=&self.monochrome {
+            let [width,height]=size;
+            if ![4,8,16].contains(&width)||![4,8,16].contains(&height)||origin.iter().any(|v|v%2!=0) {
+                return Err(invalid("invalid AVC monochrome partition geometry"));
+            }
+            out.width=width;out.height=height;out.depth=self.depth;out.chroma_depth=self.chroma_depth;
+            plane.luma_with(origin,motion,width,height,&mut out.y[..width*height],scratch)?;
+            // Fixed macroblock scratch keeps the shared predictor allocation-free;
+            // absent chroma never samples a reference or reaches decoded storage.
+            out.cb.fill(0);out.cr.fill(0);out.chroma422=None;
+            return Ok(());
+        }
         let planes = self
             .planes
             .as_ref()
@@ -175,23 +226,12 @@ impl<'a> Reference420<'a> {
         out.chroma_depth = self.chroma_depth;
         let count = width * height;
         planes[0].luma_with(origin, motion, width, height, &mut out.y[..count], scratch)?;
-        let chroma_origin = [origin[0] / 2, origin[1] / 2];
-        planes[1].chroma_with(
-            chroma_origin,
-            chroma_motion,
-            width / 2,
-            height / 2,
-            &mut out.cb[..count / 4],
-            scratch,
-        )?;
-        planes[2].chroma_with(
-            chroma_origin,
-            chroma_motion,
-            width / 2,
-            height / 2,
-            &mut out.cr[..count / 4],
-            scratch,
-        )?;
+        if self.chroma_sy==1 {out.chroma422=Some([[0;128];2]);}else{out.chroma422=None;}
+        let chroma_origin=[origin[0]/2,origin[1]/self.chroma_sy as i32];
+        let chroma_motion=[chroma_motion[0],chroma_motion[1].checked_mul((2/self.chroma_sy)as i32).ok_or_else(||invalid("AVC chroma vector overflow"))?];
+        let [cb,cr]=out.chroma_planes_mut();
+        planes[1].chroma_with(chroma_origin,chroma_motion,width/2,height/self.chroma_sy,cb,scratch)?;
+        planes[2].chroma_with(chroma_origin,chroma_motion,width/2,height/self.chroma_sy,cr,scratch)?;
         Ok(())
     }
 }
@@ -210,13 +250,48 @@ impl Prediction420 {
             cr: [0; 64],
             depth,
             chroma_depth: depths[1],
+            chroma422:None,
         }
+    }
+    pub(crate) fn empty_components_422(depths:[u8;2])->Self {
+        let mut out=Self::empty_components(depths);out.chroma422=Some([[0;128];2]);out
+    }
+    pub(crate) fn planar_planes_mut(&mut self)->[&mut[u16];3] {
+        let n=self.width*self.height;
+        match &mut self.chroma422 {Some([cb,cr])=>[&mut self.y[..n],&mut cb[..n/2],&mut cr[..n/2]],None=>[&mut self.y[..n],&mut self.cb[..n/4],&mut self.cr[..n/4]]}
+    }
+    pub fn chroma_subsampling(&self)->[usize;2] {[2,if self.chroma422.is_some(){1}else{2}]}
+    pub fn chroma_planes(&self)->[&[u16];2] {
+        let n=self.width*self.height/(2*self.chroma_subsampling()[1]);
+        match &self.chroma422 {Some([cb,cr])=>[&cb[..n],&cr[..n]],None=>[&self.cb[..n],&self.cr[..n]]}
+    }
+    fn chroma_planes_mut(&mut self)->[&mut[u16];2] {
+        let n=self.width*self.height/(2*self.chroma_subsampling()[1]);
+        match &mut self.chroma422 {Some([cb,cr])=>[&mut cb[..n],&mut cr[..n]],None=>[&mut self.cb[..n],&mut self.cr[..n]]}
     }
     pub fn dimensions(&self) -> (usize, usize) {
         (self.width, self.height)
     }
     pub fn bit_depth(&self) -> u8 {
         self.depth
+    }
+    pub(crate) fn component_depths(&self) -> [u8; 2] {
+        [self.depth, self.chroma_depth]
+    }
+    pub(crate) fn reconstruct_chroma422(mut self,coefficients:&super::avc_inter_coefficients::InterChroma422,qp:[u8;3],weights:&[[u8;16];3],bypass:bool)->Result<Self> {
+        if self.chroma422.is_none()||self.dimensions()!=(16,16){return Err(invalid("422 inter residual requires an 8x16 chroma prediction"));}
+        let depth=self.chroma_depth;
+        for (component,plane)in self.chroma_planes_mut().into_iter().enumerate() {
+            let dc=if bypass {coefficients.dc[component]}else{super::avc_picture::chroma_dc_422(&coefficients.dc[component],qp[component+1],depth,weights[component+1][0])?};
+            for block in 0..8 {
+                let (x,y)=(block%2*4,block/2*4);
+                let pred=std::array::from_fn(|i|plane[(y+i/4)*8+x+i%4]);
+                let residual=if bypass {let mut v=coefficients.ac[component][block];v[0]=dc[block];v}else{super::avc_transform::residual_4x4(&coefficients.ac[component][block],qp[component+1],depth,&weights[component+1],Some(dc[block]))?};
+                let decoded=super::avc_transform::reconstruct_4x4(&pred,&residual,depth)?;
+                for row in 0..4 {plane[(y+row)*8+x..(y+row)*8+x+4].copy_from_slice(&decoded[row*4..row*4+4]);}
+            }
+        }
+        Ok(self)
     }
     /// Apply explicit uni-prediction weights in Y/Cb/Cr order.
     pub fn weight(mut self, weights: [ComponentWeight; 3]) -> Result<Self> {
@@ -225,16 +300,10 @@ impl Prediction420 {
     }
     pub fn weight_in_place(&mut self, weights: [ComponentWeight; 3]) -> Result<()> {
         let count = self.width * self.height;
-        for (component, samples) in [
-            &mut self.y[..count],
-            &mut self.cb[..count / 4],
-            &mut self.cr[..count / 4],
-        ]
-        .into_iter()
-        .enumerate()
-        {
-            let w = weights[component];
-            weight_block(samples, w.weight, w.offset, w.denominator, if component==0 {self.depth}else{self.chroma_depth})?;
+        weight_block(&mut self.y[..count],weights[0].weight,weights[0].offset,weights[0].denominator,self.depth)?;
+        let depth=self.chroma_depth;
+        for (samples,w)in self.chroma_planes_mut().into_iter().zip(&weights[1..]) {
+            weight_block(samples,w.weight,w.offset,w.denominator,depth)?;
         }
         Ok(())
     }
@@ -249,34 +318,18 @@ impl Prediction420 {
         other: &Self,
         weights: [[ComponentWeight; 3]; 2],
     ) -> Result<()> {
-        if self.width != other.width || self.height != other.height || self.depth != other.depth || self.chroma_depth != other.chroma_depth {
+        if self.width != other.width || self.height != other.height || self.depth != other.depth || self.chroma_depth != other.chroma_depth || self.chroma_subsampling()!=other.chroma_subsampling() {
             return Err(invalid("AVC prediction geometry or bit depth mismatch"));
         }
         let count = self.width * self.height;
-        let a = [
-            &mut self.y[..count],
-            &mut self.cb[..count / 4],
-            &mut self.cr[..count / 4],
-        ];
-        let b = [
-            &other.y[..count],
-            &other.cb[..count / 4],
-            &other.cr[..count / 4],
-        ];
-        for (component, (a, b)) in a.into_iter().zip(b).enumerate() {
-            let w = [weights[0][component], weights[1][component]];
-            if w[0].denominator != w[1].denominator {
-                return Err(invalid("AVC bipred denominators differ"));
-            }
-            bipred_block(
-                a,
-                b,
-                [w[0].weight, w[1].weight],
-                [w[0].offset, w[1].offset],
-                w[0].denominator,
-                if component==0 {self.depth}else{self.chroma_depth},
-            )?;
-        }
+        let blend=|a:&mut[u16],b:&[u16],component:usize,depth:u8|->Result<()> {
+            let w=[weights[0][component],weights[1][component]];
+            if w[0].denominator!=w[1].denominator {return Err(invalid("AVC bipred denominators differ"));}
+            bipred_block(a,b,[w[0].weight,w[1].weight],[w[0].offset,w[1].offset],w[0].denominator,depth)
+        };
+        blend(&mut self.y[..count],&other.y[..count],0,self.depth)?;
+        let depth=self.chroma_depth;
+        for (i,(a,b))in self.chroma_planes_mut().into_iter().zip(other.chroma_planes()).enumerate(){blend(a,b,i+1,depth)?;}
         Ok(())
     }
 }
@@ -314,6 +367,10 @@ impl Prediction420 {
             }
         };
         self.y = super::avc_transform::reconstruct(&self.y, &residual, self.depth)?;
+        if self.chroma422.is_some() {
+            if chroma_dc.iter().flatten().any(|&v|v!=0)||chroma_ac.iter().flatten().flatten().any(|&v|v!=0) {return Err(invalid("AVC 422 inter chroma residual needs eight-block syntax"));}
+            return Ok(self);
+        }
         for (component, plane) in [&mut self.cb, &mut self.cr].into_iter().enumerate() {
             let residual = super::avc_bypass::blocks4::<64>(
                 &chroma_ac[component],
@@ -346,7 +403,7 @@ impl Prediction420 {
         qs: [u8; 3],
         switching: bool,
     ) -> Result<Self> {
-        if self.dimensions() != (16, 16) || self.depth != 8 || self.chroma_depth != 8 {
+        if self.dimensions() != (16, 16) || self.depth != 8 || self.chroma_depth != 8 || self.chroma422.is_some() {
             return Err(invalid("SP requires an eight-bit 16x16 prediction"));
         }
         for index in 0..16 {
@@ -420,6 +477,10 @@ impl Prediction420 {
                 }
             }
         }
+        if self.chroma422.is_some() {
+            if chroma_dc.iter().flatten().any(|&v|v!=0)||chroma_ac.iter().flatten().flatten().any(|&v|v!=0) {return Err(invalid("AVC 422 inter chroma residual needs eight-block syntax"));}
+            return Ok(self);
+        }
         for (component, plane) in [&mut self.cb, &mut self.cr].into_iter().enumerate() {
             let dc = chroma_dc_2x2(
                 &chroma_dc[component],
@@ -465,6 +526,7 @@ impl MacroblockPrediction {
         let [x, y] = origin;
         let (w, h) = partition.dimensions();
         if partition.depth != self.picture.depth || partition.chroma_depth != self.picture.chroma_depth
+            || (self.covered!=0 && partition.chroma_subsampling()!=self.picture.chroma_subsampling())
             || x > 16 - w
             || y > 16 - h
             || x % 4 != 0
@@ -482,11 +544,9 @@ impl MacroblockPrediction {
             return Err(invalid("overlapping AVC prediction partitions"));
         }
         // Predictions are clipped to the bit depth when interpolated and weighted.
-        debug_assert!([
-            (&partition.y[..w*h],self.picture.depth),
-            (&partition.cb[..w*h/4],self.picture.chroma_depth),
-            (&partition.cr[..w*h/4],self.picture.chroma_depth),
-        ].into_iter().all(|(plane,depth)|plane.iter().all(|&v|u32::from(v)<(1u32<<depth))));
+        debug_assert!(partition.y[..w*h].iter().all(|&v|u32::from(v)<(1u32<<self.picture.depth)));
+        debug_assert!(partition.chroma_planes().into_iter().all(|p|p.iter().all(|&v|u32::from(v)<(1u32<<self.picture.chroma_depth))));
+        if self.covered==0 {self.picture.chroma422=partition.chroma422.as_ref().map(|_|[[0;128];2]);}
         // Rows are 4 to 16 samples; plain loops beat a memmove call per row.
         for row in 0..h {
             let dst = &mut self.picture.y[(y + row) * 16 + x..][..w];
@@ -495,18 +555,9 @@ impl MacroblockPrediction {
                 *d = *s;
             }
         }
-        let (cw, ch) = (w / 2, h / 2);
-        for (dst, src) in [
-            (&mut self.picture.cb, &partition.cb),
-            (&mut self.picture.cr, &partition.cr),
-        ] {
-            for row in 0..ch {
-                let dst = &mut dst[(y / 2 + row) * 8 + x / 2..][..cw];
-                let src = &src[row * cw..][..cw];
-                for (d, s) in dst.iter_mut().zip(src) {
-                    *d = *s;
-                }
-            }
+        let sy=partition.chroma_subsampling()[1];let (cw,ch)=(w/2,h/sy);
+        for (dst,src)in self.picture.chroma_planes_mut().into_iter().zip(partition.chroma_planes()) {
+            for row in 0..ch {dst[(y/sy+row)*8+x/2..][..cw].copy_from_slice(&src[row*cw..][..cw]);}
         }
         self.covered |= mask;
         Ok(())
@@ -740,5 +791,24 @@ mod unavailable_tests {
         }
         assert!(Reference420::unavailable(7).is_err());
         assert!(Reference420::unavailable(15).is_err());
+    }
+}
+
+#[cfg(test)]
+mod unavailable_component_tests {
+    use super::*;
+    #[test]
+    fn unavailable_references_keep_and_validate_each_component_depth() {
+        for depths in [[8,10],[14,8],[12,14]] {
+            let reference=Reference420::unavailable_components(depths).unwrap();
+            assert_eq!([reference.depth,reference.chroma_depth],depths);
+            for bottom in [false,true] {
+                let field=reference.field_view(bottom).unwrap();
+                assert_eq!([field.depth,field.chroma_depth],depths);
+                let error=field.predict([0,0],[0,0],[4,4]).err().unwrap();
+                assert!(error.to_string().contains("non-existing"));
+            }
+        }
+        for depths in [[7,10],[15,8],[8,7],[8,15]] {assert!(Reference420::unavailable_components(depths).is_err());}
     }
 }

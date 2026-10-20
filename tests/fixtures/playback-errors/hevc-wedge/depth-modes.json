@@ -1,0 +1,4985 @@
+{
+  "provenance": "Own CABAC components, not full 3D picture acceptance.",
+  "cases": [
+    {
+      "file": "depth-modes-I-swap0-qp0.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 0,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-I-swap0-qp26.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 26,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-I-swap0-qp51.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 51,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-P-swap0-qp0.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 0,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-P-swap0-qp26.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 26,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-P-swap0-qp51.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 51,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-B-swap0-qp0.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 0,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-B-swap0-qp26.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 26,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-B-swap0-qp51.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 51,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-P-swap1-qp0.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 0,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-P-swap1-qp26.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 26,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-P-swap1-qp51.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 51,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-B-swap1-qp0.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 0,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-B-swap1-qp26.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 26,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    },
+    {
+      "file": "depth-modes-B-swap1-qp51.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 51,
+      "blocks": [
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 85
+        },
+        {
+          "log": 2,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 801
+        },
+        {
+          "log": 3,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 4,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "wedge",
+          "index": 509
+        },
+        {
+          "log": 5,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "contour",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            false
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            false,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        },
+        {
+          "log": 6,
+          "enabled": [
+            true,
+            true
+          ],
+          "mode": "ordinary",
+          "index": 0
+        }
+      ]
+    }
+  ]
+}

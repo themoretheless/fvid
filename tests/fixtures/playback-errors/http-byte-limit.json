@@ -1,0 +1,7 @@
+{
+  "file": "http-byte-limit.y4m",
+  "sha256": "c94de7b0eec2dd6e02a020015441590469e7fdfd3e9d76a7d316f575ae829868",
+  "frames": 3,
+  "reproduction": "Unknown-length body read exceeds max_bytes by an entire chunk before refusing; reader must consume at most the budget plus one overflow-detection byte.",
+  "provenance": "Three authored progressive YUV420 frames; no private media, network or external tools."
+}

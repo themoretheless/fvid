@@ -1,0 +1,506 @@
+[
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e0-a0-m0",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e0-a0-m1",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e0-a0-m2",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e0-a1-m0",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e0-a1-m1",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e0-a1-m2",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e1-a0-m0",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e1-a0-m1",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e1-a0-m2",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e1-a1-m0",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e1-a1-m1",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y8-c8-e1-a1-m2",
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e0-a0-m0",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e0-a0-m1",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e0-a0-m2",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e0-a1-m0",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e0-a1-m1",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e0-a1-m2",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e1-a0-m0",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e1-a0-m1",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e1-a0-m2",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e1-a1-m0",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e1-a1-m1",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y10-c12-e1-a1-m2",
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e0-a0-m0",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e0-a0-m1",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e0-a0-m2",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 0,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e0-a1-m0",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e0-a1-m1",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e0-a1-m2",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "axis": 1,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e1-a0-m0",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e1-a0-m1",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e1-a0-m2",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 0,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e1-a1-m0",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 0,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e1-a1-m1",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 1,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  },
+  {
+    "name": "b-422-p-luma-filter-y14-c8-e1-a1-m2",
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": true,
+    "axis": 1,
+    "filter_mode": 2,
+    "qp": 32,
+    "decode_order": [
+      0,
+      2,
+      1
+    ]
+  }
+]

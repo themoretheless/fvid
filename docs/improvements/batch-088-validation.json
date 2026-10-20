@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0105"
+  ],
+  "checked_at": "2026-10-16T04:18:44.883440+00:00",
+  "before": [
+    "evidence/batch-088-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-088-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-088-final-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-088-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-088-worker.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-088-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-088-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Zero-ID extension of105. Twelve authored predictive-codec WAV/AIFC sources reproduce48non-EOF seek failures, including exact packed boundaries with incorrect PCM. Ordinary playback, rewind and12EOF controls pass before the fix.",
+    "Predictive coded seeks decode from the beginning after reset, suppress complete preroll windows and clip the first overlapping PCM window at the requested sample. Existing PCM/G711 exact byte offsets remain direct. Encoded packet clocks/payloads and public signatures remain unchanged.",
+    "60cold direct decoder seeks and60warmed actual recording-worker seeks exactly match continuous native PCM and clocks;12sources cover mono/stereo MACE3/6,GSM,TrueSpeech,G722,Creative and all four G726 widths. Saved authored native video decodes; generation remains separate and encoder/network/private media free.",
+    "33WAV/14AIFF units,5basic worker tests,7related integrations, fixture reproduction and current player build pass. No external-reference codec-quality, physical DAC or latency improvement claim; cold history replay is linear.",
+    "Broader worker run evidence/batch-088-final-worker.log has27passing/5failing old AAC seek oracles in concurrent MP4/Matroska code, none using WAV/AIFF. Failures: requested2400/4000 versus earlier2040/2056/2048 and present_decoded now returning None for suppressed preroll. Recorded separately, not claimed fixed or counted. Initial WAV unit filter selected zero tests; final-wav selects33 and supersedes it.",
+    "Later recheck evidence/batch-103-worker-recheck.log passes32of32: concurrent AAC seek expectations are resolved by parallel work,without this task editing those paths orcounting additional IDs. Historical27/5log is retained."
+  ],
+  "compatibility": "Predictive raw WAV/AIFF seeks now return exact samples and encoded preroll begins at0. Manual AudioStream callers must honor present_decoded; PCM/G711 direct offsets remain unchanged.",
+  "counting": "Extends105 without a new independent ID. accepted_count108,nextID0109."
+}

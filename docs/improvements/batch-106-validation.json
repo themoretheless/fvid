@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0125"
+  ],
+  "checked_at": "2026-10-16T06:53:44.614497+00:00",
+  "before": [
+    "evidence/batch-106-reproduction-before.log",
+    "evidence/batch-106-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-106-integration.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-106-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-104-reader-verified.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-106-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-106-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Ten authored C0..CF volume-column panning cases compare native mono/stereo PCM with independent identical-sample instruments whose pan is assigned in the sample header. Five levels0/64/128/192/240,onset,persistence,return-center,channel isolation and standard8xx precedence.",
+    "Before: passing ignored reproduction and forced acceptance fail20unsupported classifications and eight stereo PCM comparisons; center and8xxoverride audio controls already healthy. Worker before failures stop at full playback, not a separate pre-fix seek defect.",
+    "After: acceptance enabled, old reproduction inverted;20actual worker row-seek/EOF targets pass after fullplay/rewind. Setter uses low nibble shifted4before standard8xx;volume and sample phase preserved. Existing mixing law/public APIs/timeline unchanged.",
+    "13integrations,11decoder/6reader units,fixture reproduction and player build pass. Authored raw XM plus separate VP9/PCM companion, no private media/encoder/network/performance/full tracker claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "v_SetPan;handleEffects_TickZero",
+      "rule": "Volume column panning shifts the low nibble left4;standard8xxexecutes afterward."
+    }
+  ],
+  "compatibility": "Previously ignored C0..CF volume-column panning now renders. Other unsupported volume-column commands still report ignored; public interfaces unchanged.",
+  "counting": "One independently accepted volume-column panning capability;standard8xxprecedence is a control,not another ID."
+}

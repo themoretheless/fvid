@@ -1,0 +1,7 @@
+{
+  "provenance": "Authored60ms VP9/PCM. The stream reset hook fails only after valid playback. This tests transition refusal, not malformed-media decoder conformance. No encoder, private media or network.",
+  "sha256": {
+    "navigation.mkv": "f836a3b388dd73e5523842aa04810ccbca1ec089406d673536c09c6b1a33c36a",
+    "expected.f32le": "9cc1df2c95816e96424cdab2d6afd8cfb8e0826bd3f25209395684c24560a07e"
+  }
+}

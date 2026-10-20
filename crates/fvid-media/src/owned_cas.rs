@@ -97,6 +97,30 @@ impl Cas {
             self.apply_rgb(&mut frame.data, frame.width, frame.height, depth, 3)
         }
     }
+    /// Filter separate opacity only when the alpha plane bit is selected.
+    pub(crate) fn apply_alpha(
+        &self,
+        data: &mut Vec<u8>,
+        width: usize,
+        height: usize,
+        depth: u8,
+    ) -> Result<()> {
+        let count = width
+            .checked_mul(height)
+            .ok_or("cas alpha geometry overflow")?;
+        self.filter(
+            data,
+            depth,
+            count,
+            &[Plane {
+                offset: 0,
+                width,
+                height,
+                stride: 1,
+                mask: 8,
+            }],
+        )
+    }
     /// Packed RGB/RGBA, LE above eight bits. Plane bits follow G/B/R/A ordering.
     pub fn apply_rgb(
         &self,
@@ -138,7 +162,7 @@ impl Cas {
         {
             return Err("cas sample exceeds precision".into());
         }
-        if self.planes == 0 {
+        if !planes.iter().any(|plane| self.planes & plane.mask != 0) {
             return Ok(());
         }
         let mut output = crate::owned_frame::buffer(data.len())?;

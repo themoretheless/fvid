@@ -1,0 +1,4853 @@
+{
+  "provenance": "Owned mixed-role PCM/CABAC and MP4. Independent saved A1 disparity, shifted corner maximum, 8x8 source-motion lookup and own-view chroma filtering. No external codec or test-time generation.",
+  "cases": [
+    {
+      "file": "multicu-iv-64-0-8-128-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 8,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 222,
+          "refined": 222
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 147,
+          "refined": 147
+        }
+      ],
+      "oracle_offset": 0
+    },
+    {
+      "file": "multicu-iv-64-0-8--128-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 8,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        }
+      ],
+      "oracle_offset": 12288
+    },
+    {
+      "file": "multicu-iv-64-0-8-4-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 8,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 222,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        }
+      ],
+      "oracle_offset": 24576
+    },
+    {
+      "file": "multicu-iv-64-0-8--4-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 8,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        }
+      ],
+      "oracle_offset": 36864
+    },
+    {
+      "file": "multicu-iv-64-0-8-16--3.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 8,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 222,
+          "refined": 22
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        }
+      ],
+      "oracle_offset": 49152
+    },
+    {
+      "file": "multicu-iv-64-0-8--16-3.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 8,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        }
+      ],
+      "oracle_offset": 61440
+    },
+    {
+      "file": "multicu-iv-64-0-24-128-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 24,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 222,
+          "refined": 222
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 147,
+          "refined": 147
+        }
+      ],
+      "oracle_offset": 73728
+    },
+    {
+      "file": "multicu-iv-64-0-24--128-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 24,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        }
+      ],
+      "oracle_offset": 86016
+    },
+    {
+      "file": "multicu-iv-64-0-24-4-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 24,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 222,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        }
+      ],
+      "oracle_offset": 98304
+    },
+    {
+      "file": "multicu-iv-64-0-24--4-0.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 24,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        }
+      ],
+      "oracle_offset": 110592
+    },
+    {
+      "file": "multicu-iv-64-0-24-16--3.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 24,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 222,
+          "refined": 22
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        }
+      ],
+      "oracle_offset": 122880
+    },
+    {
+      "file": "multicu-iv-64-0-24--16-3.mp4",
+      "size": 64,
+      "direct": false,
+      "cut": 24,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        }
+      ],
+      "oracle_offset": 135168
+    },
+    {
+      "file": "multicu-iv-64-1-8-128-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 8,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 222,
+          "refined": 222
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 147,
+          "refined": 147
+        }
+      ],
+      "oracle_offset": 147456
+    },
+    {
+      "file": "multicu-iv-64-1-8--128-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 8,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        }
+      ],
+      "oracle_offset": 159744
+    },
+    {
+      "file": "multicu-iv-64-1-8-4-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 8,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 222,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        }
+      ],
+      "oracle_offset": 172032
+    },
+    {
+      "file": "multicu-iv-64-1-8--4-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 8,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        }
+      ],
+      "oracle_offset": 184320
+    },
+    {
+      "file": "multicu-iv-64-1-8-16--3.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 8,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 222,
+          "refined": 22
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        }
+      ],
+      "oracle_offset": 196608
+    },
+    {
+      "file": "multicu-iv-64-1-8--16-3.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 8,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        }
+      ],
+      "oracle_offset": 208896
+    },
+    {
+      "file": "multicu-iv-64-1-24-128-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 24,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 222,
+          "refined": 222
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 147,
+          "refined": 147
+        }
+      ],
+      "oracle_offset": 221184
+    },
+    {
+      "file": "multicu-iv-64-1-24--128-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 24,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        }
+      ],
+      "oracle_offset": 233472
+    },
+    {
+      "file": "multicu-iv-64-1-24-4-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 24,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 222,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        }
+      ],
+      "oracle_offset": 245760
+    },
+    {
+      "file": "multicu-iv-64-1-24--4-0.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 24,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        }
+      ],
+      "oracle_offset": 258048
+    },
+    {
+      "file": "multicu-iv-64-1-24-16--3.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 24,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 222,
+          "refined": 22
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        }
+      ],
+      "oracle_offset": 270336
+    },
+    {
+      "file": "multicu-iv-64-1-24--16-3.mp4",
+      "size": 64,
+      "direct": true,
+      "cut": 24,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        }
+      ],
+      "oracle_offset": 282624
+    },
+    {
+      "file": "multicu-iv-128-0-8-128-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 8,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 230,
+          "refined": 230
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 230,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 254,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 229,
+          "depth": 169,
+          "refined": 169
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 169,
+          "depth": 203,
+          "refined": 203
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 203,
+          "depth": 179,
+          "refined": 179
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 154,
+          "depth": 139,
+          "refined": 139
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 139,
+          "depth": 250,
+          "refined": 250
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 250,
+          "depth": 190,
+          "refined": 190
+        }
+      ],
+      "oracle_offset": 294912
+    },
+    {
+      "file": "multicu-iv-128-0-8--128-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 8,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -122,
+          "depth": 236,
+          "refined": -236
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -236,
+          "depth": 125,
+          "refined": -125
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -218,
+          "depth": 249,
+          "refined": -249
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -249,
+          "depth": 200,
+          "refined": -200
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -229,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -229,
+          "depth": 239,
+          "refined": -239
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -239,
+          "depth": 225,
+          "refined": -225
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -154,
+          "depth": 244,
+          "refined": -244
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -244,
+          "depth": 175,
+          "refined": -175
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -175,
+          "depth": 223,
+          "refined": -223
+        }
+      ],
+      "oracle_offset": 344064
+    },
+    {
+      "file": "multicu-iv-128-0-8-4-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 8,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 236,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 8,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 6,
+          "depth": 168,
+          "refined": 5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 5,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 7,
+          "depth": 211,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 7,
+          "depth": 225,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 7,
+          "depth": 232,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 5,
+          "depth": 129,
+          "refined": 4
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 4,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        }
+      ],
+      "oracle_offset": 393216
+    },
+    {
+      "file": "multicu-iv-128-0-8--4-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 8,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -5,
+          "depth": 147,
+          "refined": -5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -7,
+          "depth": 236,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -7,
+          "depth": 204,
+          "refined": -6
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        }
+      ],
+      "oracle_offset": 442368
+    },
+    {
+      "file": "multicu-iv-128-0-8-16--3.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 8,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 139,
+          "refined": 11
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 11,
+          "depth": 250,
+          "refined": 25
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 25,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 22,
+          "depth": 196,
+          "refined": 19
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 19,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 23,
+          "depth": 239,
+          "refined": 24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 24,
+          "depth": 253,
+          "refined": 26
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 26,
+          "depth": 182,
+          "refined": 17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 13,
+          "depth": 143,
+          "refined": 12
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 12,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 24,
+          "depth": 190,
+          "refined": 18
+        }
+      ],
+      "oracle_offset": 491520
+    },
+    {
+      "file": "multicu-iv-128-0-8--16-3.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 8,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -24,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -13,
+          "depth": 133,
+          "refined": -11
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -11,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -23,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -24,
+          "depth": 208,
+          "refined": -20
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -20,
+          "depth": 183,
+          "refined": -17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -13,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -23,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        }
+      ],
+      "oracle_offset": 540672
+    },
+    {
+      "file": "multicu-iv-128-0-24-128-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 24,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 230,
+          "refined": 230
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 230,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 254,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 229,
+          "depth": 169,
+          "refined": 169
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 169,
+          "depth": 203,
+          "refined": 203
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 203,
+          "depth": 179,
+          "refined": 179
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 154,
+          "depth": 139,
+          "refined": 139
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 139,
+          "depth": 250,
+          "refined": 250
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 250,
+          "depth": 190,
+          "refined": 190
+        }
+      ],
+      "oracle_offset": 589824
+    },
+    {
+      "file": "multicu-iv-128-0-24--128-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 24,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -122,
+          "depth": 236,
+          "refined": -236
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -236,
+          "depth": 125,
+          "refined": -125
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -218,
+          "depth": 249,
+          "refined": -249
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -249,
+          "depth": 200,
+          "refined": -200
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -229,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -229,
+          "depth": 239,
+          "refined": -239
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -239,
+          "depth": 225,
+          "refined": -225
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -154,
+          "depth": 244,
+          "refined": -244
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -244,
+          "depth": 175,
+          "refined": -175
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -175,
+          "depth": 223,
+          "refined": -223
+        }
+      ],
+      "oracle_offset": 638976
+    },
+    {
+      "file": "multicu-iv-128-0-24-4-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 24,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 236,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 8,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 6,
+          "depth": 168,
+          "refined": 5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 5,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 7,
+          "depth": 211,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 7,
+          "depth": 225,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 7,
+          "depth": 232,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 5,
+          "depth": 129,
+          "refined": 4
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 4,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        }
+      ],
+      "oracle_offset": 688128
+    },
+    {
+      "file": "multicu-iv-128-0-24--4-0.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 24,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -5,
+          "depth": 147,
+          "refined": -5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -7,
+          "depth": 236,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -7,
+          "depth": 204,
+          "refined": -6
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        }
+      ],
+      "oracle_offset": 737280
+    },
+    {
+      "file": "multicu-iv-128-0-24-16--3.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 24,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 139,
+          "refined": 11
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 11,
+          "depth": 250,
+          "refined": 25
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 25,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 22,
+          "depth": 196,
+          "refined": 19
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 19,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 23,
+          "depth": 239,
+          "refined": 24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 24,
+          "depth": 253,
+          "refined": 26
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 26,
+          "depth": 182,
+          "refined": 17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 13,
+          "depth": 143,
+          "refined": 12
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 12,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 24,
+          "depth": 190,
+          "refined": 18
+        }
+      ],
+      "oracle_offset": 786432
+    },
+    {
+      "file": "multicu-iv-128-0-24--16-3.mp4",
+      "size": 128,
+      "direct": false,
+      "cut": 24,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -24,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -13,
+          "depth": 133,
+          "refined": -11
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -11,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -23,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -24,
+          "depth": 208,
+          "refined": -20
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -20,
+          "depth": 183,
+          "refined": -17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -13,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -23,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        }
+      ],
+      "oracle_offset": 835584
+    },
+    {
+      "file": "multicu-iv-128-1-8-128-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 8,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 230,
+          "refined": 230
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 230,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 254,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 229,
+          "depth": 169,
+          "refined": 169
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 169,
+          "depth": 203,
+          "refined": 203
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 203,
+          "depth": 179,
+          "refined": 179
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 154,
+          "depth": 139,
+          "refined": 139
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 139,
+          "depth": 250,
+          "refined": 250
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 250,
+          "depth": 190,
+          "refined": 190
+        }
+      ],
+      "oracle_offset": 884736
+    },
+    {
+      "file": "multicu-iv-128-1-8--128-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 8,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -122,
+          "depth": 236,
+          "refined": -236
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -236,
+          "depth": 125,
+          "refined": -125
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -218,
+          "depth": 249,
+          "refined": -249
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -249,
+          "depth": 200,
+          "refined": -200
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -229,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -229,
+          "depth": 239,
+          "refined": -239
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -239,
+          "depth": 225,
+          "refined": -225
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -154,
+          "depth": 244,
+          "refined": -244
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -244,
+          "depth": 175,
+          "refined": -175
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -175,
+          "depth": 223,
+          "refined": -223
+        }
+      ],
+      "oracle_offset": 933888
+    },
+    {
+      "file": "multicu-iv-128-1-8-4-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 8,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 236,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 8,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 6,
+          "depth": 168,
+          "refined": 5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 5,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 7,
+          "depth": 211,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 7,
+          "depth": 225,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 7,
+          "depth": 232,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 5,
+          "depth": 129,
+          "refined": 4
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 4,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        }
+      ],
+      "oracle_offset": 983040
+    },
+    {
+      "file": "multicu-iv-128-1-8--4-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 8,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -5,
+          "depth": 147,
+          "refined": -5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -7,
+          "depth": 236,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -7,
+          "depth": 204,
+          "refined": -6
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        }
+      ],
+      "oracle_offset": 1032192
+    },
+    {
+      "file": "multicu-iv-128-1-8-16--3.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 8,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 139,
+          "refined": 11
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 11,
+          "depth": 250,
+          "refined": 25
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 25,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 22,
+          "depth": 196,
+          "refined": 19
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 19,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 23,
+          "depth": 239,
+          "refined": 24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 24,
+          "depth": 253,
+          "refined": 26
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 26,
+          "depth": 182,
+          "refined": 17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 13,
+          "depth": 143,
+          "refined": 12
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 12,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 24,
+          "depth": 190,
+          "refined": 18
+        }
+      ],
+      "oracle_offset": 1081344
+    },
+    {
+      "file": "multicu-iv-128-1-8--16-3.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 8,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -24,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -13,
+          "depth": 133,
+          "refined": -11
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -11,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -23,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -24,
+          "depth": 208,
+          "refined": -20
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -20,
+          "depth": 183,
+          "refined": -17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -13,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -23,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        }
+      ],
+      "oracle_offset": 1130496
+    },
+    {
+      "file": "multicu-iv-128-1-24-128-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 24,
+      "scale": 128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 254,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 243,
+          "depth": 243,
+          "refined": 243
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 218,
+          "depth": 230,
+          "refined": 230
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 230,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 254,
+          "depth": 254,
+          "refined": 254
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 229,
+          "depth": 169,
+          "refined": 169
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 169,
+          "depth": 203,
+          "refined": 203
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 203,
+          "depth": 179,
+          "refined": 179
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 154,
+          "depth": 139,
+          "refined": 139
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 139,
+          "depth": 250,
+          "refined": 250
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 250,
+          "depth": 190,
+          "refined": 190
+        }
+      ],
+      "oracle_offset": 1179648
+    },
+    {
+      "file": "multicu-iv-128-1-24--128-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 24,
+      "scale": -128,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -254
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -254,
+          "depth": 122,
+          "refined": -122
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -122,
+          "depth": 236,
+          "refined": -236
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -236,
+          "depth": 125,
+          "refined": -125
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -218,
+          "depth": 218,
+          "refined": -218
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -218,
+          "depth": 249,
+          "refined": -249
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -249,
+          "depth": 200,
+          "refined": -200
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -229,
+          "depth": 229,
+          "refined": -229
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -229,
+          "depth": 239,
+          "refined": -239
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -239,
+          "depth": 225,
+          "refined": -225
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -154
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -154,
+          "depth": 244,
+          "refined": -244
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -244,
+          "depth": 175,
+          "refined": -175
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -175,
+          "depth": 223,
+          "refined": -223
+        }
+      ],
+      "oracle_offset": 1228800
+    },
+    {
+      "file": "multicu-iv-128-1-24-4-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 24,
+      "scale": 4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 8,
+          "depth": 236,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 8,
+          "depth": 243,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 7,
+          "depth": 200,
+          "refined": 6
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 6,
+          "depth": 168,
+          "refined": 5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 5,
+          "depth": 254,
+          "refined": 8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 7,
+          "depth": 211,
+          "refined": 7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 7,
+          "depth": 225,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 7,
+          "depth": 232,
+          "refined": 7
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 5,
+          "depth": 129,
+          "refined": 4
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 4,
+          "depth": 229,
+          "refined": 7
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 7,
+          "depth": 243,
+          "refined": 8
+        }
+      ],
+      "oracle_offset": 1277952
+    },
+    {
+      "file": "multicu-iv-128-1-24--4-0.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 24,
+      "scale": -4,
+      "offset": 0,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -8
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -7,
+          "depth": 172,
+          "refined": -5
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -5,
+          "depth": 147,
+          "refined": -5
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -7,
+          "depth": 229,
+          "refined": -7
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -7,
+          "depth": 236,
+          "refined": -7
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -7,
+          "depth": 204,
+          "refined": -6
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -5
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -5,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -8,
+          "depth": 247,
+          "refined": -8
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -8,
+          "depth": 215,
+          "refined": -7
+        }
+      ],
+      "oracle_offset": 1327104
+    },
+    {
+      "file": "multicu-iv-128-1-24-16--3.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 24,
+      "scale": 16,
+      "offset": -3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": 26,
+          "depth": 139,
+          "refined": 11
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": 11,
+          "depth": 250,
+          "refined": 25
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": 25,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": 21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": 21,
+          "depth": 221,
+          "refined": 22
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": 22,
+          "depth": 196,
+          "refined": 19
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": 19,
+          "depth": 254,
+          "refined": 26
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": 23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": 23,
+          "depth": 239,
+          "refined": 24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": 24,
+          "depth": 253,
+          "refined": 26
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": 26,
+          "depth": 182,
+          "refined": 17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": 13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": 13,
+          "depth": 143,
+          "refined": 12
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": 12,
+          "depth": 243,
+          "refined": 24
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": 24,
+          "depth": 190,
+          "refined": 18
+        }
+      ],
+      "oracle_offset": 1376256
+    },
+    {
+      "file": "multicu-iv-128-1-24--16-3.mp4",
+      "size": 128,
+      "direct": true,
+      "cut": 24,
+      "scale": -16,
+      "offset": 3,
+      "blocks": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": 0,
+          "depth": 254,
+          "refined": -26
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": -26,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": -24,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": 0,
+          "depth": 218,
+          "refined": -21
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": -21,
+          "depth": 151,
+          "refined": -13
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": -13,
+          "depth": 133,
+          "refined": -11
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": -11,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": 0,
+          "depth": 229,
+          "refined": -23
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": -23,
+          "depth": 240,
+          "refined": -24
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": -24,
+          "depth": 208,
+          "refined": -20
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": -20,
+          "depth": 183,
+          "refined": -17
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": 0,
+          "depth": 154,
+          "refined": -13
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": -13,
+          "depth": 233,
+          "refined": -23
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": -23,
+          "depth": 219,
+          "refined": -21
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": -21,
+          "depth": 240,
+          "refined": -24
+        }
+      ],
+      "oracle_offset": 1425408
+    }
+  ]
+}

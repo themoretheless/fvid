@@ -1,0 +1,47 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0036"
+  ],
+  "checked_at": "2026-10-15T08:29:39.445895+00:00",
+  "before": {
+    "failed": 1,
+    "evidence": "evidence/batch-014-rgb-cas-before.log",
+    "cause": "Native RGB export rejects the authored CAS request while the same files decode and geometry/color export controls pass."
+  },
+  "qualification": [
+    "Native contrast-adaptive sharpening now runs after geometry and negate, before color curves.",
+    "Separate opacity uses the CAS alpha bit8; RGB G/B/R bits1/2/4 preserve channel ordering. No public interface changed.",
+    "Twenty short authored clips include added smooth gradients. Zero-plane identity and nontrivial RGB/opacity changes are asserted; all mask and coded-depth variants match qualified packed RGBA kernels.",
+    "YUV444A alpha-only sharpening preserves color. Native software playback verifies exact filtered pixels, clocks, seek, rewind and EOF.",
+    "Invalid settings, packet count, packet bytes and controlled-memory limits fail without publishing output. Ordinary tests use saved fixtures without FFmpeg or network."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-014-rgb-cas-owner-complete.log",
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-014-rgb-cas-root-final.log",
+      "passed": 17,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-014-rgb-cas-kernel.log",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-014-rgb-cas-player-check.log",
+      "status": "passed"
+    },
+    {
+      "log": "evidence/batch-014-rgb-cas-fixtures.log",
+      "python_passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 32,
+  "remaining": [],
+  "counting": "One spatial sharpening integration capability, including its separate-opacity channel semantics; fixture/mask/depth variants do not add IDs."
+}

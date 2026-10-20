@@ -13,7 +13,7 @@ pub fn probe(path: &Path) -> Result<MediaInfo, String> {
     probe_as(path, None)
 }
 
-/// Inspect owned MP4/MOV, Matroska/WebM, RIFF/WAVE PCM, AAC-LC ADTS or Y4M.
+/// Inspect owned MP4/MOV, Matroska/WebM, WAVE, bare MPEG audio/FLAC, ADTS or Y4M.
 /// Format hints never override the signature or bypass container validation.
 pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> {
     match format {
@@ -21,6 +21,8 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> 
         Some("webm" | "matroska" | "matroska,webm") => return crate::owned_webm_probe::probe_webm(path),
         Some("wav") => return probe_wave(path).map_err(|e| e.to_string()),
         Some("aac") => return probe_adts(path),
+        Some("flac") => return crate::owned_flac_probe::probe_flac(path),
+        Some("mp1" | "mp2" | "mp3" | "mpeg_audio") => return crate::owned_mpeg_probe::probe_mpeg(path),
         Some("y4m" | "yuv4mpegpipe") => return crate::owned_y4m_probe::probe_y4m(path),
         Some(_) => return Err("format has no owned media-library probe yet".into()),
         None => {}
@@ -36,6 +38,10 @@ pub fn probe_as(path: &Path, format: Option<&str>) -> Result<MediaInfo, String> 
     if crate::owned_mp4::recognizes_prefix(&signature[..8]) { return crate::owned_mp4_probe::probe_mp4(path); }
     if signature[..4] == [0x1a, 0x45, 0xdf, 0xa3] {
         return crate::owned_webm_probe::probe_webm(path);
+    }
+    if signature.starts_with(b"fLaC") {return crate::owned_flac_probe::probe_flac(path);}
+    if crate::owned_mpeg_audio::has_signature(&signature) {
+        return crate::owned_mpeg_probe::probe_mpeg(path);
     }
     let mut prefix = [0; 7];
     let mut file = File::open(path).map_err(|e| e.to_string())?;

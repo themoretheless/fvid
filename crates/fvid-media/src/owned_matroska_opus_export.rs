@@ -18,8 +18,10 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
         Default::default(),
     )
     .map_err(|e| e.to_string())?;
+    let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
     Ok(reader.tracks.iter().enumerate().any(|(index, t)| {
-        (options.streams.is_empty() || options.streams.contains(&index))
+        ((options.streams.is_empty() && preferred.contains(&t.number))
+            || options.streams.contains(&index))
             && t.kind == 2
             && t.codec == "A_OPUS"
     }))
@@ -68,11 +70,11 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels) = geometry(source, options)?;
+    let (rate, channels, mask) = geometry_with_mask(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
-        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+        mask,
         options,
         |writer, options| {
             crate::owned_matroska_opus::decode_matroska_opus_pcm(
@@ -88,6 +90,10 @@ pub(crate) fn apply(
 }
 
 pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+    geometry_with_mask(source, options).map(|(rate, channels, _)| (rate, channels))
+}
+
+fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
@@ -97,11 +103,12 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let index = match options.streams.as_slice() {
         [index] => *index,
         [] => {
+            let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
             let indices: Vec<_> = reader
                 .tracks
                 .iter()
                 .enumerate()
-                .filter_map(|(i, t)| (t.kind == 2).then_some(i))
+                .filter_map(|(i, t)| (t.kind == 2 && preferred.contains(&t.number)).then_some(i))
                 .collect();
             if indices.len() != 1 {
                 return Err("select exactly one audio stream".into());
@@ -116,12 +123,11 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
         .tracks
         .get(index)
         .ok_or("selected audio stream is absent")?;
-    let decoder = crate::owned_opus::OpusDecoder::new(
-        &track.codec_private,
-        u32::try_from(track.sample_rate).map_err(|_| "Opus rate overflow")?,
-        u16::try_from(track.channels).map_err(|_| "Opus channel overflow")?,
-    )
-    .map_err(|e| e.to_string())?;
-    let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-    Ok((rate, channels))
+    let rate = u32::try_from(track.sample_rate).map_err(|_| "Opus rate overflow")?;
+    let channels = u16::try_from(track.channels).map_err(|_| "Opus channel overflow")?;
+    // Qualify geometry without allocating a complete decoder solely to probe it.
+    crate::owned_opus::OpusDecoder::decode_admission_bytes(&track.codec_private, rate, channels)?;
+    let head = fvid_opus::OpusHead::parse(&track.codec_private).map_err(|e| e.to_string())?;
+    let mask = head.wave_channel_mask().unwrap_or(0);
+    Ok((rate, channels, mask))
 }

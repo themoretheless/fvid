@@ -1,0 +1,62 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0040"
+  ],
+  "checked_at": "2026-10-15T09:17:47.284066+00:00",
+  "source_sha256": "74880d342623575e283d4fb76ccabbfa56aa411ddc5bb19d5794aaa1da3d1c10",
+  "before": {
+    "control_passed": 1,
+    "acceptance_failed": 1,
+    "cause": "Valid equal-depth authored MBAFF controls decode; y8/c10 mixed-depth intra PCM is specifically refused as unconnected, before sample reconstruction.",
+    "evidence": "evidence/batch-018-mbaff-depth-before-acceptance.log"
+  },
+  "qualification": [
+    "128 authored16x32 two-frame40ms clips cover luma/chroma8/10/12/14, frame/field macroblock pairs, CAVLC PCM/DC, enabled loop filtering and CABAC PCM. Exact per-component arrays are independent author oracles.",
+    "Remove the intra-only equal-depth guard. Existing per-component reconstruction already preserves precision; MBAFF loop filtering now receives each plane depth.",
+    "Native MP4 software playback checks raw components exactly, analytic BT601 RGB within1 code value, exact50Hz clocks, seek, rewind and EOF.",
+    "Sixteen edge-precision exported clips verify lossless horizontal flip, exact promoted component samples,14-bit FFV1 output and20ms packet times.",
+    "Four authored inter-reference companion videos remain explicit refusal tests for unsupported mixed-depth MBAFF inter reconstruction. This change does not claim that capability.",
+    "Truncation, decoder error/reset recovery and lazy memory-admission refusal pass. Ordinary tests use saved samples without encoder/network.",
+    "An initial test expected budget refusal at construction; corrected to the actual lazy decode admission boundary. No production fix counted for that test authoring error."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-018-mbaff-depth-root-cabac-final.log",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-018-mbaff-depth-kernel-retry.log",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-018-mbaff-depth-related-integrations.log",
+      "passed": 50,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-018-mbaff-depth-player-check.log",
+      "status": "passed"
+    },
+    {
+      "log": "evidence/batch-018-mbaff-depth-fixtures-cabac-final.log",
+      "python_passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 59,
+  "baseline_environment_failure": {
+    "cause": "No space left on device during two builds. Removed only this task temporary incremental compiler cache; preserved checkout/fixtures/evidence. Nonincremental retries passed.",
+    "failed_logs": [
+      "evidence/batch-018-mbaff-depth-kernel.log",
+      "evidence/batch-018-mbaff-depth-root-complete.log"
+    ]
+  },
+  "remaining": [],
+  "limitations": [
+    "Mixed-component-depth MBAFF inter reconstruction remains unsupported; guarded refusal verified.",
+    "New authored mixed-depth fixtures qualify PCM/DC and filter admission; existing independent JM references qualify the broader equal-depth MBAFF paths."
+  ],
+  "counting": "One useful intra MBAFF independent-component precision capability.128 fixtures, entropy/layout/depth variants and regressions add no IDs."
+}

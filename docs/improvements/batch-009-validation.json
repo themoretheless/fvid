@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "candidate_ids": [
+    "FVID-0031"
+  ],
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc8794.html#section-13"
+  ],
+  "before": {
+    "passed": 1,
+    "failed": 3,
+    "evidence": "evidence/batch-009-text-before.log"
+  },
+  "remaining": [],
+  "accepted_ids": [
+    "FVID-0031"
+  ],
+  "checked_at": "2026-10-15T05:19:22.732592+00:00",
+  "distinct_rust_tests_passed": 60,
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --test matroska_text_termination_regressions --test matroska_empty_pose_regressions --test matroska_header_stripping_regressions",
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_text_termination_playback --test ebml_io_regressions --test ffv1_reordered_trim",
+      "passed": 9,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib webm",
+      "passed": 36,
+      "failed": 0
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p 'test_matroska*regressions.py'",
+      "passed": 5,
+      "failed": 0
+    }
+  ],
+  "qualification": [
+    "Eight accepted authored VP9 video cases cover original control, terminated DocType, CodecID, Unicode track names and optional metadata; each passes native pixels, clocks, seek, rewind and EOF.",
+    "Strict UTF-8 validation ignores bytes only after the first NUL. Invalid bytes before it remain rejected. Lossy metadata and chapter titles discard suffix padding too.",
+    "Stored element length still controls resource admission; an early NUL does not bypass the byte limit. Retained string capacities remain included in existing index accounting.",
+    "Software playback verified; player configuration type-checks. No hardware runtime or performance claim."
+  ],
+  "counting": "One EBML semantic-string termination bug; all field/UTF-8/padding variants are grouped under this ID.",
+  "source_hashes": {
+    "crates/fvid-media/src/owned_ebml_impl.rs": "633aa36ee9afcb14a78e66a771f04b447655aabd314a931f137eb7d163785477",
+    "crates/fvid-media/src/owned_matroska_metadata_read_impl.rs": "13bfc370f9eef14515db1cadf3870a37558461d2aa835e45c3af3510e54341d5",
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "5e393e2892d220c2c05b4f611a49485923f060b4f910e9d46ca85d72312376b7",
+    "crates/fvid-media/tests/matroska_text_termination_regressions.rs": "d2593655af8f3188918c298b02e1ac1499b08f5d4966bd57bc4ccb8664ee32a1",
+    "tests/matroska_text_termination_playback.rs": "689e752b42031d1c3f6ea37ca4301354a51a6530657b53a118da626f5112adef",
+    "scripts/generate_matroska_text_termination_regressions.py": "4195552dd18ce78c8ab488f9bb60caf27b10b8e50f0b5eaf8df336a2b96fe155"
+  }
+}

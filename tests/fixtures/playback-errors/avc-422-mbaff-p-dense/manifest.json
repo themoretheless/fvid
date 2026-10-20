@@ -1,0 +1,1538 @@
+[
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-frame-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-field-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-columns-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y8-c8-checker-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 8,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-frame-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-field-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-columns-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y10-c12-checker-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 10,
+    "chroma_depth": 12,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-frame-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "frame",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-field-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "field",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-columns-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "columns",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n0-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n0-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n0-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n0-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": false,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n1-crop0-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n1-crop0-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n1-crop1-a0",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": false,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "422-mbaff-dense-y14-c8-checker-n1-crop1-a1",
+    "format": 2,
+    "luma_depth": 14,
+    "chroma_depth": 8,
+    "cabac": false,
+    "topology": "checker",
+    "negative": true,
+    "aso": true,
+    "crop": [
+      2,
+      2,
+      2,
+      2
+    ]
+  }
+]

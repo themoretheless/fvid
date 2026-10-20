@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0059"
+  ],
+  "checked_at": "2026-10-15T20:04:14.626021+00:00",
+  "before": [
+    "evidence/batch-035-pacing-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-035-audio-thread-final.log",
+      "kind": "rust",
+      "passed": 27
+    },
+    {
+      "log": "evidence/batch-035-cpal-final.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-035-minimal-final.log",
+      "kind": "rust",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-035-audio-fixtures.log",
+      "kind": "python",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-035-player-build-final.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored1.4s video decodes70 frames, actual production callback emits960 expected48kHz samples. Before fix public position remains0 despite20ms backend progress; after fix public position reaches20ms within100ms during original482ms wait.",
+    "Elapsed wall time preserves original pacing deadline. Commands still interrupt wait immediately; existing pause/seek/rewind/stop tests pass.",
+    "Fixtures generate separately without encoder/network/private media. Existing generator defaults remain byte exact. No physical-device or OS scheduling guarantee claimed.",
+    "Pacing still uses a fixed source-duration wait; altered-rate refill is a separate unqualified audit candidate."
+  ],
+  "counting": "One stale public-clock defect; fixtures/test variants count0."
+}

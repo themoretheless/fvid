@@ -34,7 +34,8 @@ pub fn prepare<'a>(
             1 | 5 => {}
             _ => return Err(invalid("unsupported in-band AVC NAL")),
         }
-        if slices.len() >= count as usize {
+        let plane_count = if sps.separate_colour_plane { 3 } else { 1 };
+        if slices.len() >= (count as usize).saturating_mul(plane_count) {
             return Err(invalid("too many AVC slices for picture"));
         }
         let header = SliceHeader::parse(nal, sps, pps)?;
@@ -49,7 +50,7 @@ pub fn prepare<'a>(
                 || header.bottom_field != first.bottom_field
                 || header.idr != first.idr
                 || header.idr_pic_id != first.idr_pic_id
-                || header.colour_plane_id != first.colour_plane_id
+                || (!sps.separate_colour_plane && header.colour_plane_id != first.colour_plane_id)
                 || header.poc_lsb != first.poc_lsb
                 || header.delta_poc_bottom != first.delta_poc_bottom
                 || header.delta_poc != first.delta_poc
@@ -81,11 +82,22 @@ pub fn prepare<'a>(
     {
         return Err(invalid("AVC uniform slice type promise violated"));
     }
-    slices.sort_unstable_by_key(|slice| slice.header.first_mb);
+    if sps.separate_colour_plane
+        && (0..3).any(|plane| !slices.iter().any(|slice| slice.header.colour_plane_id == plane))
+    {
+        return Err(invalid("AVC access unit is missing a colour plane"));
+    }
+    slices.sort_unstable_by_key(|slice| (slice.header.colour_plane_id, slice.header.first_mb));
     if slices.first().is_some_and(|s| s.header.first_mb != 0) {
         return Err(invalid("AVC access unit must cover macroblock zero"));
     }
     for index in 0..slices.len().saturating_sub(1) {
+        if slices[index].header.colour_plane_id != slices[index + 1].header.colour_plane_id {
+            if slices[index + 1].header.first_mb != 0 {
+                return Err(invalid("AVC colour plane must cover macroblock zero"));
+            }
+            continue;
+        }
         let end = slices[index + 1].header.first_mb;
         if slices[index].header.first_mb == end {
             return Err(invalid("AVC slice macroblock addresses overlap"));

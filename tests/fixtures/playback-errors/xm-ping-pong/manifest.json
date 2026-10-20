@@ -1,0 +1,43 @@
+{
+  "provenance": "Five authored signed16loops compare ping-pong with independently unfolded forward data,excluding repeated turn endpoints. Loop prefixes,length1/3/32/64andhigh pitch;five rows include release. Independent PCM tolerance1e-6allows floating fold arithmetic. Native VP9/PCM companion,no private data/encoder/network.",
+  "cases": [
+    {
+      "name": "loop-0-64-49",
+      "file": "loop-0-64-49.xm",
+      "control": "loop-0-64-49-forward.xm"
+    },
+    {
+      "name": "loop-8-32-49",
+      "file": "loop-8-32-49.xm",
+      "control": "loop-8-32-49-forward.xm"
+    },
+    {
+      "name": "loop-0-3-49",
+      "file": "loop-0-3-49.xm",
+      "control": "loop-0-3-49-forward.xm"
+    },
+    {
+      "name": "loop-0-64-96",
+      "file": "loop-0-64-96.xm",
+      "control": "loop-0-64-96-forward.xm"
+    },
+    {
+      "name": "loop-0-1-49",
+      "file": "loop-0-1-49.xm",
+      "control": "loop-0-1-49-forward.xm"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "loop-0-64-49.xm": "71326083b2b2c1ee6982607e3f9ca7f2419335b1d6f9e130d178fe980ce20635",
+    "loop-0-64-49-forward.xm": "aafcef5933fe5d03a92ad67a3ddc9728bd3fe663e5e61c326f6538ed92abac6c",
+    "loop-8-32-49.xm": "8003d7fc8538e7e682dfa6ca670dec886055cec3472fc1369e85f44974e3f4e0",
+    "loop-8-32-49-forward.xm": "eeda86a996f2104aeff0a772b2ea1a6a20ff0de6a785e888a918025cb949b63f",
+    "loop-0-3-49.xm": "07a8e5085ad890d0a8452251d23355d2bcf89536f58684847977cbab2328f91b",
+    "loop-0-3-49-forward.xm": "57807279b1aaac9306d8fc17384df2c0c2e5ceb803aacc64be2f884c38ef4e1f",
+    "loop-0-64-96.xm": "3f1897a56176187ed28d12f55c11cc5e83ba430486bd6d1813adb320b5d3ab7d",
+    "loop-0-64-96-forward.xm": "c964e687bc296e3590b79f35355921aac6913afd7e93e1929634dcfbfee40104",
+    "loop-0-1-49.xm": "81875a8492cbcf45cccd6e25cc60e5ecdcd32a0b0384568e83b74c7f4b7a7d5e",
+    "loop-0-1-49-forward.xm": "cecfe6eb2799ba20ec93282f01ff8d64da5589cef58f48cc819e1099abbcc51b"
+  }
+}

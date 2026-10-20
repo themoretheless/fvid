@@ -1,0 +1,122 @@
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 10 warnings
+   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
+error[E0308]: mismatched types
+   --> crates/fvid-media/src/owned_ogg_joint_export.rs:119:22
+    |
+119 |         sample_rate: program.sample_rate(),
+    |                      ^^^^^^^^^^^^^^^^^^^^^ expected `i32`, found `u32`
+
+error[E0063]: missing fields `decode_errors`, `planar_interleave_bytes` and `sample_format` in initializer of `fvid_media_info::AudioDecodeStats`
+   --> crates/fvid-media/src/owned_ogg_joint_export.rs:116:8
+    |
+116 |     Ok(AudioDecodeStats {
+    |        ^^^^^^^^^^^^^^^^ missing `decode_errors`, `planar_interleave_bytes` and `sample_format`
+
+error[E0308]: mismatched types
+   --> crates/fvid-media/src/owned_ogg_joint_export.rs:147:32
+    |
+147 |         move |writer, options| decode(&mut program, writer, until, options),
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `owned_aac::stream::AudioDecodeStats`, found `fvid_media_info::AudioDecodeStats`
+    |
+    = note: `fvid_media_info::AudioDecodeStats` and `owned_aac::stream::AudioDecodeStats` have similar names, but are actually distinct types
+note: `fvid_media_info::AudioDecodeStats` is defined in crate `fvid_media_info`
+   --> crates/fvid-media-info/src/lib.rs:118:1
+    |
+118 | pub struct AudioDecodeStats {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: `owned_aac::stream::AudioDecodeStats` is defined in the current crate
+   --> crates/fvid-media/src/owned_aac/stream.rs:13:1
+    |
+ 13 | pub struct AudioDecodeStats {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:325:5
+    |
+325 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+error[E0308]: mismatched types
+   --> crates/fvid-media/src/owned_ogg_joint_export.rs:120:19
+    |
+120 |         channels: program.channels(),
+    |                   ^^^^^^^^^^^^^^^^^^ expected `i32`, found `u16`
+
+Some errors have detailed explanations: E0063, E0308.
+For more information about an error, try `rustc --explain E0063`.
+warning: `fvid-media` (lib) generated 1 warning
+error: could not compile `fvid-media` (lib) due to 4 previous errors; 1 warning emitted

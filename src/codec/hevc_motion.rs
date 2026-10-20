@@ -6,6 +6,30 @@ use super::{
 };
 use crate::{Result, invalid};
 use std::sync::Arc;
+#[path = "hevc_texture_motion.rs"]
+pub mod texture;
+#[path = "hevc_inter_view_motion.rs"]
+pub mod inter_view;
+#[path = "hevc_inter_view_candidate.rs"]
+pub mod inter_view_candidate;
+#[path = "hevc_view_synthesis.rs"]
+pub mod view_synthesis;
+#[path = "hevc_illumination.rs"]
+pub mod illumination;
+#[path = "hevc_dbbp.rs"]
+pub mod dbbp;
+#[path = "hevc_inter_view_residual.rs"]
+pub mod inter_view_residual;
+#[path = "hevc_merge_order.rs"]
+pub mod merge_order;
+#[path = "hevc_subblock_motion.rs"]
+pub mod subblock_motion;
+#[path = "hevc_texture_inter_view.rs"]
+pub mod texture_inter_view;
+#[path = "hevc_depth_inter_view.rs"]
+pub mod depth_inter_view;
+#[path = "hevc_disparity.rs"]
+pub mod disparity;
 #[derive(Clone)]
 pub struct Reference {
     pub layer_id: u8,
@@ -20,6 +44,17 @@ struct View<'a> {
     planes: &'a [super::hevc_plane::Plane; 3],
 }
 impl Reference {
+    /// Annex I candidate metadata comes from the decoded source, not from the
+    /// current slice or guessed temporal/IRAP defaults.
+    pub fn disparity_metadata(&self,graph:&super::hevc_vps_extension::LayerDependencyPrefix)->Result<disparity::CandidatePicture> {
+        let picture=self.picture.as_ref().ok_or_else(||invalid("HEVC disparity candidate picture is not completed"))?;
+        let nal=picture.nal_header();
+        if !nal.is_vcl() || nal.temporal_id>6 || nal.layer_id!=self.layer_id {
+            return Err(invalid("HEVC disparity candidate NAL identity disagrees with reference"));
+        }
+        Ok(disparity::CandidatePicture {view_index:graph.view_index(self.layer_id)?,
+            temporal_id:nal.temporal_id,irap:nal.is_irap(),poc:self.poc})
+    }
     pub fn identity(&self) -> super::hevc_reference_list::PictureIdentity {
         super::hevc_reference_list::PictureIdentity {layer_id:self.layer_id,poc:self.poc}
     }
@@ -49,9 +84,21 @@ impl Reference {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Vector {
     pub reference: u8,
-    pub mv: [i16; 2],
+    /// Retained quarter-sample motion, including unclipped camera-derived DI.
+    /// Ordinary coded MVD still wraps at its normative signed-16-bit boundary.
+    pub mv: [i64; 2],
 }
 pub type Motion = [Option<Vector>; 2];
+/// Texture selection carries its sub-block state separately; flattening it to
+/// a single ordinary vector would lose motion boundaries and default fallback.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Resolved {
+    Ordinary(Motion),
+    InterView(Motion),
+    InterViewShift(Motion),
+    ViewSynthesis,
+    Texture,
+}
 /// Preserve the referenced POC when publishing slice-local motion indices in a
 /// picture-wide map used by deblocking and later temporal prediction.
 pub(crate) fn remap_references<T: PartialEq>(
@@ -90,7 +137,15 @@ impl Spatial<'_> {
         header: &SliceHeader,
         list: usize,
         reference: u8,
-    ) -> Result<Option<[i16; 2]>> {
+        depth: bool,
+        annex: Option<inter_view::Context<'_>>,
+    ) -> Result<Option<[i64; 2]>> {
+        Ok(self.temporal_candidate(header,list,reference,depth,annex,false)?.map(|v|v.mv))
+    }
+    fn temporal_candidate(
+        &self,header:&SliceHeader,list:usize,reference:u8,depth:bool,
+        annex:Option<inter_view::Context<'_>>,allow_alternative:bool,
+    )->Result<Option<Vector>> {
         let collocated = self.lists[header.collocated_list]
             .get(header.collocated_ref as usize)
             .ok_or_else(|| invalid("HEVC collocated reference is missing"))?;
@@ -131,26 +186,43 @@ impl Spatial<'_> {
             let source_poc = *p.reference_pocs[source_list]
                 .get(vector.reference as usize)
                 .ok_or_else(|| invalid("HEVC collocated motion has invalid reference"))?;
-            let target = self.lists[list]
-                .get(reference as usize)
-                .ok_or_else(|| invalid("HEVC temporal target reference is missing"))?;
             let source_layer = *p.reference_layers[source_list]
                 .get(vector.reference as usize)
                 .ok_or_else(|| invalid("HEVC collocated reference layer is missing"))?;
-            if source_layer>62 || target.layer_id>62 { return Err(invalid("HEVC temporal reference layer out of range")); }
             let source_long = *p.reference_long_term[source_list]
                 .get(vector.reference as usize)
                 .ok_or_else(|| invalid("HEVC collocated reference classification is missing"))?;
+            let mut selected_reference=reference;
+            let mut target=self.lists[list].get(reference as usize)
+                .ok_or_else(||invalid("HEVC temporal target reference is missing"))?;
+            // I-57 and I-120..I-124 apply only to Annex I temporal merge.
+            // Keep the selected index with its vector; AMVP cannot change its
+            // explicitly coded reference and must retain base unavailability.
+            if allow_alternative && annex.is_some() && reference==0
+                && source_long!=target.long_term
+            {
+                if let Some((index,alternative))=self.lists[list].iter()
+                    .take(header.references[list]as usize).enumerate().skip(1)
+                    .find(|(_,r)|r.long_term!=target.long_term)
+                {
+                    selected_reference=index as u8;
+                    target=alternative;
+                }
+            }
+            if source_layer>62 || target.layer_id>62 { return Err(invalid("HEVC temporal reference layer out of range")); }
             // 8.5.3.2.9 also admits current-picture references: matching
             // long-term vectors transfer unchanged, even with zero POC distance.
-            if let Some(mv) = reference_predictor(
-                vector.mv,
-                collocated.poc.saturating_sub(source_poc),
-                self.poc.saturating_sub(target.poc),
-                source_long,
-                target.long_term,
-            )? {
-                return Ok(Some(mv));
+            let predicted=if let Some(context)=annex {
+                context.predict(vector.mv,[collocated.layer_id,header.nal.layer_id],
+                    [source_layer,target.layer_id],
+                    [collocated.poc.saturating_sub(source_poc),self.poc.saturating_sub(target.poc)],
+                    [source_long,target.long_term],
+                    if depth {inter_view::Domain::IntegerDepth}else{inter_view::Domain::QuarterSample})?
+            }else{reference_predictor_domain(vector.mv,
+                collocated.poc.saturating_sub(source_poc),self.poc.saturating_sub(target.poc),
+                source_long,target.long_term,depth)?};
+            if let Some(mv) = predicted {
+                return Ok(Some(Vector{reference:selected_reference,mv}));
             }
         }
         Ok(None)
@@ -161,6 +233,81 @@ impl Spatial<'_> {
         header: &SliceHeader,
         at: impl Fn(i32, i32) -> Option<Motion>,
     ) -> Result<Motion> {
+        match self.resolve_with_texture(syntax, header, at, None)? {
+            Resolved::Ordinary(motion) => Ok(motion),
+            Resolved::Texture | Resolved::ViewSynthesis | Resolved::InterView(_) | Resolved::InterViewShift(_) => Err(invalid("unexpected HEVC layered merge in ordinary prediction")),
+        }
+    }
+    /// `texture` is the default sub-block candidate expressed in the same
+    /// motion/reference-index domain as the initial depth merge list. The
+    /// caller retains the full sub-block arrays when Texture is selected.
+    pub fn resolve_with_texture(
+        &self,
+        syntax: Prediction,
+        header: &SliceHeader,
+        at: impl Fn(i32, i32) -> Option<Motion>,
+        texture: Option<Motion>,
+    ) -> Result<Resolved> {
+        self.resolve_domain(syntax,header,at,texture,false,None)
+    }
+    pub fn resolve_depth_with_texture(
+        &self, syntax: Prediction, header: &SliceHeader,
+        at: impl Fn(i32,i32)->Option<Motion>, texture: Option<Motion>,
+    ) -> Result<Resolved> {
+        self.resolve_domain(syntax,header,at,texture,true,None)
+    }
+    /// Native layered owner retains VPS view context for temporal merge,
+    /// including shared-CU recursion. Explicit AMVP uses base collocated rules.
+    pub fn resolve_layered(
+        &self, syntax:Prediction, header:&SliceHeader,
+        at:impl Fn(i32,i32)->Option<Motion>, texture:Option<Motion>,
+        context:&super::hevc_slice::LayeredSliceContext<'_>,
+    )->Result<Resolved> {
+        self.resolve_layered_with_iv(syntax,header,at,texture,None,context)
+    }
+    /// Native depth IV returns one ordinary motion; texture IV uses its separate
+    /// sub-block publication and is not admitted by this depth-only route.
+    pub fn resolve_layered_with_iv(
+        &self,syntax:Prediction,header:&SliceHeader,at:impl Fn(i32,i32)->Option<Motion>,
+        texture:Option<Motion>,iv:Option<Motion>,context:&super::hevc_slice::LayeredSliceContext<'_>,
+    )->Result<Resolved> {
+        if header.nal.layer_id!=context.sps.layer_id {
+            return Err(invalid("HEVC motion layer disagrees with SPS binding"));
+        }
+        self.resolve_domain_with_iv(syntax,header,at,texture,context.sps.sps.depth_layer,
+            inter_view::Context::from_layered(context)?,iv)
+    }
+    pub fn resolve_texture_layered(
+        &self,syntax:Prediction,header:&SliceHeader,at:impl Fn(i32,i32)->Option<Motion>,
+        special:&merge_order::Specials<'_,Motion>,context:&super::hevc_slice::LayeredSliceContext<'_>,
+    )->Result<Resolved> {
+        if context.sps.sps.depth_layer || header.nal.layer_id!=context.sps.layer_id
+            || special.depth || special.texture.is_some() {
+            return Err(invalid("invalid HEVC texture merge binding"));
+        }
+        self.resolve_extended_domain(syntax,header,at,None,false,inter_view::Context::from_layered(context)?,None,Some(special))
+    }
+    fn resolve_domain(
+        &self, syntax: Prediction, header: &SliceHeader,
+        at: impl Fn(i32,i32)->Option<Motion>, texture: Option<Motion>, depth: bool, annex:Option<inter_view::Context<'_>>,
+    ) -> Result<Resolved> {
+        self.resolve_domain_with_iv(syntax,header,at,texture,depth,annex,None)
+    }
+    fn resolve_domain_with_iv(
+        &self,syntax:Prediction,header:&SliceHeader,at:impl Fn(i32,i32)->Option<Motion>,
+        texture:Option<Motion>,depth:bool,annex:Option<inter_view::Context<'_>>,iv:Option<Motion>,
+    )->Result<Resolved> {
+        self.resolve_extended_domain(syntax,header,at,texture,depth,annex,iv,None)
+    }
+    fn resolve_extended_domain(
+        &self,syntax:Prediction,header:&SliceHeader,at:impl Fn(i32,i32)->Option<Motion>,
+        texture:Option<Motion>,depth:bool,annex:Option<inter_view::Context<'_>>,iv:Option<Motion>,
+        extended:Option<&merge_order::Specials<'_,Motion>>,
+    )->Result<Resolved> {
+        if iv==Some([None;2])||iv.is_some()&&!depth {return Err(invalid("invalid HEVC depth IV candidate"));}
+        if texture == Some([None; 2]) {
+            return Err(invalid("inactive HEVC texture candidate passed as available"));
+        }
         let [x, y, w, h] = self.rect.map(|v| v as i32);
         let sample = |xx, yy| {
             if self.partition == Partition::Quarters
@@ -190,7 +337,19 @@ impl Spatial<'_> {
                         part_index: 0,
                         ..*self
                     };
-                    return shared.resolve(syntax, header, at);
+                    // I-137: a 4x8/8x4 original PB selects the initial list even
+                    // when parallel merging derives it at the shared CU size.
+                    let mut result = shared.resolve_extended_domain(syntax, header, at,
+                        if w + h == 12 { None } else { texture }, depth, annex,
+                        if w+h==12 {None}else{iv},if w+h==12 {None}else{extended})?;
+                    // Restore the original PB restriction after shared-CU
+                    // derivation, whose 8x8 dimensions do not trigger it.
+                    if w + h == 12 {
+                        if let Resolved::Ordinary(motion) = &mut result {
+                            if motion.iter().all(Option::is_some) { motion[1] = None; }
+                        }
+                    }
+                    return Ok(result);
                 }
                 let mut raw = points.map(|[xx, yy]| {
                     if x >> self.merge_log2 == xx >> self.merge_log2
@@ -217,44 +376,54 @@ impl Spatial<'_> {
                 }
                 let mut candidates = Vec::with_capacity(5);
                 if let Some(v) = raw[0] {
-                    candidates.push(v);
+                    candidates.push((texture::MergeKind::A1, v));
                 }
                 if let Some(v) = raw[1] {
                     if raw[0] != Some(v) {
-                        candidates.push(v);
+                        candidates.push((texture::MergeKind::B1, v));
                     }
                 }
                 if let Some(v) = raw[2] {
                     if raw[1] != Some(v) {
-                        candidates.push(v);
+                        candidates.push((texture::MergeKind::B0, v));
                     }
                 }
                 if let Some(v) = raw[3] {
                     if raw[0] != Some(v) {
-                        candidates.push(v);
+                        candidates.push((texture::MergeKind::A0, v));
                     }
                 }
                 if let Some(v) = raw[4] {
                     if candidates.len() < 4 && raw[0] != Some(v) && raw[1] != Some(v) {
-                        candidates.push(v);
+                        candidates.push((texture::MergeKind::B2, v));
                     }
                 }
                 let max = header.max_merge_candidates as usize;
+                let mut temporal_index=None;
+                let mut temporal_references=[0;2];
                 if candidates.len() < max && header.temporal_mvp {
                     let mut temporal = [None; 2];
                     for list in 0..2 {
                         if header.references[list] > 0 {
                             temporal[list] = self
-                                .temporal(header, list, 0)?
-                                .map(|mv| Vector { reference: 0, mv });
+                                .temporal_candidate(header, list, 0, depth, annex, true)?;
+                            if let Some(vector)=temporal[list].as_mut() {
+                                temporal_references[list]=vector.reference;
+                                // I.8.5.3.2.7 step 9 publishes AltRefIdx only
+                                // if Col itself wins, not for combined entries.
+                                vector.reference=0;
+                            }
                         }
                     }
                     if temporal.iter().any(Option::is_some) {
-                        candidates.push(temporal);
+                        temporal_index=Some(candidates.len());
+                        candidates.push((texture::MergeKind::Other, temporal));
                     }
                 }
                 candidates.truncate(max);
-                if header.references[1] > 0 && candidates.len() < max {
+                // I.8.5.3.2.2 keeps the initial combination threshold at five,
+                // even when tex_mc permits a six-entry merge list.
+                if header.references[1] > 0 && candidates.len() < max && candidates.len() < 5 {
                     let original = candidates.len();
                     for [a, b] in [
                         [0, 1],
@@ -273,12 +442,12 @@ impl Spatial<'_> {
                     .into_iter()
                     .take(original * (original.saturating_sub(1)))
                     {
-                        if let (Some(l), Some(r)) = (candidates[a][0], candidates[b][1]) {
+                        if let (Some(l), Some(r)) = (candidates[a].1[0], candidates[b].1[1]) {
                             if self.lists[0][l.reference as usize].poc
                                 != self.lists[1][r.reference as usize].poc
                                 || l.mv != r.mv
                             {
-                                candidates.push([Some(l), Some(r)]);
+                                candidates.push((texture::MergeKind::Other, [Some(l), Some(r)]));
                             }
                         }
                         if candidates.len() == max {
@@ -297,12 +466,37 @@ impl Spatial<'_> {
                         reference: if zero < refs { zero } else { 0 },
                         mv: [0; 2],
                     };
-                    candidates.push([Some(v), (header.references[1] > 0).then_some(v)]);
+                    candidates.push((texture::MergeKind::Other, [Some(v), (header.references[1] > 0).then_some(v)]));
                     zero += 1;
                 }
-                let mut result = *candidates
-                    .get(index as usize)
-                    .ok_or_else(|| invalid("HEVC merge index out of range"))?;
+                if index as usize >= max { return Err(invalid("HEVC merge index out of range")); }
+                // Ordinary prediction keeps its allocation/order. Only active
+                // texture prediction constructs the normative extended list.
+                let mut selected_iv=0;
+                let (mut result,selected_initial)=if w+h!=12&&(texture.is_some()||iv.is_some()||extended.is_some()) {
+                    // T and the admitted IV route are depth-role tools. The legacy
+                    // texture entry point's `depth` only controls MV arithmetic.
+                    let special=merge_order::Specials {texture:texture.as_ref(),inter_view:iv.as_ref(),depth:true,..Default::default()};
+                    let special=extended.unwrap_or(&special);
+                    match merge_order::select(&candidates,special,max,index as usize,[w as u32,h as u32])? {
+                        merge_order::Selection::Initial(i)=>{
+                            if special.view_synthesis && special.left_view_synthesis && candidates[i].0==texture::MergeKind::A1 {return Ok(Resolved::ViewSynthesis);}
+                            (candidates[i].1,Some(i))
+                        },
+                        merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+                        merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+                        merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV candidate"))?,None)},
+                        merge_order::Selection::InterViewShift=>{selected_iv=2;(special.inter_view_shift.copied().ok_or_else(||invalid("missing selected HEVC IVShift candidate"))?,None)},
+                        merge_order::Selection::Disparity=>(special.disparity.copied().ok_or_else(||invalid("missing selected HEVC DI candidate"))?,None),
+                        merge_order::Selection::DisparityShift=>(special.disparity_shift.copied().ok_or_else(||invalid("missing selected HEVC DIShift candidate"))?,None),
+                        _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+                    }
+                }else{(candidates[index as usize].1,Some(index as usize))};
+                if temporal_index.is_some() && selected_initial==temporal_index {
+                    for (list,vector)in result.iter_mut().enumerate() {
+                        if let Some(vector)=vector {vector.reference=temporal_references[list];}
+                    }
+                }
                 for (list, vector) in result.iter_mut().enumerate() {
                     if let Some(v) = vector {
                         if header.use_integer_mv
@@ -315,7 +509,7 @@ impl Spatial<'_> {
                 if w + h == 12 && result.iter().all(Option::is_some) {
                     result[1] = None;
                 }
-                Ok(result)
+                Ok(match selected_iv {1=>Resolved::InterView(result),2=>Resolved::InterViewShift(result),_=>Resolved::Ordinary(result)})
             }
             Prediction::Explicit {
                 references,
@@ -335,7 +529,7 @@ impl Spatial<'_> {
                     };
                     let target = &self.lists[list][reference as usize];
                     let find =
-                        |neighbours: &[Option<Motion>], scaled: bool| -> Result<Option<[i16; 2]>> {
+                        |neighbours: &[Option<Motion>], scaled: bool| -> Result<Option<[i64; 2]>> {
                             for motion in neighbours.iter().flatten() {
                                 for l in [list, 1 - list] {
                                     if let Some(v) = motion[l] {
@@ -348,12 +542,12 @@ impl Spatial<'_> {
                                             return Ok(Some(v.mv));
                                         }
                                         if scaled {
-                                            return reference_predictor(
+                                            return reference_predictor_domain(
                                                 v.mv,
                                                 self.poc.saturating_sub(source.poc),
                                                 self.poc.saturating_sub(target.poc),
                                                 source.long_term,
-                                                target.long_term,
+                                                target.long_term, depth,
                                             );
                                         }
                                     }
@@ -383,7 +577,9 @@ impl Spatial<'_> {
                         }
                     }
                     if choices.len() < 2 && header.temporal_mvp {
-                        if let Some(mv) = self.temporal(header, list, reference)? {
+                        // I.8.5.3.2.5 routes explicit AMVP to base 8.5.3.2.9.
+                        // Numeric view-distance scaling belongs to merge only.
+                        if let Some(mv) = self.temporal(header, list, reference, depth, None)? {
                             choices.push(mv);
                         }
                     }
@@ -392,27 +588,38 @@ impl Spatial<'_> {
                     result[list] = Some(Vector {
                         reference,
                         mv: std::array::from_fn(|i| {
-                            add_motion_difference(
-                                predicted[i],
-                                differences[list][i],
-                                header.use_integer_mv
-                                    || self.lists[list][reference as usize].picture.is_none(),
-                            )
+                            if depth {
+                                add_depth_motion_difference(predicted[i], differences[list][i])
+                            } else {
+                                add_motion_difference(
+                                    predicted[i], differences[list][i],
+                                    header.use_integer_mv || self.lists[list][reference as usize].picture.is_none(),
+                                )
+                            }
                         }),
                     });
                 }
-                Ok(result)
+                Ok(Resolved::Ordinary(result))
             }
         }
     }
 }
+fn reference_predictor_domain(
+    mv: [i64;2], source: i32, target: i32, source_long: bool, target_long: bool, depth: bool,
+) -> Result<Option<[i64;2]>> {
+    if !depth { return reference_predictor(mv,source,target,source_long,target_long); }
+    let integer=texture::integer_motion([Some(Vector {reference:0,mv}),None])?[0].unwrap();
+    Ok(reference_predictor(integer.samples.map(i64::from),source,target,source_long,target_long)?
+        .map(|v|v.map(|x|x*4)))
+}
+
 fn reference_predictor(
-    mv: [i16; 2],
+    mv: [i64; 2],
     source: i32,
     target: i32,
     source_long: bool,
     target_long: bool,
-) -> Result<Option<[i16; 2]>> {
+) -> Result<Option<[i64; 2]>> {
     if source_long != target_long {
         return Ok(None);
     }
@@ -421,7 +628,7 @@ fn reference_predictor(
     }
     Ok(Some(scale(mv, source, target)?))
 }
-pub fn scale(mv: [i16; 2], source: i32, target: i32) -> Result<[i16; 2]> {
+pub fn scale(mv: [i64; 2], source: i32, target: i32) -> Result<[i64; 2]> {
     if source == target {
         return Ok(mv);
     }
@@ -433,8 +640,8 @@ pub fn scale(mv: [i16; 2], source: i32, target: i32) -> Result<[i16; 2]> {
     let tx = (16384 + (td.abs() >> 1)) / td;
     let factor = ((tb * tx + 32) >> 6).clamp(-4096, 4095);
     Ok(mv.map(|v| {
-        let product = factor * i32::from(v);
-        (product.signum() * ((product.abs() + 127) >> 8)).clamp(-32768, 32767) as i16
+        let product = i128::from(factor) * i128::from(v);
+        (product.signum() * ((product.abs() + 127) >> 8)).clamp(-32768, 32767) as i64
     }))
 }
 const LUMA: [[i32; 8]; 4] = [
@@ -469,7 +676,7 @@ fn interpolate_block_with_format(
     picture: View<'_>,
     c: usize,
     rect: [u32; 4],
-    mv: [i16; 2],
+    mv: [i64; 2],
     scratch: &mut [i32],
     output: &mut [i32],
     chroma_format: u8,
@@ -478,31 +685,31 @@ fn interpolate_block_with_format(
     let chroma = usize::from(c != 0);
     let shifts = component_shifts(c, chroma_format);
     let bits = shifts.map(|shift| 2 + shift);
-    let width = (picture.dimensions[0] >> shifts[0]) as i32;
-    let height = (picture.dimensions[1] >> shifts[1]) as i32;
+    let width = (picture.dimensions[0] >> shifts[0]) as i64;
+    let height = (picture.dimensions[1] >> shifts[1]) as i64;
     let samples = picture.planes[c].samples();
     let depth = picture.depth[chroma];
-    let x = x as i32 + (i32::from(mv[0]) >> bits[0]);
-    let y = y as i32 + (i32::from(mv[1]) >> bits[1]);
+    let x = x as i64 + (mv[0] >> bits[0]);
+    let y = y as i64 + (mv[1] >> bits[1]);
     let phase_shifts = shifts.map(|shift| usize::from(c != 0 && shift == 0));
-    let fx = ((i32::from(mv[0]) & ((1 << bits[0]) - 1)) as usize) << phase_shifts[0];
-    let fy = ((i32::from(mv[1]) & ((1 << bits[1]) - 1)) as usize) << phase_shifts[1];
+    let fx = ((mv[0] & ((1 << bits[0]) - 1)) as usize) << phase_shifts[0];
+    let fy = ((mv[1] & ((1 << bits[1]) - 1)) as usize) << phase_shifts[1];
     let filters = |f: usize| -> &[i32] { if c == 0 { &LUMA[f] } else { &CHROMA[f] } };
     let start = if c == 0 { -3 } else { -1 };
     let taps = if c == 0 { 8 } else { 4 };
     let extra = if fy == 0 { 0 } else { taps - 1 };
     if fx == 0 && fy == 0 {
         for row in 0..h {
-            let yy = (y + row as i32).clamp(0, height - 1) as usize;
+            let yy = (y + row as i64).clamp(0, height - 1) as usize;
             let source = &samples[yy * width as usize..(yy + 1) * width as usize];
             let out_row = &mut output[row * w..(row + 1) * w];
-            if x >= 0 && x as usize + w <= width as usize {
+            if x >= 0 && x <= width - w as i64 {
                 for (out, &value) in out_row.iter_mut().zip(&source[x as usize..x as usize + w]) {
                     *out = i32::from(value) << (14u8.saturating_sub(depth).max(2));
                 }
             } else {
                 for (col, out) in out_row.iter_mut().enumerate() {
-                    *out = i32::from(source[(x + col as i32).clamp(0, width - 1) as usize])
+                    *out = i32::from(source[(x + col as i64).clamp(0, width - 1) as usize])
                         << (14u8.saturating_sub(depth).max(2));
                 }
             }
@@ -513,17 +720,17 @@ fn interpolate_block_with_format(
     let horizontal = &mut scratch[..horizontal_len];
     horizontal.fill(0);
     for row in 0..h + extra {
-        let yy = (y + row as i32 + if fy == 0 { 0 } else { start }).clamp(0, height - 1);
+        let yy = (y + row as i64 + if fy == 0 { 0 } else { start }).clamp(0, height - 1);
         let source = &samples[yy as usize * width as usize..(yy as usize + 1) * width as usize];
         let target = &mut horizontal[row * w..(row + 1) * w];
         if fx == 0 {
-            if x >= 0 && x as usize + w <= width as usize {
+            if x >= 0 && x <= width - w as i64 {
                 for (out, &value) in target.iter_mut().zip(&source[x as usize..x as usize + w]) {
                     *out = i32::from(value) << (14u8.saturating_sub(depth).max(2));
                 }
             } else {
                 for (col, out) in target.iter_mut().enumerate() {
-                    *out = i32::from(source[(x + col as i32).clamp(0, width - 1) as usize])
+                    *out = i32::from(source[(x + col as i64).clamp(0, width - 1) as usize])
                         << (14u8.saturating_sub(depth).max(2));
                 }
             }
@@ -532,8 +739,8 @@ fn interpolate_block_with_format(
                 if weight == 0 {
                     continue;
                 }
-                let left = x + start + k as i32;
-                if left >= 0 && left as usize + w <= width as usize {
+                let left = x + start + k as i64;
+                if left >= 0 && left <= width - w as i64 {
                     fvid_cpu::hevc_fir_accumulate_u16(
                         target,
                         &source[left as usize..left as usize + w],
@@ -542,7 +749,7 @@ fn interpolate_block_with_format(
                 } else {
                     for (col, out) in target.iter_mut().enumerate() {
                         *out += weight
-                            * i32::from(source[(left + col as i32).clamp(0, width - 1) as usize]);
+                            * i32::from(source[(left + col as i64).clamp(0, width - 1) as usize]);
                     }
                 }
             }
@@ -618,6 +825,32 @@ pub(crate) fn predict_with_current(
     chroma_format: u8,
     current: Option<(&[super::hevc_plane::Plane; 3], [u8; 2])>,
 ) -> Result<Vec<u16>> {
+    predict_wide_with_current(lists,motion.map(|v|v.map(|v|view_synthesis::WideVector {
+        reference:v.reference,mv:v.mv.map(i64::from),
+    })),rect,component,depth,weights,scratch,chroma_format,current)
+}
+
+/// Pixel prediction with unclipped camera-derived vectors. Retained native
+/// motion uses the same coordinate width; coded MVD wrapping remains separate.
+pub fn predict_wide_with_chroma_format(
+    lists:&[Vec<Reference>;2],motion:view_synthesis::WideMotion,rect:[u32;4],
+    component:usize,depth:u8,weights:Option<&super::hevc_slice::Weights>,
+    scratch:&mut Vec<i32>,chroma_format:u8,
+)->Result<Vec<u16>> {
+    predict_wide_with_current(lists,motion,rect,component,depth,weights,scratch,chroma_format,None)
+}
+
+fn predict_wide_with_current(
+    lists: &[Vec<Reference>; 2],
+    motion: view_synthesis::WideMotion,
+    rect: [u32; 4],
+    component: usize,
+    depth: u8,
+    weights: Option<&super::hevc_slice::Weights>,
+    scratch: &mut Vec<i32>,
+    chroma_format: u8,
+    current: Option<(&[super::hevc_plane::Plane; 3], [u8; 2])>,
+) -> Result<Vec<u16>> {
     if component > 2
         || !(8..=16).contains(&depth)
         || (chroma_format > 3 || (chroma_format == 0 && component != 0))
@@ -672,8 +905,8 @@ pub(crate) fn predict_with_current(
                 return Err(invalid("HEVC current-picture luma vector is fractional"));
             }
             let start = [
-                i32::from(input.1[0]) >> (2 + shifts[0]),
-                i32::from(input.1[1]) >> (2 + shifts[1]),
+                input.1[0] >> (2 + shifts[0]),
+                input.1[1] >> (2 + shifts[1]),
             ];
             let phase = [
                 input.1[0] & ((1 << (2 + shifts[0])) - 1) != 0,
@@ -714,22 +947,22 @@ pub(crate) fn predict_with_current(
             .1
             .iter()
             .enumerate()
-            .all(|(axis, v)| i32::from(*v) & ((1 << (2 + shifts[axis])) - 1) == 0)
+            .all(|(axis, v)| *v & ((1 << (2 + shifts[axis])) - 1) == 0)
     {
         let picture = first_input.0.view(current)?;
         let width = (picture.dimensions[0] >> shifts[0]) as usize;
-        let height = (picture.dimensions[1] >> shifts[1]) as i32;
-        let xx = x as i32 + (i32::from(first_input.1[0]) >> (2 + shifts[0]));
-        let yy = y as i32 + (i32::from(first_input.1[1]) >> (2 + shifts[1]));
+        let height = (picture.dimensions[1] >> shifts[1]) as i64;
+        let xx = x as i64 + (first_input.1[0] >> (2 + shifts[0]));
+        let yy = y as i64 + (first_input.1[1] >> (2 + shifts[1]));
         let mut output = Vec::with_capacity(w as usize * h as usize);
         for row in 0..h {
-            let row = (yy + row as i32).clamp(0, height - 1) as usize;
+            let row = (yy + row as i64).clamp(0, height - 1) as usize;
             let source = &picture.planes[component].samples()[row * width..(row + 1) * width];
-            if xx >= 0 && xx as usize + w as usize <= width {
+            if xx >= 0 && xx <= width as i64 - i64::from(w) {
                 output.extend_from_slice(&source[xx as usize..xx as usize + w as usize]);
             } else {
                 output.extend(
-                    (0..w).map(|col| source[(xx + col as i32).clamp(0, width as i32 - 1) as usize]),
+                    (0..w).map(|col| source[(xx + col as i64).clamp(0, width as i64 - 1) as usize]),
                 );
             }
         }
@@ -854,7 +1087,14 @@ mod tests {
             mv: [64, -32],
         });
         let picture = Arc::new(Picture {
+            nal:super::super::hevc_nal::NalHeader{unit_type:1,layer_id:0,temporal_id:0},
+            coding:None,
             colour_planes: None,
+            queued_dim_blocks: 0,
+            queued_inter_dc_blocks: 0,
+            queued_texture_blocks: 0,
+            #[cfg(test)]
+            queued_inter_blocks: 0,
             pcm_luma_samples: 0,
             cross_component_blocks: 0,
             act_blocks: 0,
@@ -903,7 +1143,23 @@ mod tests {
             poc: 12,
             lists: &lists,
         };
-        assert_eq!(spatial.temporal(&header, 0, 1).unwrap(), Some([64, -32]));
+        assert_eq!(spatial.temporal(&header, 0, 1, false, None).unwrap(), Some([64, -32]));
+        let mut dimensions=vec![[0;16];3];dimensions[1][1]=1;dimensions[2][1]=2;
+        let graph=crate::codec::hevc_vps_extension::LayerDependencyPrefix {
+            base_additional_profile:None,layer_ids:vec![0,3,5],
+            scalability_ids:dimensions,view_ids:vec![100,102,108],direct:vec![0;3],
+            transitive:vec![0;3],tree_partitions:vec![],end_bit:0,
+        };
+        let annex=inter_view::Context::from_graph(&graph,5,true).unwrap();
+        let mut layered_lists=lists.clone();layered_lists[0][0].layer_id=3;
+        let layered=Spatial {lists:&layered_lists,..spatial};
+        let mut header=header.clone();header.nal.layer_id=5;
+        assert_eq!(layered.temporal(&header,0,1,false,Some(annex)).unwrap(),Some([256,-128]));
+        header.temporal_mvp=true;
+        let resolved=layered.resolve_domain(Prediction::Explicit {
+            references:[Some(1),None],differences:[[0;2];2],predictors:[0;2],
+        },&header,|_,_|None,None,false,Some(annex)).unwrap();
+        assert!(matches!(resolved,Resolved::Ordinary([Some(Vector {reference:1,mv:[64,-32]}),None])));
     }
 
     #[test]
@@ -928,7 +1184,14 @@ mod tests {
             let chroma_side = if chroma_format == 3 { 32 } else { 16 };
             let chroma_height = if chroma_format == 1 { 16 } else { 32 };
             let mut picture = Picture {
+                nal:super::super::hevc_nal::NalHeader{unit_type:1,layer_id:0,temporal_id:0},
+            coding:None,
                 colour_planes: None,
+                queued_dim_blocks: 0,
+                queued_inter_dc_blocks: 0,
+            queued_texture_blocks: 0,
+            #[cfg(test)]
+            queued_inter_blocks: 0,
                 pcm_luma_samples: 0,
                 cross_component_blocks: 0,
                 act_blocks: 0,
@@ -991,8 +1254,8 @@ mod tests {
                             [([0, 0], -3), ([n - 8, height - 8], 3)]
                         {
                             let mv = [
-                                (displacement << bits[0]) + fx as i16,
-                                (displacement << bits[1]) + fy as i16,
+                                (displacement << bits[0]) + fx as i32,
+                                (displacement << bits[1]) + fy as i32,
                             ];
                             let mut scratch = vec![0i32; 8 * 15];
                             let mut output = vec![0i32; 64];
@@ -1004,7 +1267,7 @@ mod tests {
                                 },
                                 c,
                                 [origin_x as u32, origin_y as u32, 8, 8],
-                                mv,
+                                mv.map(i64::from),
                                 &mut scratch,
                                 &mut output,
                                 chroma_format,
@@ -1078,10 +1341,10 @@ mod tests {
                                 8 << shifts[1],
                             ];
                             for motion in [
-                                [Some(Vector { reference: 0, mv }), None],
+                                [Some(Vector { reference: 0, mv:mv.map(i64::from) }), None],
                                 [
-                                    Some(Vector { reference: 0, mv }),
-                                    Some(Vector { reference: 0, mv }),
+                                    Some(Vector { reference: 0, mv:mv.map(i64::from) }),
+                                    Some(Vector { reference: 0, mv:mv.map(i64::from) }),
                                 ],
                             ] {
                                 let predicted = predict_with_chroma_format(
@@ -1145,12 +1408,19 @@ mod reference_remap_tests {
     }
 }
 
-fn add_motion_difference(predictor: i16, difference: i16, integer: bool) -> i16 {
-    if integer {
-        (predictor >> 2).wrapping_add(difference).wrapping_shl(2)
+fn add_depth_motion_difference(predictor: i64, difference: i16) -> i64 {
+    // I-110..I-113 wrap in integer depth units; I.8.5.3.3 shifts for sampling.
+    i64::from(((predictor >> 2) as i16).wrapping_add(difference)) * 4
+}
+
+fn add_motion_difference(predictor: i64, difference: i16, integer: bool) -> i64 {
+    // Ordinary HEVC still wraps at its normative signed-16-bit boundary.
+    // Wider storage does not widen the coded ordinary-MVD domain.
+    i64::from(if integer {
+        ((predictor >> 2) as i16).wrapping_add(difference).wrapping_shl(2)
     } else {
-        predictor.wrapping_add(difference)
-    }
+        (predictor as i16).wrapping_add(difference)
+    })
 }
 
 #[cfg(test)]
@@ -1404,5 +1674,127 @@ mod current_sampling_contract {
             })
             .is_err()
         );
+    }
+}
+
+#[cfg(test)]
+mod texture_selection_tests {
+    use super::*;
+    fn header() -> SliceHeader {
+        use crate::codec::hevc_decoder::{LayeredAccessUnit, LayeredDpb, LayeredParameters};
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/hevc-wedge");
+        let mut movie = crate::container::mp4::Mp4Reader::open(
+            std::io::Cursor::new(std::fs::read(root.join("cqt-exact-texture-motion.mp4")).unwrap()),
+            Default::default()).unwrap();
+        let mut params = LayeredParameters::from_configuration(&movie.tracks()[0].configuration, 64<<20).unwrap();
+        let mut dpb = LayeredDpb::default();
+        let mut packet = Vec::new();
+        movie.read_packet(0, 0, &mut packet).unwrap();
+        let plan = LayeredAccessUnit::parse(&params, dpb.poc(), &packet, 4, 1, 64<<20).unwrap();
+        let (updated, _, _) = dpb.decode(plan, 64<<20).unwrap(); params = updated;
+        movie.read_packet(0, 1, &mut packet).unwrap();
+        let plan = LayeredAccessUnit::parse(&params, dpb.poc(), &packet, 4, 1, 64<<20).unwrap();
+        let mut h = plan.pictures().iter().find(|p| p.binding.sps.layer_id == 3).unwrap().slices[0].clone();
+        h.max_merge_candidates = 5;
+        h.temporal_mvp = false;
+        h.references = [1, 0];
+        h
+    }
+    fn motion(x: i64) -> Motion { [Some(Vector {reference:0, mv:[x,0]}), None] }
+    #[test]
+    fn wide_current_picture_neighbour_keeps_integer_motion_and_coded_mvd_wrap() {
+        let h=header();
+        let lists=[vec![Reference{layer_id:3,poc:0,long_term:false,picture:None}],vec![]];
+        let spatial=Spatial{rect:[16,16,16,16],cu:[16,16,16],partition:Partition::Full,
+            part_index:0,merge_log2:2,ctu_log2:5,poc:1,lists:&lists};
+        for value in [i64::from(i32::MAX)+17,i64::from(i32::MIN)-19,i64::MAX,i64::MIN] {
+            let at=|x,y|((x,y)==(15,31)).then_some(motion(value));
+            // A current-picture reference requires integer precision, but its
+            // retained value must not narrow to i32 or the coded i16 domain.
+            assert_eq!(spatial.resolve(Prediction::Merge(0),&h,at).unwrap(),motion((value>>2)<<2));
+            let syntax=Prediction::Explicit{references:[Some(0),None],differences:[[1,0],[0,0]],predictors:[0,0]};
+            let expected=i64::from(((value>>2)as i16).wrapping_add(1).wrapping_shl(2));
+            let result=spatial.resolve(syntax,&h,at).unwrap();
+            assert_eq!(result[0].unwrap().mv,[expected,0]);
+        }
+    }
+    #[test]
+    fn actual_spatial_resolver_selects_t_without_flattening_and_keeps_spatial_duplicates() {
+        let h = header();
+        let lists = [vec![Reference {layer_id:3, poc:0, long_term:false, picture:None}], vec![]];
+        let spatial = Spatial {rect:[16,16,16,16], cu:[16,16,16], partition:Partition::Full,
+            part_index:0, merge_log2:2, ctu_log2:5, poc:1, lists:&lists};
+        let at = |x,y| match (x,y) {
+            (15,31) | (32,15) => Some(motion(4)),
+            (31,15) => Some(motion(8)), _ => None,
+        };
+        assert_eq!(spatial.resolve(Prediction::Merge(0), &h, at).unwrap(), motion(4));
+        assert_eq!(spatial.resolve_with_texture(Prediction::Merge(0), &h, at, Some(motion(4))).unwrap(), Resolved::Texture);
+        assert_eq!(spatial.resolve_with_texture(Prediction::Merge(1), &h, at, Some(motion(4))).unwrap(), Resolved::Ordinary(motion(8)));
+        assert_eq!(spatial.resolve_with_texture(Prediction::Merge(2), &h, at, Some(motion(4))).unwrap(), Resolved::Ordinary(motion(4)));
+        assert_eq!(spatial.resolve_with_texture(Prediction::Merge(4), &h, at, Some(motion(4))).unwrap(), Resolved::Ordinary(motion(0)));
+        assert!(spatial.resolve_with_texture(Prediction::Merge(5), &h, at, Some(motion(4))).is_err());
+        assert!(spatial.resolve_with_texture(Prediction::Merge(0), &h, at, Some([None;2])).is_err());
+        let explicit = Prediction::Explicit {references:[Some(0),None], differences:[[0;2];2], predictors:[0;2]};
+        assert_eq!(spatial.resolve_with_texture(explicit, &h, at, Some(motion(4))).unwrap(),
+            Resolved::Ordinary(spatial.resolve(explicit, &h, at).unwrap()));
+    }
+    #[test]
+    fn depth_iv_and_texture_precedence_preserve_depth_spatial_comparison_rules() {
+        let h=header();
+        let lists=[vec![Reference{layer_id:3,poc:0,long_term:false,picture:None}],vec![]];
+        let spatial=Spatial{rect:[16,16,16,16],cu:[16,16,16],partition:Partition::Full,part_index:0,merge_log2:2,ctu_log2:5,poc:1,lists:&lists};
+        let at=|x,y|match(x,y){(15,31)|(32,15)=>Some(motion(4)),(31,15)=>Some(motion(8)),_=>None};
+        let resolve=|index,t,iv|spatial.resolve_domain_with_iv(Prediction::Merge(index),&h,at,t,true,None,iv).unwrap();
+        assert_eq!(resolve(0,Some(motion(4)),Some(motion(8))),Resolved::Texture);
+        assert_eq!(resolve(1,Some(motion(4)),Some(motion(8))),Resolved::InterView(motion(8)));
+        // Depth compares A1/B1 against T, not IV; B1 equal to IV remains.
+        assert_eq!(resolve(2,Some(motion(4)),Some(motion(8))),Resolved::Ordinary(motion(8)));
+        assert_eq!(resolve(3,Some(motion(4)),Some(motion(8))),Resolved::Ordinary(motion(4)));
+        assert_eq!(resolve(1,Some(motion(4)),Some(motion(4))),Resolved::Ordinary(motion(8)));
+        assert!(spatial.resolve_domain_with_iv(Prediction::Merge(0),&h,at,None,true,None,Some([None;2])).is_err());
+    }
+    #[test]
+    fn tiny_original_pb_bypasses_t_even_with_shared_parallel_merge_cu() {
+        let mut h = header();
+        h.references = [1,1];
+        h.slice_type = crate::codec::hevc_cabac::SliceType::B;
+        let lists = [vec![Reference {layer_id:3, poc:0, long_term:false, picture:None}],
+            vec![Reference {layer_id:3, poc:0, long_term:false, picture:None}]];
+        for (rect, partition) in [([16,16,4,8],Partition::Vertical),([16,16,8,4],Partition::Horizontal)] {
+            for parallel in [2,3] {
+                let spatial = Spatial {rect,cu:[16,16,8],partition,part_index:0,
+                    merge_log2:parallel,ctu_log2:5,poc:1,lists:&lists};
+                assert_eq!(spatial.resolve_with_texture(Prediction::Merge(0), &h, |_,_|None, Some(motion(4))).unwrap(),
+                    Resolved::Ordinary(motion(0)));
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod depth_domain_tests {
+    use super::*;
+    #[test]
+    fn depth_mvd_wraps_in_integer_units_before_quarter_publication() {
+        for predictor in [-32768i64,-8192,-1,0,1,8192,32767] {
+            for difference in i16::MIN..=i16::MAX {
+                let sum=(i64::from(predictor)+i64::from(difference)+32768).rem_euclid(65536)-32768;
+                assert_eq!(add_depth_motion_difference(predictor*4,difference),sum*4);
+            }
+        }
+        assert_eq!(add_depth_motion_difference(0,32767),131068);
+        assert_eq!(add_depth_motion_difference(0,-32768),-131072);
+    }
+    #[test]
+    fn depth_reference_scaling_uses_integer_domain_clipping_and_classification() {
+        let mv=[32767*4,-32768*4];
+        assert_eq!(reference_predictor_domain(mv,4,4,false,false,true).unwrap(),Some(mv));
+        assert_eq!(reference_predictor_domain(mv,4,2,false,false,true).unwrap(),Some([16383*4,-16384*4]));
+        assert_eq!(reference_predictor_domain(mv,4,8,false,false,true).unwrap(),Some(mv));
+        assert_eq!(reference_predictor_domain(mv,0,8,true,true,true).unwrap(),Some(mv));
+        assert_eq!(reference_predictor_domain(mv,4,2,true,false,true).unwrap(),None);
+        assert!(reference_predictor_domain([1,0],4,2,false,false,true).is_err());
     }
 }

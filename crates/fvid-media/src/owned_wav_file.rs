@@ -176,7 +176,7 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    if sample_rate <= 0 || !(1..=64).contains(&channels) {
+    if sample_rate <= 0 || !(1..=255).contains(&channels) {
         return Err("invalid wav rate/channel count".into());
     }
     if count % channels as usize != 0 {
@@ -185,7 +185,7 @@ fn write_pcm_wave<const WIDTH: usize, F: FnMut() -> Result<()>>(
     let data_bytes = (count as u64)
         .checked_mul(WIDTH as u64)
         .ok_or("wav data size overflow")?;
-    if mask != 0 && mask.count_ones() != channels as u32 {
+    if mask != 0 && mask.count_ones() > channels as u32 {
         return Err("invalid WAV channel mask".into());
     }
     let extensible = mask != 0 || (WIDTH == 8 && channels > 2);

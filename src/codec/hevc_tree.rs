@@ -11,6 +11,8 @@ pub struct Node {
 }
 
 pub trait Visitor<B: ResidualBins> {
+    /// Annex I inter-component split inference; normal traversal consumes bins.
+    fn predicted_unsplit(&self,_node:Node)->Result<bool> {Ok(false)}
     /// Left/top depths at (x-1,y)/(x,y-1), excluding unavailable slice/tile
     /// neighbours. Publish completed CU depth before the next sibling is visited.
     fn neighbouring_depths(&self, node: Node) -> [Option<u8>; 2];
@@ -52,7 +54,9 @@ pub fn read_ctu<B: ResidualBins>(
         let side = 1u64 << node.log2_size;
         let inside = u64::from(node.x) + side <= u64::from(picture[0])
             && u64::from(node.y) + side <= u64::from(picture[1]);
-        let split = if node.log2_size == min {
+        let predicted=v.predicted_unsplit(node)?;
+        if predicted && !inside {return Err(invalid("HEVC predicted unsplit CU exceeds picture"));}
+        let split = if node.log2_size == min || predicted {
             false
         } else if !inside {
             true
@@ -206,5 +210,32 @@ mod tests {
         assert!(read_ctu(&mut bins, &mut field, [71, 72], [64, 64], 6, 3).is_err());
         assert!(read_ctu(&mut bins, &mut field, [72, 72], [8, 0], 6, 3).is_err());
         assert!(read_ctu(&mut bins, &mut field, [64, 64], [0, 0], 6, 3).is_err());
+    }
+}
+
+#[cfg(test)]
+mod predicted_tree_tests {
+    use super::*;
+    struct NoBins;
+    impl ResidualBins for NoBins {
+        fn decision(&mut self,_:Syntax,_:usize)->Result<bool>{panic!("predicted split consumed a bin")}
+        fn bypass(&mut self)->Result<bool>{panic!("unexpected bypass")}
+    }
+    #[derive(Default)]struct VisitorProbe{leaves:Vec<Node>}
+    impl Visitor<NoBins> for VisitorProbe {
+        fn predicted_unsplit(&self,_:Node)->Result<bool>{Ok(true)}
+        fn neighbouring_depths(&self,_:Node)->[Option<u8>;2]{[None;2]}
+        fn enter(&mut self,_:Node,split:bool)->Result<()> {assert!(!split);Ok(())}
+        fn leaf(&mut self,_:&mut NoBins,node:Node)->Result<()>{self.leaves.push(node);Ok(())}
+    }
+    #[test]
+    fn predicted_unsplit_omits_bins_and_oversized_boundary_is_refused() {
+        let mut v=VisitorProbe::default();
+        read_ctu(&mut NoBins,&mut v,[64,64],[0,0],6,3).unwrap();
+        assert_eq!(v.leaves,[Node{x:0,y:0,log2_size:6,depth:0}]);
+        let mut partial=VisitorProbe::default();
+        assert_eq!(read_ctu(&mut NoBins,&mut partial,[48,64],[32,0],5,3).err().unwrap().to_string(),
+            "HEVC predicted unsplit CU exceeds picture");
+        assert!(partial.leaves.is_empty());
     }
 }

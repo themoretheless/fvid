@@ -1,0 +1,13 @@
+{
+  "provenance": "Authored60ms VP9 and stereo PCM. Complete finite controls, truncated frame companions and IEEE non-finite companions verify strict playback admission. No encoder/private media/network.",
+  "sha256": {
+    "valid-int.mkv": "4fb6ab8c2c56f9eff9dc10fc2c687fd54e91b7a75e87b910ea54e0549470162a",
+    "valid-int-expected.f32le": "b4c10313fc1cbb1fee9c3e7e2642c0d37900f61b0777e08790cd36ac295890d0",
+    "short-byte.mkv": "61b7f79971e57e1e0168bbbd14e0c568fa4ecd66a7c9db66b8c9c4be1a381ad7",
+    "short-channel.mkv": "47d8cdf8058b7f69e0515faa2a924d8838434205fb732af09cd4528487613827",
+    "valid-float.mkv": "4d8f12e54a39317c76050c25020febe2ab285208c2684406eff0725526e5e1b6",
+    "valid-float-expected.f32le": "b4c10313fc1cbb1fee9c3e7e2642c0d37900f61b0777e08790cd36ac295890d0",
+    "nan.mkv": "a3c47cfc6940fc6cdd15abc22191d8224ef820eff81d73e5cf195c3c158509bd",
+    "infinity.mkv": "129e416c588d74924394fa383e9c845680127c2f4223ca2240dbe3019a921cf6"
+  }
+}

@@ -1,0 +1,4 @@
+{"side":64,"field":false,"allocations":82,"allocated_bytes":229246,"peak_requested_live_delta":33979,"debug_elapsed_ns_diagnostic":183743000}
+{"side":64,"field":true,"allocations":82,"allocated_bytes":128894,"peak_requested_live_delta":27707,"debug_elapsed_ns_diagnostic":232863083}
+{"side":128,"field":false,"allocations":274,"allocated_bytes":3320590,"peak_requested_live_delta":132331,"debug_elapsed_ns_diagnostic":2383710417}
+{"side":128,"field":true,"allocations":274,"allocated_bytes":1714958,"peak_requested_live_delta":107243,"debug_elapsed_ns_diagnostic":1854808292}

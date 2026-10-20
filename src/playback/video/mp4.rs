@@ -433,7 +433,20 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             }));
         }
         match &mut self.decoder {
-            Decoder::Avc(d) => Ok(d.decode_order(&self.packet)?.map(|picture| (picture, None))),
+            Decoder::Avc(d) => {
+                let Some(picture)=d.decode_order(&self.packet)? else {return Ok(None)};
+                let vui = d.active_vui().or_else(|| d.recorded_vui());
+                let identity = vui
+                    .and_then(|v| v.video_signal)
+                    .and_then(|(_, _, c)| c)
+                    .is_some_and(|c| c[2] == 0);
+                if picture.chroma_format()? != 1 || identity {
+                    self.decoded_planar = Some(Arc::new(
+                        crate::playback_native::avc_picture_with_vui(&picture, vui, self.queue_budget)?,
+                    ));
+                }
+                Ok(Some((picture,None)))
+            },
             Decoder::Hevc(d) => {
                 let Some(frame) = d.decode_packet(&self.packet)?.filter(|f| f.output) else {
                     return Ok(None);
@@ -445,10 +458,10 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 let explicit_geometry =
                     d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
                 if explicit_geometry {
-                    self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture(
+                    self.decoded_planar = Some(Arc::new(crate::playback_native::hevc_picture_with_vui(
                         p,
                         d.parameters().0.chroma_format,
-                        colour,
+                        d.parameters().0.vui.as_ref(),
                     )?));
                 }
                 let coded_width = p.dimensions[0] as usize;
@@ -554,7 +567,9 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                             kr: match decoded.color.matrix {
                                 0 | 1 => 0.2126,
                                 2 | 5 | 6 => 0.299,
-                                9 => 0.2627,
+                                4 => 0.30,
+                                7 => 0.212,
+                                9 | 10 => 0.2627,
                                 _ => {
                                     return Err(invalid("unsupported AV1 RGB matrix coefficients"));
                                 }
@@ -562,7 +577,9 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                             kb: match decoded.color.matrix {
                                 0 | 1 => 0.0722,
                                 2 | 5 | 6 => 0.114,
-                                9 => 0.0593,
+                                4 => 0.11,
+                                7 => 0.087,
+                                9 | 10 => 0.0593,
                                 _ => {
                                     return Err(invalid("unsupported AV1 RGB matrix coefficients"));
                                 }
@@ -849,6 +866,15 @@ pub(crate) fn open_hardware(
 fn open_hardware_avc(configuration: &[u8], shared: bool) -> Option<Hardware> {
     let config = crate::codec::config::AvcConfig::parse(configuration).ok()?;
     let sps = crate::codec::avc::Sps::parse(config.sps.first()?).ok()?;
+    if sps
+        .vui
+        .as_ref()
+        .and_then(|v| v.video_signal)
+        .and_then(|(_, _, c)| c)
+        .is_some_and(|c| c[2] == 0)
+    {
+        return None;
+    }
     let colour = crate::playback_native::AvcColour::from_vui(sps.vui.as_ref()).ok()?;
     let session = if shared {
         fvid_vt::Session::new_avc_surface(&config.sps, &config.pps, config.length_size, colour.full)
@@ -886,6 +912,12 @@ fn open_hardware_hevc(configuration: &[u8], budget: usize, shared: bool) -> Opti
         return None;
     }
     let sps_parsed = crate::codec::hevc_sps::Sps::parse(sps.first()?, budget).ok()?;
+    // The hardware adapter exposes YUV planes; identity GBR uses the exact
+    // software RGB path until a hardware RGB payload is qualified.
+    if sps_parsed.vui.as_ref().and_then(|v| v.signal.as_ref())
+        .and_then(|s| s.colour).is_some_and(|c| c[2] == 0) {
+        return None;
+    }
     let colour = crate::playback_native::AvcColour::from_hevc_vui(sps_parsed.vui.as_ref()).ok()?;
     let constructor = if shared {
         fvid_vt::Session::new_hevc_surface

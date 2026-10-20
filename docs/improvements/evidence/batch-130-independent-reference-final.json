@@ -1,0 +1,60 @@
+{
+  "scope": "Independent raw-codec PCM only. FFmpeg returns448zeroVorbisframes even for EOS446/447; finalgranule presentation trim is independently authored and verified by native stream/worker tests,not qualified by this external decoder. Mixed-codec chain switch is not supported by the invoked FFmpeg demuxer.",
+  "vorbis": [
+    {
+      "file": "vorbis-48000-448.ogg",
+      "exit_code": 0,
+      "frames": 448,
+      "expected_frames": 448,
+      "all_zero": true,
+      "stderr": ""
+    },
+    {
+      "file": "vorbis-48000-446.ogg",
+      "exit_code": 0,
+      "frames": 448,
+      "expected_frames": 446,
+      "all_zero": true,
+      "stderr": ""
+    },
+    {
+      "file": "vorbis-44100-448.ogg",
+      "exit_code": 0,
+      "frames": 448,
+      "expected_frames": 448,
+      "all_zero": true,
+      "stderr": ""
+    },
+    {
+      "file": "vorbis-44100-447.ogg",
+      "exit_code": 0,
+      "frames": 448,
+      "expected_frames": 447,
+      "all_zero": true,
+      "stderr": ""
+    },
+    {
+      "file": "vorbis-96000-448.ogg",
+      "exit_code": 0,
+      "frames": 448,
+      "expected_frames": 448,
+      "all_zero": true,
+      "stderr": ""
+    },
+    {
+      "file": "vorbis-8000-448.ogg",
+      "exit_code": 0,
+      "frames": 448,
+      "expected_frames": 448,
+      "all_zero": true,
+      "stderr": ""
+    }
+  ],
+  "opus": {
+    "exit_code": 0,
+    "frames": 960,
+    "peak": 0.0,
+    "nonzero": 0,
+    "stderr": ""
+  }
+}

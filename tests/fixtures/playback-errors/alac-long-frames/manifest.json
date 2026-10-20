@@ -1,0 +1,163 @@
+{
+  "provenance": "Authored periodic stereo PCM, own raw/Rice ALAC and neutral VP9. Long frames and maximum-u32 cookie with short explicitly counted packets. No private media or external encoders.",
+  "cases": [
+    {
+      "name": "4097-rice-implicit",
+      "maximum": 4097,
+      "samples": 4097,
+      "raw": false,
+      "declared": false
+    },
+    {
+      "name": "4097-rice",
+      "maximum": 4097,
+      "samples": 4097,
+      "raw": false,
+      "declared": true
+    },
+    {
+      "name": "4097-raw-implicit",
+      "maximum": 4097,
+      "samples": 4097,
+      "raw": true,
+      "declared": false
+    },
+    {
+      "name": "4097-raw",
+      "maximum": 4097,
+      "samples": 4097,
+      "raw": true,
+      "declared": true
+    },
+    {
+      "name": "8192-rice-implicit",
+      "maximum": 8192,
+      "samples": 8192,
+      "raw": false,
+      "declared": false
+    },
+    {
+      "name": "8192-rice",
+      "maximum": 8192,
+      "samples": 8192,
+      "raw": false,
+      "declared": true
+    },
+    {
+      "name": "8192-raw-implicit",
+      "maximum": 8192,
+      "samples": 8192,
+      "raw": true,
+      "declared": false
+    },
+    {
+      "name": "8192-raw",
+      "maximum": 8192,
+      "samples": 8192,
+      "raw": true,
+      "declared": true
+    },
+    {
+      "name": "16384-rice-implicit",
+      "maximum": 16384,
+      "samples": 16384,
+      "raw": false,
+      "declared": false
+    },
+    {
+      "name": "16384-rice",
+      "maximum": 16384,
+      "samples": 16384,
+      "raw": false,
+      "declared": true
+    },
+    {
+      "name": "16384-raw-implicit",
+      "maximum": 16384,
+      "samples": 16384,
+      "raw": true,
+      "declared": false
+    },
+    {
+      "name": "16384-raw",
+      "maximum": 16384,
+      "samples": 16384,
+      "raw": true,
+      "declared": true
+    },
+    {
+      "name": "65536-rice-implicit",
+      "maximum": 65536,
+      "samples": 65536,
+      "raw": false,
+      "declared": false
+    },
+    {
+      "name": "65536-rice",
+      "maximum": 65536,
+      "samples": 65536,
+      "raw": false,
+      "declared": true
+    },
+    {
+      "name": "65536-raw-implicit",
+      "maximum": 65536,
+      "samples": 65536,
+      "raw": true,
+      "declared": false
+    },
+    {
+      "name": "65536-raw",
+      "maximum": 65536,
+      "samples": 65536,
+      "raw": true,
+      "declared": true
+    },
+    {
+      "name": "4294967295-rice",
+      "maximum": 4294967295,
+      "samples": 16,
+      "raw": false,
+      "declared": true
+    }
+  ],
+  "files": {
+    "4097-rice-implicit.mkv": "f059d7f95c4b7a28e35d7521278d9faa83d904341bf71a7db538aa914a6e51f5",
+    "4097-rice-implicit.m4a": "e279390b902b5404780d7c3c691abafed2b71a0cd2dbe7b1c29ab2dfa1455da9",
+    "4097-rice.mkv": "8f82b2e9d52d0e348fa4e2c9a96fac9188a3241fa68f025eb5566e9d703f7890",
+    "4097-rice.m4a": "b19368dd43318d0e9d5b9727264eb720bf0f6976b3406265b544dae03589eb0d",
+    "4097-raw-implicit.mkv": "606b5e0898bebc5f7854ce5921ba375e30e05f3dea50c805d50b937507ae97d8",
+    "4097-raw-implicit.m4a": "540c44be990b17c0bab2f873e16d3671d8545f42a06dfbc37cde62aa87f8fb69",
+    "4097-raw.mkv": "91b861d832c48d2304ac5311531bc5e9675f443ddacab1378ddfa19778557356",
+    "4097-raw.m4a": "85f98c31f8f2598facb59b493d098ddc741ff601b5d490799796184a933e92a6",
+    "8192-rice-implicit.mkv": "8fb335dba33afcc2a718ea36ae5e23f7949bb934b74d3d5cb42a059254261faf",
+    "8192-rice-implicit.m4a": "5eab7019cf473dbe89ec1e72cde692189603e65fbcb33d8126e2e5140a94d186",
+    "8192-rice.mkv": "f1a0cfe5afc4a811ec401f6f490c5731d35a9e47f03d7653fb43941241f0b484",
+    "8192-rice.m4a": "309ca6d3cb87a6d86db2079611ad08181203df6e484e8fa36468fd506ce76e1e",
+    "8192-raw-implicit.mkv": "ceef3de0e8e629f0b226e0cb816a6828011c8a51fdc7abb015e7ba6fce78d0af",
+    "8192-raw-implicit.m4a": "8125a6f4b238e251cafa7be7f010137abea1c90437db4fe53910d48cc14f3870",
+    "8192-raw.mkv": "b3a17d881581799301b0594ea2ae10f5817edad076c5345f80cf810b4a1024c0",
+    "8192-raw.m4a": "3f3b7d057e35721bf6031bc2b1b8bd136e7b11139caa9c7bec0d74e88b497ff1",
+    "16384-rice-implicit.mkv": "7db39e42a231c501d805b2f1348c05a9c7cc5c6699e398fd8425365b54a2f2ec",
+    "16384-rice-implicit.m4a": "8e148446b6c08be0d43cca122f54c053c66a06c73f52a1f3738362b0e4f6f6a0",
+    "16384-rice.mkv": "d7bab1b65e3dd0994c07142ce5e2e3f5807e25b2e3614b7d58dc770efaae119e",
+    "16384-rice.m4a": "b50af1a46e35776625e54d7b531332091cf0be3f3c0f63591a47637d394494cd",
+    "16384-raw-implicit.mkv": "1980ba904d766c7f9f41e3ba74575501708ca001dcf4395ae5fd1a38819caead",
+    "16384-raw-implicit.m4a": "4e2588fceb259f0db76de43c29bc38ea1ee39ea70394e88c29910e9617f864d6",
+    "16384-raw.mkv": "bff0721595a98b2bd6ad32b63f8f802c9af3acabe2bbbc1c372bf32c7e56578c",
+    "16384-raw.m4a": "4597dc2b06412e2674385ac524ac8904cc7dda3bba13288aa167d2d3aa2fbcd1",
+    "65536-rice-implicit.mkv": "0262bde5231e8471dbf570e24c00dbb25c825137bff26741f6c004b6b891efe6",
+    "65536-rice-implicit.m4a": "0ee72a7f53153450586ed5f5675cd1952301bcf6d2f6ce084304fa44f7937b9c",
+    "65536-rice.mkv": "84fa5a196df3d3754fea8dbfbd9c957dd97566b4bccfd27b9ca0d516aec0db66",
+    "65536-rice.m4a": "eb57a22f11ea1aeea51f129c71375694c53df277e6ab347c9aab02ec40246405",
+    "65536-raw-implicit.mkv": "0f67d016b7400a92900f991886202ae7450d0c58e92d79f470e9e44c00c115ec",
+    "65536-raw-implicit.m4a": "a68ca5c5c10ee97312f1c8e03562de46fa21614d482457bc159ee75eb9bf2520",
+    "65536-raw.mkv": "44c4e8a8d5a5230141ffa738754573e9d522178f3b4d66924db41e2c5c38ac5f",
+    "65536-raw.m4a": "49de87a7eb183cbebc9a37270f3932fb841f95093555c7d11d2b5a68ad2b379c",
+    "4294967295-rice.mkv": "2e1da65bb2847ac6191f5e441dcfc6a7e1e1c85bcd42eb2ed39207480a1369d4",
+    "4294967295-rice.m4a": "1abf89268d98e11f56eeeaa086da1f983f46ca939043cfeca4084753bd8e6bb4",
+    "maximum.cookie": "8f0bc8cf52ff975487235b596347a11e4114227589102d0cca7fb10b2a5ce89f",
+    "truncated-raw.packet": "37b9e1c2461151a52f224e8c24d27e3a7bc5215930599b506c3e5c9139d30341",
+    "truncated-raw.mkv": "b2a193e4621dd0be5cc08646e5cbbd06bb9326a9a3081392697699d1f5a06a84"
+  }
+}

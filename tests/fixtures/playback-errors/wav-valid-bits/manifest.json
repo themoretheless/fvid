@@ -1,0 +1,78 @@
+{
+  "provenance": "Authored20ms8k PCM with left-aligned valid bits and zero padding, signed/unsigned boundary values, mono/stereo. Plain Wave and matching native VP9/PCM controls. Corrupt header precision/container variants are distinct refusals. No encoder/private media/network.",
+  "cases": [
+    {
+      "name": "pcm12-in-16",
+      "storage": 16,
+      "valid": 12,
+      "channels": 1,
+      "frames": 160
+    },
+    {
+      "name": "pcm20-in-24",
+      "storage": 24,
+      "valid": 20,
+      "channels": 2,
+      "frames": 160
+    },
+    {
+      "name": "pcm24-in-32",
+      "storage": 32,
+      "valid": 24,
+      "channels": 1,
+      "frames": 160
+    },
+    {
+      "name": "pcm16-in-32",
+      "storage": 32,
+      "valid": 16,
+      "channels": 2,
+      "frames": 160
+    },
+    {
+      "name": "pcm8-in-16",
+      "storage": 16,
+      "valid": 8,
+      "channels": 1,
+      "frames": 160
+    },
+    {
+      "name": "pcm7-in-8",
+      "storage": 8,
+      "valid": 7,
+      "channels": 2,
+      "frames": 160
+    }
+  ],
+  "sha256": {
+    "pcm12-in-16.wav": "b7de6c91247a0179b678870c52338cd69b4894158a195a84d4d11ca204cd38b1",
+    "pcm12-in-16-control.wav": "70b42ca07aad4e2b994e5e0d6a2f2207493ada2fd3be65e21d584a378beefa84",
+    "pcm12-in-16.f32le": "e7c2a2ba7563edc66fdb5903e6122d06d3a72b048601022f6d309c756c2db140",
+    "pcm12-in-16-video.mkv": "69a67553abee5b4bd846bad5e2058b98980bb97d7dd77a7f1ec261c3a0b81341",
+    "pcm20-in-24.wav": "b1b202e3abdc8cdd257625e831cca83ff0c704031b908d152bbb61a229ede0b5",
+    "pcm20-in-24-control.wav": "82b180641da82dca7c20d3059d0e9b2e31f5fcb351d243d1770d9cf28df7823d",
+    "pcm20-in-24.f32le": "52a6fb646189cb942b2d909394eee5fd223227cf8292aebc046fe2ff506a05c3",
+    "pcm20-in-24-video.mkv": "e56e14bf90bff251cb7fc29a43cf2e4d8a82d8f9ee973c77a75f6cfeb2d442c5",
+    "pcm24-in-32.wav": "a9caccd0c975e89e0f6e14c9b7c95a8e5d8c025631511e4946c9f56f41f5d7a3",
+    "pcm24-in-32-control.wav": "882712b71c6d821d6ad81c6ff9044d4d9327479dd43f8d205b9df46671e1bd72",
+    "pcm24-in-32.f32le": "873e4f51cd6462a3340d1fa944aa79532501273a2da15d64644b6fc10834e9ec",
+    "pcm24-in-32-video.mkv": "4c00cb68f30192d370d4e3be4a3b2d556957886af66e637b6225f63e03e53291",
+    "pcm16-in-32.wav": "4f7d930116084582a7fb8131a5962c1aea6041d8ba02ea4051664d20f09d1b90",
+    "pcm16-in-32-control.wav": "01e47ae0a8debeef9c7e59e0e74f6c95a906d173e16430dbbb691da594fd7b3b",
+    "pcm16-in-32.f32le": "4101ef234cd2c4dd40a15e4ee5e9047ea147d89376ba908da1de32a926195a02",
+    "pcm16-in-32-video.mkv": "767d850b44ce09bbf9b42882e28c8234fcb62265d5ad05c0d6029f19c47822eb",
+    "pcm8-in-16.wav": "cdeae0dcb10a93ccceb6c466407a59e1d60a58d054616c09281873fff75f95e9",
+    "pcm8-in-16-control.wav": "6ff7751af0c97a4aeb4b946ed8ef61c4cbe0af2d47f41181b26dd1f0566fd4a5",
+    "pcm8-in-16.f32le": "f376e23ff41f414893c90c8e659416980af58c5c4b5f29468ce7ab8d99723c0c",
+    "pcm8-in-16-video.mkv": "42408bb2ffe305e11bcf3ca7d37fe23dad54a18603be0b1cd13f5cb70bd0b077",
+    "pcm7-in-8.wav": "b0ab1f95c894be443a51bc147f2160e0ed6e51a79d62285cabb8e4af62457ac9",
+    "pcm7-in-8-control.wav": "0b0eeb8c467b9167b746abc27e6145acdecfe27e98880c5ad85a43f66ebba1c2",
+    "pcm7-in-8.f32le": "0947d8e5bba1e9f592d7dee86bf675f4f681024a13dbea6224ed23fbb4f0ba39",
+    "pcm7-in-8-video.mkv": "fe0de0816c5630f0a25a0d877a316ee4746ba96a3b517d45d2638062274ba2b7",
+    "invalid-container12.wav": "1c4d467114c866e053774c4371bd00e00ff1856420c069ef6db7e9dbe2ce6750",
+    "invalid-valid-zero.wav": "de7bc9a4e830e19775eac039bf95fe46a45f2af3641987f356bcf45be32dca2d",
+    "invalid-valid-too-wide.wav": "fe585a2be7ae8c3ed7743aa2ce24da85cf538b50bfb93a677df5872e39ce8efd",
+    "invalid-float-precision.wav": "31c42012db83a2ef394ff2e8e04575ae86a54b1ac3c7317fe1134a2cb4e4b33e",
+    "float-control.wav": "5509da4967122f86c2ca2618afedcd22014d92cbaacb3bab1350933d439abf1a"
+  }
+}

@@ -1,0 +1,15 @@
+#![cfg(feature="player")]
+use fvid::audio::{AudioStream,AudioDecode};
+use std::{io::Cursor,path::Path,time::Duration};
+#[path="support/audio_capture.rs"] mod capture;
+fn open(bytes:Vec<u8>)->fvid::playback_flac::FlacAudioReader{fvid::playback_flac::FlacAudioReader::open(Cursor::new(bytes),Default::default()).unwrap()}
+fn render(bytes:Vec<u8>)->Vec<(Duration,Vec<u8>)>{let mut source=open(bytes);let mut decoder=source.make_decoder().unwrap();let mut out=Vec::new();while let Some(p)=source.next_packet().unwrap(){let f=decoder.decode_packet(&p.data,p.pts,p.duration as u64).unwrap().unwrap();out.push((f.packet.presentation_time(),f.packet.data));}out}
+#[test]
+fn flac_legal_block_size_codes_match_equivalent_escape_encoding(){
+ let base=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/flac-block-codes");let manifest:serde_json::Value=serde_json::from_slice(&std::fs::read(base.join("manifest.json")).unwrap()).unwrap();let mut failures=Vec::new();let mut video=fvid::playback_native::NativeReader::software(Cursor::new(std::fs::read(base.join("video.mkv")).unwrap()),32<<20).unwrap();assert!(video.read_frame_raw().unwrap().is_some());assert!(video.read_frame_raw().unwrap().is_none());
+ for case in manifest["cases"].as_array().unwrap(){let name=case["file"].as_str().unwrap();let bytes=std::fs::read(base.join(name)).unwrap();let control=std::fs::read(base.join(case["control"].as_str().unwrap())).unwrap();let expected=render(control);let size=case["size"].as_u64().unwrap();let mut decoder=fvid::codec::flac_decoder::FlacDecoder::new(&bytes[8..42],44100,1).unwrap();for(i,packet)in case["packets"].as_array().unwrap().iter().enumerate(){let encoded=std::fs::read(base.join(packet.as_str().unwrap())).unwrap();let pcm=decoder.decode_packet(&encoded,(i as u64*size)as i64,size).unwrap().unwrap();let level=case["levels"][i].as_i64().unwrap() as f32/32768.0;let wanted=(0..size).flat_map(|_|level.to_le_bytes()).collect::<Vec<_>>();assert_eq!(pcm.packet.data,wanted,"{name}: independent literalPCM");assert_eq!(pcm.packet.data,expected[i].1);}
+ let source=match fvid::playback_flac::FlacAudioReader::open(Cursor::new(bytes.clone()),Default::default()){Ok(s)=>s,Err(e)=>{failures.push(format!("{name}: validblockdescriptorrefused{e}"));continue;}};assert_eq!(render(bytes.clone()),expected);let end=source.duration().unwrap();for target in [expected[expected.len()/2].0,end]{capture::worker_check_with_seek(Box::new(open(bytes.clone())),&expected,Some(target));}
+ }
+ let info=std::fs::read(base.join("code12.flac")).unwrap()[8..42].to_vec();for name in manifest["invalid"].as_array().unwrap(){let name=name.as_str().unwrap();let encoded=std::fs::read(base.join(name)).unwrap();assert!(fvid_media::owned_flac::frame_header(&encoded).is_none(),"{name}: invalidblockheaderadmitted");let mut decoder=fvid::codec::flac_decoder::FlacDecoder::new(&info,44100,1).unwrap();assert!(decoder.decode_packet(&encoded,0,64).is_err(),"{name}: invalidblockcodecaccepted");}
+ assert!(failures.is_empty(),"{}",failures.join("; "));
+}

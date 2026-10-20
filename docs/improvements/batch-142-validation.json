@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0151"
+  ],
+  "checked_at": "2026-10-16T15:14:50.271564+00:00",
+  "before": [
+    "evidence/batch-142-before.log",
+    "evidence/batch-142-acceptance-before.log",
+    "evidence/batch-142-xm-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-142-after.log",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-142-minimal.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-142-units.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-142-integration.log",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-142-fixtures.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-142-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Move XM timeline row admission immediately before insertion and reject when len equals Limits.rows. The previous len>limit check at loop entry could be bypassed by a final Bxx jump beyond the order list. Existing order bounds and one-pass loop detection run before admission,so exact limits remain valid when no new row will be appended.",
+    "Before: three authored end-jump scores accept1/2/3 timeline rows under declared limits0/1/2. Forced refusal regression fails on the1row score with rows=0. After: all three precisely refuse through Module::parse and XmAudioReader::open. These are parser/reader admission refusals,not worker error events.",
+    "Natural-end and end-jump controls accept exact n and n+1 budgets; a one-pass B00 loop accepts its exact one-row budget. Six actual worker targets verify exact-budget scores against independent natural-end PCM through play,rewind,120ms seek and EOF. Native authored VP9/PCM companion decodes.",
+    "Minimal no-default-features regression,35 XM parser/decoder/reader units,related integration tests,fixture reproduction and player build pass. Ordinary tests/generator require no FFmpeg,network or private media. No public signature,default limit or loop policy changes.",
+    "The guarantee is a maximum logical number of admitted timeline rows; Vec reserved capacity and total heap bytes are not bounded by this row count alone. No allocation/RSS/performance claim is made."
+  ],
+  "counting": "One timeline row-budget bypass. Three boundary scores,exact/loop controls and worker targets add zero IDs."
+}

@@ -1,0 +1,15 @@
+{
+  "provenance": "Authored raw 2x2 frames and authored neutral VP9 picture with UTF-8 text tags; malformed text timelines are sidecars. No private inputs, external codec or network.",
+  "files": {
+    "clip with spaces.y4m": "85fc604ccc65f613314015b73274bf68e5c0e6dc0f1e20e5a65904d3362fbf41",
+    "clip@name.y4m": "85fc604ccc65f613314015b73274bf68e5c0e6dc0f1e20e5a65904d3362fbf41",
+    "control.y4m": "85fc604ccc65f613314015b73274bf68e5c0e6dc0f1e20e5a65904d3362fbf41",
+    "invalid-time.edl": "925a7d125a0510b3f7f71f93383123fa0c8f84a3023a9af8502a8686fecfeaee",
+    "invalid-time.smil": "31a2a533ea18aa970b0236cbdd0677467fe5a9db9c4959236aecd6d29f8b5773",
+    "numeric-controls.json": "d7fb6844d8963d95040f0a63379f479c2dc87371d9dcbba94741f3b08435115c",
+    "overflow-clock.srt": "2d18b781f972081a281019f6de24e2f100761c388cdfb7a10294799d6b316542",
+    "quoted-path.edl": "063a16c242e7ce8ae616496876ff0f7c2266b2eccc1f88f79ccd200babc399fa",
+    "quoted-path.smil": "112ef4152ba02e2c9751546c3fa74655a40a2fa4016cbff5e64a2cfb9addfc1f",
+    "unicode-osd.webm": "10c028c889bd488f20a63e5be84c02c522942f922a464463f8841d7ab9455ebe"
+  }
+}

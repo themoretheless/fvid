@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0107"
+  ],
+  "checked_at": "2026-10-16T03:52:44.859396+00:00",
+  "before": [
+    "evidence/batch-086-pcm-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-086-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-086-wav.log",
+      "kind": "rust",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-086-aiff.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-086-au.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-086-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-086-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "The direct fixed-frame byte-skip route already handles selected PCM widths/laws but omits other stateless PCM variants.62specific worker seeks over authored width and cross-packet probes round earlier or change the suffix despite exact full numeric baselines. Existing direct and EOF controls pass.",
+    "WAV/AIFF/AU now route every Coding::Pcm variant through the existing exact frame-byte offset path; G711 behavior remains and predictive coded-block paths are unchanged. This fixes format classification, separate from compressed-history restoration105.",
+    "18short integer8/16/24/32 and float32/64 source cases plus three6147sample ramps exercise117actual worker targets, including samples on either side of2048/4096 boundaries, last samples and EOF. Full decoded f32 matches independently authored numeric oracles; play/rewind and all suffix PTS/PCM match exactly.",
+    "33 WAV/14 AIFF/9 AU units, six related EOF/truncation/valid-bit/alignment/sample-clock integration targets, fixture reproduction and player build pass. Two short authored native VP9/PCM video companions decode. No encoder/network/private media, physical output or performance claim.",
+    "Initial generation syntax and test type-inference errors are excluded; pcm-before contains the actual62specific behavioral failures after healthy fixture setup. Updated existing window-seek unit expectations now require correct exact sample/remaining packet duration."
+  ],
+  "compatibility": "Previously omitted fixed PCM widths now return the requested sample and begin encoded data at its exact complete frame. Public signatures are unchanged; callers no longer receive earlier PCM windows. Predictive compressed-format seek behavior is unchanged in this item.",
+  "counting": "One missing fixed-frame PCM seek classification across three readers. Formats, widths, packet boundaries,117worker targets and authoring/test repairs add no IDs."
+}

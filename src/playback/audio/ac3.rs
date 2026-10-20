@@ -21,9 +21,10 @@
 //! [`crate::codec::ac3_decoder::syncframe`] probe refuses it by name.
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
-use crate::codec::ac3_decoder::{Syncframe, syncframe};
+use crate::codec::ac3_decoder::syncframe;
 use crate::{Result, invalid};
 use std::io::Read;
+use std::cell::Cell;
 use std::time::Duration;
 
 /// What a limit guards: how much the reader may take in, and how many frames it
@@ -48,10 +49,42 @@ impl Default for Limits {
 /// The tag [`crate::codec::make_audio_decoder`] answers for AC-3, as Matroska
 /// names it; the MP4 fourcc `ac-3` reaches the same decoder.
 pub const TAG: &str = "A_AC3";
+pub const EAC3_TAG: &str = "A_EAC3";
 
 /// Samples every syncframe decodes per channel, for all three rates: six blocks
 /// of 256, which Section 5.4.1 fixes and Section 5.18's frame sizes follow.
 const SAMPLES_PER_FRAME: u32 = 1536;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SyncHeader {
+    codec: &'static str,
+    sample_rate: u32,
+    channels: u16,
+    frame_bytes: usize,
+    samples: u32,
+}
+
+fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {
+    if let Some(at) = syncframe(bytes) {
+        return Some(SyncHeader {
+            codec: TAG,
+            sample_rate: at.sample_rate,
+            channels: at.channels,
+            frame_bytes: at.frame_bytes,
+            samples: SAMPLES_PER_FRAME,
+        });
+    }
+    if let Some(at) = crate::codec::eac3_decoder::frame(bytes) {
+        return Some(SyncHeader {
+            codec: EAC3_TAG,
+            sample_rate: at.sample_rate,
+            channels: at.channels,
+            frame_bytes: at.frame_bytes,
+            samples: (at.blocks * 256) as u32,
+        });
+    }
+    None
+}
 
 /// One frame of the stream: where it sits in the file, how long it is, and the
 /// sample it starts on.
@@ -64,15 +97,18 @@ pub struct Frame {
     /// than a copy of the numbers the file states.
     pub rate: u32,
     pub channels: u16,
+    pub samples: u32,
 }
 
-/// A `.ac3` file: the geometry its first frame states and the frames that play.
+/// A `.ac3` or `.ec3` file: the geometry its first frame states and the frames that play.
 #[derive(Clone, Debug)]
 pub struct Ac3 {
+    pub codec: &'static str,
     pub sample_rate: u32,
     pub channels: u16,
     pub frames: Vec<Frame>,
     data: Vec<u8>,
+    truncated_final_frame: bool,
 }
 
 impl Ac3 {
@@ -91,16 +127,23 @@ impl Ac3 {
         // ended, with no gap to scan across. That is what a real AC-3 stream looks
         // like end to end, and what a file of some other shape that happens to hold
         // two bytes resembling a syncword does not.
-        let mut found: Vec<Syncframe> = Vec::new();
+        let mut found: Vec<SyncHeader> = Vec::new();
         let mut starts: Vec<usize> = Vec::new();
         let mut pos = 0usize;
-        while pos + 2 <= bytes.len() && syncframe(&bytes[pos..]).is_none() {
+        while pos + 2 <= bytes.len() && probe_syncframe(&bytes[pos..]).is_none() {
             pos += 1;
         }
         let first_start = pos;
-        while let Some(at) = syncframe(bytes.get(pos..).unwrap_or_default()) {
+        let mut truncated_final_frame = false;
+        while let Some(at) = probe_syncframe(bytes.get(pos..).unwrap_or_default()) {
+            if let Some(first) = found.first()
+                && at.codec != first.codec
+            {
+                break;
+            }
             if pos + at.frame_bytes > bytes.len() {
                 // A frame reaching past what the file holds is a truncated tail.
+                truncated_final_frame = true;
                 break;
             }
             if found.len() >= limits.packets {
@@ -145,14 +188,17 @@ impl Ac3 {
                 pts,
                 rate: at.sample_rate,
                 channels: at.channels,
+                samples: at.samples,
             });
-            pts += u64::from(SAMPLES_PER_FRAME);
+            pts += u64::from(at.samples);
         }
         Ok(Self {
+            codec: first.codec,
             sample_rate: first.sample_rate,
             channels: first.channels,
             frames,
             data: bytes.to_vec(),
+            truncated_final_frame,
         })
     }
 
@@ -172,15 +218,17 @@ impl Ac3 {
     pub fn samples(&self) -> u64 {
         self.frames
             .last()
-            .map(|at| at.pts + u64::from(SAMPLES_PER_FRAME))
+            .map(|at| at.pts + u64::from(at.samples))
             .unwrap_or(0)
     }
 }
 
-/// A `.ac3` file read as an audio track.
+/// A `.ac3` or `.ec3` file read as an audio track.
 pub struct Ac3AudioReader {
     ac3: Ac3,
     packet: usize,
+    presentation_trim: Cell<u64>,
+    presentation_floor: Option<u64>,
 }
 
 impl Ac3AudioReader {
@@ -189,10 +237,12 @@ impl Ac3AudioReader {
     pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         Ok(Self {
             ac3: Ac3::parse(&bytes, &limits)?,
             packet: 0,
+            presentation_trim: Cell::new(0),
+            presentation_floor: None,
         })
     }
 
@@ -200,11 +250,15 @@ impl Ac3AudioReader {
     pub fn ac3(&self) -> &Ac3 {
         &self.ac3
     }
+
+    fn audible_samples(&self) -> u64 {
+        self.ac3.samples().saturating_sub(crate::codec::ac3_decoder::ENCODER_DELAY as u64)
+    }
 }
 
 impl AudioStream for Ac3AudioReader {
     fn codec(&self) -> &str {
-        TAG
+        self.ac3.codec
     }
 
     /// Packets are stamped in samples, the same timescale the decoder reports.
@@ -224,9 +278,48 @@ impl AudioStream for Ac3AudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        Some(Duration::from_secs_f64(
-            self.ac3.samples() as f64 / f64::from(self.ac3.sample_rate),
-        ))
+        let samples = self.audible_samples();
+        let rate = u64::from(self.ac3.sample_rate);
+        Some(Duration::new(samples / rate, ((samples % rate) * 1_000_000_000 / rate) as u32))
+    }
+
+    fn present_decoded(&self, mut packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        let stride = usize::from(self.channels()) * 4;
+        if stride == 0 || !packet.data.len().is_multiple_of(stride) {
+            return Err(invalid("invalid raw AC-3 decoded geometry"));
+        }
+        let frames = packet.data.len() / stride;
+        let window = self
+            .ac3
+            .frames
+            .iter()
+            .find(|at| at.pts as i64 == source_pts)
+            .map(|at| at.samples as usize)
+            .unwrap_or(SAMPLES_PER_FRAME as usize);
+        if frames > window {
+            return Err(invalid("raw AC-3 packet exceeds its frame window"));
+        }
+        let trim = self.presentation_trim.get();
+        packet.pts = u64::try_from(source_pts).ok().and_then(|pts| pts.checked_sub(trim))
+            .ok_or_else(|| invalid("raw AC-3 presentation precedes its source timeline"))?;
+        packet.timebase_num = 1;
+        packet.timebase_den = self.sample_rate();
+        self.presentation_trim.set(trim + (window - frames) as u64);
+        let skip = self.presentation_floor.unwrap_or(0).saturating_sub(packet.pts).min(frames as u64) as usize;
+        if skip == frames { return Ok(None); }
+        if skip != 0 {
+            packet.data.copy_within(skip * stride.., 0);
+            packet.data.truncate((frames - skip) * stride);
+            packet.pts += skip as u64;
+        }
+        Ok(Some(packet))
+    }
+
+    fn validate_eof(&self) -> Result<()> {
+        if self.ac3.truncated_final_frame {
+            return Err(invalid("AC-3 final frame is truncated"));
+        }
+        Ok(())
     }
 
     /// A frame describes itself: this container stores no setup block.
@@ -250,7 +343,7 @@ impl AudioStream for Ac3AudioReader {
         let packet = EncodedPacket {
             data: self.ac3.packet(self.packet).to_vec(),
             pts: at.pts as i64,
-            duration: i64::from(SAMPLES_PER_FRAME),
+            duration: i64::from(at.samples),
         };
         self.packet += 1;
         Ok(Some(packet))
@@ -258,25 +351,32 @@ impl AudioStream for Ac3AudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
+        self.presentation_trim.set(0);
+        self.presentation_floor = None;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let target = pts.max(0) as u64;
-        let index = self
-            .ac3
-            .frames
-            .partition_point(|at| at.pts <= target)
-            .saturating_sub(1);
-        self.packet = index;
-        self.ac3.frames[index].pts as i64
+        self.presentation_trim.set(0);
+        let target = (pts.max(0) as u64).min(self.audible_samples());
+        self.presentation_floor = Some(target);
+        if target >= self.audible_samples() {
+            self.packet = self.ac3.frames.len();
+            return self.audible_samples() as i64;
+        }
+        // Replay history for overlap/dither fidelity, then hide PCM before target.
+        self.packet = 0;
+        target as i64
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Ac3, Ac3AudioReader, Limits, SAMPLES_PER_FRAME, Syncframe, TAG};
+    use super::{Ac3, Ac3AudioReader, Limits, SAMPLES_PER_FRAME, TAG};
     use crate::audio::{AudioStream, EncodedPacket};
-    use crate::codec::{ac3_decoder::syncframe, make_audio_decoder};
+    use crate::codec::{
+        ac3_decoder::{Syncframe, syncframe},
+        make_audio_decoder,
+    };
 
     /// The four files under `tests/fixtures/audio`, each an AC-3 elementary stream
     /// written by this machine's FFmpeg and covering the three rates and the channel
@@ -351,8 +451,8 @@ mod tests {
         assert_eq!(reader.timescale(), 48_000);
         assert_eq!(
             reader.duration(),
-            Some(std::time::Duration::from_micros(256_000)),
-            "eight frames of 1536 samples at 48000 Hz"
+            Some(std::time::Duration::from_nanos(250_666_666)),
+            "eight frames less the native256sample leading trim"
         );
     }
 
@@ -405,20 +505,18 @@ mod tests {
     }
 
     #[test]
-    fn a_seek_lands_on_the_frame_at_or_before_the_sample_asked_for() {
+    fn a_seek_restores_history_before_the_requested_audible_sample() {
         let mut reader = Ac3AudioReader::open(SURROUND, Limits::default()).expect("opens");
-        assert_eq!(reader.seek_to(4000), 3072, "the third frame starts at 3072");
-        assert_eq!(reader.seek_to(3072), 3072, "a frame start stays there");
+        assert_eq!(reader.seek_to(4000), 4000, "seek is sample accurate");
+        assert_eq!(reader.next_packet().unwrap().unwrap().pts,0,"encoded history is preroll");
+        assert_eq!(reader.seek_to(3072), 3072, "exact requested sample");
         assert_eq!(reader.seek_to(0), 0);
         assert_eq!(
             reader.seek_to(1 << 30),
-            10_752,
-            "past the end is the last frame"
+            12_032,
+            "past the audible end is exhausted"
         );
-        let packet = reader.next_packet().expect("packet").expect("frame");
-        assert_eq!(packet.pts, 10_752);
-        // The last of the eight frames of 1792 bytes.
-        assert_eq!(packet.data, &SURROUND[7 * 1792..]);
+        assert!(reader.next_packet().expect("packet").is_none());
         reader.rewind();
         assert_eq!(reader.seek_to(-5), 0, "a negative sample is the start");
     }

@@ -3,6 +3,8 @@
 pub enum PcmFormat {
     /// Unsigned 8-bit integer PCM, as specified by Matroska.
     Unsigned8,
+    ALaw,
+    MuLaw,
     /// Signed integer of `bits` bits per sample, packed with no padding.
     Int { bits: u8, big_endian: bool },
     /// IEEE float of 32 or 64 bits, little-endian.
@@ -12,7 +14,7 @@ pub enum PcmFormat {
 impl PcmFormat {
     pub fn bits(self) -> u8 {
         match self {
-            Self::Unsigned8 => 8,
+            Self::Unsigned8 | Self::ALaw | Self::MuLaw => 8,
             Self::Int { bits, .. } | Self::Float { bits } => bits,
         }
     }
@@ -27,7 +29,7 @@ impl PcmFormat {
     /// name themselves differently and stay refused rather than playing noise.
     fn supported(self) -> bool {
         match self {
-            Self::Unsigned8 => true,
+            Self::Unsigned8 | Self::ALaw | Self::MuLaw => true,
             Self::Int { bits, .. } => matches!(bits, 8 | 16 | 24 | 32),
             Self::Float { bits } => matches!(bits, 32 | 64),
         }
@@ -36,6 +38,8 @@ impl PcmFormat {
     /// One sample widened into -1.0..=1.0.
     fn sample_f32(self, bytes: &[u8]) -> f32 {
         match self {
+            Self::ALaw => f32::from(fvid_codecs::g711::Law::ALaw.decode(bytes[0]))/32768.,
+            Self::MuLaw => f32::from(fvid_codecs::g711::Law::MuLaw.decode(bytes[0]))/32768.,
             Self::Unsigned8 => (f32::from(bytes[0]) - 128.0) / 128.0,
             Self::Int { bits, big_endian } => {
                 sign_extended(bytes, big_endian) as f32 / (1i64 << (i64::from(bits) - 1)) as f32
@@ -73,11 +77,17 @@ pub struct PcmDecoder {
 }
 
 impl PcmDecoder {
+    /// Stored bytes in one complete interleaved source frame.
+    pub fn encoded_frame_bytes(&self) -> Result<usize> {
+        usize::from(self.channels).checked_mul(self.format.sample_bytes())
+            .ok_or_else(||invalid("PCM source frame size overflow"))
+    }
     pub fn new(format: PcmFormat, sample_rate: u32, channels: u16) -> Result<Self> {
         if !format.supported() {
             return Err(invalid(&format!(
                 "unsupported {} PCM at {} bits",
                 match format {
+                    PcmFormat::ALaw | PcmFormat::MuLaw => "G.711",
                     PcmFormat::Unsigned8 | PcmFormat::Int { .. } => "integer",
                     PcmFormat::Float { .. } => "float",
                 },
@@ -110,27 +120,40 @@ impl PcmDecoder {
     /// Integer PCM named by width and byte order, as the containers describe it.
     /// A zero width is taken as 16-bit, the default both containers mean.
     pub fn int(bits: u16, big_endian: bool, sample_rate: u32, channels: u16) -> Result<Self> {
-        let bits = if bits == 0 { 16 } else { bits as u8 };
+        let bits = if bits == 0 { 16 } else {
+            u8::try_from(bits).map_err(|_| invalid(&format!("unsupported integer PCM at {bits} bits")))?
+        };
         Self::new(PcmFormat::Int { bits, big_endian }, sample_rate, channels)
     }
 
     /// IEEE float PCM of 32 or 64 bits.
     pub fn float(bits: u16, sample_rate: u32, channels: u16) -> Result<Self> {
-        let bits = if bits == 0 { 32 } else { bits as u8 };
+        let bits = if bits == 0 { 32 } else {
+            u8::try_from(bits).map_err(|_| invalid(&format!("unsupported float PCM at {bits} bits")))?
+        };
         Self::new(PcmFormat::Float { bits }, sample_rate, channels)
     }
 
-    /// Widen `data` into interleaved f32 little-endian bytes. A tail short of one
-    /// frame is dropped: it holds no complete sample for every channel.
-    fn convert(&self, data: &[u8]) -> Vec<u8> {
-        let frame = self.format.sample_bytes() * usize::from(self.channels);
-        let frames = data.len() / frame;
-        let mut out = Vec::with_capacity(frames * usize::from(self.channels) * 4);
-        out.extend(
-            data[..frames * frame].chunks_exact(self.format.sample_bytes())
-                .flat_map(|sample| self.sample(sample).to_le_bytes()),
-        );
-        out
+    /// Widen complete finite channel frames into interleaved f32 bytes.
+    /// Refuse malformed packets before publishing any samples to playback.
+    fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+        let sample_bytes = self.format.sample_bytes();
+        let frame = sample_bytes * usize::from(self.channels);
+        if !data.len().is_multiple_of(frame) {
+            return Err(invalid("PCM packet ends in an incomplete channel frame"));
+        }
+        let bytes = (data.len() / sample_bytes).checked_mul(4)
+            .ok_or_else(|| invalid("decoded PCM size overflow"))?;
+        let mut out = Vec::new();
+        out.try_reserve_exact(bytes).map_err(|_| invalid("decoded PCM allocation failed"))?;
+        for sample in data.chunks_exact(sample_bytes) {
+            let sample = self.sample(sample);
+            if !sample.is_finite() {
+                return Err(invalid("PCM packet contains non-finite samples"));
+            }
+            out.extend_from_slice(&sample.to_le_bytes());
+        }
+        Ok(out)
     }
 
     /// Strict packet conversion for container export: reject incomplete frames.
@@ -155,6 +178,8 @@ impl PcmDecoder {
         }
         let samples: Vec<f64> = data.chunks_exact(self.format.sample_bytes()).map(|bytes| {
             match self.format {
+                PcmFormat::ALaw => f64::from(fvid_codecs::g711::Law::ALaw.decode(bytes[0]))/32768.,
+                PcmFormat::MuLaw => f64::from(fvid_codecs::g711::Law::MuLaw.decode(bytes[0]))/32768.,
                 PcmFormat::Unsigned8 => (f64::from(bytes[0]) - 128.0) / 128.0,
                 PcmFormat::Int { bits, big_endian } => f64::from(sign_extended(bytes, big_endian)) / (1u64 << (bits - 1)) as f64,
                 PcmFormat::Float { bits: 32 } => f64::from(if self.float_big_endian { f32::from_be_bytes(bytes.try_into().unwrap()) } else { f32::from_le_bytes(bytes.try_into().unwrap()) }),

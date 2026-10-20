@@ -1,0 +1,5618 @@
+[
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t0-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t0-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t0-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t0-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t0-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t0-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t1-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t1-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t1-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t1-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t1-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t1-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t2-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t2-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t2-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t2-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t2-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t2-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t3-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t3-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t3-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t3-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t3-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-sps-t3-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t0-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t0-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t0-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t0-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t0-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t0-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t1-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t1-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t1-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t1-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t1-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t1-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t2-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t2-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t2-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t2-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t2-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t2-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t3-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t3-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t3-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t3-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t3-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-pps-t3-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t0-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t0-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t0-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t0-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t0-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t0-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t1-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t1-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t1-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t1-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t1-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t1-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t2-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t2-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t2-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t2-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t2-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t2-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t3-d0-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t3-d0-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t3-d1-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t3-d1-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t3-d2-a0",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e0-fallback-t3-d2-a1",
+    "depth": 8,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t0-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t0-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t0-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t0-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t0-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t0-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t1-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t1-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t1-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t1-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t1-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t1-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t2-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t2-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t2-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t2-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t2-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t2-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t3-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t3-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t3-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t3-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t3-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-sps-t3-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t0-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t0-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t0-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t0-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t0-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t0-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t1-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t1-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t1-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t1-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t1-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t1-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t2-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t2-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t2-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t2-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t2-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t2-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t3-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t3-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t3-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t3-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t3-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-pps-t3-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t0-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t0-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t0-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t0-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t0-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t0-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t1-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t1-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t1-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t1-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t1-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t1-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t2-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t2-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t2-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t2-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t2-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t2-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t3-d0-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t3-d0-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t3-d1-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t3-d1-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t3-d2-a0",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-8-e1-fallback-t3-d2-a1",
+    "depth": 8,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t0-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t0-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t0-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t0-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t0-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t0-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t1-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t1-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t1-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t1-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t1-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t1-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t2-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t2-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t2-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t2-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t2-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t2-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t3-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t3-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t3-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t3-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t3-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-sps-t3-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t0-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t0-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t0-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t0-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t0-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t0-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t1-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t1-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t1-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t1-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t1-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t1-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t2-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t2-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t2-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t2-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t2-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t2-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t3-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t3-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t3-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t3-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t3-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-pps-t3-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t0-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t0-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t0-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t0-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t0-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t0-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t1-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t1-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t1-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t1-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t1-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t1-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t2-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t2-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t2-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t2-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t2-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t2-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t3-d0-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t3-d0-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t3-d1-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t3-d1-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t3-d2-a0",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e0-fallback-t3-d2-a1",
+    "depth": 10,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t0-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t0-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t0-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t0-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t0-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t0-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t1-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t1-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t1-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t1-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t1-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t1-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t2-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t2-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t2-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t2-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t2-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t2-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t3-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t3-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t3-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t3-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t3-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-sps-t3-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t0-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t0-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t0-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t0-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t0-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t0-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t1-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t1-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t1-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t1-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t1-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t1-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t2-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t2-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t2-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t2-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t2-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t2-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t3-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t3-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t3-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t3-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t3-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-pps-t3-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t0-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t0-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t0-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t0-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t0-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t0-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t1-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t1-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t1-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t1-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t1-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t1-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t2-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t2-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t2-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t2-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t2-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t2-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t3-d0-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t3-d0-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t3-d1-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t3-d1-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t3-d2-a0",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-10-e1-fallback-t3-d2-a1",
+    "depth": 10,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t0-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t0-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t0-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t0-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t0-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t0-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t1-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t1-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t1-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t1-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t1-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t1-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t2-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t2-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t2-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t2-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t2-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t2-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t3-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t3-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t3-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t3-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t3-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-sps-t3-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t0-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t0-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t0-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t0-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t0-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t0-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t1-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t1-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t1-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t1-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t1-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t1-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t2-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t2-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t2-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t2-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t2-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t2-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t3-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t3-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t3-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t3-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t3-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-pps-t3-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t0-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t0-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t0-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t0-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t0-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t0-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t1-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t1-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t1-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t1-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t1-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t1-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t2-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t2-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t2-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t2-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t2-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t2-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t3-d0-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t3-d0-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t3-d1-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t3-d1-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t3-d2-a0",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e0-fallback-t3-d2-a1",
+    "depth": 14,
+    "cabac": false,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t0-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t0-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t0-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t0-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t0-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t0-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t1-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t1-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t1-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t1-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t1-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t1-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t2-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t2-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t2-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t2-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t2-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t2-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t3-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t3-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t3-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t3-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t3-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-sps-t3-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "sps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t0-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t0-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t0-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t0-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t0-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t0-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t1-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t1-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t1-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t1-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t1-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t1-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t2-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t2-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t2-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t2-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t2-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t2-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t3-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t3-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t3-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t3-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t3-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-pps-t3-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "pps",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t0-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t0-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t0-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t0-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t0-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t0-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "frame",
+      "field",
+      "columns"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t1-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t1-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t1-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t1-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t1-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t1-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "field",
+      "columns",
+      "checker"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t2-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t2-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t2-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t2-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t2-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t2-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "columns",
+      "checker",
+      "frame"
+    ],
+    "deblock": 2,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t3-d0-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t3-d0-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 0,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t3-d1-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t3-d1-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 1,
+    "aso": true
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t3-d2-a0",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": false
+  },
+  {
+    "name": "sep-mbaff-8x8-14-e1-fallback-t3-d2-a1",
+    "depth": 14,
+    "cabac": true,
+    "scaling": "fallback",
+    "layouts": [
+      "checker",
+      "frame",
+      "field"
+    ],
+    "deblock": 2,
+    "aso": true
+  }
+]

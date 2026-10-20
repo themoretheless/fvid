@@ -1,0 +1,133 @@
+{
+  "provenance": "Own raw/Rice SCE/CPE packets and neutral VP9. Only the first/last reserved header bit or reserved shifted-byte code is changed; cookie and body stay authored controls. No private media/external codec/network.",
+  "controls": [
+    {
+      "name": "1-16-raw",
+      "channels": 1,
+      "depth": 16,
+      "compressed": false
+    },
+    {
+      "name": "2-16-raw",
+      "channels": 2,
+      "depth": 16,
+      "compressed": false
+    },
+    {
+      "name": "1-32-rice",
+      "channels": 1,
+      "depth": 32,
+      "compressed": true
+    },
+    {
+      "name": "2-32-rice",
+      "channels": 2,
+      "depth": 32,
+      "compressed": true
+    }
+  ],
+  "invalid": [
+    {
+      "name": "1-16-raw-reserved-first",
+      "control": "1-16-raw",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "1-16-raw-reserved-last",
+      "control": "1-16-raw",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "1-16-raw-shifted-code3",
+      "control": "1-16-raw",
+      "error": "ALAC element uses reserved shifted-byte code 3"
+    },
+    {
+      "name": "2-16-raw-reserved-first",
+      "control": "2-16-raw",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "2-16-raw-reserved-last",
+      "control": "2-16-raw",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "2-16-raw-shifted-code3",
+      "control": "2-16-raw",
+      "error": "ALAC element uses reserved shifted-byte code 3"
+    },
+    {
+      "name": "1-32-rice-reserved-first",
+      "control": "1-32-rice",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "1-32-rice-reserved-last",
+      "control": "1-32-rice",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "1-32-rice-shifted-code3",
+      "control": "1-32-rice",
+      "error": "ALAC element uses reserved shifted-byte code 3"
+    },
+    {
+      "name": "2-32-rice-reserved-first",
+      "control": "2-32-rice",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "2-32-rice-reserved-last",
+      "control": "2-32-rice",
+      "error": "ALAC element has nonzero reserved header bits"
+    },
+    {
+      "name": "2-32-rice-shifted-code3",
+      "control": "2-32-rice",
+      "error": "ALAC element uses reserved shifted-byte code 3"
+    }
+  ],
+  "files": {
+    "1-16-raw.mkv": "51ddf1a706827ffbb122c3b8c9085d253ea32c51744e1cd2c597855a528aecda",
+    "1-16-raw.m4a": "23e5630884da3dca4dd0f75c89876f99c44db0fcb15d5c449091266d8c52c46c",
+    "1-16-raw.cookie": "7e341747944b8ed75b315bf5dd53969ea8be15a9f924fba91d53221bb9c7e5f3",
+    "1-16-raw.packet": "b1690e55c5a6886044c33d812fa57664313636206ad7ba196304ac6c79fefd88",
+    "1-16-raw-reserved-first.mkv": "fea9c33855fd3487b927f913e470f58dc3eb50355ac6b363d2d60e3c7f936ace",
+    "1-16-raw-reserved-first.packet": "cd9ecc338c1f6e7ed545b7d3e3144bae8e782617e4dfe4b2aa41705cb8cb35c9",
+    "1-16-raw-reserved-last.mkv": "e08770d50e653cfb086813fd1ac4f2e0d13a09ec0c4b882addec2d01a66eb84c",
+    "1-16-raw-reserved-last.packet": "e14d35f747a5b18f65f25b64118a924eae8dd44fe8a76f0358466b284061fcb2",
+    "1-16-raw-shifted-code3.mkv": "46b0b79cf60f7e4b488dcb2b2a7a0f0d2ce1091b6ebf191117454d9f1be6d4df",
+    "1-16-raw-shifted-code3.packet": "0882309961f56cdd83019a712e24bc43ee52c888e23f30951da4c6cd6f8e6d3e",
+    "2-16-raw.mkv": "12a5c20d7153c1d45840b965083467caa941c3f0948fa39afe37b238669333db",
+    "2-16-raw.m4a": "7e223bf0dce279fbf5b27026b583582d820dde8dd999ba566c12b2c292f092f4",
+    "2-16-raw.cookie": "de7ab171086a844cc0193ee5683f29f4134b6b5e357f4bdc7d7865801a4d305d",
+    "2-16-raw.packet": "7277fa58ac4c417d898a49e9390af17e00bd5a328aff4fe723f75bad958aa905",
+    "2-16-raw-reserved-first.mkv": "4e59874fb62ab9aac8a986b4c701af828b6650ae2e59cd739b40ffc958dee531",
+    "2-16-raw-reserved-first.packet": "9c1a2d99b3a09981f94a718b725bcee60e3997c339e641dda332f1f77cdd15df",
+    "2-16-raw-reserved-last.mkv": "4659762deb4b76af13d21bc8bb222f1b1a38f5a60f084285a84c50f13c63e41f",
+    "2-16-raw-reserved-last.packet": "13166572767aaf40b01c034c8689f3406ed9084df9c72c92f6cb1928dddc9773",
+    "2-16-raw-shifted-code3.mkv": "f85276a9a03f8727246677e966e944a2de1c7ec84e231a51ec203ecf0398be87",
+    "2-16-raw-shifted-code3.packet": "42b284695765dcf4e74788a13c86a1232a8f24733fdf34af6b240ff735cb82dc",
+    "1-32-rice.mkv": "41b06b8d870e64d2c65adaaa24ffdc2b0e4be46b74f027ffe854796a5d923cb6",
+    "1-32-rice.m4a": "9d9498197f68407439a99c32d3363e5fd5925e903df25baa408d685e157c8a92",
+    "1-32-rice.cookie": "03a49983619a500c5e80a1b4d678c07de92b1e4cfa5eb7dbfb69218ca693d111",
+    "1-32-rice.packet": "99092e339f6746c9020a2eabd49575f37c4e0ee24f1cde15f6a9e5b6adbfc1a6",
+    "1-32-rice-reserved-first.mkv": "876593257dbb6492631603f3f62e8b497f08d894cfa1994f436994a9aad1db54",
+    "1-32-rice-reserved-first.packet": "5aef8b0de132ec4aabaed0ddf9eac49c8a45352ee003615e67a3f500043a0cf8",
+    "1-32-rice-reserved-last.mkv": "7968a7f13b12c9db885e097c0bee125bebbff75c57ab66bdc8bf9dacc1e49b92",
+    "1-32-rice-reserved-last.packet": "5fc778b18a500ec3b00384ed788ff615fccfe40cfb8c46b0498f85ff9c700a48",
+    "1-32-rice-shifted-code3.mkv": "272d95026a3104789e8961442f5805cc2f5eb3616508dee908398d88bca835b6",
+    "1-32-rice-shifted-code3.packet": "7e0cd2861836b5aa922a08a9f486d586d8467cb9c3602e01773dbddeb66adc5d",
+    "2-32-rice.mkv": "095d87caa80f2112038e1de852fe5d16f7a8d06d9b50609ab03a90bb6168a003",
+    "2-32-rice.m4a": "1508f0265db0a93fe731f339b5729f21e671714e59957073c7aedb59f18b7e7e",
+    "2-32-rice.cookie": "882ce464b3fb26874c05fd30b28da57cdb7f03947b0efdf14702431467481712",
+    "2-32-rice.packet": "b4bfc72c1d89dd94404968b780e4531195e7f099a3ec1aad434d691f7fc3a55f",
+    "2-32-rice-reserved-first.mkv": "68fac69556f23b8a83e4e16a676d649f6ef5a27d7be82ada364c9dda68174794",
+    "2-32-rice-reserved-first.packet": "bec79a741e6be3ceab9a86fad6b88fd39dbc27aee50a39d91fee405ad2c076b7",
+    "2-32-rice-reserved-last.mkv": "f1640b39f1ce22aef24ed0ebfba3542da2216aecbfe16d5ec3be8a9ff025a7bc",
+    "2-32-rice-reserved-last.packet": "6cce30c8a51d322178dbca7425c8edb0f9d054be6dc411ae53a0367cc4b55493",
+    "2-32-rice-shifted-code3.mkv": "eb43fa44357771ee61ae671c826c84cf3ba74dce9489733738e4a78dc2c72cab",
+    "2-32-rice-shifted-code3.packet": "1fb2f88257887f48109e43a12afd5d3847b03e639093110ec9807904925b3647"
+  }
+}

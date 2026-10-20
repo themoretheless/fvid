@@ -1,0 +1,17 @@
+{
+  "provenance": "Authored MIDI/XM native references read in place. Regression gates native decoder calls at known history-window boundaries to prove pause is serviced before a second decode, without host-speed timing assumptions. Separate authored native VP9/PCM video. No encoder/network/private media.",
+  "cases": [
+    {
+      "kind": "midi",
+      "source": "tests/fixtures/midi/two-notes.mid",
+      "target_ms": 1500,
+      "sha256": "55118571e7325c2415ee7d3e0c8cbeaea7fd27fffd7815b7bf745e975e58e880"
+    },
+    {
+      "kind": "xm",
+      "source": "tests/fixtures/playback-errors/xm-sample-grid/held-125.xm",
+      "target_ms": 1920,
+      "sha256": "030e383934c2cb6e210e09dcda6a9b73f9a924646399d10267e9c7ab44eeed65"
+    }
+  ]
+}

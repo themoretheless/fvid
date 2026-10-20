@@ -5,8 +5,13 @@ use std::{
 };
 type Result<T> = std::result::Result<T, String>;
 static SERIAL: AtomicU64 = AtomicU64::new(0);
-pub(crate) struct Directory(pub(crate) PathBuf);
+pub(crate) struct Directory(pub(crate) PathBuf, Vec<PathBuf>);
 impl Directory {
+    pub(crate) fn stage_path(&mut self, name: &str) -> PathBuf {
+        let path = self.0.join(name);
+        self.1.push(path.clone());
+        path
+    }
     pub(crate) fn new() -> Result<Self> {
         loop {
             let path = std::env::temp_dir().join(format!(
@@ -21,7 +26,7 @@ impl Directory {
                 builder.mode(0o700);
             }
             match builder.create(&path) {
-                Ok(()) => return Ok(Self(path)),
+                Ok(()) => return Ok(Self(path, Vec::new())),
                 Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => continue,
                 Err(e) => return Err(e.to_string()),
             }
@@ -30,6 +35,9 @@ impl Directory {
 }
 impl Drop for Directory {
     fn drop(&mut self) {
+        for path in &self.1 {
+            let _ = std::fs::remove_file(path);
+        }
         let _ = std::fs::remove_file(self.0.join("video.mkv"));
         let _ = std::fs::remove_dir(&self.0);
     }

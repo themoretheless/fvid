@@ -1,0 +1,54 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0136"
+  ],
+  "checked_at": "2026-10-16T07:52:04.918493+00:00",
+  "before": [
+    "evidence/batch-118-reproduction-before.log",
+    "evidence/batch-118-acceptance-before-final.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-118-integration.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-118-decoder-verified.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-118-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-118-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twenty-five authored RPN0inputs compare everymono/stereoPCMbytewithindependently encoded default2semitone bends orminus-ten-octave notecontrol. Semitone0/1/2/3/4/12/24/127,cents25/50/75,positive/negativebend,active/future voices,LSB/MSBorder,null/unknown/NRPN/reselect,CC121andchannel15/isolation.",
+    "Before ignored reproduction passesandacceptance initiallyignored.Forcedacceptance fails44mono/stereoPCMcomparisons across22inputs;range2,unknownRPNandunselecteddata controls healthy.Worker failures stopatgeneration0beforeseek;no separatepre-fixseekdefect claimed.",
+    "After acceptanceenabled,oldignoredexpectationinverted.Persistent channel sensitivity retunes sounding/future notes withoutphase reset.RPNselection andNRPNactive mode areseparate,soNRPNdoesnotdestroy oldRPNbytes;null/CC121disabledataentry.CC121preserves sensitivity;decoderresetrestores2semitones/nullselection.",
+    "50actualindependent worker100ms/EOFtargets plusfullplay/rewind matchPCMbytes.Aseparatemaximumrange/cents/keyresourceprobe verifiesfiniteboundedoutput andactualworker EOF;newnativeunitchecksphase/stepin[0,1),32voicebudget andresetat8k/44.1k.Thatprobe isstabilityqualification,notindependent high-alias pitch equivalence. Foldwholecycles once atretune;defaultsub-cycleincrements remainunchanged.",
+    "18decoder units,15integrations,fixture reproduction andplayerbuildpass.One newunit timestamp usedu64instead ofexistingi64API;corrected andverifiedunitsrerun;productionbuild unaffected bytest-onlycorrection.NoFFmpeg/network/private media/physicalDAC/performance/fullGMclaim. OtherRPN/DataIncrementDecrementremainignoredanddocumented."
+  ],
+  "sources": [
+    {
+      "url": "https://midi.org/midi-1-0-control-change-messages",
+      "section": "RegisteredParametersRPN0;CC6/38/100/101;null127/127",
+      "rule": "RPN0selects pitchbend sensitivity:MSBsemitones/LSBcents.Nullselectiondisablesdataentry."
+    },
+    {
+      "url": "https://microsoft.github.io/MIDI/kb/in-box-general-midi-synth/",
+      "section": "ResetAllControllers;registeredparameters",
+      "rule": "CC121resets parameterselects andbend;pitchsensitivity is supported RPN0."
+    }
+  ],
+  "compatibility": "AdditiveRPN0sensitivitysupport.Default2semitones/legacyPCM andpublicsignatures retained.UnknownRPN/NRPNdataignored;docsdescribeprofilelimits.",
+  "counting": "One nativebend-sensitivity capability;25pairs,51workerschecks,resourcephaseguard andselectioncontrols add noextra IDs."
+}

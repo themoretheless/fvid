@@ -1,0 +1,178 @@
+{
+  "provenance": "Fourteen active-operand range violations inpublic nativeMIDI10byte records;fourteen7/14bit boundary/unusedbyte controls. Faults injected intofirstpacket ofauthored100ms MIDI;separate nativeVP9/PCMvideo. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "note-key-128",
+      "file": "note-key-128.packet",
+      "bad": true
+    },
+    {
+      "name": "note-velocity-128",
+      "file": "note-velocity-128.packet",
+      "bad": true
+    },
+    {
+      "name": "off-key-128",
+      "file": "off-key-128.packet",
+      "bad": true
+    },
+    {
+      "name": "program-128",
+      "file": "program-128.packet",
+      "bad": true
+    },
+    {
+      "name": "control-number-128",
+      "file": "control-number-128.packet",
+      "bad": true
+    },
+    {
+      "name": "control-value-128",
+      "file": "control-value-128.packet",
+      "bad": true
+    },
+    {
+      "name": "note-key-255",
+      "file": "note-key-255.packet",
+      "bad": true
+    },
+    {
+      "name": "note-velocity-255",
+      "file": "note-velocity-255.packet",
+      "bad": true
+    },
+    {
+      "name": "off-key-255",
+      "file": "off-key-255.packet",
+      "bad": true
+    },
+    {
+      "name": "program-255",
+      "file": "program-255.packet",
+      "bad": true
+    },
+    {
+      "name": "control-number-255",
+      "file": "control-number-255.packet",
+      "bad": true
+    },
+    {
+      "name": "control-value-255",
+      "file": "control-value-255.packet",
+      "bad": true
+    },
+    {
+      "name": "bend-16384",
+      "file": "bend-16384.packet",
+      "bad": true
+    },
+    {
+      "name": "bend-65535",
+      "file": "bend-65535.packet",
+      "bad": true
+    },
+    {
+      "name": "valid-note-0-0",
+      "file": "valid-note-0-0.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-note-0-127",
+      "file": "valid-note-0-127.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-note-127-0",
+      "file": "valid-note-127-0.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-note-127-127",
+      "file": "valid-note-127-127.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-off-0",
+      "file": "valid-off-0.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-off-127",
+      "file": "valid-off-127.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-program-0",
+      "file": "valid-program-0.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-program-127",
+      "file": "valid-program-127.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-control-0-0",
+      "file": "valid-control-0-0.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-control-127-127",
+      "file": "valid-control-127-127.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-bend-0",
+      "file": "valid-bend-0.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-bend-16383",
+      "file": "valid-bend-16383.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-off-unused-bytes",
+      "file": "valid-off-unused-bytes.packet",
+      "bad": false
+    },
+    {
+      "name": "valid-bend-unused-bytes",
+      "file": "valid-bend-unused-bytes.packet",
+      "bad": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "control.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "normal.packet": "f00e7b44ff287881a6ada3f54cb6b33d7e5296cc66c8a397633a04509a41c39b",
+    "note-key-128.packet": "924e09372f02f370fff54c74047d4e6db1603119fcd4530d25e82e117eec33b2",
+    "note-velocity-128.packet": "3eb3b9d3c581ec46e76d44b994f24cc794869914f394c7c852b29a59cf6c183f",
+    "off-key-128.packet": "05828a3fe66bb6d2c8fa6b6fd9b78b61e486f0d4ead82c198b40515e22a29d3f",
+    "program-128.packet": "f72520d270e48fd5debd95098ac597b84bb96ddb922e30f2331f50ca1eafde22",
+    "control-number-128.packet": "32362d844afcea4e4e9829e5b764e5db8d71f322c729c4d8ff4114ad4968ab95",
+    "control-value-128.packet": "02fa16f19071f2d130dae75dbf80c7540d81b3861c098ba1c2943e4a9af2d1a5",
+    "note-key-255.packet": "3210544e2ab2840249cf195aee59a04c21c6159fcc44d9282baa9b75cafd16b4",
+    "note-velocity-255.packet": "50b5683d0da56b4f06e6ce8719df14a0cbc608d30398fa5ade1607205e7ef45e",
+    "off-key-255.packet": "c0142c661f1638193f8decd28eee611c2ded89ea70853eee1c7db6edb39685f1",
+    "program-255.packet": "54ac5d7c3cec097600130a42fd2d6232eb0122943d352fd73062969d0b0418c4",
+    "control-number-255.packet": "6a5fabced272971f575ffe3872ce635f3e2374329bf1816cc7f7d1e12cbbf710",
+    "control-value-255.packet": "00dd5d0ab3080491f50bc778f5616933609bd53fa386ab281dc4cb233b2b72e2",
+    "bend-16384.packet": "54c2e01fb80979ef83834a9bcb0c4bb924a895b53dacb7bdae208a9ee878483f",
+    "bend-65535.packet": "1f45d2c710d96ad8d5493d82375b8658de4f6c579d6cdfb22e6a973be501d47d",
+    "valid-note-0-0.packet": "96eeff563b3135e3f77964e8c062328fd207c8bc9e754fc423abaf83eb3f1490",
+    "valid-note-0-127.packet": "82178039c4e42f9c2dee91a01de48c8f0a29e356f99ee20a4b0f27211aa956a0",
+    "valid-note-127-0.packet": "fc53a18672328e39333c79496cdb25a0666897603c8510c37a37d2a08e08fc7d",
+    "valid-note-127-127.packet": "850bb0debafbaddd81fb55adad04a538824805e495989e8178219159a40b363b",
+    "valid-off-0.packet": "337a32712f14c5df0b57a64bd6c321a043081688ecd4f33fd8319470da2256b1",
+    "valid-off-127.packet": "00f9a7db5f3768766394f5f6e6f7bd4234759ced85b8e8d5c4f87982eedee48e",
+    "valid-program-0.packet": "41f45e0c4ba13f0e8c873f321d4a83b354816b4f6f1c7cb51b97d7fae02ebe25",
+    "valid-program-127.packet": "620cc1a45ddae55098114aaf49f44ee0c2ef921de828a6341767b3c91e845b12",
+    "valid-control-0-0.packet": "ab0c4a5b8bd8ee364e1e638e7d81465a8f4ffe9a8da3f2494962622b72ddc2b4",
+    "valid-control-127-127.packet": "070f192ba098cd6482da271728eda9f7c40c63c120b4d6f5cb6c712a038b6bee",
+    "valid-bend-0.packet": "a09c0eb5f6573e91903df6f638f627c71ce004356e4b3f8c0573e7514d94ef16",
+    "valid-bend-16383.packet": "fac2b5a0a5c19b2b1de3bbacbbd1aa013b0d26b3ce3f8ce512b77a8de1491cbf",
+    "valid-off-unused-bytes.packet": "abeafa8aac098c65229623747b2a8830df5610af5ee38bf7b86294405a0d9f7e",
+    "valid-bend-unused-bytes.packet": "9b30b2e87c9ebde20425ee54161130d3a89124f26fdc24587c4213c0f74f9b75"
+  }
+}

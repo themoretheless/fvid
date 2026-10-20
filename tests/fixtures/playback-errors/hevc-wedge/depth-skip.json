@@ -1,0 +1,9125 @@
+{
+  "provenance": "Own skip-intra component streams; not full pictures.",
+  "cases": [
+    {
+      "file": "depth-skip-I-swap0-qp0.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 0,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-I-swap0-qp26.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 26,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-I-swap0-qp51.cabac",
+      "slice": "I",
+      "swap": false,
+      "qp": 51,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-P-swap0-qp0.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 0,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-P-swap0-qp26.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 26,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-P-swap0-qp51.cabac",
+      "slice": "P",
+      "swap": false,
+      "qp": 51,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-B-swap0-qp0.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 0,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-B-swap0-qp26.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 26,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-B-swap0-qp51.cabac",
+      "slice": "B",
+      "swap": false,
+      "qp": 51,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-P-swap1-qp0.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 0,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-P-swap1-qp26.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 26,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-P-swap1-qp51.cabac",
+      "slice": "P",
+      "swap": true,
+      "qp": 51,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-B-swap1-qp0.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 0,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-B-swap1-qp26.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 26,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    },
+    {
+      "file": "depth-skip-B-swap1-qp51.cabac",
+      "slice": "B",
+      "swap": true,
+      "qp": 51,
+      "blocks": [
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": true,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": false,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": null
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 0
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 1
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 2
+        },
+        {
+          "skipped": false,
+          "enabled": true,
+          "mode": 3
+        }
+      ]
+    }
+  ]
+}

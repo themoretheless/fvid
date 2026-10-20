@@ -1,0 +1,77 @@
+{
+  "variants": [
+    {
+      "file": "opus-surround-presentation.opus",
+      "channels": 6,
+      "pre_skip": 312,
+      "final_trim": 137,
+      "sha256": "a6feb994b79b914241b28ea5040756973a7760620e26b96d68ad81d700439507"
+    },
+    {
+      "file": "opus-surround-padded-presentation.opus",
+      "channels": 6,
+      "pre_skip": 312,
+      "final_trim": 137,
+      "sha256": "1c9e40e2ba6a555acdafdbbea22729ac4d597e341d290aea8aa82855422e0ae4"
+    },
+    {
+      "file": "opus-surround-chained.opus",
+      "chains": 2,
+      "pre_skips": [
+        312,
+        648
+      ],
+      "final_trims": [
+        137,
+        211
+      ],
+      "sha256": "769217f32c9f0c0dfc4cdf5f53ade3f0363f36bd36d92f6b6ee4f3f8cdf491e8"
+    },
+    {
+      "file": "opus-discrete-tagged.opus",
+      "video": "hevc-opus-discrete-companion.mkv",
+      "channels": 6,
+      "mapping_family": 255,
+      "pre_skip": 312,
+      "final_trim": 137,
+      "sha256": "bf044185a43c5f5e83bcc5c435a37d22cf151ca1e25aac84d5ca6f23b943347f"
+    },
+    {
+      "file": "opus-surround-parallel.opus",
+      "streams": 2,
+      "pre_skips": [
+        312,
+        648
+      ],
+      "final_trims": [
+        137,
+        137
+      ],
+      "sha256": "490a23eb3ffa4576d3c47b32d861f803ecb4fdf9ea22929fe274bc827b5f9d63"
+    },
+    {
+      "file": "opus-surround-parallel-chained.opus",
+      "links": 2,
+      "tracks": 2,
+      "sha256": "5f48a284e63bee4a4d6e13129ac775c4da99fd78e74abad9c5899f5f1a44d674"
+    },
+    {
+      "file": "opus-surround-reconfigured.opus",
+      "chains": 2,
+      "second_gain_q8": 1536,
+      "second_pre_skip": 648,
+      "second_mapping": [
+        5,
+        0,
+        0,
+        255,
+        2,
+        1
+      ],
+      "second_video": "hevc-opus-reconfigured-companion.mkv",
+      "second_video_sha256": "7ae567da09fd03e5d850115819aac50dc1ce991e32cfe5cb2d98d2fb98ac5911",
+      "sha256": "8a05dee2738f43aec2b3f51b707d1a7a20a58c44e7c51b22b1cb569627301179"
+    }
+  ],
+  "provenance": "Existing authored six-channel Opus packets also present in short HEVC/Opus synthetic video; pure Python Ogg framing and CRC, no codec runs."
+}

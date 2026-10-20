@@ -1,0 +1,10 @@
+{
+  "source": "https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c",
+  "retrieved_source_sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "scope": "Primary player implementation; semantic inspection only,no code copied into fvid.",
+  "observations": [
+    "keyOffCmd compares elapsed row tick with param masked to31. It is a tick-nonzero effect.",
+    "K00 is separately handled on tick0 before a same-cell new note.",
+    "Without an enabled volume envelope key-off clears volume and requests quick volume ramp. Native fvid existing note97 behavior is the independent PCM control; no claim of bit-identical FT2 mixer."
+  ]
+}

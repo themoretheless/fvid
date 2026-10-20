@@ -1,0 +1,63 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0070"
+  ],
+  "checked_at": "2026-10-15T21:26:37.890136+00:00",
+  "before": [
+    "evidence/batch-046-lace-padding-before.log",
+    "evidence/batch-046-owned-lace-origin-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-046-root-webm.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-046-owned-webm.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-046-owned-pcm.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-046-integration.log",
+      "kind": "rust",
+      "passed": 40
+    },
+    {
+      "log": "evidence/batch-046-audio-thread.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-046-minimal.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-046-lace-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-046-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "spec": "https://www.matroska.org/technical/elements.html#DiscardPadding",
+  "qualification": [
+    "DiscardPadding describes the Block, which can contain several laced frames.30 authored60ms VP9/PCM fixtures exercise fixed/Xiph/EBML laces, signed head/tail padding across one/multiple/all frames and fractional sample boundaries. All480 source samples decode exactly before trim.",
+    "Before18 spanning/whole variants reject valid padding because the full block amount is attached to one20ms packet. Distribution now caps each frame trim at its duration and carries the remaining amount toward the appropriate end.",
+    "Owned leading-origin regression was reproduced after parser distribution: head30ms output reinserts80 discarded samples as silence (1280 instead of960 f32 bytes;2560 instead of1920 f64). Origin now accumulates until audible output starts.",
+    "Root samples, timestamps, integral declared endpoints, playback/rewind/seek20ms and EOF pass. Owned f32/f64 exports match their normalized-origin oracles for integral-sample metadata. Fully padded root playback succeeds with no PCM; owned raw export separately retains its existing no-samples refusal.",
+    "Padding larger than the entire block, i64::MIN magnitude and319-byte packet cap refuse with precise errors. Existing compressed-frame zlib/header-stripping, variable Opus lace timing/native export and prior padding/delay tests pass.",
+    "No public signatures change. New spanning-padding acceptance is PCM-focused; no new compressed-codec conformance or physical-DAC claim. Nonintegral-sample metadata rounding is separately under audit."
+  ],
+  "counting": "One block-level padding extent improvement; parser distribution and preserving its leading export origin are necessary parts. Lace modes, signs, f32/f64, sample variants and tests add no IDs."
+}

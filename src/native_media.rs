@@ -2,6 +2,8 @@
 //! This module is available without the legacy `media` feature or FFmpeg.
 use crate::playback_native::{NativeReader, RawFrame};
 use crate::{Result, invalid};
+use fvid_media::owned_matroska_sample_clock::quantized_sample_matches as aac_quantized_sample_matches;
+use fvid_media::owned_matroska_grid_clock::grid_sample_matches as aac_quantized_grid_matches;
 use std::{fs::File, io::BufReader, path::Path, time::Duration};
 
 pub use fvid_media_info::{DecodeStats, DecodeTransform};
@@ -348,9 +350,10 @@ use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
 use crate::native_audio_decoder::NativeAudioCheckpoint as Mp4AacCheckpoint;
 include!("../crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs");
 
-/// Decode a contiguous Matroska AAC stream, discarding codec delay and per-block
-/// padding. Sub-tick timestamp quantization is tolerated without drifting PCM.
-/// Intervals address the trimmed sample sequence starting at its first sample.
+/// Decode Matroska AAC on its container presentation timeline. Decode negative
+/// preroll for history, trim signed padding and preserve timestamp gaps as silence.
+/// Intervals address container time starting at zero, including leading offsets.
+/// Coded sample timing resolves quantization before audible windows are cropped.
 pub fn decode_matroska_aac_pcm_interval(
     data: &[u8],
     output: &mut impl std::io::Write,

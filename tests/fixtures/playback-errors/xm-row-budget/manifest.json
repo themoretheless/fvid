@@ -1,0 +1,33 @@
+{
+  "provenance": "Authored one-to-three row XM scores ending through B01 beyond the single-entry order list,matched natural-end controls and B00one-pass loop. Signed16loop,authored VP9/PCM companion. No external encoder,network or private media.",
+  "cases": [
+    {
+      "file": "end-jump-1.xm",
+      "control": "end-jump-1-natural.xm",
+      "rows": 1,
+      "short_budget": 0
+    },
+    {
+      "file": "end-jump-2.xm",
+      "control": "end-jump-2-natural.xm",
+      "rows": 2,
+      "short_budget": 1
+    },
+    {
+      "file": "end-jump-3.xm",
+      "control": "end-jump-3-natural.xm",
+      "rows": 3,
+      "short_budget": 2
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "end-jump-1.xm": "7c46c974577edab41ce0068e76d0f463e90331b879259270b359b0422af19c21",
+    "end-jump-1-natural.xm": "8140aedad94f7dbc28d5676944e5fa7d1cc4ef5934e085027a200acfe9bf3e74",
+    "end-jump-2.xm": "fc2b8bd6d4a529a794763d9d9b69b1592dd26002d23e061fa965ade51382ee56",
+    "end-jump-2-natural.xm": "aa898018d41f90d84d4a92020b7c9f4e3200f85ac38ff00a7b489d3bc55ef200",
+    "end-jump-3.xm": "e7bf7ae23afdf1a33f6ada0a713ee867c92b579cb9494040be320d8367e101f4",
+    "end-jump-3-natural.xm": "04e122659d028fa83ebd448c2211e776f30b34bdf904d6869607d6e237741a0f",
+    "one-pass-loop.xm": "29dc8d979f1a7298518a5ee5935af1d31d03dadeead169061820f2a1fbe205eb"
+  }
+}

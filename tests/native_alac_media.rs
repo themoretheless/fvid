@@ -55,7 +55,9 @@ fn cli_plan_intervals_gain_selection_and_api_use_owned_alac() {
     let start = (from.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
     let end = (to.as_nanos() * u128::from(stats.sample_rate)).div_ceil(1_000_000_000) as usize;
     let samples: Vec<f32> = bytes
-        .as_chunks::<4>().0.iter()
+        .as_chunks::<4>()
+        .0
+        .iter()
         .map(|p| f32::from_le_bytes(*p))
         .collect();
     let expected: Vec<u8> = (start..end)
@@ -172,7 +174,9 @@ fn owned_mix_and_merge_accept_alac_inputs() {
     let decoded = d.0.join("merge.f32le");
     export(&merged, &decoded, None, 1.0, None, None, None, None, None).unwrap();
     let expected: Vec<u8> = bytes
-        .as_chunks::<4>().0.iter()
+        .as_chunks::<4>()
+        .0
+        .iter()
         .flat_map(|sample| sample.iter().chain(sample).copied())
         .collect();
     assert_eq!(std::fs::read(decoded).unwrap(), expected);
@@ -360,11 +364,86 @@ fn matroska_alac_delay_and_signed_padding_are_sample_exact() {
         } else {
             [
                 &whole[100 * stride..first_frames * stride],
+                &vec![0; 50 * stride],
                 &whole[(first_frames + 50) * stride..],
             ]
             .concat()
         };
-        assert_eq!(stats.sample_frames, (frames - 150) as u64);
+        // Interior head trimming is silence on the presentation timeline.
+        assert_eq!(
+            stats.sample_frames,
+            (frames - if sign > 0 { 150 } else { 100 }) as u64
+        );
         assert_eq!(std::fs::read(output).unwrap(), expected);
+    }
+}
+
+#[test]
+fn ordinary_zero_quantization_native_exports_match_full_and_active_filter_windows() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/playback-errors/alac-multichannel");
+    let m: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+    let d = dir();
+    for name in [
+        "2-16-discrete-predictor-1-q0.mkv",
+        "2-24-named-predictor-30-q0-twice.mkv",
+        "6-32-named-adaptive-30-q0-twice.mkv",
+        "7-20-discrete-adaptive-4-q0.mkv",
+    ] {
+        let c = m["cases"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["file"] == name)
+            .unwrap();
+        let channels = c["channels"].as_u64().unwrap() as usize;
+        let depth = c["depth"].as_u64().unwrap();
+        let frames = c["samples"].as_u64().unwrap() as usize;
+        let mut expected = Vec::new();
+        for n in 0..frames {
+            for ch in c["order"].as_array().unwrap() {
+                let ch = ch.as_u64().unwrap() as usize;
+                let v = ((ch + 1) * 101 + n * 7) as i32 * if ch % 2 == 0 { 1 } else { -1 };
+                let jump = if c["jump_sample"]
+                    .as_u64()
+                    .is_some_and(|start| n as u64 >= start)
+                {
+                    c["jump_high"].as_i64().unwrap() as i32
+                } else {
+                    0
+                };
+                let v = (v + jump) * c["scale"].as_i64().unwrap() as i32
+                    + if c["low_bias"].as_bool().unwrap() {
+                        ch as i32 + 1
+                    } else {
+                        0
+                    };
+                expected.extend((v as f32 / (1u64 << (depth - 1)) as f32).to_le_bytes());
+            }
+        }
+        for extension in ["mkv", "m4a"] {
+            for window in [false, true] {
+                let source = root.join(name).with_extension(extension);
+                let output = d.0.join(format!("{name}-{extension}-{window}.f32le"));
+                let interval =
+                    window.then_some((Duration::from_millis(1), Duration::from_millis(2)));
+                let stats = export(
+                    &source, &output, interval, 1.0, None, None, None, None, None,
+                )
+                .unwrap();
+                let want = if window {
+                    &expected[48 * channels * 4..96 * channels * 4]
+                } else {
+                    &expected
+                };
+                assert_eq!(
+                    std::fs::read(output).unwrap(),
+                    want,
+                    "{name}/{extension}/{window}"
+                );
+                assert_eq!(stats.sample_frames, want.len() as u64 / channels as u64 / 4);
+            }
+        }
     }
 }

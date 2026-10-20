@@ -1,0 +1,183 @@
+use fvid::audio::AudioStream;
+use std::time::Duration;
+
+struct Capture {
+    packets: std::sync::Arc<std::sync::Mutex<Vec<(Duration, Vec<u8>)>>>,
+    spec: Option<fvid::audio::AudioSpec>,
+    at: Duration,
+}
+impl fvid::audio::AudioBackend for Capture {
+    fn start(&mut self, spec: fvid::audio::AudioSpec) -> Result<(), fvid::audio::AudioError> {
+        self.spec = Some(spec);
+        Ok(())
+    }
+    fn push(&mut self, packet: fvid::audio::AudioPacket) -> Result<(), fvid::audio::AudioError> {
+        let spec = self.spec.unwrap();
+        self.at = packet.presentation_time()
+            + Duration::from_nanos(
+                (packet.data.len() / 4 / usize::from(spec.channels)) as u64 * 1_000_000_000
+                    / u64::from(spec.sample_rate),
+            );
+        self.packets
+            .lock()
+            .unwrap()
+            .push((packet.presentation_time(), packet.data));
+        Ok(())
+    }
+    fn position(&self) -> Duration {
+        self.at
+    }
+    fn flush(&mut self, at: Duration) -> Result<(), fvid::audio::AudioError> {
+        self.at = at;
+        self.packets.lock().unwrap().clear();
+        Ok(())
+    }
+    fn pause(&mut self) -> Result<(), fvid::audio::AudioError> {
+        Ok(())
+    }
+    fn resume(&mut self) -> Result<(), fvid::audio::AudioError> {
+        Ok(())
+    }
+    fn stop(&mut self) -> Result<(), fvid::audio::AudioError> {
+        Ok(())
+    }
+}
+#[allow(dead_code)]
+pub fn worker_check(audio: Box<dyn AudioStream>, expected: &[(Duration, Vec<u8>)]) {
+    worker_check_with_seek(audio, expected, None);
+}
+#[allow(dead_code)]
+pub fn worker_check_with_seek(
+    audio: Box<dyn AudioStream>,
+    expected: &[(Duration, Vec<u8>)],
+    seek: Option<Duration>,
+) {
+    worker_check_impl(audio, expected, seek, None);
+}
+#[allow(dead_code)]
+pub fn worker_check_with_seek_expected(
+    audio: Box<dyn AudioStream>,
+    expected: &[(Duration, Vec<u8>)],
+    seek: Duration,
+    expected_seek: &[(Duration, Vec<u8>)],
+) {
+    worker_check_impl(audio, expected, Some(seek), Some(expected_seek));
+}
+fn worker_check_impl(
+    audio: Box<dyn AudioStream>,
+    expected: &[(Duration, Vec<u8>)],
+    seek: Option<Duration>,
+    expected_seek: Option<&[(Duration, Vec<u8>)]>,
+) {
+    let spec = (audio.sample_rate(), audio.channels());
+    let captured = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let sink = captured.clone();
+    let mut playback = fvid::audio_thread::AudioPlayback::start(audio, move || {
+        Box::new(Capture {
+            packets: sink,
+            spec: None,
+            at: Duration::ZERO,
+        })
+    });
+    for generation in 0..if seek.is_some() { 3 } else { 2 } {
+        if generation == 1 {
+            playback.rewind();
+        }
+        if generation == 2 {
+            playback.seek(seek.unwrap());
+        }
+        playback.play();
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        loop {
+            assert!(
+                std::time::Instant::now() < deadline,
+                "audio worker did not reach EOF"
+            );
+            match playback.poll() {
+                Some(fvid::audio_thread::AudioEvent::Ended(g)) if g == generation => break,
+                Some(fvid::audio_thread::AudioEvent::Error(e)) => panic!("{e}"),
+                _ => {}
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let wanted: Vec<_> = if generation == 2 && expected_seek.is_some() {
+            expected_seek.unwrap().to_vec()
+        } else {
+            expected
+                .iter()
+                .filter(|(at, _)| generation != 2 || *at >= seek.unwrap())
+                .cloned()
+                .collect()
+        };
+        {
+            let actual = captured.lock().unwrap();
+            assert_eq!(
+                actual.len(),
+                wanted.len(),
+                "worker generation{generation}: packet count"
+            );
+            for (index, (actual, wanted)) in actual.iter().zip(&wanted).enumerate() {
+                assert_eq!(
+                    actual.0, wanted.0,
+                    "worker generation{generation} packet{index}: PTS"
+                );
+                assert!(
+                    actual.1 == wanted.1,
+                    "worker generation{generation} packet{index}: PCM differs (actual{} expected{} bytes)",
+                    actual.1.len(),
+                    wanted.1.len()
+                );
+            }
+        }
+        let end = wanted
+            .last()
+            .map(|(at, data)| {
+                *at + Duration::from_nanos(
+                    (data.len() / 4 / usize::from(spec.1)) as u64 * 1_000_000_000
+                        / u64::from(spec.0),
+                )
+            })
+            .unwrap_or(if generation == 2 {
+                seek.unwrap()
+            } else {
+                Duration::ZERO
+            });
+        assert_eq!(
+            playback.position(),
+            end,
+            "worker generation{generation}: audible end position"
+        );
+    }
+}
+#[allow(dead_code)]
+pub fn worker_refusal(audio: Box<dyn AudioStream>, needle: &str) {
+    let captured = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let sink = captured.clone();
+    let playback = fvid::audio_thread::AudioPlayback::start(audio, move || {
+        Box::new(Capture {
+            packets: sink,
+            spec: None,
+            at: Duration::ZERO,
+        })
+    });
+    playback.play();
+    let deadline = std::time::Instant::now() + Duration::from_secs(5);
+    loop {
+        assert!(
+            std::time::Instant::now() < deadline,
+            "audio worker did not refuse invalid padding"
+        );
+        match playback.poll() {
+            Some(fvid::audio_thread::AudioEvent::Error(error)) => {
+                assert!(error.contains(needle), "{error}");
+                assert!(captured.lock().unwrap().is_empty());
+                return;
+            }
+            Some(fvid::audio_thread::AudioEvent::Ended(_)) => {
+                panic!("invalid audio accepted to EOF")
+            }
+            _ => {}
+        }
+        std::thread::sleep(Duration::from_millis(1));
+    }
+}

@@ -1,0 +1,16 @@
+{
+  "provenance": "Authored60ms VP9/8kHz mono PCM,480 audio frames, shorter than512-frame stretch segment. No encoder/private media/network.",
+  "rates": [
+    500,
+    875,
+    1000,
+    1250,
+    1750,
+    2000
+  ],
+  "source_frames": 480,
+  "sha256": {
+    "short-finite.mkv": "1e4c81a628529064dfd81fd1c510a5dd6ef3a60f84ad52c5fac373c0b9d66f19",
+    "expected-source.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

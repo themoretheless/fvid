@@ -64,12 +64,23 @@ impl AudioPacket {
         if self.timebase_den == 0 {
             return Duration::ZERO;
         }
-        let nanos = (self.pts as u128)
-            .saturating_mul(self.timebase_num as u128)
-            .saturating_mul(1_000_000_000)
-            / (self.timebase_den as u128);
-        Duration::from_nanos(nanos as u64)
+        let units = u128::from(self.pts) * u128::from(self.timebase_num);
+        let denominator = u128::from(self.timebase_den);
+        let seconds = units / denominator;
+        let Ok(seconds) = u64::try_from(seconds) else {
+            return Duration::MAX;
+        };
+        let nanos = (units % denominator) * 1_000_000_000 / denominator;
+        Duration::new(seconds, nanos as u32)
     }
+}
+
+/// Exact sample-clock duration, flooring only the final fractional nanosecond.
+/// Quotient/remainder keeps the full u64 sample range without nanosecond overflow.
+pub(crate) fn sample_duration(samples: u64, sample_rate: u32) -> Duration {
+    if sample_rate == 0 { return Duration::ZERO; }
+    let scale = u64::from(sample_rate);
+    Duration::new(samples / scale, ((samples % scale) * 1_000_000_000 / scale) as u32)
 }
 
 /// Scale one sample by a volume level given in thousandths, where 1000 is the
@@ -156,12 +167,11 @@ const STRETCH_SEARCH_STEP: usize = 4;
 /// wherever the segment's head continues the tail of the one before, and the
 /// joint disappears under that crossfade.
 ///
-/// What the stretch retires is what the playback clock runs on, so it is driven
-/// by the rate the caller asked for rather than by the places the segments
-/// happen to fit: the playhead moves by [`Stretch::hop`] every segment, and a
-/// start moved by the search shifts the wave inside the audio, not the audio
-/// along the stream. The retirement stays one tolerance behind that place, which
-/// is as far back as the next segment can still reach.
+/// Nominal progress follows the requested rate rather than the search's wave
+/// alignment. [`Stretch::rendered`] reports source progress actually emitted;
+/// [`Stretch::retired`] reports input history that the next search cannot use.
+/// Keeping these separate prevents preparing a segment from advancing an A/V
+/// clock before its output frames have been rendered.
 pub struct Stretch {
     /// Interleaved channels of the stream being stretched.
     channels: usize,
@@ -170,10 +180,16 @@ pub struct Stretch {
     /// Unfinished stream frame of that distance, carried between segments the
     /// way the plain rate path carries it, so the average stays exact.
     phase: u32,
+    /// Nominal source clock and fractional carry of the segment being served.
+    segment_start: usize,
+    segment_rate: u32,
+    segment_phase: u32,
     /// Frame the next segment starts searching around.
     nominal: usize,
     /// Frames retired: everything before them is out of reach of the search.
     retired: usize,
+    /// Nominal source progress represented by output already emitted.
+    rendered: usize,
     /// The tail of the last segment as it was cut, which the next is fitted to
     /// and faded out under. Empty before the first segment.
     held: Vec<f32>,
@@ -190,8 +206,12 @@ impl Stretch {
             channels,
             milli,
             phase: 0,
+            segment_start: 0,
+            segment_rate: milli,
+            segment_phase: 0,
             nominal: 0,
             retired: 0,
+            rendered: 0,
             held: Vec::new(),
             segment: Vec::new(),
             taken: STRETCH_FADE,
@@ -199,7 +219,7 @@ impl Stretch {
     }
 
     /// Move to another rate without disturbing the playhead: only the distance
-    /// between segment starts changes.
+    /// between segment starts changes. Zero suspends output until a later rate.
     pub fn set_rate(&mut self, milli: u32) {
         self.milli = milli;
     }
@@ -218,6 +238,11 @@ impl Stretch {
         self.retired
     }
 
+    /// Nominal source-frame progress represented by emitted output. Use this
+    /// for playback timing; `retired` is only the safe input-discard boundary.
+    pub fn rendered(&self) -> usize { self.rendered }
+
+
     /// How far apart two segment starts are in the stream.
     fn hop(&self) -> usize {
         scaled_frames(STRETCH_FADE, self.milli, 0).0
@@ -229,23 +254,59 @@ impl Stretch {
     /// frame `base`, which is where [`Stretch::retired`] was when the window was
     /// taken. Output shorter than asked for means the window ran out.
     pub fn fill(&mut self, base: usize, input: &[f32], output: &mut [f32]) -> usize {
+        self.fill_bounded(base, input, output, None)
+    }
+
+    /// Finish a source ending at `end`; the caller pads its processing window
+    /// with zeros beyond that frame. Only the remaining nominal duration is
+    /// emitted, and search history is retired when no future input can use it.
+    pub(crate) fn fill_final(&mut self, base: usize, input: &[f32], end: usize, output: &mut [f32]) -> usize {
+        self.fill_bounded(base, input, output, Some(end))
+    }
+    pub(crate) fn has_pending_output(&self) -> bool { self.taken < STRETCH_FADE }
+
+    fn fill_bounded(&mut self, base: usize, input: &[f32], output: &mut [f32], end: Option<usize>) -> usize {
         let channels = self.channels;
+        if channels == 0 || self.milli == 0 { return 0; }
         let mut written = 0;
         while written < output.len() {
-            if self.taken >= STRETCH_FADE && !self.build(base, input) {
+            if self.taken >= STRETCH_FADE {
+                if let Some(end) = end.filter(|&end| self.nominal >= end) {
+                    self.retired = end;
+                    self.rendered = end;
+                    self.taken = STRETCH_FADE;
+                    break;
+                }
+                if !self.build(base, input) { break; }
+            }
+            let limit = if let Some(end) = end {
+                if self.segment_rate == 0 { break; }
+                let numerator = (end.saturating_sub(self.segment_start) as u128 * 1000)
+                    .saturating_sub(u128::from(self.segment_phase));
+                numerator.div_ceil(u128::from(self.segment_rate)).min(STRETCH_FADE as u128) as usize
+            } else { STRETCH_FADE };
+            if self.taken >= limit {
+                self.retired = end.expect("finite segment limit");
+                self.rendered = self.retired;
+                self.taken = STRETCH_FADE;
                 break;
             }
-            // Room and segment are counted in frames; a leftover element of an
-            // incomplete last frame stays for the caller's next window.
-            let take = ((output.len() - written) / channels).min(STRETCH_FADE - self.taken);
-            if take == 0 {
-                break;
-            }
+            let take = ((output.len() - written) / channels).min(limit - self.taken);
+            if take == 0 { break; }
             let from = self.taken * channels;
             let to = from + take * channels;
             output[written..written + take * channels].copy_from_slice(&self.segment[from..to]);
             written += take * channels;
             self.taken += take;
+            let progress = (self.taken as u128 * u128::from(self.segment_rate)
+                + u128::from(self.segment_phase)) / 1000;
+            self.rendered = self.segment_start.saturating_add(progress.min(usize::MAX as u128) as usize);
+            if let Some(end) = end.filter(|&end| self.taken == limit && (limit < STRETCH_FADE || self.nominal >= end)) {
+                self.retired = end;
+                self.rendered = end;
+                self.taken = STRETCH_FADE;
+                break;
+            }
         }
         written
     }
@@ -288,6 +349,9 @@ impl Stretch {
         // The reference is the unblended tail, so a segment cut at the place the
         // rate asks for hands the stream's own samples back.
         self.held = input[end - STRETCH_FADE * channels..end].to_vec();
+        self.segment_start = self.nominal.max(base);
+        self.segment_rate = self.milli;
+        self.segment_phase = self.phase;
         let (hop, carry) = scaled_frames(STRETCH_FADE, self.milli, self.phase);
         self.phase = carry;
         // The next place is the rate's own progression: the start the search
@@ -388,10 +452,27 @@ pub trait AudioBackend {
     /// `resume` starts the clock, which is how a caller keeps the audio clock
     /// anchored to the moment it starts presenting.
     fn start(&mut self, spec: AudioSpec) -> Result<(), AudioError>;
+    /// Negotiate an explicit source speaker assignment. Backends without spatial
+    /// output retain their existing stream contract through the default method.
+    fn start_with_layout(&mut self,spec:AudioSpec,_mask:Option<u32>)->Result<(),AudioError>{self.start(spec)}
+
+    /// A codec-specific fold can retain positions beyond speaker masks.
+    fn start_with_router(&mut self,spec:AudioSpec,router:Option<fvid_media::owned_stereo_router::StereoRouter>)->Result<(),AudioError>{
+        self.start_with_layout(spec,router.as_ref().and_then(|r|r.source_mask()))
+    }
 
     /// Push a decoded packet for playback. The backend takes ownership and
     /// schedules the samples according to the packet's presentation time.
     fn push(&mut self, packet: AudioPacket) -> Result<(), AudioError>;
+
+    /// Mark the end of decoded input so asynchronous backends can finish DSP
+    /// and device buffers. Synchronous backends need no additional work.
+    fn begin_drain(&mut self) -> Result<(), AudioError> { Ok(()) }
+
+    /// Whether accepted samples have finished playing, including device delay.
+    /// Asynchronous backends override this; failures must be returned instead
+    /// of leaving the caller waiting for an output device that cannot advance.
+    fn drain_status(&self) -> Result<bool, AudioError> { Ok(true) }
 
     /// Current playback position on the stream timeline. Used for
     /// A/V sync: the video presentation waits until the audio clock has
@@ -530,11 +611,27 @@ pub enum AudioStep {
 }
 
 pub trait AudioStream: Send {
+    /// Device fold in the decoder's emitted PCM order. Codecs with positions
+    /// beyond WAVE masks override this; mask-only readers retain compatibility.
+    fn stereo_router(&self)->crate::Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
+        self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|crate::invalid(&e))).transpose()
+    }
+
+    /// Explicit decoded speaker assignment; zero retains unassigned channels.
+    fn speaker_mask(&self)->crate::Result<Option<u32>> {Ok(None)}
     /// Build a decoder after the reader has negotiated the decoded layout.
     /// Readers with verified in-band extensions may override metadata dispatch.
     #[cfg(feature = "player")]
     fn make_decoder(&self) -> crate::Result<Box<dyn AudioDecode>> {
         crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())
+    }
+
+    /// Reset history after navigation or a container segment boundary. Readers
+    /// with changing codec setup can replace the decoder before more PCM arrives.
+    #[cfg(feature = "player")]
+    fn reset_decoder(&mut self, decoder: &mut Box<dyn AudioDecode>) -> crate::Result<()> {
+        decoder.reset();
+        Ok(())
     }
 
     /// Source timestamp required for the current seek/range preroll.
@@ -576,6 +673,10 @@ pub trait AudioStream: Send {
     /// order. The track being read is one of them, so a longer list is what
     /// makes the track key worth having.
     fn audio_tracks(&self) -> Vec<AudioTrack>;
+    /// Position of this stream in audio_tracks(). Preferred-default container
+    /// readers override this; existing single-source adapters retain index zero.
+    fn audio_track_index(&self) -> usize { 0 }
+
     /// Whether queued codec PCM still belongs to an active presentation range.
     /// Completed edits/silence must not receive an out-of-range lookahead frame.
     fn drain_decoded_at_eof(&self) -> bool { true }
@@ -595,16 +696,14 @@ pub trait AudioStream: Send {
 
     /// Wall-clock time of a packet timestamp.
     fn time_of(&self, pts: i64) -> Duration {
-        let timescale = self.timescale();
-        if timescale == 0 {
-            return Duration::ZERO;
-        }
-        Duration::from_secs_f64(pts.max(0) as f64 / f64::from(timescale))
+        sample_duration(pts.max(0) as u64, self.timescale())
     }
 }
 
 /// Decoder half of the audio pipeline: turn encoded packets into PCM.
 pub enum AudioCheckpoint {
+    #[cfg(feature = "player")]
+    Mp3(crate::codec::mp3_decoder::Checkpoint),
     Aac(crate::codec::aac_native::AacCheckpoint),
     PsAac(crate::codec::aac_ps_playback::Checkpoint),
 }
@@ -648,12 +747,14 @@ pub struct CodecEntry {
 // Registry of known audio codec tags with their display names.
 const CODEC_ENTRIES: &[CodecEntry] = &[
     CodecEntry { tags: &["A_OPUS"], name: "Opus" },
+    CodecEntry { tags: &["A_OGG/VORBIS_OPUS"], name: "Vorbis/Opus" },
     CodecEntry { tags: &["A_VORBIS"], name: "Vorbis" },
     CodecEntry { tags: &["A_MPEG/L3"], name: "MP3" },
     CodecEntry { tags: &["A_MPEG/L2"], name: "MP2" },
     CodecEntry { tags: &["A_FLAC"], name: "FLAC" },
     CodecEntry { tags: &["alac", "A_ALAC"], name: "ALAC" },
     CodecEntry { tags: &["A_AC3", "ac-3"], name: "Dolby Digital" },
+    CodecEntry { tags: &["A_EAC3", "ec-3"], name: "Dolby Digital Plus" },
     CodecEntry { tags: &["mp4a"], name: "AAC" },
     CodecEntry { 
         tags: &[
@@ -989,6 +1090,19 @@ mod tests {
             let (frames, carry) = scaled_frames(128, 1_000, 0);
             assert_eq!(frames, 128);
             assert_eq!(carry, 0);
+        }
+    }
+}
+
+#[cfg(test)]
+mod sample_duration_tests {
+    #[test]
+    fn sample_duration_matches_packet_clock_through_u64_bounds() {
+        for samples in [0, 1, 384, u64::MAX] {
+            for rate in [0, 1, 44_100, u32::MAX] {
+                let packet = super::AudioPacket { data: Vec::new(), pts: samples, timebase_num: 1, timebase_den: rate };
+                assert_eq!(super::sample_duration(samples, rate), packet.presentation_time());
+            }
         }
     }
 }

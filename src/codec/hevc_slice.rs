@@ -10,7 +10,7 @@ use super::{
 use crate::{Result, invalid};
 #[path = "hevc_slice_layered.rs"]
 mod layered;
-pub use layered::{LayeredSliceContext, LayeredSliceSyntax};
+pub use layered::{LayeredSliceContext, LayeredSliceSyntax, SliceCamera, SliceCameraPair};
 #[derive(Clone, Copy, Debug)]
 pub struct Weight {
     pub values: [i16; 3],
@@ -146,6 +146,10 @@ impl SliceHeader {
                     .as_ref()
                     .map_or(0, |s| s.reference_layers.capacity()),
                 1,
+            ),
+            (
+                self.layered.as_ref().and_then(|s|s.camera.as_ref()).map_or(0,|c|c.pairs.capacity()),
+                std::mem::size_of::<SliceCameraPair>(),
             ),
             (
                 self.weights.as_ref().map_or(0, |w| w.lists[0].capacity()),
@@ -424,13 +428,13 @@ impl SliceHeader {
         if payload.header.is_irap()
             && slice_type != SliceType::I
             && !pps.current_picture_reference
-            && layout.is_none_or(|l| l.direct_count() == 0)
+            && layout.is_none_or(|l| l.reference_count() == 0)
         {
             return Err(invalid("HEVC IRAP slice must be intra"));
         }
         if slice_type != SliceType::I
             && !pps.current_picture_reference
-            && layout.is_some_and(|l| l.direct_count() == 0)
+            && layout.is_some_and(|l| l.reference_count() == 0)
             && context.is_some_and(|c| {
                 c.sps.output_ordering[usize::from(payload.header.temporal_id)].max_decoded_pictures
                     <= 1
@@ -512,13 +516,18 @@ impl SliceHeader {
             + long_term.iter().filter(|r| r.used).count();
         if layout.is_some_and(|l| {
             payload.header.unit_type == 21
-                || matches!(payload.header.unit_type, 16..=18) && l.direct_count() == 0
+                || matches!(payload.header.unit_type, 16..=18) && l.reference_count() == 0
         }) && used_temporal > 0
         {
             return Err(invalid("HEVC layered IRAP cannot use temporal RPS entries"));
         }
         if let (Some(layout), Some(syntax)) = (layout, layered.as_mut()) {
             layout.references(b, syntax, budget.saturating_sub(payload.bytes.capacity()))?;
+        }
+        if let (Some(context),Some(syntax))=(context,layered.as_mut()) {
+            if context.in_component_prediction_available(payload.header,syntax)? {
+                syntax.in_component_prediction=Some(b.bit()?);
+            }
         }
         let chroma = sps.chroma_format != 0 && !sps.separate_colour_plane;
         let sao = if sps.sao {
@@ -678,7 +687,17 @@ impl SliceHeader {
                 }
                 weights = Some(table);
             }
-            max_merge_candidates = 5 - ue(b, 4)? as u8;
+            if weights.is_none() {
+                if let (Some(context),Some(syntax))=(context,layered.as_mut()) {
+                    if context.illumination_flag_present()? {
+                        let enabled=b.bit()?;
+                        let disabled_merge_zero=enabled&&b.bit()?;
+                        syntax.illumination_compensation=Some([enabled,disabled_merge_zero]);
+                    }
+                }
+            }
+            let limit=merge_candidate_limit(sps,layered.as_ref(),context)?;
+            max_merge_candidates = limit - ue(b,u32::from(limit-1))? as u8;
         }
         let use_integer_mv =
             if sps.motion_vector_resolution_control == 2 && slice_type != SliceType::I {
@@ -728,6 +747,9 @@ impl SliceHeader {
             } else {
                 pps.loop_filter_across_slices
             };
+        if let (Some(context),Some(syntax))=(context,layered.as_mut()) {
+            syntax.camera=context.camera_parameters(b,budget.saturating_sub(payload.bytes.capacity()))?;
+        }
         let (entry_point_offsets, extension, entropy_byte_offset, entropy_substreams) =
             entropy_tail(nal, &payload.bytes, b, pps, count, budget)?;
         if let (Some(context), Some(layout), Some(syntax)) = (context, layout, layered.as_mut()) {
@@ -917,4 +939,28 @@ mod tests {
         bad[4] = 0x81;
         assert!(SliceHeader::parse_idr(&bad, &sps, &pps, 1024).is_err());
     }
+}
+
+/// I-19/I-22/I-25 and I-35/I-36: the extra-candidate flag is an OR,
+/// not a count of enabled tools. Potential reference layers, not just the
+/// currently selected IL pictures, determine IV/DI availability.
+pub(crate) fn merge_candidate_limit(sps:&Sps,syntax:Option<&LayeredSliceSyntax>,context:Option<&LayeredSliceContext<'_>>)->Result<u8> {
+    let Some(tools)=sps.three_d.as_ref()else{return Ok(5)};
+    let reference_layers=if let Some(context)=context {
+        context.vps.extension.as_ref().map(|e|e.graph.reference_list_layers(context.sps.layer_id)).transpose()?.unwrap_or(0)
+    }else{0};
+    let in_component=syntax.is_some_and(|s|s.in_component_prediction==Some(true));
+    let iv=reference_layers>0&&tools.inter_view_disparity[usize::from(sps.depth_layer)];
+    let texture=sps.depth_layer&&tools.texture_motion&&in_component;
+    let vsp=if !sps.depth_layer&&reference_layers>0&&tools.view_synthesis_prediction&&in_component {
+        let syntax=syntax.unwrap();
+        if syntax.reference_layers.is_empty() {true}
+        else if let Some(camera)=syntax.camera.as_ref() {
+            let graph=&context.unwrap().vps.extension.as_ref().unwrap().graph;
+            let mut present=true;
+            for &layer in &syntax.reference_layers {let view=graph.view_index(layer)?;present&=camera.pairs.iter().any(|p|p.reference_view==view);}
+            present
+        }else{false}
+    }else{false};
+    Ok(5+u8::from(iv||texture||vsp))
 }

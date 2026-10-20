@@ -1,0 +1,32 @@
+[
+  {
+    "name": "mono-8-i16-horizontal",
+    "depth": 8,
+    "mode": "i16-horizontal"
+  },
+  {
+    "name": "mono-8-i4-dc",
+    "depth": 8,
+    "mode": "i4-dc"
+  },
+  {
+    "name": "mono-10-i16-horizontal",
+    "depth": 10,
+    "mode": "i16-horizontal"
+  },
+  {
+    "name": "mono-10-i4-dc",
+    "depth": 10,
+    "mode": "i4-dc"
+  },
+  {
+    "name": "mono-14-i16-horizontal",
+    "depth": 14,
+    "mode": "i16-horizontal"
+  },
+  {
+    "name": "mono-14-i4-dc",
+    "depth": 14,
+    "mode": "i4-dc"
+  }
+]

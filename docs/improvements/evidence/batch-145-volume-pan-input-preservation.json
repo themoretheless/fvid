@@ -1,0 +1,26 @@
+{
+  "unchanged_actual_and_without_inputs": {
+    "pan-0.xm": "c933beae29d6d56dc3ba892b2ebc455a6428d98db3a6794bbaa6714b66a6c526",
+    "pan-0-without.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "pan-64.xm": "d343ed21e1cdfa9838fb7b6db17c60e41918b233ec93979bdbea99ef8b81117d",
+    "pan-64-without.xm": "4c79c7b9b999c227c52be42c370218c11daec75ad947647b625545020910ea15",
+    "pan-128.xm": "9b57d4b6b90433ee8a3f5eaf113c66fd220114b453837e66fd6bbfea628d3d0d",
+    "pan-128-without.xm": "5c5b5146f0f403f7eb31ed7e94db46dcc0d695d4bf2ef54ee81a27f7874f6a42",
+    "pan-192.xm": "f839959a55c9ce46fd9e82a3a271ca9884fc5dc2119d044e6bcb7656f0b558d8",
+    "pan-192-without.xm": "08ed2e5012f1f98a7c8f45c806214b4b7e90fb811f48f7367b802aa810fc1080",
+    "pan-240.xm": "e949c9bb8a7d8935b6b74208ae011cd428d9429208dbf90015507894d87a435b",
+    "pan-240-without.xm": "e4f5277c4f80a56957f061e1e69080c111a64d3194acb68a4afd683059aa85d0",
+    "note-on.xm": "045e249653e2dbb341b6fd8426315b786894df577ec86d4e5a86dcef9a7a42a4",
+    "note-on-without.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "effect-overrides-column.xm": "9813ad6afa7729ae54984e5f8e785fb87c4fff02b6d75f3ea28488c40c51e9d4",
+    "effect-overrides-column-without.xm": "108fcb49cef59929df821be5b9935f6f1536584dfbce6a480cf8bc5fda0ade02",
+    "persist.xm": "577b2e657b3bef17e9ce7225517f6b4879edaa3e395b5a0f5b5d42503f52e481",
+    "persist-without.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "return-center.xm": "dd56a16cff7a219e88b6cfd51fb07dade5e0c62f51316b65923bfc5ceb6fa65f",
+    "return-center-without.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "channel-isolation.xm": "07a57ab6f93f8b75005c9a89c8f0c6a5d0d56ff9172de21764c189ce832ec833",
+    "channel-isolation-without.xm": "8775da10cc1df7380854db3b8a24cdeca55857d7feafc217ccea1273db1dc6eb"
+  },
+  "video_unchanged": true,
+  "migration": "Only reference scores and explicit row-selection metadata changed;actual pan-command inputs remain byte-identical."
+}

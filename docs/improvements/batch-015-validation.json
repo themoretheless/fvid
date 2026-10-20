@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0037"
+  ],
+  "checked_at": "2026-10-15T08:42:59.105827+00:00",
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.29.1",
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.29.2",
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.29.3"
+  ],
+  "before": {
+    "control_passed": 1,
+    "acceptance_failed": 1,
+    "empty_output_acceptance_failed": 1,
+    "evidence": [
+      "evidence/batch-015-audio-defaults-before-control-final.log",
+      "evidence/batch-015-audio-defaults-before-acceptance-final.log",
+      "evidence/batch-015-audio-defaults-empty-output-before.log"
+    ]
+  },
+  "qualification": [
+    "Eight valid 60ms authored VP9+PCM variants and two explicit-zero refusal clips; independently authored exact480-sample float32 oracle.",
+    "Missing/empty SamplingFrequency and Channels use8000Hz/mono. Empty OutputSamplingFrequency inherits core frequency. Video/non-audio metadata retains zero fields.",
+    "AAC SBR/PS codec-driven inference preserves existing missing-field handling. Explicit zeros are invalid, not absence.",
+    "Exact PCM and20\u201340ms selection, packet hard-stop exact prefix, byte/memory refusal, native video pixels/clocks/seek/rewind/EOF pass.",
+    "Tests load saved bytes without encoder/network. One initial test harness used unsupported rawPCM output for the file-export API; it was corrected to the actual streamingPCM API before the valid control and reproduction were recorded.",
+    "The initial packet-limit assertion expected an error; the documented decoder hard-stop returns a successful exact prefix. Corrected test verifies that contract, not a production change."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-015-audio-defaults-owner-complete.log",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-015-audio-defaults-root-complete.log",
+      "passed": 11,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-015-audio-defaults-matroska-complete.log",
+      "passed": 9,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-015-audio-defaults-player-check.log",
+      "status": "passed"
+    },
+    {
+      "log": "evidence/batch-015-audio-defaults-fixtures-final.log",
+      "python_passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 27,
+  "remaining": [],
+  "counting": "One schema-default audio metadata defect with inherited-output and explicit-zero variants, not one ID per field/sample."
+}

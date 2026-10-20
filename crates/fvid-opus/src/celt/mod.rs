@@ -1806,15 +1806,13 @@ fn alloc_trim_analysis(
 
 #[inline(always)]
 fn median3(a: f32, b: f32, c: f32) -> f32 {
-    let mut v = [a, b, c];
-    v.sort_by(|x, y| x.partial_cmp(y).unwrap_or(std::cmp::Ordering::Equal));
-    v[1]
+    a.max(b).min(c.max(a.min(b)))
 }
 
 #[inline(always)]
 fn median5(v: &[f32]) -> f32 {
     let mut x = [v[0], v[1], v[2], v[3], v[4]];
-    x.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    x.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
     x[2]
 }
 

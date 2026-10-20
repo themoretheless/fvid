@@ -16,6 +16,23 @@ pub(crate) fn supports(
     {
         return false;
     }
+    if crate::owned_g711_wave_export::recognizes(source,options).unwrap_or(false) {
+        return crate::owned_g711_wave_export::supports(source,transform,options);
+    }
+    if crate::owned_ogg_opus_export::recognizes(source).unwrap_or(false) {
+        return match crate::owned_ogg_audio_export::coding(source, options) {
+            Ok(crate::owned_ogg_audio_export::Backend::Vorbis) => {
+                crate::owned_ogg_vorbis_export::supports(source, transform, options)
+            }
+            Ok(crate::owned_ogg_audio_export::Backend::Opus) => {
+                crate::owned_ogg_opus_export::supports(source, transform, options)
+            }
+            Err(error) => error.starts_with("controlled memory budget exceeded:"),
+            Ok(crate::owned_ogg_audio_export::Backend::Joint) => {
+                crate::owned_ogg_joint_export::supports(source, transform, options)
+            }
+        };
+    }
     if crate::owned_mp4_audio_export::recognizes(source, options).unwrap_or(false) {
         return crate::owned_mp4_audio_export::supports(source, transform, options);
     }
@@ -28,8 +45,20 @@ pub(crate) fn supports(
     if crate::owned_matroska_opus_export::recognizes(source, options).unwrap_or(false) {
         return crate::owned_matroska_opus_export::supports(source, transform, options);
     }
+    if crate::owned_matroska_flac_export::recognizes(source, options).unwrap_or(false) {
+        return crate::owned_matroska_flac_export::supports(source, transform, options);
+    }
+    if crate::owned_matroska_mp3_export::recognizes(source, options).unwrap_or(false) {
+        return crate::owned_matroska_mp3_export::supports(source, transform, options);
+    }
     if crate::owned_matroska_alac_export::recognizes(source, options).unwrap_or(false) {
         return crate::owned_matroska_alac_export::supports(source, transform, options);
+    }
+    if crate::owned_raw_flac::recognizes(source).unwrap_or(false) {
+        return crate::owned_raw_flac::geometry(source,options).is_ok();
+    }
+    if crate::owned_raw_mp3::recognizes(source).unwrap_or(false) {
+        return crate::owned_raw_mp3::geometry(source, options).is_ok();
     }
     if crate::owned_adts_export::recognizes(source).unwrap_or(false) {
         return simple_options(options)
@@ -48,9 +77,10 @@ pub(crate) fn supports(
             || (info.channels <= 8 && matches!(channels, 1 | 2))
             || (matches!(info.channels, 1 | 2) && (1..=8).contains(&channels));
         let layout = !changes_channels
-            || (info.channels <= 2 && info.channel_mask == 0)
-            || crate::owned_pcm_channels::standard_mask(info.channels)
-                .is_some_and(|mask| mask == u64::from(info.channel_mask));
+            || crate::owned_pcm_channels::rematrix_layout_supported(
+                info.channels,
+                info.channel_mask,
+            );
         conversion && layout
     })
 }
@@ -93,9 +123,9 @@ pub(crate) fn validate_request(
     }
     if transform
         .channels
-        .is_some_and(|channels| !(1..=64).contains(&channels))
+        .is_some_and(|channels| !(1..=255).contains(&channels))
     {
-        return Err("channels must be within 1..=64".into());
+        return Err("channels must be within 1..=255".into());
     }
     if options.metadata_set.len() + options.metadata_delete.len() > 64 {
         return Err("at most 64 container metadata mutations".into());
@@ -134,6 +164,22 @@ pub fn decode_audio_transformed(
         return Err("owned WAVE export requires .wav output".into());
     }
     let gain = validate_request(transform, options)?;
+    if crate::owned_g711_wave_export::recognizes(source,options)? {
+        return crate::owned_g711_wave_export::apply(source,destination,transform,options);
+    }
+    if crate::owned_ogg_opus_export::recognizes(source)? {
+        return match crate::owned_ogg_audio_export::coding(source, options)? {
+            crate::owned_ogg_audio_export::Backend::Vorbis => {
+                crate::owned_ogg_vorbis_export::apply(source, destination, transform, options)
+            }
+            crate::owned_ogg_audio_export::Backend::Opus => {
+                crate::owned_ogg_opus_export::apply(source, destination, transform, options)
+            }
+            crate::owned_ogg_audio_export::Backend::Joint => {
+                crate::owned_ogg_joint_export::apply(source, destination, transform, options)
+            }
+        };
+    }
     if crate::owned_mp4_audio_export::recognizes(source, options)? {
         return crate::owned_mp4_audio_export::apply(source, destination, transform, options);
     }
@@ -146,8 +192,20 @@ pub fn decode_audio_transformed(
     if crate::owned_matroska_opus_export::recognizes(source, options)? {
         return crate::owned_matroska_opus_export::apply(source, destination, transform, options);
     }
+    if crate::owned_matroska_flac_export::recognizes(source, options)? {
+        return crate::owned_matroska_flac_export::apply(source, destination, transform, options);
+    }
+    if crate::owned_matroska_mp3_export::recognizes(source, options)? {
+        return crate::owned_matroska_mp3_export::apply(source, destination, transform, options);
+    }
     if crate::owned_matroska_alac_export::recognizes(source, options)? {
         return crate::owned_matroska_alac_export::apply(source, destination, transform, options);
+    }
+    if crate::owned_raw_flac::recognizes(source)? {
+        return crate::owned_raw_flac::apply(source,destination,transform,options);
+    }
+    if crate::owned_raw_mp3::recognizes(source)? {
+        return crate::owned_raw_mp3::apply(source, destination, transform, options);
     }
     if crate::owned_adts_export::recognizes(source)? {
         if !simple_options(options) {
@@ -236,34 +294,22 @@ pub fn decode_audio_transformed(
         let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
         let info =
             crate::owned_wave_inspect::inspect(&mut file, None).map_err(|e| e.to_string())?;
-        if !(info.channel_mask == 0 && info.channels <= 2
-            || crate::owned_pcm_channels::standard_mask(info.channels)
-                .is_some_and(|mask| mask == u64::from(info.channel_mask)))
-        {
+        if !crate::owned_pcm_channels::rematrix_layout_supported(info.channels, info.channel_mask) {
             return Err("owned rematrix requires a standard explicit speaker layout".into());
         }
     }
-    let (output_mask, info_chunks) = if source_info.channel_mask != 0
-        || integer.is_some()
-        || input.sample_format == "dbl"
-        || !options.metadata_set.is_empty()
-        || !options.metadata_delete.is_empty()
-    {
-        let mut file = std::fs::File::open(source).map_err(|e| e.to_string())?;
-        let info = crate::owned_wave_inspect::inspect(&mut file, options.cancel.as_ref())
-            .map_err(|e| e.to_string())?;
-        let mask = if channels == input.channels {
-            info.channel_mask
-        } else {
-            crate::owned_pcm_channels::standard_mask(channels as u16).unwrap_or(0) as u32
-        };
-        let chunks =
-            crate::owned_wave_inspect::info_chunks(&mut file, &info, options.cancel.as_ref())
-                .map_err(|e| e.to_string())?;
-        (mask, chunks)
+    let output_mask = if channels == input.channels {
+        source_info.channel_mask
     } else {
-        (0, Vec::new())
+        crate::owned_pcm_channels::standard_mask(channels as u16).unwrap_or(0) as u32
     };
+    // INFO is independent of sample representation and speaker assignment.
+    let info_chunks = crate::owned_wave_inspect::info_chunks(
+        &mut source_file,
+        &source_info,
+        options.cancel.as_ref(),
+    )
+    .map_err(|e| e.to_string())?;
     let info_chunks = crate::owned_wave_metadata::edit_info_chunks(
         &info_chunks,
         &options.metadata_delete,
@@ -282,11 +328,12 @@ pub fn decode_audio_transformed(
             channels as u16,
         )
         .map_err(|e| e.to_string())?;
-        let mut matrix = crate::owned_pcm_gain_f64::PcmGain::new(
+        let mut matrix = crate::owned_pcm_gain_f64::PcmGain::with_mask(
             &mut resampler,
             1.,
             input.channels as u16,
             channels as u16,
+            source_info.effective_channel_mask(),
         )?;
         for block in pcm.chunks(4096 * input.channels as usize * input_width) {
             if let Some(hook) = &options.progress {
@@ -324,11 +371,12 @@ pub fn decode_audio_transformed(
             channels as u16,
         )
         .map_err(|e| e.to_string())?;
-        let mut matrix = crate::owned_pcm_gain::PcmGain::new(
+        let mut matrix = crate::owned_pcm_gain::PcmGain::with_mask(
             &mut resampler,
             1.,
             input.channels as u16,
             channels as u16,
+            source_info.effective_channel_mask(),
         )?;
         for block in pcm.chunks(4096 * input.channels as usize * 4) {
             if let Some(hook) = &options.progress {
@@ -509,13 +557,15 @@ mod tests {
             assert!((f32::from_le_bytes(sample.try_into().unwrap()) - 0.25).abs() < 1e-6);
         }
         let absent = files.0.join("absent.wav");
-        assert!(decode_audio_interval(
-            &source,
-            &absent,
-            Some((1_000_000, 2_000_000)),
-            &CopyOptions::default()
-        )
-        .is_err());
+        assert!(
+            decode_audio_interval(
+                &source,
+                &absent,
+                Some((1_000_000, 2_000_000)),
+                &CopyOptions::default()
+            )
+            .is_err()
+        );
         assert!(!absent.exists());
         let limited = CopyOptions {
             stream_metadata_set: vec![(0, "title".into(), "unmapped".into())],
@@ -1011,11 +1061,13 @@ mod admission_tests {
             let error = crate::decode_audio(&source, &absent, &options).unwrap_err();
             assert!(error.contains("controlled memory budget exceeded"));
             assert!(!absent.exists());
-            assert!(events
-                .lock()
-                .unwrap()
-                .iter()
-                .all(|event| event.packets == 0 && event.payload_bytes == 0 && !event.done));
+            assert!(
+                events
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .all(|event| event.packets == 0 && event.payload_bytes == 0 && !event.done)
+            );
             let output = dir.join(format!("output-{bits}.wav"));
             let options = CopyOptions {
                 max_controlled_bytes: Some(64 * 1024),
@@ -1126,16 +1178,18 @@ mod integer_tests {
                 Some("own PCM")
             );
             let rejected = dir.join(format!("budget-{bits}.wav"));
-            assert!(crate::decode_audio(
-                &source,
-                &rejected,
-                &CopyOptions {
-                    max_controlled_bytes: Some(1),
-                    ..Default::default()
-                }
-            )
-            .unwrap_err()
-            .contains("controlled memory"));
+            assert!(
+                crate::decode_audio(
+                    &source,
+                    &rejected,
+                    &CopyOptions {
+                        max_controlled_bytes: Some(1),
+                        ..Default::default()
+                    }
+                )
+                .unwrap_err()
+                .contains("controlled memory")
+            );
             assert!(!rejected.exists());
         }
         let source = dir.join("dc.wav");

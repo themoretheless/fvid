@@ -1,0 +1,57 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0117"
+  ],
+  "checked_at": "2026-10-16T05:10:27.577490+00:00",
+  "before": [
+    "evidence/batch-097-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-097-integration.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-097-decoder.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-097-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-097-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-097-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Five authored200ms notes compare CC121with explicit expression127/centered bend at100ms. First-window PCM is identical in every pair,isolating reset behavior. Four native/worker PCM mismatches and three overwritten program values reproduce before fix; already-default audio is a healthy control.",
+    "Reset changes only supported resettable state:expression andbend. Centered bend uses the same native active-voice retuning path as an explicit PitchBend event. Program andchannel volume are preserved. Cases cover full up/down bend,channel15,nondefault volume/expression/program,mixed-channel isolation anddefault state.",
+    "Five native full PCM/timestamp and program-state equivalence checks pass against independent explicit message sequences. Actual recording workers pass controls,CC121fullplay,rewind,100msseek andEOF with exact reference suffixes. Short authored native video decodes.",
+    "16decoder/5reader units,10integration tests,pure fixture reproduction and current player build pass. No encoder/network/private media,physical output,full GeneralMIDI conformance,instrument-timbre implementation or performance claim."
+  ],
+  "sources": [
+    {
+      "url": "https://midi.org/response-to-reset-all-controllers",
+      "section": "RP015purpose",
+      "rule": "Defines a consistent response for channel-mode121."
+    },
+    {
+      "url": "https://microsoft.github.io/MIDI/kb/in-box-general-midi-synth/",
+      "section": "Control changes",
+      "rule": "Primary implementation documentation resets expression and pitchbend while preserving channel volume andprogram."
+    }
+  ],
+  "compatibility": "Supported CC121now has consistent channel-scoped reset semantics. Audio/program state previously changed incorrectly is corrected; public signatures andexplicit controller messages remain unchanged.",
+  "counting": "One ResetAllControllers response problem. Pitch,gain,program and channel variants are facets of the same command and add noIDs."
+}

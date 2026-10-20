@@ -1,4 +1,8 @@
 //! Filter the single video track and retain selected AAC/Opus packet timelines.
+#[path = "owned_webm_audio_window.rs"]
+mod audio_window;
+#[path = "owned_webm_pcm_window.rs"]
+mod pcm_window;
 use crate::{owned_matroska as mkv, owned_webm as webm};
 use fvid_control::CopyOptions;
 use fvid_media_info::{LosslessStats, LosslessTransform};
@@ -14,6 +18,9 @@ struct Input {
     reader: Reader,
     video: usize,
     selected: Vec<usize>,
+    trimmed_audio_sample_frames: u64,
+    pcm_windows: Vec<usize>,
+    video_origin: i64,
 }
 fn open(path: &Path, options: &CopyOptions) -> Result<Reader> {
     let mut reader = webm::WebmReader::open(
@@ -41,7 +48,7 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
     {
         return Ok(None);
     }
-    if t.interval.is_some() || crate::owned_lossless::request(t).is_none() {
+    if crate::owned_lossless::request(t).is_none() {
         return Ok(None);
     }
     let mut normalized = o.clone();
@@ -79,10 +86,9 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
     }
     let video = videos[0];
     let track = &reader.tracks[video];
-    if !matches!(track.codec.as_str(), "V_FFV1" | "V_VP9" | "V_AV1")
-        || track.crop != [0; 4]
-        || track.rotation != 0
-    {
+    // The shared video pipeline bakes stored crop/rotation before filtering;
+    // companion audio retains its original timestamps independently.
+    if !matches!(track.codec.as_str(), "V_FFV1" | "V_VP9" | "V_AV1" | "V_MPEGH/ISO/HEVC") {
         return Ok(None);
     }
     let selected = crate::owned_mp4_matroska::selection(reader.tracks.len(), &o.streams)
@@ -137,7 +143,7 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
                 if p.duration_ns.unwrap_or(track.default_duration_ns) == 0 {
                     let duration = if track.codec == "A_OPUS" {
                         let bytes = reader.read_packet(index).map_err(|e| e.to_string())?;
-                        crate::owned_opus_packet::duration_ns(&bytes).map_err(|e| e.to_string())?
+                        crate::owned_opus_packet::duration_ns_with_header(&track.codec_private,&bytes).map_err(|e| e.to_string())?
                     } else {
                         let config =
                             crate::owned_aac::config::AacConfig::parse(&track.codec_private)
@@ -160,10 +166,28 @@ fn qualify(path: &Path, t: &LosslessTransform, o: &CopyOptions) -> Result<Option
     {
         return Err("metadata refers to missing input track".into());
     }
+    let mut trimmed_audio_sample_frames = 0u64;
+    let mut pcm_windows=Vec::new();
+    let mut video_origin=0;
+    if let Some(window) = t.interval {
+        let number=reader.tracks[video].number;
+        let origin=reader.packets.iter().filter(|p|p.track==number && !p.invisible).map(|p|p.pts_ns).min().ok_or("input has no visible video")?;
+        video_origin=origin;
+        for &index in &selected {
+            if index==video {continue;}
+            match audio_window::apply(&mut reader,index,origin,window,o)? {
+                Some(removed)=>trimmed_audio_sample_frames=trimmed_audio_sample_frames.checked_add(removed).ok_or("trimmed sample count overflow")?,
+                None=>pcm_windows.push(index),
+            }
+        }
+    }
     Ok(Some(Input {
         reader,
         video,
         selected,
+        trimmed_audio_sample_frames,
+        pcm_windows,
+        video_origin,
     }))
 }
 pub(crate) fn supports(source: &Path, t: &LosslessTransform, o: &CopyOptions) -> bool {
@@ -201,7 +225,7 @@ pub(crate) fn try_export(
     if destination.symlink_metadata().is_ok() {
         return Err("output already exists".into());
     }
-    let private = crate::owned_video_temporary::Directory::new()?;
+    let mut private = crate::owned_video_temporary::Directory::new()?;
     let video_path = private.0.join("video.mkv");
     let mut stage = o.clone();
     stage.progress = None;
@@ -223,6 +247,20 @@ pub(crate) fn try_export(
         crate::owned_ffv1_export::export(source, &video_path, &request, &stage)?;
     let mut video = open(&video_path, o)?;
     let vt = video.tracks[0].clone();
+    let mut pcm_readers=BTreeMap::new();
+    if let Some(window)=t.interval {
+        for &index in &input.pcm_windows {
+            let track=input.reader.tracks[index].clone();
+            let first=input.reader.packets.iter().find(|p|p.track==track.number).ok_or("audio track has no packets")?.pts_ns;
+            let prepared=pcm_window::prepare(source,index,&track,first,input.video_origin,window,o,&mut private)?;
+            let total=pcm_window::presentation_samples(&mut input.reader,index,prepared.rate,o)?;
+            input.trimmed_audio_sample_frames=input.trimmed_audio_sample_frames.checked_add(total.saturating_sub(prepared.sample_frames)).ok_or("trimmed sample count overflow")?;
+            let pcm=open(&prepared.path,o)?;
+            let mut replacement=pcm.tracks[0].clone();replacement.number=track.number;
+            input.reader.tracks[index]=replacement;
+            pcm_readers.insert(index,pcm);
+        }
+    }
     let mut tracks = input.reader.tracks.clone();
     for track in &mut tracks {
         if track.language.is_empty() {
@@ -299,6 +337,11 @@ pub(crate) fn try_export(
                 width: u32::try_from(track.width).map_err(|_| "video width overflow")?,
                 height: u32::try_from(track.height).map_err(|_| "video height overflow")?,
             }
+        } else if track.codec == "A_PCM/FLOAT/IEEE" {
+            mkv::Encoding::PcmFloat32 {
+                sample_rate:u32::try_from(track.sample_rate).map_err(|_|"PCM rate overflow")?,
+                channels:u16::try_from(track.channels).map_err(|_|"PCM channel count overflow")?,
+            }
         } else if track.codec == "A_OPUS" {
             mkv::Encoding::Opus {
                 configuration: &track.codec_private,
@@ -342,11 +385,15 @@ pub(crate) fn try_export(
     for (mapped, &index) in input.selected.iter().enumerate() {
         let packets = if index == input.video {
             &video.packets
+        } else if let Some(pcm)=pcm_readers.get(&index) {
+            &pcm.packets
         } else {
             &input.reader.packets
         };
         let number = if index == input.video {
             vt.number
+        } else if let Some(pcm)=pcm_readers.get(&index) {
+            pcm.tracks[0].number
         } else {
             tracks[index].number
         };
@@ -380,9 +427,13 @@ pub(crate) fn try_export(
         .map_err(|e| e.to_string())?;
         for &(_, mapped, index) in &schedule {
             check(o)?;
-            let is_video = input.selected[mapped] == input.video;
+            let source_index=input.selected[mapped];
+            let is_video = source_index == input.video;
+            let is_pcm=pcm_readers.contains_key(&source_index);
             let reader = if is_video {
                 &mut video
+            } else if let Some(pcm)=pcm_readers.get_mut(&source_index) {
+                pcm
             } else {
                 &mut input.reader
             };
@@ -403,7 +454,7 @@ pub(crate) fn try_export(
                     },
                 )
                 .map_err(|e| e.to_string())?;
-            if !is_video {
+            if !is_video && !is_pcm {
                 copied += 1;
             }
             if let Some(hook) = &o.progress {
@@ -419,7 +470,7 @@ pub(crate) fn try_export(
         copied_packets: copied,
         video_frames: decoded.video_frames,
         seek_used: false,
-        trimmed_audio_sample_frames: 0,
+        trimmed_audio_sample_frames: input.trimmed_audio_sample_frames,
         pixel_format: decoded.pixel_format,
         encoder: "ffv1".into(),
         fvid_crop_payload_copies: 0,

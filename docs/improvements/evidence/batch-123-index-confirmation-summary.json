@@ -1,0 +1,16 @@
+{
+  "scope": "Confirmation after two early outliers in the first run; all initial observations retained. Concurrent workspace load not isolated. No speedup or tail-latency claim.",
+  "iterations_per_run": 20000,
+  "pairs": 15,
+  "before_median_ns": 1454335541,
+  "after_median_ns": 1467821625,
+  "paired_median_ratio": 1.008387089204618,
+  "median_ratio_bootstrap95": [
+    1.005695242099567,
+    1.011991720578089
+  ],
+  "ratio_range": [
+    0.9165917647065508,
+    1.4727489622638696
+  ]
+}

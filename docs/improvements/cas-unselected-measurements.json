@@ -1,0 +1,445 @@
+{
+  "checked_at": "2026-10-15T08:52:41.369596+00:00",
+  "platform": "macOS-26.7.2-arm64-arm-64bit",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "build": "rustc --edition=2024 -O docs/improvements/benchmark-cas-unselected.rs",
+  "method": "Six alternating paired executions of separately compiled actual before/after CAS source. Initialization/warmup/parsing and final sample equality checks are outside timing; allocation counts cover timed calls. Fixed three-channel RGB buffers and alpha-only mask8.",
+  "source_hashes": {
+    "before": "90c36f7e4308aa68da372f0ad715e51ac2a601b34d68ec41b7852bfbd1bfcb22",
+    "after": "1bfc604de3e3da36e1b5ac38970ca31f7cdd3d9abe301faa59f251e9732488ea"
+  },
+  "scope": "Kernel-only omitted-plane case, not full video throughput or RSS.16-bit sample-range validation remains linear even when no channel is selected.",
+  "summaries": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "depth": 8,
+      "before_median_ns_per_call": 161750.0,
+      "after_median_ns_per_call": 7.65234375,
+      "before_allocations_per_call": 1,
+      "after_allocations_per_call": 0,
+      "saved_allocated_bytes_per_call": 6220800,
+      "speed_ratio": 21137.314956610517
+    },
+    {
+      "width": 3840,
+      "height": 2160,
+      "depth": 8,
+      "before_median_ns_per_call": 606205.078125,
+      "after_median_ns_per_call": 7.8125,
+      "before_allocations_per_call": 1,
+      "after_allocations_per_call": 0,
+      "saved_allocated_bytes_per_call": 24883200,
+      "speed_ratio": 77594.25
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "depth": 16,
+      "before_median_ns_per_call": 3391205.078125,
+      "after_median_ns_per_call": 2233941.0859375,
+      "before_allocations_per_call": 1,
+      "after_allocations_per_call": 0,
+      "saved_allocated_bytes_per_call": 12441600,
+      "speed_ratio": 1.5180369345782636
+    }
+  ],
+  "runs": [
+    {
+      "pair": 1,
+      "version": "before",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 20925917,
+          "allocations": 128,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 23238500,
+          "allocations": 32,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 185801250,
+          "allocations": 64,
+          "allocated_bytes": 796262400
+        }
+      ]
+    },
+    {
+      "pair": 1,
+      "version": "after",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 917,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 292,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 150428750,
+          "allocations": 0,
+          "allocated_bytes": 0
+        }
+      ]
+    },
+    {
+      "pair": 2,
+      "version": "after",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 1000,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 250,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 138697583,
+          "allocations": 0,
+          "allocated_bytes": 0
+        }
+      ]
+    },
+    {
+      "pair": 2,
+      "version": "before",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 20004000,
+          "allocations": 128,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 19436083,
+          "allocations": 32,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 261086875,
+          "allocations": 64,
+          "allocated_bytes": 796262400
+        }
+      ]
+    },
+    {
+      "pair": 3,
+      "version": "before",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 20438833,
+          "allocations": 128,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 19487375,
+          "allocations": 32,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 218446875,
+          "allocations": 64,
+          "allocated_bytes": 796262400
+        }
+      ]
+    },
+    {
+      "pair": 3,
+      "version": "after",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 1583,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 292,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 139067417,
+          "allocations": 0,
+          "allocated_bytes": 0
+        }
+      ]
+    },
+    {
+      "pair": 4,
+      "version": "after",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 1000,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 250,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 146057167,
+          "allocations": 0,
+          "allocated_bytes": 0
+        }
+      ]
+    },
+    {
+      "pair": 4,
+      "version": "before",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 20482083,
+          "allocations": 128,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 19350708,
+          "allocations": 32,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 215627375,
+          "allocations": 64,
+          "allocated_bytes": 796262400
+        }
+      ]
+    },
+    {
+      "pair": 5,
+      "version": "before",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 28238792,
+          "allocations": 128,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 18205333,
+          "allocations": 32,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 223395958,
+          "allocations": 64,
+          "allocated_bytes": 796262400
+        }
+      ]
+    },
+    {
+      "pair": 5,
+      "version": "after",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 959,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 250,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 146824500,
+          "allocations": 0,
+          "allocated_bytes": 0
+        }
+      ]
+    },
+    {
+      "pair": 6,
+      "version": "after",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 958,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 250,
+          "allocations": 0,
+          "allocated_bytes": 0
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 139887292,
+          "allocations": 0,
+          "allocated_bytes": 0
+        }
+      ]
+    },
+    {
+      "pair": 6,
+      "version": "before",
+      "cases": [
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 8,
+          "calls": 128,
+          "elapsed_ns": 21008291,
+          "allocations": 128,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 3840,
+          "height": 2160,
+          "depth": 8,
+          "calls": 32,
+          "elapsed_ns": 19361042,
+          "allocations": 32,
+          "allocated_bytes": 796262400
+        },
+        {
+          "width": 1920,
+          "height": 1080,
+          "depth": 16,
+          "calls": 64,
+          "elapsed_ns": 158621458,
+          "allocations": 64,
+          "allocated_bytes": 796262400
+        }
+      ]
+    }
+  ]
+}

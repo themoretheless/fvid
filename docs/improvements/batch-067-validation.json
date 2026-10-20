@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0091"
+  ],
+  "checked_at": "2026-10-16T01:44:39.557024+00:00",
+  "before": [
+    "evidence/batch-067-clock-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-067-integration.log",
+      "kind": "rust",
+      "passed": 3
+    },
+    {
+      "log": "evidence/batch-067-final-clock.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-067-midi.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-067-xm-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-067-smf.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-067-xm-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-067-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-067-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored MIDI/XM readers use1000Hz source time. Native synthesis retained millisecond PTS while tagging them with PCM44100Hz: MIDI100ms became2.267573ms, XM120ms became2.721088ms.24nonzero windows reproduce wrong output presentation timestamps; the fixed clock now separates windows correctly.",
+    "Both native synth decoders now tag returned PCM with1000Hz presentation timebase, retaining source PTS and unchanged PCM rate/layout/data generation. Source timing remains exact at output rates8000/44100/48000. No sample clock rounding is introduced.",
+    "Actual recording workers verify byte-identical full PCM, correct per-window PTS and final2200ms MIDI/480ms XM endpoints on play, rewind, seek0 and complete-EOF seek. Before direct PCM clock assertions specifically reproduce the error; no physical audio device or perception claim.",
+    "16 MIDI decoder/11 XM decoder/5 MIDI reader/6 XM reader units, related integrations, fixture reproduction and player build pass. Existing clock unit expectations are corrected to source milliseconds; no encoder/network/private inputs.",
+    "Score duration metadata remains2000ms/360ms in this item; correcting presentation clock exposes that separate metadata mismatch. The abandoned duration probe batch-067-before.log is discovery evidence only and excluded from acceptance checks."
+  ],
+  "compatibility": "PCM presentation timebase now truthfully describes the existing millisecond PTS. Consumers using AudioPacket timebase get correct scheduling; direct consumers incorrectly assuming synthesis PTS are sample ticks must honor the timebase. No signatures or PCM values change.",
+  "counting": "One shared synth source-clock tagging defect across MIDI/XM. Rate variants, packet windows, oracle corrections and fixture controls add no IDs."
+}

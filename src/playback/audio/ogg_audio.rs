@@ -1,334 +1,129 @@
-//! Audio playback of Ogg Vorbis out of the `.ogg` file the codec ships in.
-//!
-//! Vorbis is the one coding on this machine's list of Ogg bitstreams that the
-//! player already decodes, and the container gives the reader three things to find
-//! in it: the geometry, which lives in the identification packet rather than in a
-//! header beside the audio; the identification and setup packets a Vorbis decoder
-//! needs before it sees a single sample; and the timeline, which Ogg states as a
-//! sample count in the granule of each page while the packets themselves carry only
-//! their block size. [`crate::container::ogg`] reads the framing and stops there,
-//! because what a bitstream *is* is not a container question; naming the coding,
-//! laying the timeline out and dropping the packet a Vorbis decoder has no use for
-//! is this file's job.
-//!
-//! A stream is three header packets - identification, comment, setup - and then
-//! audio for as far as its serial runs. The comment packet is metadata, and like
-//! the WebM reader this one leaves it out of what it hands the decoder. Neither of
-//! the timeline's numbers is stored anywhere either: a Vorbis packet holds half its
-//! block size in samples, and which of the identification header's two block sizes
-//! a packet uses is one bit of the packet's own first byte, so every timestamp
-//! below is computed rather than read.
-//!
-//! Chained streams - one Vorbis bitstream ending and another beginning, which is
-//! how a gapless album and half the Ogg samples in the K-Lite list are written -
-//! are played end to end as one timeline, which is what a listener hears them as.
-//! That is only possible while every chain states the same program, so a chain
-//! whose identification or setup header differs from the first is refused rather
-//! than decoded with the wrong codebooks.
-
-use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
-use crate::container::ogg::{Coding, Limits, Ogg, Packet};
-use crate::{Result, invalid, unsupported};
-use std::io::Read;
-use std::time::Duration;
-
-/// The tag [`crate::codec::make_audio_decoder`] answers for Vorbis, as Matroska
-/// spells it - the same tag a WebM track of this codec arrives under.
-pub const VORBIS: &str = "A_VORBIS";
-
-/// The second and third of the three packets every Vorbis bitstream opens with.
-/// The first is what names the bitstream, so the container has already read it.
-const COMMENT: &[u8] = b"\x03vorbis";
-const SETUP: &[u8] = b"\x05vorbis";
-
-/// One audio packet of the timeline: which packet of which chain it is, and where
-/// it sits in samples of the track's own rate.
-#[derive(Clone, Copy, Debug)]
-struct Stamp {
-    chain: usize,
-    packet: usize,
-    pts: i64,
-    duration: i64,
-}
-
-/// What an identification header states about the track, once checked.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct Geometry {
-    sample_rate: u32,
-    channels: u16,
-    /// The two block sizes as their powers of two, in the order a packet's own bit
-    /// picks between them.
-    blocks: [u8; 2],
-}
-
-/// Read the 30 bytes an identification header is made of. Every field is checked
-/// against what the decoder down the line does with it: a header whose block sizes
-/// are out of range or the wrong way round states a timeline this reader cannot lay
-/// out, and symphonia refuses the same pair of exponents.
-fn geometry(ident: &[u8]) -> Result<Geometry> {
-    // The concatenated form handed to the decoder assumes the header is exactly as
-    // long as the codec defines, since the setup packet starts at the byte after it.
-    let header: [u8; 30] = ident.try_into().map_err(|_| {
-        invalid(&format!(
-            "a Vorbis identification header is 30 bytes and this one is {}",
-            ident.len()
-        ))
-    })?;
-    let version = u32::from_le_bytes(header[7..11].try_into().expect("four version bytes"));
-    if version != 0 {
-        return Err(invalid(&format!(
-            "Vorbis version {version} is not the one bitstream this reader times"
-        )));
-    }
-    let width = header[11];
-    if width == 0 || width > 32 {
-        return Err(invalid(&format!(
-            "a Vorbis track of {width} channels states no layout a decoder maps"
-        )));
-    }
-    let channels = u16::from(width);
-    let sample_rate = u32::from_le_bytes(header[12..16].try_into().expect("four rate bytes"));
-    if sample_rate == 0 {
-        return Err(invalid("a Vorbis track states a sample rate of zero"));
-    }
-    // The two exponents share one byte and the framing marker follows them, which
-    // is what tells this header from one a draft writer left half-finished.
-    let blocks = [header[28] & 0x0f, header[28] >> 4];
-    if header[29] != 1 {
-        return Err(invalid(&format!(
-            "a Vorbis identification header ends with {:#04x} where its framing marker is 1",
-            header[29]
-        )));
-    }
-    for (which, exponent) in [("short", blocks[0]), ("long", blocks[1])] {
-        if !(6..=13).contains(&exponent) {
-            return Err(invalid(&format!(
-                "the {which} Vorbis block size exponent {exponent} is out of the range 6..=13"
-            )));
-        }
-    }
-    if blocks[0] > blocks[1] {
-        return Err(invalid(&format!(
-            "a Vorbis track's short block size exponent {} exceeds its long one {}",
-            blocks[0], blocks[1]
-        )));
-    }
-    Ok(Geometry {
-        sample_rate,
-        channels,
-        blocks,
-    })
-}
-
-/// How many samples a packet holds: half the block size its first byte names, the
-/// long one where bit 1 of that byte is set and the short one where it is not.
-fn samples(packet: &Packet, blocks: [u8; 2]) -> Result<i64> {
-    let flag = packet
-        .data
-        .first()
-        .ok_or_else(|| invalid("a Vorbis bitstream holds an audio packet with nothing in it"))?;
-    Ok(1i64 << (usize::from(blocks[usize::from(flag & 2 != 0)]) - 1))
-}
-
-/// An Ogg file's Vorbis track, read as an audio stream.
+//! Thin player adapter over the library-owned Ogg Vorbis program.
+use crate::container::ogg::{Limits, Ogg};
+use crate::{
+    Result,
+    audio::{AudioPacket, AudioStep, AudioStream, AudioTrack, EncodedPacket},
+};
+use fvid_media::owned_ogg_vorbis as owned;
+pub use owned::VORBIS;
+#[cfg(test)]
+use owned::{Geometry, geometry};
+use std::{io::Read, time::Duration};
 pub struct OggAudioReader {
-    ogg: Ogg,
-    packets: Vec<Stamp>,
-    packet: usize,
-    shape: Geometry,
-    /// The identification and setup packets concatenated, which is the form the
-    /// decoder unpacks - without the comment packet that sits between them in the
-    /// stream.
-    extra_data: Vec<u8>,
-    /// Samples the chains state that a listener hears, added up.
-    stated: i64,
+    program: owned::Program,
 }
-
 impl OggAudioReader {
-    /// Open the file's Vorbis track, whichever chain of the file it sits in. A file
-    /// carrying only another coding is refused by its own name: the container was
-    /// read, and what it names is the coding with no arm here, which is a different
-    /// gap from a container nobody opens.
-    pub fn open<R: Read>(reader: R, limits: Limits) -> Result<Self> {
-        let ogg = Self::read(reader, limits)?;
-        let playable: Vec<usize> = ogg
-            .chains()
-            .iter()
-            .enumerate()
-            .filter(|(_, chain)| chain.coding == Coding::Vorbis)
-            .map(|(number, _)| number)
-            .collect();
-        if playable.is_empty() {
-            let named: Vec<String> = ogg
-                .chains()
-                .iter()
-                .map(|chain| {
-                    let opening = chain
-                        .packets
-                        .first()
-                        .map(|packet| packet.data.as_slice())
-                        .unwrap_or_default();
-                    chain.coding.describe(opening)
-                })
-                .collect();
-            return Err(unsupported(&format!(
-                "Ogg bitstream coded {} has no decoder arm here",
-                named.join(" / ")
-            )));
-        }
-        // The first chain states the program, geometry and codebooks both.
-        let headers = &ogg.chains()[playable[0]].packets;
-        if headers.len() < 3
-            || !headers[1].data.starts_with(COMMENT)
-            || !headers[2].data.starts_with(SETUP)
-        {
-            return Err(invalid(
-                "an Ogg Vorbis bitstream does not hold its three header packets in the order the codec defines",
-            ));
-        }
-        let shape = geometry(&headers[0].data)?;
-        let mut extra_data = headers[0].data.clone();
-        extra_data.extend_from_slice(&headers[2].data);
-        let mut stated = 0i64;
-        let mut packets: Vec<Stamp> = Vec::new();
-        let mut pts = 0i64;
-        for chain in playable {
-            let stream = &ogg.chains()[chain];
-            // Every chain after the first is only the same program if the two
-            // packets that state it - the geometry and the codebooks - agree with
-            // the first byte for byte. The comment between them is metadata each
-            // chain is free to carry in its own words, which is how a chained
-            // album states a title per movement.
-            if stream.packets.len() < 3
-                || stream.packets[0].data != headers[0].data
-                || stream.packets[2].data != headers[2].data
-            {
-                return Err(invalid(&format!(
-                    "bitstream {} is coded differently from the chain ahead of it",
-                    stream.serial
-                )));
-            }
-            if stream.packets.len() < 4 {
-                return Err(invalid(&format!(
-                    "bitstream {} is three header packets and no audio",
-                    stream.serial
-                )));
-            }
-            let start = pts;
-            for (number, packet) in stream.packets.iter().enumerate().skip(3) {
-                let duration = samples(packet, shape.blocks)?;
-                packets.push(Stamp {
-                    chain,
-                    packet: number,
-                    pts,
-                    duration,
-                });
-                pts += duration;
-            }
-            // The position a chain's pages state, taking the last one written in it.
-            // Where none carries a position the samples its packets add up to are all
-            // the file has to say.
-            stated += stream
-                .packets
-                .iter()
-                .rev()
-                .find_map(|packet| packet.end_granule)
-                .unwrap_or(pts - start);
-        }
+    pub fn open<R: Read>(source: R, limits: Limits) -> Result<Self> {
         Ok(Self {
-            ogg,
-            packets,
-            packet: 0,
-            shape,
-            extra_data,
-            stated,
+            program: owned::Program::open(source, limits)?,
         })
     }
-
-    /// Take the whole file in: Ogg packets carry no lengths of their own, so the
-    /// page walk that rebuilds them reads every byte.
-    fn read<R: Read>(mut reader: R, limits: Limits) -> Result<Ogg> {
-        let mut bytes = Vec::new();
-        let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
-        Ogg::parse(&bytes, &limits)
+    pub fn open_track<R: Read>(source: R, limits: Limits, nth: usize) -> Result<Self> {
+        Ok(Self {
+            program: owned::Program::open_track(source, limits, nth)?,
+        })
     }
-
-    /// The container's own shape, for a caller that wants to say what it opened.
     pub fn ogg(&self) -> &Ogg {
-        &self.ogg
+        self.program.ogg()
     }
 }
-
+fn encoded(p: fvid_media::owned_ogg_opus::EncodedPacket) -> EncodedPacket {
+    EncodedPacket {
+        data: p.data,
+        pts: p.pts,
+        duration: p.duration,
+    }
+}
 impl AudioStream for OggAudioReader {
     fn codec(&self) -> &str {
-        VORBIS
+        self.program.codec()
     }
-
-    /// Packets are stamped in samples, the same timescale the decoder reports.
     fn timescale(&self) -> u32 {
-        self.shape.sample_rate
+        self.program.timescale()
     }
-
     fn sample_rate(&self) -> u32 {
-        self.shape.sample_rate
+        self.program.sample_rate()
     }
-
     fn channels(&self) -> u16 {
-        self.shape.channels
+        self.program.channels()
     }
-
-    /// What the chains' pages state as their ends, added up: the samples a listener
-    /// hears, which is shorter than the timeline above by the pre-roll a Vorbis
-    /// stream encodes in front of the audio.
     fn duration(&self) -> Option<Duration> {
-        let samples = u64::try_from(self.stated).ok()?;
-        Some(Duration::from_secs_f64(
-            samples as f64 / f64::from(self.shape.sample_rate),
-        ))
+        self.program.duration()
     }
-
     fn extra_data(&self) -> &[u8] {
-        &self.extra_data
+        self.program.extra_data()
     }
-
-    /// One program: a file's chains run one after another rather than beside each
-    /// other, so there is no second track to choose.
+    fn audio_track_index(&self) -> usize {
+        self.program.audio_track_index()
+    }
     fn audio_tracks(&self) -> Vec<AudioTrack> {
-        vec![AudioTrack {
-            sample_rate: self.shape.sample_rate,
-            channels: self.shape.channels,
-            name: String::new(),
-            language: String::new(),
-        }]
+        self.program
+            .audio_tracks()
+            .into_iter()
+            .map(|t| AudioTrack {
+                sample_rate: t.sample_rate,
+                channels: t.channels,
+                name: t.name,
+                language: t.language,
+            })
+            .collect()
     }
-
     fn next_packet(&mut self) -> Result<Option<EncodedPacket>> {
-        let Some(at) = self.packets.get(self.packet) else {
-            return Ok(None);
-        };
-        let packet = EncodedPacket {
-            data: self.ogg.chains()[at.chain].packets[at.packet].data.clone(),
-            pts: at.pts,
-            duration: at.duration,
-        };
-        self.packet += 1;
-        Ok(Some(packet))
+        self.program.next_packet().map(|p| p.map(encoded))
     }
-
+    fn next_step(&mut self) -> Result<Option<AudioStep>> {
+        self.program.next_step().map(|s| {
+            s.map(|s| match s {
+                fvid_media::owned_ogg_opus::AudioStep::ResetDecoder => AudioStep::ResetDecoder,
+                fvid_media::owned_ogg_opus::AudioStep::Encoded(p) => AudioStep::Encoded(encoded(p)),
+            })
+        })
+    }
+    fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        let (ident, _) = fvid_codecs::vorbis_audio::configuration_headers(self.extra_data())?;
+        let shape = fvid_codecs::vorbis::Identification::parse(ident)?;
+        crate::codec::make_audio_decoder(
+            self.codec(),
+            self.extra_data(),
+            shape.sample_rate,
+            u16::from(shape.channels),
+            0,
+        )
+    }
+    fn reset_decoder(&mut self, decoder: &mut Box<dyn crate::audio::AudioDecode>) -> Result<()> {
+        *decoder = self.make_decoder()?;
+        Ok(())
+    }
     fn rewind(&mut self) {
-        self.packet = 0;
+        self.program.rewind()
     }
-
     fn seek_to(&mut self, pts: i64) -> i64 {
-        let target = pts.max(0);
-        let index = self.packets.partition_point(|at| at.pts <= target);
-        let index = index.saturating_sub(1);
-        self.packet = index;
-        self.packets.get(index).map_or(0, |at| at.pts)
+        self.program.seek_to(pts)
+    }
+    fn preroll_target(&self) -> Option<i64> {
+        self.program.preroll_target()
+    }
+    fn present_decoded(&self, p: AudioPacket, source: i64) -> Result<Option<AudioPacket>> {
+        self.program
+            .present_decoded(
+                fvid_media::owned_ogg_opus::AudioPacket {
+                    data: p.data,
+                    pts: p.pts,
+                    timebase_num: p.timebase_num,
+                    timebase_den: p.timebase_den,
+                },
+                source,
+            )
+            .map(|p| {
+                p.map(|p| AudioPacket {
+                    data: p.data,
+                    pts: p.pts,
+                    timebase_num: p.timebase_num,
+                    timebase_den: p.timebase_den,
+                })
+            })
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::{Geometry, OggAudioReader, VORBIS, geometry};
@@ -416,7 +211,7 @@ mod tests {
     }
 
     #[test]
-    fn every_packet_is_stamped_at_half_its_block_size_apart() {
+    fn every_packet_is_stamped_by_its_decoded_overlap() {
         let reader = open(TONE).expect("fixture opens");
         let shape = geometry(&reader.ogg().chains()[0].packets[0].data).expect("geometry");
         assert_eq!(
@@ -431,14 +226,16 @@ mod tests {
         // One block of 2048 samples at 44.1 kHz is 1024 samples of audio, so the
         // 88 packets run the timeline to 90 112 samples - the granule's 88 256 plus
         // the pre-roll the encoder put in front of the tone.
-        let last = reader.packets.last().expect("audio");
-        assert_eq!((last.pts, last.duration), (89_088, 1_024));
-        assert_eq!(reader.packets.len(), 88);
+        let last = reader.program.packet_times().last().expect("audio");
+        assert_eq!((last.0, last.1), (88_064, 1_024));
+        assert_eq!(reader.program.packet_times().len(), 88);
         assert!(
             reader
-                .packets
+                .program
+                .packet_times()
+                .collect::<Vec<_>>()
                 .windows(2)
-                .all(|pair| pair[1].pts == pair[0].pts + pair[0].duration),
+                .all(|pair| pair[1].0 == pair[0].0 + pair[0].1),
             "one chain's packets follow each other without a gap"
         );
     }
@@ -475,20 +272,19 @@ mod tests {
             // One block of the 2 048 the packet names is heard as 1 024 samples,
             // except at the front: the first packet's window reaches into the block
             // behind it, so the decoder holds it and gives nothing yet.
-            assert_eq!(
-                got,
-                if decoded == 0 { 0 } else { 1_024 },
-                "packet {decoded}"
-            );
+            assert_eq!(got, 1_024, "packet {decoded}");
             assert_eq!((pcm.timebase_num, pcm.timebase_den), (1, 44_100));
             heard += got;
             decoded += 1;
         }
-        assert_eq!(decoded, 88, "every packet of a real file decodes");
+        assert_eq!(
+            decoded, 87,
+            "the first packet primes overlap; subsequent packets return PCM"
+        );
         // What a listener is handed, beside the timeline the reader stamped: one
         // block short of it, which is the block the decoder never got the packet for.
         assert_eq!(heard, 89_088);
-        assert_eq!(reader.packets.len(), 88);
+        assert_eq!(reader.program.packet_times().len(), 88);
         reader.rewind();
         assert_eq!(reader.next_packet().expect("packet").expect("first").pts, 0);
     }
@@ -496,12 +292,15 @@ mod tests {
     #[test]
     fn a_timestamp_lands_on_the_packet_at_or_before_it() {
         let mut reader = open(TONE).expect("fixture opens");
-        assert_eq!(reader.seek_to(89_088), 89_088);
-        assert_eq!(reader.seek_to(89_089), 89_088);
+        assert_eq!(reader.seek_to(10_001), 10_001);
+        assert_eq!(
+            reader.next_packet().unwrap().unwrap().pts,
+            0,
+            "decode preroll begins at the chain start"
+        );
         assert_eq!(reader.seek_to(-1), 0);
-        assert_eq!(reader.seek_to(1 << 40), 89_088);
-        assert!(reader.next_packet().expect("packet").is_some());
-        assert!(reader.next_packet().expect("no more").is_none());
+        assert_eq!(reader.seek_to(1 << 40), 88_256);
+        assert!(reader.next_packet().unwrap().is_none());
     }
 
     /// The sample the coverage matrix pins for the Vorbis row: two chained streams,
@@ -535,20 +334,16 @@ mod tests {
         // ffprobe calls this file 0.03 s long, because it stamps a chained stream by
         // the last chain's granule alone. A player that runs the chains one after
         // another offers the pair, so the length it reports is their sum.
-        assert_eq!(reader.stated, 2 * 1_323);
+        assert_eq!(reader.program.end_samples(), 2 * 1_323);
         assert_eq!(
-            reader
-                .packets
-                .iter()
-                .map(|at| (at.pts, at.duration))
-                .collect::<Vec<_>>(),
+            reader.program.packet_times().collect::<Vec<_>>(),
             vec![
-                (0, 128),
-                (128, 1_024),
-                (1_152, 1_024),
-                (2_176, 128),
-                (2_304, 1_024),
-                (3_328, 1_024),
+                (0, 0),
+                (0, 576),
+                (576, 1_024),
+                (1_323, 0),
+                (1_323, 576),
+                (1_899, 1_024),
             ]
         );
     }
@@ -642,7 +437,7 @@ mod tests {
         let copy = doctored(&bytes, at, 0x0c);
         assert_eq!(copy[at - 28..][..7], *b"\x01vorbis");
         let error = open(&copy).err().expect("a second chain that disagrees");
-        assert!(error.to_string().contains("coded differently"), "{error}");
+        assert!(error.to_string().contains("exponent"), "{error}");
         // The two chains' comments do differ - each states its own title - and that
         // is what the sample is named for, so the pair opens with one decoder run.
         assert!(

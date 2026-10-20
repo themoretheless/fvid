@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0060"
+  ],
+  "checked_at": "2026-10-15T20:07:01.695096+00:00",
+  "before": [
+    "evidence/batch-036-refill-qualified-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-036-audio-thread.log",
+      "kind": "rust",
+      "passed": 27
+    },
+    {
+      "log": "evidence/batch-036-cpal.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-036-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-036-audio-fixtures.log",
+      "kind": "python",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-036-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native2.1s VP9 video decodes105 frames. Production CPAL2x callback emits12000 frames and advances24000 source frames; current lead falls below200ms. Before: third packet remains absent at100ms. After: write cursor advances65536 to98304 within100ms.",
+    "Stored frontier replaces wall-time completion of source pacing; source progress is reevaluated every5ms. Final-output drain retains its wall polling semantics. Command arrivals still interrupt waits immediately.",
+    "Actual worker/CPAL EOF, finite stretch, pause, resume, navigation and error gates pass. Constructor changes in included Vorbis tests preserve existing tests and add no ID.",
+    "An initial two-packet candidate passed before the fix and is explicitly excluded as a reproduction; only qualified three-packet log proves the failure.",
+    "Generator is separate and tests run offline without FFmpeg. No physical-DAC or hard real-time guarantee claimed."
+  ],
+  "counting": "One device-progress refill defect; earlier stale-public-position issue remains separately59."
+}

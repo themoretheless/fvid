@@ -1,0 +1,77 @@
+{
+  "provenance": "Owned PCM/CABAC and MP4 only. I.8.5.3.2.5 explicitly selects base 8.5.3.2.9 for AMVP, which copies long-term motion; merge alone selects I.8.5.3.2.6 view scaling. No private media, FFmpeg, network or test-time generation.",
+  "cases": [
+    {
+      "file": "amvp-merge-texture-off-amvp.mp4",
+      "kind": "texture",
+      "merge": false,
+      "enabled": false,
+      "target_layer": 5,
+      "source_layer": 3,
+      "expected_quarter_mv": 4
+    },
+    {
+      "file": "amvp-merge-texture-on-amvp.mp4",
+      "kind": "texture",
+      "merge": false,
+      "enabled": true,
+      "target_layer": 5,
+      "source_layer": 3,
+      "expected_quarter_mv": 4
+    },
+    {
+      "file": "amvp-merge-texture-off-merge.mp4",
+      "kind": "texture",
+      "merge": true,
+      "enabled": false,
+      "target_layer": 5,
+      "source_layer": 3,
+      "expected_quarter_mv": 4
+    },
+    {
+      "file": "amvp-merge-texture-on-merge.mp4",
+      "kind": "texture",
+      "merge": true,
+      "enabled": true,
+      "target_layer": 5,
+      "source_layer": 3,
+      "expected_quarter_mv": 16
+    },
+    {
+      "file": "amvp-merge-depth-off-amvp.mp4",
+      "kind": "depth",
+      "merge": false,
+      "enabled": false,
+      "target_layer": 8,
+      "source_layer": 5,
+      "expected_quarter_mv": 4
+    },
+    {
+      "file": "amvp-merge-depth-on-amvp.mp4",
+      "kind": "depth",
+      "merge": false,
+      "enabled": true,
+      "target_layer": 8,
+      "source_layer": 5,
+      "expected_quarter_mv": 4
+    },
+    {
+      "file": "amvp-merge-depth-off-merge.mp4",
+      "kind": "depth",
+      "merge": true,
+      "enabled": false,
+      "target_layer": 8,
+      "source_layer": 5,
+      "expected_quarter_mv": 4
+    },
+    {
+      "file": "amvp-merge-depth-on-merge.mp4",
+      "kind": "depth",
+      "merge": true,
+      "enabled": true,
+      "target_layer": 8,
+      "source_layer": 5,
+      "expected_quarter_mv": 16
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "provenance": "Four authored60ms dual AVC B-picture tracks plus64ms AVC/two mono AAC-LC silence tracks. Component arrays/bitstreams derive from owned synthetic writers; no private data/encoder/network.",
+  "cases": [
+    {
+      "file": "disabled-first.mp4",
+      "flags": [
+        6,
+        3
+      ],
+      "effective_enabled": [
+        false,
+        true
+      ]
+    },
+    {
+      "file": "legacy-zero.mp4",
+      "flags": [
+        0,
+        0
+      ],
+      "effective_enabled": [
+        true,
+        true
+      ]
+    },
+    {
+      "file": "legacy-disabled.mp4",
+      "flags": [
+        6,
+        6
+      ],
+      "effective_enabled": [
+        true,
+        true
+      ]
+    },
+    {
+      "file": "both-enabled.mp4",
+      "flags": [
+        3,
+        3
+      ],
+      "effective_enabled": [
+        true,
+        true
+      ]
+    }
+  ],
+  "sha256": {
+    "disabled-first.mp4": "515864d978d329af60de509a7a0af37f1c3d9a36497e1bb103a4463a9e0cd9fc",
+    "legacy-zero.mp4": "24f7374609965ba3118db044451734632c5dd5c52a2bb69d3117f8e75fe4073a",
+    "legacy-disabled.mp4": "c54c4951d6000a89aae1deec051c1889180f1400ef6d5f3800d5b08343a598b4",
+    "both-enabled.mp4": "0457f72654e84ee4b277bdcafd4b475680face1212e9662f4b479bec3ef3ab56",
+    "audiovisual.mp4": "08e318509520c5ea17264164755a09a24b686135d880b832679b1c69818d1191"
+  }
+}

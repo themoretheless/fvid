@@ -1,0 +1,64 @@
+{
+  "provenance": "Authored20ms VP9/PCM companion and WAV/AIFF/AU PCM, authored tiny VP9/AVI IMA blocks. Additional existing synthetic tone/note controls are referenced in place and not copied. Tests compare bounded/exact/maximum reads, packet bytes and clocks; no decoder capability is added. No private media, encoder or network.",
+  "cases": [
+    {
+      "kind": "wav",
+      "file": "control.wav",
+      "expected": "pcm.f32le"
+    },
+    {
+      "kind": "aiff",
+      "file": "control.aiff",
+      "expected": "pcm.f32le"
+    },
+    {
+      "kind": "au",
+      "file": "control.au",
+      "expected": "pcm.f32le"
+    },
+    {
+      "kind": "avi",
+      "file": "control.avi",
+      "expected": "ima.f32le"
+    },
+    {
+      "kind": "aac",
+      "existing_fixture": "audio/aac-stereo.aac",
+      "sha256": "a7820d4dbd8a1e4d619246a986aa48efcf94856640215db6a5648509bfeb8314"
+    },
+    {
+      "kind": "ac3",
+      "existing_fixture": "audio/ac3-stereo.ac3",
+      "sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb"
+    },
+    {
+      "kind": "mp3",
+      "existing_fixture": "mp3/tone.mp3",
+      "sha256": "f0c47ab469f1738cfd453a71e498f5cf353e56cd3238994bc2a005c60777a145"
+    },
+    {
+      "kind": "flac",
+      "existing_fixture": "flac/tone.flac",
+      "sha256": "7d70db4387b94a2563fbe73c34dba88bdcdfe14969d578944bbf7ef19cced734"
+    },
+    {
+      "kind": "smf",
+      "existing_fixture": "midi/two-notes.mid",
+      "sha256": "55118571e7325c2415ee7d3e0c8cbeaea7fd27fffd7815b7bf745e975e58e880"
+    },
+    {
+      "kind": "xm",
+      "existing_fixture": "xm/two-notes.xm",
+      "sha256": "e37153032d0c8d9cb29cef522bb60218c6361e51842e3d52775ac01bd25c5771"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "pcm.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "control.wav": "e1da04013618993e28a8984936226dd12b826d9ba7a79394a299088f5730ef92",
+    "control.aiff": "a4b94873ed1633b566c249cfa71bff9cfb087c61ea297ebc3b3ce9f0af87f37b",
+    "control.au": "d6bd5abf33c284544cc0cb48c5fe459133102b5eba125e2c81b34086059699ab",
+    "control.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f"
+  }
+}

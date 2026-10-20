@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0077"
+  ],
+  "checked_at": "2026-10-15T23:18:13.162007+00:00",
+  "before": [
+    "evidence/batch-053-preroll-before.log",
+    "evidence/batch-053-seek-before.log",
+    "evidence/batch-053-resume-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-053-all-navigation-after.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-053-worker-final.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-053-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-053-seek-final.log",
+      "kind": "rust",
+      "passed": 40
+    },
+    {
+      "log": "evidence/batch-053-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-053-player-final.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "The authored60ms native VP9/PCM control plays completely and matches480PCM frames before navigation. Actual Player.restart previously resumed audio before Player.present finished the restarted picture preroll. After restart correction, the same fixture independently reproduced seek20ms premature sound. After seek correction, Play during pending preroll independently bypassed the hold. These are one synchronization invariant and one ID.",
+    "AudioPlayback.rewind now preserves play/pause state. A/V restart and seek command Pause before moving audio; present resumes only when picture preroll finishes. toggle_pause does not release sound while buffering. Sound-only restart retains explicit Play and sound-only seeks preserve state.",
+    "Two automatic regressions cover paused rewind waiting for explicit Play plus actual Player restart, playing seek, paused seek and resume during pending seek. A100ms pre-picture interval queues no audio, does not resume the device and holds the correct clock; after picture readiness the full/sought native PCM matches exactly. Paused seek stays paused until the user resumes.",
+    "31 worker tests,40 related seek tests and native controls/refusals/duration/Opus integrations pass. Two existing seek tests are ignored and count no runtime coverage. Final player build and fixture reproducibility pass. No layout change, performance or physical-DAC claim.",
+    "An overlapping intermediate log was accidentally truncated while a previous run still held its descriptor. It is excluded; all accepted evidence is from separate completed non-NUL logs. Final navigation acceptance includes all four Player paths."
+  ],
+  "compatibility": "Rewind preserves the current play/pause state; callers wanting restart playback should issue Play explicitly, as the sound-only Player already does. A/V navigation resumes sound with picture readiness.",
+  "counting": "One audio/video navigation preroll synchronization improvement. Restart, seek, pause and early Play are variants of this same invariant."
+}

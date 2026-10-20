@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0143"
+  ],
+  "checked_at": "2026-10-16T10:03:25.772864+00:00",
+  "before": [
+    "evidence/batch-127-reproduction.log",
+    "evidence/batch-127-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-127-integration.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-127-decoder.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-127-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-127-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twenty-two authored RPN2inputs compare independent transposed-note or equivalent RPN0bend performances. Before correction36mono/stereoPCM comparisons over18files fail; four center/LSB-only/unselected/unknown controls are healthy.36worker attempts fail generation0 fullplay, so no separate pre-fix seek defect is claimed. Passing ignored reproduction and forced intended acceptance are recorded separately.",
+    "RPN2 MSB values0..127 encode whole semitones minus64; LSB is unused. Retune active/future voices while retaining original keys forNoteOff. Tuning composes with pitchbend, survives CC121 with selectors nulled, and decoder reset restores zero. Null/NRPN/unknown guards and per-channel isolation remain.",
+    "After all44mono/stereoPCM comparisons match exactly.44actual worker100ms/EOFtargets include completeplay/rewind.14related integration tests and19decoderunits pass; extreme values at8k/44.1k preserve key identity, finite PCM and bounded phase/step/voices,then reset tuning. Player build and fixture reproducibility pass.",
+    "Pure generators/ordinary tests require no FFmpeg/network/private media. Separate authored native VP9/PCM video companion passes. This is the existing native sine instrument profile; no fullGM,physicalDAC or performance claim."
+  ],
+  "sources": [
+    {
+      "url": "https://midi.org/midi-1-0-control-change-messages",
+      "section": "Table3aRPN0:2",
+      "rule": "Channel coarse tuning uses only MSB with one-semitone resolution,center64,range minus64..plus63."
+    },
+    {
+      "url": "https://microsoft.github.io/MIDI/kb/in-box-general-midi-synth/",
+      "section": "Control changes and registered parameters",
+      "rule": "CC121resets parameter selection and bend; registered coarse/fine tuning are distinct channel parameters."
+    }
+  ],
+  "compatibility": "Additive RPN2support; public APIs and default PCM unchanged. Original MIDI note identity is preserved. Other unsupported RPN/NRPN data remain ignored.",
+  "counting": "One missing independent channel coarse-tuning parameter. Bounds,selector variants,resource guards andworker targets add zero extra IDs."
+}

@@ -1,0 +1,9 @@
+{
+  "source": "https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c",
+  "retrieved_source_sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "scope": "Primary player implementation; semantic inspection only,no code copied into fvid.",
+  "observations": [
+    "getNextPos applies the selected break row after changing the order,then resets the row to0when it is outside the actual destination pattern row count.",
+    "This fallback also applies after Bxx/Dxx and does not depend on whether the parameter already exceeded the global63row limit."
+  ]
+}

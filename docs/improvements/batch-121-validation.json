@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0138"
+  ],
+  "checked_at": "2026-10-16T08:24:37.674909+00:00",
+  "before": [
+    "evidence/batch-121-before-final.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-121-integration.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-121-reader.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-121-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-121-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-121-ffmpeg-reference.json",
+      "kind": "external-reference",
+      "passed": 6
+    }
+  ],
+  "qualification": [
+    "Six shortauthoredconstant16bitstreams comparelegalblock-sizeencodingswithindependentalternativeheaders andliteralPCM.Before8192/16384codes13/14and8bitescape255(block256)refuseatfirstheader;4096/32768/65535controls healthy. Nativecodecindependentlydecodeseveryauthoredpacketbeforeindexopening,provingprecisefield-admissionfailure.",
+    "Removeerroneousreservedclassificationofcodes13/14andacceptall8bituncommonblockminus-onevalues.16bitescape65535(block65536)andreservedblock0remainrefusedbynativecodec/indexheader;valid65535sampleboundstillplays.",
+    "AftereveryPCMbyte/PTSmatchesalternativeencoding;12actualworkermidpacket/EOFtargets plusfullplay/rewind pass.22readerunits,eightintegrations,fixture reproduction andplayerbuildpass. One65535samplecontrolhasuniquelegalencoding,soitsoracleisliteralPCM/nativedecode ratherthanindependentalternativecode.",
+    "ExplicitlocalFFmpegreferenceindependentlydecodesallsixauthoredstreams toexactliteralPCM;version/bytecounts/SHArecorded. Thisisanopt-inreferenceoperationoutsidenormaltestsandgeneration.NoFFmpeg/networkdependencyinordinaryregressions.",
+    "PureauthoredrawFLACplusVP9/PCMcompanion,no private media/performance/physicalDACclaim.Oneblock-sizefieldcompatibilityproblem;threewrongdescriptors/controls/refusals add noextraIDs."
+  ],
+  "sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9639.html",
+      "section": "9.1.1BlockSizeBits;9.1.6UncommonBlockSize",
+      "rule": "Codes8..15represent256..32768;8bitescape255represents256.16bitescape65535isforbidden65536."
+    }
+  ],
+  "compatibility": "Validfull-FLACblock-sizeencodings nowindexandplay.Publicinterfaces/decoderPCM unchanged;reserved/oversizeblockrefusals retained.",
+  "counting": "One legalblock-sizeadmission problem;variants,maximumguards andexternalreference add noextraIDs."
+}

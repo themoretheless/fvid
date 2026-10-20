@@ -1,0 +1,7 @@
+{
+  "file": "matroska-interrupted-copy.webm",
+  "sha256": "95315fa813bf4c08c44c2c4ce5e9a9a30c4ea5dd581d140c8edccd3060351e16",
+  "interrupt_at": 12782,
+  "frames": 3,
+  "provenance": "Authored VP9 frames and trailing in-segment Void; interruption injected at EOF verification after identity copy."
+}

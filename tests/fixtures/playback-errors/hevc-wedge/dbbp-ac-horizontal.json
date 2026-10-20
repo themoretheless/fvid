@@ -1,0 +1,872 @@
+{
+  "provenance": "Owned PCM/CABAC/MP4 with signed DC or first-frequency AC coefficients and scalar interpolation/composition/inverse-DCT oracle. Offline.",
+  "different_from_zero_motion": 31417,
+  "nonzero_residual_witnesses": 28341,
+  "residual_order_witnesses": 1661,
+  "cases": [
+    {
+      "file": "dbbp-ac-horizontal-0-0-0-64-64--64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 0
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-0--64--64-64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 1536
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-0-0-64-64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 3072
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-0-0--64--64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 4608
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-1-64-64--64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 6144
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-1--64--64-64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 7680
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-1-0-64-64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 9216
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-0-1-0--64--64.mp4",
+      "vertical": false,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 10752
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-0-64-64--64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 12288
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-0--64--64-64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 13824
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-0-0-64-64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 15360
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-0-0--64--64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 16896
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-1-64-64--64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 18432
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-1--64--64-64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 19968
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-1-0-64-64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 21504
+    },
+    {
+      "file": "dbbp-ac-horizontal-0-1-1-0--64--64.mp4",
+      "vertical": false,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 23040
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-0-64-64--64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 24576
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-0--64--64-64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 26112
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-0-0-64-64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 27648
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-0-0--64--64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": false,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 29184
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-1-64-64--64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 30720
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-1--64--64-64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 32256
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-1-0-64-64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 33792
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-0-1-0--64--64.mp4",
+      "vertical": true,
+      "enabled": false,
+      "weighted": true,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 35328
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-0-64-64--64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 36864
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-0--64--64-64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 38400
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-0-0-64-64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 39936
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-0-0--64--64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": false,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 41472
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-1-64-64--64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        64,
+        64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 43008
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-1--64--64-64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        -64,
+        -64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 44544
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-1-0-64-64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        0,
+        64,
+        64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 46080
+    },
+    {
+      "file": "dbbp-ac-horizontal-1-1-1-0--64--64.mp4",
+      "vertical": true,
+      "enabled": true,
+      "weighted": true,
+      "levels": [
+        0,
+        -64,
+        -64
+      ],
+      "ac": "horizontal",
+      "mvs": [
+        [
+          1,
+          3
+        ],
+        [
+          -7,
+          -5
+        ]
+      ],
+      "references": [
+        0,
+        1
+      ],
+      "offset": 47616
+    }
+  ]
+}

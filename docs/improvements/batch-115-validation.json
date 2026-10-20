@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0134"
+  ],
+  "checked_at": "2026-10-16T07:30:20.249211+00:00",
+  "before": [
+    "evidence/batch-115-reproduction-before.log",
+    "evidence/batch-115-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-115-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-115-clock-admission-final.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-115-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-115-core-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-115-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-115-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twelve authored SMPTE24/25/29dropframe/30FPScases compare withindependent equivalent PPQtempo ratios:basic,tempo-ignored andfractional event positions for eachrate. Before passing specific-refusal reproduction withignoredacceptance;forcedacceptance reportsall12validinputsunsupported.",
+    "New native rational timecode clock converts eachabsolute tick tou64microseconds throughu128,retaining fractions. Tempo meta-events do not alter SMPTEtime.Drop-frame-29uses30000/1001FPS. All known eventwindowbytes,scoreend/nativePCM/PTS match PPQcontrols exactly,not only sample-rounded audio.",
+    "Acceptance enabled andold refusal expectation becomes explicit supportedclockmetadata.24actualworker100ms/EOFtargets plusfullplay/rewind match every independent PCMbyte.Five invalid frame-rate/ticks-per-frameheaders refuse withspecificcause atparser andreaderadmission.",
+    "17player parserunits,17no-default coreparserunits,11integrations,finalexactclock/admission tests,fixture reproduction andplayerbuild pass.No FFmpeg/network/private media/physical output/performance/fullGMclaim.SMPTEOffsetFF54is still ignored anddocumented separately;this accepts division-based clocking only.",
+    "Public TimeDivision enum andSmfFile.time_division expose exactclockgeometry.Legacy ticks_per_quarter remains unchanged forPPQandis0fornewlyaccepted SMPTEfiles. Thiscasewaspreviouslyunsupported;docs/NATIVE_PLAYBACK.md explains how consumers inspect eitherclock. Public helper signatures/PPQbehavior retained."
+  ],
+  "sources": [
+    {
+      "url": "https://www.cs.cmu.edu/~music/cmp/archives/cmsip/readings/Standard-MIDI-file-format-updated.pdf",
+      "section": "Header division word;SMPTESubdivisions",
+      "rule": "Signedratecodes-24/-25/-29/-30andpositive ticks/frame specify timecode timing independently ofPPQtempo."
+    }
+  ],
+  "compatibility": "Additive SMPTEdivision support andexplicit clock metadata. ExistingPPQfield/values unchanged;new SMPTEuses0legacyPPQandtypedtime_division. SMPTEOffset/fullMIDIprofile not newlysupported.",
+  "counting": "One native timecodeclock capability;fourrates,twelvepairs,fiverefusals andAPI/docs add noextraIDs."
+}

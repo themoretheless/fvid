@@ -71,7 +71,7 @@ def main():
             name = f'hevc-multilayer-sps-{seed}-{kind}-synthetic.mp4'
             (DEST / name).write_bytes(b''.join(rewrite(t, p) for t, p in roots))
             cases.append(dict(file=name, seed=seed, kind=kind, constraint=constraint,
-                              expectation='invalid' if malformed else 'refusal' if three_d else 'acceptance'))
+                              expectation='invalid' if malformed or three_d else 'acceptance'))
     (DEST / 'hevc-multilayer-sps.json').write_text(json.dumps(dict(
         cases=cases,
         provenance='Original synthetic I/P/B seeds documented in fixtures/hevc/README.md. '

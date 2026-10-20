@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0054"
+  ],
+  "checked_at": "2026-10-15T17:51:25.977761+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-031-audio-integrations-qualified.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-031-webm-audio-unit-final.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-031-fixtures.log",
+      "kind": "python",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-031-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 50,
+  "distinct_python_tests_passed": 14,
+  "before": [
+    "evidence/batch-031-audio-delay-before.log"
+  ],
+  "spec": "https://www.matroska.org/technical/elements.html#CodecDelay",
+  "qualification": [
+    "Un-delayed control passes; five shifted-clock variants and overflow refusal fail before the fix.",
+    "Six authored60ms VP9/PCM clips verify zero,1ns,10/20/100ms delay, entire negative preroll and signed-padding overlap. Source timestamps and independently authored exact sample windows pass.",
+    "Seek translates presentation coordinates to indexed source coordinates and returns the delayed landing PTS. Actual capture workers verify replay/seek/EOF and empty audible output for entirely negative audio.",
+    "Declared generic endpoints account for delay before padding/window clipping. Unrepresentable u64 delay refuses specifically before backend output.",
+    "Existing specialized Opus/Vorbis transport remains preserved. Non-Opus preroll index matching uses the same delayed coordinates. Baseline compressed codec and MP4 clock/worker controls pass.",
+    "Normal tests load saved bytes without FFmpeg/network. No public interface changed; no performance claim."
+  ],
+  "remaining": [
+    "Acceptance uses software capture; physical device output/hardware paths are not qualified.",
+    "AAC-specific padding/terminal metadata remain separate unqualified audit candidates.",
+    "Opus retains historical private index coordinates because its stream seek rebuilds preskip history."
+  ],
+  "counting": "One ignored generic CodecDelay field through source presentation, index navigation and declared endpoints. Delay/sample variants and existing specialized transport add no IDs."
+}

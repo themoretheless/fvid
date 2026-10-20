@@ -22,6 +22,71 @@ pub struct LayerDependencyPrefix {
     pub tree_partitions: Vec<Vec<u8>>,
     pub end_bit: usize,
 }
+impl LayerDependencyPrefix {
+    /// Annex I ViewIdx is scalability dimension 1, not nuh_layer_id and not
+    /// view_id_val (whose values may be equal or unrelated to layer ordering).
+    pub fn view_index(&self, layer_id: u8) -> Result<u16> {
+        let _ = self.depth_layer_ids()?;
+        let index = self.layer_ids.iter().position(|&id|id==layer_id)
+            .ok_or_else(|| invalid("HEVC view index names an unknown layer"))?;
+        Ok(u16::from(self.scalability_ids[index][1]))
+    }
+    /// I-11 ViewIdVal(pic): numeric view identifier, distinct from ViewIdx.
+    pub fn view_id_value(&self, layer_id: u8) -> Result<u16> {
+        let index=usize::from(self.view_index(layer_id)?);
+        let value=self.view_ids.get(index).copied()
+            .ok_or_else(||invalid("HEVC view index exceeds view identifier table"))?;
+        if value>32767 {return Err(invalid("HEVC view identifier exceeds coded bit width"));}
+        Ok(value)
+    }
+    /// I-8 reference-list layers share the current layer's depth/texture role.
+    /// Opposite-role dependencies remain in `direct` for AU ordering and tools.
+    pub fn reference_list_layers(&self,layer_id:u8)->Result<u64> {
+        let _=self.depth_layer_ids()?;
+        if self.direct.len()!=self.layer_ids.len() {
+            return Err(invalid("invalid HEVC reference-list layer graph"));
+        }
+        let index=self.layer_ids.iter().position(|&id|id==layer_id)
+            .ok_or_else(||invalid("HEVC reference list names an unknown layer"))?;
+        let lower=self.layer_ids[..index].iter().fold(0u64,|mask,&id|mask|(1u64<<id));
+        if self.direct[index]&!lower!=0 {return Err(invalid("invalid HEVC reference-list dependency"));}
+        Ok(self.layer_ids.iter().copied().zip(&self.scalability_ids)
+            .filter(|(_,d)|d[0]==self.scalability_ids[index][0])
+            .fold(0u64,|mask,(id,_)|mask|((1u64<<id)&self.direct[index])))
+    }
+    /// I-9 ViewCompLayerId: identify a view component, not its AU availability.
+    /// Layer IDs are resolved from scalability dimensions, never view_id_val.
+    pub fn view_component_layer(&self, layer_id:u8, depth:bool)->Result<Option<u8>> {
+        let _=self.depth_layer_ids()?;
+        let index=self.layer_ids.iter().position(|&id|id==layer_id)
+            .ok_or_else(||invalid("HEVC view component names an unknown layer"))?;
+        self.view_component_for_index(u16::from(self.scalability_ids[index][1]),depth)
+    }
+    /// I-9 mapping for an explicit ViewIdx. This is not a numeric view_id_val
+    /// or a NAL layer ID. Dependency/auxiliary representations are excluded.
+    pub fn view_component_for_index(&self,view_index:u16,depth:bool)->Result<Option<u8>> {
+        let _=self.depth_layer_ids()?;
+        Ok(self.layer_ids.iter().copied().zip(&self.scalability_ids)
+            .filter(|(_,d)|d[0]==u8::from(depth) && u16::from(d[1])==view_index && d[2]==0 && d[3]==0)
+            .map(|(id,_)|id).last())
+    }
+
+    /// F-3 / I-13 depth-layer order, preserving VPS order rather than a bit mask.
+    pub fn depth_layer_ids(&self) -> Result<impl Iterator<Item = u8> + '_> {
+        if self.layer_ids.is_empty() || self.layer_ids.len() > 63
+            || self.layer_ids.len() != self.scalability_ids.len()
+            || self.layer_ids[0] != 0
+            || self.layer_ids.iter().any(|id| *id > 62)
+            || self.layer_ids.windows(2).any(|v| v[0] >= v[1])
+            || self.scalability_ids.iter().any(|d| d[0] > 1)
+            || self.scalability_ids[0][0] != 0
+        {
+            return Err(invalid("invalid HEVC VPS depth-layer identity graph"));
+        }
+        Ok(self.layer_ids.iter().copied().zip(&self.scalability_ids)
+            .filter_map(|(id, dimensions)| (dimensions[0] == 1).then_some(id)))
+    }
+}
 /// Annex F layer sets and temporal inter-layer admission metadata. Layer lists
 /// preserve normative tree-partition order; they are not sorted bit masks.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -1596,5 +1661,49 @@ mod tests {
         many += "0"; // rep_format_idx_present_flag
         many += &original[79..];
         assert!(poc_lsb_aligned(&packed(many), 3, 0).unwrap());
+    }
+}
+
+#[cfg(test)]
+mod texture_view_index_tests {
+    use super::*;
+    #[test]
+    fn view_indices_follow_scalability_dimensions_even_with_unrelated_or_equal_view_ids() {
+        let mut dimensions = vec![[0;16];4];
+        dimensions[1][0]=1;
+        dimensions[2][1]=2;
+        dimensions[3][0]=1; dimensions[3][1]=2;
+        let mut graph = LayerDependencyPrefix {base_additional_profile:None,
+            layer_ids:vec![0,3,5,8],scalability_ids:dimensions,view_ids:vec![900,17],
+            direct:vec![0;4],transitive:vec![0;4],tree_partitions:vec![],end_bit:0};
+        for ids in [vec![900,17],vec![7,7]] {
+            graph.view_ids=ids;
+            for (layer,view) in [(0,0),(3,0),(5,2),(8,2)] {
+                assert_eq!(graph.view_index(layer).unwrap(),view);
+            }
+        }
+        assert!(graph.view_index(2).is_err());
+        graph.scalability_ids.pop();
+        assert!(graph.view_index(0).is_err());
+    }
+}
+
+#[cfg(test)]
+mod inter_view_identifier_tests {
+    use super::*;
+    #[test]
+    fn view_values_use_indices_preserve_equal_ids_and_refuse_missing_entries() {
+        let mut dims=vec![[0;16];3];dims[1][1]=1;dims[2][0]=1;dims[2][1]=1;
+        let mut graph=LayerDependencyPrefix {base_additional_profile:None,
+            layer_ids:vec![0,3,5],scalability_ids:dims,view_ids:vec![900,17],
+            direct:vec![0;3],transitive:vec![0;3],tree_partitions:vec![],end_bit:0};
+        for (layer,wanted)in [(0,900),(3,17),(5,17)] {
+            assert_eq!(graph.view_id_value(layer).unwrap(),wanted);
+        }
+        graph.view_ids=vec![7,7];
+        assert_eq!(graph.view_id_value(0).unwrap(),graph.view_id_value(5).unwrap());
+        graph.view_ids[1]=32768;assert!(graph.view_id_value(3).is_err());
+        graph.view_ids.pop();assert!(graph.view_id_value(3).is_err());
+        assert!(graph.view_id_value(2).is_err());
     }
 }

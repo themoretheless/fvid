@@ -393,7 +393,7 @@ impl<'a> IntraCabacReader<'a> {
         ) || (mbaff && header.field_pic)
             || !pps.cabac
             || (sps.mb_adaptive_frame_field && !mbaff && !header.field_pic)
-            || sps.chroma_format != 1
+            || sps.chroma_format > 2
             || sps.separate_colour_plane
             || !matches!(pps.slice_groups, SliceGroups::Single)
         {
@@ -446,7 +446,7 @@ impl<'a> IntraCabacReader<'a> {
             chroma_modes: grid(count)?,
             dc: [grid(count)?, grid(count)?, grid(count)?],
             luma: grid(count * 16)?,
-            chroma: [grid(count * 4)?, grid(count * 4)?],
+            chroma: [grid(count * if sps.chroma_format==2 {8}else{4})?, grid(count * if sps.chroma_format==2 {8}else{4})?],
             modes: grid(count * 16)?,
             mbaff,
             field_picture: header.field_pic,
@@ -534,6 +534,20 @@ impl<'a> IntraCabacReader<'a> {
         let [a, b] = self.component_neighbours(grid, side, x, y)?;
         Ok(u8::from(a != 0 && (a != 255 || intra)) + 2 * u8::from(b != 0 && (b != 255 || intra)))
     }
+    fn chroma_index(&self,x:usize,y:usize)->usize {
+        let w=self.sps.width_mbs as usize;
+        if self.sps.chroma_format==2 {(y/4*w+x/2)*8+y%4*2+x%2}else{block_index(w,2,x,y)}
+    }
+    fn chroma_coded_context(&self,grid:&[u8],block:usize,intra:bool)->Result<u8> {
+        if self.sps.chroma_format!=2 {
+            let w=self.sps.width_mbs as usize;
+            return self.component_coded_context(grid,2,self.address%w*2+block%2,self.address/w*2+block/2,intra);
+        }
+        let w=self.sps.width_mbs as usize;
+        let [a,b]=super::avc_mbaff::block_neighbours(self.address,[block%2,block/2],w,self.types.len()/w,self.mbaff,[2,1],|pair|self.pair_field(pair))?
+            .map(|n|n.map_or(255,|(owner,local)|grid[owner*8+local[1]*2+local[0]]));
+        Ok(u8::from(a!=0&&(a!=255||intra))+2*u8::from(b!=0&&(b!=255||intra)))
+    }
     pub fn arithmetic(&mut self) -> Result<&mut AvcCabac<'a>> {
         if self.finished {
             return Err(invalid("CABAC slice already finished"));
@@ -559,6 +573,29 @@ impl<'a> IntraCabacReader<'a> {
     /// `luma_coded` is raster 4x4 order; for 8x8 each covered cell receives the
     /// inferred flag. Discard the reader after any error, including termination.
     pub fn record_inter(&mut self, block: &InterNeighbourContext) -> Result<()> {
+        if self.sps.chroma_format == 2
+            && (block.chroma_dc.iter().any(|&v| v)
+                || block.chroma_ac.iter().flatten().any(|&v| v))
+        {
+            return Err(invalid("AVC 422 requires eight-block inter neighbour contexts"));
+        }
+        self.record_inter_chroma(block, [[false; 8]; 2])
+    }
+    pub fn record_inter_422(
+        &mut self,
+        block: &InterNeighbourContext,
+        chroma_ac: [[bool; 8]; 2],
+    ) -> Result<()> {
+        if self.sps.chroma_format != 2 {
+            return Err(invalid("AVC 422 inter neighbour context requires 4:2:2 SPS"));
+        }
+        self.record_inter_chroma(block, chroma_ac)
+    }
+    fn record_inter_chroma(
+        &mut self,
+        block: &InterNeighbourContext,
+        chroma_ac_422: [[bool; 8]; 2],
+    ) -> Result<()> {
         if self.finished || self.slice_type == SliceType::I || self.address >= self.types.len() {
             return Err(invalid("invalid CABAC inter context position"));
         }
@@ -589,6 +626,12 @@ impl<'a> IntraCabacReader<'a> {
             }
         }
         for c in 0..2 {
+            if self.sps.chroma_format == 2 {
+                for (i, &coded) in chroma_ac_422[c].iter().enumerate() {
+                    self.chroma[c][at * 8 + i] = u8::from(coded);
+                }
+                continue;
+            }
             for y in 0..2 {
                 for x in 0..2 {
                     self.chroma[c][block_index(w, 2, mx * 2 + x, my * 2 + y)] =
@@ -669,6 +712,7 @@ impl<'a> IntraCabacReader<'a> {
         let (mx, my) = (at % w, at / w);
         self.types[at] = mb_type;
         let mut mb = IntraMacroblock {
+            chroma422: if self.sps.chroma_format==2 {Some(Box::new(super::avc_macroblock::Chroma422 {dc:[[0;8];2],ac:[[[0;16];8];2],pcm:[[0;128];2]}))}else{None},
             switching_qs: None,
             address: at as u32,
             qp: self.qp,
@@ -681,9 +725,12 @@ impl<'a> IntraCabacReader<'a> {
             chroma_ac: [[[0; 16]; 4]; 2],
         };
         if mb_type == 25 {
-            mb.luma = self
+            if let Some(wide)=&mut mb.chroma422 {
+                let (luma,chroma)=self.cabac.pcm422(self.sps.bit_depth_luma,self.sps.bit_depth_chroma)?;
+                mb.luma=luma;wide.pcm=chroma;
+            } else {mb.luma = self
                 .cabac
-                .pcm(self.sps.bit_depth_luma, self.sps.bit_depth_chroma)?;
+                .pcm_components(self.sps.bit_depth_luma, self.sps.bit_depth_chroma,self.sps.chroma_format!=0)?;}
             mb.qp = 0;
             self.previous_delta = false;
             self.patterns[at] = 47;
@@ -698,10 +745,12 @@ impl<'a> IntraCabacReader<'a> {
                     self.luma[p] = 1;
                 }
             }
+            let cy=if self.sps.chroma_format==2 {4}else{2};
             for plane in &mut self.chroma {
-                for y in 0..2 {
+                for y in 0..cy {
                     for x in 0..2 {
-                        plane[block_index(w, 2, mx * 2 + x, my * 2 + y)] = 1;
+                        let index=if cy==4 {at*8+y*2+x}else{block_index(w,2,mx*2+x,my*2+y)};
+                        plane[index] = 1;
                     }
                 }
             }
@@ -758,6 +807,7 @@ impl<'a> IntraCabacReader<'a> {
                 }
             }
         }
+        if self.sps.chroma_format!=0 {
         let [a, b] = self.macro_neighbours(&self.chroma_modes)?;
         let inc = usize::from(a != 255 && a != 0) + usize::from(b != 255 && b != 0);
         let mode = if self.bin(64 + inc)? == 0 {
@@ -769,6 +819,9 @@ impl<'a> IntraCabacReader<'a> {
         };
         self.chroma_modes[at] = mode;
         mb.chroma_mode = ChromaMode::try_from(mode)?;
+        } else if mb.coded_block_pattern & 0x30 != 0 {
+            return Err(invalid("monochrome CABAC intra macroblock signals chroma residual"));
+        }
         if mb_type == 0 {
             mb.coded_block_pattern = self.read_pattern()?;
         }
@@ -799,6 +852,7 @@ impl<'a> IntraCabacReader<'a> {
             && self.bin(399 + usize::from(a == 1) + usize::from(b == 1))? != 0;
         self.eight[at] = u8::from(eight);
         let mut mb = IntraMacroblock {
+            chroma422: if self.sps.chroma_format==2 && pattern>>4!=0 {Some(Box::new(super::avc_macroblock::Chroma422 {dc:[[0;8];2],ac:[[[0;16];8];2],pcm:[[0;128];2]}))}else{None},
             switching_qs: None,
             address: at as u32,
             qp: self.qp,
@@ -831,6 +885,7 @@ impl<'a> IntraCabacReader<'a> {
             }
         }
         let coefficients = super::avc_inter_coefficients::InterCoefficients {
+            chroma422:mb.chroma422.map(|wide|Box::new(super::avc_inter_coefficients::InterChroma422 {counts:wide.ac.map(|plane|plane.map(|block|block.iter().filter(|&&v|v!=0).count()as u8)),dc:wide.dc,ac:wide.ac})),
             luma_counts: mb
                 .luma_levels
                 .map(|block| block.iter().filter(|&&v| v != 0).count() as u8),
@@ -898,6 +953,7 @@ impl<'a> IntraCabacReader<'a> {
             let inc = usize::from(left == Some(0)) + 2 * usize::from(top == Some(0));
             pattern |= self.bin(73 + inc)? << block;
         }
+        if self.sps.chroma_format==0 {return Ok(pattern);}
         let inc = usize::from(a != 255 && a >> 4 != 0) + 2 * usize::from(b != 255 && b >> 4 != 0);
         if self.bin(77 + inc)? != 0 {
             let inc =
@@ -1001,25 +1057,29 @@ impl<'a> IntraCabacReader<'a> {
             let inc = self.macro_coded_context(&self.dc[component + 1], intra)?;
             self.dc[component + 1][at] = 0;
             if mb.coded_block_pattern >> 4 != 0 {
-                let r = self.cabac.residual(Cat::ChromaDc, inc, field, false)?;
+                let r = self.cabac.residual(Cat::ChromaDc, inc, field, self.sps.chroma_format==2)?;
                 self.dc[component + 1][at] = u8::from(r.total_coefficients != 0);
-                mb.chroma_dc[component].copy_from_slice(&r.coefficients[..4]);
+                if let Some(wide)=&mut mb.chroma422 {
+                    for (i,at)in [0,2,1,4,6,3,5,7].into_iter().enumerate(){wide.dc[component][at]=r.coefficients[i];}
+                } else {mb.chroma_dc[component].copy_from_slice(&r.coefficients[..4]);}
             }
         }
         for component in 0..2 {
-            for block in 0..4 {
-                let (x, y) = (mx * 2 + block % 2, my * 2 + block / 2);
+            let cy=if self.sps.chroma_format==2 {4}else{2};
+            for block in 0..2*cy {
+                let (x, y) = (mx * 2 + block % 2, my * cy + block / 2);
                 let mut coded = 0;
                 if mb.coded_block_pattern >> 4 == 2 {
                     let inc =
-                        self.component_coded_context(&self.chroma[component], 2, x, y, intra)?;
+                        self.chroma_coded_context(&self.chroma[component],block,intra)?;
                     let r = self.cabac.residual(Cat::ChromaAc, inc, field, false)?;
                     coded = u8::from(r.total_coefficients != 0);
                     let mut levels = [0; 16];
                     levels[1..].copy_from_slice(&r.coefficients[..15]);
-                    mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);
+                    if let Some(wide)=&mut mb.chroma422 {wide.ac[component][block]=inverse_scan_4x4(&levels,field);}
+                    else{mb.chroma_ac[component][block] = inverse_scan_4x4(&levels, field);}
                 }
-                self.chroma[component][block_index(w, 2, x, y)] = coded;
+                let index=self.chroma_index(x,y);self.chroma[component][index] = coded;
             }
         }
         Ok(())

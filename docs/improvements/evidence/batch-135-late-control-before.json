@@ -1,0 +1,8 @@
+{
+  "source_binary": "batch135-before",
+  "edge_sample": 46,
+  "packet_frames": 4410,
+  "first_prefix_equal": true,
+  "muted_interval_zero": true,
+  "unmuted_suffix_equal": true
+}

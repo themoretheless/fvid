@@ -192,7 +192,7 @@ pub use config::{Application, Bandwidth, OpusMode, RateControl, Signal};
 pub use decoder::OpusDecoder;
 pub use encoder::{MAX_PACKET_BYTES, OpusEncoder};
 pub use error::{Error, Result};
-pub use multistream::{ChannelLayout, OpusMSDecoder, OpusMSEncoder};
+pub use multistream::{ChannelLayout, OpusMSDecoder, OpusMSEncoder, multistream_packet_samples};
 pub use ogg::{OggOpusReader, OggOpusWriter, OggPacket, OpusHead, OpusTags, Trim};
 pub use packet::MAX_PACKET_SAMPLES;
 pub use parallel::{DEFAULT_WARMUP_MS, ParallelConfig, ParallelPlan, encode_parallel};

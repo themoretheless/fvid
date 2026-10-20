@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0118"
+  ],
+  "checked_at": "2026-10-16T05:19:38.776742+00:00",
+  "before": [
+    "evidence/batch-098-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-098-integration.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-098-decoder.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-098-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-098-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-098-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Eight authored100ms MIDI pairs isolate lifetime behavior at one event tick. Five losses reproduce for an unmatched key,one chord key,another channel,AllNotesOff on another channel andAllSoundOff on another channel. Three matching stop controls intentionally remain silent.",
+    "Before fix,drop_finished removes every level0voice,including unrelated Stage::Attack before rendering. It now removes only completed release voices. An immediate AllSoundOff marks affected voices released as well as level0,so deliberate cuts do not resume attacking.",
+    "Native PCM/timestamps match independent surviving-note controls in all eight pairs. Audible controls verify genuine notes; matching-stop controls verify silence. Actual recording workers pass control sources and target fullplay,rewind,100msseek andEOF with exact suffixes. Short authored native video decodes.",
+    "16decoder/5reader units,nine integration tests,pure fixture reproduction and current player build pass. Voice-count limits,release envelopes,pitch/controller resets and prior EOF/preroll checks remain covered. No encoder/network/private media,physical output or performance claim."
+  ],
+  "compatibility": "Unmatched/channel-scoped stop events no longer delete other attacks. Matching NoteOff/AllNotesOff/AllSoundOff keep their intended silence/release behavior; signatures and packet format remain unchanged.",
+  "counting": "One stage-versus-level voice-lifetime cleanup problem. Five lost-note forms,three silence controls and worker variants add noIDs."
+}

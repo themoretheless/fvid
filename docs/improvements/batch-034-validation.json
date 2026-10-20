@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0058"
+  ],
+  "checked_at": "2026-10-15T20:02:42.638022+00:00",
+  "before": [
+    "evidence/batch-034-stretch-clock-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-034-cpal-clock-qualified.log",
+      "kind": "rust",
+      "passed": 29
+    },
+    {
+      "log": "evidence/batch-034-audio-thread.log",
+      "kind": "rust",
+      "passed": 27
+    },
+    {
+      "log": "evidence/batch-034-audio-core.log",
+      "kind": "rust",
+      "passed": 95
+    },
+    {
+      "log": "evidence/batch-034-audio-minimal.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-034-audio-fixtures.log",
+      "kind": "python",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-034-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native140ms video and1120 PCM sample controls pass before and after.64 callback frames at1.75 advance112 source frames,14ms, and do not pass20ms video gate.",
+    "Independent emitted cursor retains fractional phase across callbacks, mono/stereo, eight rates, rate switching, zero suspension and seek. Safe retirement separately retains required DSP history.",
+    "Public Stretch::rendered is additive. No physical DAC, throughput, RSS or device-latency clock claim. Concurrent WAV G.711 integration was repaired externally and adds no ID."
+  ],
+  "counting": "One clock defect; variants and tests add no IDs."
+}

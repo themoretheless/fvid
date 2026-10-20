@@ -14,6 +14,69 @@ pub fn standard_mask(channels: u16) -> Option<u64> {
     }
 }
 
+/// Layouts admitted by the owned mono/stereo rematrix. Quad is distinct
+/// from the generic four-channel front-centre/back-centre arrangement.
+pub fn rematrix_layout_supported(channels: u16, mask: u32) -> bool {
+    (1..=8).contains(&channels) && mask & !0x3ffff == 0 && mask.count_ones() <= u32::from(channels)
+}
+/// Deterministic speaker fold: front channels stay at unity, LFE and unassigned
+/// channels are omitted, remaining speakers fold at -3 dB by lateral position.
+/// A single centre channel retains the historical dual-mono unity behavior.
+fn stereo_weight(speaker: Option<i32>, mono: bool) -> [f64; 2] {
+    let k = std::f64::consts::FRAC_1_SQRT_2;
+    match speaker {
+        Some(0) => [1., 0.],
+        Some(1) => [0., 1.],
+        Some(2) if mono => [1., 1.],
+        Some(2 | 8 | 11 | 13 | 16) => [k, k],
+        Some(4 | 6 | 9 | 12 | 15) => [k, 0.],
+        Some(5 | 7 | 10 | 14 | 17) => [0., k],
+        _ => [0., 0.],
+    }
+}
+/// Source-channel to destination-channel matrix. Layout-preserving identity is
+/// handled by callers. Expansion routes matching speakers first; other speakers
+/// fold to available front channels without inventing surround or LFE content.
+pub(crate) fn rematrix_coefficients(
+    input: u16,
+    output: u16,
+    mask: u32,
+) -> Result<[[f64; 8]; 8], String> {
+    let mut coefficients = [[0.; 8]; 8];
+    if input == output {
+        return Ok(coefficients);
+    }
+    if !rematrix_layout_supported(input, mask) || output == 0 || output > 8 {
+        return Err("unsupported PCM source speaker layout".into());
+    }
+    let destination = standard_mask(output).unwrap_or(0);
+    let discrete = if mask == 0 {
+        Some(stereo_coefficients(input, mask)?)
+    } else {
+        None
+    };
+    for i in 0..usize::from(input) {
+        let speaker = mask_channel_at(u64::from(mask), i as u32);
+        let [left, right] = discrete
+            .as_ref()
+            .map_or_else(|| stereo_weight(speaker, input == 1), |weights| weights[i]);
+        if output == 1 {
+            coefficients[i][0] = (left + right) * 0.5;
+        } else if output == 2 {
+            coefficients[i][0] = left;
+            coefficients[i][1] = right;
+        } else if let Some(j) = (0..u32::from(output))
+            .find(|&j| speaker.is_some() && mask_channel_at(destination, j) == speaker)
+        {
+            coefficients[i][j as usize] = 1.;
+        } else {
+            coefficients[i][0] = left;
+            coefficients[i][1] = right;
+        }
+    }
+    Ok(coefficients)
+}
+
 /// Conventional default output layout, distinct from explicit rematrix layouts.
 /// In particular three unspecified output channels default to FL/FR/LFE (2.1),
 /// while `standard_mask(3)` intentionally describes FL/FR/FC (3.0).
@@ -147,4 +210,31 @@ mod default_tests {
         assert!(default_layout(0).is_none());
         assert!(default_layout(9).is_none());
     }
+}
+/// Stereo fold coefficients independent of source/destination channel-count
+/// equality. Device routing uses this even for rear-only stereo sources.
+pub fn stereo_coefficients(channels: u16, mask: u32) -> Result<[[f64; 2]; 8], String> {
+    if !rematrix_layout_supported(channels, mask) {
+        return Err("unsupported PCM source speaker layout".into());
+    }
+    let mut coefficients = [[0.; 2]; 8];
+    if mask == 0 {
+        // Unknown multichannel roles: a role-free average makes every channel
+        // audible without claiming that channel indices are speaker positions.
+        if channels == 1 {
+            coefficients[0] = [1., 1.];
+        } else if channels == 2 {
+            coefficients[0] = [1., 0.];
+            coefficients[1] = [0., 1.];
+        } else {
+            for row in &mut coefficients[..usize::from(channels)] {
+                *row = [1. / f64::from(channels); 2];
+            }
+        }
+        return Ok(coefficients);
+    }
+    for (i, row) in coefficients[..usize::from(channels)].iter_mut().enumerate() {
+        *row = stereo_weight(mask_channel_at(u64::from(mask), i as u32), channels == 1);
+    }
+    Ok(coefficients)
 }

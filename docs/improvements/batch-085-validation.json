@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0105"
+  ],
+  "checked_at": "2026-10-16T03:34:45.622448+00:00",
+  "before": [
+    "evidence/batch-085-decoded-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-085-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-085-final-cold-warm.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-085-aac-reader.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-085-final-worker.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-085-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-085-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Follow-up extends105 raw sample-accurate seek to ADTS AAC with zero IDs. Four authored LC stereo/mono44/SBR/PS cases reproduce20non-EOF worker seek mismatches; frame-flooring also loses odd output samples when output/core ratio is2. Four EOF controls remain healthy.",
+    "Seek floor/checkpoint comparison now consistently use decoded output-sample units; encoded core timestamps remain unchanged and resume checkpoints still require exact encoded boundaries. Presentation clips the first overlapping decoded PCM window to the requested sample, including odd SBR/PS targets.",
+    "Six short authored sources include two synthetic SBR/PS repetitions crossing the1s checkpoint bucket.38cold decoder seeks and38warmed actual worker seeks at1/3/10ms/1025/end-1/end plus two1.3s+1sample targets exactly match continuous native PCM suffixes and clocks. Ordinary play and rewind repeat controls.",
+    "11 AAC reader/32 worker tests, related raw AC3/sample-clock/read-budget integrations, pure fixture reproduction and player build pass. Existing ADTS worker oracles are updated from frame-rounded landing to exact partial PCM suffixes; Matroska AAC existing coarse oracle remains unchanged.",
+    "Initial cloned test assumed immediate output and failed on legal delayed AAC None; corrected decoded-before handles finish/drain and records the specific20failures. Intermediate worker oracle failures are excluded in favor of final-worker. No new IDs for these test corrections.",
+    "No encoder/network/private source, physical DAC, reference-quality synthesis or latency improvement claim. Existing bounded warmed checkpoint step-count gate remains passing; cold history replay remains linear."
+  ],
+  "compatibility": "Raw AAC seek now returns exact output samples instead of core-frame-rounded points. Manual AudioStream consumers must honor present_decoded for partial/preroll PCM, as already required by stateful AAC. Encoded core frame metadata and signatures remain unchanged.",
+  "counting": "Extension of105 sample-accurate raw audio navigation; accepted_count stays106, next unusedID107."
+}

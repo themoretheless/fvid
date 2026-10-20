@@ -11,6 +11,9 @@ pub use super::hevc_vps_extension::{
 pub use super::hevc_vps_extension::{RepresentationFormat, RepresentationFormats};
 use super::{bits::BitReader, hevc_nal::NalRbsp, hevc_profile::ProfileTierLevel};
 use crate::{Result, invalid};
+#[path = "hevc_vps_3d.rs"]
+mod camera;
+pub use camera::{CameraPair, CameraView, ThreeDExtension};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Ordering {
@@ -148,6 +151,8 @@ pub struct LayeredVps {
     pub extension: Option<Box<LayeredExtensionPrefix>>,
     pub vui: Option<Box<VpsVuiPrefix>>,
     pub bsp: Option<Box<BspHrdParameters>>,
+    pub three_d_extension: Option<Box<ThreeDExtension>>,
+    /// The coded vps_extension2_flag, retained for Annex F compatibility.
     pub future_extension: bool,
 }
 impl LayeredVps {
@@ -170,6 +175,7 @@ impl LayeredVps {
             .saturating_add(self.extension.as_ref().map_or(0, |e| e.retained_bytes()))
             .saturating_add(self.vui.as_ref().map_or(0, |v| v.retained_bytes()))
             .saturating_add(self.bsp.as_ref().map_or(0, |b| b.retained_bytes()))
+            .saturating_add(self.three_d_extension.as_ref().map_or(0, |c| c.retained_bytes()))
     }
 
     /// Resolve the PTL applying to a necessary layer of the selected OLS.
@@ -274,6 +280,7 @@ impl LayeredVps {
         let mut vui = None;
         let mut bsp = None;
         let mut future = false;
+        let mut three_d_extension = None;
         if let Some(start) = vps.extension_start {
             let maximum = vps.ordering.len() as u8 - 1;
             let prefix =
@@ -307,10 +314,31 @@ impl LayeredVps {
             let mut bits = BitReader::new(&rbsp.bytes);
             bits.skip(end)?;
             future = bits.bit()?;
-            if future {
-                while bits.more_rbsp_data() {
-                    bits.bit()?;
+            let has_3d = |ptl: &ProfileTierLevel| {
+                ptl.profile.into_iter()
+                    .chain(ptl.sub_layers.iter().filter_map(|s| s.profile))
+                    .any(|p| p.space == 0 && p.compatible_with(8))
+            };
+            let annex_i = has_3d(&vps.profile)
+                || prefix.graph.base_additional_profile.as_ref().is_some_and(has_3d)
+                || prefix.output.extra_profiles.iter().any(|(_, p)| has_3d(p));
+            if future && annex_i {
+                if bits.bit()? {
+                    while bits.position() % 8 != 0 {
+                        if !bits.bit()? {
+                            return Err(invalid("HEVC VPS 3D alignment bit is not one"));
+                        }
+                    }
+                    let end = super::hevc_3d_syntax::payload_end(&rbsp.bytes)?;
+                    let camera = ThreeDExtension::read(&mut bits, end, &prefix.graph, left)?;
+                    charge(&mut left, camera.retained_bytes())?;
+                    three_d_extension = Some(Box::new(camera));
                 }
+                if bits.bit()? {
+                    while bits.more_rbsp_data() { bits.bit()?; }
+                }
+            } else if future {
+                while bits.more_rbsp_data() { bits.bit()?; }
             }
             bits.finish_rbsp()?;
             // Replacement allocation briefly overlaps the deferred Annex A
@@ -331,6 +359,7 @@ impl LayeredVps {
             extension,
             vui,
             bsp,
+            three_d_extension,
             future_extension: future,
         })
     }

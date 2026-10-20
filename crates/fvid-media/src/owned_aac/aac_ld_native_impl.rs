@@ -7,7 +7,25 @@ impl NativeAacDecoder {
     ) -> Result<Option<AacFrame>> {
         use super::aac_ld_synthesis::LdWindowShape;
         let config = &self.config;
+        let pce_elements: Vec<u8> = self
+            .program
+            .as_ref()
+            .filter(|_| config.channel_configuration == 0)
+            .map(|p| {
+                p.elements
+                    .iter()
+                    .map(|e| {
+                        if e.position == super::aac_pce::Position::Lfe {
+                            3
+                        } else {
+                            u8::from(e.pair)
+                        }
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
         let elements: &[u8] = match config.channel_configuration {
+            0 if !pce_elements.is_empty() => &pce_elements,
             1 => &[0],
             2 => &[1],
             3 => &[0, 1],
@@ -24,8 +42,13 @@ impl NativeAacDecoder {
         let mut bits = BitReader::new(packet);
         let mut noise = self.noise.clone();
         let mut channels = Vec::with_capacity(usize::from(config.channels));
-        for element in elements {
-            bits.read(4)?; // ER tags are signaled but configured order owns placement.
+        for (index, element) in elements.iter().enumerate() {
+            let tag = bits.read(4)? as u8;
+            if let Some(program) = &self.program {
+                if program.elements.get(index).is_none_or(|e| e.tag != tag) {
+                    return Err(invalid("AAC element is absent from PCE"));
+                }
+            }
             if *element == 1 {
                 let (pair, prediction) = ChannelPair::read_ld(&mut bits, config)?;
                 let (left, right) = pair.spectra_with_noise(config, &mut noise)?;

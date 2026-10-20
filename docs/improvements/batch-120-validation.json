@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0063"
+  ],
+  "checked_at": "2026-10-16T08:19:05.150430+00:00",
+  "before": [
+    "evidence/batch-120-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-120-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-120-readers-verified.log",
+      "kind": "rust",
+      "passed": 78
+    },
+    {
+      "log": "evidence/batch-120-clock-unit.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-120-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-120-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Zero-IDfollowup FVID-0063.Twenty-four authored PCM/constantFLACtracks acrossWAV/AIFF/AU/FLAC andsix clockboundaries.Before12publicdurations rounduptheendpoint1ns;all12actualworkerEOFfailures explicitlyreachgeneration2afterhealthy fullplay/rewind.Other12controls healthy.",
+    "Share exactquotient/remainder sample_duration helperwithAudioStream.time_ofanduseitforfourqualifiedreaderdurations.AUusesalreadyvalidatedcompleteframes,notfloating byte-rate division. Publicendnowmatchesstored samplegridandEOFlanding.",
+    "24independentPCM/PTS/metadata/directEOFcontrols and24actualworkerpublicEOFtargets pass. Sevenintegrations,78readerunits,fixture reproduction andplayerbuild pass.Newclockunitcomparespublic rationalAudioPacketclockthroughu64MAXsamples/u32MAXrateandzero-ratebehavior.",
+    "Twolegacyreaderunitexpectations usednearest-nanosecond floatDurationandfailedby1nsaftercorrection;updatedonlythoseoraclestoexactintegerendpoints,thenall78pass. Theirfirstfailurelogretained.Countzero. Sharedcapturehelpernowlabelspositionassertionswithgenerationtoavoidmisclassifyingpre-seek failures.",
+    "Qualificationisfourreaders.SomeAAC/Ogg/AVIadaptersstillhavefloatingdurationcalculationsandawaitindependentfixturequalification;thisbatchdoesnotclaimtheirclockcoverage. NoadditionalacceptedIDforformatvariants/helper/oraclerepair.Rawauthoredmedia/VP9companion,noencoder/network/private media/performance/physicalDACclaim."
+  ],
+  "counting": "Existingrational-clock defectfamilyfollowup;acceptedcount137unchanged."
+}

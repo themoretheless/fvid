@@ -1,0 +1,5 @@
+    Blocking waiting for file lock on build directory
+error: failed to link or copy `/private/tmp/fvid-improvements-target/debug/build/proc-macro2-fd2f5883f5cee3fd/build_script_build-fd2f5883f5cee3fd` to `/private/tmp/fvid-improvements-target/debug/build/proc-macro2-fd2f5883f5cee3fd/build-script-build`
+
+Caused by:
+  No space left on device (os error 28)

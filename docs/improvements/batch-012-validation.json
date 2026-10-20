@@ -1,0 +1,67 @@
+{
+  "status": "accepted",
+  "candidate_ids": [
+    "FVID-0034"
+  ],
+  "standards": [
+    "https://doc.rust-lang.org/cargo/reference/build-scripts.html#rerun-if-changed"
+  ],
+  "measurements": "build-watch-measurements.json",
+  "source_scripts": [
+    "build.rs",
+    "crates/fvid-media/build.rs"
+  ],
+  "completed": [
+    "Two alternating before/after warmed pairs; all Cargo checks pass, actual invocation counters 1\u21920 for both scripts, libraries dirty\u2192fresh.",
+    "Final uninstrumented marker probe: 0.128 s, libraries fresh, build-script output mtimes unchanged.",
+    "Two Python contract tests passed across root/default-media/legacy-media mini projects, including real Rust-source rebuilds, build.rs input tracking, optional prefix changes and target-specific Windows stack directive."
+  ],
+  "remaining": [],
+  "counting": "One redundant build-dependency problem across two linker setup scripts. Benchmark harness, counters, test variants and validation infrastructure add no IDs.",
+  "limitations": [
+    "Local cached headless-check workload only; no clean-build, release-build or playback-speed claim.",
+    "Windows linker output is tested with a host-compiled script; no Windows executable runtime qualification."
+  ],
+  "accepted_ids": [
+    "FVID-0034"
+  ],
+  "checked_at": "2026-10-15T07:01:11.618845+00:00",
+  "checks": [
+    {
+      "command": "Two alternating warmed before/after full-project cargo check pairs; final uninstrumented warm/probe",
+      "result": "all ten Cargo checks passed",
+      "measurements": "build-watch-measurements.json"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_build_script_inputs.py",
+      "passed": 2,
+      "failed": 0,
+      "log": "evidence/batch-012-build-watch-contract.log"
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed",
+      "log": "evidence/batch-012-build-watch-player-check.log"
+    },
+    {
+      "command": "FVID_FFMPEG_PREFIX=/private/tmp/fvid-build-watch-prefix cargo check --locked --offline -p fvid-media --lib --features http-input,legacy-ffmpeg",
+      "result": "passed",
+      "log": "evidence/batch-012-build-watch-media-feature-check.log"
+    }
+  ],
+  "qualification": [
+    "Both scripts now declare only build.rs as their file input; the media legacy benchmark prefix retains its environment watch. Cargo still tracks target/feature and Rust compiler source dependencies.",
+    "Actual script execution counters in Cargo OUT_DIR fall from one to zero for each script in both pairs; both libraries change from dirty to fresh. Temporary instrumentation and markers are removed.",
+    "Standalone offline dependency-free Cargo regression projects prove unrelated documentation and Rust-source edits do not rerun linker setup, Rust edits still recompile their target, and build.rs edits still rerun the script.",
+    "Legacy-prefix changes trigger a fresh script run and update the emitted search directory. Host-compiled script probes preserve the Windows-only 8 MiB stack instruction. Tests require neither FFmpeg nor network.",
+    "Only the stated cached incremental-check workload is measured; no general application or clean-build speed claim."
+  ],
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "source_hashes": {
+    "build.rs": "06eef9d78e4d4f113750e9dad4798b60f753afc3c5fad41fbdc9b1180ea863c4",
+    "crates/fvid-media/build.rs": "bcf19d457b8c5b5602b822ce7bdf1c3aaa75ca7871b80558b089d0c6738bf3c7",
+    "scripts/test_build_script_inputs.py": "3149cf6f6b3d2d3a206a25d10b92bb45b1199ffedbe5316bee9972af6f522f68",
+    "docs/improvements/benchmark-build-watch.py": "255335655c6b27e537e2aa144eeb9dcc97889648c570423457a327f3466da198"
+  }
+}

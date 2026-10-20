@@ -1,0 +1,27 @@
+{
+  "generator": "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_vorbis_large_setup.py",
+  "fixtures": [
+    {
+      "file": "vorbis-large-entries.ogg",
+      "video": "hevc-vorbis-large-entries.mkv",
+      "entries": 1000001,
+      "dimensions": 1,
+      "multiplicands": 0,
+      "setup_bytes": 125061,
+      "pages": 10,
+      "sha256": "9142d11be7c296976dec5877d2abbea4226c4cbff4a168f9eea151727aa519f6",
+      "video_sha256": "50104a8274a5ed029ba58b63cc7b372a093c2571a8928ac895a95eec60184ad4"
+    },
+    {
+      "file": "vorbis-large-multiplicands.ogg",
+      "video": "hevc-vorbis-large-multiplicands.mkv",
+      "entries": 33,
+      "dimensions": 32768,
+      "multiplicands": 1081344,
+      "setup_bytes": 135242,
+      "pages": 11,
+      "sha256": "2d62c09d3c8fb403f0dfabae959ca60b983f259885946ad4358c8d08a7961beb",
+      "video_sha256": "b626f171d9a177faa60733d65838554ee062373b5e726fa25640c0869fc0f16d"
+    }
+  ]
+}

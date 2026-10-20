@@ -1,0 +1,277 @@
+{
+  "scope": "Authored compressed Layer III chain PCM acceptance; protected frames, long/start/short/stop mixed windows and MS stereo",
+  "cases": [
+    {
+      "name": "48000-1ch",
+      "rate": 48000,
+      "channels": 1,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "samples": 4608
+    },
+    {
+      "name": "48000-2ch",
+      "rate": 48000,
+      "channels": 2,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "samples": 4608
+    },
+    {
+      "name": "24000-1ch",
+      "rate": 24000,
+      "channels": 1,
+      "sizes": [
+        480,
+        481,
+        480,
+        481
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "24000-2ch",
+      "rate": 24000,
+      "channels": 2,
+      "sizes": [
+        480,
+        481,
+        480,
+        481
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "8000-1ch",
+      "rate": 8000,
+      "channels": 1,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "8000-2ch",
+      "rate": 8000,
+      "channels": 2,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "44100-1ch",
+      "rate": 44100,
+      "channels": 1,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "samples": 4608
+    },
+    {
+      "name": "44100-2ch",
+      "rate": 44100,
+      "channels": 2,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "samples": 4608
+    },
+    {
+      "name": "22050-1ch",
+      "rate": 22050,
+      "channels": 1,
+      "sizes": [
+        522,
+        523,
+        522,
+        523
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "22050-2ch",
+      "rate": 22050,
+      "channels": 2,
+      "sizes": [
+        522,
+        523,
+        522,
+        523
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "11025-1ch",
+      "rate": 11025,
+      "channels": 1,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "11025-2ch",
+      "rate": 11025,
+      "channels": 2,
+      "sizes": [
+        1044,
+        1045,
+        1044,
+        1045
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "32000-1ch",
+      "rate": 32000,
+      "channels": 1,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "samples": 4608
+    },
+    {
+      "name": "32000-2ch",
+      "rate": 32000,
+      "channels": 2,
+      "sizes": [
+        1440,
+        1441,
+        1440,
+        1441
+      ],
+      "samples": 4608
+    },
+    {
+      "name": "16000-1ch",
+      "rate": 16000,
+      "channels": 1,
+      "sizes": [
+        720,
+        721,
+        720,
+        721
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "16000-2ch",
+      "rate": 16000,
+      "channels": 2,
+      "sizes": [
+        720,
+        721,
+        720,
+        721
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "12000-1ch",
+      "rate": 12000,
+      "channels": 1,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "samples": 2304
+    },
+    {
+      "name": "12000-2ch",
+      "rate": 12000,
+      "channels": 2,
+      "sizes": [
+        960,
+        961,
+        960,
+        961
+      ],
+      "samples": 2304
+    }
+  ],
+  "files": {
+    "48000-1ch.mp3": "13b3074a0b01fb489c0476281770a72f21d0e35a80e61372243c64f95ba814dd",
+    "48000-1ch.f32le": "9b4fd2ac1dfd5f91a94486c11304d1b75b6bd6a0f95a1f9f47efcb13b743eba5",
+    "48000-1ch.mkv": "08a18bc508c335228c7c775951ea4ab157be17d1c888a2cc2e0d4de9f538e962",
+    "48000-2ch.mp3": "672d4487643cd2c5325b1f64ffbcf669c108d10254b9ef640bb23b91034d8c81",
+    "48000-2ch.f32le": "f18f65e9270281d9c68c7c36670e7c1a1c79b25b7a378b1bfa2114a3c7b624e4",
+    "48000-2ch.mkv": "7921dd0ef4c337c9fa8969c75038d327bd7e80b7d9bc48f2c25c83eb1e489bf3",
+    "24000-1ch.mp3": "e283774595bb8ecfaa9462d8541f9f0bf66e09232235b7ffbef9cb9cb7f4ea18",
+    "24000-1ch.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "24000-1ch.mkv": "b1564bbdfee1f475b53af1afbc84b1bdc93c5e9fd0355eb2b08e2b36741a9b03",
+    "24000-2ch.mp3": "74032139fa527c4c88387a504d7579859da0bae7d9fbf38d216b5a9998bbd2bc",
+    "24000-2ch.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "24000-2ch.mkv": "223925e3fd3616b8fd3caf64557223629fb12743547f21a618713efd7eef9f53",
+    "8000-1ch.mp3": "9dce72d32b76b15db5dcaedc46a43402ddeff9e8a2983d870a7d0592da2afb43",
+    "8000-1ch.f32le": "b0c9d847c70ac1482886b15d90a3fe804633057f0d54a3e55f325c2f5bb7af0d",
+    "8000-1ch.mkv": "2a0c67614eac9bb7e09d45682d68a8338c16284625994f36ce2a098c1ca9e2ca",
+    "8000-2ch.mp3": "e5632cac6e5eae633c5f09949ceb7d5566156152b14f80d828197d4ac369444c",
+    "8000-2ch.f32le": "de87010c8a84ec499a4b39a1363a4a1bd2fd5a3849fa203f73ddbb101e0dbae8",
+    "8000-2ch.mkv": "3320592d866ba8b66dc92c0eb6e0286b541559925038e79f4e15cdb65b1aa0ec",
+    "44100-1ch.mp3": "5a5440354e8ee46924af8b783d1112c306f9fb1c13e7627f2d99fd43ce763c6a",
+    "44100-1ch.f32le": "c17d6658c9f5b5060015fbbbaa2906cc7ba49878618938744080b4b3b16fb03e",
+    "44100-1ch.mkv": "b7667a77bd97aa4f0e5a2316a971a0a97d798966bed5e5fcb14b3b8d755d9113",
+    "44100-2ch.mp3": "e6ccb9fbfeeda114029e5fb9f3c8ef37ce388485eab5a0b28e5727745c3af0ce",
+    "44100-2ch.f32le": "217d1a85a5e74c2c369f5522f35bc7566cb38a8e9411d0dc855b45de047bee2d",
+    "44100-2ch.mkv": "79534f9b0b28a210d21a92edba16503905124e631b525b6e803a23419a8547b3",
+    "22050-1ch.mp3": "70e8a270a299cfb58f7bd093378771366c43f3427a9c80f703a171b32944f589",
+    "22050-1ch.f32le": "6a0b6d5f8ebb790c3d8389023d39c47177d5c92d282f0b4b52e3c9b20c73a877",
+    "22050-1ch.mkv": "24d6ce09e95c765d90c11ba68fe00984b9502a59df54892d8daabdf37672c798",
+    "22050-2ch.mp3": "51e04358501157368cbd3a2d76a88e48398063cb0655c048f9ec2e18c681fbf2",
+    "22050-2ch.f32le": "f161d01cf67100f3a9df0c1060e05e3976e754ea49d0ab1c2ed77b632f6cd720",
+    "22050-2ch.mkv": "557b04104f9bb5a7a3bc7b0b83a4756052600cd60f4de5b3fbf0aa4cf428ae4d",
+    "11025-1ch.mp3": "b7fcc55befdaa931f0153aa965865a926c129457c2fee451857fa627e7f1ae72",
+    "11025-1ch.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "11025-1ch.mkv": "5e61b5c56dc94474556e4ab39431a69b6b97a4e223721df848e0d2a654753314",
+    "11025-2ch.mp3": "a81615f85425db00614e776ac51bf248216f8c0136e6b463c49867430a74edb4",
+    "11025-2ch.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "11025-2ch.mkv": "b5fea1e8bd8c0122794abf7f9ae2115385d273c3a61aeb547dc6ca3e05f736ea",
+    "32000-1ch.mp3": "0d29b2f2cfe63fc6e48292752531cba186fb91c8df2b4b536d8f4fddfe502949",
+    "32000-1ch.f32le": "f18644d8ecffe0e99b387764e20b02f5ac35a1a8e7813fdb40ee29304166fc4a",
+    "32000-1ch.mkv": "bf0ebc96b1d3ba5a4a06221a44f942b19fda1ab17d6677aa5b410b17049efc44",
+    "32000-2ch.mp3": "34f3d0644f25b05820d0271277d1d4e74bec8880765bd855a6eb1289aca190a7",
+    "32000-2ch.f32le": "8c3c4dbbd1556ebe7d0d85ad0ec7a1fcfcd373065d40f36a32c72a9d94e88306",
+    "32000-2ch.mkv": "917782d8482440e69526a51de0beeba0466876a8abe86a772cae9e3f9ec702eb",
+    "16000-1ch.mp3": "37a690b9abb9ffa530672ad90b0958769d4a1b6a4c3bd9870ec7bf93a4c10efa",
+    "16000-1ch.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "16000-1ch.mkv": "70ca47093ccef88ffc27613676aba27cebe1d90394d4056f630cf4c5c2241a2f",
+    "16000-2ch.mp3": "677a62082444da40fe8cc352950b6a55711b4bc86618f794b9a4427cec6ce280",
+    "16000-2ch.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "16000-2ch.mkv": "f6b72556231dff7e2c2982e7d50d9d8d5758e0d55532c5366bb06dc518c7ed0a",
+    "12000-1ch.mp3": "b6c0d58bd7f2259ba98aab78f3b530c4b50c6c0c52e4d7f128e16ee4f9d3e5ad",
+    "12000-1ch.f32le": "e167fa85bc8a4645d12bbf5209713e948c2ebfb10a5335631878c391877483d8",
+    "12000-1ch.mkv": "b6519175a7e47b165452eff39cecf772b01320c841c449d3b903b3ecb70e1592",
+    "12000-2ch.mp3": "0afd5dc78acfbae56c4b830ea39d366c7da989401048fc897b681589cf38af34",
+    "12000-2ch.f32le": "d4be70d54377dab851a428f201c45ee6af52522de8b95186555dbe51e36500df",
+    "12000-2ch.mkv": "11461a040f3135f636175459ecd14867056e3cef4edbe5c40823d03ec6279049"
+  }
+}

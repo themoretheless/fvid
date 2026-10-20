@@ -150,7 +150,14 @@ impl Perspective {
             .checked_mul(ch)
             .ok_or("perspective dimensions overflow")?;
         let second = y.checked_add(c).ok_or("perspective storage overflow")?;
-        let mut planes = vec![
+        let alpha_offset = if alpha {
+            second
+                .checked_add(c)
+                .ok_or("perspective storage overflow")?
+        } else {
+            0
+        };
+        let planes = [
             Plane {
                 width: w,
                 height: h,
@@ -172,19 +179,15 @@ impl Perspective {
                 stride: 1,
                 sub,
             },
-        ];
-        if alpha {
-            planes.push(Plane {
+            Plane {
                 width: w,
                 height: h,
-                offset: second
-                    .checked_add(c)
-                    .ok_or("perspective storage overflow")?,
+                offset: alpha_offset,
                 stride: 1,
                 sub: [1, 1],
-            });
-        }
-        self.process(data, w, h, depth, &planes, n, t)
+            },
+        ];
+        self.process(data, w, h, depth, &planes[..if alpha { 4 } else { 3 }], n, t)
     }
     pub fn apply_rgb(
         &self,
@@ -199,16 +202,14 @@ impl Perspective {
         if !matches!(channels, 3 | 4) {
             return Err("invalid perspective RGB channels".into());
         }
-        let planes: Vec<_> = (0..channels)
-            .map(|offset| Plane {
-                width: w,
-                height: h,
-                offset,
-                stride: channels,
-                sub: [1, 1],
-            })
-            .collect();
-        self.process(data, w, h, depth, &planes, n, t)
+        let planes = [0usize, 1, 2, 3].map(|offset| Plane {
+            width: w,
+            height: h,
+            offset,
+            stride: channels,
+            sub: [1, 1],
+        });
+        self.process(data, w, h, depth, &planes[..channels], n, t)
     }
     pub fn apply_gray(
         &self,
@@ -275,23 +276,25 @@ impl Perspective {
         let mut points = Vec::new();
         points.try_reserve_exact(size).map_err(|e| e.to_string())?;
         for y in 0..h {
+            let y_f64 = y as f64;
+            let base_den = matrix[7] * y_f64 + 1.;
+            let base_u = matrix[1] * y_f64 + matrix[2];
+            let base_v = matrix[4] * y_f64 + matrix[5];
             for x in 0..w {
                 let x = x as f64;
-                let y = y as f64;
-                let denominator = matrix[6] * x + matrix[7] * y + 1.;
+                let denominator = matrix[6] * x + base_den;
                 if denominator == 0. || !denominator.is_finite() {
                     return Err("perspective projection crosses a pole".into());
                 }
-                let coordinate = |a: usize| -> Result<i64> {
-                    let v =
-                        256. * (matrix[a] * x + matrix[a + 1] * y + matrix[a + 2]) / denominator;
+                let coordinate = |m_x: f64, base: f64| -> Result<i64> {
+                    let v = 256. * (m_x * x + base) / denominator;
                     // Bound conversion to the reference coordinate representation, not media allocation.
                     if !v.is_finite() || v < i32::MIN as f64 || v > i32::MAX as f64 {
                         return Err("perspective coordinate exceeds signed mapping range".into());
                     }
                     Ok(v.round_ties_even() as i64)
                 };
-                points.push([coordinate(0)?, coordinate(3)?]);
+                points.push([coordinate(matrix[0], base_u)?, coordinate(matrix[3], base_v)?]);
             }
         }
         *cache = Some(Map {
@@ -350,31 +353,38 @@ impl Perspective {
         let map = cache.as_ref().unwrap();
         let mut output = crate::owned_frame::buffer(data.len())?;
         for p in planes {
+            let max_x = p.width as i64 - 1;
+            let max_y = p.height as i64 - 1;
+            let read = |x: i64, y: i64| -> i64 {
+                let x = x.clamp(0, max_x) as usize;
+                let y = y.clamp(0, max_y) as usize;
+                let at = (p.offset + (y * p.width + x) * p.stride) * bytes;
+                if bytes == 1 {
+                    data[at] as i64
+                } else {
+                    u16::from_le_bytes([data[at], data[at + 1]]) as i64
+                }
+            };
             for y in 0..p.height {
+                let row_map = &map.points[y * p.sub[1] * w..];
                 for x in 0..p.width {
-                    let [u, v] = map.points[y * p.sub[1] * w + x * p.sub[0]];
+                    let [u, v] = row_map[x * p.sub[0]];
                     let u = u / p.sub[0] as i64 - (i64::from(u < 0 && u % p.sub[0] as i64 != 0));
                     let v = v / p.sub[1] as i64 - (i64::from(v < 0 && v % p.sub[1] as i64 != 0));
                     let (ix, iy) = (u >> 8, v >> 8);
                     let (fx, fy) = ((u & 255) as usize, (v & 255) as usize);
-                    let read = |x: i64, y: i64| -> i64 {
-                        let x = x.clamp(0, p.width as i64 - 1) as usize;
-                        let y = y.clamp(0, p.height as i64 - 1) as usize;
-                        let at = (p.offset + (y * p.width + x) * p.stride) * bytes;
-                        if bytes == 1 {
-                            data[at] as i64
-                        } else {
-                            u16::from_le_bytes([data[at], data[at + 1]]) as i64
-                        }
-                    };
                     let value = if self.cubic {
+                        let fx_coeff = self.coefficients[fx];
+                        let fy_coeff = self.coefficients[fy];
                         let mut sum = 0i64;
                         for dy in 0..4 {
-                            for dx in 0..4 {
-                                sum += self.coefficients[fx][dx]
-                                    * self.coefficients[fy][dy]
-                                    * read(ix + dx as i64 - 1, iy + dy as i64 - 1);
-                            }
+                            let wy = fy_coeff[dy];
+                            let ry = iy + dy as i64 - 1;
+                            let row_sum = fx_coeff[0] * read(ix - 1, ry)
+                                + fx_coeff[1] * read(ix, ry)
+                                + fx_coeff[2] * read(ix + 1, ry)
+                                + fx_coeff[3] * read(ix + 2, ry);
+                            sum += wy * row_sum;
                         }
                         (sum + (1 << 21)) >> 22
                     } else {

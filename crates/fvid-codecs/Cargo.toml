@@ -16,3 +16,7 @@ fvid-media = { path = "../fvid-media", default-features = false }
 [features]
 default = []
 player = ["dep:fvid-platform"]
+
+[[bench]]
+name = "ffmpeg_vorbis_reference"
+harness = false

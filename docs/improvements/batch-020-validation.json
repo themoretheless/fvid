@@ -1,0 +1,84 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0042"
+  ],
+  "checked_at": "2026-10-15T11:12:37.303222+00:00",
+  "before": "Equal-depth controls pass; mixed8/10 P-skip refuses specifically with invalid MBAFF reconstruction configuration.",
+  "result": "Carry independent component precision through P/B prediction, publication, unavailable references and component-specific deblocking QP normalization.",
+  "qualification": [
+    "164 authored MP4 and66 Matroska clips cover CAVLC/CABAC, frame/field, Pskip/codedP/B, residual reference echo and selected spatial/temporal directB. Exact independent planar samples, analytic RGB, timestamps, seek/rewind/EOF pass.",
+    "44 edge-precision MP4 FFV1 exports preserve promoted components after horizontal flip. Packet/byte/controlled-memory refusal publishes no output.",
+    "10 authored mixed intra/P-slice clips additionally qualify per-component intra deblocking QP normalization and strict native precision through seek.",
+    "Ordinary tests use saved synthetic data without FFmpeg/network. Historical inter refusal companions now assert acceptance.",
+    "Concurrent Opus parser integration repaired separately, count0; see baseline-repair-opus-transport.json."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-mbaff-unit.log",
+      "kind": "rust",
+      "passed": 21
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-compensation-unit.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-prediction-unit.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-root-retry.log",
+      "kind": "rust",
+      "passed": 36
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-root-qualified.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-mixed-slices-final.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-fixtures-qualified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-mixed-slice-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-player-final.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-minimal-final.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-before-controls.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-020-mbaff-inter-components-before-acceptance.log",
+      "kind": "before",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 75,
+  "distinct_python_tests_passed": 2,
+  "remaining": [
+    "Owned Matroska AVC export is not qualified by this change."
+  ],
+  "counting": "One independent mixed-component MBAFF inter capability; variants, tests and concurrent baseline repair add no IDs."
+}

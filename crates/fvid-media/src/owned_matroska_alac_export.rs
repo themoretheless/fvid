@@ -18,8 +18,9 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
         Default::default(),
     )
     .map_err(|e| e.to_string())?;
+    let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
     Ok(reader.tracks.iter().enumerate().any(|(index, t)| {
-        (options.streams.is_empty() || options.streams.contains(&index))
+        ((options.streams.is_empty() && preferred.contains(&t.number)) || options.streams.contains(&index))
             && t.kind == 2
             && t.codec == "A_ALAC"
     }))
@@ -72,11 +73,11 @@ pub(crate) fn apply(
         return Err("media operation cancelled".into());
     }
     crate::owned_budget::check_rss_budget(options)?;
-    let (rate, channels) = geometry(source, options)?;
+    let (rate, channels, mask) = geometry_with_mask(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded(
         rate,
         channels,
-        crate::owned_pcm_channels::standard_mask(channels).unwrap_or(0) as u32,
+        mask,
         options,
         |writer, options| {
             crate::owned_matroska_alac::decode_matroska_alac_pcm(
@@ -91,7 +92,8 @@ pub(crate) fn apply(
     crate::owned_adts_export::export_spool(spool, destination, transform, options)
 }
 
-pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,options)?;Ok((rate,channels))}
+pub(crate) fn geometry_with_mask(source: &Path, options: &CopyOptions) -> Result<(u32, u16,u32)> {
     let mut reader = crate::owned_matroska_audio::open_audio_reader(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
         options,
@@ -101,11 +103,12 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let index = match options.streams.as_slice() {
         [index] => *index,
         [] => {
+            let preferred=reader.preferred_track_numbers(&reader.tracks.iter().filter(|t|t.kind==2).map(|t|t.number).collect::<Vec<_>>());
             let indices: Vec<_> = reader
                 .tracks
                 .iter()
                 .enumerate()
-                .filter_map(|(i, t)| (t.kind == 2).then_some(i))
+                .filter_map(|(i, t)| (t.kind == 2 && preferred.contains(&t.number)).then_some(i))
                 .collect();
             if indices.len() != 1 {
                 return Err("select exactly one audio stream".into());
@@ -123,7 +126,7 @@ pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16
     let decoder =
         crate::owned_alac::AlacDecoder::from_matroska(track).map_err(|e| e.to_string())?;
     let (rate, channels) = (decoder.sample_rate(), decoder.channels());
-    Ok((rate, channels))
+    Ok((rate, channels,decoder.channel_mask()))
 }
 
 #[cfg(test)]

@@ -1,0 +1,56 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0074"
+  ],
+  "checked_at": "2026-10-15T23:03:16.750332+00:00",
+  "before": [
+    "evidence/batch-050-publication-before-final.log",
+    "evidence/batch-050-player-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-050-publication-after.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-050-player-after.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-050-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-050-integration.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-050-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-050-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-050-minimal.log",
+      "kind": "compile",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored short native VP9/Opus controls validate all video frames and exact finite audio length. The tail case learns20ms atEOF but the handle retained60ms through playback, rewind and seek0. Fully known empty0 and untrimmed60ms controls are separate.",
+    "The worker publishes a newly known Some duration only after decoder completion and successful validate_eof. Unknown None preserves the last known value; Some0 is published; invalid EOF does not replace prior length.31 worker tests include these guards.",
+    "An actual sound-only Player using the native stream and running AudioPlayback independently reproduced its stale60ms timeline after the handle fix. poll_audio now follows latest known duration when there is no picture. The functioning player timeline regression passes with20ms. Video-owned duration is unchanged.",
+    "Shared private Arc/Mutex storage preserves all public method signatures. Normal tests require no FFmpeg/network. The feature-disabled run compiles the minimal library and executes zero audio-thread tests; it counts only compilation, never runtime coverage. No performance or physical-DAC claim."
+  ],
+  "compatibility": "AudioPlayback.duration now returns the latest successfully completed source length rather than an immutable startup estimate. Sound-only Player follows it; unknown updates preserve known length.",
+  "counting": "One end-to-end duration publication problem. Handle, Player consumer, fixture controls and guards form one ID."
+}

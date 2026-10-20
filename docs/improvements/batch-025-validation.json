@@ -1,0 +1,65 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0047"
+  ],
+  "checked_at": "2026-10-15T12:10:29.919958+00:00",
+  "before": "Omitted/empty/enabled controls pass. Correct disabled16px+enabled64px file presents16px video; owned PCM refuses two stored audio streams despite only one enabled.",
+  "result": "Retain track usability separately, validate flag/defaults and apply it to automatic video/audio/subtitle selection; preserve raw track/packet indices and explicit audio inspection.",
+  "sources": [
+    "https://www.matroska.org/technical/elements.html#FlagEnabled"
+  ],
+  "qualification": [
+    "Seven authored60ms VP9 variants cover default/empty/explicit flags, disabled-first track, late Tracks, malformed disabled payload ignored for decode, and all-disabled refusal. Exact neutral RGB, source dimensions, clocks, seek/rewind/EOF pass.",
+    "Authored video plus two PCM/subtitle track pairs verifies automatic enabled PCM output, actual player PCM decode, player subtitle list/cues, exact clocks and navigation. Explicit extraction of disabled stored audio still works.",
+    "File audio geometry and full/20-40ms WAVE export match independent PCM arrays. Related AAC/ALAC/PCM file-admission units pass.",
+    "Invalid boolean and duplicate flags refuse specifically. Disabled packets still consume index/byte/resource budgets; the private usability set is included in index memory estimation.",
+    "All stored tracks/packets remain inspectable; identity copies match every byte. Transform re-muxing that cannot preserve usability remains explicitly unsupported and publishes no output.",
+    "Additive track_enabled(number) accessor returns false for unknown IDs; Track public struct shape and existing public signatures remain unchanged."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-before-qualified.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-player-final.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-player-unit.log",
+      "kind": "rust",
+      "passed": 36
+    },
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-parser-unit.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-related.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-owner-unit.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-025-matroska-enabled-tracks-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 94,
+  "distinct_python_tests_passed": 1,
+  "remaining": [
+    "Control/chapter codecs that dynamically enable unusable tracks are unsupported.",
+    "Re-mux writers do not yet preserve disabled-track attributes; admission refuses that transformation.",
+    "Audio was qualified through exact software PCM decode, not physical device output."
+  ],
+  "counting": "One ignored Matroska usability attribute across automatic selections. Variants, reader accessor, strict parsing and tests add no separate IDs."
+}

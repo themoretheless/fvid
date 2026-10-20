@@ -1,0 +1,237 @@
+{
+  "provenance": "Owned PCM/CABAC 4-layer movies, no private media, external codec, network or test-time generation.",
+  "specification": "H.265 v8 I.8.5.3.2.7 step 9 applies AltRefIdx only when Col itself is selected.",
+  "probe": [
+    32,
+    0,
+    32,
+    32
+  ],
+  "first_cu_references": [
+    1,
+    1
+  ],
+  "first_cu_motion": [
+    2,
+    -2
+  ],
+  "probe_initial_order": [
+    "A1",
+    "Col",
+    "A1L0+ColL1",
+    "ColL0+A1L1",
+    "Zero0"
+  ],
+  "cases": [
+    {
+      "file": "temporal-alt-combined-64-0.mp4",
+      "size": 64,
+      "direct": false,
+      "index": 0,
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-64-1.mp4",
+      "size": 64,
+      "direct": false,
+      "index": 1,
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-64-2.mp4",
+      "size": 64,
+      "direct": false,
+      "index": 2,
+      "references": [
+        1,
+        0
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-64-3.mp4",
+      "size": 64,
+      "direct": false,
+      "index": 3,
+      "references": [
+        0,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-64-4.mp4",
+      "size": 64,
+      "direct": false,
+      "index": 4,
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-0.mp4",
+      "size": 128,
+      "direct": false,
+      "index": 0,
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-1.mp4",
+      "size": 128,
+      "direct": false,
+      "index": 1,
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-2.mp4",
+      "size": 128,
+      "direct": false,
+      "index": 2,
+      "references": [
+        1,
+        0
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-3.mp4",
+      "size": 128,
+      "direct": false,
+      "index": 3,
+      "references": [
+        0,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-4.mp4",
+      "size": 128,
+      "direct": false,
+      "index": 4,
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-0-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "index": 0,
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-1-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "index": 1,
+      "references": [
+        1,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-2-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "index": 2,
+      "references": [
+        1,
+        0
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-3-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "index": 3,
+      "references": [
+        0,
+        1
+      ],
+      "motion": [
+        2,
+        -2
+      ]
+    },
+    {
+      "file": "temporal-alt-combined-128-4-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "index": 4,
+      "references": [
+        0,
+        0
+      ],
+      "motion": [
+        0,
+        0
+      ]
+    }
+  ]
+}

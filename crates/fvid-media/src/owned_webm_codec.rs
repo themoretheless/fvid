@@ -1,8 +1,11 @@
 //! Owned WebM packet-to-planar adapter for the shared streaming pipeline.
+#[path = "owned_webm_presentation.rs"]
+mod presentation;
+pub(crate) use presentation::Presentation;
 use crate::owned_frame::{GeometryFrame, buffer};
 use fvid_codecs::{
     Error,
-    codec::{av1_decoder, vp9, vp9_decoder},
+    codec::{av1_decoder, avc_decoder, hevc_decoder, vp9, vp9_decoder},
 };
 type Result<T> = std::result::Result<T, String>;
 pub(crate) const UNSUPPORTED_PREFIX: &str = "unsupported owned video capability: ";
@@ -11,6 +14,12 @@ fn core_error(error: Error) -> String {
         Error::Unsupported(value) => format!("{UNSUPPORTED_PREFIX}{value}"),
         other => other.to_string(),
     }
+}
+pub(crate) fn video_track<R: std::io::Read+std::io::Seek>(reader:&crate::owned_webm::WebmReader<R>) -> Option<&crate::owned_webm::Track> {
+    let candidates:Vec<_>=reader.tracks.iter().filter(|t|t.kind==1 && matches!(t.codec.as_str(),
+        "V_FFV1"|"V_VP9"|"V_AV1"|"V_MPEG4/ISO/AVC"|"V_MPEGH/ISO/HEVC")).map(|t|t.number).collect();
+    let number=reader.preferred_track_numbers(&candidates).first().copied()?;
+    reader.tracks.iter().find(|t|t.number==number)
 }
 pub(crate) struct Decoded {
     pub frame: GeometryFrame,
@@ -21,6 +30,8 @@ enum Kind {
     Ffv1(crate::owned_ffv1_decoder::Decoder),
     Vp9(vp9_decoder::Decoder),
     Av1(av1_decoder::Decoder),
+    Hevc(hevc_decoder::HevcDecoder),
+    Avc(avc_decoder::AvcDecoder),
 }
 pub(crate) struct Decoder {
     kind: Kind,
@@ -36,6 +47,22 @@ impl Decoder {
                 private,
                 usize::MAX,
             )?),
+            "V_MPEG4/ISO/AVC" => {
+                let decoder = match avc_decoder::AvcDecoder::new(private, usize::MAX) {
+                    Ok(value) => value,
+                    Err(Error::Unsupported(_)) => return Ok(None),
+                    Err(error) => return Err(error.to_string()),
+                };
+                Kind::Avc(decoder)
+            }
+            "V_MPEGH/ISO/HEVC" => {
+                let decoder = match hevc_decoder::HevcDecoder::from_configuration(private, usize::MAX) {
+                    Ok(value) => value,
+                    Err(Error::Unsupported(_)) => return Ok(None),
+                    Err(error) => return Err(error.to_string()),
+                };
+                Kind::Hevc(decoder)
+            }
             "V_VP9" => Kind::Vp9(vp9_decoder::Decoder::new(usize::MAX)),
             "V_AV1" => {
                 let decoder = match av1_decoder::Decoder::from_configuration(private, usize::MAX) {
@@ -53,6 +80,12 @@ impl Decoder {
             colour: None,
         }))
     }
+    pub(crate) fn has_pending_field(&self) -> bool {
+        matches!(&self.kind, Kind::Avc(d) if d.has_pending_field())
+    }
+    pub(crate) fn output_is_field_pair(&self) -> bool {
+        matches!(&self.kind, Kind::Avc(d) if d.output_is_field_pair())
+    }
     pub fn monochrome(&self) -> Option<bool> {
         self.mono
     }
@@ -60,10 +93,11 @@ impl Decoder {
         self.colour
     }
     pub fn hdr(&self) -> Option<crate::owned_matroska::HdrMetadata> {
-        let Kind::Av1(decoder) = &self.kind else {
-            return None;
-        };
-        Some(hdr_metadata(decoder.hdr()))
+        match &self.kind {
+            Kind::Av1(decoder) => Some(hdr_metadata(decoder.hdr())),
+            Kind::Hevc(decoder) => Some(hdr_metadata(decoder.hdr())),
+            _ => None,
+        }
     }
     pub fn decode(&mut self, packet: &[u8]) -> Result<Option<Decoded>> {
         let mut shown = None;
@@ -76,6 +110,72 @@ impl Decoder {
                     frame: decoded.frame,
                     depth: decoded.depth,
                 }));
+            }
+            Kind::Avc(decoder) => {
+                let picture = decoder.decode_order(packet).map_err(core_error)?;
+                if let Some(picture) = picture {
+                    let (width, height) = picture.dimensions();
+                    let chroma = picture.chroma_format().map_err(core_error)?;
+                    let mono = chroma == 0;
+                    self.mono = Some(mono);
+                    self.colour = decoder
+                        .active_vui()
+                        .or_else(|| decoder.recorded_vui())
+                        .and_then(|v| v.video_signal)
+                        .map(|(_, full, codes)| {
+                            let [primaries, transfer, matrix] = codes.unwrap_or([2, 2, 2]);
+                            (full, matrix, primaries, transfer)
+                        });
+                    let rgb = self.colour.is_some_and(|c| c.1 == 0);
+                    if rgb && chroma != 3 {
+                        return Err("AVC identity RGB requires 4:4:4".into());
+                    }
+                    let sub = match chroma {
+                        0 | 3 => [1, 1],
+                        1 => [2, 2],
+                        2 => [2, 1],
+                        _ => return Err("invalid AVC chroma format".into()),
+                    };
+                    shown = Some(Decoded {
+                        frame: GeometryFrame {
+                            width,
+                            height,
+                            subsampling: if rgb { None } else { Some(sub) },
+                            data: crate::owned_mp4_video_decode::pack_avc_format(&picture, rgb)?,
+                        },
+                        depth: if mono {
+                            picture.bit_depth
+                        } else {
+                            picture.bit_depth.max(picture.chroma_bit_depth)
+                        },
+                        alpha: None,
+                    });
+                }
+            }
+            Kind::Hevc(decoder) => {
+                if let Some(decoded) = decoder.decode_packet(packet).map_err(core_error)?.filter(|f| f.output) {
+                    let p = &decoded.picture;
+                    let sps = decoder.parameters().0;
+                    let mono = sps.chroma_format == 0;
+                    let sub = match sps.chroma_format {
+                        0 | 3 => [false, false], 1 => [true, true], 2 => [true, false],
+                        _ => return Err("invalid HEVC chroma format".into()),
+                    };
+                    self.colour = sps.vui.as_ref().and_then(|v| v.signal.as_ref()).map(|signal| {
+                        let [primaries, transfer, matrix] = signal.colour.unwrap_or([2, 2, 2]);
+                        (signal.full_range, matrix, primaries, transfer)
+                    });
+                    self.mono = Some(mono);
+                    let rgb = self.colour.is_some_and(|c| c.1 == 0);
+                    if rgb && sps.chroma_format != 3 { return Err("HEVC identity RGB requires 4:4:4".into()); }
+                    let data = crate::owned_mp4_video_decode::pack_hevc(p, sub, mono, rgb)?;
+                    let width = p.dimensions[0].checked_sub(p.crop[0]).and_then(|v|v.checked_sub(p.crop[1])).ok_or("HEVC crop exceeds width")? as usize;
+                    let height = p.dimensions[1].checked_sub(p.crop[2]).and_then(|v|v.checked_sub(p.crop[3])).ok_or("HEVC crop exceeds height")? as usize;
+                    shown = Some(Decoded {
+                        frame: GeometryFrame { width, height, subsampling: if rgb { None } else { Some(sub.map(|s|if s {2}else{1})) }, data },
+                        depth: if mono {p.depth[0]} else {p.depth[0].max(p.depth[1])}, alpha: None,
+                    });
+                }
             }
             Kind::Vp9(decoder) => {
                 for frame in vp9::frames(packet).map_err(core_error)? {
@@ -275,7 +375,7 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
     reader: &mut crate::owned_webm::WebmReader<R>,
     options: Option<&fvid_control::CopyOptions>,
 ) -> Result<Option<Vec<Option<u64>>>> {
-    let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
+    let Some(track) = video_track(reader) else {
         return Err("input has no video stream".into());
     };
     let number = track.number;
@@ -311,6 +411,7 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
         .try_reserve_exact(reader.packets.len())
         .map_err(|_| "presentation index allocation failed")?;
     let mut consumed = 0u64;
+    let mut pending_field = None;
     for index in 0..reader.packets.len() {
         let packet = &reader.packets[index];
         if packet.track != number {
@@ -334,34 +435,51 @@ pub(crate) fn presentation_durations<R: std::io::Read + std::io::Seek>(
         if options.is_some_and(|o| bytes.len() > o.max_packet_bytes) {
             return Err("input packet exceeds byte limit".into());
         }
-        match decoder.decode(&bytes) {
+        let decoded = decoder.decode(&bytes);
+        if decoder.has_pending_field() { pending_field.get_or_insert(index); }
+        match decoded {
+            Ok(Some(_)) if decoder.output_is_field_pair() => {
+                let first = pending_field.take().ok_or("missing AVC first-field timing")?;
+                if reader.packets[first].invisible != !shown { return Err("AVC field pair visibility differs".into()); }
+                durations[first] = durations[first].zip(durations[index])
+                    .map(|(a,b)|a.checked_add(b).ok_or("AVC field-pair duration overflow")).transpose()?;
+                if shown { visible.push((first, reader.packets[first].pts_ns)); }
+            }
             Ok(Some(_)) if shown => visible.push((index, pts)),
             Ok(_) => {}
             Err(error) if error.starts_with(UNSUPPORTED_PREFIX) => return Ok(None),
             Err(error) => return Err(error),
         }
     }
+    if pending_field.is_some() { return Err("unpaired AVC field at end of Matroska".into()); }
+    visible.sort_unstable_by_key(|&(index, pts)| (pts, index));
     for (position, &(index, pts)) in visible.iter().enumerate() {
         if durations[index].is_some() {
             continue;
         }
         let end = if let Some(&(_, next)) = visible.get(position + 1) {
-            i128::from(next)
+            next
         } else if let Some(end) = reader
             .duration_ns
-            .filter(|&v| i128::from(v) > i128::from(pts))
+            .and_then(|v| i64::try_from(v).ok())
+            .filter(|&v| v > pts)
         {
-            i128::from(end)
+            end
         } else if let Some(&(_, previous)) = position.checked_sub(1).and_then(|p| visible.get(p)) {
-            i128::from(pts) + (i128::from(pts) - i128::from(previous))
+            let Some(delta) = pts.checked_sub(previous) else {
+                return Ok(None);
+            };
+            let Some(end) = pts.checked_add(delta) else {
+                return Ok(None);
+            };
+            end
         } else {
             return Ok(None);
         };
-        let interval = end - i128::from(pts);
-        if interval <= 0 {
+        let Some(interval) = end.checked_sub(pts).filter(|&d| d > 0) else {
             return Ok(None);
-        }
-        durations[index] = Some(u64::try_from(interval).map_err(|_| "video duration overflow")?);
+        };
+        durations[index] = Some(interval as u64);
     }
     Ok(Some(durations))
 }
@@ -389,5 +507,28 @@ pub(crate) fn hdr_metadata(
             max_cll: hdr.light.max_cll,
             max_fall: hdr.light.max_fall,
         },
+    }
+}
+
+#[cfg(test)]
+mod avc_pipeline_tests {
+    use super::*;
+    #[test]
+    fn separate_fields_expose_pair_binding_state() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/playback-errors/avc-field-pcm-8bit-top-first.mp4");
+        let mut reader = crate::owned_mp4::Mp4Reader::open(
+            std::io::Cursor::new(std::fs::read(path).unwrap()), Default::default()).unwrap();
+        let private = reader.tracks()[0].configuration.clone();
+        let mut decoder = Decoder::new("V_MPEG4/ISO/AVC", &private, 16, 32).unwrap().unwrap();
+        let mut packet = Vec::new();
+        reader.read_packet(0, 0, &mut packet).unwrap();
+        assert!(decoder.decode(&packet).unwrap().is_none());
+        assert!(decoder.has_pending_field());
+        assert!(!decoder.output_is_field_pair());
+        reader.read_packet(0, 1, &mut packet).unwrap();
+        assert!(decoder.decode(&packet).unwrap().is_some());
+        assert!(!decoder.has_pending_field());
+        assert!(decoder.output_is_field_pair());
     }
 }

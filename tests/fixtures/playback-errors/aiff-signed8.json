@@ -1,0 +1,52 @@
+{
+  "fixtures": [
+    {
+      "file": "aiff-signed8-AIFF-1ch.aiff",
+      "sha256": "673c499e888f234928e6f5a3fa1c03cf911e8323e81121645b8c409ac217c47c",
+      "pcm": "aiff-signed8-AIFF-1ch.f32le",
+      "channels": 1,
+      "frames": 4103,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aiff-signed8-NONE-1ch.aiff",
+      "sha256": "d56739a0e5e3c9654406a1aa098b56f259a4ec5df84d47898d25566de5e77c1d",
+      "pcm": "aiff-signed8-NONE-1ch.f32le",
+      "channels": 1,
+      "frames": 4103,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aiff-signed8-sowt-1ch.aiff",
+      "sha256": "3562b36881837809b98d22f43c16ee0aba59537ab723d0a702b249b98bdd938d",
+      "pcm": "aiff-signed8-sowt-1ch.f32le",
+      "channels": 1,
+      "frames": 4103,
+      "video_companion": "g711-alaw-1ch.avi"
+    },
+    {
+      "file": "aiff-signed8-AIFF-2ch.aiff",
+      "sha256": "7db4b3e41ef596316cae82d561f95f914f6374f69b28cbdb60514570f1624cee",
+      "pcm": "aiff-signed8-AIFF-2ch.f32le",
+      "channels": 2,
+      "frames": 4103,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "aiff-signed8-NONE-2ch.aiff",
+      "sha256": "03f01426ffbb2802e82cf84eb8c0fa40eeefb9b7301f91b018d33a37eb61ab45",
+      "pcm": "aiff-signed8-NONE-2ch.f32le",
+      "channels": 2,
+      "frames": 4103,
+      "video_companion": "g711-alaw-2ch.avi"
+    },
+    {
+      "file": "aiff-signed8-sowt-2ch.aiff",
+      "sha256": "cae00bbf58ad2df0aa899514c511509c0a2f8885bcba5f2a00172457d90e7ba1",
+      "pcm": "aiff-signed8-sowt-2ch.f32le",
+      "channels": 2,
+      "frames": 4103,
+      "video_companion": "g711-alaw-2ch.avi"
+    }
+  ]
+}

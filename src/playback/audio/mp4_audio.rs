@@ -34,7 +34,7 @@ pub struct Mp4AudioReader<R> {
 }
 
 /// Audio fourccs decoded by the player, including the owned PCM endian mapping.
-const CODECS: [[u8; 4]; 15] = [
+const CODECS: [[u8; 4]; 16] = [
     *b"mp4a",
     *b"raw ",
     *b"in24",
@@ -50,6 +50,7 @@ const CODECS: [[u8; 4]; 15] = [
     *b"MAC3",
     *b"MAC6",
     *b"ac-3",
+    *b"ec-3",
 ];
 
 /// The decoder dispatch's name for a tag that cannot spell it itself. Not just the
@@ -69,9 +70,25 @@ fn codec_name(codec: &[u8; 4]) -> Option<&'static str> {
 }
 
 impl<R: Read + Seek> Mp4AudioReader<R> {
-    /// Open the first audio track that a decoder exists for.
+    /// Prefer enabled movie audio; explicit track lists retain container order.
     pub fn open(reader: R, limits: Limits) -> Result<Self> {
-        Self::open_at(reader, limits, 0)
+        let demuxer = Mp4Reader::open(reader, limits)?;
+        let candidates = Self::supported(&demuxer);
+        let usable: Vec<_> = candidates.iter().copied()
+            .filter(|&index| Self::automatic_pcm_usable(&demuxer.tracks()[index])).collect();
+        let admitted = if usable.is_empty() { &candidates } else { &usable };
+        let rank = |index| match demuxer.track_header_flags(index).unwrap_or(0) & 3 {
+            3 => 2, 1 => 1, _ => 0,
+        };
+        if let Some(best) = admitted.iter().map(|&index| rank(index)).max()
+            && let Some(index) = admitted.iter().copied().find(|&index| rank(index) == best)
+        {
+            return Self::from_demuxer(demuxer,index);
+        }
+        match Self::first_audio(&demuxer) {
+            Some(codec) => Err(unsupported(&format!("MP4 audio track coded `{}` has no decoder here",String::from_utf8_lossy(&codec)))),
+            None => Err(invalid("MP4 has no such audio track")),
+        }
     }
 
     /// Open the `nth` audio track a decoder exists for, counting in container
@@ -116,6 +133,14 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     }
 
     /// Container indices of the audio tracks a decoder exists for.
+    fn automatic_pcm_usable(track: &crate::container::mp4::Track) -> bool {
+        if !matches!(&track.codec, b"raw " | b"sowt" | b"twos" | b"in24" | b"in32" | b"fl32" | b"fl64") {
+            return true;
+        }
+        crate::codec::make_audio_decoder(std::str::from_utf8(&track.codec).unwrap_or(""),
+            &track.configuration, track.sample_rate, track.channels, track.bit_depth).is_ok()
+    }
+
     fn supported(demuxer: &Mp4Reader<R>) -> Vec<usize> {
         demuxer
             .tracks()
@@ -135,7 +160,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         if track.handler != *b"soun" {
             return Err(invalid("selected MP4 track is not audio"));
         }
-        let timeline = if track.codec == *b"mp4a" && (track.edits.len()>1 || track.edits.first().is_some_and(|e|e.media_time<0)) {
+        let owned_adpcm = matches!(&track.codec, b"ima4" | b"ms\x00\x02" | b"ms\x00\x11");
+        let timeline = if (track.codec == *b"mp4a" && (track.edits.len()>1 || track.edits.first().is_some_and(|e|e.media_time<0)))
+            || ((owned_adpcm || matches!(&track.codec, b"ac-3" | b"ec-3")) && !track.edits.is_empty()) {
             Some(crate::container::audio_timeline::AudioTimeline::new(&track.edits,track.duration,track.timescale,demuxer.movie_timescale(),track.sample_rate)?)
         } else {None};
         // Probe with the owned parser, rather than guessing from the sample
@@ -227,7 +254,23 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// Packets are timestamped in the *track* timescale, which differs from the
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
+    fn speaker_mask(&self)->Result<Option<u32>> {
+        if self.track().codec==*b"alac" {crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.track().configuration,self.track().sample_rate,self.track().channels).map(Some)}else{Ok(None)}
+    }
+
+    fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
+        if self.track().codec!=*b"mp4a"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
+        let asc=crate::codec::config::aac_specific_config(&self.track().configuration)?;
+        fvid_media::owned_aac::speaker_routing::stereo_router(asc,self.sample_rate(),self.channels(),self.in_band_ps).map(Some).map_err(|e|invalid(&e))
+    }
+
     fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.track().codec == *b"ac-3" {
+            return Ok(Box::new(crate::codec::ac3_decoder::Ac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?));
+        }
+        if self.track().codec == *b"ec-3" {
+            return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?));
+        }
         if self.in_band_ps {
             Ok(Box::new(crate::codec::aac_ps_playback::PsAacDecoder::new_with_in_band_ps(
                 &self.track().configuration, self.track().sample_rate, 2,
@@ -277,7 +320,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
     fn duration(&self) -> Option<std::time::Duration> {
         let track = self.track();
-        if track.codec == *b"mp4a" && !track.edits.is_empty() && self.demuxer.movie_timescale() != 0 {
+        if (track.codec == *b"mp4a" || self.timeline.is_some()) && !track.edits.is_empty() && self.demuxer.movie_timescale() != 0 {
             let ticks = track.edits.iter().try_fold(0u128, |sum, edit| sum.checked_add(u128::from(edit.duration)))?;
             let nanos = ticks.checked_mul(1_000_000_000)? / u128::from(self.demuxer.movie_timescale());
             return Some(std::time::Duration::from_nanos(u64::try_from(nanos).unwrap_or(u64::MAX)));
@@ -331,6 +374,35 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             self.edit_cursor.set(pts+(last-first) as u64);
             return Ok(Some(packet));
         }
+        if track.codec != *b"mp4a" {
+            let rate = self.sample_rate();
+            let scale = track.timescale;
+            let stride = usize::from(self.channels()) * 4;
+            if rate == 0 || scale == 0 || stride == 0 || !packet.data.len().is_multiple_of(stride) {
+                return Err(invalid("invalid MP4 decoded audio geometry"));
+            }
+            let frames = packet.data.len() / stride;
+            if frames == 0 { return Ok(None); }
+            if source_pts < self.presentation_floor {
+                let skip = (((i128::from(self.presentation_floor) - i128::from(source_pts)) as u128 * u128::from(rate))
+                    .div_ceil(u128::from(scale))).min(frames as u128) as usize;
+                if skip == frames { return Ok(None); }
+                packet.data.copy_within(skip * stride.., 0);
+                packet.data.truncate((frames - skip) * stride);
+                let numerator = i128::from(source_pts) * i128::from(rate)
+                    + skip as i128 * i128::from(scale);
+                let at = numerator * 1_000_000_000 / (i128::from(rate) * i128::from(scale));
+                packet.pts = u64::try_from(at).map_err(|_| invalid("negative MP4 audio presentation time"))?;
+                packet.timebase_den = 1_000_000_000;
+            } else {
+                // Decoder output labels the integer PTS with a sample clock;
+                // the caller supplied track media units, which need not match.
+                packet.pts = source_pts as u64;
+                packet.timebase_den = scale;
+            }
+            packet.timebase_num = 1;
+            return Ok(Some(packet));
+        }
         // Single media edits cover encoder priming and padding. Complex edit
         // sequences require replay/silence scheduling beyond this packet hook.
         if track.codec != *b"mp4a" || track.edits.len() > 1 || track.edits.first().is_some_and(|e| e.media_time < 0) {
@@ -364,6 +436,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         &self.track().configuration
     }
 
+    fn audio_track_index(&self) -> usize { Self::supported(&self.demuxer).iter().position(|&index|index==self.track_index).unwrap_or(0) }
     fn audio_tracks(&self) -> Vec<crate::audio::AudioTrack> {
         Mp4AudioReader::supported(&self.demuxer)
             .into_iter()
@@ -431,13 +504,23 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         let track = self.track();
         let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
         let preroll = track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0));
-        let landed = Mp4AudioReader::seek(self, pts.saturating_add(shift));
+        let source_end=if track.duration>0 {track.duration as u128}else{
+            track.samples.get(track.samples.len().saturating_sub(1)).map_or(0,|sample|sample.pts.max(0)as u128+u128::from(sample.duration))
+        };
+        let end=if preroll&&track.edits.len()==1&&self.demuxer.movie_timescale()!=0 {
+            (shift.max(0)as u128+(u128::from(track.edits[0].duration)*u128::from(track.timescale)).div_ceil(u128::from(self.demuxer.movie_timescale()))).min(source_end)
+        }else{source_end};
+        let requested=pts.max(0).saturating_add(shift).max(0);
+        let requested=if preroll {requested.min(end.min(i64::MAX as u128)as i64)}else{requested};
+        let landed = Mp4AudioReader::seek(self, requested);
         if preroll {
             // Restore all decoder overlap/history before exposing the landed
             // packet. Preroll PCM is discarded by present_decoded.
             self.rewind();
-            self.presentation_floor = landed;
+            self.presentation_floor = requested;
+            return requested;
         }
+        self.presentation_floor = requested;
         landed
     }
 }
@@ -829,11 +912,13 @@ mod edit_seek_tests {
         let file = include_bytes!("../../../tests/fixtures/playback-errors/aac-rounded-two-tracks.m4a").as_slice();
         let mut stream = Mp4AudioReader::open_at(std::io::Cursor::new(file),Default::default(),1).unwrap();
         let landed = stream.seek_to(2400);
-        assert_eq!(landed,3064);
-        assert_eq!(stream.time_of(landed),std::time::Duration::from_nanos(42_833_333));
+        assert_eq!(landed,3408); // exact requested sample plus priming, not packet start
+        assert_eq!(stream.time_of(landed),std::time::Duration::from_millis(50));
         let packet = stream.next_packet().unwrap().unwrap();
         assert_eq!(packet.pts,0); // seek primes the decoder from the beginning
-        assert_eq!(stream.seek_to(0),0);
+        let zero=stream.seek_to(0);
+        assert_eq!(zero,1008);
+        assert_eq!(stream.time_of(zero),std::time::Duration::ZERO);
         assert_eq!(stream.time_of(0),std::time::Duration::ZERO);
     }
 }

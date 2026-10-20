@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0110"
+  ],
+  "checked_at": "2026-10-16T04:24:42.467686+00:00",
+  "before": [
+    "evidence/batch-090-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-090-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-090-final-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-090-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-090-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-090-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four exact valid-input refusals before fix. Only MTrk chunks increment the declared track count; every skipped extension retains checked length bounds and forward progress even for zero payload. No alignment padding is invented for odd SMF chunks.",
+    "Six saved valid cases synthesize byte-identical100ms note/release PCM and timestamps; actual recording workers pass play,rewind andEOF. A truncated extension is a precise refusal control, and missing declared tracks remain refused. Separate authored native video decodes.",
+    "17parser/5reader tests,seven integration regressions,fixture reproduction and player build pass. Initial parser unit expected unknown chunk rejection; revised oracle specifically checks refusal for a missing declared track after skipping it. Initial16/1parser result is excluded.",
+    "No encoder/network/private media,reference-synth quality,physical DAC or performance claim. Source public API/track limits remain unchanged; whole-file bound also bounds total extension scanning."
+  ],
+  "sources": [
+    {
+      "url": "https://www.cs.cmu.edu/~music/cmp/archives/cmsip/readings/Standard-MIDI-file-format-updated.pdf",
+      "section": "1.3,page3",
+      "rule": "Readers must ignore unknown chunk types by their declared length; SMF chunks do not require even-byte alignment."
+    }
+  ],
+  "compatibility": "Previously refused valid extension-bearing SMF files now play; truncated chunks and absent required musical tracks remain errors.",
+  "counting": "One unknown-chunk compatibility problem; placement,count,length and control variants add noIDs."
+}

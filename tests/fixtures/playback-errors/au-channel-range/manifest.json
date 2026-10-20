@@ -1,0 +1,33 @@
+{
+  "provenance": "Authored AU signed8 with one complete silent frame at u32 channel counts, bounded files131097bytes maximum. Above-u16 geometry must refuse even with a permissive channel budget. Mono/stereo numeric native controls and matching short VP9/PCM video. The65535boundary control is metadata/packet geometry, not physical-device acceptance. No private media, encoder or network.",
+  "bad": [
+    {
+      "file": "channels-65536.au",
+      "channels": 65536
+    },
+    {
+      "file": "channels-65537.au",
+      "channels": 65537
+    },
+    {
+      "file": "channels-65538.au",
+      "channels": 65538
+    },
+    {
+      "file": "channels-131073.au",
+      "channels": 131073
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "mono.au": "c3a44097d96676934968f6d9b958cd45758d13aee2f5da77529fa5cb9745a74b",
+    "mono.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "stereo.au": "6559b5986a8c220c4f83bb5161df7b5eb838648143b62f5e8c54778907ff58b6",
+    "stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "representable-max.au": "b9bc84b2e7a746c0cd2438d83dd3c1908398e5a20da6e61a906c111f6c7b28fe",
+    "channels-65536.au": "3345d2de38531c8a5b7b7b9c2af22c1c38390e4721fd4cf56affd3ab9e666ffa",
+    "channels-65537.au": "1896b04e4a4ab674d977bcc2988e8dce615a439d93791601273a5ea5413b24b1",
+    "channels-65538.au": "a08bbba5820f5c11840e5f9e7fb986767f782877bffb60c50890aa86ac3007dc",
+    "channels-131073.au": "610a677990d22476809130b592bf71822ead73e0e47aba4e7a14163118035ac4"
+  }
+}

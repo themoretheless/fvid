@@ -1,0 +1,50 @@
+[
+  {
+    "file": "ms-44100-384.avi",
+    "exit_code": 0,
+    "bytes": 1536,
+    "expected_bytes": 1536,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "ms-44100-192.avi",
+    "exit_code": 0,
+    "bytes": 768,
+    "expected_bytes": 768,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "ms-48000-64.avi",
+    "exit_code": 0,
+    "bytes": 256,
+    "expected_bytes": 256,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "ms-48000-128.avi",
+    "exit_code": 0,
+    "bytes": 512,
+    "expected_bytes": 512,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "ms-96000-64.avi",
+    "exit_code": 0,
+    "bytes": 256,
+    "expected_bytes": 256,
+    "exact": true,
+    "stderr": ""
+  },
+  {
+    "file": "ms-8000-384.avi",
+    "exit_code": 0,
+    "bytes": 1536,
+    "expected_bytes": 1536,
+    "exact": true,
+    "stderr": ""
+  }
+]

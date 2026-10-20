@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0121"
+  ],
+  "checked_at": "2026-10-16T05:55:52.278934+00:00",
+  "before": [
+    "evidence/batch-101-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-101-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-101-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-101-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-101-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-101-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four authored signed16ramp samples use already-supported volume-column commands. Late/initial mute reproduce permanent lost playback on restoring volume; explicit keyoff andunlooped natural end are healthy silence controls. Before-fixworker comparisons fail during fullplayback,not at a separately proven seek phase.",
+    "A held note atzero gain remains alive andreads/advances samples. Only released zero-level notes stop atthis branch; sample exhaustion still stops an unlooped voice normally. No new feature opcode,format orpublic interface is added.",
+    "Independent continuous-note controls verify exact sample phase once volume has settled. First64frames of restored volume are deliberately outside the independent steady-phase oracle because native smoothing changes their gain; their bytes are checked through worker roundtrip. Muted suffixes must be zero andlater steady samples match every byte of continuous playback.",
+    "Actual recording workers pass fullplay,rewind,nonzero landed-row seek andEOF against the combined native-transition/independent-continuity oracle. Unlooped samples must advance to their natural end while muted,andkeyoff must not be undone by increasing volume. Short authored native video decodes.",
+    "11decoder/6reader units,11integration tests,pure fixture reproduction and current player build pass. Voice storage remains bounded by the module channel count. No encoder/network/private media,physical output,full tracker-reference quality or performance claim; extra muted-sample advancement is required for correctness."
+  ],
+  "compatibility": "Supported volume-column mute/unmute now preserves held sample phase. Explicit keyoff andnatural sample end still terminate playback; source packets,timestamps andsignatures remain unchanged.",
+  "counting": "One held-note lifetime/phase problem caused byzero volume. Two losses,two silence controls,phase guards andworker variants add noIDs."
+}

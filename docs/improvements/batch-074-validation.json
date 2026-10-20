@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0098"
+  ],
+  "checked_at": "2026-10-16T02:03:44.499762+00:00",
+  "before": [
+    "evidence/batch-074-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-074-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-074-smf-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-074-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-074-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-074-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "An authored format2 two-independent-track file is parsed into one combined source and actual native worker playback is bit-identical to a format1 simultaneous mixture, with one400ms audio track. This specifically confirms unintended mixing rather than an unrelated codec/parser error.",
+    "Multiple format2 tracks now refuse before constructing a shared timeline. This is an explicit unsupported-independent-selection refusal, not acceptance of the intended independent playback.",
+    "Single-track format0/1/2 and multi-track simultaneous format1 controls retain their existing behavior and exact native PCM. Actual worker play/rewind/EOF seek passes for all four; a short authored VP9/PCM companion decodes.",
+    "17 parser/5 reader units, six related integration targets, fixtures and player build pass. No independent track selection, MIDI video embedding, physical DAC, reference-quality synthesis or performance claim."
+  ],
+  "compatibility": "Multi-track format2 previously played a misleading simultaneous mixture; it now reports unsupported independent tracks. Use supported simultaneous format1 only when mixing is intended, or select/extract a single independent sequence. Single-track format2 remains supported.",
+  "counting": "One unsupported independent MIDI track admission problem; format and playback controls add no IDs."
+}

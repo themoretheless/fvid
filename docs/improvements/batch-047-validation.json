@@ -1,0 +1,63 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0071"
+  ],
+  "checked_at": "2026-10-15T21:52:45.192395+00:00",
+  "before": [
+    "evidence/batch-047-padding-rounding-qualified-before.log",
+    "evidence/batch-047-vorbis-endpoint-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-047-webm-audio-complete.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-047-audio-thread-complete.log",
+      "kind": "rust",
+      "passed": 30
+    },
+    {
+      "log": "evidence/batch-047-integration-complete.log",
+      "kind": "rust",
+      "passed": 36
+    },
+    {
+      "log": "evidence/batch-047-cpal-complete.log",
+      "kind": "rust",
+      "passed": 37
+    },
+    {
+      "log": "evidence/batch-047-minimal-complete.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-047-padding-fixtures-complete.log",
+      "kind": "python",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-047-rounding-fixtures-complete.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-047-player-build-complete.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored20ms VP9/PCM has exactly known zero padding samples at44.1/48kHz; metadata is nearest-ns encoding of that count. Synthetic Opus DTX zero-preskip controls decode960 finite samples. Untrimmed PCM/control bytes are verified before metadata processing.",
+    "Before eight head/tail cases lose an extra nonpadding sample:48kHz two samples become three;44.1kHz one/four become two/five. Independent owned decoding agrees with the authored sample-count oracles. Root playback/replay now matches these outputs exactly.",
+    "Authored stereo Vorbis silent modes verify448 control frames and446 after two-sample trim. Its declared endpoint previously describes445 frames (9.270833 instead of9.291666ms) despite446 rendered frames. Endpoint math now shares the restored count; native workers replay exact sample intervals.",
+    "A candidate nearest-only implementation admitted padding1ns beyond the whole packet; this was caught before acceptance. Rounded decoded-duration bounds now retain precise refusal and zero backend output for oversized head/tail padding. Candidate-bound failure adds no ID.",
+    "Prior53 and70 sub-sample fixture oracles now follow the corrected nearest-sample policy, and laced f32/f64/declared endpoints pass for rounded metadata too. User seek and negative presentation clipping retain their existing ceil boundary rule.",
+    "No public signatures, throughput or physical-DAC claim. Codec parameters and media are authored; generation stays outside ordinary offline tests."
+  ],
+  "compatibility": "Sub-sample codec padding no longer always rounds upward: below-half-sample metadata rounds to zero, matching owned decode. Valid muxer sample-count padding retains its intended counts. Malformed whole-packet overflow still refuses.",
+  "counting": "One padding quantization improvement, including PCM/Opus/Vorbis and declared endpoint consistency. Rates/signs/codecs/legacy-oracle adjustments and bounds tests add no IDs."
+}

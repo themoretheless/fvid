@@ -1,0 +1,96 @@
+{
+  "status": "accepted",
+  "checked_at": "2026-10-14T20:20:15.745465+00:00",
+  "accepted_ids": [
+    "FVID-0026",
+    "FVID-0027"
+  ],
+  "before": {
+    "declared_duration": {
+      "passed": 0,
+      "failed": 3,
+      "evidence": "evidence/batch-005-matroska-duration-before.log"
+    },
+    "player_declared_duration": {
+      "passed": 0,
+      "failed": 1,
+      "evidence": "evidence/batch-005-matroska-duration-playback-before.log"
+    },
+    "tail_initial": {
+      "passed": 2,
+      "failed": 7,
+      "evidence": "evidence/batch-005-matroska-tail-before.log"
+    },
+    "tail_expanded": {
+      "passed": 1,
+      "failed": 11,
+      "evidence": "evidence/batch-005-matroska-tail-before-expanded.log",
+      "qualification": "Tests linked the cached pre-change root playback artifact; expanded fixtures exposed a last-frame seek duration mismatch as well as query/cache mismatches.",
+      "executable_sha256": "fd36dda4ddfe455d2fc0e02f1603d932a231d2c2cb5195eddd62f7563ba2d6b9"
+    }
+  },
+  "qualification": [
+    "Declared-duration boundary fixtures qualify metadata precision and representability, not actual playback lasting years.",
+    "Presentation-tail fixtures are short authored VP9 clips, paired with declared-duration controls carrying identical packets.",
+    "Explicit, default, previous-frame and fallback durations must remain consistent across sequential playback, seek, rewind, EOF, reported duration and cache intervals.",
+    "No GUI, hardware decoding or performance claim.",
+    "Player configuration successfully type-checks, including macOS feature branches; runtime qualification remains native software playback.",
+    "The final tail matrix contains seven paired clips, including a nonzero 70ms track origin.",
+    "Full fvid-codecs unit audit is separate ongoing baseline qualification, not a source of accepted improvement IDs."
+  ],
+  "counting": "One exact declared-duration problem and one history-dependent presentation-tail problem. Multiple APIs, fixtures and tests are not separate improvements.",
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --test matroska_duration_regressions --test matroska_clock_regressions",
+      "passed": 11,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-duration-after.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_duration_playback --test matroska_tail_playback --test matroska_track_clock_playback --test matroska_lacing",
+      "passed": 20,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-tail-after.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib webm",
+      "passed": 36,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-tail-root-unit.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test hevc_matroska_reorder --test hevc_matroska_timeline",
+      "passed": 2,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-tail-hevc.log"
+    },
+    {
+      "command": "Compile and run updated matroska_tail_playback test target against the cargo-built root library",
+      "passed": 13,
+      "failed": 0,
+      "overlap_with_previous_tail_target": 12,
+      "additional_distinct_tests": 1,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-tail-final-13.log"
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed",
+      "log": "/private/tmp/fvid-improvement-logs/matroska-tail-player-check.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_matroska_duration_regressions.py",
+      "passed": 2,
+      "failed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 70,
+  "source_hashes": {
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "9064fe6898a869f6b89203610469fb540abad4981aef10cabfb682953e69c791",
+    "src/playback/video/webm.rs": "58f03b3e38c1c0a95792d1a9146b4e1fed7313a4e8509902dbb297de03649858",
+    "crates/fvid-media/tests/matroska_duration_regressions.rs": "2a3c2a903a9595b19fe3af0fab1b0fe35f283f73e936debbff38339d2a245cb9",
+    "tests/matroska_duration_playback.rs": "4adad506001b0b110371a21ff739e6c6b4c00249d222a60b47d7650ed0904197",
+    "tests/matroska_tail_playback.rs": "bf3969b4dffd5ddf281d7eef340c7265102328b416bb1ac84cac54f2f221f3bb",
+    "scripts/generate_matroska_duration_regressions.py": "577840f6e8458111f931d72cd0bb21370d0c7d367e5697f98fda4599d40687dd",
+    "scripts/generate_matroska_tail_regressions.py": "3fc7dde4ba3ce19fd83040f056af1d76c4b2605889008227b3b91613a32395aa"
+  }
+}

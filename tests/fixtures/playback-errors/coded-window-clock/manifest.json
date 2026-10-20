@@ -1,0 +1,62 @@
+{
+  "provenance": "Fully authored short coded runs, no copied speech/media/codec parameters. MACE6sample units, Microsoft GSM320sample blocks with valid field widths, and32byte/240sample TrueSpeech blocks cross nondivisible2048frame windows. Continuous grouped native decode is the PCM consistency control. Short native VP9/PCM video companion. No encoder/network.",
+  "cases": [
+    {
+      "name": "mac3-1",
+      "kind": "aiff",
+      "file": "mac3-1.aiff",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2046
+    },
+    {
+      "name": "mac3-2",
+      "kind": "aiff",
+      "file": "mac3-2.aiff",
+      "frames": 6144,
+      "channels": 2,
+      "grain": 2046
+    },
+    {
+      "name": "mac6-1",
+      "kind": "aiff",
+      "file": "mac6-1.aiff",
+      "frames": 6144,
+      "channels": 1,
+      "grain": 2046
+    },
+    {
+      "name": "mac6-2",
+      "kind": "aiff",
+      "file": "mac6-2.aiff",
+      "frames": 6144,
+      "channels": 2,
+      "grain": 2046
+    },
+    {
+      "name": "gsm",
+      "kind": "wav",
+      "file": "gsm.wav",
+      "frames": 4480,
+      "channels": 1,
+      "grain": 1920
+    },
+    {
+      "name": "truespeech",
+      "kind": "wav",
+      "file": "truespeech.wav",
+      "frames": 4800,
+      "channels": 1,
+      "grain": 1920
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "mac3-1.aiff": "92ffcb853e143383d5ed411ccdcd17baf674694f84d22f3e4f01cb234da9c2b3",
+    "mac3-2.aiff": "56fb8fe44c7d450e9a14c28686454427fd97f91c34846c8f596f9c4133ba13f6",
+    "mac6-1.aiff": "ceae2f1b62bf9de264873bf17a9df799ccdc2fc9a6c480d95ce8e479c4521b37",
+    "mac6-2.aiff": "0f36fca0196c6f90ef72ce19eee2e4ac2bd861a15557aa9edccffec9c6066d3b",
+    "gsm.wav": "82f1efc55ab78606e92b097b41ea63ef9a304a2643f8cd6856d4aacacee88a15",
+    "truespeech.wav": "c80215f22c27cc17b4dd8075d92010c963d999ecb3998fd03f643ecca0d97a67"
+  }
+}

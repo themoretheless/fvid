@@ -1,0 +1,526 @@
+{
+  "provenance": "Owned B slices, PCM reference pictures and DBBP CABAC/MP4; independent uni/bi sample-domain and contour oracle. Offline.",
+  "l1_reduction_witnesses": 126877,
+  "cases": [
+    {
+      "file": "dbbp-b-0-0-2.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 0
+    },
+    {
+      "file": "dbbp-b-0-0-2-weighted.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 1536
+    },
+    {
+      "file": "dbbp-b-0-0-1.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 3072
+    },
+    {
+      "file": "dbbp-b-0-0-1-weighted.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 4608
+    },
+    {
+      "file": "dbbp-b-0-1-2.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 6144
+    },
+    {
+      "file": "dbbp-b-0-1-2-weighted.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 7680
+    },
+    {
+      "file": "dbbp-b-0-1-1.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 9216
+    },
+    {
+      "file": "dbbp-b-0-1-1-weighted.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 10752
+    },
+    {
+      "file": "dbbp-b-1-0-2.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 12288
+    },
+    {
+      "file": "dbbp-b-1-0-2-weighted.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 13824
+    },
+    {
+      "file": "dbbp-b-1-0-1.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 15360
+    },
+    {
+      "file": "dbbp-b-1-0-1-weighted.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 16896
+    },
+    {
+      "file": "dbbp-b-1-1-2.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 18432
+    },
+    {
+      "file": "dbbp-b-1-1-2-weighted.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 19968
+    },
+    {
+      "file": "dbbp-b-1-1-1.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 21504
+    },
+    {
+      "file": "dbbp-b-1-1-1-weighted.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        1,
+        2,
+        30
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 32,
+      "direct": false,
+      "offset": 23040
+    },
+    {
+      "file": "dbbp-b-0-0-2-explicit-bi.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": true,
+      "size": 32,
+      "direct": false,
+      "offset": 24576
+    },
+    {
+      "file": "dbbp-b-1-0-2-explicit-bi.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": true,
+      "size": 32,
+      "direct": false,
+      "offset": 26112
+    },
+    {
+      "file": "dbbp-b-128-0-0-0-2.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 27648
+    },
+    {
+      "file": "dbbp-b-128-1-0-0-2.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 52224
+    },
+    {
+      "file": "dbbp-b-128-0-0-0-2-weighted.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 76800
+    },
+    {
+      "file": "dbbp-b-128-1-0-0-2-weighted.mp4",
+      "vertical": false,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 101376
+    },
+    {
+      "file": "dbbp-b-128-0-0-1-2.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 125952
+    },
+    {
+      "file": "dbbp-b-128-1-0-1-2.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 150528
+    },
+    {
+      "file": "dbbp-b-128-0-0-1-2-weighted.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 175104
+    },
+    {
+      "file": "dbbp-b-128-1-0-1-2-weighted.mp4",
+      "vertical": false,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 199680
+    },
+    {
+      "file": "dbbp-b-128-0-1-0-2.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 224256
+    },
+    {
+      "file": "dbbp-b-128-1-1-0-2.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 248832
+    },
+    {
+      "file": "dbbp-b-128-0-1-0-2-weighted.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 273408
+    },
+    {
+      "file": "dbbp-b-128-1-1-0-2-weighted.mp4",
+      "vertical": true,
+      "enabled": false,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 297984
+    },
+    {
+      "file": "dbbp-b-128-0-1-1-2.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 322560
+    },
+    {
+      "file": "dbbp-b-128-1-1-1-2.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": false,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 347136
+    },
+    {
+      "file": "dbbp-b-128-0-1-1-2-weighted.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": false,
+      "offset": 371712
+    },
+    {
+      "file": "dbbp-b-128-1-1-1-2-weighted.mp4",
+      "vertical": true,
+      "enabled": true,
+      "gain": [
+        2,
+        1,
+        -40
+      ],
+      "weighted": true,
+      "explicit_bi": false,
+      "size": 128,
+      "direct": true,
+      "offset": 396288
+    }
+  ],
+  "refusal_cases": [
+    {
+      "file": "dbbp-b-0-1-2-explicit-bi.mp4",
+      "reason": "HEVC DBBP explicit predictor is bidirectional"
+    },
+    {
+      "file": "dbbp-b-1-1-2-explicit-bi.mp4",
+      "reason": "HEVC DBBP explicit predictor is bidirectional"
+    }
+  ]
+}

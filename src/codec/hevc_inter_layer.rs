@@ -17,7 +17,7 @@ pub struct PictureStatus {
     pub discardable: bool,
 }
 impl PictureStatus {
-    fn validate(&self) -> Result<()> {
+    pub(crate) fn validate(&self) -> Result<()> {
         if self.identity.layer_id > 62
             || self.identity.layer_id != self.nal.layer_id
             || self.nal.temporal_id > 6

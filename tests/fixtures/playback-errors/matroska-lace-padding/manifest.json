@@ -1,0 +1,624 @@
+{
+  "provenance": "Authored60ms VP9/8kHz mono PCM, three20ms frames in fixed/Xiph/EBML laces. Signed block-level padding crosses lace boundaries; independent sample oracles. No encoder/private media/network.",
+  "spec": "https://www.matroska.org/technical/elements.html#DiscardPadding",
+  "cases": [
+    {
+      "file": "fixed-control.mkv",
+      "oracle": "fixed-control.f32le",
+      "padding_ns": 0,
+      "first": 0,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "fixed-tail-one.mkv",
+      "oracle": "fixed-tail-one.f32le",
+      "padding_ns": 10000000,
+      "first": 0,
+      "last": 400,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "fixed-head-one.mkv",
+      "oracle": "fixed-head-one.f32le",
+      "padding_ns": -10000000,
+      "first": 80,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 10000000,
+          "first": 80,
+          "frames": 80
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "fixed-tail-boundary.mkv",
+      "oracle": "fixed-tail-boundary.f32le",
+      "padding_ns": 20000000,
+      "first": 0,
+      "last": 320,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "fixed-tail-span.mkv",
+      "oracle": "fixed-tail-span.f32le",
+      "padding_ns": 30000000,
+      "first": 0,
+      "last": 240,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "fixed-head-span.mkv",
+      "oracle": "fixed-head-span.f32le",
+      "padding_ns": -30000000,
+      "first": 240,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 30000000,
+          "first": 240,
+          "frames": 80
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "fixed-tail-rounding.mkv",
+      "oracle": "fixed-tail-rounding.f32le",
+      "padding_ns": 30000001,
+      "first": 0,
+      "last": 240,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "fixed-head-rounding.mkv",
+      "oracle": "fixed-head-rounding.f32le",
+      "padding_ns": -30000001,
+      "first": 240,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 30000000,
+          "first": 240,
+          "frames": 80
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "fixed-tail-whole.mkv",
+      "oracle": "fixed-tail-whole.f32le",
+      "padding_ns": 60000000,
+      "first": 0,
+      "last": 0,
+      "packets": []
+    },
+    {
+      "file": "fixed-head-whole.mkv",
+      "oracle": "fixed-head-whole.f32le",
+      "padding_ns": -60000000,
+      "first": 480,
+      "last": 480,
+      "packets": []
+    },
+    {
+      "file": "xiph-control.mkv",
+      "oracle": "xiph-control.f32le",
+      "padding_ns": 0,
+      "first": 0,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "xiph-tail-one.mkv",
+      "oracle": "xiph-tail-one.f32le",
+      "padding_ns": 10000000,
+      "first": 0,
+      "last": 400,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "xiph-head-one.mkv",
+      "oracle": "xiph-head-one.f32le",
+      "padding_ns": -10000000,
+      "first": 80,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 10000000,
+          "first": 80,
+          "frames": 80
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "xiph-tail-boundary.mkv",
+      "oracle": "xiph-tail-boundary.f32le",
+      "padding_ns": 20000000,
+      "first": 0,
+      "last": 320,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "xiph-tail-span.mkv",
+      "oracle": "xiph-tail-span.f32le",
+      "padding_ns": 30000000,
+      "first": 0,
+      "last": 240,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "xiph-head-span.mkv",
+      "oracle": "xiph-head-span.f32le",
+      "padding_ns": -30000000,
+      "first": 240,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 30000000,
+          "first": 240,
+          "frames": 80
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "xiph-tail-rounding.mkv",
+      "oracle": "xiph-tail-rounding.f32le",
+      "padding_ns": 30000001,
+      "first": 0,
+      "last": 240,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "xiph-head-rounding.mkv",
+      "oracle": "xiph-head-rounding.f32le",
+      "padding_ns": -30000001,
+      "first": 240,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 30000000,
+          "first": 240,
+          "frames": 80
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "xiph-tail-whole.mkv",
+      "oracle": "xiph-tail-whole.f32le",
+      "padding_ns": 60000000,
+      "first": 0,
+      "last": 0,
+      "packets": []
+    },
+    {
+      "file": "xiph-head-whole.mkv",
+      "oracle": "xiph-head-whole.f32le",
+      "padding_ns": -60000000,
+      "first": 480,
+      "last": 480,
+      "packets": []
+    },
+    {
+      "file": "ebml-control.mkv",
+      "oracle": "ebml-control.f32le",
+      "padding_ns": 0,
+      "first": 0,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "ebml-tail-one.mkv",
+      "oracle": "ebml-tail-one.f32le",
+      "padding_ns": 10000000,
+      "first": 0,
+      "last": 400,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "ebml-head-one.mkv",
+      "oracle": "ebml-head-one.f32le",
+      "padding_ns": -10000000,
+      "first": 80,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 10000000,
+          "first": 80,
+          "frames": 80
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "ebml-tail-boundary.mkv",
+      "oracle": "ebml-tail-boundary.f32le",
+      "padding_ns": 20000000,
+      "first": 0,
+      "last": 320,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "ebml-tail-span.mkv",
+      "oracle": "ebml-tail-span.f32le",
+      "padding_ns": 30000000,
+      "first": 0,
+      "last": 240,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "ebml-head-span.mkv",
+      "oracle": "ebml-head-span.f32le",
+      "padding_ns": -30000000,
+      "first": 240,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 30000000,
+          "first": 240,
+          "frames": 80
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "ebml-tail-rounding.mkv",
+      "oracle": "ebml-tail-rounding.f32le",
+      "padding_ns": 30000001,
+      "first": 0,
+      "last": 240,
+      "packets": [
+        {
+          "pts_ns": 0,
+          "first": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "first": 160,
+          "frames": 80
+        }
+      ]
+    },
+    {
+      "file": "ebml-head-rounding.mkv",
+      "oracle": "ebml-head-rounding.f32le",
+      "padding_ns": -30000001,
+      "first": 240,
+      "last": 480,
+      "packets": [
+        {
+          "pts_ns": 30000000,
+          "first": 240,
+          "frames": 80
+        },
+        {
+          "pts_ns": 40000000,
+          "first": 320,
+          "frames": 160
+        }
+      ]
+    },
+    {
+      "file": "ebml-tail-whole.mkv",
+      "oracle": "ebml-tail-whole.f32le",
+      "padding_ns": 60000000,
+      "first": 0,
+      "last": 0,
+      "packets": []
+    },
+    {
+      "file": "ebml-head-whole.mkv",
+      "oracle": "ebml-head-whole.f32le",
+      "padding_ns": -60000000,
+      "first": 480,
+      "last": 480,
+      "packets": []
+    }
+  ],
+  "invalid": [
+    "too-large.mkv",
+    "min-negative.mkv"
+  ],
+  "sha256": {
+    "fixed-control.mkv": "2db992b3a745fcd96db7cb8e244dc77ef995b11fda5cf01dc49e30e772737f66",
+    "fixed-control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "fixed-tail-one.mkv": "771852ab9ae5cca60250c906221a93e8208b30ad3db699eed67a1762db511403",
+    "fixed-tail-one.f32le": "bf5445bbdcf4d0ad31c15a4519892dc89fac59f50841661c92c253b87a1d9799",
+    "fixed-head-one.mkv": "edc301941f66392802a9b82afc4081971b7c96ba760dfacd4410e161270977a7",
+    "fixed-head-one.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "fixed-tail-boundary.mkv": "28eb0cbe78fc5bacaee86b8d22fb8b3bf87a90cede316218d38ff143e483089a",
+    "fixed-tail-boundary.f32le": "ece0e76e164f9734962a2ca50cd99d36208c09588b5093876a4fa25d741e233f",
+    "fixed-tail-span.mkv": "d3a586f61c1c470b603e140a302247446319c3d3d30e710f009a678c5871300d",
+    "fixed-tail-span.f32le": "315f38f1078906a129b9dec82eb46335559ff9c905af1f6eeb05489625e5f82b",
+    "fixed-head-span.mkv": "668589da753383545f65b79f9d7d2d6c62fe91e57ce3beec112b84b8489241f9",
+    "fixed-head-span.f32le": "353b4a442d4ec4d302f3753a1535cd96741712a4f88031fc1cd578affe09499e",
+    "fixed-tail-rounding.mkv": "430285551e1cef52e1eeee11069899738f76056a50d0ca8b35dbef7a19e6819f",
+    "fixed-tail-rounding.f32le": "315f38f1078906a129b9dec82eb46335559ff9c905af1f6eeb05489625e5f82b",
+    "fixed-head-rounding.mkv": "7fbc758a598edc5127c8f80570629c24aca2d947b22ad0b726a15fbef900edc6",
+    "fixed-head-rounding.f32le": "353b4a442d4ec4d302f3753a1535cd96741712a4f88031fc1cd578affe09499e",
+    "fixed-tail-whole.mkv": "02bf43f15064215e464959f6eda50718779e8544a5bd229fe3cd57487940391d",
+    "fixed-tail-whole.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fixed-head-whole.mkv": "d808498baaf7f02d955e12fe2fa1a7d51b5e49d3e169333bf187caf40b0de0b7",
+    "fixed-head-whole.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "xiph-control.mkv": "09783e10fd532f35900162b79e6aa894dce3b2f4833cded5a783d28cc5e41920",
+    "xiph-control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "xiph-tail-one.mkv": "74d9944caa5e3ce6abc0d04790a1a892234c78dc0ed6acb7aa24cb68a62ee909",
+    "xiph-tail-one.f32le": "bf5445bbdcf4d0ad31c15a4519892dc89fac59f50841661c92c253b87a1d9799",
+    "xiph-head-one.mkv": "370374d57ee0be6e4d948111dab2eac0096baeee042f48407bca8961c42757ed",
+    "xiph-head-one.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "xiph-tail-boundary.mkv": "295b7e9f54cbd6362cd2f0ad34b53f4e181ac1d3271aabe5b0d4a525d70f1c5f",
+    "xiph-tail-boundary.f32le": "ece0e76e164f9734962a2ca50cd99d36208c09588b5093876a4fa25d741e233f",
+    "xiph-tail-span.mkv": "9366ee5981ef7809bc125a907bb4c300f894af783031ad125904071955f7fb2a",
+    "xiph-tail-span.f32le": "315f38f1078906a129b9dec82eb46335559ff9c905af1f6eeb05489625e5f82b",
+    "xiph-head-span.mkv": "a1e140985e6034d2f179b4ce4d57beef45711ea1fe8d20ae2552d45eb907590c",
+    "xiph-head-span.f32le": "353b4a442d4ec4d302f3753a1535cd96741712a4f88031fc1cd578affe09499e",
+    "xiph-tail-rounding.mkv": "6336f3ae36cdc356cc7abc0fdcf0b23fb0c540593365a5f71db06a3af2719c59",
+    "xiph-tail-rounding.f32le": "315f38f1078906a129b9dec82eb46335559ff9c905af1f6eeb05489625e5f82b",
+    "xiph-head-rounding.mkv": "254aba465f395348414d53e3f82fce23d765da8e4f6f5b8369b6fd9a874668e5",
+    "xiph-head-rounding.f32le": "353b4a442d4ec4d302f3753a1535cd96741712a4f88031fc1cd578affe09499e",
+    "xiph-tail-whole.mkv": "67a0bc247aba90b5d14634da5fce3f415b273a7d46814f6aafa17802ea76406b",
+    "xiph-tail-whole.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "xiph-head-whole.mkv": "f3036d85a30a42657ed522324cae93044e845c7de75a65e47c8198e6d989ffbc",
+    "xiph-head-whole.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ebml-control.mkv": "e8ef0418d9c99ef5291a79cc5f509d5d4be013b60e4052e4d0b2d5cd1de32aab",
+    "ebml-control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "ebml-tail-one.mkv": "4ebb3432be6c6ca484e91f011b33c343cf73d67bb820911d1e8a69624fa8484f",
+    "ebml-tail-one.f32le": "bf5445bbdcf4d0ad31c15a4519892dc89fac59f50841661c92c253b87a1d9799",
+    "ebml-head-one.mkv": "e226b50903dfe9bcfe29887228a9abb3f35fa500af911fbccf717a0e2dd3c814",
+    "ebml-head-one.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "ebml-tail-boundary.mkv": "7f434039aca07c6846a6f6d452e11665f105421113f92b2ab19676c9107128a0",
+    "ebml-tail-boundary.f32le": "ece0e76e164f9734962a2ca50cd99d36208c09588b5093876a4fa25d741e233f",
+    "ebml-tail-span.mkv": "69db593b10174a23c29aa8c2bd1f5a8d60babf161cdc5597bd6d4c4422e68173",
+    "ebml-tail-span.f32le": "315f38f1078906a129b9dec82eb46335559ff9c905af1f6eeb05489625e5f82b",
+    "ebml-head-span.mkv": "900c2d136005b6f560f373c73704238b4750fed0f88fdc25b461edd5db68dcb4",
+    "ebml-head-span.f32le": "353b4a442d4ec4d302f3753a1535cd96741712a4f88031fc1cd578affe09499e",
+    "ebml-tail-rounding.mkv": "c03d2b8d5bbb17b3e88b29bde35959cd97377d4930a5f04b31d758e74bb6752f",
+    "ebml-tail-rounding.f32le": "315f38f1078906a129b9dec82eb46335559ff9c905af1f6eeb05489625e5f82b",
+    "ebml-head-rounding.mkv": "9fc69992b3238901f4e51689cde99fdfa490c754c50ea2b168774caab1d2d629",
+    "ebml-head-rounding.f32le": "353b4a442d4ec4d302f3753a1535cd96741712a4f88031fc1cd578affe09499e",
+    "ebml-tail-whole.mkv": "a7abbec1dc6d28d1c7efbb6285abc843daf1a9cfa61a1f933f9abed3cc91f7c7",
+    "ebml-tail-whole.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ebml-head-whole.mkv": "cba57e12375fc7eaf36b6fa3fe405fb0d5c66a2b9318afa27b0b4b1c2234b588",
+    "ebml-head-whole.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expected-source.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "too-large.mkv": "9dac921401bcd65bafdad1e7c64bc5c8e29fa0692de89bbd32cd10b03bb76020",
+    "min-negative.mkv": "eb3bd1d0a610325ba064fce6957b45f3f5aabe1bddba0a649b3c473efc5458ca"
+  }
+}

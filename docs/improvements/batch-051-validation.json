@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0075"
+  ],
+  "checked_at": "2026-10-15T23:04:35.168104+00:00",
+  "before": [
+    "evidence/batch-051-reset-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-051-reset-after.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-051-worker.log",
+      "kind": "rust",
+      "passed": 31
+    },
+    {
+      "log": "evidence/batch-051-integration.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-051-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-051-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored60ms VP9 and three20ms native PCM packets decode fully and bit-match the expected480-frame control before fault injection. Successful seek20ms and rewind still deliver their exact PCM suffix/full sequence.",
+    "Before correction the reset hook refused precisely, but seek flushed the device and published20ms while rewind flushed it; neither stopped output. Now failure routes through the terminal transition handler, attempts backend.stop, reports the reset context and ends the worker before flush or public clock mutation.",
+    "Final integration extends the initial passing test with Play/Seek after refusal: no second reset and no additional PCM are allowed.31 related worker tests and navigation/duration/Opus integrations pass; player builds.",
+    "The failure is injected in the AudioStream reset hook after actual native playback. It qualifies custom reset/refusal behavior, not a malformed codec sample or a physical device failure. The shared terminal handler also retains stop-failure diagnostics already qualified by pause/flush tests. No public interface or performance change."
+  ],
+  "compatibility": "A failed navigation decoder reset or preroll restoration is terminal. Further Play/Seek requires reopening the failed playback handle.",
+  "counting": "One decoder-reset navigation failure. Seek, rewind, successful controls and terminal follow-up commands are variants of the same problem."
+}

@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0055"
+  ],
+  "checked_at": "2026-10-15T18:20:09.068583+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-032-cpal-worker-qualified.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-032-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-032-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 13,
+  "distinct_python_tests_passed": 1,
+  "before": [
+    "evidence/batch-032-audio-ring-before.log",
+    "evidence/batch-032-partial-frame-candidate.log"
+  ],
+  "qualification": [
+    "Authored700ms VP9/mono PCM video decodes35 pictures and32768 exact samples. Successful CPAL push previously retained24000 frames only, losing8768.",
+    "Bounded fallible ring growth preserves every queued interleaved sample and global consumed positions through old/new wrap boundaries. Budget/overflow/partial-frame refusals publish no additional samples and retain previous data.",
+    "Real CPAL Shared.fill device-callback code now emits all fixture samples exactly. Actual AudioPlayback worker plus virtual callback device verifies byte/sample identity, replay, seek and EOF without opening hardware.",
+    "Grown-ring playback at1.25rate matches an independent contiguous window of the same synthetic samples through the native stretcher beyond the old24000-frame boundary. A candidate growth-coordinate regression was detected and repaired before acceptance; it adds no ID.",
+    "Flush after growth clears old data and resets output clock. Existing ring wrap, time stretch, fade/flush and output-device selection controls pass.",
+    "Geometry/allocation admission is fallible; retained ring storage and individual decoded packets have explicit32MiB ceilings. Queue scratch/window and full-process RSS are not represented by that ring-only limit."
+  ],
+  "compatibility": "Public signatures are unchanged. Output queues/decoded packets exceeding32MiB now return AudioError rather than reporting successful partial playback. Callers should handle the existing Result error path.",
+  "remaining": [
+    "Hardware device initialization and DAC output are not claimed; actual production queue/callback code is exercised with a virtual device.",
+    "No throughput/latency/RSS improvement claimed.",
+    "EOF-to-device-drain timing and packet presentation-gap scheduling remain separate audit candidates."
+  ],
+  "counting": "One successful-output-write conservation contract. Capacity growth, malformed partial-frame refusal, resource admission, callback/navigation tests and candidate repairs do not add IDs."
+}

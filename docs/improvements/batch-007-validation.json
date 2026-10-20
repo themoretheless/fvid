@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "candidate_ids": [
+    "FVID-0029"
+  ],
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc8794.html#section-7.3",
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.28.44"
+  ],
+  "before": {
+    "passed": 1,
+    "failed": 1,
+    "evidence": "evidence/batch-007-empty-pose-before.log"
+  },
+  "scope": "Schema defaults handled specifically for projection angles. Generic float parsing and unrelated field defaults are unchanged.",
+  "checks_completed": {
+    "owner_rust_tests": 17,
+    "python_fixture_tests": 1
+  },
+  "remaining": [],
+  "accepted_ids": [
+    "FVID-0029"
+  ],
+  "checked_at": "2026-10-15T05:02:46.589226+00:00",
+  "distinct_rust_tests_passed": 56,
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --test matroska_empty_pose_regressions --test matroska_header_stripping_regressions --test matroska_clock_regressions",
+      "passed": 17,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_empty_pose_playback --test matroska_duration_playback --test matroska_track_clock_playback",
+      "passed": 3,
+      "failed": 0
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib webm",
+      "passed": 36,
+      "failed": 0
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_matroska_empty_pose_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "qualification": [
+    "Four legal empty-pose variants and original control decode three frames with exact pixels, timestamps, seek, rewind and EOF.",
+    "A one-byte float remains refused for invalid WebM float size.",
+    "Software playback verified; no hardware runtime or performance claim."
+  ],
+  "counting": "One projection-default compatibility problem; axes and fixture variants count together.",
+  "source_hashes": {
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "1848a7dad4c3b67355087fbbd6ba0e05147051acee4ba7c461e15c8aa8cd4e43",
+    "crates/fvid-media/tests/matroska_empty_pose_regressions.rs": "ca9777684e929b4d8474eb82c70bbfb8da3a09d2842c4b402e739ca343cc0817",
+    "tests/matroska_empty_pose_playback.rs": "b7c73e2aa894e9a0e815f9bbf509b228623f379b9e7a7779dd7930723726a9db",
+    "scripts/generate_matroska_empty_pose_regressions.py": "8a51a9e4a89dd8c96f4e38906ad4f81ffc7a5f6ec8640672f779e7701e1886a1"
+  }
+}

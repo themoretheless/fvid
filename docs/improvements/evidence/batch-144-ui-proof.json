@@ -1,0 +1,29 @@
+{
+  "status": "visually-verified",
+  "checked_at": "2026-10-16T15:23:00.752985+00:00",
+  "source": "src/player.rs",
+  "source_sha256": "69c0d9df2ca99cf80f1ae0babe4b89b6e15cdd2dcbcb75fc414dc5d8dfac37de",
+  "binary_sha256": "37ff128f41ae57b42d47ce39465a88ff17d4889fc9eaa4a8c1083d175c2ddf8d",
+  "before": {
+    "request": "Move the shown seek preparation percentage to the upper panel.",
+    "source_anchor": "frame.left()+12,frame.bottom()-8,LEFT_BOTTOM",
+    "user_image_sha256": "1adffdbb5543ce7f2d089faec3ae1df9a9ad8e2edb7dfafbab436f22fd5b761a"
+  },
+  "after": {
+    "source_anchor": "top.x,top.y+48,LEFT_TOP; top=frame.top()+24,macOS title inset respected",
+    "observed_text": "Подготовка быстрой перемотки: 60%",
+    "observed_position": "Upper left title area,about192px from left and148px from top in2560x1600screenshot. Controls faded; status remains visible.",
+    "cua_call": "progressVerification.getAXStateAndScreenshot(); successful screenshot in this conversation after launcher opened authored long VP9 score."
+  },
+  "runtime": {
+    "native_playback": "Visible authored color bars and frame counter while software VP9 preparation is active.",
+    "input": "1000 remuxed repeats of the existing authored vp9-long-gop-seek.webm; diagnostic file only in private/tmp,not a copied private video.",
+    "diagnostic_generation": "Explicit FFmpeg stream copy only; ordinary tests/generators and production player do not require FFmpeg.",
+    "build_log": "evidence/batch-142-player-build.log"
+  },
+  "qualification": [
+    "The initial short sample completed preparation before capture. A development bundle with a fixed authored input allowed capture of the real60percent preparation state. No production debug hook or fake percentage was added.",
+    "Visible proof covers the running windowed layout with faded controls. Fullscreen and narrow-width screenshots were not captured. Source preserves existing percentage computation,100ms refresh and preparation condition.",
+    "A later secondary UI interaction returned noWindowsAvailable; no completion-state screenshot is claimed. The requested active status position itself was already visibly verified."
+  ]
+}

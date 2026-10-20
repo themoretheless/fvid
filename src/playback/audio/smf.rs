@@ -24,6 +24,7 @@ pub const CHANNELS: u16 = 2;
 pub struct SmfAudioReader {
     file: SmfFile,
     window: usize,
+    presentation_floor: i64,
 }
 
 impl SmfAudioReader {
@@ -33,7 +34,7 @@ impl SmfAudioReader {
     pub fn open<R: Read>(mut reader: R, limits: smf::Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         if bytes.len() > limits.file_bytes {
             return Err(invalid(&format!(
                 "SMF is over the {} byte limit",
@@ -43,6 +44,7 @@ impl SmfAudioReader {
         Ok(Self {
             file: SmfFile::parse(&bytes, &limits)?,
             window: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -57,16 +59,48 @@ impl SmfAudioReader {
         self.file.windows()
     }
 
+    /// The score ends here even if its last key was never explicitly lifted.
+    /// Put note release in the ordinary packet stream so seek history uses it too.
+    fn packet_data(&self, index: usize) -> Vec<u8> {
+        let mut data = self.file.window_packet(index);
+        let end = self.file.duration().as_micros() as u64;
+        if end / smf::WINDOW_MICROSECONDS == index as u64 {
+            let offset = (end % smf::WINDOW_MICROSECONDS) as u32;
+            for channel in 0..16 {
+                // Lift the pedal before releasing keys, preserving pitch/gain.
+                smf::write_record(smf::Event::Control { channel, number: 64, value: 0 }, offset, &mut data);
+                smf::write_record(smf::Event::Control { channel, number: 123, value: 0 }, offset, &mut data);
+            }
+        }
+        data
+    }
+
     /// The window index a packet timestamp names, which is where a seek lands:
     /// the packet that covers the time asked for, never one before it.
     fn window_of(&self, pts: i64) -> usize {
         let millis = pts.max(0) as u64;
-        let index = (millis / WINDOW_MILLISECONDS) as usize;
-        index.min(self.packet_count() - 1)
+        let index = usize::try_from(millis / WINDOW_MILLISECONDS).unwrap_or(usize::MAX);
+        index.min(self.packet_count())
     }
 }
 
 impl AudioStream for SmfAudioReader {
+    /// Restore history through ordinary worker steps, so commands can interrupt it.
+    #[cfg(feature = "player")]
+    fn reset_decoder(&mut self, decoder: &mut Box<dyn crate::audio::AudioDecode>) -> Result<()> {
+        decoder.reset();
+        if self.window < self.packet_count() {
+            self.presentation_floor = self.window as i64 * WINDOW_MILLISECONDS as i64;
+            self.window = 0;
+        }
+        Ok(())
+    }
+
+    fn present_decoded(&self, packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        // Compare source ticks, not XM's rounded PCM sample timestamps.
+        Ok((source_pts >= self.presentation_floor).then_some(packet))
+    }
+
     fn codec(&self) -> &str {
         "midi"
     }
@@ -84,7 +118,8 @@ impl AudioStream for SmfAudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        Some(self.file.duration())
+        // Playback includes the release window the source schedules after the score.
+        Some(Duration::from_millis((self.packet_count() as u64).saturating_mul(WINDOW_MILLISECONDS)))
     }
 
     fn extra_data(&self) -> &[u8] {
@@ -107,7 +142,7 @@ impl AudioStream for SmfAudioReader {
             return Ok(None);
         }
         let packet = EncodedPacket {
-            data: self.file.window_packet(self.window),
+            data: self.packet_data(self.window),
             pts: self.window as i64 * WINDOW_MILLISECONDS as i64,
             duration: WINDOW_MILLISECONDS as i64,
         };
@@ -117,11 +152,13 @@ impl AudioStream for SmfAudioReader {
 
     fn rewind(&mut self) {
         self.window = 0;
+        self.presentation_floor = 0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
         self.window = self.window_of(pts);
-        self.window as i64 * WINDOW_MILLISECONDS as i64
+        self.presentation_floor = self.window as i64 * WINDOW_MILLISECONDS as i64;
+        self.presentation_floor
     }
 }
 
@@ -168,7 +205,7 @@ mod tests {
         assert_eq!(reader.extra_data(), &[] as &[u8]);
         // Four quarters at 120 bpm is two seconds, which is where the longer of
         // the two tracks stopped.
-        assert_eq!(reader.duration(), Some(Duration::from_secs(2)));
+        assert_eq!(reader.duration(), Some(Duration::from_millis(2200)));
         let tracks = reader.audio_tracks();
         assert_eq!(tracks.len(), 1);
         assert_eq!(tracks[0].name, "A");
@@ -199,12 +236,14 @@ mod tests {
             .filter(|data| !data.is_empty())
             .map(|data| smf::read_window(data).expect("records"))
             .collect::<Vec<_>>();
-        assert_eq!(with_events.len(), 4);
+        assert_eq!(with_events.len(), 5);
+        assert_eq!(with_events[4].iter().map(|event| event.event).collect::<Vec<_>>(),
+            (0..16).flat_map(|channel| [64, 123].map(|number| smf::Event::Control { channel, number, value: 0 })).collect::<Vec<_>>());
         // A4 struck, A4 lifted, E5 struck, E5 lifted, each in the window its own
         // tempo places it in, and the melody's own instrument change riding with
         // the first note.
         assert_eq!(
-            with_events
+            with_events[..4]
                 .iter()
                 .map(|events| events.iter().map(|event| event.event).collect::<Vec<_>>())
                 .collect::<Vec<_>>(),
@@ -248,18 +287,11 @@ mod tests {
         // The seek landed on the packet that covers the time asked for, and that
         // is the one the cursor hands over next.
         assert_eq!(packet.pts, 1200);
-        // Before the start, and past the end, are both answered with a packet that
-        // exists rather than a cursor that has run off.
         assert_eq!(reader.seek_to(-10), 0);
-        assert_eq!(reader.seek_to(99_999), 2100);
-        assert!(
-            reader
-                .next_packet()
-                .expect("packet")
-                .expect("the last packet")
-                .data
-                .is_empty()
-        );
+        assert_eq!(reader.seek_to(2100), 2100);
+        assert!(reader.next_packet().expect("tail").expect("release window").data.is_empty());
+        assert_eq!(reader.seek_to(99_999), 2200);
+        assert!(reader.next_packet().expect("EOF").is_none());
         assert!(reader.next_packet().expect("no more").is_none());
         reader.rewind();
         assert_eq!(
@@ -284,7 +316,7 @@ mod tests {
                 .decode_encoded(&packet.data, packet.pts as u64, packet.duration as u64)
                 .expect("renders")
                 .expect("a packet of PCM");
-            assert_eq!((audio.timebase_num, audio.timebase_den), (1, SAMPLE_RATE));
+            assert_eq!((audio.timebase_num, audio.timebase_den), (1, 1_000));
             assert_eq!(audio.data.len() / 4 / usize::from(CHANNELS), 4410);
             frames += (audio.data.len() / 4 / usize::from(CHANNELS)) as u64;
             let samples = audio

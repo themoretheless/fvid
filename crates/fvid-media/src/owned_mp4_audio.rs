@@ -78,12 +78,6 @@ impl Mp4TimelineDecoder {
                 }
             }
             b"alac" => {
-                if track.configuration.len() < 24
-                    || u32::from_be_bytes(track.configuration[20..24].try_into().unwrap())
-                        != track.sample_rate
-                {
-                    return Err(invalid("ALAC cookie and track sample rates disagree"));
-                }
                 Ok(Self::Alac(crate::owned_alac::AlacDecoder::new(
                     &track.configuration,
                     track.sample_rate,
@@ -157,9 +151,7 @@ impl Mp4TimelineDecoder {
             Self::Pcm(d) => {
                 crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
             }
-            Self::Alac(d) => {
-                crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
-            }
+            Self::Alac(d) => d.channel_mask(),
         }
     }
     fn reset(&mut self) {
@@ -196,12 +188,11 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
     reader: &Mp4TimelineReader<R>,
     selected: Option<usize>,
 ) -> Result<usize> {
-    let indices: Vec<_> = reader
-        .tracks()
-        .iter()
-        .enumerate()
-        .filter_map(|(index, t)| (t.handler == *b"soun").then_some(index))
-        .collect();
+    let indices: Vec<_> = if selected.is_none() {
+        reader.automatic_track_indices(&[*b"soun"])
+    } else {
+        reader.tracks().iter().enumerate().filter_map(|(index,t)|(t.handler==*b"soun").then_some(index)).collect()
+    };
     match selected {
         Some(index) if indices.contains(&index) => Ok(index),
         None if indices.len() == 1 => Ok(indices[0]),

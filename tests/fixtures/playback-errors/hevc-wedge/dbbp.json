@@ -1,0 +1,90 @@
+{
+  "provenance": "Owned PCM/CABAC, two explicit PUs, DBBP SPS and MP4. Offline, no external codec or private source.",
+  "syntax_bits": 16,
+  "cases": [
+    {
+      "file": "dbbp-p-32-0-0.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": false,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-p-32-0-1.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": false,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-p-32-1-0.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": true,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-p-32-1-1.mp4",
+      "size": 32,
+      "direct": false,
+      "vertical": true,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-p-128-0-0.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-p-128-0-1.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-p-128-1-0.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-p-128-1-1.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-p-128-0-0-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-p-128-0-1-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true
+    },
+    {
+      "file": "dbbp-p-128-1-0-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false
+    },
+    {
+      "file": "dbbp-p-128-1-1-direct.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0079"
+  ],
+  "checked_at": "2026-10-15T23:31:46.470354+00:00",
+  "before": [
+    "evidence/batch-055-vorbis-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-055-vorbis-final-pass.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-055-integration-final.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-055-root-parser.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-055-owned-parser.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-055-minimal-final.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-055-webm-audio.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-055-fixtures-acceptance.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-055-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored Vorbis short/long/short/long/long/short blocks decode448exact stereo frames. Fixed/Xiph/EBML equal subdivision shifts all five audible packet starts despite correct native data. The prior unlaced control establishes0/1.666666/3.333333/5/7.666666ms; each laced mode fails before.",
+    "Admitted Vorbis setup yields compact mode/block tables, retained once per encountered track. Lace duration uses(previous+current block size)/4 and cumulative sample conversion, including a preceding packet outside the group or in an earlier scan. First decoder priming contributes0frames. Unknown setup retains prior declared-timing indexability.",
+    "Twenty-four short video fixtures cover three lace encodings, one/two groups, declared/codec-derived timing and two-frame tail trimming. Root native decode and real capture worker playback/rewind/seek0 exactly match control PCM/timestamps. Owned incremental index agrees within1ns quantization and exact inferred frame counts.",
+    "A separate authored out-of-range mode refuses with its precise mode-count error before any PCM. Opening is intentionally lazy: refusal is verified on first audio read, and independently during owned scan_all, not incorrectly expected at initial first-video-cluster open.",
+    "26 root,26 minimal,1 owned parser,19 WebM audio tests and related Opus/padding/preroll integrations pass; player builds. Early integration failure occurred while fixture variants were being extended and is excluded; final stable runs are recorded. No throughput, native Vorbis export or physical-DAC claim."
+  ],
+  "baseline_repairs": [
+    "Concurrent existing MP3 checkpoint work exposed a non-player compile error: AudioCheckpoint::Mp3 referenced the player-gated decoder. Matching the variant cfg to the decoder restores minimal compilation. This integration repair adds0IDs; evidence/batch-055-minimal-parser.log records the separate initial failure."
+  ],
+  "compatibility": "Admitted standard Vorbis configuration now supplies variable lace timing and permits laces without declared duration. Unsupported headers preserve their prior declared-timing path. Public interfaces are unchanged.",
+  "counting": "One Vorbis overlap lace clock improvement. Cases, compact setup reuse, corruption controls and baseline integration repair add no IDs."
+}

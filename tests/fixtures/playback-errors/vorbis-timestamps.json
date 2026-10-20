@@ -1,0 +1,458 @@
+{
+  "generator": "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_vorbis_timestamps.py",
+  "video": "hevc-vorbis-timestamps-companion.mkv",
+  "modes": [
+    0,
+    2,
+    1,
+    2,
+    2,
+    0
+  ],
+  "durations": [
+    0,
+    80,
+    80,
+    80,
+    128,
+    80
+  ],
+  "fixtures": [
+    {
+      "file": "vorbis-timestamps-zero.ogg",
+      "offset": 0,
+      "end": 411,
+      "sha256": "67fb22a1eb142c630895f7faa47106163616d882c8df47a730053b336741bce4"
+    },
+    {
+      "file": "vorbis-timestamps-initial-trim.ogg",
+      "offset": -17,
+      "end": 394,
+      "sha256": "b2405257c112a96c08379d85b25bb01bee58fac5f78b81220da355d294aa324e"
+    },
+    {
+      "file": "vorbis-timestamps-positive-origin.ogg",
+      "offset": 23,
+      "end": 434,
+      "sha256": "83d274e82afc1c7d81c200ad8af211e7ac8f734d3fea6ecff4fafd48488f4cb1"
+    }
+  ],
+  "webm_variants": [
+    {
+      "file": "hevc-vorbis-initial-trim-tail.mkv",
+      "padding_ns": 4625000,
+      "codec_delay_ns": 2125000,
+      "sha256": "420da10062f367f81ce5052aea721a05c7c2f1919d812772e91ae7967ea00875"
+    },
+    {
+      "file": "hevc-vorbis-fractional-tail-padding.mkv",
+      "padding_ns": 1,
+      "codec_delay_ns": 0,
+      "sha256": "f4a064b03e6cac84b8ba910f8e06d19898edd884db00f989701056a0ce6cc163"
+    },
+    {
+      "file": "hevc-vorbis-tail-padding.mkv",
+      "padding_ns": 4625000,
+      "codec_delay_ns": 0,
+      "sha256": "8ddc86f7f83a91009338083484c2cbfdf849c5ffdbd35e899822fce38ee7a2d0"
+    },
+    {
+      "file": "hevc-vorbis-head-padding.mkv",
+      "padding_ns": -2125000,
+      "codec_delay_ns": 0,
+      "sha256": "b1622d39fb0b5a2c40fa56247f91fbcdae310953666a72990b873179cefc4127"
+    },
+    {
+      "file": "hevc-vorbis-codec-delay.mkv",
+      "padding_ns": 0,
+      "codec_delay_ns": 2125000,
+      "sha256": "c6215268509d5b7d813ce5a942f0231c3cb18afb70633d422e446e77df2cb468"
+    }
+  ],
+  "channel_variants": [
+    {
+      "file": "vorbis-channels-1.ogg",
+      "channels": 1,
+      "sha256": "72de26cd019a8a766950c65861f7315eeb7f1955032edf8b2b2bf3b1ec48815c",
+      "video": "hevc-vorbis-channels-1.mkv",
+      "video_sha256": "0871ce5ad1b8a4e018fdb97b7b112f5c59f13024e25e5739db429a8f18dc3102"
+    },
+    {
+      "file": "vorbis-channels-2.ogg",
+      "channels": 2,
+      "sha256": "303064672c9985e053e2a1db870dad5626803c825d1ab9e9b56cd16e5ab980ff",
+      "video": "hevc-vorbis-channels-2.mkv",
+      "video_sha256": "afa87ecd6149f69613f424d6cb577cf22a07c1a62be6045ce42be5b1cc3da109"
+    },
+    {
+      "file": "vorbis-channels-4.ogg",
+      "channels": 4,
+      "sha256": "9475f531539dfb0e61c5cb2f481cf9a59cd3df6c10e7dc88f4709f48962d2710",
+      "video": "hevc-vorbis-channels-4.mkv",
+      "video_sha256": "2a53dc596428fd6b842490a786a126c19d3b1e55f4af7420a43be7878812d067"
+    },
+    {
+      "file": "vorbis-channels-6.ogg",
+      "channels": 6,
+      "sha256": "0001524345dc2919707d2833aec3733d7ceb3657b566b762e56dd786ea82febb",
+      "video": "hevc-vorbis-channels-6.mkv",
+      "video_sha256": "307192c1fedb6f6e31419ccd55a02e2bb08633b8b0f1227c96a7c6b3f22ec14f"
+    },
+    {
+      "file": "vorbis-channels-7.ogg",
+      "channels": 7,
+      "sha256": "a2971738f4005d5951084601b6eebd6f64568ffa0db730e85a2fda182513ac7c",
+      "video": "hevc-vorbis-channels-7.mkv",
+      "video_sha256": "2118f083c4bef31043d1edb02938a968f9fb6bd111ae73755d9552aa1e1ffaa3"
+    },
+    {
+      "file": "vorbis-channels-8.ogg",
+      "channels": 8,
+      "sha256": "e29972411be7c0e493b4a276e05b6dad958f00c16a520f9c6a7a0e9692edbca6",
+      "video": "hevc-vorbis-channels-8.mkv",
+      "video_sha256": "8cdeb9d0ecafac744a0e2bb6ced0b56c853d08584cdb207842db8d6a6e9ba422"
+    },
+    {
+      "file": "vorbis-channels-9.ogg",
+      "channels": 9,
+      "sha256": "a300663284f7e589ecca15fe8d928aa399dc9085e4cdd2dc531e2c65a7dd14bb",
+      "video": "hevc-vorbis-channels-9.mkv",
+      "video_sha256": "ff447909621609e41860b58b3d17f14e1063aec5788f2dcdc54d5699b59ba819"
+    },
+    {
+      "file": "vorbis-channels-33.ogg",
+      "channels": 33,
+      "sha256": "b1be8e1001d83880ea5219acb5d59c66975d399f53c7076916f5603137f176ef",
+      "video": "hevc-vorbis-channels-33.mkv",
+      "video_sha256": "13dddc7dc591125634e243a243e2345922ad0b058d1e3bb56675f5785df0280d"
+    },
+    {
+      "file": "vorbis-channels-255.ogg",
+      "channels": 255,
+      "sha256": "b77bdaede56294d678832f97bc9be5a21e6e336ed223d8e2a760bebce665b19d",
+      "video": "hevc-vorbis-channels-255.mkv",
+      "video_sha256": "3fccc69af65f36f0ea7c83b55be08170482e73c99571ce8765bfe1631ec47c79"
+    }
+  ],
+  "channel_chains": [
+    {
+      "file": "vorbis-channel-chain-1-2.ogg",
+      "channels": [
+        1,
+        2
+      ],
+      "sha256": "df178235e3566035e0ccf3dd3cf849bc2f0e6d5f0202f6246dfb7c07189ff74a",
+      "videos": [
+        "hevc-vorbis-channels-1.mkv",
+        "hevc-vorbis-channels-2.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-channel-chain-2-1.ogg",
+      "channels": [
+        2,
+        1
+      ],
+      "sha256": "7900e7c838f7a641197704d5618b4c03670e83363b123f6938e421334c2fe4fb",
+      "videos": [
+        "hevc-vorbis-channels-2.mkv",
+        "hevc-vorbis-channels-1.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-channel-chain-4-6.ogg",
+      "channels": [
+        4,
+        6
+      ],
+      "sha256": "bac10cec86fb8825f321a9c45f752cf5ca61f8fd860f2ba5d8e6a99184638813",
+      "videos": [
+        "hevc-vorbis-channels-4.mkv",
+        "hevc-vorbis-channels-6.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-channel-chain-7-8.ogg",
+      "channels": [
+        7,
+        8
+      ],
+      "sha256": "83aef055cc11d422befb98f7a00136f7d6391b289cf80847afbc9597d59fd1d1",
+      "videos": [
+        "hevc-vorbis-channels-7.mkv",
+        "hevc-vorbis-channels-8.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-channel-chain-9-33.ogg",
+      "channels": [
+        9,
+        33
+      ],
+      "sha256": "d72485f88e77bf83ba99a0265d84977ad51a0453822e2f96d9bc3366b322a3f2",
+      "videos": [
+        "hevc-vorbis-channels-9.mkv",
+        "hevc-vorbis-channels-33.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-channel-chain-33-9.ogg",
+      "channels": [
+        33,
+        9
+      ],
+      "sha256": "2610f8b249455e720d488e19ba4426e093fa4254bbe162845b0cd312fffc49dc",
+      "videos": [
+        "hevc-vorbis-channels-33.mkv",
+        "hevc-vorbis-channels-9.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-channel-chain-2-255.ogg",
+      "channels": [
+        2,
+        255
+      ],
+      "sha256": "0711b5ce82b371bc2a08a4f2905cf1da01bb3b45c6f98768cebbfb83717a2b7e",
+      "videos": [
+        "hevc-vorbis-channels-2.mkv",
+        "hevc-vorbis-channels-255.mkv"
+      ]
+    }
+  ],
+  "codec_chains": [
+    {
+      "file": "ogg-codec-chain-vorbis-opus.ogg",
+      "sha256": "4375a46f12d7c2b772e0767f6ab6041a377fa2e0119cbccf443348ed0f738b7a",
+      "videos": [
+        "hevc-vorbis-timestamps-companion.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-opus-vorbis.ogg",
+      "sha256": "744e28d5a6cbe9062f282191a40f8f92e05ef25922d8e55dc77e6ae31ca4b5bc",
+      "videos": [
+        "hevc-vorbis-timestamps-companion.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-vorbis-opus-vorbis.ogg",
+      "sha256": "8ae2a3694b30d7e2ad7e6bd55d67bdc086fdbee7aba95d10c734baca0d307655",
+      "videos": [
+        "hevc-vorbis-timestamps-companion.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-opus-vorbis-opus.ogg",
+      "sha256": "92459a4b4bc36cfce1cd7c14bcfd9db0042b1dea5f42ec14af801c322cc7a5bb",
+      "videos": [
+        "hevc-vorbis-timestamps-companion.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-discrete-opus.ogg",
+      "sha256": "c620073d247a320ee1f4301e845464861f008f21da8b69d2c5cdfd6c60e20bd9",
+      "videos": [
+        "hevc-vorbis-channels-9.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-multiplex-swap.ogg",
+      "sha256": "eb9ac0a7ae06db3bd6b62d7203e67094bb69f6d8272023ee7d11b4679b8964c5",
+      "videos": [
+        "hevc-vorbis-timestamps-companion.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-initial-trim-opus.ogg",
+      "sha256": "cf3e14022e9eec5f5a363d4434234be0c0b52f50de2264b6e5fb21ee955b8ca1",
+      "videos": [
+        "hevc-vorbis-initial-trim-tail.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-positive-origin-opus.ogg",
+      "sha256": "0820b066f389743e4330ac2490a4f3d94269ed04a5746cce29561971763f6662",
+      "videos": [
+        "hevc-vorbis-positive-origin-tail.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-tone-vorbis-opus.ogg",
+      "sha256": "3d4539d29aefdff6cd80a15f98ac38b4c2de266ad6419011b2b95a2b11b2a681",
+      "videos": [
+        "hevc-vorbis-rate-tone-44100.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    },
+    {
+      "file": "ogg-codec-chain-tone-opus-vorbis.ogg",
+      "sha256": "6e95671f5fd6adf26f2818b7ba594af9819b5920665c8f9d57a95dc0f6d1f008",
+      "videos": [
+        "hevc-vorbis-rate-tone-44100.mkv",
+        "hevc-opus-surround-companion.mkv"
+      ]
+    }
+  ],
+  "rate_chains": [
+    {
+      "file": "vorbis-rate-chain-8000-12000-offset-0.ogg",
+      "rates": [
+        8000,
+        12000
+      ],
+      "offset": 0,
+      "sha256": "d8f0f4cb0320e0800b4566195ea4e79532bcc6d6a8555ecaec50be543f63bdd2",
+      "videos": [
+        "hevc-vorbis-rate-8000-offset-0.mkv",
+        "hevc-vorbis-rate-12000-offset-0.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-rate-chain-12000-8000-offset-0.ogg",
+      "rates": [
+        12000,
+        8000
+      ],
+      "offset": 0,
+      "sha256": "5978b84bf64114aeddfe4a9c6f93820e423734974f81090c2a9d395c67e23665",
+      "videos": [
+        "hevc-vorbis-rate-12000-offset-0.mkv",
+        "hevc-vorbis-rate-8000-offset-0.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-rate-chain-44100-48000-offset-0.ogg",
+      "rates": [
+        44100,
+        48000
+      ],
+      "offset": 0,
+      "sha256": "410275e545a786a48af0c122f0d0da7770cb24938103d241fcedbf8ea7e252e4",
+      "videos": [
+        "hevc-vorbis-rate-44100-offset-0.mkv",
+        "hevc-vorbis-rate-48000-offset-0.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-rate-chain-48000-44100-offset-0.ogg",
+      "rates": [
+        48000,
+        44100
+      ],
+      "offset": 0,
+      "sha256": "728da7866d82c6be5a04606159a63027e178c1c574ab346d7d59cf5e236bfa8e",
+      "videos": [
+        "hevc-vorbis-rate-48000-offset-0.mkv",
+        "hevc-vorbis-rate-44100-offset-0.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-rate-chain-8000-12000-offset--17.ogg",
+      "rates": [
+        8000,
+        12000
+      ],
+      "offset": -17,
+      "sha256": "05e7b53fa1ba33828feb89e04e23d6c3f7bfc9bee4f987ef7fef6102579107d3",
+      "videos": [
+        "hevc-vorbis-rate-8000-offset-0.mkv",
+        "hevc-vorbis-rate-12000-offset--17.mkv"
+      ]
+    },
+    {
+      "file": "vorbis-rate-chain-8000-12000-offset-23.ogg",
+      "rates": [
+        8000,
+        12000
+      ],
+      "offset": 23,
+      "sha256": "e917377100c1ec8a577dca6b9e3bbc9eccb3e4ca8f065c96afb79cfe0d035aba",
+      "videos": [
+        "hevc-vorbis-rate-8000-offset-0.mkv",
+        "hevc-vorbis-rate-12000-offset-23.mkv"
+      ]
+    }
+  ],
+  "rate_tone_videos": [
+    "hevc-vorbis-rate-tone-44100.mkv",
+    "hevc-vorbis-rate-tone-32000.mkv"
+  ],
+  "rate_extra": [
+    {
+      "file": "vorbis-rate-chain-fractional-three.ogg",
+      "sha256": "b4a355239ddaf795c2b1fe0fa313a169d1a95c84bd449877539dd05800dff19f"
+    },
+    {
+      "file": "vorbis-rate-tone-44100.ogg",
+      "sha256": "584e0e072e19d038b32111955fe8eab8a9ca9ffd35de8e207706cfc2f3e73298"
+    },
+    {
+      "file": "vorbis-rate-tone-32000.ogg",
+      "sha256": "842befc662a7be73922c4a4d1cdf8ec0050b3de128f518a5bf392480f0763aca"
+    },
+    {
+      "file": "vorbis-rate-tone-chain-44100-32000.ogg",
+      "sha256": "d14477318c16a7baec63bc15754782b85ccbebfe3fee890bda2d3618b359ea9f"
+    },
+    {
+      "file": "vorbis-rate-tone-chain-32000-44100.ogg",
+      "sha256": "f2e2e33f79db5bcd0fa81bd4677a61c1a55c79eaab96a330cddf3a817f69d7f8"
+    },
+    {
+      "file": "hevc-vorbis-rate-tone-44100.mkv",
+      "sha256": "14948953d2cccda27bb3c084f971fa4a95dc9a0729ba897c29cf7765850fa98a"
+    },
+    {
+      "file": "hevc-vorbis-rate-tone-32000.mkv",
+      "sha256": "9f3268f9d5d8b7f840ff27584993cf4ffe37898bc1442f9e329b3b034e7f8857"
+    },
+    {
+      "file": "vorbis-rate-channel-chain.ogg",
+      "sha256": "4a09f9e28a2b6d37ad746df35365e36b1c721790298ef596810bd29f8213d908"
+    },
+    {
+      "file": "hevc-vorbis-rate-channel-0.mkv",
+      "sha256": "44f46da8aadec98c885030539fc5781d5c98fa5572e8140da28e4daa8ce7517e"
+    },
+    {
+      "file": "hevc-vorbis-rate-channel-1.mkv",
+      "sha256": "54a69780526417b45a72788192b321289364b818fee5c7bad7cb440062eca02c"
+    }
+  ],
+  "endpoint_rewind": {
+    "file": "hevc-vorbis-endpoint-rewind.mkv",
+    "sha256": "8ddc86f7f83a91009338083484c2cbfdf849c5ffdbd35e899822fce38ee7a2d0"
+  },
+  "mixed": [
+    {
+      "file": "ogg-mixed-opus-first.ogg",
+      "opus_video": "hevc-opus-surround-companion.mkv",
+      "vorbis_video": "hevc-vorbis-timestamps-companion.mkv",
+      "sha256": "54b3c587d5c78341814b35351a245e2eb28ad52c377960df5b6c12cdf9ea9ca4"
+    },
+    {
+      "file": "ogg-mixed-vorbis-first.ogg",
+      "opus_video": "hevc-opus-surround-companion.mkv",
+      "vorbis_video": "hevc-vorbis-timestamps-companion.mkv",
+      "sha256": "19f76220a2a4ae2240c2bcd34a7ab94645e8ae2915ff914316a2bbff2d8afdb9"
+    }
+  ],
+  "parallel": "vorbis-timestamps-parallel.ogg",
+  "parallel_chained": "vorbis-timestamps-parallel-chained.ogg",
+  "skeleton_parallel": "vorbis-timestamps-skeleton-parallel.ogg",
+  "chained_end": 805,
+  "reconfigured": "vorbis-timestamps-reconfigured.ogg",
+  "reconfigured_video": "hevc-vorbis-reconfigured-companion.mkv",
+  "changing_blocks": "vorbis-timestamps-changing-blocks.ogg",
+  "changing_blocks_end": 1189,
+  "changing_blocks_video": "hevc-vorbis-changing-blocks-companion.mkv"
+}

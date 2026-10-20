@@ -1,0 +1,170 @@
+{
+  "scope": "Measured rejection of naive structural-framing implementation; optimized parser has identical frame/sample totals and independent regression coverage. This adds no performance ID.",
+  "pairs": [
+    {
+      "pair": 1,
+      "order": [
+        "naive",
+        "optimized"
+      ],
+      "naive": {
+        "elapsed_ns": 1354217458,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "optimized": {
+        "elapsed_ns": 364422917,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.26910221460163747
+    },
+    {
+      "pair": 2,
+      "order": [
+        "optimized",
+        "naive"
+      ],
+      "optimized": {
+        "elapsed_ns": 363100666,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "naive": {
+        "elapsed_ns": 1347898584,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.2693827787269194
+    },
+    {
+      "pair": 3,
+      "order": [
+        "naive",
+        "optimized"
+      ],
+      "naive": {
+        "elapsed_ns": 1343455917,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "optimized": {
+        "elapsed_ns": 364409250,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.2712476422849385
+    },
+    {
+      "pair": 4,
+      "order": [
+        "optimized",
+        "naive"
+      ],
+      "optimized": {
+        "elapsed_ns": 366132416,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "naive": {
+        "elapsed_ns": 1375240084,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.26623163494120494
+    },
+    {
+      "pair": 5,
+      "order": [
+        "naive",
+        "optimized"
+      ],
+      "naive": {
+        "elapsed_ns": 1359329917,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "optimized": {
+        "elapsed_ns": 369124416,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.2715488060578012
+    },
+    {
+      "pair": 6,
+      "order": [
+        "optimized",
+        "naive"
+      ],
+      "optimized": {
+        "elapsed_ns": 367033875,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "naive": {
+        "elapsed_ns": 1358802292,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.27011573145035583
+    },
+    {
+      "pair": 7,
+      "order": [
+        "naive",
+        "optimized"
+      ],
+      "naive": {
+        "elapsed_ns": 1359531958,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "optimized": {
+        "elapsed_ns": 366795333,
+        "frames": 150000,
+        "inputs": 4,
+        "iterations": 5000,
+        "samples": 144200000
+      },
+      "ratio": 0.26979530039116595
+    }
+  ],
+  "median_ratio": 0.26979530039116595,
+  "binaries": {
+    "naive": {
+      "path": "/private/tmp/fvid-flac-index-batch123-after",
+      "sha256": "adaacd5730d6f65643e950efb1982e5ee26587d439eed7e4f6905fde41f4be93"
+    },
+    "optimized": {
+      "path": "/private/tmp/fvid-flac-index-batch123-after-v2",
+      "sha256": "9f95824c225121699166d8bbac97b0859ef182efcc5d374d3bd8532ee58b97fb"
+    }
+  }
+}

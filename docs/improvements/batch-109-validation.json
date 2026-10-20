@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0128"
+  ],
+  "checked_at": "2026-10-16T06:59:57.606150+00:00",
+  "before": [
+    "evidence/batch-109-reproduction-before.log",
+    "evidence/batch-109-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-109-integration.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-109-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-109-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-109-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Six authored K00cases compare full mono/stereo PCM against independent note97controls:held loop,silence,retrigger,instrument,volume-column combination andnew note onthe same row.",
+    "Before ignored reproduction passes;forced acceptance fails12unsupported classifications andten PCM comparisons overfive inputs. Silent control healthy. Worker failures stop atfullplayback,not a separate pre-fixseek.",
+    "After acceptance enabled andold ignored expectation inverted. Immediate K00takes precedence overnew note, releases current voice,andpreserves existing no-envelope smoothing. Twelve actual worker row/EOF targets plusfullplay/rewind match every reference byte.",
+    "13integrations,11decoder units,fixture reproduction andplayer build pass. Only immediate K00is supported;nonzero Kxxremains reported unsupported because it requires intra-row tick scheduling. Authored raw XM plus VP9companion,no private media/encoder/network/performance/full tracker claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "getNewNote K00branch",
+      "rule": "Effect0x14parameter0calls keyOff before note handling,optionally resets instrument volume,then applies row effects."
+    }
+  ],
+  "compatibility": "Previously ignored immediateK00now releases notes. Delayed Kxxand public APIs unchanged.",
+  "counting": "One immediate key-off capability;six variants andsame-row precedence add no extra ID."
+}

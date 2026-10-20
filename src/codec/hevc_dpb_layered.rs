@@ -203,7 +203,7 @@ impl LayeredDpb {
     where
         B: FnMut(&LayeredAccessPicture, Option<&[(u8, Reference)]>) -> Result<()>,
     {
-        use crate::codec::{hevc_picture::decode_layered, hevc_pps::LayeredPpsContext};
+        use crate::codec::{hevc_picture::decode_layered_with_sources, hevc_pps::LayeredPpsContext};
         use std::mem::size_of;
         let sps_bytes = plan
             .pictures()
@@ -213,8 +213,35 @@ impl LayeredDpb {
                 |n, p| n.checked_add(p.binding.storage_bytes()),
             )
             .ok_or_else(|| invalid("HEVC prepared active-SPS storage overflow"))?;
+        let components_needed=plan.pictures().iter().any(|p| !p.binding.sps.sps.depth_layer
+            && p.binding.sps.sps.three_d.as_ref().is_some_and(|e|e.inter_view_disparity[0]||e.view_synthesis_prediction||e.inter_view_residual_prediction||e.depth_based_partition)
+            && p.binding.vps.extension.as_ref().is_some_and(|e|e.graph.reference_list_layers(p.binding.sps.layer_id).is_ok_and(|n|n>0))
+            && p.slices.iter().any(|h|h.slice_type!=crate::codec::hevc_cabac::SliceType::I));
+        let binding_bytes=if components_needed {
+            plan.pictures().len().checked_mul(size_of::<Arc<crate::codec::hevc_decoder::LayeredBinding>>())
+                .and_then(|n|n.checked_add(size_of::<Vec<Arc<crate::codec::hevc_decoder::LayeredBinding>>>()))
+                .ok_or_else(||invalid("HEVC component binding storage overflow"))?
+        }else{0};
+        if sps_bytes.checked_add(binding_bytes).is_none_or(|n|n>budget) {
+            return Err(invalid("HEVC component bindings exceed memory budget"));
+        }
+        let mut component_bindings=Vec::new();
+        if components_needed {
+            component_bindings.try_reserve_exact(plan.pictures().len())
+                .map_err(|_|invalid("cannot allocate HEVC component bindings"))?;
+            component_bindings.extend(plan.pictures().iter().map(|p|p.binding.clone()));
+        }
+        use crate::codec::hevc_motion::inter_view_residual::{CurrentRps,BoundSources};
+        let snapshot_count=if components_needed {plan.pictures().iter().filter(|p|!p.binding.sps.sps.depth_layer).count()}else{0};
+        let mut snapshots=Vec::<CurrentRps>::new();
+        snapshots.try_reserve_exact(snapshot_count).map_err(|_|invalid("cannot allocate HEVC AU RPS snapshots"))?;
+        let snapshot_headers=if !components_needed {0}else{snapshots.capacity().checked_mul(size_of::<CurrentRps>())
+            .and_then(|n|n.checked_add(size_of::<Vec<CurrentRps>>()))
+            .ok_or_else(||invalid("HEVC AU RPS snapshot storage overflow"))?};
+        let mut snapshot_entries=0usize;
         let available = budget
-            .checked_sub(sps_bytes)
+            .checked_sub(snapshot_headers)
+            .and_then(|n|n.checked_sub(sps_bytes)).and_then(|n|n.checked_sub(binding_bytes))
             .ok_or_else(|| invalid("HEVC prepared active SPS exceeds memory budget"))?;
         let active_sps: Vec<_> = plan
             .pictures()
@@ -227,6 +254,18 @@ impl LayeredDpb {
             available,
             before,
             |picture, temporal, completed, budget| {
+                let snapshot_source=components_needed && !picture.binding.sps.sps.depth_layer
+                    && picture.binding.vps.extension.as_ref().map(|e|->Result<bool> {
+                        let view=e.graph.view_index(picture.binding.sps.layer_id)?;
+                        Ok(e.graph.view_component_for_index(view,false)?==Some(picture.binding.sps.layer_id))
+                    }).transpose()?.unwrap_or(false);
+                let pending=if snapshot_source {
+                    Some(CurrentRps::bind(picture,0,access_unit,temporal,
+                        budget.checked_sub(snapshot_entries).ok_or_else(||invalid("HEVC AU RPS entries exceed budget"))?)?)
+                }else{None};
+                let pending_bytes=pending.as_ref().map_or(0,|s|s.metadata_bytes()-size_of::<CurrentRps>());
+                let budget=budget.checked_sub(snapshot_entries).and_then(|n|n.checked_sub(pending_bytes))
+                    .ok_or_else(||invalid("HEVC AU RPS entries exceed reconstruction budget"))?;
                 let context = LayeredPpsContext {
                     vps: &picture.binding.vps,
                     sps: &picture.binding.sps,
@@ -302,13 +341,63 @@ impl LayeredDpb {
                 let remaining = available
                     .checked_sub(held)
                     .ok_or_else(|| invalid("HEVC prepared references exceed memory budget"))?;
-                Ok(Arc::new(decode_layered(
+                // Component tools use the matching view picture in this AU,
+                // not a retained picture with the same layer ID from the DPB.
+                // CQT is disabled for an I slice, but a later independent P/B
+                // slice in the same picture can still require TexturePic.
+                let texture_header=picture.slices.iter().find(|h|
+                    crate::codec::hevc_picture::cqt_enabled(&picture.binding.sps.sps,h)
+                    || crate::codec::hevc_picture::texture_motion_enabled(&picture.binding.sps.sps,h))
+                    .unwrap_or(&picture.slices[0]);
+                let texture=crate::codec::hevc_picture::select_texture_picture(
+                    &picture.binding.context(),texture_header,picture.poc,access_unit,completed)?;
+                let first=&picture.slices[0];
+                let current=crate::codec::hevc_inter_layer::PictureStatus {
+                    identity:PictureIdentity{layer_id:picture.binding.sps.layer_id,poc:picture.poc},
+                    access_unit,nal:first.nal,discardable:first.layered.as_ref().is_some_and(|h|h.discardable),
+                };
+                let needed=!picture.binding.sps.sps.depth_layer
+                    && picture.binding.sps.sps.three_d.as_ref().is_some_and(|e|e.inter_view_disparity[0]||e.view_synthesis_prediction||e.inter_view_residual_prediction||e.depth_based_partition)
+                    && picture.binding.vps.extension.as_ref().is_some_and(|e|e.graph.reference_list_layers(picture.binding.sps.layer_id).is_ok_and(|n|n>0))
+                    && picture.slices.iter().any(|h|h.slice_type!=crate::codec::hevc_cabac::SliceType::I);
+                let components=if needed {
+                    Some(crate::codec::hevc_picture::ViewComponentPool::bind(
+                        &picture.binding.context(),first,current,&component_bindings,false,completed,remaining)?)
+                }else{None};
+                let remaining=remaining.checked_sub(components.as_ref().map_or(0,|p|p.metadata_bytes()))
+                    .ok_or_else(||invalid("HEVC component pool exceeds reconstruction budget"))?;
+                let mut refinement_needed=false;
+                if needed { for header in &picture.slices {
+                    refinement_needed|=crate::codec::hevc_picture::texture_depth_refinement_enabled(&picture.binding.context(),header)?
+                        || crate::codec::hevc_picture::texture_vsp_enabled(&picture.binding.context(),header)?
+                        || crate::codec::hevc_picture::texture_dbbp_enabled(&picture.binding.context(),header)?;
+                }}
+                let refinement=if refinement_needed {
+                    Some(crate::codec::hevc_picture::ViewComponentPool::bind(
+                        &picture.binding.context(),first,current,&component_bindings,true,completed,remaining)?)
+                }else{None};
+                let remaining=remaining.checked_sub(refinement.as_ref().map_or(0,|p|p.metadata_bytes()))
+                    .ok_or_else(||invalid("HEVC refinement pool exceeds reconstruction budget"))?;
+                let source_context=picture.binding.context();
+                let residual_sources=components.as_ref().map(|pool|BoundSources::bind(
+                    pool,&source_context,first,current,&snapshots,temporal)).transpose()?;
+                let decoded=Arc::new(decode_layered_with_sources(
                     &picture.binding.context(),
                     &picture.slices,
                     picture.poc,
                     &lists,
                     remaining,
-                )?))
+                    texture.as_deref(),
+                    components.as_ref().map(|p|(p,current)),
+                    refinement.as_ref().map(|p|(p,current)),
+                    residual_sources.as_ref(),
+                )?);
+                if let Some(snapshot)=pending {
+                    snapshot_entries=snapshot_entries.checked_add(pending_bytes)
+                        .ok_or_else(||invalid("HEVC AU RPS entries storage overflow"))?;
+                    snapshots.push(snapshot);
+                }
+                Ok(decoded)
             },
         )
     }

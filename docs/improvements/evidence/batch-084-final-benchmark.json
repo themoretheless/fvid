@@ -1,0 +1,467 @@
+{
+  "source_sha256": "612f6cc1d226e766abb3061b3c1b696c6e0ab419b711dbd67c87b89913c9bb41",
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "flags": [
+    "--edition=2024",
+    "-O",
+    "-C",
+    "target-cpu=native"
+  ],
+  "scope": "actual production native decoder with standalone audio API type shims; repeated reset/full-stream decode; no app/GPU/packaged release claim",
+  "pairs": 9,
+  "iterations": 2000,
+  "raw": [
+    {
+      "pair": 0,
+      "workload": "stereo",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 527603125,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 439398375,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8328198871073783
+    },
+    {
+      "pair": 0,
+      "workload": "coupled",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 646078875,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 538853208,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8340362591177432
+    },
+    {
+      "pair": 1,
+      "workload": "stereo",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 448634584,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 515911166,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8695965770200058
+    },
+    {
+      "pair": 1,
+      "workload": "coupled",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 985964458,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 811295667,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 1.215296097470714
+    },
+    {
+      "pair": 2,
+      "workload": "stereo",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 520176417,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 425941666,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8188407857021323
+    },
+    {
+      "pair": 2,
+      "workload": "coupled",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 647091875,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 551750000,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8526609919186514
+    },
+    {
+      "pair": 3,
+      "workload": "stereo",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 442819875,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 527111750,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8400872775080427
+    },
+    {
+      "pair": 3,
+      "workload": "coupled",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 542479792,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 645062000,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8409731033606072
+    },
+    {
+      "pair": 4,
+      "workload": "stereo",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 520737458,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 443602208,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8518730526967392
+    },
+    {
+      "pair": 4,
+      "workload": "coupled",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 648443916,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 545955500,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8419471391879016
+    },
+    {
+      "pair": 5,
+      "workload": "stereo",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 452607625,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 529390917,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8549591813264903
+    },
+    {
+      "pair": 5,
+      "workload": "coupled",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 560805750,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 642385292,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8730052773375141
+    },
+    {
+      "pair": 6,
+      "workload": "stereo",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 516939000,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 438860167,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8489592911349308
+    },
+    {
+      "pair": 6,
+      "workload": "coupled",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 649859083,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 541890417,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8338583412551918
+    },
+    {
+      "pair": 7,
+      "workload": "stereo",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 446779208,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 521511375,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8567007920009415
+    },
+    {
+      "pair": 7,
+      "workload": "coupled",
+      "order": [
+        "table",
+        "bitwise"
+      ],
+      "results": {
+        "table": {
+          "ns": 532833750,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "bitwise": {
+          "ns": 632583708,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8423134254984639
+    },
+    {
+      "pair": 8,
+      "workload": "stereo",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 508066042,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 444278333,
+          "hash": 16082137752239436180,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8744499656995379
+    },
+    {
+      "pair": 8,
+      "workload": "coupled",
+      "order": [
+        "bitwise",
+        "table"
+      ],
+      "results": {
+        "bitwise": {
+          "ns": 656071166,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        },
+        "table": {
+          "ns": 548952500,
+          "hash": 8172123996438291853,
+          "bytes": 96256
+        }
+      },
+      "ratio": 0.8367270632344784
+    }
+  ],
+  "verification": [
+    {
+      "name": "stereo",
+      "input_sha256": "b41434332842d2d18a1f6fe890c837414a94cf4faba4305e11ed842bb3a0adfb",
+      "pcm_sha256": "61301fc3a5fdc3f3e28c6347610c1fd31c5f3a4bff63135772e762be75563c75",
+      "bytes": 96256
+    },
+    {
+      "name": "coupled",
+      "input_sha256": "36072c0de62aa1f4655ceaae9c87cf8c5dd142ce859eca17ff6c9ef3a836823a",
+      "pcm_sha256": "d339e6ad9a1d9a436aac6eb9ce40ed7775424feb19a0b98d78bc157b1409bc8c",
+      "bytes": 96256
+    },
+    {
+      "name": "surround",
+      "input_sha256": "b34092707204538e63e9894b4a01ae674dfc4dc26b465407572b5940a22df73b",
+      "pcm_sha256": "4c5e712833af42418336cc4987e57244af301606318f7db2210d13ac2baae63b",
+      "bytes": 288768
+    },
+    {
+      "name": "mono32",
+      "input_sha256": "df6ee1cb2a06855fb11bddfe0485367ef535b70e37569c10565274869daa1530",
+      "pcm_sha256": "866ca2042046448bf14c9c844675e79031d2c7fe21f4130783cd4562ba01b0fe",
+      "bytes": 35840
+    },
+    {
+      "name": "crc1",
+      "input_sha256": "428c1e80fe0c101050c552140e28d02bd2d7c199b25fdbd30ca4af69dc020564",
+      "pcm_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652",
+      "bytes": 10240
+    },
+    {
+      "name": "crc2",
+      "input_sha256": "2e1d42571603d93f37601b729d3a737f1b286831d1bce5eca6340fd9265702fd",
+      "pcm_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652",
+      "bytes": 10240
+    },
+    {
+      "name": "payload",
+      "input_sha256": "4f4b7585fe63eece8180595a850f5af2fdb31b21890caca9565ccd2ca6e9665e",
+      "pcm_sha256": "84ff92691f909a05b224e1c56abb4864f01b4f8e3c854e4bb4c7baf1d3f6d652",
+      "bytes": 10240
+    }
+  ],
+  "summary": {
+    "stereo": {
+      "median_ratio": 0.8518730526967392,
+      "ratios": [
+        0.8328198871073783,
+        0.8695965770200058,
+        0.8188407857021323,
+        0.8400872775080427,
+        0.8518730526967392,
+        0.8549591813264903,
+        0.8489592911349308,
+        0.8567007920009415,
+        0.8744499656995379
+      ]
+    },
+    "coupled": {
+      "median_ratio": 0.8419471391879016,
+      "ratios": [
+        0.8340362591177432,
+        1.215296097470714,
+        0.8526609919186514,
+        0.8409731033606072,
+        0.8419471391879016,
+        0.8730052773375141,
+        0.8338583412551918,
+        0.8423134254984639,
+        0.8367270632344784
+      ]
+    }
+  }
+}

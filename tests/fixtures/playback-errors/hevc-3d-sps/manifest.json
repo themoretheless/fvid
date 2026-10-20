@@ -1,0 +1,601 @@
+{
+  "provenance": "Own complete Annex I SPS fields and unchanged authored synthetic I/P/B pictures. Syntax, depth-role admission and playback acceptance have separate tests.",
+  "syntax": [
+    {
+      "name": "inactive",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "inactive-max",
+      "bits": 24,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        6,
+        6
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "inactive-min4",
+      "bits": 20,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        4,
+        4
+      ],
+      "cb": [
+        4,
+        6
+      ]
+    },
+    {
+      "name": "flag0",
+      "bits": 16,
+      "flags": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag1",
+      "bits": 16,
+      "flags": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag2",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag3",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag4",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag5",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag6",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag7",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag8",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag9",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag10",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag11",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag12",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "flag13",
+      "bits": 16,
+      "flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "sub": [
+        3,
+        3
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    },
+    {
+      "name": "all-active",
+      "bits": 24,
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "sub": [
+        6,
+        6
+      ],
+      "cb": [
+        3,
+        6
+      ]
+    }
+  ],
+  "videos": [
+    {
+      "file": "main-ipb-inactive.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-inactive-large.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-inactive-future.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-depth-only.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-active-texture.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-inactive-base-vsp.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-inactive-base-residual.mp4",
+      "seed": "main-ipb",
+      "error": null
+    },
+    {
+      "file": "main-ipb-truncated.mp4",
+      "seed": "main-ipb",
+      "error": "truncated HEVC 3D SPS extension"
+    },
+    {
+      "file": "main-ipb-bad-size.mp4",
+      "seed": "main-ipb",
+      "error": "HEVC 3D sub-block size exceeds coding-block bounds"
+    },
+    {
+      "file": "main10-ipb-inactive.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-inactive-large.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-inactive-future.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-depth-only.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-active-texture.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-inactive-base-vsp.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-inactive-base-residual.mp4",
+      "seed": "main10-ipb",
+      "error": null
+    },
+    {
+      "file": "main10-ipb-truncated.mp4",
+      "seed": "main10-ipb",
+      "error": "truncated HEVC 3D SPS extension"
+    },
+    {
+      "file": "main10-ipb-bad-size.mp4",
+      "seed": "main10-ipb",
+      "error": "HEVC 3D sub-block size exceeds coding-block bounds"
+    }
+  ]
+}

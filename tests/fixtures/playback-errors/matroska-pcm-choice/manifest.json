@@ -1,0 +1,17 @@
+{
+  "provenance": "Authored60ms VP9 plus default PCM and a valid nondefault alternative. Unsupported PCM widths and missing Opus/AAC/Vorbis setup must not block automatic selection of16bit PCM. No encoder/private media/network.",
+  "sha256": {
+    "valid-first.mkv": "6a5e5431aed31be24b339fe10a4b01d5144522583802475bcba0562b65447573",
+    "valid-first-expected.f32le": "155e437b946ac82ae591ff382b8d19efda9397b2282672dbabd91ec31ce8a651",
+    "integer-default.mkv": "6f72705c91baefb31e523782ec363c336ddfbc5091b259c8e297fd7b15000a98",
+    "integer-default-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "float-default.mkv": "1c828e35f09d5a6934019807018b8e1628b49b32e88879566533f9b5e650f81a",
+    "float-default-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "opus-missing-setup.mkv": "c1d3f2fd0e7e8e4261d07e06c2c9c497bece2ab6951161e2769333cb7b96514c",
+    "opus-missing-setup-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "aac-missing-setup.mkv": "e368835b5e90606026cc8dc8b6a5deb0c1cb7f10847af4a5cb95f578fa714c4e",
+    "aac-missing-setup-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "vorbis-missing-setup.mkv": "ab9808c863b2a75b6ca75b0c26adf18323eac25d0d10407aaca62dc83ffa0a08",
+    "vorbis-missing-setup-expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

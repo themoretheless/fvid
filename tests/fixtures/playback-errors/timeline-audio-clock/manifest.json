@@ -1,0 +1,15 @@
+{
+  "provenance": "Existing authored synthetic audio references read in place; separate20ms native VP9/PCM video control. This regression targets timeline audio presentation clock, not Matroska demux or physical output.",
+  "cases": [
+    {
+      "kind": "smf",
+      "source": "midi/two-notes.mid",
+      "sha256": "55118571e7325c2415ee7d3e0c8cbeaea7fd27fffd7815b7bf745e975e58e880"
+    },
+    {
+      "kind": "xm",
+      "source": "xm/two-notes.xm",
+      "sha256": "5617abe2561afe911fd6fc2a1a45533a442569daa943ef660db1a254b0f0cfba"
+    }
+  ]
+}

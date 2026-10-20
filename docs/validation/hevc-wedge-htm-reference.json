@@ -1,0 +1,39 @@
+{
+  "reference": "https://github.com/listenlink/3D-HEVC",
+  "revision": "d2eb41773f9ab091b8400f76a85c40339458d715",
+  "reference_sources": {
+    "TComWedgelet.cpp": "8dc8b2affd65a16da1f1f21c67b26579b452973ec46bd3bfdfdf3d2eba18c5e6",
+    "TComRom.cpp": "bf34bbe66249a4a264d1189f83bd5e8028a4262926df40efe692e155505a4ac4"
+  },
+  "scope": "Every indexed wedge mask, including HTM 32x32 scaled copies; not full picture decoding.",
+  "tables": [
+    {
+      "size": 4,
+      "count": 86,
+      "bytes": 1376,
+      "sha256": "8ec35a6ba88637028b6ff4fbc162545bb3dbb76dc5cef933c2262c7cf7641a6a",
+      "byte_identical": true
+    },
+    {
+      "size": 8,
+      "count": 802,
+      "bytes": 51328,
+      "sha256": "4344ed2fa99c1e56b30a9526b773f13137ba45006dc230006fad0d23b76e1677",
+      "byte_identical": true
+    },
+    {
+      "size": 16,
+      "count": 510,
+      "bytes": 130560,
+      "sha256": "153a667f55661738b87c82254e545a282e6aea3b681d9904d88c2bc31ffd5032",
+      "byte_identical": true
+    },
+    {
+      "size": 32,
+      "count": 510,
+      "bytes": 522240,
+      "sha256": "f982e355f654f612c6699a6c974ea28e24d0c0c6c06ddd0b7a8a5b2807fd8913",
+      "byte_identical": true
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0115"
+  ],
+  "checked_at": "2026-10-16T05:00:13.393895+00:00",
+  "before": [
+    "evidence/batch-095-index-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-095-final-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-095-parser.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-095-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-095-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-095-fixtures.log",
+      "kind": "python",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-095-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-095-before-snapshot-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-095-after-snapshot-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Three fully authored standard XM cases distinguish constant positive/negative samples and map0/1 in both orders plus common single-sample map0. Before fix,all six declared sample selections are wrong and all six first/two-row PCM semantics are silent or wrong polarity. Authored delta payloads independently decode to128constant frames of the stated sign.",
+    "sample_slot now uses the zero-based keymap byte directly, retaining existing instrument/note/out-of-range bounds. Pattern instrument indices remain one-based. Actual workers qualify fullplay,rewind,120ms seek andEOF with the correctly selected native waveforms and clocks.",
+    "Legacy synthetic fixtures and their inline authoring helpers used the same incorrect1/2convention. Before correction,11authored XM files and10manifests are preserved byte-exact under evidence/batch-095-legacy-xm. Current canonical/derived fixtures are normalized to0/1 and manifests regenerated separately from tests. None of that maintenance adds IDs.",
+    "Explicit audit helper/examples compare native PCM SHA256,byte counts,rate/channels and every presentation timestamp before/after normalization for all11legacy fixtures. See evidence/batch-095-fixture-before.json,fixture-after.json and fixture-after.log. All are unchanged by the index correction plus fixture normalization.",
+    "18parser/11decoder/6reader tests,11integration tests,10pure fixture reproduction checks and current player build pass. Initial integration misspelled audio_read_limit target; final-integration supersedes it.",
+    "Initial strict sample-amplitude fixture assertion uncovered a separate signed8widening error before reaching index checks. index-before uses constant shape/polarity to isolate sample selection; precise amplitude is separately reproduced in batch096 and not claimed fixed here. No encoder/network/private media,physical output,independent full tracker-quality or performance claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "triggerNote:note2SampleLUT[note-1] indexes ins->smp directly",
+      "rule": "Primary FT2 replayer implementation uses zero-based sample map values."
+    }
+  ],
+  "compatibility": "Instrument.keymap now follows actual XM zero-based sample indices. Applications constructing legacy one-based synthetic maps must subtract1from valid entries; sample0 is a real sample,not an absent sentinel. Pattern instrument numbers remain one-based. Original authored fixtures/manifests are archived before normalization.",
+  "counting": "One index-base correctness problem. Six semantic failures,three new inputs,11normalized fixtures,archives,diagnostic helpers and manifest maintenance add noIDs."
+}

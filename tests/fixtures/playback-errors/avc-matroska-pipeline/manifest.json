@@ -1,0 +1,17 @@
+{
+  "provenance": "Authored synthetic AVC companions with missing default/block durations; duration inferred from visible presentation order and Segment end.",
+  "cases": [
+    {
+      "file": "y8-c14-frame-cavlc-b-bi-untimed.mkv",
+      "control": "y8-c14-frame-cavlc-b-bi.mkv"
+    },
+    {
+      "file": "y14-c8-field-cabac-b-bi-untimed.mkv",
+      "control": "y14-c8-field-cabac-b-bi.mkv"
+    }
+  ],
+  "sha256": {
+    "y8-c14-frame-cavlc-b-bi-untimed.mkv": "85f648497eed6547b16ab3921a52bb04308ef57f7221cc40611e71f829ad565c",
+    "y14-c8-field-cabac-b-bi-untimed.mkv": "cdac258cf7a8f59538bae33d847fe44bd6ed3d696dfb7574fda714497e2ca6de"
+  }
+}

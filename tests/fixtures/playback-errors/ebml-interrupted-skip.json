@@ -1,0 +1,14 @@
+{
+  "file": "ebml-interrupted-skip.webm",
+  "sha256": "e1cdc5872796e96a22402c851da9fc79e9a4e81405c6fc23a229cf4b0d018c89",
+  "interrupt_at": 133,
+  "width": 64,
+  "height": 64,
+  "frames": 3,
+  "pts_ns": [
+    0,
+    20000000,
+    40000000
+  ],
+  "provenance": "Authored neutral VP9 keyframes and EBML Void. Fault injected by the test reader; no private input or external tools."
+}

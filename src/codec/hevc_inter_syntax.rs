@@ -4,6 +4,7 @@ use super::{
     hevc_slice::SliceHeader,
 };
 use crate::{Result, invalid};
+use super::hevc_residual::ResidualBins;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Partition {
     Full,
@@ -32,7 +33,7 @@ impl Partition {
         }
     }
 }
-pub fn partition(b: &mut HevcCabac<'_>, log: u8, min_log: u8, amp: bool) -> Result<Partition> {
+pub fn partition(b: &mut impl ResidualBins, log: u8, min_log: u8, amp: bool) -> Result<Partition> {
     if b.decision(Syntax::PartMode, 0)? {
         return Ok(Partition::Full);
     }
@@ -60,6 +61,20 @@ pub fn partition(b: &mut HevcCabac<'_>, log: u8, min_log: u8, amp: bool) -> Resu
         (false, false) => Partition::Left,
         (false, true) => Partition::Right,
     })
+}
+/// I.7.4.9.5 / I.9.3.3.6: predicted full mode or reduced orientation syntax.
+pub fn partition_predicted(b:&mut impl ResidualBins,log:u8,min_log:u8,amp:bool,inferred:bool,idc:u8)->Result<Partition> {
+    if !(3..=6).contains(&min_log) || !(min_log..=6).contains(&log) || idc>2 || (inferred && idc!=0) {
+        return Err(invalid("invalid HEVC predicted partition context"));
+    }
+    if inferred {return Ok(Partition::Full);}
+    if idc==0 {return partition(b,log,min_log,amp);}
+    if b.decision(Syntax::PartMode,0)? {return Ok(Partition::Full);}
+    if log>min_log && amp && !b.decision(Syntax::PartMode,1)? {
+        let second=b.bypass()?;
+        return Ok(match(idc,second){(1,false)=>Partition::Top,(1,true)=>Partition::Bottom,(_,false)=>Partition::Left,_=>Partition::Right});
+    }
+    Ok(if idc==1{Partition::Horizontal}else{Partition::Vertical})
 }
 #[derive(Clone, Copy, Debug)]
 pub enum Prediction {
@@ -172,4 +187,44 @@ pub fn prediction(
         differences,
         predictors,
     })
+}
+
+#[cfg(test)]
+mod predicted_partition_tests {
+    use super::*;
+    use std::collections::VecDeque;
+    enum Bin {Context(usize,bool),Bypass(bool)}
+    struct Bins(VecDeque<Bin>);
+    impl ResidualBins for Bins {
+        fn decision(&mut self,syntax:Syntax,inc:usize)->Result<bool> {
+            assert!(matches!(syntax,Syntax::PartMode));
+            match self.0.pop_front().unwrap() {Bin::Context(i,b)=>{assert_eq!(i,inc);Ok(b)},_=>panic!("unexpected context bin")}
+        }
+        fn bypass(&mut self)->Result<bool> {
+            match self.0.pop_front().unwrap() {Bin::Bypass(b)=>Ok(b),_=>panic!("unexpected bypass bin")}
+        }
+    }
+    #[test]
+    fn predicted_partition_table_has_exact_bins_and_inferred_full_consumes_none() {
+        for min in 3..=6 {for log in min..=6 {for amp in [false,true] {for idc in [1,2] {
+            let mut full=Bins([Bin::Context(0,true)].into());
+            assert_eq!(partition_predicted(&mut full,log,min,amp,false,idc).unwrap(),Partition::Full);
+            assert!(full.0.is_empty());
+            let mut bins=VecDeque::from([Bin::Context(0,false)]);
+            if log>min && amp {bins.push_back(Bin::Context(1,true));}
+            let mut symmetric=Bins(bins);
+            assert_eq!(partition_predicted(&mut symmetric,log,min,amp,false,idc).unwrap(),if idc==1{Partition::Horizontal}else{Partition::Vertical});
+            assert!(symmetric.0.is_empty());
+            if log>min && amp {for second in [false,true] {
+                let mut asymmetric=Bins([Bin::Context(0,false),Bin::Context(1,false),Bin::Bypass(second)].into());
+                let expected=match(idc,second){(1,false)=>Partition::Top,(1,true)=>Partition::Bottom,(2,false)=>Partition::Left,_=>Partition::Right};
+                assert_eq!(partition_predicted(&mut asymmetric,log,min,amp,false,idc).unwrap(),expected);
+                assert!(asymmetric.0.is_empty());
+            }}
+        }}}}
+        let mut empty=Bins(VecDeque::new());
+        assert_eq!(partition_predicted(&mut empty,6,3,true,true,0).unwrap(),Partition::Full);
+        assert!(partition_predicted(&mut empty,6,3,true,false,3).is_err());
+        assert!(partition_predicted(&mut empty,6,3,true,true,1).is_err());
+    }
 }

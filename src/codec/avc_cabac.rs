@@ -56,6 +56,17 @@ impl<'a> AvcCabac<'a> {
         luma_depth: u8,
         chroma_depth: u8,
     ) -> Result<super::avc_macroblock::IntraLuma> {
+        self.pcm_components(luma_depth,chroma_depth,true)
+    }
+    pub(super) fn pcm_components(&mut self,luma_depth:u8,chroma_depth:u8,has_chroma:bool)->Result<super::avc_macroblock::IntraLuma> {
+        let (y,[cb,cr])=self.pcm_raw::<64>(luma_depth,chroma_depth,has_chroma)?;
+        Ok(super::avc_macroblock::IntraLuma::Pcm {y,cb,cr})
+    }
+    pub(super) fn pcm422(&mut self,luma_depth:u8,chroma_depth:u8)->Result<(super::avc_macroblock::IntraLuma,[[u16;128];2])> {
+        let (y,chroma)=self.pcm_raw::<128>(luma_depth,chroma_depth,true)?;
+        Ok((super::avc_macroblock::IntraLuma::Pcm {y,cb:[0;64],cr:[0;64]},chroma))
+    }
+    pub(super) fn pcm_raw<const C:usize>(&mut self,luma_depth:u8,chroma_depth:u8,has_chroma:bool)->Result<([u16;256],[[u16;C];2])> {
         if !self.engine.is_terminated()
             || !(8..=14).contains(&luma_depth)
             || !(8..=14).contains(&chroma_depth)
@@ -71,16 +82,15 @@ impl<'a> AvcCabac<'a> {
         // (unlike CAVLC); PCM starts at the next byte, as in the JM decoder.
         bits.skip((8 - bits.position() % 8) % 8)?;
         let mut y = [0; 256];
-        let mut cb = [0; 64];
-        let mut cr = [0; 64];
+        let mut chroma = [[0; C];2];
         for sample in &mut y {
             *sample = bits.read(luma_depth)? as u16;
         }
-        for sample in cb.iter_mut().chain(cr.iter_mut()) {
+        for sample in chroma.iter_mut().flatten().take(if has_chroma {2*C}else{0}) {
             *sample = bits.read(chroma_depth)? as u16;
         }
         self.engine = Cabac::new(self.rbsp, bits.position())?;
-        Ok(super::avc_macroblock::IntraLuma::Pcm { y, cb, cr })
+        Ok((y,chroma))
     }
     pub fn finish_slice(&self) -> Result<()> {
         if !self.engine.is_terminated() {

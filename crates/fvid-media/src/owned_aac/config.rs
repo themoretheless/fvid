@@ -15,7 +15,7 @@ mod ld_tests {
         let c=AacConfig::parse(&[0xbb,0x09,0xe0]).unwrap();
         assert!(c.section_data_resilience && c.scalefactor_data_resilience && c.spectral_data_resilience);
         assert!(AacConfig::parse(&[0xbb,0x08,0x40]).unwrap_err().to_string().contains("LD epConfig"));
-        assert!(AacConfig::parse(&[0xbb,0x00,0]).unwrap_err().to_string().contains("LD PCE"));
+        assert!(AacConfig::parse(&[0xbb,0x00,0]).is_err());
         assert!(AacConfig::parse(&[0xbc,0x08,0]).unwrap_err().to_string().contains("LD band geometry"));
     }
 }

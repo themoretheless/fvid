@@ -1,34 +1,21 @@
 //! Opus playback adapter over the local native Rust CELT/SILK core.
 //! Container priming and end trimming belong to AudioStream::present_decoded.
 use crate::audio::{AudioDecode, AudioPacket};
-use crate::{Result, invalid, unsupported};
+use crate::{Result, invalid};
 
 pub(crate) fn header(data: &[u8]) -> Result<fvid_opus::OpusHead> {
     let header =
         fvid_opus::OpusHead::parse(data).map_err(|e| invalid(&format!("Opus header: {e}")))?;
-    if header.channel_count > 8 || !matches!(header.mapping_family, 0 | 1) {
-        return Err(unsupported(
-            "Opus playback supports mapping families 0/1 up to eight channels",
-        ));
-    }
-    if header.mapping_family == 1 {
-        let layout = fvid_opus::ChannelLayout::surround(usize::from(header.channel_count), 1)
-            .map_err(|e| invalid(&format!("Opus layout: {e}")))?;
-        if usize::from(header.stream_count) != layout.nb_streams
-            || usize::from(header.coupled_count) != layout.nb_coupled_streams
-            || header.channel_mapping != layout.mapping
-        {
-            return Err(unsupported(
-                "Opus playback requires the standard family-1 channel mapping",
-            ));
-        }
-    }
+    header
+        .decoding_layout()
+        .map_err(|e| invalid(&format!("Opus layout: {e}")))?;
     Ok(header)
 }
 
-pub(crate) fn duration_ns(data: &[u8]) -> Result<u64> {
-    let samples =
-        fvid_opus::packet::samples_48k(data).map_err(|e| invalid(&format!("Opus packet: {e}")))?;
+pub(crate) fn duration_ns(configuration: &[u8], data: &[u8]) -> Result<u64> {
+    let head = header(configuration)?;
+    let samples = fvid_opus::multistream_packet_samples(data, usize::from(head.stream_count))
+        .map_err(|e| invalid(&format!("Opus packet: {e}")))?;
     Ok(samples as u64 * 1_000_000_000 / 48000)
 }
 

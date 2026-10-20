@@ -113,6 +113,7 @@ pub mod owned_probe;
 pub use owned_probe::{probe, probe_as};
 
 pub mod owned_pcm_channels;
+pub mod owned_stereo_router;
 
 pub mod owned_audio_mix;
 pub use owned_audio_mix::{mix_audio, merge_audio, plan_mix_audio, plan_merge_audio};
@@ -121,6 +122,7 @@ pub mod owned_audio_export;
 pub mod owned_audio_plan;
 pub use owned_audio_plan::plan_decode_audio;
 mod owned_adts_export;
+mod owned_aac_export_routing;
 pub use owned_audio_export::{decode_audio, decode_audio_interval, decode_audio_transformed};
 
 pub mod owned_wave_metadata;
@@ -189,6 +191,10 @@ pub mod owned_display_geometry;
 pub mod owned_ebml;
 
 pub mod owned_webm;
+pub mod owned_matroska_grid_clock;
+pub mod owned_matroska_sample_clock;
+pub mod owned_matroska_time;
+pub mod owned_matroska_zlib;
 
 pub mod owned_webm_probe;
 
@@ -197,6 +203,9 @@ pub mod owned_codec_metadata;
 
 pub mod owned_hevc_nal;
 
+pub mod owned_ogg;
+pub mod owned_ogg_opus;
+mod owned_ogg_opus_export;
 pub mod owned_opus_packet;
 pub mod owned_opus;
 pub mod owned_matroska_opus;
@@ -223,6 +232,20 @@ pub fn convert_subtitles(source: &std::path::Path, destination: &std::path::Path
 pub mod owned_alac;
 
 pub mod owned_matroska_alac;
+pub mod owned_matroska_flac;
+mod owned_flac_decoder;
+pub mod owned_flac;
+pub mod owned_flac_layout;
+pub mod owned_raw_flac;
+mod owned_flac_probe;
+mod owned_matroska_flac_export;
+pub mod owned_matroska_mp3;
+pub mod owned_matroska_mpeg;
+pub mod owned_mpeg_audio;
+pub mod owned_raw_mp3;
+pub mod owned_raw_mpeg;
+mod owned_mpeg_probe;
+mod owned_matroska_mp3_export;
 
 mod owned_matroska_alac_export;
 
@@ -296,3 +319,17 @@ mod owned_webm_codec;
 
 /// Shared owned AVC/HEVC/VP9/AV1 packet decoders; container workflow admission is separate.
 pub use fvid_codecs::codec as owned_codecs;
+
+pub mod owned_ogg_vorbis;
+
+mod owned_ogg_vorbis_export;
+
+pub mod owned_ogg_audio_catalog;
+
+mod owned_ogg_audio_export;
+
+mod owned_audio_clock;
+pub mod owned_ogg_audio_program;
+mod owned_ogg_joint_export;
+
+mod owned_g711_wave_export;

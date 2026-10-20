@@ -1,0 +1,23 @@
+{
+  "provenance": "Three authored300ms MIDIperformances with1/8/32voices,channelgain/expression/pan changes andnormalrelease tails. Benchmarkinputs,notnewmediafailureclaims. NativeVP9/PCMcompanion,no encoder/network/private media.",
+  "cases": [
+    {
+      "file": "voices-1.mid",
+      "voices": 1
+    },
+    {
+      "file": "voices-8.mid",
+      "voices": 8
+    },
+    {
+      "file": "voices-32.mid",
+      "voices": 32
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "voices-1.mid": "662ea183f85357f1c331332f1a2d90493016fc0dd3acfad1b943f885dec42bdd",
+    "voices-8.mid": "3d2050fc88fb41d93b39a872735be3ffe0b12274517165911d66e7d0c676201a",
+    "voices-32.mid": "54f48e104e72a0bbfae6c5b9b71ad04ebcb8cb3cfc382eeed0c45ae26622537d"
+  }
+}

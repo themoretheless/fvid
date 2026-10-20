@@ -1,0 +1,54 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0067"
+  ],
+  "checked_at": "2026-10-15T20:40:33.348353+00:00",
+  "before": [
+    "evidence/batch-043-pcm-width-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-043-player-pcm.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-043-owned-pcm.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-043-pcm-integration.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-043-minimal-pcm.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-043-audio-fixtures.log",
+      "kind": "python",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-043-width-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-043-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four authored60ms VP9/PCM clips verify native video and exact finite16bit/float32 sample controls. Before declared272bit integer and288bit float metadata build supported decoders by truncation. After both refuse at decoder initialization and retain original width in error.",
+    "Owned public constructors also refuse264/272/280/288 integer and288/320/544/576 float aliases;0/default and supported widths remain accepted. Existing signed/float/endian/precision/layout and container clock tests pass.",
+    "This is a format-refusal correction, not playback acceptance of unsupported272/288bit PCM. Existing valid interfaces/signatures unchanged, no migration required for supported widths.",
+    "Generators remain separate; stored authored fixtures require neither encoder nor network."
+  ],
+  "counting": "One unchecked PCM width-narrowing defect; integer/float/default/boundary variants add no IDs."
+}

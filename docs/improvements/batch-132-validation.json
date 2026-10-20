@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [],
+  "followup_ids": [
+    "FVID-0096"
+  ],
+  "checked_at": "2026-10-16T11:19:21.594190+00:00",
+  "before": [
+    "evidence/batch-132-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-132-integration.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-132-units.log",
+      "kind": "rust",
+      "passed": 36
+    },
+    {
+      "log": "evidence/batch-132-parser-minimal.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-132-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-132-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Fourteen authored publicnativeMIDIrecord activeoperand violations are accepted asPCMbeforefix:noteonkey/velocity,noteoffkey,program,controlnumber/value128/255,andpitchbend16384/65535. Fourteenvalid7/14bitboundary andunused-byte controls plusactualnormalSMF/video playbackpass. Faults are native10bytepacket injections,notnew SMFwireparser failures.",
+    "read_window nowvalidates onlyactive operands beforeconstructing events/synthesis. Noteon/controlrequiretwo7bitfields;noteoff/programone;pitchbend14bits. Unknowntag/channel diagnostics remain,andunusedrecordpayloadbytes remainaccepted. All14failures nowpreciselyrefuse;nextnormalPCMmatchfreshdecoder and14actualworkerfirstpacket refusals publishzeroPCM.",
+    "12rootintegrations,36combinedplayerparser/decoderunits,17no-defaultparserunits,fixture reproduction andplayerbuildpass. Validboundaryrecords stilldecode finitePCM;unsupported-but-valid controls are notnewlyimplemented. Authored normalSMF actualplay/rewind/EOFtarget remainshealthy.",
+    "Purefixturegeneration andordinarytests neednoFFmpeg/network/private media. Separate authorednativeVP9/PCMcompanion validatesvideo; no physicalDAC/fullGM/performance claim."
+  ],
+  "compatibility": "Valid native records,includingunusedpayloadbytes,retain behavior. Semanticallyinvalid native operands nowreturnErr. SMFsourceparseralreadyhadtheseoperandwidthrules.",
+  "counting": "Zero-IDFVID-0096operand-width family extended topublicnative MIDIrecords. Acceptedcount remains145."
+}

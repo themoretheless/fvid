@@ -1,0 +1,48 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0127"
+  ],
+  "checked_at": "2026-10-16T06:57:27.473340+00:00",
+  "before": [
+    "evidence/batch-108-reproduction-before.log",
+    "evidence/batch-108-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-108-integration.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-108-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-108-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-108-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Eleven authored fine-volume-column8x/9xcases compare full mono/stereo native PCM with independent direct-volume assignments. Both directions,amount0/1/15,initial0/32/64,clamps,persistence andstandardCxxprecedence are covered.",
+    "Before ignored reproduction passes,forced acceptance fails22unsupported classifications and12PCM comparisons oversix inputs;five no-op/clamp/override controls are healthy. Worker failures stop at generation0,not separate pre-fix seek failures.",
+    "After acceptance enabled andignored expectation inverted;22actual worker row-seek/EOF targets plusfullplay/rewind pass. Fine slide updates stored volume once at row start,clamps0..64,andpreserves phase/native smoothing. Other tick-based slides remain unsupported.",
+    "15integrations,11decoder units,fixture byte reproduction andplayer build pass. Authored raw XM plus independent VP9/PCM companion,no encoder/network/private media/performance/full tracker conformance claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "v_FineVolSlideDown;v_FineVolSlideUp;VJumpTab_TickZero",
+      "rule": "Volume-column8xsubtracts low nibble once at tick0withfloor0;9xadds once withcap64."
+    }
+  ],
+  "compatibility": "Previously ignored fine-volume-column8x/9xnow render. StandardCxxstill overrides them;other commands/public APIs unchanged.",
+  "counting": "One native fine-volume-slide capability;directions/variants/controls add no extra IDs."
+}

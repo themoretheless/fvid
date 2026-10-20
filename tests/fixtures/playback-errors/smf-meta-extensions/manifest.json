@@ -1,0 +1,38 @@
+{
+  "provenance": "Authored known meta-event extensions: FF2Fend payload0/1/2/3/127andFF51tempo3/4/5/127compare independent canonical250000us tempo. Three too-short tempo payloads require refusal. Original SMFgeneric meta rule requires skipping unknown trailing fields. Synthetic note andVP9/PCM companion,no private media/encoder/network.",
+  "short": [
+    "tempo-short-0.mid",
+    "tempo-short-1.mid",
+    "tempo-short-2.mid"
+  ],
+  "valid": [
+    "valid.mid",
+    "valid-with-padding.mid",
+    "end-length-0.mid",
+    "end-length-1.mid",
+    "end-length-2.mid",
+    "end-length-3.mid",
+    "end-length-127.mid",
+    "tempo-length-3.mid",
+    "tempo-length-4.mid",
+    "tempo-length-5.mid",
+    "tempo-length-127.mid"
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "valid.mid": "5c25d27d7b29ef9599d676a81a657c0744c58715282caa1d062259c61e27acbc",
+    "valid-with-padding.mid": "e2cbdea821bb9aa5a17aeca8f0b87922badd5f6496d50c99305ba746b64755a6",
+    "end-length-0.mid": "5c25d27d7b29ef9599d676a81a657c0744c58715282caa1d062259c61e27acbc",
+    "end-length-1.mid": "d5121afb32a25a7b1e063bda124c84e66281770da937a82f3c95d8a404ba7ad3",
+    "end-length-2.mid": "1caa3f30fea63df1e753fe1036db258f076e58ee0a5790a7299dc3dc09195a2a",
+    "end-length-3.mid": "922bce1fde7df18c433bb1ce52a832624cd84ba9eea7eadf0df0926e76fd40e1",
+    "end-length-127.mid": "03793cb6633cfbfcbeccb5e84466f6c7677bf01657fcd6f96a7f771fb508744c",
+    "tempo-length-3.mid": "5c25d27d7b29ef9599d676a81a657c0744c58715282caa1d062259c61e27acbc",
+    "tempo-length-4.mid": "8c9fc89cf0206c5b92726d2ef5c94521f3832cd22e1fa2a1dc4274ab33981a6a",
+    "tempo-length-5.mid": "9a4ebf10ccf68eebfc0ba00261da1676c184204e45d8e77638d8580dd0a66acd",
+    "tempo-length-127.mid": "c6b966bfb53f2585641c16fac09b25b327e5ef3f7c38c5e18d462561b27c43e0",
+    "tempo-short-0.mid": "6e718f9934060c5e040cd5593fe5d0978ddda5899c0766e16cbbc7006de9b0ee",
+    "tempo-short-1.mid": "10200debc5201fd6cb4c5438727dcd3f989b56a8d416f95c304c5f1c35c7b924",
+    "tempo-short-2.mid": "5bfa8656c9bad1c5b4eb380bb559c1f2b2e37dead26637040a3453d239f289f0"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0130"
+  ],
+  "checked_at": "2026-10-16T07:10:31.597618+00:00",
+  "before": [
+    "evidence/batch-111-before-recheck.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-111-integration.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-111-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-111-pitch-oracle-final.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-111-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-111-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Thirteen authored signed finetune bytes(-128..127includinglow1/7/8/15bits) compare linear native waveform against independently calculated originalXMfrequency andauthored ramp interpolation. Before all12nonzero inputs fail with0.170573..0.173557maximum PCM error;zero healthy. Raw-128also fails an independent one-lower-note/zero-finetune control.",
+    "Raw sample finetune is1/128semitone,butpublic note_steps accepts sixteenths. Stop passing raw bytes directly tothat publichelper. Private fractional-step pitch calculation retains all low bits;public note_steps/frames_per_second signatures anddocumented units unchanged. Sample field documentation corrected.",
+    "After maximum independent error1.8189894e-12,below predeclared1e-6. Bothlinear andAmiga raw-128exactly match independent one-lower-note controls;Amiga counterpart added aspost-fix branch qualification,not a separate baseline defect.26actual native-self worker row/EOF targets plusfullplay/rewind preserve PCM bytes. Before these native-self worker checks pass,so no pre-fixseek/worker delivery defect is claimed.",
+    "12integrations,11decoder units,final pitch oracle,fixture reproduction andcurrent player build pass. First baseline attempt failed in concurrently modified Matroska delayed-packet type inference. Added one VecDeque<(usize,_)>annotation aszero-ID integration repair;successful baseline rerun proves actualpitch defect. Other concurrent changes preserved.",
+    "This uses originalXMfull1/128tuning law;does not claim FT2lookup quantization orcompleteAmiga table identity. Existing nativeAmiga period approximation retained. Authored raw XM/VP9companion,no private media/encoder/network/performance/physical output claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/danielepiccone/xm_file/main/xm.txt",
+      "section": "Periods andfrequencies;FineTune",
+      "rule": "Signed-128is minusone semitone;127is127/128semitone.Linear period includes FineTune/2."
+    }
+  ],
+  "compatibility": "Previously mistuned raw sample finetune now uses correctscale.Public pitch helper units/signatures unchanged;zero-finetune output unchanged.",
+  "counting": "One raw-finetune scale defect;13variants,two pitch-table controls andbaseline annotation add no extra IDs."
+}

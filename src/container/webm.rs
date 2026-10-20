@@ -1,4 +1,7 @@
 //! Bounded seekable WebM/Matroska indexing, without an external demultiplexer.
+use fvid_media::owned_matroska_time::{timestamp_ns as fvid_media_clock_timestamp, duration_ns as fvid_media_clock_duration};
+use fvid_media::owned_matroska_zlib as fvid_matroska_zlib;
+use fvid_media::owned_matroska_grid_clock::PacketGrid as MatroskaPacketGrid;
 use crate::color::hdr::{ColourDescription, HdrMetadata, MasteringDisplay};
 use crate::color::tonemap::ContentLight;
 use crate::{Result, container::FileTags, invalid, unsupported};

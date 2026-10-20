@@ -1,0 +1,9655 @@
+{
+  "provenance": "Owned PCM/CABAC/MP4; cross-view PU motion seeds spatial base disparity, independent fractional interpolation and 2D padded contour oracle. Offline.",
+  "different_from_zero_base": 260885,
+  "padded_contours": 188,
+  "cases": [
+    {
+      "file": "dbbp-base-64-0-0-0-1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 0
+    },
+    {
+      "file": "dbbp-base-64-0-0-0--7--5.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 6144
+    },
+    {
+      "file": "dbbp-base-64-0-0-0-9--11.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 12288
+    },
+    {
+      "file": "dbbp-base-64-0-0-0--64-20.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 18432
+    },
+    {
+      "file": "dbbp-base-64-0-0-0-128--256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 24576
+    },
+    {
+      "file": "dbbp-base-64-0-0-0--128-256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 30720
+    },
+    {
+      "file": "dbbp-base-64-0-0-1-1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 36864
+    },
+    {
+      "file": "dbbp-base-64-0-0-1--7--5.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 43008
+    },
+    {
+      "file": "dbbp-base-64-0-0-1-9--11.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 49152
+    },
+    {
+      "file": "dbbp-base-64-0-0-1--64-20.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 55296
+    },
+    {
+      "file": "dbbp-base-64-0-0-1-128--256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 61440
+    },
+    {
+      "file": "dbbp-base-64-0-0-1--128-256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 67584
+    },
+    {
+      "file": "dbbp-base-64-0-1-0-1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 73728
+    },
+    {
+      "file": "dbbp-base-64-0-1-0--7--5.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 79872
+    },
+    {
+      "file": "dbbp-base-64-0-1-0-9--11.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 86016
+    },
+    {
+      "file": "dbbp-base-64-0-1-0--64-20.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 92160
+    },
+    {
+      "file": "dbbp-base-64-0-1-0-128--256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 98304
+    },
+    {
+      "file": "dbbp-base-64-0-1-0--128-256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 104448
+    },
+    {
+      "file": "dbbp-base-64-0-1-1-1-3.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 110592
+    },
+    {
+      "file": "dbbp-base-64-0-1-1--7--5.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 116736
+    },
+    {
+      "file": "dbbp-base-64-0-1-1-9--11.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 122880
+    },
+    {
+      "file": "dbbp-base-64-0-1-1--64-20.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 129024
+    },
+    {
+      "file": "dbbp-base-64-0-1-1-128--256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 135168
+    },
+    {
+      "file": "dbbp-base-64-0-1-1--128-256.mp4",
+      "size": 64,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 141312
+    },
+    {
+      "file": "dbbp-base-128-0-0-0-1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 147456
+    },
+    {
+      "file": "dbbp-base-128-0-0-0--7--5.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 172032
+    },
+    {
+      "file": "dbbp-base-128-0-0-0-9--11.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 196608
+    },
+    {
+      "file": "dbbp-base-128-0-0-0--64-20.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 221184
+    },
+    {
+      "file": "dbbp-base-128-0-0-0-128--256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 245760
+    },
+    {
+      "file": "dbbp-base-128-0-0-0--128-256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 270336
+    },
+    {
+      "file": "dbbp-base-128-0-0-1-1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 294912
+    },
+    {
+      "file": "dbbp-base-128-0-0-1--7--5.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 319488
+    },
+    {
+      "file": "dbbp-base-128-0-0-1-9--11.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 344064
+    },
+    {
+      "file": "dbbp-base-128-0-0-1--64-20.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 368640
+    },
+    {
+      "file": "dbbp-base-128-0-0-1-128--256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 393216
+    },
+    {
+      "file": "dbbp-base-128-0-0-1--128-256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 417792
+    },
+    {
+      "file": "dbbp-base-128-0-1-0-1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 442368
+    },
+    {
+      "file": "dbbp-base-128-0-1-0--7--5.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 466944
+    },
+    {
+      "file": "dbbp-base-128-0-1-0-9--11.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 491520
+    },
+    {
+      "file": "dbbp-base-128-0-1-0--64-20.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 516096
+    },
+    {
+      "file": "dbbp-base-128-0-1-0-128--256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 540672
+    },
+    {
+      "file": "dbbp-base-128-0-1-0--128-256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 565248
+    },
+    {
+      "file": "dbbp-base-128-0-1-1-1-3.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 589824
+    },
+    {
+      "file": "dbbp-base-128-0-1-1--7--5.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 614400
+    },
+    {
+      "file": "dbbp-base-128-0-1-1-9--11.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 638976
+    },
+    {
+      "file": "dbbp-base-128-0-1-1--64-20.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 663552
+    },
+    {
+      "file": "dbbp-base-128-0-1-1-128--256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 688128
+    },
+    {
+      "file": "dbbp-base-128-0-1-1--128-256.mp4",
+      "size": 128,
+      "direct": false,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 712704
+    },
+    {
+      "file": "dbbp-base-128-1-0-0-1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 737280
+    },
+    {
+      "file": "dbbp-base-128-1-0-0--7--5.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 761856
+    },
+    {
+      "file": "dbbp-base-128-1-0-0-9--11.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 786432
+    },
+    {
+      "file": "dbbp-base-128-1-0-0--64-20.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 811008
+    },
+    {
+      "file": "dbbp-base-128-1-0-0-128--256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 835584
+    },
+    {
+      "file": "dbbp-base-128-1-0-0--128-256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": false,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 860160
+    },
+    {
+      "file": "dbbp-base-128-1-0-1-1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 884736
+    },
+    {
+      "file": "dbbp-base-128-1-0-1--7--5.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 909312
+    },
+    {
+      "file": "dbbp-base-128-1-0-1-9--11.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 933888
+    },
+    {
+      "file": "dbbp-base-128-1-0-1--64-20.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 958464
+    },
+    {
+      "file": "dbbp-base-128-1-0-1-128--256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 983040
+    },
+    {
+      "file": "dbbp-base-128-1-0-1--128-256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": false,
+      "enabled": true,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 1007616
+    },
+    {
+      "file": "dbbp-base-128-1-1-0-1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 1032192
+    },
+    {
+      "file": "dbbp-base-128-1-1-0--7--5.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 1056768
+    },
+    {
+      "file": "dbbp-base-128-1-1-0-9--11.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 1081344
+    },
+    {
+      "file": "dbbp-base-128-1-1-0--64-20.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 1105920
+    },
+    {
+      "file": "dbbp-base-128-1-1-0-128--256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 1130496
+    },
+    {
+      "file": "dbbp-base-128-1-1-0--128-256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": false,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 1155072
+    },
+    {
+      "file": "dbbp-base-128-1-1-1-1-3.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        1,
+        3
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            1,
+            3
+          ]
+        }
+      ],
+      "offset": 1179648
+    },
+    {
+      "file": "dbbp-base-128-1-1-1--7--5.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -7,
+        -5
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -7,
+            -5
+          ]
+        }
+      ],
+      "offset": 1204224
+    },
+    {
+      "file": "dbbp-base-128-1-1-1-9--11.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        9,
+        -11
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            9,
+            -11
+          ]
+        }
+      ],
+      "offset": 1228800
+    },
+    {
+      "file": "dbbp-base-128-1-1-1--64-20.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -64,
+        20
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -64,
+            20
+          ]
+        }
+      ],
+      "offset": 1253376
+    },
+    {
+      "file": "dbbp-base-128-1-1-1-128--256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        128,
+        -256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            128,
+            -256
+          ]
+        }
+      ],
+      "offset": 1277952
+    },
+    {
+      "file": "dbbp-base-128-1-1-1--128-256.mp4",
+      "size": 128,
+      "direct": true,
+      "vertical": true,
+      "enabled": true,
+      "motion": [
+        -128,
+        256
+      ],
+      "vectors": [
+        {
+          "origin": [
+            0,
+            0
+          ],
+          "base": [
+            0,
+            0
+          ]
+        },
+        {
+          "origin": [
+            32,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            0
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            32
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            64
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            0,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            32,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            64,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        },
+        {
+          "origin": [
+            96,
+            96
+          ],
+          "base": [
+            -128,
+            256
+          ]
+        }
+      ],
+      "offset": 1302528
+    }
+  ]
+}

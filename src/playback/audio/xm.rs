@@ -32,6 +32,7 @@ pub struct XmAudioReader {
     bytes: Vec<u8>,
     module: Module,
     packet: usize,
+    presentation_floor: i64,
 }
 
 impl XmAudioReader {
@@ -42,7 +43,7 @@ impl XmAudioReader {
     pub fn open<R: Read>(mut reader: R, limits: xm::Limits) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
-        reader.by_ref().take(cap + 1).read_to_end(&mut bytes)?;
+        reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         if bytes.len() > limits.file_bytes {
             return Err(invalid(&format!(
                 "module is over the {} byte limit",
@@ -53,6 +54,7 @@ impl XmAudioReader {
             module: Module::parse(&bytes, &limits)?,
             bytes,
             packet: 0,
+            presentation_floor: 0,
         })
     }
 
@@ -68,6 +70,17 @@ impl XmAudioReader {
         self.module.packets()
     }
 
+    /// End-of-score release is playback policy; the module's own rows stay intact.
+    fn packet_data(&self, index: usize) -> Vec<u8> {
+        let mut data = self.module.packet(index);
+        if index == self.module.timeline().len() {
+            for cell in data[xm::ROW_HEADER_BYTES..].chunks_exact_mut(xm::CELL_BYTES) {
+                cell[0] = xm::NOTE_KEY_OFF;
+            }
+        }
+        data
+    }
+
     /// Where a packet starts, in the milliseconds its timestamps are in. The
     /// module's own microsecond starts are divided rather than its millisecond
     /// lengths added up, so a row whose length rounds twice in a row cannot walk
@@ -77,6 +90,12 @@ impl XmAudioReader {
         i64::try_from(microseconds / u64::from(xm::PACKET_TIMESCALE)).unwrap_or(i64::MAX)
     }
 
+    /// End of the complete scheduled timeline, including the final release row.
+    fn end_pts(&self) -> i64 {
+        let last = self.packet_count() - 1;
+        self.pts_of(last).saturating_add(self.duration_of(last))
+    }
+
     /// How long a packet lasts: the distance to the row that follows it on the
     /// timeline, and for the trailing packet the length of the row it trails.
     fn duration_of(&self, index: usize) -> i64 {
@@ -84,13 +103,31 @@ impl XmAudioReader {
         if next < self.packet_count() {
             self.pts_of(next) - self.pts_of(index)
         } else {
-            let microseconds = self.module.packet_time(index).1;
-            i64::try_from(microseconds / u64::from(xm::PACKET_TIMESCALE)).unwrap_or(0)
+            let (start, length) = self.module.packet_time(index);
+            let end = start.saturating_add(length) / u64::from(xm::PACKET_TIMESCALE);
+            // Round the absolute endpoint once, as for all preceding rows.
+            i64::try_from(end).unwrap_or(i64::MAX).saturating_sub(self.pts_of(index))
         }
     }
 }
 
 impl AudioStream for XmAudioReader {
+    /// Restore history through ordinary worker steps, so commands can interrupt it.
+    #[cfg(feature = "player")]
+    fn reset_decoder(&mut self, decoder: &mut Box<dyn crate::audio::AudioDecode>) -> Result<()> {
+        decoder.reset();
+        if self.packet < self.packet_count() {
+            self.presentation_floor = self.pts_of(self.packet);
+            self.packet = 0;
+        }
+        Ok(())
+    }
+
+    fn present_decoded(&self, packet: crate::audio::AudioPacket, source_pts: i64) -> Result<Option<crate::audio::AudioPacket>> {
+        // Compare source ticks, not XM's rounded PCM sample timestamps.
+        Ok((source_pts >= self.presentation_floor).then_some(packet))
+    }
+
     fn codec(&self) -> &str {
         "xm"
     }
@@ -108,7 +145,7 @@ impl AudioStream for XmAudioReader {
     }
 
     fn duration(&self) -> Option<Duration> {
-        Some(self.module.duration())
+        Some(Duration::from_millis(self.end_pts() as u64))
     }
 
     fn extra_data(&self) -> &[u8] {
@@ -133,7 +170,7 @@ impl AudioStream for XmAudioReader {
             return Ok(None);
         }
         let packet = EncodedPacket {
-            data: self.module.packet(self.packet),
+            data: self.packet_data(self.packet),
             pts: self.pts_of(self.packet),
             duration: self.duration_of(self.packet),
         };
@@ -143,13 +180,31 @@ impl AudioStream for XmAudioReader {
 
     fn rewind(&mut self) {
         self.packet = 0;
+        self.presentation_floor = 0;
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
-        self.packet = self
-            .module
-            .packet_at_microsecond(pts.max(0) as u64 * u64::from(xm::PACKET_TIMESCALE));
-        self.pts_of(self.packet)
+        let end = self.end_pts();
+        if pts.max(0) >= end {
+            self.packet = self.packet_count();
+            self.presentation_floor = end;
+            return end;
+        }
+        // Seek in the same published millisecond clock as packet starts. A
+        // rounded start must not select the preceding microsecond-timed row.
+        let target = pts.max(0);
+        let (mut low, mut high) = (0, self.packet_count());
+        while low < high {
+            let middle = low + (high - low) / 2;
+            if self.pts_of(middle) <= target {
+                low = middle + 1;
+            } else {
+                high = middle;
+            }
+        }
+        self.packet = low.saturating_sub(1);
+        self.presentation_floor = self.pts_of(self.packet);
+        self.presentation_floor
     }
 }
 
@@ -180,7 +235,7 @@ mod tests {
             (SAMPLE_RATE, CHANNELS)
         );
         // Six ticks a row at 125 a minute is 120 ms, over three rows.
-        assert_eq!(reader.duration(), Some(Duration::from_millis(360)));
+        assert_eq!(reader.duration(), Some(Duration::from_millis(480)));
         // The setup data is the whole file, because the renderer behind these
         // packets needs the samples the rows only name.
         assert_eq!(reader.extra_data(), FIXTURE);
@@ -220,7 +275,7 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec![(125, 6, 2); 4]
         );
-        // The notes, then nothing, then the key-off, then the tail's nothing.
+        // The notes, then nothing, then explicit key-off and the playback tail release.
         assert_eq!(
             rows.iter()
                 .map(|row| {
@@ -234,7 +289,7 @@ mod tests {
                 vec![(58, 1), (73, 1)],
                 vec![(0, 0), (0, 0)],
                 vec![(97, 0), (97, 0)],
-                vec![(0, 0), (0, 0)],
+                vec![(97, 0), (97, 0)],
             ]
         );
     }
@@ -268,7 +323,7 @@ mod tests {
         // Before the start lands on the first row, and past the module's own end on
         // the tail that lets the last note go.
         assert_eq!(reader.seek_to(-10), 0);
-        assert_eq!(reader.seek_to(9_999), 360);
+        assert_eq!(reader.seek_to(360), 360);
         assert!(
             reader
                 .next_packet()
@@ -279,6 +334,8 @@ mod tests {
                 > xm::ROW_HEADER_BYTES
         );
         assert!(reader.next_packet().expect("no more").is_none());
+        assert_eq!(reader.seek_to(9_999), 480);
+        assert!(reader.next_packet().expect("EOF").is_none());
         reader.rewind();
         assert_eq!(reader.next_packet().expect("packet").expect("first").pts, 0);
     }

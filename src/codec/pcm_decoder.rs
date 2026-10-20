@@ -31,8 +31,11 @@ impl crate::audio::AudioDecode for PcmDecoder {
         pts: u64,
         _duration: u64,
     ) -> crate::Result<Option<AudioPacket>> {
+        if matches!(self.format,PcmFormat::ALaw|PcmFormat::MuLaw) && !data.len().is_multiple_of(usize::from(self.channels)) {
+            return Err(invalid("G.711 packet ends in an incomplete channel frame"));
+        }
         Ok(Some(AudioPacket {
-            data: self.convert(data),
+            data: self.convert(data)?,
             pts,
             timebase_num: 1,
             timebase_den: self.sample_rate,
@@ -174,21 +177,13 @@ mod tests {
         );
     }
 
-    /// A frame cannot be split: half a stereo sample would shift every later
-    /// channel into the wrong place, so the leftover byte is dropped.
+    /// Refusing incomplete frames prevents silent audio data loss.
     #[test]
-    fn a_partial_frame_is_dropped_not_shifted() {
-        let mut bytes = (-32768i16).to_le_bytes().to_vec();
-        bytes.extend_from_slice(&0x40u8.to_le_bytes());
-        let out = decode(
-            PcmFormat::Int {
-                bits: 16,
-                big_endian: false,
-            },
-            1,
-            &bytes,
-        );
-        assert_eq!(out, vec![-1.0]);
+    fn a_partial_frame_is_refused_before_publication() {
+        let mut decoder=PcmDecoder::int(16,false,48000,1).unwrap();
+        let bytes=[0,128,64];
+        let error=decoder.decode_encoded(&bytes,0,0).err().expect("partial frame accepted");
+        assert!(error.to_string().contains("incomplete channel frame"));
     }
 
     #[test]

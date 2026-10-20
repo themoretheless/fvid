@@ -9,6 +9,8 @@ pub struct PackedPlanar {
     pub alpha: Option<Vec<u8>>,
     pub depth: u8,
     pub colour: AvcColour,
+    /// Explicit limited-range RGB; other RGB codecs retain their full-code contract.
+    pub rgb_limited: bool,
 }
 impl PackedPlanar {
     /// Validate storage before using it as a decoded planar picture.
@@ -26,12 +28,21 @@ impl PackedPlanar {
             alpha,
             depth,
             colour,
+            rgb_limited: false,
         };
         picture.validate()?;
         Ok(picture)
     }
+    pub fn with_rgb_limited(mut self, limited: bool) -> Result<Self> {
+        self.rgb_limited = limited;
+        self.validate()?;
+        Ok(self)
+    }
     pub(crate) fn validate(&self) -> Result<()> {
         self.layout()?;
+        if self.rgb_limited && self.frame.subsampling.is_some() {
+            return Err(invalid("limited RGB flag on YUV storage"));
+        }
         if let Some(alpha) = &self.alpha {
             let bytes = if self.depth == 8 { 1 } else { 2 };
             if self
@@ -157,17 +168,17 @@ impl PackedPlanar {
         colour: AvcColour,
         budget: usize,
     ) -> Result<Self> {
-        let depth=p.bit_depth.max(p.chroma_bit_depth);
+        let format=p.chroma_format()?;
+        let [sx,sy]=match format {0|1=>[2,2],2=>[2,1],_=>[1,1]};
+        let depth=if format==0 {p.bit_depth}else{p.bit_depth.max(p.chroma_bit_depth)};
         if !(8..=16).contains(&p.bit_depth) || !(8..=16).contains(&p.chroma_bit_depth) {
             return Err(invalid("invalid AVC component depth"));
         }
         let bytes=if depth==8 {1}else{2};
         let [left, right, top, bottom] = p.crop;
-        if left % 2 != 0
-            || top % 2 != 0
-            || !p.coded_width.is_multiple_of(2)
-            || !p.coded_height.is_multiple_of(2)
-        {
+        // Monochrome has no source chroma grid to align with. Its neutral
+        // output chroma is synthesized after cropping the luma plane.
+        if format != 0 && (left % sx != 0 || top % sy != 0) {
             return Err(invalid("unaligned coded planar crop"));
         }
         let width = p
@@ -186,8 +197,8 @@ impl PackedPlanar {
             )
             .filter(|&v| v != 0)
             .ok_or_else(|| invalid("invalid coded crop"))?;
-        let cw = width.div_ceil(2);
-        let ch = height.div_ceil(2);
+        let cw = width.div_ceil(sx);
+        let ch = height.div_ceil(sy);
         let length = width
             .checked_mul(height)
             .and_then(|n| {
@@ -203,9 +214,14 @@ impl PackedPlanar {
             .map_err(|error| invalid(&error.to_string()))?;
         for (plane, stride, x, y, w, h, source_depth) in [
             (&p.y, p.coded_width, left, top, width, height,p.bit_depth),
-            (&p.cb, p.coded_width / 2, left / 2, top / 2, cw, ch,p.chroma_bit_depth),
-            (&p.cr, p.coded_width / 2, left / 2, top / 2, cw, ch,p.chroma_bit_depth),
+            (&p.cb, p.coded_width.div_ceil(sx), left / sx, top / sy, cw, ch,p.chroma_bit_depth),
+            (&p.cr, p.coded_width.div_ceil(sx), left / sx, top / sy, cw, ch,p.chroma_bit_depth),
         ] {
+            if format==0 && plane.is_empty() {
+                let neutral=1u16<<(depth-1);
+                for _ in 0..w*h {if bytes==1 {data.push(neutral as u8);}else{data.extend_from_slice(&neutral.to_le_bytes());}}
+                continue;
+            }
             for row in 0..h {
                 let start = (y + row)
                     .checked_mul(stride)
@@ -230,7 +246,7 @@ impl PackedPlanar {
             GeometryFrame {
                 width,
                 height,
-                subsampling: Some([2, 2]),
+                subsampling: Some([sx,sy]),
                 data,
             },
             depth,
@@ -274,7 +290,7 @@ impl PackedPlanar {
                 self.depth,
                 self.colour,
                 alpha,
-            );
+            )?.with_rgb_limited(self.rgb_limited);
         }
         let data = self.colour_plane_data()?;
         let w = self.frame.width;
@@ -409,7 +425,13 @@ impl PackedPlanar {
                 if value > max {
                     return Err(invalid("RGB sample exceeds coded depth"));
                 }
-                *out = ((value * 255 + max / 2) / max) as u8;
+                *out = if self.rgb_limited {
+                    let scale = 1i64 << (self.depth - 8);
+                    let den = 219 * scale;
+                    (((i64::from(value) - 16 * scale) * 255 + den / 2) / den).clamp(0, 255) as u8
+                } else {
+                    ((value * 255 + max / 2) / max) as u8
+                };
             }
             return Ok(());
         }
@@ -441,6 +463,77 @@ impl PackedPlanar {
         }
         Ok(())
     }
+}
+
+/// Dispatch AVC identity GBR before applying any YUV colour conversion.
+pub(crate) fn avc_picture_with_vui(
+    p: &crate::codec::avc_picture::IntraPicture,
+    vui: Option<&crate::codec::avc::Vui>,
+    budget: usize,
+) -> Result<PackedPlanar> {
+    let colour = AvcColour::from_vui(vui)?;
+    let identity = vui
+        .and_then(|v| v.video_signal)
+        .and_then(|(_, _, c)| c)
+        .is_some_and(|c| c[2] == 0);
+    let format = p.chroma_format()?;
+    if !identity {
+        return PackedPlanar::from_picture(p, colour, budget);
+    }
+    if format != 3 {
+        return Err(invalid("AVC identity RGB requires 4:4:4"));
+    }
+    let planar = PackedPlanar::from_picture(p, colour, budget)?;
+    let bytes = if planar.depth == 8 { 1 } else { 2 };
+    let plane_len = planar.frame.width * planar.frame.height * bytes;
+    let mut data = crate::buffer(planar.frame.data.len())?;
+    for (pixel, out) in data.chunks_exact_mut(3 * bytes).enumerate() {
+        for (channel, plane) in [2, 0, 1].into_iter().enumerate() {
+            let offset = plane * plane_len + pixel * bytes;
+            out[channel * bytes..(channel + 1) * bytes]
+                .copy_from_slice(&planar.frame.data[offset..offset + bytes]);
+        }
+    }
+    PackedPlanar::new(
+        GeometryFrame {
+            width: planar.frame.width,
+            height: planar.frame.height,
+            subsampling: None,
+            data,
+        },
+        planar.depth,
+        colour,
+    )?
+    .with_rgb_limited(!colour.full)
+}
+
+/// Dispatch identity GBR before applying any YUV colour conversion.
+pub(crate) fn hevc_picture_with_vui(
+    p: &crate::codec::hevc_picture::Picture,
+    format: u8,
+    vui: Option<&crate::codec::hevc_vui::Vui>,
+) -> Result<PackedPlanar> {
+    let colour = AvcColour::from_hevc_vui(vui)?;
+    let identity = vui.and_then(|v| v.signal.as_ref())
+        .and_then(|s| s.colour).is_some_and(|c| c[2] == 0);
+    if !identity { return hevc_picture(p, format, colour); }
+    if format != 3 { return Err(invalid("HEVC identity RGB requires 4:4:4")); }
+    // Reuse validated conformance cropping and exact component-depth lifting.
+    let planar = hevc_picture(p, format, colour)?;
+    let bytes = if planar.depth == 8 { 1 } else { 2 };
+    let plane_len = planar.frame.width * planar.frame.height * bytes;
+    let mut data = crate::buffer(planar.frame.data.len())?;
+    for (pixel, out) in data.chunks_exact_mut(3 * bytes).enumerate() {
+        for (channel, plane) in [2, 0, 1].into_iter().enumerate() {
+            let offset = plane * plane_len + pixel * bytes;
+            out[channel * bytes..(channel + 1) * bytes]
+                .copy_from_slice(&planar.frame.data[offset..offset + bytes]);
+        }
+    }
+    PackedPlanar::new(GeometryFrame {
+        width: planar.frame.width, height: planar.frame.height,
+        subsampling: None, data,
+    }, planar.depth, colour)?.with_rgb_limited(!colour.full)
 }
 
 /// Preserve HEVC chroma geometry and component precision for display.

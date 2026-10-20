@@ -1,0 +1,270 @@
+{
+  "provenance": "Fourteen authored CC10cases withindependent isolated mono voice controls. Native center-preserving linear stereo balance:0left,64unchangeddualmono,127right. Intermediatevalues,timing,persistence,CC121preserves,channel15,isolation,gaincomposition andreleasewindow. No fullGMpan-law claim. NativeVP9/PCMcompanion,no private media/encoder/network.",
+  "cases": [
+    {
+      "file": "pan-0.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "pan-0-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "file": "pan-32.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "pan-32-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 32
+        }
+      ]
+    },
+    {
+      "file": "pan-64.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "pan-64-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 64
+        }
+      ]
+    },
+    {
+      "file": "pan-96.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "pan-96-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 96
+        }
+      ]
+    },
+    {
+      "file": "pan-127.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "pan-127-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 127
+        }
+      ]
+    },
+    {
+      "file": "late-left.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "late-left-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 100000,
+          "channel": 0,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "file": "persistent-right.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "persistent-right-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 100000,
+          "channel": 0,
+          "value": 127
+        }
+      ]
+    },
+    {
+      "file": "return-center.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "return-center-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 100000,
+          "channel": 0,
+          "value": 0
+        },
+        {
+          "us": 200000,
+          "channel": 0,
+          "value": 64
+        }
+      ]
+    },
+    {
+      "file": "reset-preserves-pan.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "reset-preserves-pan-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 100000,
+          "channel": 0,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "file": "channel15.mid",
+      "controls": [
+        {
+          "channel": 15,
+          "file": "channel15-channel-15.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 15,
+          "value": 127
+        }
+      ]
+    },
+    {
+      "file": "channel-isolation.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "channel-isolation-channel-0.mid"
+        },
+        {
+          "channel": 15,
+          "file": "channel-isolation-channel-15.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 0
+        }
+      ]
+    },
+    {
+      "file": "volume-expression.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "volume-expression-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 0,
+          "channel": 0,
+          "value": 32
+        }
+      ]
+    },
+    {
+      "file": "fractional-pan.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "fractional-pan-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 1041,
+          "channel": 0,
+          "value": 127
+        }
+      ]
+    },
+    {
+      "file": "pan-at-end.mid",
+      "controls": [
+        {
+          "channel": 0,
+          "file": "pan-at-end-channel-0.mid"
+        }
+      ],
+      "pan_events": [
+        {
+          "us": 300000,
+          "channel": 0,
+          "value": 0
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "pan-0.mid": "9fddfd93b4964adb1084746258fe85d15b24ac073820525c6f7acef9ff7a16c2",
+    "pan-0-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "pan-32.mid": "40bd632c625a06ed55594ffaf1979591aeb0ddf40f5acffef08c805f1515b88d",
+    "pan-32-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "pan-64.mid": "8e498f388a101dd9479dcae7acdb9cb81c42db2e12c778ba700bf6b3a76017ea",
+    "pan-64-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "pan-96.mid": "404e64ccbd5ee33fe0b940cae92ca81dba0260eafc3d53a8db772f57006e30f1",
+    "pan-96-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "pan-127.mid": "82ae2087801adce7f0c298db00c38a9d6c675ec1c3acef01eb741d92110141b4",
+    "pan-127-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "late-left.mid": "dcda28bea27a21017b2c98d67960a0416100a81f75256e35e2239340bdf520ac",
+    "late-left-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "persistent-right.mid": "40902ed517a2f5ed9a11a042710381a94cfe4522e10a12a72e938f0efebf7d1d",
+    "persistent-right-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "return-center.mid": "a4247c95f58222f73b7fa4f1ee77df6d47932d23e01948838b09e8cbe07f80eb",
+    "return-center-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "reset-preserves-pan.mid": "3f04a3ec97808c62c4c30762e11822943b6e0d4b248818336162176d658b825c",
+    "reset-preserves-pan-channel-0.mid": "17ffdae14c1a5ca6970ef18e1bee0701b6e67312885b02229e858b595c2d1089",
+    "channel15.mid": "5db7d51eff220bb64df313f51bdfa314d2d171c5d77dc83152f9f297359321d4",
+    "channel15-channel-15.mid": "bd113dc08c122ecbf3f2f025051d42cc9374e6b9facab5a486b1a1a76c242bb9",
+    "channel-isolation.mid": "a80dbf1efd375f919dad8201f09db12d79d7fb0e5270a149858eb98c225889d4",
+    "channel-isolation-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "channel-isolation-channel-15.mid": "bd113dc08c122ecbf3f2f025051d42cc9374e6b9facab5a486b1a1a76c242bb9",
+    "volume-expression.mid": "2925e3450bb62c810bb156b5b6d8099b043dcc36bd94eb5119319ab04ea88011",
+    "volume-expression-channel-0.mid": "dfeec11a46b33919c45d3d4fe5f0872cda7012805cef7aa1395b5e30cc2b67d7",
+    "fractional-pan.mid": "2aa6c0b6a0ace966452e828cfe1f9d839cbbbbd62461a5be7b4246febf1ee254",
+    "fractional-pan-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4",
+    "pan-at-end.mid": "f452e79986abff0a6cd18f24fe21dbbca18f9a43557fa2df7e2e5fad0cfada2e",
+    "pan-at-end-channel-0.mid": "7fcf2dcc10dfb1afae9271b0152a8527f9fbbd248511c736ba546b0dfc4897c4"
+  }
+}

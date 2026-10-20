@@ -122,18 +122,24 @@ impl LutYuv {
         }
         let tables = &cache.as_ref().unwrap().planes;
         let mut offset = 0;
-        for (component, length) in [y, c, c].into_iter().enumerate() {
-            for index in offset..offset + length {
-                if bytes == 1 {
-                    frame.data[index] = tables[component][frame.data[index] as usize] as u8;
-                } else {
-                    let at = index * 2;
-                    let val = u16::from_le_bytes([frame.data[at], frame.data[at + 1]]);
-                    frame.data[at..at + 2]
-                        .copy_from_slice(&tables[component][val as usize].to_le_bytes());
+        if bytes == 1 {
+            for (component, length) in [y, c, c].into_iter().enumerate() {
+                let lut = &tables[component];
+                for sample in &mut frame.data[offset..offset + length] {
+                    *sample = lut[*sample as usize] as u8;
                 }
+                offset += length;
             }
-            offset += length;
+        } else {
+            for (component, length) in [y, c, c].into_iter().enumerate() {
+                let lut = &tables[component];
+                let byte_len = length * 2;
+                for pair in frame.data[offset..offset + byte_len].chunks_exact_mut(2) {
+                    let val = u16::from_le_bytes([pair[0], pair[1]]);
+                    pair.copy_from_slice(&lut[val as usize].to_le_bytes());
+                }
+                offset += byte_len;
+            }
         }
         Ok(())
     }

@@ -1,0 +1,109 @@
+{
+  "provenance": "Own complete metadata NALs. Context/binding acceptance only; not a full conformant active-3D picture stream.",
+  "cases": [
+    {
+      "name": "variable",
+      "expected": [
+        1,
+        2,
+        4,
+        9
+      ],
+      "error": null
+    },
+    {
+      "name": "variable-future",
+      "expected": [
+        1,
+        2,
+        4,
+        9
+      ],
+      "error": null
+    },
+    {
+      "name": "flags-8",
+      "expected": [
+        0,
+        1,
+        128,
+        255
+      ],
+      "error": null
+    },
+    {
+      "name": "flags-8-future",
+      "expected": [
+        0,
+        1,
+        128,
+        255
+      ],
+      "error": null
+    },
+    {
+      "name": "empty",
+      "expected": [],
+      "error": null
+    },
+    {
+      "name": "empty-future",
+      "expected": [],
+      "error": null
+    },
+    {
+      "name": "duplicates",
+      "expected": [
+        7
+      ],
+      "error": null
+    },
+    {
+      "name": "duplicates-future",
+      "expected": [
+        7
+      ],
+      "error": null
+    },
+    {
+      "name": "delta-8",
+      "expected": [
+        0,
+        1,
+        128,
+        255
+      ],
+      "error": null
+    },
+    {
+      "name": "delta-8-future",
+      "expected": [
+        0,
+        1,
+        128,
+        255
+      ],
+      "error": null
+    },
+    {
+      "name": "bad-depth",
+      "expected": null,
+      "error": "HEVC DLT depth disagrees with SPS"
+    },
+    {
+      "name": "bad-depth-future",
+      "expected": null,
+      "error": "HEVC DLT depth disagrees with SPS"
+    },
+    {
+      "name": "predicted-xor",
+      "expected": null,
+      "error": "HEVC DLT layer count disagrees with VPS"
+    },
+    {
+      "name": "predicted-xor-future",
+      "expected": null,
+      "error": "HEVC DLT layer count disagrees with VPS"
+    }
+  ]
+}

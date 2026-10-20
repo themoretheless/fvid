@@ -1,0 +1,10 @@
+{
+  "provenance": "Authored60ms VP9 with mono PCM. Valid16bit integer/32bit float controls have identical samples; declared272/288bit companions must refuse rather than wrap their widths. No encoder/private media/network.",
+  "sha256": {
+    "int16.mkv": "610666e09c067e99e3a4207d7a1af91cd0df625cb3e14c29bc4c0c4fc44dd2ff",
+    "expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "int272.mkv": "adff5e4d068d9931657982e17c4a36ae64cbeaf05a7045ab4bdbb6e2d32a1d5d",
+    "float32.mkv": "e3f8eb9750840a63393c588b61c31ae53be1aa160bc3061cad0531d94e2e8e8e",
+    "float288.mkv": "5e2e9d9c777fabe0b4017a27dcaefb6b587b26c09d2dd6de08cb3e4a647d001e"
+  }
+}

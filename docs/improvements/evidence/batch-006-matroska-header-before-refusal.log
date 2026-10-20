@@ -1,0 +1,10 @@
+
+running 5 tests
+test header_stripping_restores_every_original_codec_packet_and_clock ... ignored, enable with frame header stripping support and update the old refusal expectation
+test unimplemented_zlib_compression_remains_a_declared_refusal ... ok
+test opus_lace_control_decodes_three_twenty_millisecond_packets ... ok
+test current_header_stripping_refusal_is_explicit_not_a_playback_acceptance ... ok
+test controls_decode_all_three_original_synthetic_pictures ... ok
+
+test result: ok. 4 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.04s
+

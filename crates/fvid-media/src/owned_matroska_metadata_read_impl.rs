@@ -4,9 +4,8 @@
 /// badly coded one still plays.
 pub(crate) fn lenient_text<R: Read + Seek>(r: &mut R, e: Element, max: usize) -> Option<String> {
     Some(
-        String::from_utf8_lossy(&bytes(r, e, max).ok()?)
-            .trim_end_matches('\0')
-            .to_owned(),
+        String::from_utf8_lossy(&terminated_text_bytes(bytes(r, e, max).ok()?))
+            .into_owned(),
     )
 }
 /// The children of a master up to the first one this reader cannot read, which
@@ -185,9 +184,8 @@ pub(crate) fn read_chapters<R: Read + Seek>(
                                     continue;
                                 }
                                 if let Ok(bytes) = bytes(r, text, 1024) {
-                                    title = String::from_utf8_lossy(&bytes)
-                                        .trim_end_matches('\0')
-                                        .to_owned();
+                                    title = String::from_utf8_lossy(&terminated_text_bytes(bytes))
+                                        .into_owned();
                                 }
                             }
                         }

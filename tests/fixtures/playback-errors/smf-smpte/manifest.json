@@ -1,0 +1,116 @@
+{
+  "provenance": "Twelve authored SMPTE24/25/29dropframe/30FPS basic,tempo-ignored andfractional cases compare independent PPQtempo ratios. Five illegal clock headers require refusal. Synthetic notes andnative VP9/PCM companion,no private media/encoder/network.",
+  "cases": [
+    {
+      "file": "24-basic.mid",
+      "control": "24-basic-ppq.mid",
+      "fps": 24,
+      "ticks_per_frame": 10
+    },
+    {
+      "file": "24-tempo-ignored.mid",
+      "control": "24-tempo-ignored-ppq.mid",
+      "fps": 24,
+      "ticks_per_frame": 10
+    },
+    {
+      "file": "24-fractional.mid",
+      "control": "24-fractional-ppq.mid",
+      "fps": 24,
+      "ticks_per_frame": 10
+    },
+    {
+      "file": "25-basic.mid",
+      "control": "25-basic-ppq.mid",
+      "fps": 25,
+      "ticks_per_frame": 40
+    },
+    {
+      "file": "25-tempo-ignored.mid",
+      "control": "25-tempo-ignored-ppq.mid",
+      "fps": 25,
+      "ticks_per_frame": 40
+    },
+    {
+      "file": "25-fractional.mid",
+      "control": "25-fractional-ppq.mid",
+      "fps": 25,
+      "ticks_per_frame": 40
+    },
+    {
+      "file": "29-basic.mid",
+      "control": "29-basic-ppq.mid",
+      "fps": 29,
+      "ticks_per_frame": 100
+    },
+    {
+      "file": "29-tempo-ignored.mid",
+      "control": "29-tempo-ignored-ppq.mid",
+      "fps": 29,
+      "ticks_per_frame": 100
+    },
+    {
+      "file": "29-fractional.mid",
+      "control": "29-fractional-ppq.mid",
+      "fps": 29,
+      "ticks_per_frame": 100
+    },
+    {
+      "file": "30-basic.mid",
+      "control": "30-basic-ppq.mid",
+      "fps": 30,
+      "ticks_per_frame": 10
+    },
+    {
+      "file": "30-tempo-ignored.mid",
+      "control": "30-tempo-ignored-ppq.mid",
+      "fps": 30,
+      "ticks_per_frame": 10
+    },
+    {
+      "file": "30-fractional.mid",
+      "control": "30-fractional-ppq.mid",
+      "fps": 30,
+      "ticks_per_frame": 10
+    }
+  ],
+  "invalid": [
+    "invalid-23-10.mid",
+    "invalid-26-10.mid",
+    "invalid-28-10.mid",
+    "invalid-31-10.mid",
+    "invalid-24-0.mid"
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "24-basic.mid": "5ba504b0d47cea62cc27647c22f6cb4cca5cf29a87efecd0083760c954b609c7",
+    "24-basic-ppq.mid": "39908fe4003d83953defeafdd2a93de60439df882481e2dc17b0775b38f8aa44",
+    "24-tempo-ignored.mid": "fd1d060fcc74116c60f86436a135bc25a6a7159ea29e6fa87518d7c4925545c3",
+    "24-tempo-ignored-ppq.mid": "39908fe4003d83953defeafdd2a93de60439df882481e2dc17b0775b38f8aa44",
+    "24-fractional.mid": "79904a8e71026ab560b680cc69e892ae91fbd695d45b303f016cf16139fe3d8c",
+    "24-fractional-ppq.mid": "fd530de48f6183189d851700ce7ff9faf08c4542e478e44406ecf884d73dd3f4",
+    "25-basic.mid": "c642db8362079a5dcf90ace244d94491fcf9c06cdd04fa26072dfa98b52f0779",
+    "25-basic-ppq.mid": "6d5a5520427d6947fff979016531406e40efdb9d1d4ebd41a8ed503af05be4f5",
+    "25-tempo-ignored.mid": "4415695c163f9db463a3133544b0410d8514076dfb2567d5b753c2cf2b254be2",
+    "25-tempo-ignored-ppq.mid": "6d5a5520427d6947fff979016531406e40efdb9d1d4ebd41a8ed503af05be4f5",
+    "25-fractional.mid": "d0a737e7c01b0f41bb185c6dfbf18fc5e4ad94260be27c256b06ffb5d62449b5",
+    "25-fractional-ppq.mid": "a546424fd20812334aa0bc9892a8af6be87707f3dad4e916f6923e5aede4d2f7",
+    "29-basic.mid": "dcf8d6f371a1b4f7c5bdff969ff57453da803ed8d3ce8449e658dc1fd2a9954e",
+    "29-basic-ppq.mid": "f1d71b3ce33ca349bb3151e94140a2b5f9da1113e9102996558deae240405874",
+    "29-tempo-ignored.mid": "d3b211b8df00be1a24f1402c57a1005b2c35ab3aedf280edbd0cea641445747a",
+    "29-tempo-ignored-ppq.mid": "f1d71b3ce33ca349bb3151e94140a2b5f9da1113e9102996558deae240405874",
+    "29-fractional.mid": "c93188cd22a819ba4ab0541ec6d1f56733214e7f9643a74dd8d2462e2276eb83",
+    "29-fractional-ppq.mid": "8141f4b09f0a43ed94ddadf9fb269dfd0f4730bec465a29fba1d1c5956e5cbd8",
+    "30-basic.mid": "1b5c522c8ac7cf391bb0be7017a50de4ddaacf513895d1759709d4c833e03ca4",
+    "30-basic-ppq.mid": "6dca9f9a4a13e6c7fb6c1c84fda15b73bfef52f870919534ac0a851b83a1b1b1",
+    "30-tempo-ignored.mid": "0d99d1bde26b2d8c8e7f4b71af1ddc1c1de575450f7ba4c5f5abcfaa7198f897",
+    "30-tempo-ignored-ppq.mid": "6dca9f9a4a13e6c7fb6c1c84fda15b73bfef52f870919534ac0a851b83a1b1b1",
+    "30-fractional.mid": "d9991754be428b7a5a7ffcc4758314bea9dc6f4ea3e9471f992da9db78ad8d94",
+    "30-fractional-ppq.mid": "23cc89531d36b58c4ccef2fa78a0180e050fd152e489af84414fe768b4f4eb3c",
+    "invalid-23-10.mid": "a781c26e04b8175cdb797db0f99c4dfcb7878e7aa210eb6f768128383af27e90",
+    "invalid-26-10.mid": "49b0a87bc1aeafcf4c7a7d02d93e4147cec1f75382893ac0baa086213625eaf7",
+    "invalid-28-10.mid": "7716a18fb70b103ac89438997a56f6b4e257817377cca54b689247057a8249b5",
+    "invalid-31-10.mid": "d5aa8de5ddeb7fd564fd781d0dba41e122e1c50778a331ac8b9837a48fccd314",
+    "invalid-24-0.mid": "e81d920efd7b6fb90096e0f6c0c43d0b1e84559668e0c6a1e51b719f24aed564"
+  }
+}

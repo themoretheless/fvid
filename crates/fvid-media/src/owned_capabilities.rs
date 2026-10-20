@@ -6,16 +6,19 @@ use fvid_media_info::Capabilities;
 pub fn capabilities() -> Capabilities {
     let names = |values: &[&str]| {
         let mut result: Vec<String> = values.iter().map(|value| (*value).to_owned()).collect();
-        result.sort();
+        result.sort_unstable();
         result.dedup();
         result
     };
     Capabilities {
         library_version: format!("FVid {}", env!("CARGO_PKG_VERSION")),
-        demuxers: names(&["aac", "matroska", "mov", "wav", "yuv4mpegpipe"]),
+        demuxers: names(&["aac", "matroska", "mov", "mp3", "wav", "yuv4mpegpipe"]),
         muxers: names(&["matroska", "mp4", "wav", "yuv4mpegpipe"]),
         decoders: names(&[
             "aac",
+            "mp1",
+            "mp2",
+            "mp3",
             "opus",
             "h264",
             "hevc",

@@ -16,6 +16,7 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     let mut decoder = if in_band_ps { MatroskaTimelineDecoder::with_in_band_ps(&track)? } else { MatroskaTimelineDecoder::from_matroska(&track)? };
     let rate = decoder.sample_rate();
     let channels = decoder.channels();
+    let exact_clock=matches!(track.codec.as_str(),"A_AAC"|"A_PCM/INT/LIT"|"A_PCM/INT/BIG"|"A_PCM/FLOAT/IEEE"|"A_MPEG/L1"|"A_MPEG/L2"|"A_MPEG/L3"|"A_FLAC"|"A_OPUS"|"A_ALAC");
     if track.sample_rate != u64::from(rate) || (!in_band_ps && track.channels != u64::from(channels)) {
         return Err(invalid(
             "Matroska audio geometry disagrees with configuration",
@@ -43,13 +44,18 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
     let mut leading_padding = 0u64;
     let mut position = 0u64;
     let mut origin = None;
+    // Coded audio timestamp quantization applies to the full coded window, before
+    // signed padding. Audible position must not be used as that clock.
+    let mut sample_epoch: Option<i64> = None;
+    let mut coded_samples = 0u64;
+    let mut sample_epoch_grid = None;
     let mut stats = AudioDecodeStats {
         sample_frames: 0,
         decoded_frames: 0,
         sample_rate: rate,
         channels,
     };
-    let mut pending_packet = std::collections::VecDeque::new();
+    let mut pending_packet: std::collections::VecDeque<_> = reader.packets.iter().take(0).cloned().enumerate().collect();
     let mut index = 0;
     loop {
         control.check()?;
@@ -57,51 +63,74 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
             break;
         }
         let terminal = index == reader.packets.len() || control.packet_limit_reached();
-        let (packet, samples) = if terminal {
+        let (packet_index, packet, samples) = if terminal {
             let Some(samples) = decoder.finish()? else {
                 break;
             };
             let packet = pending_packet
                 .pop_front()
                 .ok_or_else(|| invalid("delayed Matroska audio has no source packet"))?;
-            (packet, samples)
+            (packet.0, packet.1, samples)
         } else {
             let packet = reader.packets[index].clone();
             if packet.track != track.number {
                 index += 1;
                 continue;
             }
+            let source_index=index;
             let encoded = reader.read_packet(index)?;
             let samples = decoder.decode(&encoded)?;
             control.packet(encoded.len())?;
             index += 1;
             if decoder.delayed() {
-                pending_packet.push_back(packet);
+                pending_packet.push_back((source_index,packet));
                 if pending_packet.len() > 3 { return Err(invalid("delayed Matroska source lookahead exceeded")); }
                 let Some(samples) = samples else {
                     continue;
                 };
                 let packet = pending_packet.pop_front()
                     .ok_or_else(|| invalid("delayed Matroska audio source identity mismatch"))?;
-                (packet, samples)
+                (packet.0, packet.1, samples)
             } else {
                 (
+                    source_index,
                     packet,
                     samples.ok_or_else(|| invalid("immediate Matroska audio returned no PCM"))?,
                 )
             }
         };
-        let base = *origin.get_or_insert(packet.pts_ns);
-        let timestamp = ((i128::from(packet.pts_ns) - i128::from(base)) * i128::from(rate)
-            + 500_000_000)
-            .div_euclid(1_000_000_000)
-            - i128::from(total_delay);
-        let precision =
-            (u128::from(reader.timestamp_scale_ns()) * u128::from(rate) / 1_000_000_000) as u64;
         if !samples.len().is_multiple_of(usize::from(channels)) {
             return Err(invalid("invalid Matroska decoded PCM stride"));
         }
         let frames = (samples.len() / usize::from(channels)) as u64;
+        let timestamp = if exact_clock {
+            let unit = 1_000_000_000i128;
+            let grid=reader.packet_timestamp_grid(packet_index);
+            let matches=if let (Some(current),Some(epoch))=(grid,sample_epoch_grid) {
+                aac_quantized_grid_matches(current,epoch,coded_samples,rate,
+                    reader.timestamp_scale_ns(),reader.track_timestamp_scale(track.number).unwrap_or(1.0))
+            } else {sample_epoch.is_some_and(|epoch|aac_quantized_sample_matches(
+                packet.pts_ns,epoch,coded_samples,rate,reader.timestamp_scale_ns()))};
+            if !matches {
+                sample_epoch = Some(packet.pts_ns);
+                sample_epoch_grid = grid;
+                coded_samples = 0;
+            }
+            let rate = i128::from(rate);
+            let projected = i128::from(sample_epoch.unwrap()) * rate + i128::from(coded_samples) * unit;
+            coded_samples = coded_samples.checked_add(frames)
+                .ok_or_else(|| invalid("audio coded sample clock overflow"))?;
+            (projected + unit / 2).div_euclid(unit) - i128::from(total_delay)
+        } else {
+            let base = *origin.get_or_insert(packet.pts_ns);
+            ((i128::from(packet.pts_ns) - i128::from(base)) * i128::from(rate)
+                + 500_000_000).div_euclid(1_000_000_000) - i128::from(total_delay)
+        };
+        // Once coded audio timing has been resolved, explicit trims and gaps
+        // are exact sample windows, even when smaller than a container tick.
+        let precision = if exact_clock { 0 } else {
+            (u128::from(reader.timestamp_scale_ns()) * u128::from(rate) / 1_000_000_000) as u64
+        };
         let padding = trim_samples(packet.discard_padding_ns.unsigned_abs())?;
         if padding > frames {
             return Err(invalid("Matroska discard padding exceeds audio packet"));
@@ -116,13 +145,20 @@ pub(crate) fn decode_matroska_audio_reader_controlled<R: std::io::Read + std::io
         } else {
             0
         };
-        let skip_delay = delay.min(frames);
-        delay -= skip_delay;
+        let skip_delay = if exact_clock {
+            timestamp.saturating_neg().max(0).min(i128::from(frames)) as u64
+        } else {
+            let skipped = delay.min(frames);
+            delay -= skipped;
+            skipped
+        };
         let first = head.max(skip_delay);
-        if stats.decoded_frames == 0 {
-            // Leading discarded samples establish the presentation origin;
-            // reinserting them as a timestamp gap would undo DiscardPadding.
-            leading_padding = head.saturating_sub(skip_delay);
+        if !exact_clock && position == 0 && stats.sample_frames == 0 {
+            // Leading padding can consume several complete laced packets.
+            // Accumulate its origin until audible output starts, rather than
+            // reinserting the remaining discarded prefix as timestamp silence.
+            leading_padding = leading_padding.checked_add(head.saturating_sub(skip_delay))
+                .ok_or_else(|| invalid("Matroska leading padding overflow"))?;
         }
         let end = frames - tail;
         if first > end {

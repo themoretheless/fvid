@@ -391,6 +391,9 @@ impl LayeredPps {
         prepared.crop = context.sps.sps.crop;
         prepared.depth = context.sps.sps.depth;
         prepared.planes = planes;
+        // Processed sample representations have no newly coded CU geometry.
+        // Keep original maps only in the exact identity-sharing path above.
+        prepared.coding = None;
         prepared.motion = motion;
         prepared.sao.clear();
         if !motion_enabled {
@@ -671,6 +674,14 @@ mod prepared_reference_tests {
             let metadata = source.poc_translation_bytes().unwrap();
             let small = current.pps.reference_picture(&context,0,&source,metadata).unwrap();
             assert!(small.additional_reference_storage(&source).unwrap() <= metadata);
+            assert_eq!(small.coding_unit_at([0,0]).unwrap(),source.coding_unit_at([0,0]).unwrap());
+            let mut shifted=current.pps.clone();
+            shifted.reference_locations=vec![ReferenceLocation {
+                layer_id:0,scaled_offsets:None,region_offsets:Some([0,0,8,0]),phases:None,
+            }];
+            let processed=shifted.reference_picture(&context,0,&source,32<<20).unwrap();
+            assert_eq!(processed.coding_unit_at([0,0]).err().unwrap().to_string(),"HEVC picture has no coded-CU map");
+
             assert_eq!(prepared.motion, source.motion);
             assert_eq!(prepared.reference_pocs, source.reference_pocs);
             assert_eq!(prepared.reference_layers, source.reference_layers);

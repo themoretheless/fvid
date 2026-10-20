@@ -1,0 +1,113 @@
+{
+  "provenance": "Six authored constant16bitFLACblock-size descriptors:legal8192/16384codes13/14and8bitescape255representing256,versusequivalent explicit/implicitcontrols. Healthy4096/32768/65535bounds. LiteralPCMlevels andindependent nativepacketdecode. VP9/PCMcompanion,no private data/encoder/network.",
+  "cases": [
+    {
+      "file": "escape-256.flac",
+      "control": "escape-256-escape.flac",
+      "size": 256,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "escape-256-0.frame",
+        "escape-256-1.frame"
+      ]
+    },
+    {
+      "file": "code13.flac",
+      "control": "code13-escape.flac",
+      "size": 8192,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "code13-0.frame",
+        "code13-1.frame"
+      ]
+    },
+    {
+      "file": "code14.flac",
+      "control": "code14-escape.flac",
+      "size": 16384,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "code14-0.frame",
+        "code14-1.frame"
+      ]
+    },
+    {
+      "file": "code12.flac",
+      "control": "code12-escape.flac",
+      "size": 4096,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "code12-0.frame",
+        "code12-1.frame"
+      ]
+    },
+    {
+      "file": "code15.flac",
+      "control": "code15-escape.flac",
+      "size": 32768,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "code15-0.frame",
+        "code15-1.frame"
+      ]
+    },
+    {
+      "file": "maximum65535.flac",
+      "control": "maximum65535-escape.flac",
+      "size": 65535,
+      "levels": [
+        4096
+      ],
+      "packets": [
+        "maximum65535-0.frame"
+      ]
+    }
+  ],
+  "invalid": [
+    "invalid-65536.frame",
+    "invalid-reserved.frame"
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "escape-256.flac": "0fbfbe1bd3f8cbf5f8653561d626a3332c8c459b7a4cd48b7d1d6a87f8231130",
+    "escape-256-escape.flac": "61bc8d277809455132a4942f6c4d395a9edd0e054dc368d5639306905ffad851",
+    "escape-256-0.frame": "f921325d5f42c81bc6c85bddeb57ad48f9229138bba579107ae264f90db99fe9",
+    "escape-256-1.frame": "75fac5b763351e9d89f630a68b3e1919e96d4b1b15c0ef656d78a9d64ea40da7",
+    "code13.flac": "3fefd7233d9d4bc09a4fbc9ea81157825e743578aba6ccf5ed2fe8f5f8e3b787",
+    "code13-escape.flac": "7ce3aaca6d58a09dc2d861197fbe83a47a19daf6e3f7b62eddb098661a4347f9",
+    "code13-0.frame": "a4e8eabbc0072c4e89ad6108567b203576e94fae29f539c618bfe85b6a6b7856",
+    "code13-1.frame": "7cc96b557b8393a5fb4b6fce4474a67cbda59affcad641fd50004a00823d7e21",
+    "code14.flac": "bbb6f665aeddb98f06545c961f1fd5a817e8035f079939c63f44e5faa9bf2f78",
+    "code14-escape.flac": "d54cc23b5cf402b7f3878349cf6f59e527d3480defc176a92d4adf2e1d6147ea",
+    "code14-0.frame": "15983f3e96f92b2e0e818747afcaa1535785e124811afc6d5517d5f0de85f085",
+    "code14-1.frame": "e325ed1dfbb5205d9d8f363a95079ca2d592985cf1c67fd1838c98a9c444b5b0",
+    "code12.flac": "42190125e4b852599dfcf8215c2b466d405426d871d8ad0dcec5c14d26635453",
+    "code12-escape.flac": "b10ec43bc4a44c7ed968bbc43d639cab32a5e8d6c5562cc0480db5f25210b738",
+    "code12-0.frame": "82b50b0f2c69cd10c6a95b42508821eba809e95ce6c52c4a9198038e140e3ce7",
+    "code12-1.frame": "0755480d7c62e2580dd96369aed16445784b6ce5a3b14c4afc1f2e9e35207fa6",
+    "code15.flac": "22a1dc547b764ee0d927a68434375d52793a1a563982ac4736806d191e848cb9",
+    "code15-escape.flac": "ce3afd6593153c22dd29393ef2980fa95d7daddcee9dd70f2b786bc317b0b3c6",
+    "code15-0.frame": "f5fd53c66597b96d374d3c898df7332f1ec353acbebb76c88f09cde8ea5cfac9",
+    "code15-1.frame": "c829c243fc76ef80d95095d72cf77f24ea90c71435e89ca7db4649e2f9751994",
+    "maximum65535.flac": "12fac77ce67f06ee2f226a1d3a7621eea68fc843f2e216d4d3c40a8c3adc1b38",
+    "maximum65535-escape.flac": "12fac77ce67f06ee2f226a1d3a7621eea68fc843f2e216d4d3c40a8c3adc1b38",
+    "maximum65535-0.frame": "429d198ea36d313e9c6b7da76a0e46d641fbafdc88454aa5d51df918dcb3aa1d",
+    "invalid-65536.frame": "49c3032ce003ef933d3af24b22cd2b76b8ceaca7491f6acbda25814b3c9336d6",
+    "invalid-reserved.frame": "e3fca5bff609993b1b12391539a81a792f9b00ffc82899728ddfb00e4df03b38"
+  }
+}

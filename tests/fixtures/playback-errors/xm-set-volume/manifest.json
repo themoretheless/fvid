@@ -1,0 +1,108 @@
+{
+  "provenance": "Ten authored literal XM Cxxcases compared with independent volume-column encoding,0/1/16/32/64/255clamped,volume-column precedence,note-on,persistence andmute/recover. Signed16ramp loop,no envelopes/fadeouts orother unsupported effects. Without-effect counterparts separate current ignored reproduction from acceptance. Short authored VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "volume-0",
+      "file": "volume-0.xm",
+      "control": "volume-0-column.xm",
+      "without": "volume-0-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-1",
+      "file": "volume-1.xm",
+      "control": "volume-1-column.xm",
+      "without": "volume-1-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-16",
+      "file": "volume-16.xm",
+      "control": "volume-16-column.xm",
+      "without": "volume-16-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-32",
+      "file": "volume-32.xm",
+      "control": "volume-32-column.xm",
+      "without": "volume-32-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-64",
+      "file": "volume-64.xm",
+      "control": "volume-64-column.xm",
+      "without": "volume-64-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-255",
+      "file": "volume-255.xm",
+      "control": "volume-255-column.xm",
+      "without": "volume-255-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "override-column",
+      "file": "override-column.xm",
+      "control": "override-column-column.xm",
+      "without": "override-column-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "note-on",
+      "file": "note-on.xm",
+      "control": "note-on-column.xm",
+      "without": "note-on-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "persist",
+      "file": "persist.xm",
+      "control": "persist-column.xm",
+      "without": "persist-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "recover",
+      "file": "recover.xm",
+      "control": "recover-column.xm",
+      "without": "recover-without.xm",
+      "seek": 2
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "volume-0.xm": "9c05313f1c28fca8d9681a24341bf85734b15d582c63ff4ac0798dcc1be8f351",
+    "volume-0-column.xm": "fada212ac3cf512482bda595ccfbaea44af45c082c532116003337e57b9ff8e4",
+    "volume-0-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "volume-1.xm": "4523b58b3b613624b3c65ba69b9ed3abb00ce6f5153f78d0b80c5774d6b61749",
+    "volume-1-column.xm": "600f2e5ebe8138947f4e16ae11a75092130517d8adc10d56592d9555a4303789",
+    "volume-1-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "volume-16.xm": "4df399894a7cd0874e12e6293b732eddc16c1a23254e749fbbeff4612cc75a8a",
+    "volume-16-column.xm": "434ded92c5c1614a69eb90b01a5bc752eb1dd4c6a06c0b84da68794bdb92c799",
+    "volume-16-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "volume-32.xm": "85717d18069f91a621a5fa2f5e2b47fce8b9c7309366f1b9c713c8e60d258d42",
+    "volume-32-column.xm": "534372b0a37b7f34eea552b3074dc0b5d94312c3e3ac54e4ca193a8f0f959c7f",
+    "volume-32-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "volume-64.xm": "677662e85a6a6f385b276bbc14ca2f5e5f7dcab812cb2adab1b7b25fc75ceb6e",
+    "volume-64-column.xm": "e3e3298e69f3e1875628cb5bbce8a46c2a83e55ecf4ea3f3c253e3eceed2bcec",
+    "volume-64-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "volume-255.xm": "f0920ccc8412c60fd6939249ae0ddff3491232aa62b5121b497aba4aaba3d406",
+    "volume-255-column.xm": "e3e3298e69f3e1875628cb5bbce8a46c2a83e55ecf4ea3f3c253e3eceed2bcec",
+    "volume-255-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "override-column.xm": "cdbb333c78eeabab63271284b59510f9dd37187da0a1c5e11e17fc94e7a6d5ca",
+    "override-column-column.xm": "fada212ac3cf512482bda595ccfbaea44af45c082c532116003337e57b9ff8e4",
+    "override-column-without.xm": "e3e3298e69f3e1875628cb5bbce8a46c2a83e55ecf4ea3f3c253e3eceed2bcec",
+    "note-on.xm": "e9ae47acf623bf89e7c4f579bf62cfa7d091a866ff2bdf618d900eea35027fc5",
+    "note-on-column.xm": "df41d1e0ad7f5ea1929dccefd44dff6c6b6b4eb9783fc1cb216ef8acd6922a3b",
+    "note-on-without.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "persist.xm": "46dd1ac6788f3a05b4b03465140c6a895e97c18b39f9e5b1260de9d70280c009",
+    "persist-column.xm": "c803c6c9110723c823d8ac1f82f2facdf7e90a02089e6db9887b0aa5171fd341",
+    "persist-without.xm": "e8c067a4877adf8759d6ede7e50c28ed3af3675b5828ac40207fbe857288295d",
+    "recover.xm": "48e988e81bf048ea290f27d6a215cbacf99f87196129a183420bf840f7dd2dad",
+    "recover-column.xm": "1097bb8699480cce3f44a0532ef7f0d476f7672eb4b93d6fd9e5bc16446372c0",
+    "recover-without.xm": "e8c067a4877adf8759d6ede7e50c28ed3af3675b5828ac40207fbe857288295d"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "status": "accepted",
+  "checked_at": "2026-10-14T19:21:57.098418+00:00",
+  "accepted_ids": [
+    "FVID-0024",
+    "FVID-0025"
+  ],
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-11.2",
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.15"
+  ],
+  "before": {
+    "log": "/private/tmp/fvid-improvement-logs/matroska-clock-before.log",
+    "passed": 1,
+    "failed": 3,
+    "causes": [
+      "Changing Segment TimestampScale was accepted.",
+      "TrackTimestampScale half returned [0,10000000,50000000], expected [0,5000000,55000000].",
+      "TrackTimestampScale zero was ignored."
+    ]
+  },
+  "qualification": [
+    "Segment-scale mutation is a correct-refusal regression. Identical recurring Info is a successful decode control.",
+    "Track-scale acceptance covers software VP9 playback, relative block clocks, explicit durations, nanosecond default durations, late Tracks, seek, rewind, and EOF.",
+    "Independent Python Fraction oracles cover 1320 timestamps and 160 durations, including subnormal factors, all dyadic division branches, exact signed boundaries, overflow and large cancellation.",
+    "Persistent track-scale storage participates in index admission; packet count limits remain tested.",
+    "No GUI, hardware decoder or audio time-stretch claim."
+  ],
+  "excluded_work": [
+    "Concurrent private staging-directory constructor integration was completed with an empty tracked-path vector; no improvement counted."
+  ],
+  "counting": "Two independent problems. No per-fixture, per-oracle or per-test count.",
+  "checks": [
+    {
+      "command": "cargo test --locked --offline --no-default-features --test matroska_track_clock_playback --test matroska_lacing --test ebml_io_regressions",
+      "passed": 10,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-clock-playback.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib container::webm::tests",
+      "passed": 26,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-clock-root-unit.log"
+    },
+    {
+      "command": "Run cargo-built fvid_media-acbd65a170e15d18 owned_webm::",
+      "passed": 5,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-clock-owned-all-reader-unit.log"
+    },
+    {
+      "command": "cargo test --locked --offline -p fvid-media --features http-input --test matroska_clock_regressions",
+      "passed": 8,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-clock-owned-final.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test native_matroska_audio_timeline",
+      "passed": 3,
+      "failed": 0,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-clock-audio-timeline.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_stream_input_regressions.py",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "command": "Rerun cargo-linked eight-test regression binary against the final 1480-oracle manifest",
+      "passed": 8,
+      "failed": 0,
+      "duplicate_of_previous_tests": true,
+      "log": "/private/tmp/fvid-improvement-logs/matroska-clock-final-all-oracles.log"
+    }
+  ],
+  "distinct_rust_tests_passed": 52,
+  "rational_oracles": {
+    "timestamps": 1320,
+    "durations": 160,
+    "counted_improvements": 0
+  },
+  "source_hashes": {
+    "crates/fvid-media/src/owned_matroska_time.rs": "90b7ddcf4a8e414cb6eef603a137ad4280b4f1801eade4b69dbfe718d516861f",
+    "crates/fvid-media/src/owned_webm_reader_impl.rs": "3fb07bb1e55ec55a88684b0ea4947d8c50fd3734572a240edbf80d74cd546726",
+    "crates/fvid-media/src/owned_webm.rs": "fca53c41d9ac09c3b8828d46fab42b9ab1aea5861b62e884defd18b8b66bf56e",
+    "src/container/webm.rs": "9b99ba1ec8d23d02b5701ec00c71e7b680048acd5fc52e111ec4e7f83dff5853",
+    "crates/fvid-media/tests/matroska_clock_regressions.rs": "82903a400957070f221288704c663a226f1a63a70e00948b55a6b62967fe7cd1",
+    "tests/matroska_track_clock_playback.rs": "9efc212b983c6fc44c96233cc7ebab1192487c0a600db79609b290bac8419024",
+    "scripts/generate_matroska_clock_regressions.py": "12663c85f555a5d62ff33f0d8eb6cd4a1e841a7709618c63fad09bcf18904dcf"
+  }
+}

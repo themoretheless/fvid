@@ -1,0 +1,54 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0135"
+  ],
+  "checked_at": "2026-10-16T07:40:50.295917+00:00",
+  "before": [
+    "evidence/batch-117-reproduction-before.log",
+    "evidence/batch-117-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-117-integration.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-117-decoder.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-117-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-117-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Fourteen authored CC10inputs compare fullstereoPCM/PTSwithindependently isolated mono voices andliteral native-profile balance.0/32/64/96/127,late/sticky/returncenter,CC121preservation,channel15/isolation,volume/expression,fractionaltiming andend-of-score release covered.",
+    "Before ignored-control reproduction passeswithacceptance initiallyignored;forcedacceptance shows13wrongstereoperformances,center64healthy.Monoall14matchesindependent drycontrols. Workerfailures stop atgeneration0fullplayback,not a separately reachedpre-fixseek.",
+    "After acceptanceenabled andoldignoredexpectationinverted. Apply channelpan before independentL/Rclipping;default64preserves every legacydual-mono byte. Monoandlegacy>2channeloutputs keep drymix.CC121preservespan,decoderresetrestores64;panLSBCC42stillignored.",
+    "28actualstereoworker100ms/EOFtargets plusfullplay/rewind match every independently assembledPCMbyte.17decoder units,14integrations,fixture reproduction andplayerbuild pass. Narrowdiffcheckclean.",
+    "This accepts CC10within existing sine-instrument profile usingcenter-preserving linearspeakerbalance,notfullGM/equal-power/external-synthpanlawequivalence.RawMIDIandindependentVP9/PCMcompanion,no private data/FFmpeg/network/performance/physicalDACclaim.Profilelaw/limitsdocumented indocs/NATIVE_PLAYBACK.md."
+  ],
+  "sources": [
+    {
+      "url": "https://midi.org/midi-1-0-control-change-messages",
+      "section": "CC10Pan",
+      "rule": "CC10is channelpanMSB,values0..127."
+    },
+    {
+      "url": "https://microsoft.github.io/MIDI/kb/in-box-general-midi-synth/",
+      "section": "ResetAllControllers",
+      "rule": "CC121deliberately preservespan while resettingexpression/pedals/bend."
+    }
+  ],
+  "compatibility": "Previously ignoredCC10now changesstereo placement;defaultcenter64/mono/wideroutputs unchanged.Publicsignatures/audio clocks andprogramprofile unchanged.",
+  "counting": "One nativeCC10stereo capability;14cases,28targets andmono/controlvariants add noextra IDs."
+}

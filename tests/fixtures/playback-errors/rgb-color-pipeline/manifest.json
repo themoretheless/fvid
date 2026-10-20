@@ -1,0 +1,499 @@
+{
+  "provenance": "Authored eight-pixel RGB or YUV444 arrays and varying opacity, independently range-coded as three FFV1 v1 keyframes. 60 ms clips; no private media, codec parameters, external encoder or network.",
+  "cases": [
+    {
+      "file": "rgb-8.mkv",
+      "layout": "rgb",
+      "depth": 8,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-8-0.color"
+        },
+        {
+          "color": "rgb-8-1.color"
+        },
+        {
+          "color": "rgb-8-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-8-smooth.mkv",
+      "layout": "rgb",
+      "depth": 8,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-8-smooth-0.color"
+        },
+        {
+          "color": "rgb-8-smooth-1.color"
+        },
+        {
+          "color": "rgb-8-smooth-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-10.mkv",
+      "layout": "rgb",
+      "depth": 10,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-10-0.color"
+        },
+        {
+          "color": "rgb-10-1.color"
+        },
+        {
+          "color": "rgb-10-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-10-smooth.mkv",
+      "layout": "rgb",
+      "depth": 10,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-10-smooth-0.color"
+        },
+        {
+          "color": "rgb-10-smooth-1.color"
+        },
+        {
+          "color": "rgb-10-smooth-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-12.mkv",
+      "layout": "rgb",
+      "depth": 12,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-12-0.color"
+        },
+        {
+          "color": "rgb-12-1.color"
+        },
+        {
+          "color": "rgb-12-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-12-smooth.mkv",
+      "layout": "rgb",
+      "depth": 12,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-12-smooth-0.color"
+        },
+        {
+          "color": "rgb-12-smooth-1.color"
+        },
+        {
+          "color": "rgb-12-smooth-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-16.mkv",
+      "layout": "rgb",
+      "depth": 16,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-16-0.color"
+        },
+        {
+          "color": "rgb-16-1.color"
+        },
+        {
+          "color": "rgb-16-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-16-smooth.mkv",
+      "layout": "rgb",
+      "depth": 16,
+      "alpha": false,
+      "frames": [
+        {
+          "color": "rgb-16-smooth-0.color"
+        },
+        {
+          "color": "rgb-16-smooth-1.color"
+        },
+        {
+          "color": "rgb-16-smooth-2.color"
+        }
+      ]
+    },
+    {
+      "file": "rgb-8-alpha.mkv",
+      "layout": "rgb",
+      "depth": 8,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "rgb-8-alpha-0.color",
+          "alpha": "rgb-8-alpha-0.alpha"
+        },
+        {
+          "color": "rgb-8-alpha-1.color",
+          "alpha": "rgb-8-alpha-1.alpha"
+        },
+        {
+          "color": "rgb-8-alpha-2.color",
+          "alpha": "rgb-8-alpha-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "rgb-8-alpha-smooth.mkv",
+      "layout": "rgb",
+      "depth": 8,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "rgb-8-alpha-smooth-0.color",
+          "alpha": "rgb-8-alpha-smooth-0.alpha"
+        },
+        {
+          "color": "rgb-8-alpha-smooth-1.color",
+          "alpha": "rgb-8-alpha-smooth-1.alpha"
+        },
+        {
+          "color": "rgb-8-alpha-smooth-2.color",
+          "alpha": "rgb-8-alpha-smooth-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "rgb-16-alpha.mkv",
+      "layout": "rgb",
+      "depth": 16,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "rgb-16-alpha-0.color",
+          "alpha": "rgb-16-alpha-0.alpha"
+        },
+        {
+          "color": "rgb-16-alpha-1.color",
+          "alpha": "rgb-16-alpha-1.alpha"
+        },
+        {
+          "color": "rgb-16-alpha-2.color",
+          "alpha": "rgb-16-alpha-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "rgb-16-alpha-smooth.mkv",
+      "layout": "rgb",
+      "depth": 16,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "rgb-16-alpha-smooth-0.color",
+          "alpha": "rgb-16-alpha-smooth-0.alpha"
+        },
+        {
+          "color": "rgb-16-alpha-smooth-1.color",
+          "alpha": "rgb-16-alpha-smooth-1.alpha"
+        },
+        {
+          "color": "rgb-16-alpha-smooth-2.color",
+          "alpha": "rgb-16-alpha-smooth-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-8-alpha.mkv",
+      "layout": "yuv444",
+      "depth": 8,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-8-alpha-0.color",
+          "alpha": "yuv444-8-alpha-0.alpha"
+        },
+        {
+          "color": "yuv444-8-alpha-1.color",
+          "alpha": "yuv444-8-alpha-1.alpha"
+        },
+        {
+          "color": "yuv444-8-alpha-2.color",
+          "alpha": "yuv444-8-alpha-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-8-alpha-smooth.mkv",
+      "layout": "yuv444",
+      "depth": 8,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-8-alpha-smooth-0.color",
+          "alpha": "yuv444-8-alpha-smooth-0.alpha"
+        },
+        {
+          "color": "yuv444-8-alpha-smooth-1.color",
+          "alpha": "yuv444-8-alpha-smooth-1.alpha"
+        },
+        {
+          "color": "yuv444-8-alpha-smooth-2.color",
+          "alpha": "yuv444-8-alpha-smooth-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-10-alpha.mkv",
+      "layout": "yuv444",
+      "depth": 10,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-10-alpha-0.color",
+          "alpha": "yuv444-10-alpha-0.alpha"
+        },
+        {
+          "color": "yuv444-10-alpha-1.color",
+          "alpha": "yuv444-10-alpha-1.alpha"
+        },
+        {
+          "color": "yuv444-10-alpha-2.color",
+          "alpha": "yuv444-10-alpha-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-10-alpha-smooth.mkv",
+      "layout": "yuv444",
+      "depth": 10,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-10-alpha-smooth-0.color",
+          "alpha": "yuv444-10-alpha-smooth-0.alpha"
+        },
+        {
+          "color": "yuv444-10-alpha-smooth-1.color",
+          "alpha": "yuv444-10-alpha-smooth-1.alpha"
+        },
+        {
+          "color": "yuv444-10-alpha-smooth-2.color",
+          "alpha": "yuv444-10-alpha-smooth-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-12-alpha.mkv",
+      "layout": "yuv444",
+      "depth": 12,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-12-alpha-0.color",
+          "alpha": "yuv444-12-alpha-0.alpha"
+        },
+        {
+          "color": "yuv444-12-alpha-1.color",
+          "alpha": "yuv444-12-alpha-1.alpha"
+        },
+        {
+          "color": "yuv444-12-alpha-2.color",
+          "alpha": "yuv444-12-alpha-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-12-alpha-smooth.mkv",
+      "layout": "yuv444",
+      "depth": 12,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-12-alpha-smooth-0.color",
+          "alpha": "yuv444-12-alpha-smooth-0.alpha"
+        },
+        {
+          "color": "yuv444-12-alpha-smooth-1.color",
+          "alpha": "yuv444-12-alpha-smooth-1.alpha"
+        },
+        {
+          "color": "yuv444-12-alpha-smooth-2.color",
+          "alpha": "yuv444-12-alpha-smooth-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-16-alpha.mkv",
+      "layout": "yuv444",
+      "depth": 16,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-16-alpha-0.color",
+          "alpha": "yuv444-16-alpha-0.alpha"
+        },
+        {
+          "color": "yuv444-16-alpha-1.color",
+          "alpha": "yuv444-16-alpha-1.alpha"
+        },
+        {
+          "color": "yuv444-16-alpha-2.color",
+          "alpha": "yuv444-16-alpha-2.alpha"
+        }
+      ]
+    },
+    {
+      "file": "yuv444-16-alpha-smooth.mkv",
+      "layout": "yuv444",
+      "depth": 16,
+      "alpha": true,
+      "frames": [
+        {
+          "color": "yuv444-16-alpha-smooth-0.color",
+          "alpha": "yuv444-16-alpha-smooth-0.alpha"
+        },
+        {
+          "color": "yuv444-16-alpha-smooth-1.color",
+          "alpha": "yuv444-16-alpha-smooth-1.alpha"
+        },
+        {
+          "color": "yuv444-16-alpha-smooth-2.color",
+          "alpha": "yuv444-16-alpha-smooth-2.alpha"
+        }
+      ]
+    }
+  ],
+  "files": {
+    "rgb-8-0.color": "09cdf37ca149e16b711637f34dbc46774941a941fa65e872fb5b4195b9a20dd2",
+    "rgb-8-1.color": "72cbc26bc3c6430d78a741cad9568cb1a51872b8f504e6f31c6da53f7421dcfa",
+    "rgb-8-2.color": "61b8454e0708447f233387aebe6a5a7eb5f979b7d666e5879a87fe23ab86b11f",
+    "rgb-8.mkv": "7e8047d5e6f314b558215fbefbc471d9dd1b4e7d77653769dc78bcfcfb911070",
+    "rgb-8-smooth-0.color": "6f65ad6b0e3520e75d3abda3c9540eef897382a126f28f57df9b03474da6fd98",
+    "rgb-8-smooth-1.color": "6e313cd21a33d9c69f9cede5f0d29e95e61e906d4e0d6cfa4d307dc776ac1d49",
+    "rgb-8-smooth-2.color": "83bb001322ed58514aa14093dd7d48f9a74ddb0448aff6234932f1b3558f58e5",
+    "rgb-8-smooth.mkv": "9caef3a1cd9adcfac6c7337a221669048a120a9bb00c4e79f5d30b9a7d243830",
+    "rgb-10-0.color": "2dd6d7d06f495453c93cbcef2d5f0acc7e271105bff04719a08c35fb2c6c1c3d",
+    "rgb-10-1.color": "45ffeddc6541a653237573365c56d984779abffd5bb3c778c77dd52bfa3df146",
+    "rgb-10-2.color": "b15ef446968b0f3cd830b7ff594832f7a1c434b27fb6a356a7dda4e60d4e49af",
+    "rgb-10.mkv": "fc78c61496e8f2e9ee089d3d66389f9ff3e92569a0148c00c10305389f0ce606",
+    "rgb-10-smooth-0.color": "9d041975626eabe26b1ba54e8089e951f81381f6a02d8eff03281f927c7e3d03",
+    "rgb-10-smooth-1.color": "f199d3bd66d79628eab8117f0b24ee97a10941320c5bbab9d4e822cf35236d71",
+    "rgb-10-smooth-2.color": "3e6eb5f221c1001b921fe45e4cf87849544005c07f90384e1c2c5d031028a252",
+    "rgb-10-smooth.mkv": "313a34b734671deea08753073a04b4b60224e873535e5c8b978e2a5828b51cd7",
+    "rgb-12-0.color": "374c397be2d78bd712f1bdfbf7eacdcfdb5e8918aab15af2e8d1a5efcd6b9882",
+    "rgb-12-1.color": "3916d87aaa147e7cdbe763af7b177a3e30cbdc1819bc1304020e755129c7d270",
+    "rgb-12-2.color": "e98b1d8897ee8b529d26e7fe5af8bc632f968a9c279f09d86cbf95ca9b0269d2",
+    "rgb-12.mkv": "51a6fb024979f13a608dff466ad60170272bd04cea7f063f4d9e2d58b82b0ffe",
+    "rgb-12-smooth-0.color": "47385dce9c3679cb356c3ac848528019673befb9602e025c8e01352f9ad4684e",
+    "rgb-12-smooth-1.color": "562272e44c675f72de3d7363dc9e4e5c569fd061930761f4b46ab1b3d33b8d40",
+    "rgb-12-smooth-2.color": "ad921fbace0cb863c19d59b643b6daa69e68b16d95321a42a4c3dd93e807c0ac",
+    "rgb-12-smooth.mkv": "2a8dd23947be1f9dea7d409f969170abb71c679f47e10bcab09a637bbf4f01a2",
+    "rgb-16-0.color": "31674ca19d859cb39eff00e2f91bab7179a65432ad48570396d4bac706196915",
+    "rgb-16-1.color": "b023c47379ca64c5347fb5e6b0587114ce368f8bfdc9ee03e9d9058937ca5886",
+    "rgb-16-2.color": "49034dda110b85f3616db9e8ad93642a2a66f7d68c8190e021c65b1ae091bf19",
+    "rgb-16.mkv": "93baf20457e3e55f9fdf7794e2233a5418e539c970063a5107f31e34e63a10cf",
+    "rgb-16-smooth-0.color": "4e95367e9d2cd62c0cf705de4a49b72da80f98bf27416882655f8457caca6311",
+    "rgb-16-smooth-1.color": "4136adc2fa900995c7910d3cc07442af3502681f7f33510fc8f5edb6a0ce7d60",
+    "rgb-16-smooth-2.color": "da6fa74f1626a42cc04337b5b502e9f967d40d288485d7e13c75a0707118e7b3",
+    "rgb-16-smooth.mkv": "9645d69f88afad53ceda7de34335f0793e621c32baf043f5c738878adada49ed",
+    "rgb-8-alpha-0.color": "09cdf37ca149e16b711637f34dbc46774941a941fa65e872fb5b4195b9a20dd2",
+    "rgb-8-alpha-0.alpha": "ddb76f3a8c792940255fbb47133574c1dd8c57c3683cde2d568fffabb7402d2f",
+    "rgb-8-alpha-1.color": "72cbc26bc3c6430d78a741cad9568cb1a51872b8f504e6f31c6da53f7421dcfa",
+    "rgb-8-alpha-1.alpha": "b8df7796d1ba1deb62c635870a5471cfaaec7dac175352de8e52f080bac6db61",
+    "rgb-8-alpha-2.color": "61b8454e0708447f233387aebe6a5a7eb5f979b7d666e5879a87fe23ab86b11f",
+    "rgb-8-alpha-2.alpha": "ae5eb48d7fe03cd454bae2979c1c4711fdc75700826e1d93bed1a674f2920845",
+    "rgb-8-alpha.mkv": "4c8bdd6629a6c7fcdb27a28ef430178511ed1e7e509113b59d6ecd84e6d42013",
+    "rgb-8-alpha-smooth-0.color": "6f65ad6b0e3520e75d3abda3c9540eef897382a126f28f57df9b03474da6fd98",
+    "rgb-8-alpha-smooth-0.alpha": "e9c441bb822eb8134e230e32d919db71740059c8723ba2f4dd717a97be3b6a41",
+    "rgb-8-alpha-smooth-1.color": "6e313cd21a33d9c69f9cede5f0d29e95e61e906d4e0d6cfa4d307dc776ac1d49",
+    "rgb-8-alpha-smooth-1.alpha": "31455b1ab566c94afbde1b89e8c8a84c76c4f22350e09913c411dc371ccbf0c6",
+    "rgb-8-alpha-smooth-2.color": "83bb001322ed58514aa14093dd7d48f9a74ddb0448aff6234932f1b3558f58e5",
+    "rgb-8-alpha-smooth-2.alpha": "103c4eb2f66ad9a9e4005695c3d297b82120fe81d9b5324676a6c6baed4a0e6a",
+    "rgb-8-alpha-smooth.mkv": "f020aa633cbb892c75b07fbf4ebd99243decc59446da056b7af1bb62b98c234a",
+    "rgb-16-alpha-0.color": "31674ca19d859cb39eff00e2f91bab7179a65432ad48570396d4bac706196915",
+    "rgb-16-alpha-0.alpha": "d401998cb10abecdf501e7d5274508fdc6abae59c8c194dd941856274afa2725",
+    "rgb-16-alpha-1.color": "b023c47379ca64c5347fb5e6b0587114ce368f8bfdc9ee03e9d9058937ca5886",
+    "rgb-16-alpha-1.alpha": "295c34366790b138a0a6e66a5e7a4a29c9f9a392bb3d8207b230c0f4d398c57b",
+    "rgb-16-alpha-2.color": "49034dda110b85f3616db9e8ad93642a2a66f7d68c8190e021c65b1ae091bf19",
+    "rgb-16-alpha-2.alpha": "93f6061d5eaa3692421f1c1ec1b0798a87e6b867f721bfba1aa0faf28207361e",
+    "rgb-16-alpha.mkv": "86635bab572b4cc7b31f3105562e37499cbf2bd712df163817e2cb88b80698b9",
+    "rgb-16-alpha-smooth-0.color": "4e95367e9d2cd62c0cf705de4a49b72da80f98bf27416882655f8457caca6311",
+    "rgb-16-alpha-smooth-0.alpha": "e29d03ff40a656f3b8992226f932b28983d87f70858226dc0f1de0af034d67d9",
+    "rgb-16-alpha-smooth-1.color": "4136adc2fa900995c7910d3cc07442af3502681f7f33510fc8f5edb6a0ce7d60",
+    "rgb-16-alpha-smooth-1.alpha": "35dc2ba1aca67f70d3818009c054e86f828330fbfe2ee6fd506e4a31d8f8c1ce",
+    "rgb-16-alpha-smooth-2.color": "da6fa74f1626a42cc04337b5b502e9f967d40d288485d7e13c75a0707118e7b3",
+    "rgb-16-alpha-smooth-2.alpha": "5c4708f2537a0e5d003627deedbf2f68fab7d3a6bfa05cbd9a27f5b3f9181b85",
+    "rgb-16-alpha-smooth.mkv": "05eb14c45e9c10d1b536058b45c6a0b7ca66003b1e82370e89ba4389b7e3bf86",
+    "yuv444-8-alpha-0.color": "f71f3a1ba04ef968409bb014462ee95fd98de5ca4dc3738f890b27821c02b64a",
+    "yuv444-8-alpha-0.alpha": "ddb76f3a8c792940255fbb47133574c1dd8c57c3683cde2d568fffabb7402d2f",
+    "yuv444-8-alpha-1.color": "53db4b22bd6829ac9b2a11d2fe4a91a58aa3cdef3d351c7b9eb290c999f06bcd",
+    "yuv444-8-alpha-1.alpha": "b8df7796d1ba1deb62c635870a5471cfaaec7dac175352de8e52f080bac6db61",
+    "yuv444-8-alpha-2.color": "9782558ed0eb2ec51724a977314de30180a2debf6881835b4120bdd5fc7abf6d",
+    "yuv444-8-alpha-2.alpha": "ae5eb48d7fe03cd454bae2979c1c4711fdc75700826e1d93bed1a674f2920845",
+    "yuv444-8-alpha.mkv": "50beb0edc2541d356fdaffccdce47d8aec0290d40b18df77115ea85f3146e8bd",
+    "yuv444-8-alpha-smooth-0.color": "eeb6d88f3a12987546d8a570fff064649e244df5e5f59bb76c7b6e94a6189c59",
+    "yuv444-8-alpha-smooth-0.alpha": "e9c441bb822eb8134e230e32d919db71740059c8723ba2f4dd717a97be3b6a41",
+    "yuv444-8-alpha-smooth-1.color": "4c7c0e995e9eebef009ef7bd5b88de7ffad5314a0500372782a0d110e2d39db6",
+    "yuv444-8-alpha-smooth-1.alpha": "31455b1ab566c94afbde1b89e8c8a84c76c4f22350e09913c411dc371ccbf0c6",
+    "yuv444-8-alpha-smooth-2.color": "ec95b21f0bca770dd9f02025a7c8c2fab136c212ec32248bac84a0887fb16422",
+    "yuv444-8-alpha-smooth-2.alpha": "103c4eb2f66ad9a9e4005695c3d297b82120fe81d9b5324676a6c6baed4a0e6a",
+    "yuv444-8-alpha-smooth.mkv": "7450547d2c0472947e9a2439291fa233665ffef242fbb48f19a1340179859599",
+    "yuv444-10-alpha-0.color": "7b5542ba4872260b51ffa024047791863ab4a1730e2a7f389dd936794fc58328",
+    "yuv444-10-alpha-0.alpha": "f840f83c2f51ff70cb346c16703a583c7ed02ccc271e4274a60460c208ac5252",
+    "yuv444-10-alpha-1.color": "ef0caf69cc5524c075a335d3a37dd71cca1c6f746593b40a3b8b9509241e343d",
+    "yuv444-10-alpha-1.alpha": "eb7659b1a774cabcf607211e0c562f90bd922be6379b7d23788145580112a975",
+    "yuv444-10-alpha-2.color": "4270a7a397078af1dc0abea592bf537a7bcac75ed453fb29ee8a44857b0b0307",
+    "yuv444-10-alpha-2.alpha": "0bdb0220f241dd72dd83995051e8ffca402019f15995f26a0198f70e6ba651d6",
+    "yuv444-10-alpha.mkv": "d880361cfbc2c0fb8e4dc6ccafda5bfc2a1016db21beac7618ef955382c977ff",
+    "yuv444-10-alpha-smooth-0.color": "47a02157021d294f4b9ba7d04d3696fa97eea1831039ee104639d73cc1a8ebf6",
+    "yuv444-10-alpha-smooth-0.alpha": "142245f6b43ccd15a0d1fee7f22d290e464bac360075db26dd5c9ea4f1cbcf9e",
+    "yuv444-10-alpha-smooth-1.color": "db53e1f4f83574c63be6af4f7ac07883877d134813d3b5e64ad1ce42a257dbdf",
+    "yuv444-10-alpha-smooth-1.alpha": "ed5d9f542477cc9057fc40390d84864bf1d788fc16c4dd8cdc502179cd059f6c",
+    "yuv444-10-alpha-smooth-2.color": "d4ba6b1e552eb5a132b903eedd4d86139e960553d618e3023ba7405ac88b06c6",
+    "yuv444-10-alpha-smooth-2.alpha": "0a5bb3595ca9116b4809f2e2812677ac7e1694cfbddb46a83bdf0c996c10a775",
+    "yuv444-10-alpha-smooth.mkv": "f5aa8a6bcdb6938c39ece88151d7ac872735341d0bfc9834e78b89ac92aab7c2",
+    "yuv444-12-alpha-0.color": "351168015787685073a8d2c9c7de29bbdba1723f38c6f621fb16ecf27e813637",
+    "yuv444-12-alpha-0.alpha": "9ddf6a3f6399961b56c62e7aa000c49b8eaa1b66190b2f294151865501b7095f",
+    "yuv444-12-alpha-1.color": "1201f9ff5a331ebe2e6f9ac0e5850282d76206471643cd6b52a3629f6ff991c7",
+    "yuv444-12-alpha-1.alpha": "7c6a8b2aea0cf10b286ea204c8360d698e9087d5cc5fd449323b46027b565b7c",
+    "yuv444-12-alpha-2.color": "75c6703a2a196fd4e08e933f94c0530d8de8673bf5a633ce3c4f248615fbd7ba",
+    "yuv444-12-alpha-2.alpha": "81cf6abafd8f4c18a94d59266929880d5c8c9a24ec77cdeb56fa7675b3df0c2d",
+    "yuv444-12-alpha.mkv": "9bf46b589ea79e4ec0997dbd928691fa1fbc83f3923bbc7db56facdf3677be27",
+    "yuv444-12-alpha-smooth-0.color": "b54829ff7b034a43211225ca65ca3299fe6d292697ace4b2cb45f2ac796d39fd",
+    "yuv444-12-alpha-smooth-0.alpha": "e031613774b3abb1d49858eba0763f01a499934abc47724b95792204f801419a",
+    "yuv444-12-alpha-smooth-1.color": "6801d3a7904de17e51bcb2ba45eca482d2b344f782548e353ffbc54ac4a357f1",
+    "yuv444-12-alpha-smooth-1.alpha": "a77077e4df68e352afe377293b6a4ed8443404dc494412b4dc98cadca30f38a6",
+    "yuv444-12-alpha-smooth-2.color": "f379bff7474c68c60dd9aef0b71a81bcd3347df1b6f26a602ceb60fde0fe990d",
+    "yuv444-12-alpha-smooth-2.alpha": "a04509cf99b7f4a40f6588756ff400dc93085671609ad9381cde92b5c5ce880d",
+    "yuv444-12-alpha-smooth.mkv": "861d3cc581fa0fafead979960138d3b2f601a2b6c71d1a35cf7a42682887e84d",
+    "yuv444-16-alpha-0.color": "0049a917d2ed0d7fdbaedda4a515c6faefdf4473c57cd9131e47ce78bc39d6f5",
+    "yuv444-16-alpha-0.alpha": "d401998cb10abecdf501e7d5274508fdc6abae59c8c194dd941856274afa2725",
+    "yuv444-16-alpha-1.color": "f0d08afcff51e4f742e69b09e0e73847bfcb348242d3ef88618079db67a06d48",
+    "yuv444-16-alpha-1.alpha": "295c34366790b138a0a6e66a5e7a4a29c9f9a392bb3d8207b230c0f4d398c57b",
+    "yuv444-16-alpha-2.color": "3912dcd1ae8307837b2538f14d9ea87b5a2722e26240a5665a85746d70f18986",
+    "yuv444-16-alpha-2.alpha": "93f6061d5eaa3692421f1c1ec1b0798a87e6b867f721bfba1aa0faf28207361e",
+    "yuv444-16-alpha.mkv": "ebf9598c6932f67b146b138d5873afd0250a87776125e5da85bcd835d5dc111e",
+    "yuv444-16-alpha-smooth-0.color": "d6118ac861db2514bf1f977556803976d2f2bfbdfff05fbdf7e8a4d6f768a189",
+    "yuv444-16-alpha-smooth-0.alpha": "e29d03ff40a656f3b8992226f932b28983d87f70858226dc0f1de0af034d67d9",
+    "yuv444-16-alpha-smooth-1.color": "26e18c56c42344034a4a59d0fe991317bce256ac4575eb259db2269d8b35a4d0",
+    "yuv444-16-alpha-smooth-1.alpha": "35dc2ba1aca67f70d3818009c054e86f828330fbfe2ee6fd506e4a31d8f8c1ce",
+    "yuv444-16-alpha-smooth-2.color": "5e305fe0027fe4e016b0b318904f9ea430fb533b7eb9ff8c682f8b4594dedac0",
+    "yuv444-16-alpha-smooth-2.alpha": "5c4708f2537a0e5d003627deedbf2f68fab7d3a6bfa05cbd9a27f5b3f9181b85",
+    "yuv444-16-alpha-smooth.mkv": "37fd3fe69493ff2afd33dcb784b01c8e86cc0e2b4aa4a11eb8a3120f5bc215c6"
+  }
+}

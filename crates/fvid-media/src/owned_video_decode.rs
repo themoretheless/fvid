@@ -117,9 +117,11 @@ pub(crate) fn decode_webm(
     {
         return Ok(None);
     }
+    let mut reader_limits = crate::owned_webm::Limits::default();
+    if let Some(options) = options { reader_limits.packet_bytes = options.max_packet_bytes; }
     let mut reader = crate::owned_webm::WebmReader::open(
         BufReader::new(File::open(source).map_err(|e| e.to_string())?),
-        Default::default(),
+        reader_limits,
     )
     .map_err(|e| e.to_string())?;
     if let Some(options) = options {
@@ -133,18 +135,20 @@ pub(crate) fn decode_webm(
         }
     }
     reader.scan_all().map_err(|e| e.to_string())?;
-    let inferred = if visit.is_some() && reader.tracks.iter().any(|t|t.kind==1 && matches!(t.codec.as_str(),"V_VP9"|"V_AV1")) {
+    let inferred = if visit.is_some() && crate::owned_webm_codec::video_track(&reader).is_some_and(|t| matches!(t.codec.as_str(),"V_VP9"|"V_AV1"|"V_MPEGH/ISO/HEVC"|"V_MPEG4/ISO/AVC")) {
         let Some(durations)=crate::owned_webm_codec::presentation_durations(&mut reader,options)? else {return Ok(None);};
         Some(durations)
     } else {None};
-    let Some(track) = reader.tracks.iter().find(|t| t.kind == 1) else {
-        return Err("input has no video stream".into());
+    let Some(track) = crate::owned_webm_codec::video_track(&reader) else {
+        return if reader.tracks.iter().any(|t|t.kind==1 && reader.track_enabled(t.number)) {Ok(None)}
+            else {Err("input has no video stream".into())};
     };
     let stored_crop=track.crop;
     let stored_rotation=track.rotation;
     let number = track.number;
     let track_hdr=track.hdr;
     let full_range = track.colour.full_range;
+    let explicit_full_range = track.full_range;
     let matrix = if track.colour.matrix == 0 {6} else {track.colour.matrix};
     let default_duration = track.default_duration_ns;
     let (n,d)=track.pixel_aspect();
@@ -172,52 +176,29 @@ pub(crate) fn decode_webm(
     let mut overlay = None;
     let mut frame_metadata = None;
     let mut temporal_format = None;
-    let mut consumed = 0u64;
+    let mut consumed;
     let mut selected_inputs = 0u64;
-    for index in 0..reader.packets.len() {
-        if options
-            .and_then(|o| o.cancel.as_ref())
-            .is_some_and(fvid_control::CancelFlag::is_cancelled)
-        {
-            return Err("media operation cancelled".into());
-        }
-        let p = &reader.packets[index];
-        if p.track != number {
-            continue;
-        }
-        // FFV1 has exactly one shown picture per visible block. Preserve its
-        // existing pre-read interval/packet-limit boundary; compressed codecs
-        // must first decode hidden references before deciding to stop.
-        if !compressed && !p.invisible && !stats.pixel_format.is_empty() {
-            if let (Some(origin),Some((_,to)))=(origin,transform.interval) {
-                if i128::from(p.pts_ns)-i128::from(origin)>=i128::from(to)*1000 {break;}
-            }
-        }
-        let visible = !p.invisible;
-        let pts_ns = p.pts_ns;
-        let duration_ns = p
-            .duration_ns.filter(|&v|v!=0)
-            .or((default_duration != 0).then_some(default_duration))
-            .or_else(||inferred.as_ref().and_then(|values|values[index]));
-        if options
-            .and_then(|o| o.max_packets)
-            .is_some_and(|limit| consumed >= limit)
-        {
-            return Err("FFV1 input packet count exceeds limit".into());
-        }
-        consumed = consumed
-            .checked_add(1)
-            .ok_or("FFV1 input packet count overflow")?;
-        let packet = reader.read_packet(index).map_err(|e| e.to_string())?;
-        let mut decoded = match decoder.decode(&packet) {
+    let quantum = reader.timestamp_scale_ns();
+    let mut presentation = crate::owned_webm_codec::Presentation::new(&reader, number)?;
+    loop {
+        // Preserve the existing FFV1 interval boundary before reading packets.
+        let stop = if !compressed && !stats.pixel_format.is_empty() {
+            origin.zip(transform.interval).map(|(origin, (_, to))| i128::from(origin) + i128::from(to) * 1000)
+        } else { None };
+        let next = presentation.next(&mut reader, &mut decoder, number, default_duration,
+            inferred.as_deref(), options, stop);
+        consumed = presentation.consumed;
+        let frame = match next {
             Ok(Some(frame)) => frame,
-            Ok(None)=>continue,
-            Err(error) if error.starts_with(crate::owned_ffv1_decoder::UNSUPPORTED_PREFIX) || error.starts_with(crate::owned_webm_codec::UNSUPPORTED_PREFIX) => {
-                return Ok(None);
-            }
+            Ok(None) => break,
+            Err(error) if error.starts_with(crate::owned_ffv1_decoder::UNSUPPORTED_PREFIX)
+                || error.starts_with(crate::owned_webm_codec::UNSUPPORTED_PREFIX) => return Ok(None),
             Err(error) => return Err(error),
         };
-        if !visible {continue;}
+        let (pts_ns, duration_ns) = (frame.pts, frame.duration);
+        let (frame_mono, frame_colour, frame_hdr) = (frame.mono, frame.colour, frame.hdr);
+        let mut decoded = frame.decoded;
+        let visible = true;
         if crate::owned_display_geometry::needs(&decoded.frame,stored_crop,stored_rotation) {
             let (frame,alpha)=crate::owned_display_geometry::apply(&decoded.frame,decoded.alpha.as_deref(),decoded.depth,stored_crop,stored_rotation)?;
             decoded.frame=frame;decoded.alpha=alpha;
@@ -238,13 +219,15 @@ pub(crate) fn decode_webm(
         let selected=transform.interval.is_none_or(|(from,_)|time>=i128::from(from)*1000);
         stats.width=u32::try_from(decoded.frame.width).map_err(|_|"video width overflow")?;
         stats.height=u32::try_from(decoded.frame.height).map_err(|_|"video height overflow")?;
-        let (full_range,matrix,primaries,transfer)=decoder.colour().unwrap_or((full_range,matrix,0,0));
-        let (full_range, matrix) = if decoded.frame.subsampling.is_none() { (true, 0) } else { (full_range, matrix) };
-        let bit_hdr=decoder.hdr().unwrap_or_default();
+        let (full_range,matrix,primaries,transfer)=frame_colour.unwrap_or((full_range,matrix,0,0));
+        let (full_range, matrix) = if decoded.frame.subsampling.is_none() {
+            (frame_colour.map(|c|c.0).or(explicit_full_range).unwrap_or(true), 0)
+        } else { (full_range, matrix) };
+        let bit_hdr=frame_hdr.unwrap_or_default();
         let hdr=crate::owned_matroska::HdrMetadata{mastering:bit_hdr.mastering.or(track_hdr.mastering),light:crate::owned_matroska::ContentLight{max_cll:if bit_hdr.light.max_cll!=0.0 {bit_hdr.light.max_cll}else{track_hdr.light.max_cll},max_fall:if bit_hdr.light.max_fall!=0.0 {bit_hdr.light.max_fall}else{track_hdr.light.max_fall}}};
         if crate::owned_deband::Deband::needs_equal_planes(transform.deband.as_deref())
-            && (decoder.monochrome()==Some(true) || decoded.frame.subsampling!=Some([1,1])) {return Ok(None);}
-        let base = if decoder.monochrome() == Some(true) {
+            && (frame_mono || decoded.frame.subsampling!=Some([1,1])) {return Ok(None);}
+        let base = if frame_mono {
             "gray"
         } else {
             match decoded.frame.subsampling {
@@ -278,7 +261,7 @@ pub(crate) fn decode_webm(
             let Some((width, height, format, pixels)) = process_frame_with_overlay(
                 &decoded.frame,
                 decoded.depth,
-                decoder.monochrome() == Some(true),
+                frame_mono,
                 full_range,
                 &frame_transform,
                 transform.overlay.as_ref(),
@@ -292,7 +275,7 @@ pub(crate) fn decode_webm(
                 Some(crate::owned_fade::FrameTime {
                     ticks: i128::from(pts_ns) - i128::from(origin),
                     scale: 1_000_000_000,
-                    quantum: reader.timestamp_scale_ns(),
+                    quantum: quantum,
                 }),
                 Some(&history),
                 source_info,
@@ -449,10 +432,16 @@ fn transform_alpha(
     remaining.pad = None;
     remaining.scale = None;
     remaining.negate = None;
+    remaining.cas = None;
     remaining.curves = None;
     remaining.colorbalance = None;
     remaining.colorlevels = None;
     remaining.colorchannelmixer = None;
+    remaining.grayworld = None;
+    remaining.vibrance = None;
+    remaining.exposure = None;
+    remaining.colorcontrast = None;
+    remaining.colorhold = None;
     if remaining != DecodeTransform::default() { return Ok(None); }
     let geometry = DecodeTransform {
         crop: request.crop, horizontal_flip: request.horizontal_flip,
@@ -474,6 +463,9 @@ fn transform_alpha(
     let mut alpha = crate::owned_frame::buffer(output.data.len()/3)?;
     for (pixel, sample) in output.data.chunks_exact(3*bytes).zip(alpha.chunks_exact_mut(bytes)) {
         sample.copy_from_slice(&pixel[..bytes]);
+    }
+    if let Some(args) = request.cas.as_deref() {
+        crate::owned_cas::Cas::parse(args)?.apply_alpha(&mut alpha, output.width, output.height, depth)?;
     }
     Ok(Some(alpha))
 }

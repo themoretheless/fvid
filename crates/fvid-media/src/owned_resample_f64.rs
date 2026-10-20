@@ -11,18 +11,18 @@ pub struct Resampler<W> {
     channels: usize,
     radius: i64,
     cutoff: f64,
-    queue: VecDeque<[f64; 64]>,
+    queue: VecDeque<[f64; 255]>,
     base: u64,
     count: u64,
     emitted: u64,
-    first: [f64; 64],
-    last: [f64; 64],
-    frame: [f64; 64],
+    first: [f64; 255],
+    last: [f64; 255],
+    frame: [f64; 255],
     filled: usize,
 }
 impl<W: Write> Resampler<W> {
     pub fn new(output: W, input_rate: u32, output_rate: u32, channels: u16) -> io::Result<Self> {
-        if input_rate == 0 || output_rate == 0 || !(1..=64).contains(&channels) {
+        if input_rate == 0 || output_rate == 0 || !(1..=255).contains(&channels) {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "invalid resampler geometry",
@@ -40,9 +40,9 @@ impl<W: Write> Resampler<W> {
             base: 0,
             count: 0,
             emitted: 0,
-            first: [0.0; 64],
-            last: [0.0; 64],
-            frame: [0.0; 64],
+            first: [0.0; 255],
+            last: [0.0; 255],
+            frame: [0.0; 255],
             filled: 0,
         })
     }
@@ -58,7 +58,7 @@ impl<W: Write> Resampler<W> {
             }
             let fraction =
                 (position % u128::from(self.output_rate)) as f64 / f64::from(self.output_rate);
-            let mut sum = [0.0f64; 64];
+            let mut sum = [0.0f64; 255];
             let mut normalization = 0.0;
             for offset in -self.radius..=self.radius {
                 let distance = offset as f64 - fraction;
@@ -245,7 +245,7 @@ mod precision_tests {
 impl Resampler<Vec<u8>> {
     pub(crate) fn retained_storage_bytes(&self) -> usize {
         std::mem::size_of_val(self)
-            + self.queue.capacity() * std::mem::size_of::<[f64; 64]>()
+            + self.queue.capacity() * std::mem::size_of::<[f64; 255]>()
             + self.output.capacity()
     }
 }

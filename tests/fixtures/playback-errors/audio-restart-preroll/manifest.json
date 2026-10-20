@@ -1,0 +1,7 @@
+{
+  "provenance": "Authored native60ms VP9 and PCM. Restart is held before Player.present to observe preroll gating. No encoder/private media/network.",
+  "sha256": {
+    "restart.mkv": "f836a3b388dd73e5523842aa04810ccbca1ec089406d673536c09c6b1a33c36a",
+    "expected.f32le": "9cc1df2c95816e96424cdab2d6afd8cfb8e0826bd3f25209395684c24560a07e"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "provenance": "Authored60ms VP9 and8kHz mono PCM, three160-sample blocks. Test holds the production CPAL callback until source EOF. No encoder/private media/network.",
+  "frames": 480,
+  "sha256": {
+    "queued-tail.mkv": "1e4c81a628529064dfd81fd1c510a5dd6ef3a60f84ad52c5fac373c0b9d66f19",
+    "expected.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189"
+  }
+}

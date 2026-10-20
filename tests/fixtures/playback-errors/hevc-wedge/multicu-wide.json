@@ -1,0 +1,145 @@
+{
+  "provenance": "Owned mixed-role PCM/CABAC, multi-CTU skip target and MP4. Camera scale zero isolates constant signed disparity across CU boundaries. No private media, FFmpeg or test-time generation.",
+  "cases": [
+    {
+      "file": "multicu-wide-64-0-0.mp4",
+      "size": 64,
+      "direct": false,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "multicu-wide-64-0-2.mp4",
+      "size": 64,
+      "direct": false,
+      "offset": 2,
+      "disparity": 4
+    },
+    {
+      "file": "multicu-wide-64-0--2.mp4",
+      "size": 64,
+      "direct": false,
+      "offset": -2,
+      "disparity": -4
+    },
+    {
+      "file": "multicu-wide-64-0-2147483647.mp4",
+      "size": 64,
+      "direct": false,
+      "offset": 2147483647,
+      "disparity": 4294967294
+    },
+    {
+      "file": "multicu-wide-64-0--2147483647.mp4",
+      "size": 64,
+      "direct": false,
+      "offset": -2147483647,
+      "disparity": -4294967294
+    },
+    {
+      "file": "multicu-wide-64-1-0.mp4",
+      "size": 64,
+      "direct": true,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "multicu-wide-64-1-2.mp4",
+      "size": 64,
+      "direct": true,
+      "offset": 2,
+      "disparity": 4
+    },
+    {
+      "file": "multicu-wide-64-1--2.mp4",
+      "size": 64,
+      "direct": true,
+      "offset": -2,
+      "disparity": -4
+    },
+    {
+      "file": "multicu-wide-64-1-2147483647.mp4",
+      "size": 64,
+      "direct": true,
+      "offset": 2147483647,
+      "disparity": 4294967294
+    },
+    {
+      "file": "multicu-wide-64-1--2147483647.mp4",
+      "size": 64,
+      "direct": true,
+      "offset": -2147483647,
+      "disparity": -4294967294
+    },
+    {
+      "file": "multicu-wide-128-0-0.mp4",
+      "size": 128,
+      "direct": false,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "multicu-wide-128-0-2.mp4",
+      "size": 128,
+      "direct": false,
+      "offset": 2,
+      "disparity": 4
+    },
+    {
+      "file": "multicu-wide-128-0--2.mp4",
+      "size": 128,
+      "direct": false,
+      "offset": -2,
+      "disparity": -4
+    },
+    {
+      "file": "multicu-wide-128-0-2147483647.mp4",
+      "size": 128,
+      "direct": false,
+      "offset": 2147483647,
+      "disparity": 4294967294
+    },
+    {
+      "file": "multicu-wide-128-0--2147483647.mp4",
+      "size": 128,
+      "direct": false,
+      "offset": -2147483647,
+      "disparity": -4294967294
+    },
+    {
+      "file": "multicu-wide-128-1-0.mp4",
+      "size": 128,
+      "direct": true,
+      "offset": 0,
+      "disparity": 0
+    },
+    {
+      "file": "multicu-wide-128-1-2.mp4",
+      "size": 128,
+      "direct": true,
+      "offset": 2,
+      "disparity": 4
+    },
+    {
+      "file": "multicu-wide-128-1--2.mp4",
+      "size": 128,
+      "direct": true,
+      "offset": -2,
+      "disparity": -4
+    },
+    {
+      "file": "multicu-wide-128-1-2147483647.mp4",
+      "size": 128,
+      "direct": true,
+      "offset": 2147483647,
+      "disparity": 4294967294
+    },
+    {
+      "file": "multicu-wide-128-1--2147483647.mp4",
+      "size": 128,
+      "direct": true,
+      "offset": -2147483647,
+      "disparity": -4294967294
+    }
+  ]
+}

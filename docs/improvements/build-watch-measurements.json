@@ -1,0 +1,268 @@
+{
+  "original": {
+    "root": "fn main() {\n    // Windows reserves only 1 MiB for the main thread by default. Owned codec\n    // parsing and the media CLI require the same stack headroom as Rust tests.\n    // Keep GUI execution on the main thread and reserve a bounded 8 MiB stack.\n    if std::env::var(\"CARGO_CFG_TARGET_OS\").as_deref() == Ok(\"windows\") {\n        println!(\"cargo:rustc-link-arg-bin=fvid=/STACK:8388608\");\n    }\n}\n",
+    "media": "//! Optional search directory for the benchmark that links libavutil directly.\n//! The library never links FFmpeg and needs no FFmpeg headers or bindgen.\nfn main() {\n    #[cfg(feature = \"legacy-ffmpeg\")]\n    {\n        println!(\"cargo:rerun-if-env-changed=FVID_FFMPEG_PREFIX\");\n        let prefix = std::env::var_os(\"FVID_FFMPEG_PREFIX\")\n            .map(std::path::PathBuf::from)\n            .unwrap_or_else(|| match std::env::var(\"CARGO_CFG_TARGET_OS\").as_deref() {\n                Ok(\"macos\") => \"/opt/homebrew\".into(),\n                Ok(\"windows\") => r\"C:\\ffmpeg-shared\".into(),\n                _ => \"/usr\".into(),\n            });\n        println!(\n            \"cargo:rustc-link-search=native={}\",\n            prefix.join(\"lib\").display()\n        );\n    }\n}\n"
+  },
+  "fixed": {
+    "root": "fn main() {\n    println!(\"cargo:rerun-if-changed=build.rs\");\n    // Windows reserves only 1 MiB for the main thread by default. Owned codec\n    // parsing and the media CLI require the same stack headroom as Rust tests.\n    // Keep GUI execution on the main thread and reserve a bounded 8 MiB stack.\n    if std::env::var(\"CARGO_CFG_TARGET_OS\").as_deref() == Ok(\"windows\") {\n        println!(\"cargo:rustc-link-arg-bin=fvid=/STACK:8388608\");\n    }\n}\n",
+    "media": "//! Optional search directory for the benchmark that links libavutil directly.\n//! The library never links FFmpeg and needs no FFmpeg headers or bindgen.\nfn main() {\n    println!(\"cargo:rerun-if-changed=build.rs\");\n    #[cfg(feature = \"legacy-ffmpeg\")]\n    {\n        println!(\"cargo:rerun-if-env-changed=FVID_FFMPEG_PREFIX\");\n        let prefix = std::env::var_os(\"FVID_FFMPEG_PREFIX\")\n            .map(std::path::PathBuf::from)\n            .unwrap_or_else(|| match std::env::var(\"CARGO_CFG_TARGET_OS\").as_deref() {\n                Ok(\"macos\") => \"/opt/homebrew\".into(),\n                Ok(\"windows\") => r\"C:\\ffmpeg-shared\".into(),\n                _ => \"/usr\".into(),\n            });\n        println!(\n            \"cargo:rustc-link-search=native={}\",\n            prefix.join(\"lib\").display()\n        );\n    }\n}\n"
+  },
+  "runs": [
+    {
+      "label": "before-0-warm",
+      "seconds": 22.814767458,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-before-0-warm.jsonl",
+      "stderr": "evidence/batch-012-build-watch-before-0-warm.stderr"
+    },
+    {
+      "label": "before-0-probe",
+      "seconds": 12.946582500000002,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-before-0-probe.jsonl",
+      "stderr": "evidence/batch-012-build-watch-before-0-probe.stderr",
+      "script_invocations": {
+        "media": 1,
+        "root": 1
+      }
+    },
+    {
+      "label": "after-0-warm",
+      "seconds": 15.020725167000002,
+      "exit_code": 0,
+      "out_dirs": {
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out",
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-after-0-warm.jsonl",
+      "stderr": "evidence/batch-012-build-watch-after-0-warm.stderr"
+    },
+    {
+      "label": "after-0-probe",
+      "seconds": 0.3375471250000004,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": true,
+        "root": true
+      },
+      "stdout": "evidence/batch-012-build-watch-after-0-probe.jsonl",
+      "stderr": "evidence/batch-012-build-watch-after-0-probe.stderr",
+      "script_invocations": {
+        "root": 0,
+        "media": 0
+      }
+    },
+    {
+      "label": "before-1-warm",
+      "seconds": 1.5639243339999993,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-before-1-warm.jsonl",
+      "stderr": "evidence/batch-012-build-watch-before-1-warm.stderr"
+    },
+    {
+      "label": "before-1-probe",
+      "seconds": 13.412321249999998,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-before-1-probe.jsonl",
+      "stderr": "evidence/batch-012-build-watch-before-1-probe.stderr",
+      "script_invocations": {
+        "media": 1,
+        "root": 1
+      }
+    },
+    {
+      "label": "after-1-warm",
+      "seconds": 13.81230462500001,
+      "exit_code": 0,
+      "out_dirs": {
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out",
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-after-1-warm.jsonl",
+      "stderr": "evidence/batch-012-build-watch-after-1-warm.stderr"
+    },
+    {
+      "label": "after-1-probe",
+      "seconds": 0.30148349999998914,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": true,
+        "root": true
+      },
+      "stdout": "evidence/batch-012-build-watch-after-1-probe.jsonl",
+      "stderr": "evidence/batch-012-build-watch-after-1-probe.stderr",
+      "script_invocations": {
+        "root": 0,
+        "media": 0
+      }
+    },
+    {
+      "label": "final-uninstrumented-warm",
+      "seconds": 1.6112197500000036,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": false,
+        "root": false
+      },
+      "stdout": "evidence/batch-012-build-watch-final-uninstrumented-warm.jsonl",
+      "stderr": "evidence/batch-012-build-watch-final-uninstrumented-warm.stderr"
+    },
+    {
+      "label": "final-uninstrumented-probe",
+      "seconds": 0.1280674169999969,
+      "exit_code": 0,
+      "out_dirs": {
+        "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+        "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+      },
+      "library_fresh": {
+        "media": true,
+        "root": true
+      },
+      "stdout": "evidence/batch-012-build-watch-final-uninstrumented-probe.jsonl",
+      "stderr": "evidence/batch-012-build-watch-final-uninstrumented-probe.stderr"
+    }
+  ],
+  "pairs": [
+    {
+      "before": {
+        "label": "before-0-probe",
+        "seconds": 12.946582500000002,
+        "exit_code": 0,
+        "out_dirs": {
+          "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+          "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+        },
+        "library_fresh": {
+          "media": false,
+          "root": false
+        },
+        "stdout": "evidence/batch-012-build-watch-before-0-probe.jsonl",
+        "stderr": "evidence/batch-012-build-watch-before-0-probe.stderr",
+        "script_invocations": {
+          "media": 1,
+          "root": 1
+        }
+      },
+      "after": {
+        "label": "after-0-probe",
+        "seconds": 0.3375471250000004,
+        "exit_code": 0,
+        "out_dirs": {
+          "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+          "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+        },
+        "library_fresh": {
+          "media": true,
+          "root": true
+        },
+        "stdout": "evidence/batch-012-build-watch-after-0-probe.jsonl",
+        "stderr": "evidence/batch-012-build-watch-after-0-probe.stderr",
+        "script_invocations": {
+          "root": 0,
+          "media": 0
+        }
+      }
+    },
+    {
+      "before": {
+        "label": "before-1-probe",
+        "seconds": 13.412321249999998,
+        "exit_code": 0,
+        "out_dirs": {
+          "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+          "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+        },
+        "library_fresh": {
+          "media": false,
+          "root": false
+        },
+        "stdout": "evidence/batch-012-build-watch-before-1-probe.jsonl",
+        "stderr": "evidence/batch-012-build-watch-before-1-probe.stderr",
+        "script_invocations": {
+          "media": 1,
+          "root": 1
+        }
+      },
+      "after": {
+        "label": "after-1-probe",
+        "seconds": 0.30148349999998914,
+        "exit_code": 0,
+        "out_dirs": {
+          "media": "/private/tmp/fvid-improvements-target/debug/build/fvid-media-fafad64afa143de0/out",
+          "root": "/private/tmp/fvid-improvements-target/debug/build/fvid-75b812695a6c64ce/out"
+        },
+        "library_fresh": {
+          "media": true,
+          "root": true
+        },
+        "stdout": "evidence/batch-012-build-watch-after-1-probe.jsonl",
+        "stderr": "evidence/batch-012-build-watch-after-1-probe.stderr",
+        "script_invocations": {
+          "root": 0,
+          "media": 0
+        }
+      }
+    }
+  ],
+  "status": "measured improvement",
+  "final_hashes": {
+    "root": "06eef9d78e4d4f113750e9dad4798b60f753afc3c5fad41fbdc9b1180ea863c4",
+    "media": "bcf19d457b8c5b5602b822ce7bdf1c3aaa75ca7871b80558b089d0c6738bf3c7"
+  },
+  "median_before_seconds": 13.179451875,
+  "median_after_seconds": 0.31951531249999476,
+  "scope": "Cached headless cargo check after editing only unrelated documentation and test text markers; two alternating warmed pairs. No cold-build or playback throughput claim."
+}

@@ -1,0 +1,107 @@
+{
+  "provenance": "Authored delayed Kxx versus independent note97 at split tick rows. FT2 command masks parameter to5bits on nonzero ticks; zero masked or beyond row has no action. Signed16loop,no envelopes/fadeouts,authored VP9/PCM companion. No external encoder/network/private media.",
+  "cases": [
+    {
+      "name": "key-off-01",
+      "file": "key-off-01.xm",
+      "control": "key-off-01-control.xm",
+      "tick": 1,
+      "active": true
+    },
+    {
+      "name": "key-off-02",
+      "file": "key-off-02.xm",
+      "control": "key-off-02-control.xm",
+      "tick": 2,
+      "active": true
+    },
+    {
+      "name": "key-off-03",
+      "file": "key-off-03.xm",
+      "control": "key-off-03-control.xm",
+      "tick": 3,
+      "active": true
+    },
+    {
+      "name": "key-off-05",
+      "file": "key-off-05.xm",
+      "control": "key-off-05-control.xm",
+      "tick": 5,
+      "active": true
+    },
+    {
+      "name": "key-off-06",
+      "file": "key-off-06.xm",
+      "control": "key-off-06-control.xm",
+      "tick": 6,
+      "active": false
+    },
+    {
+      "name": "key-off-08",
+      "file": "key-off-08.xm",
+      "control": "key-off-08-control.xm",
+      "tick": 8,
+      "active": false
+    },
+    {
+      "name": "key-off-1f",
+      "file": "key-off-1f.xm",
+      "control": "key-off-1f-control.xm",
+      "tick": 31,
+      "active": false
+    },
+    {
+      "name": "key-off-20",
+      "file": "key-off-20.xm",
+      "control": "key-off-20-control.xm",
+      "tick": 0,
+      "active": false
+    },
+    {
+      "name": "key-off-21",
+      "file": "key-off-21.xm",
+      "control": "key-off-21-control.xm",
+      "tick": 1,
+      "active": true
+    },
+    {
+      "name": "key-off-3f",
+      "file": "key-off-3f.xm",
+      "control": "key-off-3f-control.xm",
+      "tick": 31,
+      "active": false
+    },
+    {
+      "name": "key-off-ff",
+      "file": "key-off-ff.xm",
+      "control": "key-off-ff-control.xm",
+      "tick": 31,
+      "active": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "key-off-01.xm": "3c81bc04caf414d4f26ab3e088da4c9c52671dc8a44a79fb6a4501dec36f2b90",
+    "key-off-01-control.xm": "85d995b2f91628dc220218795a252cbd4a4130daaf729109f82cf296839d1975",
+    "key-off-02.xm": "a61563826507e79f0559b260f2084f55c7357ef32a432e3b4531ac0e10b5a60a",
+    "key-off-02-control.xm": "ea9a4fd6268102c58ef2b8118757529de411086217ac59f68eca6cb847bf10f1",
+    "key-off-03.xm": "170a51728f2827addaab1ad0b2aa2c54e180ed18cbf927190156238175a3590e",
+    "key-off-03-control.xm": "a9299c30a01dfdb5d57eff88af8113b65661e9a82dc393e6773ebcefa337b79e",
+    "key-off-05.xm": "0fed85bd4bf4dd94ba1ac7c2fe4794a30d983765e9e4031f7889cf2aec943692",
+    "key-off-05-control.xm": "73471a5f6634bf3c6baef82f87b4537f41cc039ca0746286b2f98bad5973d83d",
+    "key-off-06.xm": "6e1eb4e0a199c33376b79218d75914a56ae09b4943ebc7fcdea0d31368e11e04",
+    "key-off-06-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "key-off-08.xm": "06ff7437708c1d46a3176b90d6e2bf48bb3915dfce7fde1e34381fabe4e1dbfa",
+    "key-off-08-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "key-off-1f.xm": "569b0a77fe5e7754aa82d955f73d23d5fb47787b0f73748bda9174fcb025388c",
+    "key-off-1f-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "key-off-20.xm": "db1e67feda1277f8d59562366fdab32d116c70e8cb31090f2f73c4d33fcca305",
+    "key-off-20-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "key-off-21.xm": "88a9945ab60fe0c688839dd4b1df3fbd3a4e1a1e4dc2529cac6982e50ff4b655",
+    "key-off-21-control.xm": "85d995b2f91628dc220218795a252cbd4a4130daaf729109f82cf296839d1975",
+    "key-off-3f.xm": "04b274a278dd49f0c0ed5db3e0328684464e69af3c30378db1673f9b41e73de1",
+    "key-off-3f-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e",
+    "key-off-ff.xm": "20b6acb6a9e45bf33c50b2de2adda61a72566b8a34ae213da38fb4e4afb92c2f",
+    "key-off-ff-control.xm": "632d44f6798c20080e8231849917abd109177a53b8544cf79eb4790b9ab4d82e"
+  }
+}

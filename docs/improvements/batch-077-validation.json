@@ -1,0 +1,41 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0088"
+  ],
+  "checked_at": "2026-10-16T02:14:50.645714+00:00",
+  "before": [
+    "evidence/batch-077-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-077-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-077-ac3.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-077-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-077-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Follow-up extends88 known-truncated EOF invariant to rawAC3; it adds zero IDs. The contiguous-frame parser recognizes the final frame header and knows its payload is incomplete but its90percent coverage heuristic still admits the complete prefix.",
+    "Authored16frame tone derivatives with one-byte and half-frame final truncations return15correct native frames and report successful raw/worker EOF before the fix. Eight precise raw/play/rewind/EOF-seek false-success observations reproduce.",
+    "Parser retains an internal known-truncated flag and AudioStream.validate_eof reports it. Prefix parsing/decoding remains usable and may queue15frames before error. Genuine15frame prefixes, full16frame audio and small nonaudio zero tails remain successful.",
+    "6 AC3 units, four related integration targets, fixture reproduction and player build pass. Saved media derives only from an existing authored synthetic repository tone; separate short VP9/PCM companion decodes. No encoder/network/private input required.",
+    "This is known parsed full-header frame truncation. Incomplete unrecognized headers, generic nonaudio tails, CRC/concealment and corruption admission are outside this extension. No complete truncated playback, physical output or performance claim."
+  ],
+  "compatibility": "Known incomplete final AC3 frames now report incomplete EOF while retaining usable prefixes and existing nonaudio-tail tolerance.",
+  "counting": "Extension of acceptedFVID0088; accepted_count remains100 and next unusedID101."
+}

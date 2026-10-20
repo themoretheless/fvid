@@ -102,9 +102,6 @@ impl PacketPcmDecoder {
         }
     }
     fn alac(cookie: &[u8], rate: u32, channels: u16) -> Result<Self> {
-        if cookie.len() < 24 || u32::from_be_bytes(cookie[20..24].try_into().unwrap()) != rate {
-            return Err(invalid("ALAC cookie and track sample rates disagree"));
-        }
         Ok(Self::Alac {
             decoder: crate::codec::alac_decoder::AlacDecoder::new(cookie, rate, channels)?,
             rate,

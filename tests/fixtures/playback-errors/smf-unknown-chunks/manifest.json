@@ -1,0 +1,50 @@
+{
+  "provenance": "Authored100ms single note with bounded unknown SMF chunks before/between actual tracks, odd and zero lengths, truncated control. Separate authored native VP9/PCM video. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "plain-single",
+      "file": "plain-single.mid",
+      "bad": false
+    },
+    {
+      "name": "plain-two",
+      "file": "plain-two.mid",
+      "bad": false
+    },
+    {
+      "name": "odd-extension-before",
+      "file": "odd-extension-before.mid",
+      "bad": false
+    },
+    {
+      "name": "empty-extension-before",
+      "file": "empty-extension-before.mid",
+      "bad": false
+    },
+    {
+      "name": "extensions-between",
+      "file": "extensions-between.mid",
+      "bad": false
+    },
+    {
+      "name": "many-extensions",
+      "file": "many-extensions.mid",
+      "bad": false
+    },
+    {
+      "name": "truncated-extension",
+      "file": "truncated-extension.mid",
+      "bad": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "plain-single.mid": "3379dec1be89d10cfcc1b4aa42d30c9a62052ffb5716f400f01d0ec4817b2f46",
+    "plain-two.mid": "bd50f752fc5c39ddc713a780311fb9270c2ce1bce8e1efd40a39bdf64b403e60",
+    "odd-extension-before.mid": "1a6707409a0946296ec8e80bf0f482681c06d75f473832b5030967bbe1fd49e0",
+    "empty-extension-before.mid": "caa10a1e282568b7cccf447447e9330eb6969f1a913549d6a1f1841836f2c220",
+    "extensions-between.mid": "6ef53871792fae4763c00d3cc66f2ee96b59f207bcf1c0620532253d94c57086",
+    "many-extensions.mid": "bade3fa67731747be98a1bedcff67f5f24300e1295fbcda2f37050cac8d97a42",
+    "truncated-extension.mid": "db445df68f16076938315459f25e769616f859f2896f105a0cc63f6409a975c4"
+  }
+}

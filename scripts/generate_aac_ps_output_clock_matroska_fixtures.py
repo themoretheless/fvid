@@ -32,7 +32,7 @@ def main():
   info=element(0x1549a966,number(0x2ad7b1,1_000_000)+element(0x4489,struct.pack('>d',123)))
   data=header+element(0x18538067,info+element(0x1654ae6b,atrack+vtrack)+element(0x1f43b675,cluster))
   name=f"he-aac-ps-output-clock-{c['kind'].lower()}-{slots*64}-synthetic.mkv";(DEST/name).write_bytes(data)
-  out.append(dict(file=name,slots=slots,frame_starts=[0,2400,4800],source_pts_ns=[p*1_000_000 for p in pts],first_skip_samples=480,pcm=c['pcm']['Double'],sha256=hashlib.sha256(data).hexdigest()))
+  out.append(dict(file=name,slots=slots,frame_starts=[0,1920,4320],source_pts_ns=[p*1_000_000 for p in pts],first_skip_samples=480,pcm=c['pcm']['Double'],sha256=hashlib.sha256(data).hexdigest()))
  invalid=[]
  original=(DEST/out[0]['file']).read_bytes();pattern=element(0x78b5,struct.pack('>d',48000));assert original.count(pattern)==1
  for label,value in [('zero',0.),('negative',-48000.),('nan',float('nan')),('infinity',float('inf'))]:

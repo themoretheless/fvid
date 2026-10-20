@@ -1,0 +1,9 @@
+{
+  "provenance": "Authored140ms neutral VP9/8kHz mono PCM,1120 samples.64 rendered device frames at1.75rate must advance112 source frames, not a DSP search-retirement boundary. No encoder/private media/network.",
+  "frames": 1120,
+  "sample_rate": 8000,
+  "sha256": {
+    "progress.mkv": "37eaa23f7425093837e6fd9d398d4212dc02f7572e368a098a1b2b5d1da874fe",
+    "expected-source.f32le": "eb78ee2de927f20aeb22b763a75319ffda1c7ba554cbcad92a3afa046fc04fce"
+  }
+}

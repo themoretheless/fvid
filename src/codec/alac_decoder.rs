@@ -12,7 +12,8 @@
 //! starts at the fields themselves. Either way the reader hands over those fields,
 //! which fix the frame length, the sample depth and the three Rice parameters every
 //! compressed header is measured against. The rate and the channel count come from
-//! the container, which owns the timeline the samples are stamped on.
+//! the container, which owns the timeline the samples are stamped on. The rate
+//! must agree with the cookie so reconstruction and timestamp geometry cannot diverge.
 //!
 //! Bits come from the top of each byte down, and no sample is aligned to a byte
 //! boundary: the frame's last residual can end mid-byte and the packet simply
@@ -44,7 +45,7 @@ impl AudioDecode for AlacDecoder {
         pts: u64,
         _duration: u64,
     ) -> Result<Option<AudioPacket>> {
-        let mut samples = Vec::new();
+        let mut samples = Vec::<f32>::new();
         self.frame(data, &mut samples)?;
         let bytes: Vec<u8> = samples
             .iter()
@@ -166,6 +167,19 @@ mod tests {
         );
     }
 
+    #[test]
+    fn large_frame_limits_and_discrete_multichannel_cookies_are_accepted_without_scratch() {
+        let mut long = COOKIE;
+        long[..4].copy_from_slice(&65536u32.to_be_bytes());
+        let decoder = AlacDecoder::new(&long, 44_100, 2).expect("valid long-frame setup");
+        assert!(decoder.channel.iter().all(|ch| ch.samples.is_empty() && ch.residual.is_empty() && ch.low.is_empty()));
+        let mut six = COOKIE;
+        six[COOKIE_CHANNELS] = 6;
+        let decoder = AlacDecoder::new(&six, 44_100, 6).expect("valid discrete six-channel setup");
+        assert_eq!(decoder.channel_mask(), 0);
+        assert_eq!(decoder.channel.len(), 6);
+    }
+
     /// Every geometry a frame cannot be read against is named at open, so a track
     /// that will not decode says why before the player tries a packet of it.
     #[test]
@@ -179,16 +193,6 @@ mod tests {
                 .expect("refused setup data");
             assert!(error.to_string().contains(wanted), "{error}");
         }
-        // Frames longer than the encoder's own default would be paid for per packet.
-        let mut long = COOKIE;
-        long[FRAME_LENGTH] = 1;
-        assert!(
-            AlacDecoder::new(&long, 44_100, 2)
-                .err()
-                .expect("a 65536-sample frame")
-                .to_string()
-                .contains("outside")
-        );
         // A depth the coding does not have is refused rather than rounded to one.
         let mut shallow = COOKIE;
         shallow[SAMPLE_SIZE] = 12;
@@ -199,19 +203,8 @@ mod tests {
                 .to_string()
                 .contains("12 bits")
         );
-        // A track whose channels disagree with its cookie cannot say which layout
-        // its samples are in, and a wider track places its elements by a map this
-        // decoder has not read.
+        // A track whose channels disagree with its cookie cannot place samples.
         assert!(AlacDecoder::new(&COOKIE, 44_100, 1).is_err());
-        let mut six = COOKIE;
-        six[COOKIE_CHANNELS] = 6;
-        assert!(
-            AlacDecoder::new(&six, 44_100, 6)
-                .err()
-                .expect("no element map")
-                .to_string()
-                .contains("no element map")
-        );
         assert!(AlacDecoder::new(&COOKIE, 0, 2).is_err());
     }
 
@@ -301,8 +294,8 @@ mod tests {
     #[test]
     fn a_zero_run_that_outruns_its_frame_is_refused() {
         // One residual, then a run of three samples in a frame that holds three. The
-        // reference clamps such a run to what fits; here the whole packet is refused
-        // instead, so a frame cannot quietly end short of what it promised.
+        // reference refuses a run beyond the declared count, and this decoder
+        // likewise refuses the whole packet rather than truncating it.
         let mut bits = Bits::new(&[0x88]);
         let mut out = [0i32; 3];
         let error = rice(&mut bits, &mut out, 16, 0, &params(3, 10))

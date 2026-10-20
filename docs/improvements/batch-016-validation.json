@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0038"
+  ],
+  "checked_at": "2026-10-15T08:49:16.630494+00:00",
+  "standards": [
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.2.9",
+    "https://www.rfc-editor.org/rfc/rfc9559.html#section-5.1.4.1.15"
+  ],
+  "before": {
+    "control_passed": 1,
+    "acceptance_failed": 2,
+    "evidence": "evidence/batch-016-empty-clock-before-acceptance.log",
+    "cause": "Empty TimestampScale is read as forbidden zero; empty TrackTimestampScale fails generic float-size parsing."
+  },
+  "qualification": [
+    "Four valid authored55ms VP9 videos (control, empty segment scale, empty track scale, both) and two malformed controls.",
+    "Use schema1_000_000ns segment ticks and1.0 track scale for empty elements; keep explicit zero and malformed widths invalid.",
+    "Exact stored packet bytes, PTS, block durations, segment duration, pixels, seek, rewind, EOF and index limits pass.",
+    "Related exact track-clock, duration, tail and audio-default regressions remain passing. Ordinary tests need no encoder or network.",
+    "A test harness initially attempted packet2 before scanning the lazy index; corrected control scan_all before verifying all stored bytes. No production change for this test authoring error."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-016-empty-clock-root-final.log",
+      "passed": 20,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-016-empty-clock-owner-final.log",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-016-empty-clock-owner-integration-final.log",
+      "passed": 9,
+      "failed": 0
+    },
+    {
+      "log": "evidence/batch-016-empty-clock-player-check.log",
+      "status": "passed"
+    },
+    {
+      "log": "evidence/batch-016-empty-clock-fixtures.log",
+      "python_passed": 1
+    }
+  ],
+  "distinct_rust_tests_passed": 37,
+  "remaining": [],
+  "counting": "One defaulted Matroska clock compatibility problem; segment/track field variants and malformed controls count once."
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "file": "vorbis-48000-448.ogg",
+    "exit_code": 0,
+    "frames": 256,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0xbfcc54380] Insufficient output buffer\n[vorbis @ 0xbfcc54e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xbfcc18300] [dec:vorbis @ 0xbfcc24500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0xbfcc54e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xbfcc18300] [dec:vorbis @ 0xbfcc24500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0xbfcc54e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xbfcc18300] [dec:vorbis @ 0xbfcc24500] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-48000-446.ogg",
+    "exit_code": 0,
+    "frames": 256,
+    "expected_frames": 446,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0xc0cc70380] Insufficient output buffer\n[vorbis @ 0xc0cc70e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xc0d008300] [dec:vorbis @ 0xc0d00c500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0xc0cc70e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xc0d008300] [dec:vorbis @ 0xc0d00c500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0xc0cc70e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xc0d008300] [dec:vorbis @ 0xc0d00c500] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-44100-448.ogg",
+    "exit_code": 0,
+    "frames": 256,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0x7fac50380] Insufficient output buffer\n[vorbis @ 0x7fac50e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x7fac18300] [dec:vorbis @ 0x7fac20500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0x7fac50e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x7fac18300] [dec:vorbis @ 0x7fac20500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0x7fac50e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x7fac18300] [dec:vorbis @ 0x7fac20500] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-44100-447.ogg",
+    "exit_code": 0,
+    "frames": 256,
+    "expected_frames": 447,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0xa45058380] Insufficient output buffer\n[vorbis @ 0xa45058e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xa44c1c300] [dec:vorbis @ 0xa44c24500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0xa45058e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xa44c1c300] [dec:vorbis @ 0xa44c24500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0xa45058e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0xa44c1c300] [dec:vorbis @ 0xa44c24500] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-96000-448.ogg",
+    "exit_code": 0,
+    "frames": 256,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0x79cc6c380] Insufficient output buffer\n[vorbis @ 0x79cc6ce00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x79d008300] [dec:vorbis @ 0x79d00c500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0x79cc6ce00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x79d008300] [dec:vorbis @ 0x79d00c500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0x79cc6ce00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x79d008300] [dec:vorbis @ 0x79d00c500] Error submitting packet to decoder: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-8000-448.ogg",
+    "exit_code": 0,
+    "frames": 256,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0x72d058380] Insufficient output buffer\n[vorbis @ 0x72d058e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x72cc18300] [dec:vorbis @ 0x72cc24500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0x72d058e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x72cc18300] [dec:vorbis @ 0x72cc24500] Error submitting packet to decoder: Invalid data found when processing input\n[vorbis @ 0x72d058e00] Insufficient output buffer\n[aist#0:0/vorbis @ 0x72cc18300] [dec:vorbis @ 0x72cc24500] Error submitting packet to decoder: Invalid data found when processing input\n"
+  }
+]

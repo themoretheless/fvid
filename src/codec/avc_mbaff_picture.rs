@@ -2,7 +2,7 @@
 use super::{
     avc::{Pps, Sps},
     avc_cabac_macroblock::IntraCabacReader,
-    avc_deblock::{MbaffIntraBlock, mbaff_intra_plane},
+    avc_deblock::{MbaffIntraBlock, mbaff_intra_plane_subsampled},
     avc_macroblock::{IntraCavlcReader, IntraLuma},
     avc_mbaff::{Readiness420, layout, write_samples},
     avc_picture::{IntraPicture, reconstruct_macroblock},
@@ -10,6 +10,8 @@ use super::{
     avc_slice::SliceHeader,
 };
 use crate::{Result, invalid};
+#[path = "avc_mbaff_pcm_picture.rs"]
+mod component_pcm;
 fn plane(size: usize) -> Result<Vec<u16>> {
     let mut values = Vec::new();
     values
@@ -36,30 +38,32 @@ pub fn reconstruct_inter_macroblock(
     let pixels = w
         .checked_mul(h)
         .ok_or_else(|| invalid("MBAFF picture size overflow"))?;
+    let sub=prediction.chroma_subsampling();
+    let monochrome = picture.cb.is_empty() && picture.cr.is_empty();
+    let chroma_samples=if monochrome { 0 } else { pixels/(sub[0]*sub[1]) };
     if !(8..=14).contains(&picture.bit_depth)
+        || !(8..=14).contains(&picture.chroma_bit_depth)
         || w % 16 != 0
         || h % 32 != 0
         || prediction.dimensions() != (16, 16)
-        || prediction.bit_depth() != picture.bit_depth
+        || prediction.component_depths() != [picture.bit_depth, picture.chroma_bit_depth]
         || picture.y.len() != pixels
-        || picture.cb.len() != pixels / 4
-        || picture.cr.len() != pixels / 4
+        || picture.cb.len() != chroma_samples
+        || picture.cr.len() != chroma_samples
     {
         return Err(invalid("invalid MBAFF inter reconstruction picture"));
     }
-    let maximum = (1u16 << picture.bit_depth) - 1;
-    if prediction
-        .y
-        .iter()
-        .chain(&prediction.cb)
-        .chain(&prediction.cr)
-        .any(|&v| v > maximum)
+    let [cb,cr]=prediction.chroma_planes();
+    if [(&prediction.y[..], picture.bit_depth),
+        (cb, picture.chroma_bit_depth),
+        (cr, picture.chroma_bit_depth)]
+        .into_iter().any(|(samples, depth)| samples.iter().any(|&v| v >= 1u16 << depth))
     {
         return Err(invalid("MBAFF inter prediction exceeds bit depth"));
     }
     let targets = [
         layout(address, w / 16, h / 16, true, field, [1, 1])?,
-        layout(address, w / 16, h / 16, true, field, [2, 2])?,
+        layout(address, w / 16, h / 16, true, field, sub)?,
     ];
     let reconstructed = if let Some(c) = coefficients {
         let luma = if transform8 {
@@ -67,7 +71,7 @@ pub fn reconstruct_inter_macroblock(
         } else {
             super::avc_compensation::InterLumaResidual::Blocks4(&c.luma4)
         };
-        if bypass {
+        let reconstructed=if bypass {
             prediction.reconstruct_inter_bypass(luma, &c.chroma_dc, &c.chroma_ac)?
         } else {
             prediction.reconstruct_inter(
@@ -78,13 +82,19 @@ pub fn reconstruct_inter_macroblock(
                 &[scaling.four[3], scaling.four[4], scaling.four[5]],
                 &scaling.eight[1],
             )?
-        }
+        };
+        if let Some(wide)=&c.chroma422 {
+            reconstructed.reconstruct_chroma422(wide,qps,&[scaling.four[3],scaling.four[4],scaling.four[5]],bypass)?
+        } else {reconstructed}
     } else {
         prediction
     };
     write_samples(&mut picture.y, w, targets[0], &reconstructed.y)?;
-    write_samples(&mut picture.cb, w / 2, targets[1], &reconstructed.cb)?;
-    write_samples(&mut picture.cr, w / 2, targets[1], &reconstructed.cr)?;
+    let [cb,cr]=reconstructed.chroma_planes();
+    if !monochrome {
+        write_samples(&mut picture.cb, w / 2, targets[1], cb)?;
+        write_samples(&mut picture.cr, w / 2, targets[1], cr)?;
+    }
     Ok(())
 }
 /// Join inter sample publication with complete slice-local readiness. No ready
@@ -154,10 +164,10 @@ impl<'a> MbaffSliceReader<'a> {
                         header,
                         sps,
                         pps,
-                        count * 80,
+                        count * if sps.chroma_format==2 {112}else{80},
                     )?
                 } else {
-                    super::avc_inter_slice::InterCavlcSlice::new_fmo(header, sps, pps, count * 96)?
+                    super::avc_inter_slice::InterCavlcSlice::new_fmo(header, sps, pps, count * if sps.chroma_format==2 {128}else{96})?
                 },
             )
         })
@@ -279,9 +289,9 @@ fn decode_optional_slices_impl(
     use super::{
         avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
         avc_compensation::Reference420,
-        avc_deblock::{MbaffBlockEdges, mbaff_inter_plane},
+        avc_deblock::{MbaffBlockEdges, mbaff_inter_plane_subsampled},
         avc_inter::{Partition, Prediction},
-        avc_inter_prediction::predict_macroblock_mbaff,
+        avc_inter_prediction::predict_macroblock_mbaff_components,
         avc_inter_slice::InterMacroblock,
         avc_motion_field::MotionField,
         avc_mv::Neighbour,
@@ -293,9 +303,8 @@ fn decode_optional_slices_impl(
         || headers[0].first_mb != 0
         || sps.frame_mbs_only
         || !sps.mb_adaptive_frame_field
-        || sps.chroma_format != 1
+        || !matches!(sps.chroma_format,0..=2)
         || sps.separate_colour_plane
-        || sps.bit_depth_luma != sps.bit_depth_chroma
         || headers.iter().any(|h| {
             !matches!(h.slice_type, SliceType::I | SliceType::Si | SliceType::P | SliceType::Sp | SliceType::B)
                 || h.field_pic
@@ -304,6 +313,13 @@ fn decode_optional_slices_impl(
         })
     {
         return Err(invalid("invalid MBAFF reconstruction configuration"));
+    }
+    if headers.iter().any(|h| matches!(h.slice_type, SliceType::Sp | SliceType::Si))
+        && (sps.profile != 88 || sps.chroma_format != 1 || sps.separate_colour_plane
+            || sps.bit_depth_luma != 8 || sps.bit_depth_chroma != 8 || pps.cabac
+            || pps.transform_8x8 || sps.transform_bypass)
+    {
+        return Err(crate::unsupported("AVC SP/SI requires eight-bit Extended-profile 4:2:0 CAVLC"));
     }
     let first = headers[0];
     if headers.iter().any(|h| {
@@ -329,8 +345,8 @@ fn decode_optional_slices_impl(
         .checked_mul(h)
         .ok_or_else(|| invalid("MBAFF picture size overflow"))?;
     let count = pixels / 256;
-    let reserve = pixels
-        .checked_mul(6)
+    let reserve = super::avc_picture::decoded_storage(sps,w,h)?
+        .checked_mul(2)
         .and_then(|n| n.checked_add(pixels / 16))
         .and_then(|n| {
             count
@@ -338,9 +354,9 @@ fn decode_optional_slices_impl(
                     (if pps.cabac {
                         1024
                     } else if fmo {
-                        97
+                        if sps.chroma_format==2 {129}else{97}
                     } else {
-                        80
+                        if sps.chroma_format==2 {112}else{80}
                     }) + std::mem::size_of::<MbaffBlockEdges>(),
                 )
                 .and_then(|c| n.checked_add(c))
@@ -363,8 +379,8 @@ fn decode_optional_slices_impl(
         bit_depth: sps.bit_depth_luma,
         chroma_bit_depth: sps.bit_depth_chroma,
         y: plane(pixels)?,
-        cb: plane(pixels / 4)?,
-        cr: plane(pixels / 4)?,
+        cb: plane(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?,
+        cr: plane(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?,
     };
     let mut deblocking = Vec::new();
     deblocking
@@ -427,22 +443,27 @@ fn decode_optional_slices_impl(
                 .map_err(|_| invalid("cannot allocate MBAFF references"))?;
             for reference in lists[list] {
                 let Some(reference) = reference else {
-                    views[list].push(Reference420::unavailable(picture.bit_depth)?);
+                    views[list].push(Reference420::unavailable_components([picture.bit_depth, picture.chroma_bit_depth])?);
                     continue;
                 };
                 if reference.coded_width != w
                     || reference.coded_height != h
                     || reference.bit_depth != picture.bit_depth || reference.chroma_bit_depth != picture.chroma_bit_depth
+                    || u32::from(reference.chroma_format()?)!=sps.chroma_format
                 {
                     return Err(invalid("MBAFF P reference geometry/depth mismatch"));
                 }
-                views[list].push(Reference420::new(
+                views[list].push(if sps.chroma_format==0 {
+                    Reference420::new_monochrome(&reference.y,w,h,[picture.bit_depth,picture.chroma_bit_depth])?
+                } else if sps.chroma_format==2 {
+                    Reference420::new_components_422([&reference.y,&reference.cb,&reference.cr],w,h,[picture.bit_depth,picture.chroma_bit_depth])?
+                } else {Reference420::new_components(
                     [&reference.y, &reference.cb, &reference.cr],
                     w,
                     h,
                     [w, w / 2, w / 2],
-                    picture.bit_depth,
-                )?);
+                    [picture.bit_depth, picture.chroma_bit_depth],
+                )?});
             }
         }
         let refs: [Vec<&Reference420<'_>>; 2] =
@@ -471,7 +492,7 @@ fn decode_optional_slices_impl(
                     [Neighbour::NoPrediction; 2],
                 )?;
                 let pcm = matches!(mb.luma, IntraLuma::Pcm { .. });
-                let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
+                let bd = 6 * (i32::from(sps.bit_depth_chroma) - 8);
                 let qps = if pcm {
                     [0; 3]
                 } else {
@@ -581,11 +602,11 @@ fn decode_optional_slices_impl(
             let weights = super::avc_inter_prediction::mbaff_weights(
                 address, field, header, pps, &vectors, direct,
             )?;
-            let prediction = predict_macroblock_mbaff(
+            let prediction = predict_macroblock_mbaff_components(
                 address,
                 [w / 16, h / 16],
                 field,
-                picture.bit_depth,
+                [picture.bit_depth, picture.chroma_bit_depth],
                 &parts,
                 &vectors,
                 [&refs[0], &refs[1]],
@@ -652,10 +673,10 @@ fn decode_optional_slices_impl(
                     };
                 }
             }
-            let bd = 6 * (i32::from(sps.bit_depth_luma) - 8);
             deblocking[address] = edge_state(
                 blocks,
-                qps.map(|q| i32::from(q) - bd),
+                std::array::from_fn(|component| i32::from(qps[component]) - 6 *
+                    (i32::from(if component == 0 { sps.bit_depth_luma } else { sps.bit_depth_chroma }) - 8)),
                 field,
                 eight,
                 slice as u32,
@@ -704,23 +725,13 @@ fn decode_optional_slices_impl(
         return Err(invalid("incomplete MBAFF inter picture"));
     }
     if filtered {
-        mbaff_inter_plane(&mut picture.y, w, h, picture.bit_depth, 0, &deblocking)?;
-        mbaff_inter_plane(
-            &mut picture.cb,
-            w / 2,
-            h / 2,
-            picture.bit_depth,
-            1,
-            &deblocking,
-        )?;
-        mbaff_inter_plane(
-            &mut picture.cr,
-            w / 2,
-            h / 2,
-            picture.bit_depth,
-            2,
-            &deblocking,
-        )?;
+        let chroma_height=if sps.chroma_format==2 {h}else{h/2};
+        let sub=if sps.chroma_format==2 {[2,1]}else{[2,2]};
+        mbaff_inter_plane_subsampled(&mut picture.y,w,h,picture.bit_depth,0,[1,1],&deblocking)?;
+        if !picture.cb.is_empty() {
+            mbaff_inter_plane_subsampled(&mut picture.cb,w/2,chroma_height,picture.chroma_bit_depth,1,sub,&deblocking)?;
+            mbaff_inter_plane_subsampled(&mut picture.cr,w/2,chroma_height,picture.chroma_bit_depth,2,sub,&deblocking)?;
+        }
     }
     Ok((picture, motion))
 }
@@ -745,12 +756,33 @@ pub(crate) fn reconstruct_intra_macroblock(
     if sps.coded_dimensions() != (w as u32, h as u32)
         || picture.bit_depth != sps.bit_depth_luma || picture.chroma_bit_depth != sps.bit_depth_chroma
         || picture.y.len() != pixels
-        || picture.cb.len() != pixels / 4
-        || picture.cr.len() != pixels / 4
+        || picture.cb.len() != if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4}
+        || picture.cr.len() != if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4}
     {
         return Err(invalid("invalid MBAFF intra reconstruction picture"));
     }
-    layout(address, w / 16, h / 16, true, field, [1, 1])?;
+    let luma_layout = layout(address, w / 16, h / 16, true, field, [1, 1])?;
+    if let IntraLuma::Pcm { y, cb, cr } = &mb.luma {
+        // PCM contains complete independent samples; no prediction view or
+        // neighborhood-availability scan is needed. Geometry/readiness and all
+        // three plane lengths were validated before publishing any component.
+        let wide=if sps.chroma_format==2 {
+            Some(mb.chroma422.as_ref().ok_or_else(||invalid("missing 422 MBAFF PCM samples"))?)
+        } else {None};
+        write_samples(&mut picture.y, w, luma_layout, y)?;
+        if let Some(wide)=wide {
+            let chroma_layout=layout(address,w/16,h/16,true,field,[2,1])?;
+            write_samples(&mut picture.cb,w/2,chroma_layout,&wide.pcm[0])?;
+            write_samples(&mut picture.cr,w/2,chroma_layout,&wide.pcm[1])?;
+        } else if sps.chroma_format!=0 {
+            let chroma_layout = layout(address, w / 16, h / 16, true, field, [2, 2])?;
+            write_samples(&mut picture.cb, w / 2, chroma_layout, cb)?;
+            write_samples(&mut picture.cr, w / 2, chroma_layout, cr)?;
+        }
+        return readiness.publish_mbaff_complete_kind(
+            address, [w / 16, h / 16], field, mb.switching_qs.is_some(),
+        );
+    }
     let parity = if field { address % 2 } else { 0 };
     let step = if field { 2 } else { 1 };
     let view_h = h / step;
@@ -761,8 +793,8 @@ pub(crate) fn reconstruct_intra_macroblock(
         bit_depth: picture.bit_depth,
         chroma_bit_depth: picture.chroma_bit_depth,
         y: plane(w * view_h)?,
-        cb: plane(w * view_h / 4)?,
-        cr: plane(w * view_h / 4)?,
+        cb: plane(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {w*view_h/2}else{w*view_h/4})?,
+        cr: plane(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {w*view_h/2}else{w*view_h/4})?,
     };
     for (source, dest, stride) in [
         (&picture.y, &mut view.y, w),
@@ -795,21 +827,22 @@ pub(crate) fn reconstruct_intra_macroblock(
     let logical_y = (geometry.origin[1] - parity) / step;
     mb.address = (logical_y / 16 * (w / 16) + geometry.origin[0] / 16) as u32;
     reconstruct_macroblock(&mut view, &mb, sps, pps, scaling, &mut ready)?;
-    for (component, source, dest, stride, side) in [
-        (0, &view.y, &mut picture.y, w, 16),
-        (1, &view.cb, &mut picture.cb, w / 2, 8),
-        (2, &view.cr, &mut picture.cr, w / 2, 8),
+    for (component, source, dest, stride, bw, bh) in [
+        (0, &view.y, &mut picture.y, w, 16, 16),
+        (1, &view.cb, &mut picture.cb, w / 2, 8, if sps.chroma_format==2 {16}else{8}),
+        (2, &view.cr, &mut picture.cr, w / 2, 8, if sps.chroma_format==2 {16}else{8}),
     ] {
-        let sub = if component == 0 { [1, 1] } else { [2, 2] };
+        if source.is_empty() {continue;}
+        let sub = if component == 0 { [1, 1] } else if sps.chroma_format==2 {[2,1]} else { [2, 2] };
         let target = layout(address, w / 16, h / 16, true, field, sub)?;
         let x = target.origin[0];
         let y = (target.origin[1] - parity) / step;
         let mut samples = [0u16; 256];
-        for row in 0..side {
-            samples[row * side..row * side + side]
-                .copy_from_slice(&source[(y + row) * stride + x..(y + row) * stride + x + side]);
+        for row in 0..bh {
+            samples[row * bw..row * bw + bw]
+                .copy_from_slice(&source[(y + row) * stride + x..(y + row) * stride + x + bw]);
         }
-        write_samples(dest, stride, target, &samples[..side * side])?;
+        write_samples(dest, stride, target, &samples[..bw * bh])?;
     }
     readiness.publish_mbaff_complete_kind(
         address, [w / 16, h / 16], field, mb.switching_qs.is_some(),
@@ -834,17 +867,45 @@ pub fn decode_intra_slices(
     pps: &Pps,
     budget: usize,
 ) -> Result<IntraPicture> {
+    decode_intra_slices_impl(headers, sps, pps, budget, None)
+}
+
+pub(crate) fn decode_intra_slices_scaled(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    budget: usize,
+    scaling: ScalingMatrices,
+) -> Result<IntraPicture> {
+    decode_intra_slices_impl(headers, sps, pps, budget, Some(scaling))
+}
+
+fn decode_intra_slices_impl(
+    headers: &[&SliceHeader],
+    sps: &Sps,
+    pps: &Pps,
+    budget: usize,
+    scaling_override: Option<ScalingMatrices>,
+) -> Result<IntraPicture> {
+    if sps.separate_colour_plane && scaling_override.is_none() {
+        return super::avc_picture::decode_intra_slices(headers, sps, pps, budget);
+    }
+    let fmo = !matches!(pps.slice_groups, super::avc::SliceGroups::Single);
+    let mut ordered = Vec::new();
+    ordered
+        .try_reserve_exact(headers.len())
+        .map_err(|_| invalid("cannot allocate MBAFF intra slice index"))?;
+    ordered.extend_from_slice(headers);
+    if !fmo {
+        ordered.sort_by_key(|h| h.first_mb);
+    }
+    let headers = ordered.as_slice();
     let header = *headers
         .first()
         .ok_or_else(|| invalid("missing MBAFF intra slices"))?;
-    if header.first_mb != 0 {
+    if !fmo && header.first_mb != 0 {
         return Err(invalid(
             "MBAFF intra picture must start at macroblock pair zero",
-        ));
-    }
-    if sps.bit_depth_luma != sps.bit_depth_chroma {
-        return Err(crate::unsupported(
-            "MBAFF mixed component depths are not connected",
         ));
     }
     let (w, h) = sps.coded_dimensions();
@@ -853,19 +914,37 @@ pub fn decode_intra_slices(
         .checked_mul(h)
         .ok_or_else(|| invalid("MBAFF pixel count overflow"))?;
     let count = pixels / 256;
-    let storage = pixels
-        .checked_mul(6)
+    // Probe the cheaper PCM path only when its own scratch reservation fits.
+    // Compressed blocks fall through to the generic rectangular prediction view.
+    let pcm_working=super::avc_picture::decoded_storage(sps,w,h)?
+        .checked_add(count.checked_mul(256).and_then(|n|n.checked_add(16384))
+            .ok_or_else(||invalid("MBAFF PCM budget overflow"))?)
+        .ok_or_else(||invalid("MBAFF PCM budget overflow"))?;
+    if matches!(sps.chroma_format,0|2|3) && !sps.separate_colour_plane
+        && matches!(pps.slice_groups,super::avc::SliceGroups::Single)
+        && headers.iter().all(|h|h.disable_deblocking_filter_idc==1 || (sps.chroma_format==3 && h.disable_deblocking_filter_idc<=2))
+        && (sps.chroma_format==3 || pcm_working<=budget) {
+        match component_pcm::decode(headers,sps,pps,budget) {
+            Ok(picture)=>return Ok(picture),
+            Err(crate::Error::Unsupported(_)) if sps.chroma_format!=3=>{},
+            Err(error)=>return Err(error),
+        }
+    }
+
+    let storage = super::avc_picture::decoded_storage(sps,w,h)?
+        .checked_mul(2)
         .and_then(|n| {
             count
                 .checked_mul(80 + std::mem::size_of::<MbaffIntraBlock>())
                 .and_then(|c| n.checked_add(c))
         })
         .ok_or_else(|| invalid("MBAFF reconstruction budget overflow"))?;
+    let storage=storage.checked_add(if sps.chroma_format==2 {std::mem::size_of::<super::avc_macroblock::Chroma422>()}else{0})
+        .ok_or_else(||invalid("MBAFF wide macroblock budget overflow"))?;
     if storage > budget {
         return Err(invalid("MBAFF reconstruction exceeds memory budget"));
     }
 
-    let fmo = !matches!(pps.slice_groups, super::avc::SliceGroups::Single);
     if fmo && pps.cabac {
         return Err(invalid("MBAFF FMO requires CAVLC"));
     }
@@ -877,7 +956,10 @@ pub fn decode_intra_slices(
     } else {
         Vec::new()
     };
-    let scaling = ScalingMatrices::new(sps, pps)?;
+    let scaling = match scaling_override {
+        Some(scaling) => scaling,
+        None => ScalingMatrices::new(sps, pps)?,
+    };
     let mut readiness = Readiness420::new(w / 16, h / 16, true, count * 7)?;
     let mut picture = IntraPicture {
         coded_width: w,
@@ -886,8 +968,8 @@ pub fn decode_intra_slices(
         bit_depth: sps.bit_depth_luma,
         chroma_bit_depth: sps.bit_depth_chroma,
         y: plane(pixels)?,
-        cb: plane(pixels / 4)?,
-        cr: plane(pixels / 4)?,
+        cb: plane(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?,
+        cr: plane(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?,
     };
     let mut seen = 0;
     let mut deblocking = Vec::new();
@@ -990,17 +1072,20 @@ pub fn decode_intra_slices(
     if seen != count {
         return Err(invalid("incomplete MBAFF intra picture"));
     }
+    let chroma_height=if sps.chroma_format==2 {h}else{h/2};
     for (component, samples, width, height) in [
         (0, &mut picture.y, w, h),
-        (1, &mut picture.cb, w / 2, h / 2),
-        (2, &mut picture.cr, w / 2, h / 2),
+        (1, &mut picture.cb, w / 2, chroma_height),
+        (2, &mut picture.cr, w / 2, chroma_height),
     ] {
-        mbaff_intra_plane(
+        if samples.is_empty() {continue;}
+        mbaff_intra_plane_subsampled(
             samples,
             width,
             height,
-            picture.bit_depth,
+            if component == 0 { picture.bit_depth } else { picture.chroma_bit_depth },
             component,
+            if component==0 {[1,1]}else if sps.chroma_format==2 {[2,1]}else{[2,2]},
             &deblocking,
         )?;
     }
@@ -1147,6 +1232,7 @@ mod inter_tests {
     }
     fn coefficients() -> InterCoefficients {
         InterCoefficients {
+            chroma422:None,
             luma4: [[0; 16]; 16],
             luma8: [[0; 64]; 4],
             chroma_dc: [[0; 4]; 2],
@@ -1290,6 +1376,110 @@ mod inter_tests {
             for component in 0..3 {
                 assert!(!readiness.available(component, [0, 0]).unwrap());
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod pcm_publication_tests {
+    use super::*;
+    use super::super::{avc_intra::ChromaMode, avc_macroblock::IntraMacroblock, config::AvcConfig};
+    fn setup() -> (Sps, Pps, ScalingMatrices) {
+        let config = AvcConfig::parse(include_bytes!("../../tests/fixtures/playback-errors/avc-mbaff-pcm-memory/64-frame.avcc")).unwrap();
+        let sps = Sps::parse(config.sps[0]).unwrap();
+        let pps = Pps::parse(config.pps[0], &sps).unwrap();
+        let scaling = ScalingMatrices::new(&sps, &pps).unwrap();
+        (sps, pps, scaling)
+    }
+    fn picture() -> IntraPicture {
+        IntraPicture { coded_width: 64, coded_height: 64, crop: [0;4], bit_depth: 8, chroma_bit_depth: 10,
+            y: vec![9;4096], cb: vec![9;1024], cr: vec![9;1024] }
+    }
+    fn block(address: u32) -> IntraMacroblock {
+        IntraMacroblock { chroma422:None, address, qp: 26, switching_qs: None, luma: IntraLuma::Pcm { y: [17;256], cb: [1023;64], cr: [513;64] }, chroma_mode: ChromaMode::Dc, coded_block_pattern: 0,
+            luma_dc: [0;16], luma_levels: [[0;16];16], chroma_dc: [[0;4];2], chroma_ac: [[[0;16];4];2] }
+    }
+    #[test]
+    fn pcm_writes_only_its_frame_or_field_footprint_and_publishes_all_components() {
+        let (sps,pps,scaling)=setup();
+        for field in [false,true] { for address in [0,1,14,15] {
+            let mut picture=picture();let mut readiness=Readiness420::new(4,4,true,16*7).unwrap();
+            reconstruct_intra_macroblock(&mut picture,block(address),field,&sps,&pps,&scaling,&mut readiness).unwrap();
+            for (component,plane,stride,sub,value) in [(0,&picture.y,64,[1,1],17),(1,&picture.cb,32,[2,2],1023),(2,&picture.cr,32,[2,2],513)] {
+                let area=layout(address as usize,4,4,true,field,sub).unwrap();
+                for row in 0..plane.len()/stride {for col in 0..stride {
+                    let in_area=col>=area.origin[0] && col<area.origin[0]+area.size[0] && row>=area.origin[1] && (row-area.origin[1])%area.row_step==0 && (row-area.origin[1])/area.row_step<area.size[1];
+                    assert_eq!(plane[row*stride+col],if in_area{value}else{9});
+                }}
+                assert_ne!(readiness.available_kind(component,area.origin).unwrap(),0);
+            }
+        }}
+    }
+    #[test]
+    fn missing_rectangular_pcm_payload_cannot_publish_luma() {
+        let (mut sps,pps,_)=setup();
+        sps.chroma_format=2;
+        let scaling=ScalingMatrices::new(&sps,&pps).unwrap();
+        let mut picture=picture();picture.cb.resize(2048,9);picture.cr.resize(2048,9);
+        let before=[picture.y.clone(),picture.cb.clone(),picture.cr.clone()];
+        let mut readiness=Readiness420::new(4,4,true,16*7).unwrap();
+        assert!(reconstruct_intra_macroblock(&mut picture,block(0),false,&sps,&pps,&scaling,&mut readiness).is_err());
+        assert_eq!([picture.y,picture.cb,picture.cr],before);
+        assert_eq!(readiness.available_kind(0,[0,0]).unwrap(),0);
+    }
+    #[test]
+    fn invalid_plane_or_pair_mode_cannot_partially_publish_pcm() {
+        let (sps,pps,scaling)=setup();
+        for component in 0..3 {
+            let mut picture=picture();match component {0=>{picture.y.pop();},1=>{picture.cb.pop();},_=>{picture.cr.pop();}}
+            let before=[picture.y.clone(),picture.cb.clone(),picture.cr.clone()];
+            let mut readiness=Readiness420::new(4,4,true,16*7).unwrap();
+            assert!(reconstruct_intra_macroblock(&mut picture,block(0),false,&sps,&pps,&scaling,&mut readiness).is_err());
+            assert_eq!([picture.y,picture.cb,picture.cr],before);assert_eq!(readiness.available_kind(0,[0,0]).unwrap(),0);
+        }
+        let mut picture=picture();let mut readiness=Readiness420::new(4,4,true,16*7).unwrap();
+        reconstruct_intra_macroblock(&mut picture,block(0),false,&sps,&pps,&scaling,&mut readiness).unwrap();
+        let before=[picture.y.clone(),picture.cb.clone(),picture.cr.clone()];
+        assert!(reconstruct_intra_macroblock(&mut picture,block(1),true,&sps,&pps,&scaling,&mut readiness).is_err());
+        assert_eq!([picture.y,picture.cb,picture.cr],before);
+    }
+}
+
+#[cfg(test)]
+mod inter_component_publication_tests {
+    use super::*;
+    use super::super::avc_compensation::Prediction420;
+    fn picture(depths:[u8;2])->IntraPicture {
+        IntraPicture{coded_width:16,coded_height:32,crop:[0;4],bit_depth:depths[0],chroma_bit_depth:depths[1],y:vec![9;512],cb:vec![9;128],cr:vec![9;128]}
+    }
+    fn prediction(depths:[u8;2])->Prediction420 {
+        let mut result=Prediction420::empty_components(depths);
+        result.y.fill((1u16<<depths[0])-1);result.cb.fill((1u16<<depths[1])-1);result.cr.fill(1u16<<(depths[1]-1));result
+    }
+    #[test]
+    fn mixed_precision_prediction_validates_and_publishes_per_plane() {
+        let scaling=ScalingMatrices{four:[[16;16];6],eight:[[16;64];2]};
+        for depths in [[8,14],[14,8]] {for field in [false,true] {for address in [0,1] {
+            let mut picture=picture(depths);
+            reconstruct_inter_macroblock(&mut picture,address,field,prediction(depths),None,false,[26;3],false,&scaling).unwrap();
+            for (component,plane,stride,sub,value) in [(0,&picture.y,16,[1,1],(1u16<<depths[0])-1),(1,&picture.cb,8,[2,2],(1u16<<depths[1])-1),(2,&picture.cr,8,[2,2],1u16<<(depths[1]-1))] {
+                let area=layout(address,1,2,true,field,sub).unwrap();
+                for row in 0..plane.len()/stride {for col in 0..stride {
+                    let inside=col>=area.origin[0] && col<area.origin[0]+area.size[0] && row>=area.origin[1] && (row-area.origin[1])%area.row_step==0 && (row-area.origin[1])/area.row_step<area.size[1];
+                    assert_eq!(plane[row*stride+col],if inside{value}else{9},"component{component}");
+                }}
+            }
+        }}}
+    }
+    #[test]
+    fn mismatched_chroma_depth_or_sample_range_never_partially_publishes() {
+        let scaling=ScalingMatrices{four:[[16;16];6],eight:[[16;64];2]};
+        for malformed in 0..2 {
+            let mut picture=picture([8,14]);let before=[picture.y.clone(),picture.cb.clone(),picture.cr.clone()];
+            let mut pred=prediction(if malformed==0 {[8,10]}else{[8,14]});
+            if malformed==1 {pred.cb[0]=1<<14;}
+            assert!(reconstruct_inter_macroblock(&mut picture,0,false,pred,None,false,[26;3],false,&scaling).is_err());
+            assert_eq!([picture.y,picture.cb,picture.cr],before);
         }
     }
 }

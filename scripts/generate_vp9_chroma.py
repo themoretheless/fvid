@@ -108,12 +108,13 @@ def webm(packets):
     for i,p in enumerate(packets): cluster+=ebml('a3',b'\x81'+(i*333).to_bytes(2,'big')+b'\x80'+p)
     info=ebml('1549a966',ebml('2ad7b1',(1000000).to_bytes(3,'big')))
     return ebml('1a45dfa3',ebml('4282',b'webm'))+ebml('18538067',info+ebml('1654ae6b',ebml('ae',track))+ebml('1f43b675',cluster))
-def mp4(packets,depth,chroma,size=(64,64)):
+def mp4(packets,depth,chroma,size=(64,64),sync_samples=None):
     count=len(packets)
+    sync_samples=[1] if sync_samples is None else sync_samples
     ftyp=atom(b'ftyp',b'isom'+word(0)+b'isomvp09');mdat=atom(b'mdat',b''.join(packets))
     entry=bytearray(78);entry[6:8]=(1).to_bytes(2,'big');entry[24:28]=struct.pack('>HH',*size);entry[40:42]=(1).to_bytes(2,'big');entry[74:76]=(24).to_bytes(2,'big')
     stsd=atom(b'stsd',word(0,1)+atom(b'vp09',entry+atom(b'vpcC',bytes([1,0,0,0,(0 if chroma=='420' else 1)+(2 if depth>8 else 0),10,(depth<<4)|({'420':0,'422':2,'444':3}[chroma]<<1),6,6,6,0,0]))))
-    stbl=atom(b'stbl',stsd+atom(b'stts',word(0,1,count,1))+atom(b'stsz',word(0,0,count,*map(len,packets)))+atom(b'stsc',word(0,1,1,count,1))+atom(b'stco',word(0,1,len(ftyp)+8))+atom(b'stss',word(0,1,1)))
+    stbl=atom(b'stbl',stsd+atom(b'stts',word(0,1,count,1))+atom(b'stsz',word(0,0,count,*map(len,packets)))+atom(b'stsc',word(0,1,1,count,1))+atom(b'stco',word(0,1,len(ftyp)+8))+atom(b'stss',word(0,len(sync_samples),*sync_samples)))
     dinf=atom(b'dinf',atom(b'dref',word(0,1)+atom(b'url ',word(1))))
     tkhd=bytearray(84);tkhd[12:16]=word(1);tkhd[20:24]=word(count);tkhd[40:44]=tkhd[56:60]=word(65536);tkhd[72:76]=word(0x40000000);tkhd[76:84]=word(size[0]<<16,size[1]<<16)
     mdhd=bytearray(24);mdhd[12:20]=word(50,count);mdhd[20:22]=(21956).to_bytes(2,'big')

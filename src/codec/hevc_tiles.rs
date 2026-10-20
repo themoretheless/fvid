@@ -344,7 +344,7 @@ mod fixture_tests {
         geometry.tiles.as_mut().unwrap().column_widths = vec![2, 1];
         assert!(decode_error(&geometry, &header, 16 << 20).contains("tile partition"));
         assert!(
-            decode_error(pps, &header, 64 * 64 * 24 + 65536).contains("tile layout exceeds budget")
+            decode_error(pps, &header, super::super::hevc_picture::reconstruction_budget(64*64).unwrap()).contains("tile layout exceeds budget")
         );
     }
 

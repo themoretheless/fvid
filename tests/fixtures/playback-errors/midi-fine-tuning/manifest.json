@@ -1,0 +1,170 @@
+{
+  "provenance": "Twenty-seven authored RPN1fourteen-bit tuning controls against independent RPN0one-semitone bends;extremes/lowbits,byte-order/retention,active/future/sustainednotes,null/NRPN/coarse/bend/range composition,CC121,channel isolation. Separate nativeVP9/PCM,no encoder/network/private media.",
+  "cases": [
+    {
+      "file": "value-0.mid",
+      "control": "value-0-bend.mid"
+    },
+    {
+      "file": "value-1.mid",
+      "control": "value-1-bend.mid"
+    },
+    {
+      "file": "value-127.mid",
+      "control": "value-127-bend.mid"
+    },
+    {
+      "file": "value-128.mid",
+      "control": "value-128-bend.mid"
+    },
+    {
+      "file": "value-8191.mid",
+      "control": "value-8191-bend.mid"
+    },
+    {
+      "file": "value-8192.mid",
+      "control": "value-8192-bend.mid"
+    },
+    {
+      "file": "value-8193.mid",
+      "control": "value-8193-bend.mid"
+    },
+    {
+      "file": "value-8320.mid",
+      "control": "value-8320-bend.mid"
+    },
+    {
+      "file": "value-16382.mid",
+      "control": "value-16382-bend.mid"
+    },
+    {
+      "file": "value-16383.mid",
+      "control": "value-16383-bend.mid"
+    },
+    {
+      "file": "lsb-only.mid",
+      "control": "lsb-only-bend.mid"
+    },
+    {
+      "file": "msb-only.mid",
+      "control": "msb-only-bend.mid"
+    },
+    {
+      "file": "lsb-first-data.mid",
+      "control": "lsb-first-data-bend.mid"
+    },
+    {
+      "file": "active.mid",
+      "control": "active-bend.mid"
+    },
+    {
+      "file": "future.mid",
+      "control": "future-bend.mid"
+    },
+    {
+      "file": "null.mid",
+      "control": "null-bend.mid"
+    },
+    {
+      "file": "nrpn.mid",
+      "control": "nrpn-bend.mid"
+    },
+    {
+      "file": "rpn-reselect.mid",
+      "control": "rpn-reselect-bend.mid"
+    },
+    {
+      "file": "unknown-rpn.mid",
+      "control": "unknown-rpn-bend.mid"
+    },
+    {
+      "file": "unselected-data.mid",
+      "control": "unselected-data-bend.mid"
+    },
+    {
+      "file": "coarse-composition.mid",
+      "control": "coarse-composition-bend.mid"
+    },
+    {
+      "file": "bend-composition.mid",
+      "control": "bend-composition-bend.mid"
+    },
+    {
+      "file": "range-composition.mid",
+      "control": "range-composition-bend.mid"
+    },
+    {
+      "file": "channel-isolation.mid",
+      "control": "channel-isolation-bend.mid"
+    },
+    {
+      "file": "reset-preserves-fine.mid",
+      "control": "reset-preserves-fine-bend.mid"
+    },
+    {
+      "file": "return-center.mid",
+      "control": "return-center-bend.mid"
+    },
+    {
+      "file": "sustained-key.mid",
+      "control": "sustained-key-bend.mid"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "value-0.mid": "dba7c85642889bfc0b5af4529b32567205ace9ccc5998aaac879be1c31d3bbbe",
+    "value-0-bend.mid": "f866002468867dcdbb1eb393fb6f78d59d24526c21964e6d657857be90cb839d",
+    "value-1.mid": "d9dc1b32877a738fe9d927c8e957ec23090d324fec82034fd0a68aa64cecfb60",
+    "value-1-bend.mid": "ed000537795d147a480435779d0004c7d9db0682da2d93f95a25e461502df31e",
+    "value-127.mid": "f1861debe5f1febf842de2ee03ea1152fb9bf6d5adc0382eee9de10c7dbb36ec",
+    "value-127-bend.mid": "b0432f2c52e7ca0fd692599de008c91e0fd6b0a54cbf337014621206e7de3289",
+    "value-128.mid": "bfe09a8a4a2447667c35f54fd3466fd7d3288c8bf77ec36b402634f5238d86eb",
+    "value-128-bend.mid": "f89b2e5efdec6a02ad0a122ea9b624e307b04507e303e671bd4316cab3c22e15",
+    "value-8191.mid": "8214ea2dc6de5e35ec15c444b0e9d8591a4b2fe2d0a3899978a01d93b3e7fdfa",
+    "value-8191-bend.mid": "d0300a1b8129615f437edb3c7a3a661152ee61c211a198ab79a73027bebe06aa",
+    "value-8192.mid": "64fa45a79a2b7655ca13cb8880da8445cf7a6d0b089601493ab64a1f1f4879de",
+    "value-8192-bend.mid": "7ae155f33a63e85da559d2bbdeb32c5776b04d61641425b61a1bbc1555f0383b",
+    "value-8193.mid": "8015723c7d8ec82eedd86ac97628d23bbb279b1a7e7472ae72e0ca23831f072e",
+    "value-8193-bend.mid": "fa5297656bcb224325715aa7a7252412758ce59bcea1b0b220c2ee4d6df1c43d",
+    "value-8320.mid": "fe8411e14f865dbd6a41e301bc418b2bcfcebe77f80e786f2d147fc8de1c3aca",
+    "value-8320-bend.mid": "4382a413c166c9b1a713ca4040f3319a94df3c8df3e33e5616946c8af8c2fd0b",
+    "value-16382.mid": "a204fe4317f3fbc9449d54184e814bb6037b6e2601f150debae7af82176ba325",
+    "value-16382-bend.mid": "1b6fa7cbc882619e0de7349777704f26d215f42eb8f8cab3a6f8f0e3ab85fc6c",
+    "value-16383.mid": "2b369435beaa1099ece874c1e8792469511a193d62309d87706078a1d7302aeb",
+    "value-16383-bend.mid": "28df06c28387fda81cdcb7b8e83a747aecfb2f925942d20e2f88d6585dd8a1cc",
+    "lsb-only.mid": "decb01af0c7343985f19942c0e915fb2556680b22676576d6e179907901c9a80",
+    "lsb-only-bend.mid": "fa5297656bcb224325715aa7a7252412758ce59bcea1b0b220c2ee4d6df1c43d",
+    "msb-only.mid": "ee07adf02caf83340d23aecfa54c48f49c9ffb22121819c478d337b0850bbff0",
+    "msb-only-bend.mid": "f89b2e5efdec6a02ad0a122ea9b624e307b04507e303e671bd4316cab3c22e15",
+    "lsb-first-data.mid": "be5381232b71ac5c5cc8dd77d25e0195383ea18e5a1e6c0cbf7765f79c8b2c77",
+    "lsb-first-data-bend.mid": "bb8467c224bd88f317512a59ec53a9252e0e77692623d81842ed21145b3ad77b",
+    "active.mid": "410e642ab5687776c5f41fcf4a2fa5a2957f40cbe0cc32c3cc248c27937885e8",
+    "active-bend.mid": "fde44b3988b121d6fd08ef6f5288b7d5517439e9aa2dcefeb3a0eed79053e9c8",
+    "future.mid": "48586fc0454d3211cdd7eb11a5cbc4bda4284d76eb07f8cdf5570ac9e6f9fb58",
+    "future-bend.mid": "4f85b4f5d11b572256986a585b52d00fccbc1ac0ae76b48d0e7d80e013578196",
+    "null.mid": "7c4e320cc0908580f3ad98da6ce4e1f2051619db626669fc645c9d56596f0612",
+    "null-bend.mid": "44eed60730f7d702d9f06696873bd0229fe0e951f86b394e72498d53c46182d9",
+    "nrpn.mid": "78b8e4d2a6a718a598f094aa92d04cbed433ec8c403a7dfb2a3a1733d1e53080",
+    "nrpn-bend.mid": "44eed60730f7d702d9f06696873bd0229fe0e951f86b394e72498d53c46182d9",
+    "rpn-reselect.mid": "ce6c599bb36aff9cfad7485beb09ddac8233f144792d12ab3d03ccbafe237c51",
+    "rpn-reselect-bend.mid": "d0300a1b8129615f437edb3c7a3a661152ee61c211a198ab79a73027bebe06aa",
+    "unknown-rpn.mid": "9d69dafc0e3891bf420ae141cd557e2e7ee7dc6153c2a8be4abbc48ed6c5cfa0",
+    "unknown-rpn-bend.mid": "0f9fcff063fba0e85371219c37840ca658f2b6cbec1640db98b80ee422c76962",
+    "unselected-data.mid": "ab50eb3006d579402c67c6f93504ec0519ee325add20bda1bd634c44251f5f18",
+    "unselected-data-bend.mid": "0f9fcff063fba0e85371219c37840ca658f2b6cbec1640db98b80ee422c76962",
+    "coarse-composition.mid": "26be24392c743cbfd5512390021aaede7dc139ffa61b56fe8ff9354a0e223ab4",
+    "coarse-composition-bend.mid": "152567adeddaf4b46227e23294ffe9b07cdae2f1aa8f22944ec727e2b97f2180",
+    "bend-composition.mid": "63812fc6434e23729ca60d473dd0964bf6886d277281e7d06c51ae342278cd49",
+    "bend-composition-bend.mid": "9e34a35471ef69fc9c74ce9cc2c1168e388c5595111d99886a11f41eba54960b",
+    "range-composition.mid": "cac1a7a84542b3930e23bbb997cf137d325ff24afba7a4cc9861243245ca77a5",
+    "range-composition-bend.mid": "9e34a35471ef69fc9c74ce9cc2c1168e388c5595111d99886a11f41eba54960b",
+    "channel-isolation.mid": "22fb11c17bd727424d04f9c50f11639ee689e7ffb2dce04bd06f4a67cb9a8b98",
+    "channel-isolation-bend.mid": "c82682c939439db552452eee4de6dff8f90e809a15de106d1595fc1574d4ae06",
+    "reset-preserves-fine.mid": "2b3339eb2e2b9c14ec9a0def2bdb1b0f30bbe1d8b2d7cb0da8079031c40b593a",
+    "reset-preserves-fine-bend.mid": "1de1e4f7d180ac8804eeac2640519763d8784e7eb9f5df7511b85aad3f975906",
+    "return-center.mid": "fbef45481665c282c852cc6db63590d5516f01bfedd7bd3d6f854508aa7ab950",
+    "return-center-bend.mid": "e062b2b5069a44882d6da9841c8fa269c6ddda2558e8695a6ee9b5f6d630c5c5",
+    "sustained-key.mid": "0be7c9ba063940efb5a068fba04662240056632d3dda7c6e1b32f7360321e8f5",
+    "sustained-key-bend.mid": "70dd04234ec69ae1c8d3fe5e87d59f24398446996bfcda05df466e174fd8b471"
+  }
+}

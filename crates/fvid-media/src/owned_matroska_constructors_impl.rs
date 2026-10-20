@@ -50,6 +50,30 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         text:&std::collections::BTreeMap<String,String>,
         scoped:&std::collections::BTreeMap<usize,std::collections::BTreeMap<String,String>>,
     )->Result<Self> {
+        Self::new_with_track_usability(output,tracks,options,metadata,text,scoped,&[])
+    }
+    /// Internal transport bridge; empty usability retains legacy enabled defaults.
+    pub(crate) fn new_with_track_usability(
+        output:&'a mut W,tracks:&[TrackSpec<'_>],options:&[TrackOptions],metadata:&FileMetadata,
+        text:&std::collections::BTreeMap<String,String>,
+        scoped:&std::collections::BTreeMap<usize,std::collections::BTreeMap<String,String>>,
+        enabled:&[bool],
+    )->Result<Self> {
+        Self::new_with_track_preferences(output,tracks,options,metadata,text,scoped,enabled,&[])
+    }
+    /// Private source-to-output transport for usability and default preference.
+    pub(crate) fn new_with_track_preferences(
+        output:&'a mut W,tracks:&[TrackSpec<'_>],options:&[TrackOptions],metadata:&FileMetadata,
+        text:&std::collections::BTreeMap<String,String>,
+        scoped:&std::collections::BTreeMap<usize,std::collections::BTreeMap<String,String>>,
+        enabled:&[bool],defaults:&[bool],
+    )->Result<Self> {
+        if !defaults.is_empty() && defaults.len()!=tracks.len() {
+            return Err(invalid("Matroska default track count mismatch"));
+        }
+        if !enabled.is_empty() && enabled.len()!=tracks.len() {
+            return Err(invalid("Matroska usability track count mismatch"));
+        }
         let mut file_elements = file_metadata(metadata)?;
         file_elements.extend(extra_text_tags(text)?);
         for (&track,tags) in scoped {
@@ -65,7 +89,7 @@ impl<'a, W: Write + Seek> PacketWriter<'a, W> {
         }
         let mut entries = Vec::new();
         for (index, track) in tracks.iter().enumerate() {
-            entries.extend(track_entry(track, index as u64 + 1, options.get(index))?);
+            entries.extend(track_entry_with_usability(track, index as u64 + 1, options.get(index), enabled.get(index).copied().unwrap_or(true), defaults.get(index).copied().unwrap_or(true))?);
         }
         let delays = (0..tracks.len())
             .map(|i| options.get(i).map_or(0, |o| o.codec_delay_ns))

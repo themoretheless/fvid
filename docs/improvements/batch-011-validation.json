@@ -1,0 +1,89 @@
+{
+  "status": "accepted",
+  "candidate_ids": [
+    "FVID-0033"
+  ],
+  "standards": [
+    "https://doc.rust-lang.org/std/io/trait.Seek.html#tymethod.seek"
+  ],
+  "before": {
+    "owner": {
+      "passed": 1,
+      "failed": 1,
+      "evidence": "evidence/batch-011-owner-before.log"
+    },
+    "frontend": {
+      "passed": 2,
+      "failed": 1,
+      "evidence": "evidence/batch-011-root-before.log"
+    }
+  },
+  "qualification": [
+    "One short authored three-color VP9 MP4 with three correctly indexed sync samples. Ordinary tests load saved data without FFmpeg or network.",
+    "A valid Read+Seek adapter moves before returning an error. The regression confirms the error fires at the packet seek and preserves its message; recovery must return the requested packet.",
+    "The native frontend decoder matches independent analytic YUV sample oracles, frame clocks, seek, rewind and EOF."
+  ],
+  "completed": [
+    "Initial owner: two passed",
+    "Initial frontend: three recovery/control tests plus eight audio integration tests passed",
+    "Python fixture integrity: one passed"
+  ],
+  "remaining": [],
+  "counting": "Both duplicated MP4 readers share one cursor-invalidation bug; source copies and I/O error variants do not create additional IDs.",
+  "accepted_ids": [
+    "FVID-0033"
+  ],
+  "checked_at": "2026-10-15T06:32:33.299906+00:00",
+  "distinct_rust_tests_passed": 57,
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --lib mp4",
+      "passed": 17,
+      "failed": 0,
+      "log": "evidence/batch-011-mp4-seek-io-owner-subsystem.log",
+      "note": "The additional integration target in this invocation was filtered out and contributes zero tests."
+    },
+    {
+      "command": "cargo test --locked --offline -p fvid-media --test mp4_seek_io_regressions",
+      "passed": 2,
+      "failed": 0,
+      "log": "evidence/batch-011-mp4-seek-io-owner-final.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib mp4",
+      "passed": 27,
+      "failed": 0,
+      "log": "evidence/batch-011-mp4-seek-io-root-subsystem.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --test mp4_seek_io_regressions --test owned_mp4_audio",
+      "passed": 11,
+      "failed": 0,
+      "log": "evidence/batch-011-mp4-seek-io-root-final.log"
+    },
+    {
+      "command": "cargo check --locked --offline --no-default-features --features player",
+      "result": "passed",
+      "log": "evidence/batch-011-mp4-seek-io-player-check.log"
+    },
+    {
+      "command": "python3 -m unittest discover -s scripts -p test_mp4_seek_io_regressions.py",
+      "passed": 1,
+      "failed": 0
+    }
+  ],
+  "result": "Both readers mark cursor position unknown before an absolute seek. Seek errors preserve their message, clear failed output, and cannot cause subsequent recovery to reuse an invalid cursor cache.",
+  "limitations": [
+    "Failure injection qualifies generic Read+Seek recovery, not behavior of a particular operating-system filesystem error.",
+    "Software native decoding and player configuration are checked; no hardware runtime or performance claim."
+  ],
+  "source_hashes": {
+    "src/container/mp4.rs": "c6b52acd87f63ba40306372d472bc6ee3c70e181023baa3f56ef993c1c30a9c3",
+    "crates/fvid-media/src/owned_mp4_impl.rs": "15cdd02fbdc630386d5de2d916726aab8ef8a621040affb5d5ffa76740ee994e",
+    "tests/mp4_seek_io_regressions.rs": "1f3d99f94043e8a144f82075a4c60eab08e3945953562e986b3fd1707b50bc53",
+    "crates/fvid-media/tests/mp4_seek_io_regressions.rs": "a345aa64ba42ecb14063bd695545390bb9691acc1f5c06da66a819254c08f75d",
+    "tests/support/mp4_seek_fault.rs": "c8f3c4f604cae34c36372b83032fe6d47635492a4afa86e64e928494c5dfe7e8",
+    "scripts/generate_mp4_seek_io_regressions.py": "0f4fb2b227b8d7ef3ae0d468a2b22224edf6819da01058024f7e27d388d7cd82",
+    "scripts/generate_vp9_chroma.py": "f25655586d3808b87bd110606c3b3298f59c9ac4bc59c38670361fd2fdc39dff"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0147"
+  ],
+  "checked_at": "2026-10-16T14:24:40.823743+00:00",
+  "checks": [
+    {
+      "log": "evidence/batch-135-integration.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-135-decoder.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-135-fixture-repro.log",
+      "kind": "python",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-135-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-135-specialized-build.log",
+      "kind": "release-benchmark-build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Per-window const-generic specialization skips oscillator and mixing arithmetic at zero channel gain while preserving per-sample envelopes, phase, event order and cleanup. Initial state and future zero-volume/expression events select the guarded loop, including fractional-sample events.",
+    "Ten authored muted/control scores and three normal controller scores preserve 2293200 release PCM bytes exactly. Mono/stereo regressions cover restoration, released voices, partially muted channels and sample46 late controls. Actual worker play/rewind/seek covers20 muted and6 normal targets. Inline decoder remains488bytes; public interfaces unchanged.",
+    "Final15-pair whole-process CPU ratios: muted0.424735 (95%bootstrap median interval0.423194..0.425640),normal0.788697 (0.771960..0.806865). Before-first7-pair confirmation at doubled work: muted0.421926 (0.410458..0.423134),normal0.797809 (0.782279..0.825228). All raw outliers retained; host load unisolated; no own compilation during measurements. CPU includes setup/checksum/warmup; render wall is separately recorded. No universal workload, DAC/GPU or tail claim.",
+    "First cached-boolean variant was rejected: normal CPU ratio1.022560 with interval1.016304..1.080535 despite muted gain. Archived source/raw results remain and count zero. Final window specialization removes that regression.",
+    "Fixture generation and ordinary tests require no FFmpeg, network or private media. Audio-only synthetic cases include authored video companion. No new media failure is claimed for this measured performance opportunity."
+  ],
+  "performance_artifacts": [
+    "evidence/batch-135-specialized-muted-pairs.json",
+    "evidence/batch-135-specialized-normal-pairs.json",
+    "evidence/batch-135-confirmation-muted-pairs.json",
+    "evidence/batch-135-confirmation-normal-pairs.json",
+    "evidence/batch-135-final-pcm-comparison.json",
+    "evidence/batch-135-normal-pcm-comparison.json",
+    "evidence/batch-135-late-control-before.json"
+  ],
+  "counting": "One measured MIDI render specialization; workloads, variants, runner and regressions add zero IDs."
+}

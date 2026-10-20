@@ -1,0 +1,55 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0045"
+  ],
+  "checked_at": "2026-10-15T11:39:48.775449+00:00",
+  "before": "Equal-depth authored controls pass; mixed8/10 P-skip fails as invalid AVC P field configuration after valid intra pair.",
+  "result": "Validate both precisions and use each plane depth for reference interpolation, explicit/bipred weighting, residual prediction buffers and field loop filtering.",
+  "qualification": [
+    "160 authored40/60ms top/bottom PAFF clips cover equal and mixed8/10/12/14 depths, skip, coded zero-motionP, signed luma/chroma DC residual plus reference echo, reordered B_Bi, explicit offsets, positive horizontal and negative vertical fractional motion, and filtered constant prediction.",
+    "Independent woven sample arrays and scalar DC/interpolation/weight oracles match decoder output/reset.",
+    "Native exact components, analytic RGB tolerance1, paired clocks, seek/rewind/EOF and160 lossless flipped FFV1 exports pass.",
+    "Decoder resource refusal/reset remains correct. Related intra corruption/recovery tests, canonical field/motion units and historical complementary-field MP4 oracle test pass.",
+    "Ordinary tests need saved synthetic bytes only, no FFmpeg/network. Public interfaces unchanged."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-023-avc-field-inter-components-before-expanded.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-023-avc-field-inter-components-final.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-023-avc-field-inter-components-decoder-unit.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-023-avc-field-inter-components-owner-fields.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-023-avc-field-inter-components-fixtures.log",
+      "kind": "python",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-023-avc-field-inter-components-player.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 20,
+  "distinct_python_tests_passed": 2,
+  "remaining": [
+    "New family qualifies CAVLC; CABAC mixed-depth PAFF does not have independent new acceptance evidence.",
+    "Owned Matroska separate-field timing remains unsupported, while MP4 pairing is qualified."
+  ],
+  "counting": "One PAFF inter component-precision capability; all160 variants and test infrastructure add no IDs."
+}

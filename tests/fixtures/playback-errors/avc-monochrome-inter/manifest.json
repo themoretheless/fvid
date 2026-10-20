@@ -1,0 +1,65 @@
+[
+  {
+    "name": "mono-p-8-shift0",
+    "depth": 8,
+    "shift": 0
+  },
+  {
+    "name": "mono-p-8-shift-4",
+    "depth": 8,
+    "shift": -4
+  },
+  {
+    "name": "mono-p-8-shift4",
+    "depth": 8,
+    "shift": 4
+  },
+  {
+    "name": "mono-p-10-shift0",
+    "depth": 10,
+    "shift": 0
+  },
+  {
+    "name": "mono-p-10-shift-4",
+    "depth": 10,
+    "shift": -4
+  },
+  {
+    "name": "mono-p-10-shift4",
+    "depth": 10,
+    "shift": 4
+  },
+  {
+    "name": "mono-p-14-shift0",
+    "depth": 14,
+    "shift": 0
+  },
+  {
+    "name": "mono-p-14-shift-4",
+    "depth": 14,
+    "shift": -4
+  },
+  {
+    "name": "mono-p-14-shift4",
+    "depth": 14,
+    "shift": 4
+  },
+  {
+    "name": "mono-p-8-cabac-skip",
+    "depth": 8,
+    "shift": 0,
+    "cabac": true
+  },
+  {
+    "name": "mono-p-10-cabac-skip",
+    "depth": 10,
+    "shift": 0,
+    "cabac": true
+  },
+  {
+    "name": "mono-p-14-cabac-skip",
+    "depth": 14,
+    "shift": 0,
+    "cabac": true
+  }
+]

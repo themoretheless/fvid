@@ -16,7 +16,7 @@ use std::{
 #[path = "packed.rs"]
 mod packed;
 pub use packed::{PackedPlanar, rgba_to_rgb_on_black};
-pub(crate) use packed::{av1_picture, hevc_picture, vp9_picture};
+pub(crate) use packed::{av1_picture, avc_picture_with_vui, hevc_picture_with_vui, vp9_picture};
 
 pub use fvid_media::owned_video_timeline::PlaybackEdit;
 
@@ -121,22 +121,8 @@ fn seek_webm_to<R: Read + Seek>(
     reader: &mut crate::playback_webm::WebmVideoReader<R>,
     target: Duration,
 ) -> Result<Option<RawFrame>> {
-    let nanos = target.as_nanos();
-    let target = i64::try_from(nanos).map_err(|_| invalid("seek target overflow"))?;
-    reader.seek_to_sync(target)?;
-    let mut last = None;
-    loop {
-        let Some(frame) = reader.read_frame_raw()? else {
-            return Ok(last);
-        };
-        if reader
-            .frame_interval()
-            .is_some_and(|(_, end, _)| end > nanos)
-        {
-            return Ok(Some(frame));
-        }
-        last = Some(frame);
-    }
+    let target = i64::try_from(target.as_nanos()).map_err(|_| invalid("seek target overflow"))?;
+    reader.seek_to_frame_raw(target)
 }
 
 /// What the fourcc heading an MP4/MOV video entry is called, spelled the way a
@@ -443,6 +429,21 @@ impl<R: BufRead + Seek> NativeReader<R> {
 
     /// Indexed packet bytes and their presentation intervals. Container headers
     /// never become video time merely because they are cached near EOF.
+    pub fn warm_seeking(&mut self, path: &std::path::Path) {
+        if let Self::Webm(reader) = self { reader.warm_seeking(path); }
+    }
+    pub fn seek_cache_status(&self) -> Option<crate::playback_webm::SeekCacheStatus> {
+        if let Self::Webm(reader) = self { Some(reader.seek_cache_status()) } else { None }
+    }
+    pub fn seek_frame_cache_complete(&self) -> bool {
+        if let Self::Webm(reader) = self { reader.seek_frame_cache_complete() } else { false }
+    }
+    pub fn seek_frame_cache_count(&self) -> usize {
+        if let Self::Webm(reader) = self { reader.seek_frame_cache_count() } else { 0 }
+    }
+    pub fn seek_cache_stats(&self) -> Option<(usize, usize, usize)> {
+        if let Self::Webm(reader) = self { Some(reader.seek_cache_stats()) } else { None }
+    }
     pub fn cache_packets(&self) -> Vec<(u64, u64, Duration, Duration)> {
         match self {
             Self::Avc { source, edits, .. } => {
@@ -462,7 +463,9 @@ impl<R: BufRead + Seek> NativeReader<R> {
                     edits.as_slice()
                 };
                 let time = |ticks: i64| {
-                    Duration::from_secs_f64(ticks.max(0) as f64 / track.timescale as f64)
+                    let ticks = ticks.max(0) as u64;
+                    let scale = u64::from(track.timescale);
+                    Duration::new(ticks / scale, ((ticks % scale) * 1_000_000_000 / scale) as u32)
                 };
                 track
                     .samples
@@ -521,8 +524,10 @@ impl<R: BufRead + Seek> NativeReader<R> {
                 if ticks <= 0 {
                     return None;
                 }
-                let nanos = ticks * 1_000_000_000 / i128::from(track.timescale);
-                u64::try_from(nanos).ok().map(Duration::from_nanos)
+                let scale = i128::from(track.timescale);
+                let seconds = u64::try_from(ticks / scale).ok()?;
+                let nanos = ((ticks % scale) * 1_000_000_000 / scale) as u32;
+                Some(Duration::new(seconds, nanos))
             }
         }
     }
@@ -880,9 +885,11 @@ impl AvcColour {
         let full = signal.is_some_and(|s| s.full_range);
         let matrix = signal.and_then(|s| s.colour).map_or(2, |c| c[2]);
         let (kr, kb) = match matrix {
-            1 => (0.2126, 0.0722),
+            0 | 1 => (0.2126, 0.0722),
             2 | 5 | 6 => (0.299, 0.114),
-            9 => (0.2627, 0.0593),
+            4 => (0.30, 0.11),
+            7 => (0.212, 0.087),
+            9 | 10 => (0.2627, 0.0593),
             _ => {
                 return Err(invalid(
                     "HEVC colour matrix is not implemented for playback",
@@ -900,8 +907,11 @@ impl AvcColour {
             .map(|c| c[2])
             .unwrap_or(2);
         let (kr, kb) = match matrix {
-            1 => (0.2126, 0.0722),
+            0 | 1 => (0.2126, 0.0722),
             2 | 5 | 6 => (0.299, 0.114),
+            4 => (0.30, 0.11),
+            7 => (0.212, 0.087),
+            9 | 10 => (0.2627, 0.0593),
             _ => return Err(invalid("AVC colour matrix is not implemented for playback")),
         };
         Ok(Self { kr, kb, full })

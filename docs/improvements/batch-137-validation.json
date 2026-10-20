@@ -1,0 +1,35 @@
+{
+  "status": "accepted-followup",
+  "accepted_ids": [],
+  "followup_of": "FVID-0014",
+  "checked_at": "2026-10-16T14:42:53.425805+00:00",
+  "before": [
+    "evidence/batch-137-before.log",
+    "evidence/batch-137-before-all-cases.log",
+    "evidence/batch-137-before-clock.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-137-after-final-fixtures.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-137-subtitles.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-137-fixtures-final.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-137-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "The native player subtitle parser duplicated unsafe clock arithmetic already fixed in the separate media-command parser underFVID-0014. Checked hour/minute/addition arithmetic and wide fraction scaling now cover this copy. Four authored clocks independently panic before:hour product,minute product,total sum,fraction product. After:discard invalid ranges and retain healthy cue;19digit decimal fractions truncate to999ms exactly.",
+    "Synthetic two-frame2x2Y4M companion decodes successfully; normal tests/generator have no codec/network/private-media dependency. Regression proves native subtitle parsing and companion decoding,not a captured full player session with malformed sidecar.",
+    "Two focused tests,19subtitle unit tests,fixture byte reproduction and player build pass. No public signature changes or new arbitrary clock cap. Existing duration limits and truncation semantics retained."
+  ],
+  "counting": "Same independent subtitle-clock overflow cause asFVID-0014; zero new IDs."
+}

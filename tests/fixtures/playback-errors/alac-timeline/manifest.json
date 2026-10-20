@@ -1,0 +1,9 @@
+{
+  "provenance": "Own uncompressed ALAC packet writer, independent ramp formula and neutral VP9. Four mono packets (128samples for offset,96 for gap) at48kHz,50ms origin,optional48sample gap. No private data/FFmpeg/network.",
+  "files": {
+    "offset.mkv": "70a29e15520af62633d9493940966d5263a68280be17f69b1e5c0fd384c230b8",
+    "offset-gap.mkv": "60a7ef9f04147c0aa814353f79b18d6f2a7edddb41d72b5cee4a93226e2aaa1a",
+    "offset-delay-tail.mkv": "ace4b61195c18a4e0ec437b496d10cf75b565ae451eb4db8d68fc899787a8944",
+    "offset-discard-last.mkv": "1a8af49edee1937d1cf65720bf5718ab8eb2dc7e340c77c7402e7b5a07c01387"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "status": "qualification only",
+  "counted_improvements": 0,
+  "checked_at": "2026-10-15T07:08:25.109782+00:00",
+  "checks": [
+    {
+      "command": "cargo test --locked --offline -p fvid-media --lib",
+      "passed": 494,
+      "failed": 0,
+      "ignored": 1,
+      "seconds": 145.48,
+      "log": "evidence/media-broad-audit-after-34.log"
+    },
+    {
+      "command": "cargo test --locked --offline --no-default-features --lib",
+      "passed": 359,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 68.77,
+      "log": "evidence/root-broad-audit-after-34.log"
+    }
+  ],
+  "ignored": "owned_exposure::integer_conversion_gap::complete_integer_float_rgb_pipeline_matches_reference: pending integer/float RGB conversion compatibility",
+  "scope": "Unit suites, not a private-corpus or hardware playback qualification. Existing dirty decoder work remains preserved."
+}

@@ -1,0 +1,1248 @@
+{
+  "provenance": "36 authored PAFF Matroska companions of independently qualified PCM/DC/P/B component fixtures. Field durations10/10 or7/13ms; default and missing durations. No private media/encoder/network.",
+  "cases": [
+    {
+      "file": "y8-c8-top-pcm-explicit.mkv",
+      "configuration": "y8-c8-top-pcm.avcc",
+      "packets": [
+        "y8-c8-top-pcm-0.packet",
+        "y8-c8-top-pcm-1.packet",
+        "y8-c8-top-pcm-2.packet",
+        "y8-c8-top-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y8-c8-top-pcm-0.y",
+          "cb": "y8-c8-top-pcm-0.cb",
+          "cr": "y8-c8-top-pcm-0.cr"
+        },
+        {
+          "y": "y8-c8-top-pcm-1.y",
+          "cb": "y8-c8-top-pcm-1.cb",
+          "cr": "y8-c8-top-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c8-top-pcm.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y8-c8-top-pcm-default.mkv",
+      "configuration": "y8-c8-top-pcm.avcc",
+      "packets": [
+        "y8-c8-top-pcm-0.packet",
+        "y8-c8-top-pcm-1.packet",
+        "y8-c8-top-pcm-2.packet",
+        "y8-c8-top-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y8-c8-top-pcm-0.y",
+          "cb": "y8-c8-top-pcm-0.cb",
+          "cr": "y8-c8-top-pcm-0.cr"
+        },
+        {
+          "y": "y8-c8-top-pcm-1.y",
+          "cb": "y8-c8-top-pcm-1.cb",
+          "cr": "y8-c8-top-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c8-top-pcm.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y8-c8-top-pcm-unequal.mkv",
+      "configuration": "y8-c8-top-pcm.avcc",
+      "packets": [
+        "y8-c8-top-pcm-0.packet",
+        "y8-c8-top-pcm-1.packet",
+        "y8-c8-top-pcm-2.packet",
+        "y8-c8-top-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y8-c8-top-pcm-0.y",
+          "cb": "y8-c8-top-pcm-0.cb",
+          "cr": "y8-c8-top-pcm-0.cr"
+        },
+        {
+          "y": "y8-c8-top-pcm-1.y",
+          "cb": "y8-c8-top-pcm-1.cb",
+          "cr": "y8-c8-top-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c8-top-pcm.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y8-c8-top-pcm-untimed.mkv",
+      "configuration": "y8-c8-top-pcm.avcc",
+      "packets": [
+        "y8-c8-top-pcm-0.packet",
+        "y8-c8-top-pcm-1.packet",
+        "y8-c8-top-pcm-2.packet",
+        "y8-c8-top-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y8-c8-top-pcm-0.y",
+          "cb": "y8-c8-top-pcm-0.cb",
+          "cr": "y8-c8-top-pcm-0.cr"
+        },
+        {
+          "y": "y8-c8-top-pcm-1.y",
+          "cb": "y8-c8-top-pcm-1.cb",
+          "cr": "y8-c8-top-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c8-top-pcm.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y8-c14-bottom-pcm-explicit.mkv",
+      "configuration": "y8-c14-bottom-pcm.avcc",
+      "packets": [
+        "y8-c14-bottom-pcm-0.packet",
+        "y8-c14-bottom-pcm-1.packet",
+        "y8-c14-bottom-pcm-2.packet",
+        "y8-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": "y8-c14-bottom-pcm-truncated.packet",
+      "frames": [
+        {
+          "y": "y8-c14-bottom-pcm-0.y",
+          "cb": "y8-c14-bottom-pcm-0.cb",
+          "cr": "y8-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-pcm-1.y",
+          "cb": "y8-c14-bottom-pcm-1.cb",
+          "cr": "y8-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c14-bottom-pcm.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y8-c14-bottom-pcm-default.mkv",
+      "configuration": "y8-c14-bottom-pcm.avcc",
+      "packets": [
+        "y8-c14-bottom-pcm-0.packet",
+        "y8-c14-bottom-pcm-1.packet",
+        "y8-c14-bottom-pcm-2.packet",
+        "y8-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": "y8-c14-bottom-pcm-truncated.packet",
+      "frames": [
+        {
+          "y": "y8-c14-bottom-pcm-0.y",
+          "cb": "y8-c14-bottom-pcm-0.cb",
+          "cr": "y8-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-pcm-1.y",
+          "cb": "y8-c14-bottom-pcm-1.cb",
+          "cr": "y8-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c14-bottom-pcm.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y8-c14-bottom-pcm-unequal.mkv",
+      "configuration": "y8-c14-bottom-pcm.avcc",
+      "packets": [
+        "y8-c14-bottom-pcm-0.packet",
+        "y8-c14-bottom-pcm-1.packet",
+        "y8-c14-bottom-pcm-2.packet",
+        "y8-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": "y8-c14-bottom-pcm-truncated.packet",
+      "frames": [
+        {
+          "y": "y8-c14-bottom-pcm-0.y",
+          "cb": "y8-c14-bottom-pcm-0.cb",
+          "cr": "y8-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-pcm-1.y",
+          "cb": "y8-c14-bottom-pcm-1.cb",
+          "cr": "y8-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c14-bottom-pcm.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y8-c14-bottom-pcm-untimed.mkv",
+      "configuration": "y8-c14-bottom-pcm.avcc",
+      "packets": [
+        "y8-c14-bottom-pcm-0.packet",
+        "y8-c14-bottom-pcm-1.packet",
+        "y8-c14-bottom-pcm-2.packet",
+        "y8-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": "y8-c14-bottom-pcm-truncated.packet",
+      "frames": [
+        {
+          "y": "y8-c14-bottom-pcm-0.y",
+          "cb": "y8-c14-bottom-pcm-0.cb",
+          "cr": "y8-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-pcm-1.y",
+          "cb": "y8-c14-bottom-pcm-1.cb",
+          "cr": "y8-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y8-c14-bottom-pcm.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y14-c8-top-dc-filtered-explicit.mkv",
+      "configuration": "y14-c8-top-dc-filtered.avcc",
+      "packets": [
+        "y14-c8-top-dc-filtered-0.packet",
+        "y14-c8-top-dc-filtered-1.packet",
+        "y14-c8-top-dc-filtered-2.packet",
+        "y14-c8-top-dc-filtered-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "dc-filtered",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c8-top-dc-filtered-0.y",
+          "cb": "y14-c8-top-dc-filtered-0.cb",
+          "cr": "y14-c8-top-dc-filtered-0.cr"
+        },
+        {
+          "y": "y14-c8-top-dc-filtered-1.y",
+          "cb": "y14-c8-top-dc-filtered-1.cb",
+          "cr": "y14-c8-top-dc-filtered-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c8-top-dc-filtered.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y14-c8-top-dc-filtered-default.mkv",
+      "configuration": "y14-c8-top-dc-filtered.avcc",
+      "packets": [
+        "y14-c8-top-dc-filtered-0.packet",
+        "y14-c8-top-dc-filtered-1.packet",
+        "y14-c8-top-dc-filtered-2.packet",
+        "y14-c8-top-dc-filtered-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "dc-filtered",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c8-top-dc-filtered-0.y",
+          "cb": "y14-c8-top-dc-filtered-0.cb",
+          "cr": "y14-c8-top-dc-filtered-0.cr"
+        },
+        {
+          "y": "y14-c8-top-dc-filtered-1.y",
+          "cb": "y14-c8-top-dc-filtered-1.cb",
+          "cr": "y14-c8-top-dc-filtered-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c8-top-dc-filtered.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y14-c8-top-dc-filtered-unequal.mkv",
+      "configuration": "y14-c8-top-dc-filtered.avcc",
+      "packets": [
+        "y14-c8-top-dc-filtered-0.packet",
+        "y14-c8-top-dc-filtered-1.packet",
+        "y14-c8-top-dc-filtered-2.packet",
+        "y14-c8-top-dc-filtered-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "dc-filtered",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c8-top-dc-filtered-0.y",
+          "cb": "y14-c8-top-dc-filtered-0.cb",
+          "cr": "y14-c8-top-dc-filtered-0.cr"
+        },
+        {
+          "y": "y14-c8-top-dc-filtered-1.y",
+          "cb": "y14-c8-top-dc-filtered-1.cb",
+          "cr": "y14-c8-top-dc-filtered-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c8-top-dc-filtered.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y14-c8-top-dc-filtered-untimed.mkv",
+      "configuration": "y14-c8-top-dc-filtered.avcc",
+      "packets": [
+        "y14-c8-top-dc-filtered-0.packet",
+        "y14-c8-top-dc-filtered-1.packet",
+        "y14-c8-top-dc-filtered-2.packet",
+        "y14-c8-top-dc-filtered-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "dc-filtered",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c8-top-dc-filtered-0.y",
+          "cb": "y14-c8-top-dc-filtered-0.cb",
+          "cr": "y14-c8-top-dc-filtered-0.cr"
+        },
+        {
+          "y": "y14-c8-top-dc-filtered-1.y",
+          "cb": "y14-c8-top-dc-filtered-1.cb",
+          "cr": "y14-c8-top-dc-filtered-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c8-top-dc-filtered.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y14-c14-bottom-pcm-explicit.mkv",
+      "configuration": "y14-c14-bottom-pcm.avcc",
+      "packets": [
+        "y14-c14-bottom-pcm-0.packet",
+        "y14-c14-bottom-pcm-1.packet",
+        "y14-c14-bottom-pcm-2.packet",
+        "y14-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c14-bottom-pcm-0.y",
+          "cb": "y14-c14-bottom-pcm-0.cb",
+          "cr": "y14-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y14-c14-bottom-pcm-1.y",
+          "cb": "y14-c14-bottom-pcm-1.cb",
+          "cr": "y14-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c14-bottom-pcm.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y14-c14-bottom-pcm-default.mkv",
+      "configuration": "y14-c14-bottom-pcm.avcc",
+      "packets": [
+        "y14-c14-bottom-pcm-0.packet",
+        "y14-c14-bottom-pcm-1.packet",
+        "y14-c14-bottom-pcm-2.packet",
+        "y14-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c14-bottom-pcm-0.y",
+          "cb": "y14-c14-bottom-pcm-0.cb",
+          "cr": "y14-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y14-c14-bottom-pcm-1.y",
+          "cb": "y14-c14-bottom-pcm-1.cb",
+          "cr": "y14-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c14-bottom-pcm.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y14-c14-bottom-pcm-unequal.mkv",
+      "configuration": "y14-c14-bottom-pcm.avcc",
+      "packets": [
+        "y14-c14-bottom-pcm-0.packet",
+        "y14-c14-bottom-pcm-1.packet",
+        "y14-c14-bottom-pcm-2.packet",
+        "y14-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c14-bottom-pcm-0.y",
+          "cb": "y14-c14-bottom-pcm-0.cb",
+          "cr": "y14-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y14-c14-bottom-pcm-1.y",
+          "cb": "y14-c14-bottom-pcm-1.cb",
+          "cr": "y14-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c14-bottom-pcm.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y14-c14-bottom-pcm-untimed.mkv",
+      "configuration": "y14-c14-bottom-pcm.avcc",
+      "packets": [
+        "y14-c14-bottom-pcm-0.packet",
+        "y14-c14-bottom-pcm-1.packet",
+        "y14-c14-bottom-pcm-2.packet",
+        "y14-c14-bottom-pcm-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "pcm",
+      "truncated_packet": null,
+      "frames": [
+        {
+          "y": "y14-c14-bottom-pcm-0.y",
+          "cb": "y14-c14-bottom-pcm-0.cb",
+          "cr": "y14-c14-bottom-pcm-0.cr"
+        },
+        {
+          "y": "y14-c14-bottom-pcm-1.y",
+          "cb": "y14-c14-bottom-pcm-1.cb",
+          "cr": "y14-c14-bottom-pcm-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-components",
+      "control": "y14-c14-bottom-pcm.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y8-c14-top-b-bi-explicit.mkv",
+      "configuration": "y8-c14-top-b-bi.avcc",
+      "packets": [
+        "y8-c14-top-b-bi-0.packet",
+        "y8-c14-top-b-bi-1.packet",
+        "y8-c14-top-b-bi-2.packet",
+        "y8-c14-top-b-bi-3.packet",
+        "y8-c14-top-b-bi-4.packet",
+        "y8-c14-top-b-bi-5.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": false,
+      "mode": "b-bi",
+      "decode_order": [
+        0,
+        2,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-top-b-bi-0.y",
+          "cb": "y8-c14-top-b-bi-0.cb",
+          "cr": "y8-c14-top-b-bi-0.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-1.y",
+          "cb": "y8-c14-top-b-bi-1.cb",
+          "cr": "y8-c14-top-b-bi-1.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-2.y",
+          "cb": "y8-c14-top-b-bi-2.cb",
+          "cr": "y8-c14-top-b-bi-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-top-b-bi.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y8-c14-top-b-bi-default.mkv",
+      "configuration": "y8-c14-top-b-bi.avcc",
+      "packets": [
+        "y8-c14-top-b-bi-0.packet",
+        "y8-c14-top-b-bi-1.packet",
+        "y8-c14-top-b-bi-2.packet",
+        "y8-c14-top-b-bi-3.packet",
+        "y8-c14-top-b-bi-4.packet",
+        "y8-c14-top-b-bi-5.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": false,
+      "mode": "b-bi",
+      "decode_order": [
+        0,
+        2,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-top-b-bi-0.y",
+          "cb": "y8-c14-top-b-bi-0.cb",
+          "cr": "y8-c14-top-b-bi-0.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-1.y",
+          "cb": "y8-c14-top-b-bi-1.cb",
+          "cr": "y8-c14-top-b-bi-1.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-2.y",
+          "cb": "y8-c14-top-b-bi-2.cb",
+          "cr": "y8-c14-top-b-bi-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-top-b-bi.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y8-c14-top-b-bi-unequal.mkv",
+      "configuration": "y8-c14-top-b-bi.avcc",
+      "packets": [
+        "y8-c14-top-b-bi-0.packet",
+        "y8-c14-top-b-bi-1.packet",
+        "y8-c14-top-b-bi-2.packet",
+        "y8-c14-top-b-bi-3.packet",
+        "y8-c14-top-b-bi-4.packet",
+        "y8-c14-top-b-bi-5.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": false,
+      "mode": "b-bi",
+      "decode_order": [
+        0,
+        2,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-top-b-bi-0.y",
+          "cb": "y8-c14-top-b-bi-0.cb",
+          "cr": "y8-c14-top-b-bi-0.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-1.y",
+          "cb": "y8-c14-top-b-bi-1.cb",
+          "cr": "y8-c14-top-b-bi-1.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-2.y",
+          "cb": "y8-c14-top-b-bi-2.cb",
+          "cr": "y8-c14-top-b-bi-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-top-b-bi.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y8-c14-top-b-bi-untimed.mkv",
+      "configuration": "y8-c14-top-b-bi.avcc",
+      "packets": [
+        "y8-c14-top-b-bi-0.packet",
+        "y8-c14-top-b-bi-1.packet",
+        "y8-c14-top-b-bi-2.packet",
+        "y8-c14-top-b-bi-3.packet",
+        "y8-c14-top-b-bi-4.packet",
+        "y8-c14-top-b-bi-5.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": false,
+      "mode": "b-bi",
+      "decode_order": [
+        0,
+        2,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-top-b-bi-0.y",
+          "cb": "y8-c14-top-b-bi-0.cb",
+          "cr": "y8-c14-top-b-bi-0.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-1.y",
+          "cb": "y8-c14-top-b-bi-1.cb",
+          "cr": "y8-c14-top-b-bi-1.cr"
+        },
+        {
+          "y": "y8-c14-top-b-bi-2.y",
+          "cb": "y8-c14-top-b-bi-2.cb",
+          "cr": "y8-c14-top-b-bi-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-top-b-bi.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y14-c8-bottom-p-residual-explicit.mkv",
+      "configuration": "y14-c8-bottom-p-residual.avcc",
+      "packets": [
+        "y14-c8-bottom-p-residual-0.packet",
+        "y14-c8-bottom-p-residual-1.packet",
+        "y14-c8-bottom-p-residual-2.packet",
+        "y14-c8-bottom-p-residual-3.packet",
+        "y14-c8-bottom-p-residual-4.packet",
+        "y14-c8-bottom-p-residual-5.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": true,
+      "mode": "p-residual",
+      "decode_order": [
+        0,
+        1,
+        2
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-bottom-p-residual-0.y",
+          "cb": "y14-c8-bottom-p-residual-0.cb",
+          "cr": "y14-c8-bottom-p-residual-0.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-1.y",
+          "cb": "y14-c8-bottom-p-residual-1.cb",
+          "cr": "y14-c8-bottom-p-residual-1.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-2.y",
+          "cb": "y14-c8-bottom-p-residual-2.cb",
+          "cr": "y14-c8-bottom-p-residual-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-bottom-p-residual.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y14-c8-bottom-p-residual-default.mkv",
+      "configuration": "y14-c8-bottom-p-residual.avcc",
+      "packets": [
+        "y14-c8-bottom-p-residual-0.packet",
+        "y14-c8-bottom-p-residual-1.packet",
+        "y14-c8-bottom-p-residual-2.packet",
+        "y14-c8-bottom-p-residual-3.packet",
+        "y14-c8-bottom-p-residual-4.packet",
+        "y14-c8-bottom-p-residual-5.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": true,
+      "mode": "p-residual",
+      "decode_order": [
+        0,
+        1,
+        2
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-bottom-p-residual-0.y",
+          "cb": "y14-c8-bottom-p-residual-0.cb",
+          "cr": "y14-c8-bottom-p-residual-0.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-1.y",
+          "cb": "y14-c8-bottom-p-residual-1.cb",
+          "cr": "y14-c8-bottom-p-residual-1.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-2.y",
+          "cb": "y14-c8-bottom-p-residual-2.cb",
+          "cr": "y14-c8-bottom-p-residual-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-bottom-p-residual.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y14-c8-bottom-p-residual-unequal.mkv",
+      "configuration": "y14-c8-bottom-p-residual.avcc",
+      "packets": [
+        "y14-c8-bottom-p-residual-0.packet",
+        "y14-c8-bottom-p-residual-1.packet",
+        "y14-c8-bottom-p-residual-2.packet",
+        "y14-c8-bottom-p-residual-3.packet",
+        "y14-c8-bottom-p-residual-4.packet",
+        "y14-c8-bottom-p-residual-5.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": true,
+      "mode": "p-residual",
+      "decode_order": [
+        0,
+        1,
+        2
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-bottom-p-residual-0.y",
+          "cb": "y14-c8-bottom-p-residual-0.cb",
+          "cr": "y14-c8-bottom-p-residual-0.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-1.y",
+          "cb": "y14-c8-bottom-p-residual-1.cb",
+          "cr": "y14-c8-bottom-p-residual-1.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-2.y",
+          "cb": "y14-c8-bottom-p-residual-2.cb",
+          "cr": "y14-c8-bottom-p-residual-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-bottom-p-residual.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y14-c8-bottom-p-residual-untimed.mkv",
+      "configuration": "y14-c8-bottom-p-residual.avcc",
+      "packets": [
+        "y14-c8-bottom-p-residual-0.packet",
+        "y14-c8-bottom-p-residual-1.packet",
+        "y14-c8-bottom-p-residual-2.packet",
+        "y14-c8-bottom-p-residual-3.packet",
+        "y14-c8-bottom-p-residual-4.packet",
+        "y14-c8-bottom-p-residual-5.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": true,
+      "mode": "p-residual",
+      "decode_order": [
+        0,
+        1,
+        2
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-bottom-p-residual-0.y",
+          "cb": "y14-c8-bottom-p-residual-0.cb",
+          "cr": "y14-c8-bottom-p-residual-0.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-1.y",
+          "cb": "y14-c8-bottom-p-residual-1.cb",
+          "cr": "y14-c8-bottom-p-residual-1.cr"
+        },
+        {
+          "y": "y14-c8-bottom-p-residual-2.y",
+          "cb": "y14-c8-bottom-p-residual-2.cb",
+          "cr": "y14-c8-bottom-p-residual-2.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-bottom-p-residual.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-explicit.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-0.y",
+          "cb": "y8-c14-bottom-p-weighted-0.cb",
+          "cr": "y8-c14-bottom-p-weighted-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-hidden-reference-explicit.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "explicit",
+      "origin_ns": 20000000
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-default.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-0.y",
+          "cb": "y8-c14-bottom-p-weighted-0.cb",
+          "cr": "y8-c14-bottom-p-weighted-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-hidden-reference-default.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "default",
+      "origin_ns": 20000000
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-unequal.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-0.y",
+          "cb": "y8-c14-bottom-p-weighted-0.cb",
+          "cr": "y8-c14-bottom-p-weighted-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-hidden-reference-unequal.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "unequal",
+      "origin_ns": 20000000
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-untimed.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-0.y",
+          "cb": "y8-c14-bottom-p-weighted-0.cb",
+          "cr": "y8-c14-bottom-p-weighted-0.cr"
+        },
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "untimed"
+    },
+    {
+      "file": "y8-c14-bottom-p-weighted-hidden-reference-untimed.mkv",
+      "configuration": "y8-c14-bottom-p-weighted.avcc",
+      "packets": [
+        "y8-c14-bottom-p-weighted-0.packet",
+        "y8-c14-bottom-p-weighted-1.packet",
+        "y8-c14-bottom-p-weighted-2.packet",
+        "y8-c14-bottom-p-weighted-3.packet"
+      ],
+      "luma_depth": 8,
+      "chroma_depth": 14,
+      "bottom_first": true,
+      "mode": "p-weighted",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y8-c14-bottom-p-weighted-1.y",
+          "cb": "y8-c14-bottom-p-weighted-1.cb",
+          "cr": "y8-c14-bottom-p-weighted-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y8-c14-bottom-p-weighted.mp4",
+      "timing": "untimed",
+      "origin_ns": 20000000
+    },
+    {
+      "file": "y14-c8-top-p-y-explicit.mkv",
+      "configuration": "y14-c8-top-p-y.avcc",
+      "packets": [
+        "y14-c8-top-p-y-0.packet",
+        "y14-c8-top-p-y-1.packet",
+        "y14-c8-top-p-y-2.packet",
+        "y14-c8-top-p-y-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "p-y",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-top-p-y-0.y",
+          "cb": "y14-c8-top-p-y-0.cb",
+          "cr": "y14-c8-top-p-y-0.cr"
+        },
+        {
+          "y": "y14-c8-top-p-y-1.y",
+          "cb": "y14-c8-top-p-y-1.cb",
+          "cr": "y14-c8-top-p-y-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-top-p-y.mp4",
+      "timing": "explicit"
+    },
+    {
+      "file": "y14-c8-top-p-y-default.mkv",
+      "configuration": "y14-c8-top-p-y.avcc",
+      "packets": [
+        "y14-c8-top-p-y-0.packet",
+        "y14-c8-top-p-y-1.packet",
+        "y14-c8-top-p-y-2.packet",
+        "y14-c8-top-p-y-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "p-y",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-top-p-y-0.y",
+          "cb": "y14-c8-top-p-y-0.cb",
+          "cr": "y14-c8-top-p-y-0.cr"
+        },
+        {
+          "y": "y14-c8-top-p-y-1.y",
+          "cb": "y14-c8-top-p-y-1.cb",
+          "cr": "y14-c8-top-p-y-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-top-p-y.mp4",
+      "timing": "default"
+    },
+    {
+      "file": "y14-c8-top-p-y-unequal.mkv",
+      "configuration": "y14-c8-top-p-y.avcc",
+      "packets": [
+        "y14-c8-top-p-y-0.packet",
+        "y14-c8-top-p-y-1.packet",
+        "y14-c8-top-p-y-2.packet",
+        "y14-c8-top-p-y-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "p-y",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-top-p-y-0.y",
+          "cb": "y14-c8-top-p-y-0.cb",
+          "cr": "y14-c8-top-p-y-0.cr"
+        },
+        {
+          "y": "y14-c8-top-p-y-1.y",
+          "cb": "y14-c8-top-p-y-1.cb",
+          "cr": "y14-c8-top-p-y-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-top-p-y.mp4",
+      "timing": "unequal"
+    },
+    {
+      "file": "y14-c8-top-p-y-untimed.mkv",
+      "configuration": "y14-c8-top-p-y.avcc",
+      "packets": [
+        "y14-c8-top-p-y-0.packet",
+        "y14-c8-top-p-y-1.packet",
+        "y14-c8-top-p-y-2.packet",
+        "y14-c8-top-p-y-3.packet"
+      ],
+      "luma_depth": 14,
+      "chroma_depth": 8,
+      "bottom_first": false,
+      "mode": "p-y",
+      "decode_order": [
+        0,
+        1
+      ],
+      "frames": [
+        {
+          "y": "y14-c8-top-p-y-0.y",
+          "cb": "y14-c8-top-p-y-0.cb",
+          "cr": "y14-c8-top-p-y-0.cr"
+        },
+        {
+          "y": "y14-c8-top-p-y-1.y",
+          "cb": "y14-c8-top-p-y-1.cb",
+          "cr": "y14-c8-top-p-y-1.cr"
+        }
+      ],
+      "source_folder": "avc-field-inter-components",
+      "control": "y14-c8-top-p-y.mp4",
+      "timing": "untimed"
+    }
+  ],
+  "invalid": [
+    {
+      "file": "unpaired.mkv",
+      "error": "unpaired AVC field at end of Matroska"
+    },
+    {
+      "file": "duration-overflow.mkv",
+      "error": "AVC field-pair duration overflow"
+    },
+    {
+      "file": "visibility-mismatch.mkv",
+      "error": "AVC field pair visibility differs"
+    }
+  ],
+  "sha256": {
+    "y8-c8-top-pcm-explicit.mkv": "814f03106d828c8d527c44f57810b14bce1dcb351eed4171da759945ed056fe0",
+    "y8-c8-top-pcm-default.mkv": "649b33d667968c361bb5ba7135402c4faabd45bd54853790d35674c124a544b3",
+    "y8-c8-top-pcm-unequal.mkv": "36ae8a5b1fa35ccddebce5d4d7a4d3247822eb73d7056623549529fffe7a203f",
+    "y8-c8-top-pcm-untimed.mkv": "6139946819f2ae326738e0f4a20a09a8b2a95fc90f9522bfeb0bc247b7cc0e6c",
+    "y8-c14-bottom-pcm-explicit.mkv": "7dc33ac936b75db8f6f50e9d75d0d1e9d643ffda0a7a78c914ff7b4e089594c3",
+    "y8-c14-bottom-pcm-default.mkv": "dd6253d245718bd35b301c41d5c9fa44ff253926de7c459831fab92f793df7eb",
+    "y8-c14-bottom-pcm-unequal.mkv": "efbf45fbcbdfa66dbfa0cbf11bab585faa890554887649dab53d0754fdb07449",
+    "y8-c14-bottom-pcm-untimed.mkv": "d71c5a9e5fecc37b9dfb3392ccfb88e688ea676b8b3cd4b39125ec5e72fcf224",
+    "y14-c8-top-dc-filtered-explicit.mkv": "7bafae5d2247c59a70dafad1ee140771481131119e3231d4e0327c27d180f973",
+    "y14-c8-top-dc-filtered-default.mkv": "0d7e21b85c6bbd9984b45b204e1e5fe9b6b4ae156641cbcb67919b6b7cc793ab",
+    "y14-c8-top-dc-filtered-unequal.mkv": "7fbfcec5ea439bbe4226cad03731c7615e20fceab767a960307f358462614c0b",
+    "y14-c8-top-dc-filtered-untimed.mkv": "b49113ed6c9aeb7d0b3529750cf5d18b17a8b55c15a4829eb44c79e331476a6c",
+    "y14-c14-bottom-pcm-explicit.mkv": "36c3857009acc35698ba25ef6cb5cc5e0c04603587ddd0913a10d5fde647e312",
+    "y14-c14-bottom-pcm-default.mkv": "9d6634ab70d60b656adb1b60f6892b6302bba05c8c88131cd3e98fd59978043d",
+    "y14-c14-bottom-pcm-unequal.mkv": "61541eea06872f3606ef678a08193fee6eed77a37fd1c819962abed1dc5b9716",
+    "y14-c14-bottom-pcm-untimed.mkv": "fc2541c978a56df5c2e4df08e5f5141f2ff9b76b358a75abc1373d62324210af",
+    "y8-c14-top-b-bi-explicit.mkv": "411eacdfc11209c539706380724dd3e96d7ecb8a2a2e0d63438afa3454c8c95e",
+    "y8-c14-top-b-bi-default.mkv": "d36759447ecaa5db1821e62c3efe28adb98a7a5b7505303e8ab58def0b099ecc",
+    "y8-c14-top-b-bi-unequal.mkv": "2030731eb07226d1a98b47fec13f054ec581f1c033f503caa7acc5c7cf7d5efa",
+    "y8-c14-top-b-bi-untimed.mkv": "5e5afa27584ed65f7b5386ccf7db018bba495dfbd63dc54aacece765a98baaa3",
+    "y14-c8-bottom-p-residual-explicit.mkv": "e5ec752e9ab2433f658a0d85fe79dc55d0099407b19b56035fad3f0fc73c36e4",
+    "y14-c8-bottom-p-residual-default.mkv": "5a614200a303bfa760ccef9093a44f055a1a3794a5fc60345fb60c5bd4db9037",
+    "y14-c8-bottom-p-residual-unequal.mkv": "4c0107016ba11ceca536f6e8f70e0afdb43129f04823990b61ae4944b9a8f649",
+    "y14-c8-bottom-p-residual-untimed.mkv": "7f3c0121864197f842522774d86d7ecd7bc3d6e615d5513d2f5647781320cd11",
+    "y8-c14-bottom-p-weighted-explicit.mkv": "d30ee6fbf393d29786cd995d5a297c5ca91231129495e8516efb936192797961",
+    "y8-c14-bottom-p-weighted-hidden-reference-explicit.mkv": "3545af329e96a9278beb554598c6bd19d28c9efa78ac104d6e13a41a1178a19b",
+    "y8-c14-bottom-p-weighted-default.mkv": "56e247425961e89b0ecc0c07ec4c5e44e17af5814fa92ca3b327c6247fef4d47",
+    "y8-c14-bottom-p-weighted-hidden-reference-default.mkv": "99f3b5546ea1ece4bf9a73602bb9a1b8230a172d6069276a4bed01ebd75183d1",
+    "y8-c14-bottom-p-weighted-unequal.mkv": "74845c2921f34932e54741caa312e711f66baa335eee3631744aabedf482f433",
+    "y8-c14-bottom-p-weighted-hidden-reference-unequal.mkv": "7e2f328ce18ee87bf5c37c59e780c19d106348f98d7bb5bc4670839e369dc3b4",
+    "y8-c14-bottom-p-weighted-untimed.mkv": "1962bd98689f9f1b473a1424fc9309821fbfbb75a94d4488b9c114c540a2e10f",
+    "y8-c14-bottom-p-weighted-hidden-reference-untimed.mkv": "694814ed8915e77b9d3dc35d13ee3fac0ef62a192a3ecb6028527a32f19fe3eb",
+    "y14-c8-top-p-y-explicit.mkv": "dd5202765f2b806d1a4f029b804c468b8ceee32c74dfe6c086089a42e2536491",
+    "y14-c8-top-p-y-default.mkv": "8dd701ff3a3ddb2034de6cce44f5472c40eb7579eafa563d513ab5a8910b2d82",
+    "y14-c8-top-p-y-unequal.mkv": "04df5f8b4d565f0bd9396e6f7f69f20de84b430c12b962fcecb9776c73b5459a",
+    "y14-c8-top-p-y-untimed.mkv": "db255d67b4b63d5db3d474d50d486b1ffee7221e34b52bb0d64726eb7ae86228",
+    "unpaired.mkv": "961ebbb127d2e85ee13df37b5a4a07a58cfa3f1f965e93c9258f2504e243d85b",
+    "duration-overflow.mkv": "dac1e667f593722ce8687b5fbf9eb1f1ab7126daebddc62818b36f2308d73864",
+    "visibility-mismatch.mkv": "7e62760f43deb0dc9d39921429c4f0a33c8333fe51629f93681fdfc83c964498"
+  }
+}

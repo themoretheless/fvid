@@ -1,0 +1,3 @@
+{"width":1920,"height":1080,"depth":8,"calls":128,"elapsed_ns":1125,"allocations":0,"allocated_bytes":0}
+{"width":3840,"height":2160,"depth":8,"calls":32,"elapsed_ns":333,"allocations":0,"allocated_bytes":0}
+{"width":1920,"height":1080,"depth":16,"calls":64,"elapsed_ns":841582917,"allocations":0,"allocated_bytes":0}

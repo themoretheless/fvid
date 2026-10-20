@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0043"
+  ],
+  "checked_at": "2026-10-15T11:18:57.511389+00:00",
+  "before": "Correct authored AVC Matroska P-skip explicitly refused by owned decode dispatch; native control passes.",
+  "result": "Connect existing decode-order AVC engine to owned Matroska visitor/export, share crop and component promotion with MP4, preserve presentation sorting and explicit unsupported PAFF timing.",
+  "qualification": [
+    "66 saved synthetic frame/MBAFF clips decode; all66 FFV1 horizontal-flip exports match independent promoted Y/Cb/Cr arrays, dimensions, depth and exact20ms presentation intervals.",
+    "Two untimed B-picture companions regenerate exactly; inferred durations and sorted pixels match independently qualified timed controls.",
+    "B-picture trimming and reverse preserve content/time bindings. Packet/byte/memory-policy/cancellation refusals leave an absent destination unpublished. This assertion was tightened and rerun during batch024; the original existing-destination test could stop at overwrite admission.",
+    "Separate-field PAFF timing stays explicitly unsupported; regression uses previously authored PCM fixture.",
+    "Native playback/seek/rewind/EOF tests remain passing. Public APIs unchanged; existing64/32/16 geometry and VUI source semantics reused."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-021-avc-matroska-before.log",
+      "passed": 0,
+      "kind": "before"
+    },
+    {
+      "log": "evidence/batch-021-avc-matroska-final-timing.log",
+      "passed": 5,
+      "kind": "rust"
+    },
+    {
+      "log": "evidence/batch-021-avc-matroska-field-refusal.log",
+      "passed": 1,
+      "kind": "rust"
+    },
+    {
+      "log": "evidence/batch-021-avc-matroska-related.log",
+      "passed": 13,
+      "kind": "rust"
+    },
+    {
+      "log": "evidence/batch-021-avc-matroska-native.log",
+      "passed": 6,
+      "kind": "rust"
+    },
+    {
+      "log": "evidence/batch-021-avc-matroska-fixtures.log",
+      "passed": 5,
+      "kind": "python"
+    },
+    {
+      "log": "evidence/batch-021-avc-matroska-player.log",
+      "kind": "build",
+      "status": "passed"
+    },
+    {
+      "log": "evidence/batch-024-avc-frame-policy-tightened.log",
+      "kind": "tightened_regression",
+      "passed": 5
+    }
+  ],
+  "distinct_rust_tests_passed": 25,
+  "distinct_python_tests_passed": 5,
+  "remaining": [
+    "Separate-field AVC container timing remains explicitly unsupported."
+  ],
+  "counting": "One owned Matroska AVC frame-picture capability; no separate IDs for variants, two timing companions or infrastructure."
+}

@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0122"
+  ],
+  "checked_at": "2026-10-16T06:13:22.906395+00:00",
+  "before": [
+    "evidence/batch-102-reproduction-before.log",
+    "evidence/batch-102-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-102-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-102-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-102-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-102-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-102-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Unsupported native Cxxis explicit: original ignored-control reproduction passes andacceptance remains ignored. Forced acceptance over10literal-opcode cases reports10ignored-effect classifications andeight native/full-worker PCM differences. Seek-labeled failures inthose eight stop atgeneration0fullplayback,not atseparately proven pre-fixseek phases.",
+    "Cxxoverrides the volume column after sample/instrument volume application,clamps the parameter to64andupdates existing persistent channel volume. Supported-effect classification includes Cxx; no public API is added.",
+    "Ten signed16ramp-loop cases cover0/1/16/32/64/255clamped,column precedence,note-on,persistence andmute/recover. All complete native PCM andclock vectors match independent equivalent volume-column encodings,including native transition smoothing. Twenty actual worker targets verify landed-row seek andEOF after fullplay/rewind succeed.",
+    "Acceptance is enabled andthe former ignored-control expectation now requires changed C00PCM andzeroignored effects.11decoder/6reader units,11integration tests,pure fixture reproduction and current player build pass. Related held-zero-volume phase,literal flow opcodes andsynth preroll remain passing.",
+    "No encoder/network/private media,physical output,full tracker/envelope/global-volume conformance or performance claim. Existing native volume smoothing is retained; arbitrary global Gxxis not part ofthis ID."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/danielepiccone/xm_file/main/xm.txt",
+      "section": "Standard effects andvolume column order",
+      "rule": "Csets volume andstandard effect processing follows the volume column."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "handleEffects_TickZero andsetVol",
+      "rule": "Primary FT2 C12sets clamped0..64volume after volume-column effects."
+    }
+  ],
+  "compatibility": "Previously ignored XM Cxxnow changes native output andsupported-effect statistics. Existing volume-column,timeline packets andpublic signatures remain unchanged.",
+  "counting": "One useful native Cxxcapability. Ten variants,parameter boundaries,precedence and20worker targets add noIDs."
+}

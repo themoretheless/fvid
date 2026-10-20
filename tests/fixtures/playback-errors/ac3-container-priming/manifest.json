@@ -1,0 +1,96 @@
+{
+  "provenance": "Explicitly authored120ms16-square neutral VP9 plus mono440Hz tone, native AC3 in Matroska/MP4. FFmpeg is authoring/reference only; ordinary tests use saved files and no network/encoder. No private media.",
+  "cases": [
+    {
+      "file": "tone.mkv",
+      "reference": "tone-mkv.f32le",
+      "reference_frames": 5760,
+      "probe": {
+        "packets": [
+          {
+            "pts": -5,
+            "duration": 32,
+            "side_data_list": [
+              {}
+            ]
+          },
+          {
+            "pts": 27,
+            "duration": 32
+          },
+          {
+            "pts": 59,
+            "duration": 32
+          },
+          {
+            "pts": 91,
+            "duration": 29,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "sample_rate": "48000",
+            "channels": 1,
+            "start_time": "0.000000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "tone.mp4",
+      "reference": "tone-mp4.f32le",
+      "reference_frames": 5760,
+      "probe": {
+        "packets": [
+          {
+            "pts": -256,
+            "duration": 1536,
+            "side_data_list": [
+              {}
+            ]
+          },
+          {
+            "pts": 1280,
+            "duration": 1536
+          },
+          {
+            "pts": 2816,
+            "duration": 1536
+          },
+          {
+            "pts": 4352,
+            "duration": 1536,
+            "side_data_list": [
+              {}
+            ]
+          }
+        ],
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "sample_rate": "48000",
+            "channels": 1,
+            "start_time": "0.000000",
+            "duration": "0.120000",
+            "side_data_list": [
+              {}
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "sha256": {
+    "tone.mkv": "3cdf760668e6560d5634eee0c326c2b76b7262d167d8d98d881b2883eb0ebbb7",
+    "tone.mp4": "64d6ef9d989c2ef53fe83f97ad7f193b56e64cf14c5b37e6050056a7453c89d0",
+    "tone-mkv.f32le": "34d1a075f5d84432dfc96d56067d3de68b6f9fb91cc9c5ccc0a656bd26595ed4",
+    "tone-mp4.f32le": "34d1a075f5d84432dfc96d56067d3de68b6f9fb91cc9c5ccc0a656bd26595ed4",
+    "gap-repeat.mp4": "eb90936c58ee315d9d13d555555a95b3bd0b336dabc45734d0d1d5369c0fdf48"
+  }
+}

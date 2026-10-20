@@ -1,0 +1,152 @@
+{
+  "provenance": "Authored60ms VP9/8kHz mono PCM; signed DiscardPadding trims packet heads/tails. Independent integer sample-window oracles. No encoder/private media/network.",
+  "cases": [
+    {
+      "file": "control.mkv",
+      "oracle": "control.f32le",
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 60000000
+    },
+    {
+      "file": "start.mkv",
+      "oracle": "start.f32le",
+      "packets": [
+        {
+          "pts_ns": 10000000,
+          "frames": 80
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 60000000
+    },
+    {
+      "file": "end.mkv",
+      "oracle": "end.f32le",
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "frames": 80
+        }
+      ],
+      "end_ns": 50000000
+    },
+    {
+      "file": "both.mkv",
+      "oracle": "both.f32le",
+      "packets": [
+        {
+          "pts_ns": 10000000,
+          "frames": 80
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "frames": 80
+        }
+      ],
+      "end_ns": 50000000
+    },
+    {
+      "file": "rounding.mkv",
+      "oracle": "rounding.f32le",
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 40000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 60000000
+    },
+    {
+      "file": "whole-tail.mkv",
+      "oracle": "whole-tail.f32le",
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 160
+        },
+        {
+          "pts_ns": 20000000,
+          "frames": 160
+        }
+      ],
+      "end_ns": 40000000
+    },
+    {
+      "file": "overlap.mkv",
+      "oracle": "overlap.f32le",
+      "packets": [
+        {
+          "pts_ns": 0,
+          "frames": 80
+        },
+        {
+          "pts_ns": 10000000,
+          "frames": 160
+        },
+        {
+          "pts_ns": 30000000,
+          "frames": 80
+        }
+      ],
+      "end_ns": 40000000
+    }
+  ],
+  "invalid": "invalid-padding.mkv",
+  "sha256": {
+    "control.mkv": "1e4c81a628529064dfd81fd1c510a5dd6ef3a60f84ad52c5fac373c0b9d66f19",
+    "control.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "start.mkv": "5c8e7aefd80935186b026773c59c68ae9c8315fb233077950f2bec8f25e6b31e",
+    "start.f32le": "cf220a13739728837fcc83ff4ccff535aef5524d53d92a16cd94c7e1d6bb3888",
+    "end.mkv": "948e0a206df3ba8e8994d4dfa6f3bbfd786f49e585fefaad986dda68dbb0c08b",
+    "end.f32le": "bf5445bbdcf4d0ad31c15a4519892dc89fac59f50841661c92c253b87a1d9799",
+    "both.mkv": "ad4d97a0e4ad6187d05eeda6150fa409a50b4097a741e6cf0389a72e8ed016bc",
+    "both.f32le": "1af7b8333c247f7203b9bd665fc659b03bef4b3635bafc4a8e807a56e669c56b",
+    "rounding.mkv": "a6f411bc8d494d8ed4413b9c62dd8f4214d28801f4582d9dd69f2932f8971b64",
+    "rounding.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "whole-tail.mkv": "462be65f063bd6a93d86fb36c63cb4bf063e24d5de420f785387b43ad9bcbdf3",
+    "whole-tail.f32le": "ece0e76e164f9734962a2ca50cd99d36208c09588b5093876a4fa25d741e233f",
+    "overlap.mkv": "d9cba2d774c143d82249a3d98f7fd85190b658c3a1a1b8ee9f5f47c54d0f479b",
+    "overlap.f32le": "1af7b8333c247f7203b9bd665fc659b03bef4b3635bafc4a8e807a56e669c56b",
+    "invalid-padding.mkv": "2ea1ff762cf43761d2a1a1b1dc5e2111ea1cee9cdfa6457022e55bca93879bb7"
+  }
+}

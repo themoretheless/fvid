@@ -1,0 +1,34 @@
+{
+  "scope": "Explicit local decoder reference only; ordinary tests and generation do not use FFmpeg.",
+  "ffmpeg_version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+  "cases": [
+    {
+      "file": "rate-1000.flac",
+      "bytes": 512,
+      "rate": 1000,
+      "sha256": "dd483a3dde1921ed70760380b3a300ffe612fd74ff95ec1292825b4e6204496f",
+      "stderr": ""
+    },
+    {
+      "file": "rate-8000.flac",
+      "bytes": 512,
+      "rate": 8000,
+      "sha256": "dd483a3dde1921ed70760380b3a300ffe612fd74ff95ec1292825b4e6204496f",
+      "stderr": ""
+    },
+    {
+      "file": "rate-254000.flac",
+      "bytes": 512,
+      "rate": 254000,
+      "sha256": "dd483a3dde1921ed70760380b3a300ffe612fd74ff95ec1292825b4e6204496f",
+      "stderr": ""
+    },
+    {
+      "file": "rate-255000.flac",
+      "bytes": 512,
+      "rate": 255000,
+      "sha256": "dd483a3dde1921ed70760380b3a300ffe612fd74ff95ec1292825b4e6204496f",
+      "stderr": ""
+    }
+  ]
+}

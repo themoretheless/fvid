@@ -1,0 +1,5831 @@
+{
+  "provenance": "Owned PCM/CABAC/MP4, independent integer per-list residual/explicit-weight oracle. No external codecs, private data or runtime generation.",
+  "late_combination_witnesses": 152098,
+  "original_weight_index_witnesses": 918320,
+  "cases": [
+    {
+      "file": "residual-b-64-0-both-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 0,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-both-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 6144,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-both-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 12288,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-0-both-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 18432,
+      "original_weight_index_witnesses": 4576,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-64-0-both-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 24576,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-0-both-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 30720,
+      "original_weight_index_witnesses": 4557,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-64-0-both-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 36864,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-both-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 43008,
+      "original_weight_index_witnesses": 4564,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-past-source-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 49152,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-past-source-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 55296,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-past-source-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 61440,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-0-past-source-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 67584,
+      "original_weight_index_witnesses": 4586,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-64-0-past-source-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 73728,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-0-past-source-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 79872,
+      "original_weight_index_witnesses": 4582,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-64-0-past-source-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 86016,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-past-source-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 92160,
+      "original_weight_index_witnesses": 4582,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-source-future-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 98304,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-source-future-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 104448,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-source-future-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 110592,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-0-source-future-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 116736,
+      "original_weight_index_witnesses": 3811,
+      "late_combination_witnesses": 576
+    },
+    {
+      "file": "residual-b-64-0-source-future-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 122880,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 735
+    },
+    {
+      "file": "residual-b-64-0-source-future-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 129024,
+      "original_weight_index_witnesses": 4496,
+      "late_combination_witnesses": 382
+    },
+    {
+      "file": "residual-b-64-0-source-future-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 135168,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 213
+    },
+    {
+      "file": "residual-b-64-0-source-future-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 141312,
+      "original_weight_index_witnesses": 4036,
+      "late_combination_witnesses": 267
+    },
+    {
+      "file": "residual-b-64-0-l0-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 147456,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l0-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 153600,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l0-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 159744,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-0-l0-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 165888,
+      "original_weight_index_witnesses": 4589,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-64-0-l0-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 172032,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-0-l0-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 178176,
+      "original_weight_index_witnesses": 4569,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-64-0-l0-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 184320,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l0-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 190464,
+      "original_weight_index_witnesses": 4578,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l1-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 196608,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l1-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 202752,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l1-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 208896,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-0-l1-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 215040,
+      "original_weight_index_witnesses": 4605,
+      "late_combination_witnesses": 858
+    },
+    {
+      "file": "residual-b-64-0-l1-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 221184,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-0-l1-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 227328,
+      "original_weight_index_witnesses": 4598,
+      "late_combination_witnesses": 360
+    },
+    {
+      "file": "residual-b-64-0-l1-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 233472,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-l1-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 239616,
+      "original_weight_index_witnesses": 4602,
+      "late_combination_witnesses": 444
+    },
+    {
+      "file": "residual-b-64-0-temporal-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 245760,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-temporal-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 251904,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-temporal-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 258048,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1337
+    },
+    {
+      "file": "residual-b-64-0-temporal-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 264192,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1076
+    },
+    {
+      "file": "residual-b-64-0-temporal-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 270336,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 519
+    },
+    {
+      "file": "residual-b-64-0-temporal-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 276480,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 495
+    },
+    {
+      "file": "residual-b-64-0-temporal-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 282624,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 785
+    },
+    {
+      "file": "residual-b-64-0-temporal-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 288768,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 648
+    },
+    {
+      "file": "residual-b-64-0-future-past-0.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 294912,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-future-past-0-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 301056,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-0-future-past-1.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 307200,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1337
+    },
+    {
+      "file": "residual-b-64-0-future-past-1-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 313344,
+      "original_weight_index_witnesses": 4506,
+      "late_combination_witnesses": 1418
+    },
+    {
+      "file": "residual-b-64-0-future-past-2.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 319488,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 519
+    },
+    {
+      "file": "residual-b-64-0-future-past-2-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 325632,
+      "original_weight_index_witnesses": 4608,
+      "late_combination_witnesses": 373
+    },
+    {
+      "file": "residual-b-64-0-future-past-mixed.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 331776,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 785
+    },
+    {
+      "file": "residual-b-64-0-future-past-mixed-weighted.mp4",
+      "size": 64,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 337920,
+      "original_weight_index_witnesses": 4541,
+      "late_combination_witnesses": 823
+    },
+    {
+      "file": "residual-b-64-1-both-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 344064,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-both-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 350208,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-both-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 356352,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-1-both-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 362496,
+      "original_weight_index_witnesses": 4576,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-64-1-both-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 368640,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-1-both-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 374784,
+      "original_weight_index_witnesses": 4557,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-64-1-both-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 380928,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-both-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 387072,
+      "original_weight_index_witnesses": 4564,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-past-source-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 393216,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-past-source-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 399360,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-past-source-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 405504,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-1-past-source-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 411648,
+      "original_weight_index_witnesses": 4586,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-64-1-past-source-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 417792,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-1-past-source-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 423936,
+      "original_weight_index_witnesses": 4582,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-64-1-past-source-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 430080,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-past-source-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 436224,
+      "original_weight_index_witnesses": 4582,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-source-future-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 442368,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-source-future-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 448512,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-source-future-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 454656,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-1-source-future-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 460800,
+      "original_weight_index_witnesses": 3811,
+      "late_combination_witnesses": 576
+    },
+    {
+      "file": "residual-b-64-1-source-future-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 466944,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 735
+    },
+    {
+      "file": "residual-b-64-1-source-future-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 473088,
+      "original_weight_index_witnesses": 4496,
+      "late_combination_witnesses": 382
+    },
+    {
+      "file": "residual-b-64-1-source-future-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 479232,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 213
+    },
+    {
+      "file": "residual-b-64-1-source-future-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 485376,
+      "original_weight_index_witnesses": 4036,
+      "late_combination_witnesses": 267
+    },
+    {
+      "file": "residual-b-64-1-l0-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 491520,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l0-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 497664,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l0-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 503808,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-1-l0-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 509952,
+      "original_weight_index_witnesses": 4589,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-64-1-l0-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 516096,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-1-l0-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 522240,
+      "original_weight_index_witnesses": 4569,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-64-1-l0-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 528384,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l0-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 534528,
+      "original_weight_index_witnesses": 4578,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l1-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 540672,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l1-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 546816,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l1-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 552960,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-64-1-l1-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 559104,
+      "original_weight_index_witnesses": 4605,
+      "late_combination_witnesses": 858
+    },
+    {
+      "file": "residual-b-64-1-l1-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 565248,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-64-1-l1-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 571392,
+      "original_weight_index_witnesses": 4598,
+      "late_combination_witnesses": 360
+    },
+    {
+      "file": "residual-b-64-1-l1-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 577536,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-l1-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 583680,
+      "original_weight_index_witnesses": 4602,
+      "late_combination_witnesses": 444
+    },
+    {
+      "file": "residual-b-64-1-temporal-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 589824,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-temporal-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 595968,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-temporal-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 602112,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1337
+    },
+    {
+      "file": "residual-b-64-1-temporal-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 608256,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1076
+    },
+    {
+      "file": "residual-b-64-1-temporal-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 614400,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 519
+    },
+    {
+      "file": "residual-b-64-1-temporal-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 620544,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 495
+    },
+    {
+      "file": "residual-b-64-1-temporal-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 626688,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 785
+    },
+    {
+      "file": "residual-b-64-1-temporal-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 632832,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 648
+    },
+    {
+      "file": "residual-b-64-1-future-past-0.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 638976,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-future-past-0-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 645120,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-64-1-future-past-1.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 651264,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1337
+    },
+    {
+      "file": "residual-b-64-1-future-past-1-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 657408,
+      "original_weight_index_witnesses": 4506,
+      "late_combination_witnesses": 1418
+    },
+    {
+      "file": "residual-b-64-1-future-past-2.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 663552,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 519
+    },
+    {
+      "file": "residual-b-64-1-future-past-2-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 669696,
+      "original_weight_index_witnesses": 4608,
+      "late_combination_witnesses": 373
+    },
+    {
+      "file": "residual-b-64-1-future-past-mixed.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 675840,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 785
+    },
+    {
+      "file": "residual-b-64-1-future-past-mixed-weighted.mp4",
+      "size": 64,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 681984,
+      "original_weight_index_witnesses": 4541,
+      "late_combination_witnesses": 823
+    },
+    {
+      "file": "residual-b-128-0-both-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 688128,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-both-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 712704,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-both-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 737280,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-0-both-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 761856,
+      "original_weight_index_witnesses": 22887,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-128-0-both-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 786432,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-0-both-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 811008,
+      "original_weight_index_witnesses": 22801,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-128-0-both-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 835584,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-both-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 860160,
+      "original_weight_index_witnesses": 18285,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-past-source-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 884736,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-past-source-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 909312,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-past-source-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 933888,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-0-past-source-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 958464,
+      "original_weight_index_witnesses": 22936,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-128-0-past-source-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 983040,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-0-past-source-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 1007616,
+      "original_weight_index_witnesses": 22921,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-128-0-past-source-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 1032192,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-past-source-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 1056768,
+      "original_weight_index_witnesses": 18345,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-source-future-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1081344,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-source-future-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1105920,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-source-future-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1130496,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-0-source-future-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1155072,
+      "original_weight_index_witnesses": 19121,
+      "late_combination_witnesses": 1677
+    },
+    {
+      "file": "residual-b-128-0-source-future-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1179648,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 3051
+    },
+    {
+      "file": "residual-b-128-0-source-future-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1204224,
+      "original_weight_index_witnesses": 22464,
+      "late_combination_witnesses": 1387
+    },
+    {
+      "file": "residual-b-128-0-source-future-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1228800,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 786
+    },
+    {
+      "file": "residual-b-128-0-source-future-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 1253376,
+      "original_weight_index_witnesses": 16139,
+      "late_combination_witnesses": 1079
+    },
+    {
+      "file": "residual-b-128-0-l0-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1277952,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l0-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1302528,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l0-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1327104,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-0-l0-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1351680,
+      "original_weight_index_witnesses": 22948,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-128-0-l0-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1376256,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-0-l0-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1400832,
+      "original_weight_index_witnesses": 22861,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-128-0-l0-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1425408,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l0-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 1449984,
+      "original_weight_index_witnesses": 18334,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l1-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1474560,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l1-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1499136,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l1-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1523712,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-0-l1-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1548288,
+      "original_weight_index_witnesses": 23024,
+      "late_combination_witnesses": 3175
+    },
+    {
+      "file": "residual-b-128-0-l1-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1572864,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-0-l1-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1597440,
+      "original_weight_index_witnesses": 22997,
+      "late_combination_witnesses": 1326
+    },
+    {
+      "file": "residual-b-128-0-l1-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1622016,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-l1-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 1646592,
+      "original_weight_index_witnesses": 18413,
+      "late_combination_witnesses": 1865
+    },
+    {
+      "file": "residual-b-128-0-temporal-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1671168,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-temporal-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1695744,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-temporal-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1720320,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 5367
+    },
+    {
+      "file": "residual-b-128-0-temporal-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1744896,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 4268
+    },
+    {
+      "file": "residual-b-128-0-temporal-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1769472,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 2087
+    },
+    {
+      "file": "residual-b-128-0-temporal-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1794048,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1976
+    },
+    {
+      "file": "residual-b-128-0-temporal-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1818624,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 3198
+    },
+    {
+      "file": "residual-b-128-0-temporal-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 1843200,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 2621
+    },
+    {
+      "file": "residual-b-128-0-future-past-0.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1867776,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-future-past-0-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1892352,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-0-future-past-1.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1916928,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 5367
+    },
+    {
+      "file": "residual-b-128-0-future-past-1-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1941504,
+      "original_weight_index_witnesses": 22507,
+      "late_combination_witnesses": 5841
+    },
+    {
+      "file": "residual-b-128-0-future-past-2.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1966080,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 2087
+    },
+    {
+      "file": "residual-b-128-0-future-past-2-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 1990656,
+      "original_weight_index_witnesses": 23040,
+      "late_combination_witnesses": 1338
+    },
+    {
+      "file": "residual-b-128-0-future-past-mixed.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 2015232,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 3198
+    },
+    {
+      "file": "residual-b-128-0-future-past-mixed-weighted.mp4",
+      "size": 128,
+      "direct": false,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 2039808,
+      "original_weight_index_witnesses": 18151,
+      "late_combination_witnesses": 3317
+    },
+    {
+      "file": "residual-b-128-1-both-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2064384,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-both-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2088960,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-both-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2113536,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-1-both-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2138112,
+      "original_weight_index_witnesses": 22887,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-128-1-both-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2162688,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-1-both-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2187264,
+      "original_weight_index_witnesses": 22801,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-128-1-both-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2211840,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-both-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "both",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        2
+      ],
+      "oracle_offset": 2236416,
+      "original_weight_index_witnesses": 18285,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-past-source-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2260992,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-past-source-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2285568,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-past-source-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2310144,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-1-past-source-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2334720,
+      "original_weight_index_witnesses": 22936,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-128-1-past-source-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2359296,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-1-past-source-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2383872,
+      "original_weight_index_witnesses": 22921,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-128-1-past-source-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2408448,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-past-source-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "past-source",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        2
+      ],
+      "oracle_offset": 2433024,
+      "original_weight_index_witnesses": 18345,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-source-future-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2457600,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-source-future-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2482176,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-source-future-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2506752,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-1-source-future-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2531328,
+      "original_weight_index_witnesses": 19121,
+      "late_combination_witnesses": 1677
+    },
+    {
+      "file": "residual-b-128-1-source-future-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2555904,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 3051
+    },
+    {
+      "file": "residual-b-128-1-source-future-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2580480,
+      "original_weight_index_witnesses": 22464,
+      "late_combination_witnesses": 1387
+    },
+    {
+      "file": "residual-b-128-1-source-future-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2605056,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 786
+    },
+    {
+      "file": "residual-b-128-1-source-future-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "source-future",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        0
+      ],
+      "oracle_offset": 2629632,
+      "original_weight_index_witnesses": 16139,
+      "late_combination_witnesses": 1079
+    },
+    {
+      "file": "residual-b-128-1-l0-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2654208,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l0-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2678784,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l0-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2703360,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-1-l0-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2727936,
+      "original_weight_index_witnesses": 22948,
+      "late_combination_witnesses": 281
+    },
+    {
+      "file": "residual-b-128-1-l0-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2752512,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-1-l0-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2777088,
+      "original_weight_index_witnesses": 22861,
+      "late_combination_witnesses": 134
+    },
+    {
+      "file": "residual-b-128-1-l0-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2801664,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l0-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l0",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        1,
+        null
+      ],
+      "oracle_offset": 2826240,
+      "original_weight_index_witnesses": 18334,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l1-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2850816,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l1-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2875392,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l1-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2899968,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 347
+    },
+    {
+      "file": "residual-b-128-1-l1-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2924544,
+      "original_weight_index_witnesses": 23024,
+      "late_combination_witnesses": 3175
+    },
+    {
+      "file": "residual-b-128-1-l1-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2949120,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 141
+    },
+    {
+      "file": "residual-b-128-1-l1-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2973696,
+      "original_weight_index_witnesses": 22997,
+      "late_combination_witnesses": 1326
+    },
+    {
+      "file": "residual-b-128-1-l1-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 2998272,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-l1-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "l1",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        null,
+        2
+      ],
+      "oracle_offset": 3022848,
+      "original_weight_index_witnesses": 18413,
+      "late_combination_witnesses": 1865
+    },
+    {
+      "file": "residual-b-128-1-temporal-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3047424,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-temporal-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3072000,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-temporal-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3096576,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 5367
+    },
+    {
+      "file": "residual-b-128-1-temporal-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3121152,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 4268
+    },
+    {
+      "file": "residual-b-128-1-temporal-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3145728,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 2087
+    },
+    {
+      "file": "residual-b-128-1-temporal-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3170304,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 1976
+    },
+    {
+      "file": "residual-b-128-1-temporal-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3194880,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 3198
+    },
+    {
+      "file": "residual-b-128-1-temporal-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "temporal",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        0,
+        0
+      ],
+      "oracle_offset": 3219456,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 2621
+    },
+    {
+      "file": "residual-b-128-1-future-past-0.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3244032,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-future-past-0-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3268608,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 0
+    },
+    {
+      "file": "residual-b-128-1-future-past-1.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3293184,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 5367
+    },
+    {
+      "file": "residual-b-128-1-future-past-1-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3317760,
+      "original_weight_index_witnesses": 22507,
+      "late_combination_witnesses": 5841
+    },
+    {
+      "file": "residual-b-128-1-future-past-2.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3342336,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 2087
+    },
+    {
+      "file": "residual-b-128-1-future-past-2-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3366912,
+      "original_weight_index_witnesses": 23040,
+      "late_combination_witnesses": 1338
+    },
+    {
+      "file": "residual-b-128-1-future-past-mixed.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": false,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3391488,
+      "original_weight_index_witnesses": 0,
+      "late_combination_witnesses": 3198
+    },
+    {
+      "file": "residual-b-128-1-future-past-mixed-weighted.mp4",
+      "size": 128,
+      "direct": true,
+      "mode": "future-past",
+      "weighted": true,
+      "weights": [
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1,
+        0,
+        1,
+        2,
+        1
+      ],
+      "references": [
+        2,
+        1
+      ],
+      "oracle_offset": 3416064,
+      "original_weight_index_witnesses": 18151,
+      "late_combination_witnesses": 3317
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "provenance": "Owned PCM/CABAC, parameters and MP4 only; no private source, external codec, network or test-time generation.",
+  "scaling_applies_to": "skip temporal merge only; explicit AMVP copies long-term motion",
+  "layers": [
+    0,
+    3,
+    5,
+    8
+  ],
+  "view_indices": [
+    0,
+    0,
+    1,
+    2
+  ],
+  "depth_roles": [
+    0,
+    1,
+    1,
+    1
+  ],
+  "profile": [
+    1,
+    8,
+    8,
+    8
+  ],
+  "geometries": [
+    {
+      "size": 32,
+      "direct": false
+    },
+    {
+      "size": 128,
+      "direct": false
+    },
+    {
+      "size": 128,
+      "direct": true
+    }
+  ],
+  "vps_3d_extension": true,
+  "cp_precision": 0,
+  "num_cp": [
+    0,
+    0
+  ],
+  "motion_domain": "signed 16-bit integer depth samples; shared storage is multiplied by four",
+  "cases": [
+    {
+      "label": "",
+      "views": [
+        100,
+        102,
+        108
+      ],
+      "source": 1,
+      "target": 4
+    },
+    {
+      "label": "negative",
+      "views": [
+        100,
+        102,
+        96
+      ],
+      "source": 1,
+      "target": -2
+    },
+    {
+      "label": "equal",
+      "views": [
+        7,
+        7,
+        7
+      ],
+      "source": 1,
+      "target": 1
+    },
+    {
+      "label": "zero-source",
+      "views": [
+        100,
+        100,
+        108
+      ],
+      "source": 1,
+      "target": 1
+    },
+    {
+      "label": "zero-target",
+      "views": [
+        100,
+        102,
+        100
+      ],
+      "source": 1,
+      "target": 1
+    },
+    {
+      "label": "positive-limit",
+      "views": [
+        100,
+        102,
+        108
+      ],
+      "source": 32767,
+      "target": 32767
+    },
+    {
+      "label": "negative-limit",
+      "views": [
+        100,
+        102,
+        108
+      ],
+      "source": -32768,
+      "target": -32768
+    },
+    {
+      "label": "factor-clip",
+      "views": [
+        0,
+        1,
+        32767
+      ],
+      "source": 1,
+      "target": 16
+    },
+    {
+      "label": "integer-round",
+      "views": [
+        100,
+        103,
+        102
+      ],
+      "source": 1,
+      "target": 1
+    },
+    {
+      "label": "negative-round",
+      "views": [
+        100,
+        103,
+        102
+      ],
+      "source": -1,
+      "target": -1
+    }
+  ]
+}

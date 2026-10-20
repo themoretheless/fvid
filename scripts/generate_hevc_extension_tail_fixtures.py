@@ -5,7 +5,7 @@ from generate_he_aac_packet_fixtures import DEST, boxes
 from hevc_fixture_mp4 import box
 
 
-def extended(nal, value, tail, bad_stop=False, raised_level=False):
+def extended(nal, value, tail, bad_stop=False, raised_level=False, extension_flags=None):
     rbsp = bytearray()
     zeros = 0
     for byte in nal[2:]:
@@ -22,7 +22,7 @@ def extended(nal, value, tail, bad_stop=False, raised_level=False):
     stop = bits.rfind('1')
     syntax = bits[:stop]
     assert syntax[-1] == '0', 'seed must have extension_present_flag zero'
-    flags = '' if (nal[0] >> 1) & 63 == 32 else '0000' + f'{value:04b}'
+    flags = '' if (nal[0] >> 1) & 63 == 32 else (extension_flags if extension_flags is not None else '0000' + f'{value:04b}')
     bits = syntax[:-1] + '1' + flags + tail + ('0' if bad_stop else '1')
     bits += '0' * (-len(bits) % 8)
     raw = bytes(int(bits[i:i+8], 2) for i in range(0, len(bits), 8))

@@ -1,0 +1,72 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0140"
+  ],
+  "checked_at": "2026-10-16T09:13:50.823168+00:00",
+  "before": [
+    "evidence/batch-123-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-123-integration-final.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-123-core-layout-optimized.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-123-reader-verified.log",
+      "kind": "rust",
+      "passed": 22
+    },
+    {
+      "log": "evidence/batch-123-media-integration.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-123-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-123-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-123-independent-reference.json",
+      "kind": "external-reference",
+      "passed": 3
+    }
+  ],
+  "qualification": [
+    "Three short authored FLAC streams contain clean verbatim PCM or sample bytes resembling a metadata block / complete frame with a matching prefix CRC. Every complete authored packet independently decodes to literal PCM before indexing. Before correction both collision streams are refused: false metadata moves the cursor inside PCM; a false frame inflates the sample total from128to192. Clean control is healthy. No pre-fix worker seek failure is claimed because opening fails.",
+    "New allocation-free frame_size reads header, constant/verbatim/fixed/LPC subframes, Rice/escaped residual layout, wasted bits and footer padding, then checks CRC at the structural endpoint. The owned index no longer searches arbitrary sample bytes for a boundary. Legacy inserted metadata between actual frames remains supported. PCM reconstruction/value checks stay in decode; the prefix API does not claim full sample validity.",
+    "After all three streams match every PCM byte and timestamp in actual play/rewind, second-frame seek and EOF (six worker targets).1460 existing profiles pass exact prefix lengths, concatenated-frame/metadata prefixes, strict decode trailing-data refusal, truncated tails and CRC damage; eight malformed entropy/padding controls also refuse. Player and no-default core configurations pass.",
+    "Twelve root integration tests,22 reader units, eight standalone media-library tests including full/interval export, channel layouts, cancellation, packet and controlled-memory limits pass. One legacy corrupted-residual unit expected the old CRC-search wording; its input still refuses, now at structural footer padding with the frame offset. The diagnostic assertion was updated and all22 reader units rerun.",
+    "Independent local libFLAC confirms literal PCM for all three full streams. FFmpeg matches clean/metadata cases but has its own false-frame collision failure; this limitation is retained in the reference artifact and counts zero. Normal tests and generation require neither external decoder, network nor private media.",
+    "The naive structural parser was replaced after a slow pilot. Seven alternating pairs show optimized/naive median0.269795 with identical indexed counters. Against the original index, two15-pair runs (10000/20000 iterations per run, four existing synthetic clips) give median ratios1.001952and1.008387; confirmation median bootstrap95 interval1.005695..1.011992. This is a correctness fix with about1percent typical measured overhead, not a speedup. All outliers are retained; concurrent workspace load is not isolated and tail latency / long-file performance is not qualified.",
+    "Public frame_size is an additive API for one frame in a byte prefix. Existing decode still requires exactly one packet. Error messages now identify the frame offset and structural/CRC cause; callers matching the old free-form text must adapt. Documentation describes this distinction. No physical DAC, GPU or full external-decoder equivalence claim."
+  ],
+  "sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9639.html",
+      "section": "9.1 frame headers;9.2 subframes;9.2.7 residual coding;9.3 footer",
+      "rule": "The sample count and subframe syntax determine the payload extent. Sync-like sample data and prefix CRC matches do not establish a frame boundary."
+    }
+  ],
+  "performance_artifacts": [
+    "evidence/batch-123-index-timing.json",
+    "evidence/batch-123-index-pairs.jsonl",
+    "evidence/batch-123-index-confirmation-summary.json",
+    "evidence/batch-123-index-confirmation.jsonl",
+    "evidence/batch-123-naive-versus-optimized.json"
+  ],
+  "compatibility": "Valid collision streams now open and play. Legacy metadata insertion and strict full-packet decode remain supported. New prefix API is additive; free-form error wording becomes more precise.",
+  "counting": "One ambiguous FLAC boundary defect. Two collision variants, structural API, fast Rice/CRC implementation, benchmark infrastructure and legacy diagnostic update add no extra IDs."
+}

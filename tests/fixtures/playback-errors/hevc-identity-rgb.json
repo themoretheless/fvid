@@ -1,0 +1,2997 @@
+{
+  "cases": [
+    {
+      "file": "hevc-identity-rgb-8-full-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-full-r0-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r0-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r0-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r0-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-full-r0-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r0-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r0-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r0-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-full-r0-crop0-2.display8"
+        }
+      ],
+      "sha256": "3107fa7e8e2f13a6aa2ac1243153f877eed538ef5389e7fe2103ad7a1936b501"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-full-r0-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r0-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r0-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r0-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-full-r0-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r0-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r0-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r0-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-full-r0-crop2-2.display8"
+        }
+      ],
+      "sha256": "031edd7e6262517c26dd043c1214f932de16bbafecbd7b0f1539d6a21dbeaf98"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-full-r90-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r90-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r90-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r90-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-full-r90-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r90-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r90-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r90-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-full-r90-crop0-2.display8"
+        }
+      ],
+      "sha256": "63e5e87fe782c98469768ae015e16b2a4d45be6734e54e9342d03844d6449ff9"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-full-r90-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r90-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r90-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r90-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-full-r90-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r90-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r90-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r90-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-full-r90-crop2-2.display8"
+        }
+      ],
+      "sha256": "b0c1c12d1edda2adfb7d8718c4763a19c37e1dfe8a01969d7f8a59efa8ef3548"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-full-r180-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r180-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r180-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r180-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-full-r180-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r180-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r180-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r180-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-full-r180-crop0-2.display8"
+        }
+      ],
+      "sha256": "09c3bc54fdf17ef103bfd40bc0b8e019093e70f00e8e36137ff945e0dfe83ef4"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-full-r180-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r180-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r180-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r180-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-full-r180-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r180-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r180-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r180-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-full-r180-crop2-2.display8"
+        }
+      ],
+      "sha256": "c4a04c82e5b2c6c34b30626be4fb74b39aad02e1a572ab417c2dd1d67bb1caee"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-full-r270-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r270-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r270-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r270-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-full-r270-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r270-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r270-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r270-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-full-r270-crop0-2.display8"
+        }
+      ],
+      "sha256": "35f7fab1faea69f6e540d0096b6b207a9d1b5d5b95fb2498ed3e13a507d38084"
+    },
+    {
+      "file": "hevc-identity-rgb-8-full-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-full.mp4",
+      "configuration": "hevc-identity-rgb-8-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-full-0.packet",
+          "rgb": "hevc-identity-rgb-8-full-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-full-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-full-r270-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-1.packet",
+          "rgb": "hevc-identity-rgb-8-full-r270-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r270-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-full-r270-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-full-r270-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-full-2.packet",
+          "rgb": "hevc-identity-rgb-8-full-r270-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-full-r270-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-full-r270-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-full-r270-crop2-2.display8"
+        }
+      ],
+      "sha256": "7c49a6c2db8ef1cf01307542a2a0f24d33deb7fc47ab7bb4b00ac4edb41c12f8"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r0-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r0-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r0-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r0-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r0-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r0-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r0-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r0-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r0-crop0-2.display8"
+        }
+      ],
+      "sha256": "94abe904c48d38cfd9dc56a55e6c19fd4b188d2323b2a8a34a003846e31aca7c"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r0-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r0-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r0-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r0-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r0-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r0-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r0-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r0-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r0-crop2-2.display8"
+        }
+      ],
+      "sha256": "bd69e57d623babebe910c4ef8d41160bc506875a6188a22e4f03d5835fa61b21"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r90-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r90-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r90-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r90-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r90-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r90-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r90-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r90-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r90-crop0-2.display8"
+        }
+      ],
+      "sha256": "c8835947891d1aedd70073c702d20c641af8574796f70a70434271d549f82caf"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r90-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r90-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r90-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r90-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r90-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r90-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r90-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r90-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r90-crop2-2.display8"
+        }
+      ],
+      "sha256": "c8349fba477d9881d8606b35abee6773407506b09dee5937b73a47837aea651d"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r180-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r180-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r180-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r180-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r180-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r180-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r180-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r180-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r180-crop0-2.display8"
+        }
+      ],
+      "sha256": "22c7c2f991417c255cdc9f5712f5c0ce348472325b2e8a973371d9420768fe2b"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r180-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r180-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r180-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r180-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r180-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r180-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r180-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r180-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r180-crop2-2.display8"
+        }
+      ],
+      "sha256": "d54e3f6aa68467faa5b5603aa834a91d4876523f461d529b42e2bbf6391d11da"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r270-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r270-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r270-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r270-crop0-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r270-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r270-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r270-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r270-crop0-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r270-crop0-2.display8"
+        }
+      ],
+      "sha256": "e9c3bb927398475876b483d6bc2c272b383dea6f2bfc2d0100593e02b6c4fd82"
+    },
+    {
+      "file": "hevc-identity-rgb-8-limited-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-8-limited.mp4",
+      "configuration": "hevc-identity-rgb-8-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 8,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-8-limited-0.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-8-limited-r270-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-1.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r270-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r270-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r270-crop2-1.display",
+          "display8": "hevc-identity-rgb-8-limited-r270-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-8-limited-2.packet",
+          "rgb": "hevc-identity-rgb-8-limited-r270-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-8-limited-r270-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-8-limited-r270-crop2-2.display",
+          "display8": "hevc-identity-rgb-8-limited-r270-crop2-2.display8"
+        }
+      ],
+      "sha256": "f3599aa81649e37efec50cf57559dc7ffe70b305bb71e90cc6baba9d9150e8ac"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-full-r0-crop0-0.display8"
+        }
+      ],
+      "sha256": "d167da1e4e7d97060d0cd67d6c3c5cdd2bb620f062e729b6558d2c7bbca862b8"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-full-r0-crop2-0.display8"
+        }
+      ],
+      "sha256": "af915d2399366c65e79c808f2a725a9936ee6efaf7e6ba031aeb7e9cdd7103ca"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-full-r90-crop0-0.display8"
+        }
+      ],
+      "sha256": "77a063eaae75959c0ab2da79664f90afd412e69d0a4226dc7b1edb6bfd71d4da"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-full-r90-crop2-0.display8"
+        }
+      ],
+      "sha256": "3262754019a90feb892ac4115a76d9492495672d01634d592b790a20128ec627"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-full-r180-crop0-0.display8"
+        }
+      ],
+      "sha256": "93ae1fb6069bf622ce16276612d1ab45b85e83100d9ea0b0284bc69c56c55ccc"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-full-r180-crop2-0.display8"
+        }
+      ],
+      "sha256": "7bbf0c05f40bd15eb9783d8d922adb1361ca2cbfd2326a0037a41732ae3e955a"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-full-r270-crop0-0.display8"
+        }
+      ],
+      "sha256": "3b0ee2555a96f1b72251225e37b6068bfa90499846720a82b029d803ccb42051"
+    },
+    {
+      "file": "hevc-identity-rgb-10-full-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-full.mp4",
+      "configuration": "hevc-identity-rgb-10-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-full-0.packet",
+          "rgb": "hevc-identity-rgb-10-full-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-full-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-full-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-full-r270-crop2-0.display8"
+        }
+      ],
+      "sha256": "f3d59573c8fd0cc4c385d80c1e77b287e9b55e8e180442f006eb700a6a9d95e3"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r0-crop0-0.display8"
+        }
+      ],
+      "sha256": "83a75b534e15cf30e6d9c0aa88c3100620545e4134d7822a12c22070d71d4cea"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r0-crop2-0.display8"
+        }
+      ],
+      "sha256": "83752fe411038dcb9146855b2fce83668dc13d8225769ba7077a15b27ec43f39"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r90-crop0-0.display8"
+        }
+      ],
+      "sha256": "eca9d8c423cbee400136e4b2418f175d49e4ce753161f423f7bfe30abdc3a49d"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r90-crop2-0.display8"
+        }
+      ],
+      "sha256": "2500a186df5be5423bfe7d7e1953138a5f2c6337bc2413354082e9c233b7e157"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r180-crop0-0.display8"
+        }
+      ],
+      "sha256": "cac340a01627a3bc8b4d5879a30ed796a85af4d2896e600dd06e3bc94f58b442"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r180-crop2-0.display8"
+        }
+      ],
+      "sha256": "c33d8f0950ce0b0ad45822517f159ae85a369caa2abf28c8accb00eff97f0104"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r270-crop0-0.display8"
+        }
+      ],
+      "sha256": "c01a53df63397164232c35e51aa61f658a789f9573834880082c2d89028351ba"
+    },
+    {
+      "file": "hevc-identity-rgb-10-limited-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-10-limited.mp4",
+      "configuration": "hevc-identity-rgb-10-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 10,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-10-limited-0.packet",
+          "rgb": "hevc-identity-rgb-10-limited-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-10-limited-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-10-limited-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-10-limited-r270-crop2-0.display8"
+        }
+      ],
+      "sha256": "4d121e6b32bfc77e72de9ab19d3c39fb5234840ef49769013cd2da32c9f8b1ee"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-full-r0-crop0-0.display8"
+        }
+      ],
+      "sha256": "7f3debc051ccf7863609bcb5df89f6bead9cfdcbf6a1f89900db7b24d70c2ca8"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-full-r0-crop2-0.display8"
+        }
+      ],
+      "sha256": "db0e6f4d07d2906e764232130867b2246834638b2545514b6d01647f8193e9e4"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-full-r90-crop0-0.display8"
+        }
+      ],
+      "sha256": "f419a6a2eee664628c84ac10faf691bb8a4f2789b741900499f2a93cb4207c2c"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-full-r90-crop2-0.display8"
+        }
+      ],
+      "sha256": "6a9ae69baa4a2980a49d0b1d126a5f88a4beb46a43f0d027090e82fc7e134d47"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-full-r180-crop0-0.display8"
+        }
+      ],
+      "sha256": "b113576e5abe21630f7b00a75e74fb48c18d83902a3028e570f12c52aa0c42d3"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-full-r180-crop2-0.display8"
+        }
+      ],
+      "sha256": "f20fe8da9b51ffb0f850f8337e2b792501c7e1ceb848086f8455785535358ee9"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-full-r270-crop0-0.display8"
+        }
+      ],
+      "sha256": "c3d21f3a06a1f735d29f751436a919cf02d7c4e2c4778925e8f2aefafba1e0d8"
+    },
+    {
+      "file": "hevc-identity-rgb-12-full-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-full.mp4",
+      "configuration": "hevc-identity-rgb-12-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-full-0.packet",
+          "rgb": "hevc-identity-rgb-12-full-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-full-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-full-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-full-r270-crop2-0.display8"
+        }
+      ],
+      "sha256": "c12729423ecf096004e3a2f55361e15736534a1a086d1619643390893392dff3"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r0-crop0-0.display8"
+        }
+      ],
+      "sha256": "b721d5f872427265e01a177a5563f91c8819c14d767286609a9ff7220590dd53"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r0-crop2-0.display8"
+        }
+      ],
+      "sha256": "5e7ee8ceef0e7d87ed79720b32501bbb82dfa7de7c48693433e5cd8a13be9d03"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r90-crop0-0.display8"
+        }
+      ],
+      "sha256": "716394181f44c1d4a5e2265f70156e0ae16f11684272a46ef2130a8268256aca"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r90-crop2-0.display8"
+        }
+      ],
+      "sha256": "ce22cdbe2ce69e91bdf4528915b20944cf2edecd9c0a0ec129e3c901eca90138"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r180-crop0-0.display8"
+        }
+      ],
+      "sha256": "5aee4e4acb43533aee4a29aaeca6cf3ea9a5af42853d8d6478d1672de45b1fcb"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r180-crop2-0.display8"
+        }
+      ],
+      "sha256": "c2ebad31fb13c66efa462dd781b6b0bf8ba880e8ff9812020fb80aa25f0bebf8"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r270-crop0-0.display8"
+        }
+      ],
+      "sha256": "010495e59c8fd1d130bb2653cdca7e5b3ebf18cdea4786e077ce67e3447841cf"
+    },
+    {
+      "file": "hevc-identity-rgb-12-limited-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-12-limited.mp4",
+      "configuration": "hevc-identity-rgb-12-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 12,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-12-limited-0.packet",
+          "rgb": "hevc-identity-rgb-12-limited-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-12-limited-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-12-limited-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-12-limited-r270-crop2-0.display8"
+        }
+      ],
+      "sha256": "570a2a27b4b4b685400d0ccfc8c6d60ae293b248652d634a25738b474305ceff"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-full-r0-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r0-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r0-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r0-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-full-r0-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r0-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r0-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r0-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-full-r0-crop0-2.display8"
+        }
+      ],
+      "sha256": "afdde5d6c0917aa22876b57bc2cf93e5481697d993779a7c1f977cb64b67b89b"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-full-r0-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r0-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r0-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r0-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-full-r0-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r0-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r0-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r0-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-full-r0-crop2-2.display8"
+        }
+      ],
+      "sha256": "f7be0b912891a4e9754fcb700823430f478952905d18f887f4e56f19508fe989"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-full-r90-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r90-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r90-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r90-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-full-r90-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r90-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r90-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r90-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-full-r90-crop0-2.display8"
+        }
+      ],
+      "sha256": "c6d93d7d4339b62943cb0eb33eeb83d5aeeba2f37f484c7d5075aa0d8546603f"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-full-r90-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r90-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r90-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r90-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-full-r90-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r90-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r90-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r90-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-full-r90-crop2-2.display8"
+        }
+      ],
+      "sha256": "a8416464325ce0da0c21d3f4a75f1651dbc2449233d3d3357942a250e04158a7"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-full-r180-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r180-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r180-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r180-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-full-r180-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r180-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r180-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r180-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-full-r180-crop0-2.display8"
+        }
+      ],
+      "sha256": "ffc2554de17038e1a5d799ac97286054dbfd9e65026dd4fea1191f1ef5f17d74"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-full-r180-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r180-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r180-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r180-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-full-r180-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r180-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r180-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r180-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-full-r180-crop2-2.display8"
+        }
+      ],
+      "sha256": "67a957d5cc84cf796d86de084128e077a6947e98f309ac04cf7e7e685181b972"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-full-r270-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r270-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r270-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r270-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-full-r270-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r270-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r270-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r270-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-full-r270-crop0-2.display8"
+        }
+      ],
+      "sha256": "ff2e5de5fd4d9daa66a974d8a88360a9a66704dd42b0b618920570c73211219d"
+    },
+    {
+      "file": "hevc-identity-rgb-14-full-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-full.mp4",
+      "configuration": "hevc-identity-rgb-14-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-full-0.packet",
+          "rgb": "hevc-identity-rgb-14-full-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-full-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-full-r270-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-1.packet",
+          "rgb": "hevc-identity-rgb-14-full-r270-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r270-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-full-r270-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-full-r270-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-full-2.packet",
+          "rgb": "hevc-identity-rgb-14-full-r270-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-full-r270-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-full-r270-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-full-r270-crop2-2.display8"
+        }
+      ],
+      "sha256": "2dff2de464e9657e26d37113169be9fe6616fe3929be7a71aef27944935318fa"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r0-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r0-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r0-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r0-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r0-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r0-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r0-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r0-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r0-crop0-2.display8"
+        }
+      ],
+      "sha256": "6ec4192736e59631e478077166239f7fbc67360874bd4aa739cd06302d3dc3bc"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r0-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r0-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r0-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r0-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r0-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r0-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r0-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r0-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r0-crop2-2.display8"
+        }
+      ],
+      "sha256": "783d98b779eb1229c55206a2ffbe19b43c4f5f2ab55c4a73375ec7d45daf50dd"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r90-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r90-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r90-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r90-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r90-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r90-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r90-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r90-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r90-crop0-2.display8"
+        }
+      ],
+      "sha256": "cac505194497a84182ad490fe99af70cfd631fca336f780c4ccc47bcd9ab22d6"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r90-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r90-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r90-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r90-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r90-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r90-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r90-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r90-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r90-crop2-2.display8"
+        }
+      ],
+      "sha256": "fa82cdb30a17d859df451d2a702239dab9c9dd26428ab4d921093c59b4dbc53f"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r180-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r180-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r180-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r180-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r180-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r180-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r180-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r180-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r180-crop0-2.display8"
+        }
+      ],
+      "sha256": "5b34bdfc8ab6b7156e8bfebb864f6baa1e101018d7d4713020ae65e1626bc54d"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r180-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r180-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r180-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r180-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r180-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r180-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r180-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r180-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r180-crop2-2.display8"
+        }
+      ],
+      "sha256": "789dbf97009a79d3472b07ebb606c1939406bd8580d9f32b3b6ab323e3a4b20c"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r270-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r270-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r270-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r270-crop0-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r270-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r270-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r270-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r270-crop0-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r270-crop0-2.display8"
+        }
+      ],
+      "sha256": "231bf0bef265c03e7fc8759b2bc8602ad115745167c6358a6a7d105fb1c01ac7"
+    },
+    {
+      "file": "hevc-identity-rgb-14-limited-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-14-limited.mp4",
+      "configuration": "hevc-identity-rgb-14-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 14,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-14-limited-0.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-14-limited-r270-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-1.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r270-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r270-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r270-crop2-1.display",
+          "display8": "hevc-identity-rgb-14-limited-r270-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-14-limited-2.packet",
+          "rgb": "hevc-identity-rgb-14-limited-r270-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-14-limited-r270-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-14-limited-r270-crop2-2.display",
+          "display8": "hevc-identity-rgb-14-limited-r270-crop2-2.display8"
+        }
+      ],
+      "sha256": "1d1fe06ea6e62315da2792504232cf5833189e431ecdbac233eec7dc524bfb28"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-full-r0-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r0-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r0-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r0-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-full-r0-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r0-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r0-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r0-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-full-r0-crop0-2.display8"
+        }
+      ],
+      "sha256": "1b80d04c18482f084487b9c449676109d330c20419362922e70957c9b1bcd9ff"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-full-r0-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r0-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r0-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r0-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-full-r0-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r0-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r0-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r0-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-full-r0-crop2-2.display8"
+        }
+      ],
+      "sha256": "51c3bfcfcac0345850504b25b2ab91bd7fd47cdd51dcc1204ce588725f6962e7"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-full-r90-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r90-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r90-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r90-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-full-r90-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r90-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r90-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r90-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-full-r90-crop0-2.display8"
+        }
+      ],
+      "sha256": "a3d53d65fcd4a0881a88b0846dc49a62fb39665f6c19f43b4f215e1689b47dc8"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-full-r90-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r90-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r90-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r90-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-full-r90-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r90-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r90-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r90-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-full-r90-crop2-2.display8"
+        }
+      ],
+      "sha256": "f2d5e22f6ace140922fe959f853de7cb30877da3fa44a62118ab8a264008de1c"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-full-r180-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r180-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r180-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r180-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-full-r180-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r180-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r180-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r180-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-full-r180-crop0-2.display8"
+        }
+      ],
+      "sha256": "e08c756a8dc9c2aa260def364ebf56cd0ef9f5fd7032313f89b5e910a2c42fb8"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-full-r180-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r180-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r180-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r180-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-full-r180-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r180-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r180-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r180-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-full-r180-crop2-2.display8"
+        }
+      ],
+      "sha256": "a003194b408fa4911ea24f6af8919472f9afac3a88cdf652ea2bae5fed5ab8be"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-full-r270-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r270-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r270-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r270-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-full-r270-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r270-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r270-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r270-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-full-r270-crop0-2.display8"
+        }
+      ],
+      "sha256": "e9024ad9573ea5e3a7a45da682977201edae1ba7df5484988aab42b807da6efd"
+    },
+    {
+      "file": "hevc-identity-rgb-16-full-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-full.mp4",
+      "configuration": "hevc-identity-rgb-16-full.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": true,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-full-0.packet",
+          "rgb": "hevc-identity-rgb-16-full-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-full-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-full-r270-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-1.packet",
+          "rgb": "hevc-identity-rgb-16-full-r270-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r270-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-full-r270-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-full-r270-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-full-2.packet",
+          "rgb": "hevc-identity-rgb-16-full-r270-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-full-r270-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-full-r270-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-full-r270-crop2-2.display8"
+        }
+      ],
+      "sha256": "9a55e234b33943c809f4e2a3e7f5d0e853782d684faeb8fc45da8c6c58ead6b7"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r0-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r0-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r0-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r0-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r0-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r0-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r0-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r0-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r0-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r0-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r0-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r0-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r0-crop0-2.display8"
+        }
+      ],
+      "sha256": "99dd69bbc8727bdb9f029f9411287879ef22e06e49b1a5b9412a10311da8b829"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r0-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 0,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r0-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r0-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r0-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r0-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r0-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r0-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r0-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r0-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r0-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r0-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r0-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r0-crop2-2.display8"
+        }
+      ],
+      "sha256": "abedbaa04804fd01e7abf238cb5ef5bd45294cbfed19d27f276b65fc8507c6ca"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r90-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r90-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r90-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r90-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r90-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r90-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r90-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r90-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r90-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r90-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r90-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r90-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r90-crop0-2.display8"
+        }
+      ],
+      "sha256": "aa27dc518aa976611a3ffe3debacb8ac07cd612da6b324b65097156c30e4ece4"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r90-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 90,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r90-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r90-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r90-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r90-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r90-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r90-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r90-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r90-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r90-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r90-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r90-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r90-crop2-2.display8"
+        }
+      ],
+      "sha256": "5837dd41672f8f07dd5a456520c103f40e168b94ba15f5af5b3081fd51383ae1"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r180-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r180-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r180-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r180-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r180-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r180-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r180-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r180-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r180-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r180-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r180-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r180-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r180-crop0-2.display8"
+        }
+      ],
+      "sha256": "85171864e24a419aa525c8eddef7b4af070a1d4d2f266a370f9a2e02cba9af80"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r180-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 180,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r180-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r180-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r180-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r180-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r180-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r180-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r180-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r180-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r180-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r180-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r180-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r180-crop2-2.display8"
+        }
+      ],
+      "sha256": "31190477092562cd3043d741d54780d8decffdb73d41df5ff8c0bd82098608e4"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r270-crop0.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r270-crop0-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r270-crop0-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r270-crop0-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r270-crop0-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r270-crop0-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r270-crop0-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r270-crop0-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r270-crop0-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r270-crop0-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r270-crop0-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r270-crop0-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r270-crop0-2.display8"
+        }
+      ],
+      "sha256": "8452100820a4f0c3f1e18e3bdb11ed6442798a8f9a6a70d08a10cd87bddf2d71"
+    },
+    {
+      "file": "hevc-identity-rgb-16-limited-r270-crop2.mkv",
+      "mp4": "hevc-identity-rgb-16-limited.mp4",
+      "configuration": "hevc-identity-rgb-16-limited.hvcc",
+      "size": [
+        64,
+        64
+      ],
+      "depth": 16,
+      "full_range": false,
+      "rotation": 270,
+      "crop": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "rate": 25,
+      "frames": [
+        {
+          "packet": "hevc-identity-rgb-16-limited-0.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r270-crop2-0.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r270-crop2-0.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r270-crop2-0.display",
+          "display8": "hevc-identity-rgb-16-limited-r270-crop2-0.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-1.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r270-crop2-1.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r270-crop2-1.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r270-crop2-1.display",
+          "display8": "hevc-identity-rgb-16-limited-r270-crop2-1.display8"
+        },
+        {
+          "packet": "hevc-identity-rgb-16-limited-2.packet",
+          "rgb": "hevc-identity-rgb-16-limited-r270-crop2-2.rgb",
+          "rgb8": "hevc-identity-rgb-16-limited-r270-crop2-2.rgb8",
+          "display": "hevc-identity-rgb-16-limited-r270-crop2-2.display",
+          "display8": "hevc-identity-rgb-16-limited-r270-crop2-2.display8"
+        }
+      ],
+      "sha256": "2b016eba9a8d4ba379c9f11a7696a69c4821cedd75172485d81e627e50446e89"
+    }
+  ],
+  "provenance": "Authored PCM samples relabelled G/B/R by identity matrix VUI, exact R/G/B packing and integer full/limited RGB normalization. Offline owned SPS helper proves all non-VUI parameters unchanged; it does not decode pixel oracles. No private media, external codec or network."
+}

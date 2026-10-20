@@ -1,0 +1,65 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0078"
+  ],
+  "checked_at": "2026-10-15T23:21:37.200367+00:00",
+  "before": [
+    "evidence/batch-054-opus-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-054-acceptance-final.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-054-integration.log",
+      "kind": "rust",
+      "passed": 12
+    },
+    {
+      "log": "evidence/batch-054-root-parser.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-054-owned-parser.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-054-owned-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-054-minimal-parser.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-054-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-054-shared-generator.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-054-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored variable20/40/10/20ms Opus DTX packets and five native VP9 frames decode correctly. Without DefaultDuration the control clocks0/20/60/70ms. Adding a default causes generic equal subdivision of the90ms BlockDuration, producing0/22.5/45/67.5ms despite unchanged exact PCM. This differs from73: here packet timestamps themselves are wrong, not only endpoint metadata.",
+    "Supported Opus laces now always use packet TOC durations, even with Track DefaultDuration. The same individual durations drive signed padding distribution. Existing declared-timing fallback for unsupported Opus headers with default is retained; audio transport support does not expand.",
+    "Final acceptance covers Xiph/EBML and three defaults1/20/120ms, exact packet timestamps/frame counts/data, native video frames, actual worker playback/rewind/seek0 and90ms endpoint. Independent owned PCM export matches its unpadded control exactly at4320frames. Two authored unsupported-version audio headers retain video-only indexability; this is not an audio acceptance test.",
+    "26 root parser,26 minimal parser,1 owned parser and related Opus/padding/preroll/native export regressions pass; player builds. Shared generator defaults reproduce earlier73 fixture bytes unchanged. No performance, broad compressed conformance or physical output claim."
+  ],
+  "compatibility": "For supported Opus headers individual laced packet timing follows codec TOCs rather than equal subdivision when a default is present. Unsupported-header declared-default video-only indexability is preserved.",
+  "counting": "One variable Opus lace timing problem. Defaults, Xiph/EBML, independent exports and controls are variants, not separate IDs."
+}

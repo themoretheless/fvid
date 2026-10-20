@@ -1,0 +1,16 @@
+running 1 test
+
+thread 'declared_durations_match_metadata_without_changing_decoded_frames_or_seeks' (16652575) panicked at tests/matroska_duration_playback.rs:18:9:
+assertion `left == right` failed: double-rounding.mkv
+  left: Some(55.000001ms)
+ right: Some(55ms)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test declared_durations_match_metadata_without_changing_decoded_frames_or_seeks ... FAILED
+
+failures:
+
+failures:
+    declared_durations_match_metadata_without_changing_decoded_frames_or_seeks
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0144"
+  ],
+  "checked_at": "2026-10-16T10:34:48.930433+00:00",
+  "before": [
+    "evidence/batch-129-reproduction.log",
+    "evidence/batch-129-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-129-integration.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-129-decoder-verified.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-129-fixtures-verified.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-129-legacy-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-129-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Twenty-seven authored RPN1inputs compare independent one-semitone RPN0pitchbend performances. Before correction48mono/stereoPCM comparisons over24files fail;center/null-unselected/unknown controls account for three healthy files.48worker attempts fail generation0 fullplay;no separate pre-fixseekdefectclaimed. Passing unsupported reproduction and forced ignored acceptance are separate.",
+    "Store all14bits,retain the other byte when either data-entrybyte changes,and retune active,future andsustained voices. Center8192,step1/8192semitone,min minus1semitone,max8191/8192semitone. Compose fine/coarse/bend parameters without changingNoteOffkeys orphase. Null/NRPN guards,byteorder,lowbits,CC121preservation andchannel15isolation pass.",
+    "After all54mono/stereo comparisons match everyPCMbyte andtimestamp,plus54actual100ms/EOFworker targets with fullplay/rewind.14related integrations and19decoderunits pass. Extended tuning-extreme resource guard at8k/44.1k checksfiniteboundedPCM,phase/step,voicecount,originalkeyidentity andreset of both tuningparameters.",
+    "The old RPN0unknown-parameter guard usedRPN1,which is now supported. Its puregenerator andsavedfixture nowuseunsupportedRPN3;the old118evidence remains historically valid,andthismigration counts zero. Fixture reproduction passes forboth generators. One cfgtest assertion initially lackedBEND_CENTREimport; corrected19unitrerun is preserved separately. Production/playerbuildpasses.",
+    "Puregeneration/ordinarytests require noFFmpeg/network/private media. NativeVP9/PCM companionpasses. No physicalDAC,fullGM orperformanceclaim. OtherRPN/DataIncrementDecrement remainoutsideprofile."
+  ],
+  "sources": [
+    {
+      "url": "https://midi.org/midi-1-0-control-change-messages",
+      "section": "Table3aRPN0:1",
+      "rule": "Channel fine tuning uses14bits,center40H00H and100/8192cent resolution."
+    },
+    {
+      "url": "https://microsoft.github.io/MIDI/kb/in-box-general-midi-synth/",
+      "section": "Control changes and registered parameters",
+      "rule": "CC121resets parameterselection andpitchbend;fine/coarse tuning are registered channelparameters."
+    }
+  ],
+  "compatibility": "Additive RPN1playback; previously ignored fine-tuning data now changes pitch. Default PCM,public APIs andoriginalkeyidentity remain. RPN0unknown guard migrates toRPN3.",
+  "counting": "One missing fractional channel-tuning parameter. Lowbits,byteorders,composition,reset/resourcevariants andfixtures count zero extra IDs."
+}

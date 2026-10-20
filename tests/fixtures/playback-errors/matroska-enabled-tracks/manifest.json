@@ -1,0 +1,57 @@
+{
+  "provenance": "Authored60ms neutral16/64-square VP9 tracks with explicit/missing/empty usability flags. Disabled-corrupt case tests that disabled packet data is not decoded. No private media/encoder/network.",
+  "spec": "https://www.matroska.org/technical/elements.html#FlagEnabled",
+  "cases": [
+    {
+      "file": "omitted.mkv",
+      "side": 16
+    },
+    {
+      "file": "empty.mkv",
+      "side": 16
+    },
+    {
+      "file": "enabled.mkv",
+      "side": 16
+    },
+    {
+      "file": "disabled.mkv",
+      "side": 64
+    },
+    {
+      "file": "late-disabled.mkv",
+      "side": 64
+    },
+    {
+      "file": "disabled-corrupt.mkv",
+      "side": 64
+    },
+    {
+      "file": "all-disabled.mkv",
+      "side": null
+    }
+  ],
+  "invalid": [
+    {
+      "file": "invalid-value.mkv",
+      "error": "invalid Matroska FlagEnabled"
+    },
+    {
+      "file": "duplicate-flag.mkv",
+      "error": "duplicate Matroska FlagEnabled"
+    }
+  ],
+  "sha256": {
+    "omitted.mkv": "2a0c59393166c4b4b40ed76be7f82469b7e3575d2376ea093bd40369c5926e94",
+    "empty.mkv": "eca803a96f5d085f6c0bb816fddd1d1506028c061c364768f24db066f174a1cb",
+    "enabled.mkv": "10f1e729014a9bd5ed58ab56a540ff0a6a2d9541e2d1d4419126dbaf0455f644",
+    "disabled.mkv": "1b9c2b578566076b4a300fb4fd370ba58deca6e6ff8ee01a3dce13f57c8e4da3",
+    "late-disabled.mkv": "5f1990f5940a6ac36bdc469f6e395002213edcea7d6660f400ce5c6f17851836",
+    "disabled-corrupt.mkv": "100fc113f03b99be0c88e917b58fdfc6be666961954d858cc2b8763681ced753",
+    "all-disabled.mkv": "40060fa33c4b5b59bdd2d1f236aa7578d0aea02b9afdf0596807aea2ce4dd365",
+    "audiovisual.mkv": "8fbafab9867808f601d59a412dca5acff27f9bacc57fb194c543437df6b447b0",
+    "expected-audio.f32le": "fbdb42ac4eb6f259aa4e98001a43a676ba3204e1af62e6d1bb608f781a905189",
+    "invalid-value.mkv": "50da124a22797358f368479364c9844547f9d4739379c0a65420029d88917607",
+    "duplicate-flag.mkv": "4885207704f11c324310f3ca29c35da6f0f4ce9d20252a648d05ea046c3bb514"
+  }
+}

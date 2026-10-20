@@ -1,0 +1,75 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0123"
+  ],
+  "checked_at": "2026-10-16T06:31:41.344883+00:00",
+  "before": [
+    "evidence/batch-103-reproduction-before.log",
+    "evidence/batch-103-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-103-integration.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-103-decoder.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-103-reader.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-103-worker-recheck.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-103-no-default-xm.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-103-no-default-smf.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-103-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-103-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Ignored native Gxxis separately reproduced before implementation,with acceptance initially ignored. Forced acceptance reports22unsupported classifications and18mono/stereo native gain mismatches overnineof11inputs; default64and255clamped audio is healthy. Pre-fixworker failures stop at fullplayback before seek,so no separate pre-fixseek assertion is claimed.",
+    "Global volume is persistent across rows,clamped0..64andreset to64on decoder reset. All row cells are processed before rendering,so the last Gxxcommand applies to every voice. Mono/stereo output gain is applied before final clipping; other format/timing interfaces stay intact.",
+    "Eleven authored ramp-loop inputs cover0/1/16/32/64/255,sticky state,zero/recover,all-channel scope,last command precedence and32logical-channel headroom. Ten cases compare every PCM byte to independently gain-scaled effect-free native reference inmono/stereo. Clipping case uses an independent per-channel quarter-volume control beyond64smoothing frames per packet; transition bytes remain native roundtrip checks.",
+    "Twenty-two actual stereo worker targets verify landed-row seek andEOF after fullplay/rewind succeeds. Persistence case also requires reset to restore the initial full-volume row; recovery requires phase continuity through global mute. Acceptance is enabled andthe old ignored expectation now requires observable supported G00behavior.",
+    "11decoder/6reader units,13integration tests,fixture reproduction and current player build pass. Additional core configurations pass18XM/17SMFparser units with--no-default-features. General audio worker recheck passes32of32. Five earlier concurrent AAC seek-oracle failures from088are now resolved by parallel work,without edits ornew IDs from this task.",
+    "No encoder/network/private media,physical output,full tracker/envelope conformance or performance claim. Global gain is checked within the owned native mixing profile;32channel headroom is a correctness/resource-bound control,not a throughput benchmark."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/danielepiccone/xm_file/main/xm.txt",
+      "section": "Volume formula andG010h effect",
+      "rule": "Global volume scales channel output byGlobalVol/64."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "setGlobalVolume",
+      "rule": "Primary FT2 caps Gxxto64andupdates volume ofall channels."
+    }
+  ],
+  "compatibility": "Previously ignored XM Gxxnow changes native output andsupported-effect statistics. Default global64preserves existing PCM;reset andseek rebuild global state through ordinary preroll. Public signatures,source timeline andpacket layout are unchanged.",
+  "counting": "One useful native Gxxcapability. Eleven inputs,mono/stereo,32channel guard,22worker targets andexternal baseline recovery add noIDs."
+}

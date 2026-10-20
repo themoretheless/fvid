@@ -1,0 +1,20 @@
+E
+======================================================================
+ERROR: test_reproducible (__main__.Fixture.test_reproducible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/themoretheless/Documents/Sources/fvid/scripts/test_smf_meta_extensions_regressions.py", line 5, in test_reproducible
+    for n,b in generate().items():self.assertEqual((OUT/n).read_bytes(),b,n)
+                                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/pathlib/__init__.py", line 976, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.0/Frameworks/Python.framework/Versions/3.15/lib/python3.15/pathlib/__init__.py", line 970, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/smf-end-length/video.mkv'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+FAILED (errors=1)

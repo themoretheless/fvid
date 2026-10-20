@@ -1,0 +1,135 @@
+{
+  "provenance": "Authored20ms8k PCM RIFF/AIFF and matching native VP9/PCM. Split/repeated payloads and contradictory layout/count headers must refuse rather than choose a prefix. Identical metadata, empty unstated fact, unknown chunks and reordered header/data remain playback controls. No multipart concatenation acceptance is asserted. No private media, encoder or network.",
+  "cases": [
+    {
+      "name": "wave-control",
+      "kind": "wav",
+      "file": "wave-control.wav",
+      "refusal": null
+    },
+    {
+      "name": "wave-identical-fmt",
+      "kind": "wav",
+      "file": "wave-identical-fmt.wav",
+      "refusal": null
+    },
+    {
+      "name": "wave-identical-fact",
+      "kind": "wav",
+      "file": "wave-identical-fact.wav",
+      "refusal": null
+    },
+    {
+      "name": "wave-empty-fact",
+      "kind": "wav",
+      "file": "wave-empty-fact.wav",
+      "refusal": null
+    },
+    {
+      "name": "wave-data-first",
+      "kind": "wav",
+      "file": "wave-data-first.wav",
+      "refusal": null
+    },
+    {
+      "name": "wave-split-data",
+      "kind": "wav",
+      "file": "wave-split-data.wav",
+      "refusal": "multiple Wave data chunks"
+    },
+    {
+      "name": "wave-info-list",
+      "kind": "wav",
+      "file": "wave-info-list.wav",
+      "refusal": null
+    },
+    {
+      "name": "wave-wavl-only",
+      "kind": "wav",
+      "file": "wave-wavl-only.wav",
+      "refusal": "Wave LIST/wavl audio is not supported"
+    },
+    {
+      "name": "wave-data-plus-wavl",
+      "kind": "wav",
+      "file": "wave-data-plus-wavl.wav",
+      "refusal": "Wave LIST/wavl audio is not supported"
+    },
+    {
+      "name": "wave-repeated-data",
+      "kind": "wav",
+      "file": "wave-repeated-data.wav",
+      "refusal": "multiple Wave data chunks"
+    },
+    {
+      "name": "wave-conflicting-fmt",
+      "kind": "wav",
+      "file": "wave-conflicting-fmt.wav",
+      "refusal": "conflicting Wave fmt chunks"
+    },
+    {
+      "name": "wave-conflicting-fact",
+      "kind": "wav",
+      "file": "wave-conflicting-fact.wav",
+      "refusal": "conflicting Wave fact sample counts"
+    },
+    {
+      "name": "aiff-control",
+      "kind": "aiff",
+      "file": "aiff-control.aiff",
+      "refusal": null
+    },
+    {
+      "name": "aiff-identical-comm",
+      "kind": "aiff",
+      "file": "aiff-identical-comm.aiff",
+      "refusal": null
+    },
+    {
+      "name": "aiff-sound-first",
+      "kind": "aiff",
+      "file": "aiff-sound-first.aiff",
+      "refusal": null
+    },
+    {
+      "name": "aiff-split-sound",
+      "kind": "aiff",
+      "file": "aiff-split-sound.aiff",
+      "refusal": "multiple AIFF SSND chunks"
+    },
+    {
+      "name": "aiff-repeated-sound",
+      "kind": "aiff",
+      "file": "aiff-repeated-sound.aiff",
+      "refusal": "multiple AIFF SSND chunks"
+    },
+    {
+      "name": "aiff-conflicting-comm",
+      "kind": "aiff",
+      "file": "aiff-conflicting-comm.aiff",
+      "refusal": "conflicting AIFF COMM chunks"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "expected.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "wave-control.wav": "e1da04013618993e28a8984936226dd12b826d9ba7a79394a299088f5730ef92",
+    "wave-identical-fmt.wav": "b973bc7840cc00ae05ed83cf53d16d0b2923dfba87668205c0c0d4dfa95408f0",
+    "wave-identical-fact.wav": "94d727620080fabc744c606c567506d8079ef98230517c3ac14be39f1aa18ab8",
+    "wave-empty-fact.wav": "4f9ea4c0c848e6f3345019d913d9f712876104f3447f1698c2359fd35179b865",
+    "wave-data-first.wav": "0a0f843dbbebd7e7105485e0fe9f741b26e2feac11b8fe702dae8096128dc86a",
+    "wave-split-data.wav": "1dfec185774147ce5ba659aa7f04eb654ca354433455cac711ed264071119379",
+    "wave-info-list.wav": "223d6f2c003c9d82cd95f88137aefbb8da414fb1f57f95b4ac3ffbec2716b062",
+    "wave-wavl-only.wav": "d7a213dc35b4a6b2454906e09c99a7cba0134f825f57f255ebabf2b6ded30072",
+    "wave-data-plus-wavl.wav": "fdb31002f85db028f5bdbe994a7802f7462ed6d9a8c3314f781e784dea1daf25",
+    "wave-repeated-data.wav": "fd817219cf40ef13486a4511a1980246a05ad1026ee9884c28f85f4a352ad132",
+    "wave-conflicting-fmt.wav": "de5e9c0ae1c7dff70720c5792b8012c9d0902058e7011640f22785d72add0f5b",
+    "wave-conflicting-fact.wav": "157b914957618c97950f70981a31f7b9829a7fe8952e75b5a317200719355523",
+    "aiff-control.aiff": "a4b94873ed1633b566c249cfa71bff9cfb087c61ea297ebc3b3ce9f0af87f37b",
+    "aiff-identical-comm.aiff": "19bfc051a106bd583760be6dfde1f9d8c5ed9d0ef64aaa6512a3b13faafb59dc",
+    "aiff-sound-first.aiff": "11a33a1b62f856b61047362931d73c6c66a82a541abb5506262dbb3cd7645d69",
+    "aiff-split-sound.aiff": "97350ba73ac6a1f97f3db7c8b6fc1d88bda82f1a004c610e507b7cd9e526b0ab",
+    "aiff-repeated-sound.aiff": "c8d8f0f7aa6f61081090a72796efc7f98dcf8f90d45ba509d8aedab3d245b7b5",
+    "aiff-conflicting-comm.aiff": "687a68c3cffc31bc53a02f276749159f91081a6dd3fef423a0efcc97f399b49e"
+  }
+}

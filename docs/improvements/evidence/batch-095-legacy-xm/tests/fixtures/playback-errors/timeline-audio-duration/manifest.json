@@ -1,0 +1,30 @@
+{
+  "provenance": "Existing authored synthetic audio references read in place; separate20ms native VP9/PCM video control. This regression targets timeline audio playback duration, not Matroska demux or physical output.",
+  "cases": [
+    {
+      "kind": "smf",
+      "source": "midi/two-notes.mid",
+      "sha256": "55118571e7325c2415ee7d3e0c8cbeaea7fd27fffd7815b7bf745e975e58e880"
+    },
+    {
+      "kind": "xm",
+      "source": "xm/two-notes.xm",
+      "sha256": "e37153032d0c8d9cb29cef522bb60218c6361e51842e3d52775ac01bd25c5771"
+    },
+    {
+      "kind": "xm",
+      "file": "xm-tempo-127.xm",
+      "sha256": "49a9396844241051f817c6839ab6f02c2d12a18deae6c0b25455502f5a63dc54"
+    },
+    {
+      "kind": "xm",
+      "file": "xm-tempo-199.xm",
+      "sha256": "0399ef60e838ca5ae43a691e779b9962aeecd8e13b2b414e6cc47f60b73917b7"
+    },
+    {
+      "kind": "xm",
+      "file": "xm-tempo-255.xm",
+      "sha256": "0d2b6bb98c58861b7fa5fcbb3111e46c82030c40cd48ec137113a28857fcddc6"
+    }
+  ]
+}

@@ -20,9 +20,14 @@ use std::{
 #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
 use crate::playback_mp4::{Hardware, hardware_frame, open_hardware};
 
+#[path = "webm_seek_cache.rs"]
+mod seek_cache;
+pub use seek_cache::Status as SeekCacheStatus;
+use std::sync::{Mutex, atomic::{AtomicBool, Ordering}};
+
 enum Picture {
     Coded(Arc<IntraPicture>, AvcColour),
-    Ffv1(Arc<PackedPlanar>),
+    Packed(Arc<PackedPlanar>),
     Vp9(Box<Decoded>),
     Av1(crate::codec::av1_decoder::Decoded),
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -38,6 +43,7 @@ enum VideoDecoder {
     Av1(Box<crate::codec::av1_decoder::Decoder>),
 }
 struct Frame {
+    paired: bool,
     decoded: Picture,
     pts: i64,
     duration: Option<u64>,
@@ -58,6 +64,7 @@ pub struct WebmVideoReader<R> {
     track: u64,
     index: usize,
     pending: Option<Frame>,
+    pending_field: Option<(i64, Option<u64>, bool)>,
     future_pts: Option<Vec<i64>>,
     queued: Vec<Frame>,
     queue_budget: usize,
@@ -71,6 +78,7 @@ pub struct WebmVideoReader<R> {
     /// The signal the track's own `Colour` element states, zeroes where it wrote
     /// none.
     colour: ColourDescription,
+    explicit_full_range: Option<bool>,
     /// The light the track's `MasteringMetadata` and `MaxCLL`/`MaxFALL` name.
     hdr: HdrMetadata,
     /// What an AV1 track states about its own pictures in the bytes a reader
@@ -86,11 +94,14 @@ pub struct WebmVideoReader<R> {
     start: u128,
     end: u128,
     base: Option<i64>,
-    last_duration: u64,
     default_duration: Option<u64>,
     rgb_budget: usize,
     failed: bool,
     frames: u64,
+    seek_cache: Arc<Mutex<seek_cache::Cache>>,
+    seek_warm_stop: Option<Arc<AtomicBool>>,
+    cached_cursor: Option<u128>,
+    cache_previous_start: Option<u128>,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     hardware: Option<Hardware>,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -99,6 +110,11 @@ pub struct WebmVideoReader<R> {
     codec_private: Vec<u8>,
     #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
     raw_codec: &'static str,
+}
+impl<R> Drop for WebmVideoReader<R> {
+    fn drop(&mut self) {
+        if let Some(stop) = &self.seek_warm_stop { stop.store(true, Ordering::Release); }
+    }
 }
 impl<R: Read + Seek> WebmVideoReader<R> {
     pub fn open(reader: R, budget: usize) -> Result<Self> {
@@ -112,19 +128,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     fn open_with_hardware(reader: R, budget: usize, allow_hardware: bool) -> Result<Self> {
         let _ = allow_hardware;
         let mut demux = WebmReader::open(reader, Limits::default())?;
-        let track = demux
-            .tracks
-            .iter()
-            .find(|t| {
-                t.kind == 1
-                    && matches!(
-                        t.codec.as_str(),
-                        "V_VP9" | "V_AV1" | "V_MPEG4/ISO/AVC" | "V_MPEGH/ISO/HEVC" | "V_FFV1"
-                    )
-            })
-            .ok_or_else(|| {
-                invalid("WebM/Matroska has no supported AVC, HEVC, VP9, AV1 or FFV1 video track")
-            })?;
+        let candidates:Vec<_>=demux.tracks.iter().filter(|t|t.kind==1 && matches!(t.codec.as_str(),
+            "V_VP9"|"V_AV1"|"V_MPEG4/ISO/AVC"|"V_MPEGH/ISO/HEVC"|"V_FFV1")).map(|t|t.number).collect();
+        let number=demux.preferred_track_numbers(&candidates).first().copied()
+            .ok_or_else(||invalid("WebM/Matroska has no supported AVC, HEVC, VP9, AV1 or FFV1 video track"))?;
+        let track=demux.tracks.iter().find(|t|t.number==number).unwrap();
         let mut default_duration =
             (track.default_duration_ns > 0).then_some(track.default_duration_ns);
         let ffv1 = track.codec == "V_FFV1";
@@ -158,6 +166,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // sequence header, and a track with no `Colour` element is graded by
         // that instead, so the two are read apart.
         let (colour, hdr) = (track.colour, track.hdr);
+        let explicit_full_range = track.full_range;
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
         let track_width = track.width;
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -272,6 +281,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             track,
             index: 0,
             pending: None,
+            pending_field: None,
             future_pts,
             queued: Vec::new(),
             queue_budget,
@@ -281,6 +291,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             rotation,
             insets,
             colour,
+            explicit_full_range,
             hdr,
             codec: if ffv1 {
                 "FFV1"
@@ -297,11 +308,18 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             start: 0,
             end: 0,
             base: None,
-            last_duration: 33_333_333,
             default_duration,
             rgb_budget,
             failed: false,
             frames: 0,
+            seek_cache: Arc::new(Mutex::new(seek_cache::Cache::new(
+                (budget / 2).min(crate::playback_spool::available_memory()
+                    .map(crate::playback_spool::memory_budget).unwrap_or(0)
+                    .saturating_sub(crate::playback_spool::reserved_memory()) as usize),
+            ))),
+            seek_warm_stop: None,
+            cached_cursor: None,
+            cache_previous_start: None,
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             hardware,
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -315,6 +333,62 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             raw_codec: track_codec,
         })
     }
+    pub fn seek_cache_status(&self) -> SeekCacheStatus { SeekCacheStatus::new(&self.seek_cache) }
+    pub fn seek_cache_stats(&self) -> (usize, usize, usize) {
+        self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).stats()
+    }
+
+    /// Prepare checkpoints without delaying presentation or copying media to
+    /// disk. Dropping this item stops its worker at the next decoded picture.
+    pub fn warm_seeking(&mut self, path: &std::path::Path) {
+        if self.hardware_accelerated() || !matches!(self.decoder, VideoDecoder::Vp9(_))
+            || self.seek_warm_stop.is_some()
+            || !self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).enabled() { return; }
+        self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).preparing = true;
+        let stop = Arc::new(AtomicBool::new(false));
+        self.seek_warm_stop = Some(stop.clone());
+        let cache = self.seek_cache.clone();
+        let budget = self.rgb_budget;
+        let path = path.to_owned();
+        let duration = self.duration();
+        let workers = if duration.is_some_and(|d| d > Duration::from_secs(10)) {
+            std::thread::available_parallelism().map_or(1, |n| n.get().saturating_sub(2).clamp(1, 4))
+        } else { 1 };
+        std::thread::spawn(move || {
+            std::thread::scope(|scope| {
+                for part in 0..workers {
+                    let cache = cache.clone();
+                    let stop = stop.clone();
+                    let path = &path;
+                    scope.spawn(move || {
+                        #[cfg(feature = "player")]
+                        fvid_platform::background_preparation_thread();
+                        let result = (|| -> Result<()> {
+                            if stop.load(Ordering::Acquire) { return Ok(()); }
+                            let source = crate::playback_spool::open_shared(path)?;
+                            let mut warm = WebmVideoReader::open_software(std::io::BufReader::new(source), budget)?;
+                            warm.seek_cache = cache;
+                            let start = duration.map_or(0, |d| d.as_nanos() * part as u128 / workers as u128);
+                            let end = if part + 1 == workers { None } else { duration.map(|d| d.as_nanos() * (part + 1) as u128 / workers as u128) };
+                            warm.seek_to_sync(start.min(i64::MAX as u128) as i64)?;
+                            while !stop.load(Ordering::Acquire) && warm.read_frame_raw()?.is_some() {
+                                if end.is_some_and(|end| warm.end >= end) { break; }
+                            }
+                            Ok(())
+                        })();
+                        if let Err(error) = result { eprintln!("seek preparation: {error}"); }
+                    });
+                }
+            });
+            cache.lock().unwrap_or_else(|p| p.into_inner()).preparing = false;
+            if std::env::var_os("FVID_PLAYER_STATS").is_some() {
+                let cache = cache.lock().unwrap_or_else(|p| p.into_inner());
+                eprintln!("player seek cache: ready={} frames={} bytes={}",
+                    cache.frames_complete(), cache.frame_count(), cache.stats().1);
+            }
+        });
+    }
+
     /// Whether frames come from the platform's hardware decoder.
     pub fn hardware_accelerated(&self) -> bool {
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
@@ -477,6 +551,25 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// streaming file omits Duration, estimate its tail from indexed packet PTS.
     pub fn cache_packet_count(&self) -> usize { self.demux.packets.len() }
 
+    // Use the same last-frame clock as advance(), without depending on which
+    // frame happened to play most recently. Packet durations and DefaultDuration
+    // are nanoseconds by the time the reader exposes them here.
+    fn presentation_tail_duration(&self, pts: i64, explicit: Option<u64>) -> u64 {
+        if let Some(duration) = explicit {
+            return duration;
+        }
+        if let Some(duration) = self.default_duration {
+            return duration;
+        }
+        let previous = self.demux.packets.iter()
+            .filter(|p| p.track == self.track && !p.invisible && p.pts_ns < pts)
+            .max_by_key(|p| p.pts_ns);
+        previous.and_then(|previous| {
+            let gap = u64::try_from(i128::from(pts) - i128::from(previous.pts_ns)).ok()?;
+            Some(previous.duration_ns.map_or(gap, |duration| duration.min(gap)))
+        }).unwrap_or(33_333_333)
+    }
+
     pub fn cache_packets(&self) -> Vec<(u64, u64, Duration, Duration)> {
         let origin = self.origin();
         let mut packets: Vec<_> = self.demux.packets.iter()
@@ -486,44 +579,44 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             let start = p.pts_ns.checked_sub(origin)?;
             // SimpleBlocks commonly omit duration. The next presentation PTS
             // defines the displayed interval, including variable frame rates.
-            let end = if let Some(duration) = p.duration_ns {
-                start.checked_add(i64::try_from(duration).ok()?)?
-            } else if let Some(next) = packets.get(index + 1) {
-                next.pts_ns.checked_sub(origin)?
-            } else {
-                start.checked_add(self.frame_period().as_nanos() as i64)?
+            // Match read_inner(): an explicit duration may leave a gap, but
+            // cannot keep this picture displayed past the next picture.
+            let next = packets.get(index + 1)
+                .map(|next| i128::from(next.pts_ns) - i128::from(p.pts_ns));
+            let duration = match (p.duration_ns, next) {
+                (Some(explicit), Some(gap)) => i128::from(explicit).min(gap),
+                (None, Some(gap)) => gap,
+                (_, None) => i128::from(self.presentation_tail_duration(p.pts_ns, p.duration_ns)),
             };
+            if duration <= 0 { return None; }
+            let end = i64::try_from(i128::from(start) + duration).ok()?;
             (end > 0).then(|| (p.offset, p.offset.saturating_add(p.size as u64),
                 Duration::from_nanos(start.max(0) as u64), Duration::from_nanos(end as u64)))
         }).collect()
     }
 
     pub fn duration(&self) -> Option<Duration> {
-        let mut timestamps = self
+        let mut packets = self
             .demux
             .packets
             .iter()
-            .filter(|p| p.track == self.track && !p.invisible)
-            .map(|p| p.pts_ns);
-        let first = timestamps.next()?;
+            .filter(|p| p.track == self.track && !p.invisible);
+        let first = packets.next()?;
         let origin = self.origin();
         let end = if let Some(declared) = self.demux.duration_ns {
             i128::from(declared)
         } else {
-            let mut last = first;
-            let mut interval = 33_333_333i128;
-            for pts in timestamps {
-                if pts > last {
-                    interval = i128::from(pts) - i128::from(last);
-                    last = pts;
-                }
-            }
-            i128::from(last) + interval
+            let last = packets.fold(first, |last, packet| {
+                if packet.pts_ns > last.pts_ns { packet } else { last }
+            });
+            i128::from(last.pts_ns) + i128::from(self.presentation_tail_duration(last.pts_ns, last.duration_ns))
         };
         let nanos = u64::try_from(end - i128::from(origin)).ok()?;
         (nanos > 0).then(|| Duration::from_nanos(nanos))
     }
     pub fn rewind(&mut self) {
+        self.cached_cursor = None;
+        self.cache_previous_start = None;
         match &mut self.decoder {
             VideoDecoder::Avc(d) => d.reset(),
             VideoDecoder::Hevc(d) => d.reset(),
@@ -533,13 +626,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         self.index = 0;
         self.pending = None;
+        self.pending_field = None;
         self.queued.clear();
         self.base = None;
         self.start = 0;
         self.end = 0;
         self.frames = 0;
         self.failed = false;
-        self.last_duration = 33_333_333;
     }
     /// Where the timeline starts for the reader: the first frame once one has
     /// been displayed, and the first packet of the track before that, which is
@@ -568,6 +661,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// rather than the last one it meets; a target in front of every keyframe
     /// restarts the track at its first block.
     pub fn seek_to_sync(&mut self, target_ns: i64) -> Result<i64> {
+        self.cached_cursor = None;
+        self.cache_previous_start = None;
         // A lazy index can initially contain only decode-only pre-roll. Find
         // the first displayed timestamp before pinning the seek origin.
         while self.base.is_none()
@@ -615,6 +710,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // The picture held over from before belongs to the stretch being left
         // behind, and a decoder that had just failed is the one rebuilt here.
         self.pending = None;
+        self.pending_field = None;
         self.queued.clear();
         self.failed = false;
         self.index = index;
@@ -629,10 +725,34 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.end = self.start;
         Ok(landed)
     }
+    fn seek_to_cached_sync(&mut self, target_ns: i64) -> Result<i64> {
+        let landed = self.seek_to_sync(target_ns)?;
+        let origin = self.origin();
+        let cached = if !self.hardware_accelerated() && matches!(self.decoder, VideoDecoder::Vp9(_)) {
+            self.seek_cache.lock().unwrap_or_else(|p| p.into_inner())
+                .restore(target_ns.saturating_add(origin), self.index)
+        } else { None };
+        if let Some((index, pts, decoder)) = cached {
+            self.index = index;
+            self.decoder = VideoDecoder::Vp9(Box::new(decoder));
+            let landed = pts.saturating_sub(origin).max(0);
+            self.start = landed as u128;
+            self.end = self.start;
+            Ok(landed)
+        } else { Ok(landed) }
+    }
     /// Seek and land on the frame covering `target_ns`, refreshing `rgb()` the
     /// way continuous playback does. The pre-roll costs what decoding it costs.
     pub fn seek_to_frame(&mut self, target_ns: i64) -> Result<()> {
-        self.seek_to_sync(target_ns)?;
+        let cached = self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).frame_at(target_ns.max(0) as u128);
+        if let Some(frame) = cached {
+            let raw = self.show_cached(frame);
+            match raw.into_rgb(self.rgb_budget) {
+                Ok(rgb) => { self.rgb = rgb; return Ok(()); }
+                Err(error) => { self.failed = true; return Err(error); }
+            }
+        }
+        self.seek_to_cached_sync(target_ns)?;
         let target = u128::try_from(target_ns.max(0)).unwrap_or(u128::MAX);
         let result = (|| {
             while self.read_inner()? {
@@ -709,6 +829,15 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         // run out of blocks asks the demuxer for the next one before it believes
         // the item has ended.
         while self.index < self.demux.packets.len() || self.demux.scan_more()? {
+            if !self.hardware_accelerated() {
+                if let VideoDecoder::Vp9(decoder) = &self.decoder {
+                    let packet = &self.demux.packets[self.index];
+                    if packet.track == self.track && !packet.invisible {
+                        self.seek_cache.lock().unwrap_or_else(|p| p.into_inner())
+                            .insert(packet.pts_ns, self.index, decoder);
+                    }
+                }
+            }
             let index = self.index;
             self.index += 1;
             if self.demux.packets[index].track != self.track {
@@ -730,6 +859,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         .map_err(|error| invalid(&error.to_string()))?;
                     if let Some(surface) = surface {
                         visible = Some(Frame {
+                            paired: false,
                             decoded: Picture::Surface(surface, hardware.colour),
                             pts,
                             duration,
@@ -748,6 +878,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             Picture::Coded(Arc::new(picture), hardware.colour)
                         };
                         visible = Some(Frame {
+                            paired: false,
                             decoded,
                             pts,
                             duration,
@@ -758,11 +889,38 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             if visible.is_none() {
                 match &mut self.decoder {
                     VideoDecoder::Avc(d) => {
-                        if let Some(picture) = d.decode_order(&packet)? {
-                            let colour =
-                                AvcColour::from_vui(d.active_vui().or_else(|| d.recorded_vui()))?;
+                        let decoded = d.decode_order(&packet)?;
+                        if d.has_pending_field() {
+                            self.pending_field.get_or_insert((pts, duration.or(self.default_duration), self.demux.packets[index].invisible));
+                        }
+                        if let Some(picture) = decoded {
+                            let paired = d.output_is_field_pair();
+                            let (pts, duration) = if paired {
+                                let (first_pts, first_duration, invisible) = self.pending_field.take().ok_or_else(||invalid("missing AVC first-field timing"))?;
+                                if invisible != self.demux.packets[index].invisible { return Err(invalid("AVC field pair visibility differs")); }
+                                let duration = first_duration.zip(duration.or(self.default_duration))
+                                    .map(|(a,b)|a.checked_add(b).ok_or_else(||invalid("AVC field-pair duration overflow"))).transpose()?;
+                                (first_pts, duration)
+                            } else { (pts, duration) };
+                            let vui = d.active_vui().or_else(|| d.recorded_vui());
+                            let identity = vui
+                                .and_then(|v| v.video_signal)
+                                .and_then(|(_, _, c)| c)
+                                .is_some_and(|c| c[2] == 0);
+                            let decoded = if picture.chroma_format()? != 1 || identity {
+                                Picture::Packed(Arc::new(
+                                    crate::playback_native::avc_picture_with_vui(
+                                        &picture,
+                                        vui,
+                                        self.rgb_budget,
+                                    )?,
+                                ))
+                            } else {
+                                Picture::Coded(picture, AvcColour::from_vui(vui)?)
+                            };
                             visible = Some(Frame {
-                                decoded: Picture::Coded(picture, colour),
+                                paired,
+                                decoded,
                                 pts,
                                 duration,
                             });
@@ -771,19 +929,12 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 VideoDecoder::Hevc(d) => {
                     if let Some(frame) = d.decode_packet(&packet)?.filter(|f| f.output) {
                         let p = &frame.picture;
-                        let colour = AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())?;
-                        let picture = IntraPicture {
-                            coded_width: p.dimensions[0] as usize,
-                            coded_height: p.dimensions[1] as usize,
-                            crop: p.crop.map(|v| v as usize),
-                            bit_depth: p.depth[0],
-                            chroma_bit_depth: p.depth[1],
-                            y: p.planes[0].samples().to_vec(),
-                            cb: p.planes[1].samples().to_vec(),
-                            cr: p.planes[2].samples().to_vec(),
-                        };
+                        let packed=crate::playback_native::hevc_picture_with_vui(
+                            p,d.parameters().0.chroma_format,d.parameters().0.vui.as_ref(),
+                        )?;
                         visible = Some(Frame {
-                            decoded: Picture::Coded(Arc::new(picture), colour),
+                            paired: false,
+                            decoded: Picture::Packed(Arc::new(packed)),
                             pts,
                             duration,
                         });
@@ -794,8 +945,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     let (kr, kb) = match self.colour.matrix {
                         0 | 2 | 5 | 6 => (0.299, 0.114),
                         1 => (0.2126, 0.0722),
+                        4 => (0.30, 0.11),
                         7 => (0.212, 0.087),
-                        9 => (0.2627, 0.0593),
+                        9 | 10 => (0.2627, 0.0593),
                         _ => return Err(invalid("unsupported FFV1 display colour matrix")),
                     };
                     let colour = AvcColour {
@@ -803,9 +955,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         kb,
                         full: self.colour.full_range,
                     };
-                    let p = PackedPlanar::with_alpha(decoded.frame, decoded.depth, colour, decoded.alpha)?;
+                    let rgb_limited = decoded.frame.subsampling.is_none()
+                        && self.explicit_full_range == Some(false);
+                    let p = PackedPlanar::with_alpha(decoded.frame, decoded.depth, colour, decoded.alpha)?
+                        .with_rgb_limited(rgb_limited)?;
                     visible = Some(Frame {
-                        decoded: Picture::Ffv1(Arc::new(p)),
+                            paired: false,
+                        decoded: Picture::Packed(Arc::new(p)),
                         pts,
                         duration,
                     });
@@ -820,6 +976,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                 ));
                             }
                             visible = Some(Frame {
+                            paired: false,
                                 decoded: Picture::Vp9(Box::new(decoded)),
                                 pts,
                                 duration,
@@ -830,6 +987,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 VideoDecoder::Av1(d) => {
                     if let Some(decoded) = d.decode_container_sample(&packet)? {
                         visible = Some(Frame {
+                            paired: false,
                             decoded: Picture::Av1(decoded),
                             pts,
                             duration,
@@ -844,12 +1002,18 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 return Ok(visible);
             }
         }
+        if self.pending_field.is_some() { return Err(invalid("unpaired AVC field at end of Matroska")); }
         if let VideoDecoder::Av1(d) = &mut self.decoder {
             d.finish()?;
         }
         Ok(None)
     }
     pub fn read_frame(&mut self) -> Result<bool> {
+        if self.cached_cursor.is_some() {
+            let Some(raw) = self.read_frame_raw()? else { return Ok(false); };
+            self.rgb = raw.into_rgb(self.rgb_budget)?;
+            return Ok(true);
+        }
         if self.failed {
             return Err(invalid("WebM playback requires rewind after an error"));
         }
@@ -894,8 +1058,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     .ok_or_else(|| invalid("non-increasing WebM presentation timestamps"))?,
             )
             .map_err(|_| invalid("WebM duration overflow"))?
+        } else if current.paired && current.duration.is_none() {
+            self.demux.duration_ns.and_then(|end| u64::try_from(i128::from(end)-i128::from(current.pts)).ok())
+                .filter(|&duration|duration!=0)
+                .or_else(||(self.frames!=0).then(||u64::try_from(self.end-self.start).ok()).flatten().filter(|&duration|duration!=0))
+                .unwrap_or_else(||self.presentation_tail_duration(current.pts,None))
         } else {
-            self.default_duration.unwrap_or(self.last_duration)
+            self.presentation_tail_duration(current.pts, current.duration)
         };
         let duration = match (current.duration, next.is_some()) {
             (Some(explicit), true) => explicit.min(inferred_duration),
@@ -921,12 +1090,12 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 let (w, h) = p.dimensions();
                 ([w as u32, h as u32], p.bit_depth.max(p.chroma_bit_depth), colour.full, 0, false)
             }
-            Picture::Ffv1(p) => (
+            Picture::Packed(p) => (
                 [p.frame.width as u32, p.frame.height as u32],
                 p.depth,
                 p.colour.full,
                 0,
-                false,
+                matches!(&self.decoder, VideoDecoder::Hevc(d) if d.parameters().0.chroma_format==0),
             ),
             Picture::Vp9(d) => (
                 d.picture.size,
@@ -939,9 +1108,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 let color_space = match d.color.matrix {
                     0 => 7,
                     1 => 2,
-                    2 | 5 | 6 => 1,
+                    2 | 4 | 5 | 6 => 1,
                     7 => 4,
-                    9 => 5,
+                    9 | 10 => 5,
                     _ => return Err(invalid("unsupported AV1 RGB matrix coefficients")),
                 };
                 (
@@ -963,7 +1132,6 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         };
         self.start = start;
         self.end = start + u128::from(duration);
-        self.last_duration = duration;
         self.frames += 1;
         Ok(Some(CurrentFrame {
             decoded: current.decoded,
@@ -975,7 +1143,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         }))
     }
     fn convert_to_rgb(&mut self, current: &CurrentFrame) -> Result<bool> {
-        if let Picture::Ffv1(p) = &current.decoded {
+        if let Picture::Packed(p) = &current.decoded {
             p.to_rgb_on_black(&mut self.rgb, self.rgb_budget)?;
             return Ok(true);
         }
@@ -1043,7 +1211,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             (16.0 * scale, 219.0 * scale, 224.0 * scale)
         };
         let planes = match &current.decoded {
-            Picture::Coded(_, _) | Picture::Ffv1(_) => unreachable!("coded planes handled above"),
+            Picture::Coded(_, _) | Picture::Packed(_) => unreachable!("coded planes handled above"),
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             Picture::Surface(_, _) | Picture::Planar8(_) => unreachable!("hardware planes handled above"),
             Picture::Vp9(d) => d
@@ -1109,67 +1277,43 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         if self.failed {
             return Err(invalid("WebM playback requires rewind after an error"));
         }
+        if self.frames == 0 && self.index == 0 && self.start == 0 && self.end == 0 {
+            let first = self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).frame_at(0);
+            if let Some(frame) = first { return Ok(Some(self.show_cached(frame))); }
+        }
+        if self.cached_cursor.is_none() {
+            if let Some(previous) = self.cache_previous_start {
+                let (next, _) = self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).next_frame(previous);
+                if let Some(frame) = next { return Ok(Some(self.show_cached(frame))); }
+            }
+        }
+        if let Some(previous) = self.cached_cursor {
+            let (next, end) = self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).next_frame(previous);
+            if let Some(frame) = next { return Ok(Some(self.show_cached(frame))); }
+            if end { return Ok(None); }
+            // A partial cache may end before the file. Rejoin native decoding
+            // at the next interval instead of skipping an unprepared stretch.
+            let target = self.end.min(i64::MAX as u128) as i64;
+            self.cached_cursor = None;
+            let result = self.seek_to_frame_raw(target);
+            if let Ok(Some(raw)) = &result {
+                self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).insert_frame(
+                    self.start, self.end, self.dimensions, raw, Some(previous));
+                self.cache_previous_start = Some(self.start);
+            }
+            return result;
+        }
         let result = (|| {
             let Some(current) = self.advance()? else {
+                self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).finish_frames(self.cache_previous_start);
                 return Ok(None);
             };
-            let raw = match &current.decoded {
-                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                Picture::Surface(surface, colour) => crate::playback_native::RawFrame::Surface {
-                    surface: surface.clone(),
-                    colour: *colour,
-                },
-                #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-                Picture::Planar8(p) => crate::playback_native::RawFrame::Planar8(p.clone()),
-                Picture::Ffv1(p) => crate::playback_native::RawFrame::Planar(p.clone()),
-                Picture::Coded(picture, colour) => crate::playback_native::RawFrame::Avc {
-                    picture: picture.clone(),
-                    colour: *colour,
-                },
-                Picture::Vp9(decoded) if decoded.header.picture.format.color_space == 7 => {
-                    crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::vp9_picture(
-                        &decoded.picture, AvcColour { kr: 0.2126, kb: 0.0722, full: true }, true,
-                    )?))
-                }
-                Picture::Av1(decoded) if decoded.color.matrix == 0 && !decoded.color.monochrome => {
-                    crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::av1_picture(
-                        &decoded.picture, &decoded.color, AvcColour { kr: 0.2126, kb: 0.0722, full: true },
-                    )?))
-                }
-                Picture::Vp9(_) | Picture::Av1(_) if current.depth > 8 => {
-                    let planes=match &current.decoded {
-                        Picture::Vp9(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),
-                        Picture::Av1(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),
-                        _=>unreachable!(),
-                    };
-                    let [w,h]=current.size.map(|n|n as usize);
-                    let factors = match &current.decoded {
-                        Picture::Vp9(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
-                        Picture::Av1(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
-                        _ => [2, 2],
-                    };
-                    let cw=w.div_ceil(factors[0]);let ch=h.div_ceil(factors[1]);
-                    let bytes=w.checked_mul(h).and_then(|n|cw.checked_mul(ch).and_then(|c|c.checked_mul(2)).and_then(|c|n.checked_add(c))).and_then(|n|n.checked_mul(2))
-                        .filter(|&n|n<=self.rgb_budget).ok_or_else(||invalid("packed WebM planes exceed budget"))?;
-                    let mut data=Vec::with_capacity(bytes);
-                    for (index,(samples,stride)) in planes.into_iter().enumerate() {
-                        let (width,height)=if index==0 {(w,h)}else{(cw,ch)};
-                        for row in 0..height {for col in 0..width {
-                            let value=if index!=0 && current.monochrome {1u16<<(current.depth-1)}else {
-                                *samples.get(row*stride+col).ok_or_else(||invalid("incomplete WebM sample plane"))?
-                            };
-                            data.extend_from_slice(&value.to_le_bytes());
-                        }}
-                    }
-                    let (kr,kb)=match current.color_space {0|1|3=>(0.299,0.114),2=>(0.2126,0.0722),4=>(0.212,0.087),5=>(0.2627,0.0593),_=>return Err(invalid("unsupported native RGB colour configuration"))};
-                    crate::playback_native::RawFrame::Planar(Arc::new(PackedPlanar::new(
-                        crate::native_geometry::GeometryFrame{width:w,height:h,subsampling:Some(factors),data},current.depth,
-                        AvcColour{kr,kb,full:current.full_range})?))
-                },
-                _ => crate::playback_native::RawFrame::Planar8(Arc::new(
-                    self.current_planes(&current)?,
-                )),
-            };
+            let raw = self.current_raw(&current)?;
+            if matches!(current.decoded, Picture::Vp9(_)) {
+                self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).insert_frame(
+                    self.start, self.end, self.dimensions, &raw, self.cache_previous_start);
+                self.cache_previous_start = Some(self.start);
+            }
             Ok(Some(raw))
         })();
         if result.is_err() {
@@ -1177,6 +1321,109 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         }
         result
     }
+    fn show_cached(&mut self, frame: seek_cache::ImageFrame) -> crate::playback_native::RawFrame {
+        if self.base.is_none() { self.base = Some(self.origin()); }
+        self.start = frame.start;
+        self.end = frame.end;
+        self.dimensions = frame.dimensions;
+        self.frames = self.frames.saturating_add(1);
+        self.cached_cursor = Some(frame.start);
+        self.failed = false;
+        frame.raw()
+    }
+    pub fn seek_frame_cache_complete(&self) -> bool {
+        self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).frames_complete()
+    }
+    pub fn seek_frame_cache_count(&self) -> usize {
+        self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).frame_count()
+    }
+    fn current_raw(&self, current: &CurrentFrame) -> Result<crate::playback_native::RawFrame> {
+        let raw = match &current.decoded {
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Picture::Surface(surface, colour) => crate::playback_native::RawFrame::Surface {
+                surface: surface.clone(),
+                colour: *colour,
+            },
+            #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
+            Picture::Planar8(p) => crate::playback_native::RawFrame::Planar8(p.clone()),
+            Picture::Packed(p) => crate::playback_native::RawFrame::Planar(p.clone()),
+            Picture::Coded(picture, colour) => crate::playback_native::RawFrame::Avc {
+                picture: picture.clone(),
+                colour: *colour,
+            },
+            Picture::Vp9(decoded) if decoded.header.picture.format.color_space == 7 => {
+                crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::vp9_picture(
+                    &decoded.picture, AvcColour { kr: 0.2126, kb: 0.0722, full: true }, true,
+                )?))
+            }
+            Picture::Av1(decoded) if decoded.color.matrix == 0 && !decoded.color.monochrome => {
+                crate::playback_native::RawFrame::Planar(Arc::new(crate::playback_native::av1_picture(
+                    &decoded.picture, &decoded.color, AvcColour { kr: 0.2126, kb: 0.0722, full: true },
+                )?))
+            }
+            Picture::Vp9(_) | Picture::Av1(_) if current.depth > 8 => {
+                let planes=match &current.decoded {
+                    Picture::Vp9(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),
+                    Picture::Av1(d)=>d.picture.planes.each_ref().map(|p|(p.samples.as_slice(),p.width)),
+                    _=>unreachable!(),
+                };
+                let [w,h]=current.size.map(|n|n as usize);
+                let factors = match &current.decoded {
+                    Picture::Vp9(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
+                    Picture::Av1(d) => d.picture.subsampling.map(|sub| 1usize << usize::from(sub)),
+                    _ => [2, 2],
+                };
+                let cw=w.div_ceil(factors[0]);let ch=h.div_ceil(factors[1]);
+                let bytes=w.checked_mul(h).and_then(|n|cw.checked_mul(ch).and_then(|c|c.checked_mul(2)).and_then(|c|n.checked_add(c))).and_then(|n|n.checked_mul(2))
+                    .filter(|&n|n<=self.rgb_budget).ok_or_else(||invalid("packed WebM planes exceed budget"))?;
+                let mut data=Vec::with_capacity(bytes);
+                for (index,(samples,stride)) in planes.into_iter().enumerate() {
+                    let (width,height)=if index==0 {(w,h)}else{(cw,ch)};
+                    for row in 0..height {for col in 0..width {
+                        let value=if index!=0 && current.monochrome {1u16<<(current.depth-1)}else {
+                            *samples.get(row*stride+col).ok_or_else(||invalid("incomplete WebM sample plane"))?
+                        };
+                        data.extend_from_slice(&value.to_le_bytes());
+                    }}
+                }
+                let (kr,kb)=match current.color_space {0|1|3=>(0.299,0.114),2=>(0.2126,0.0722),4=>(0.212,0.087),5=>(0.2627,0.0593),_=>return Err(invalid("unsupported native RGB colour configuration"))};
+                crate::playback_native::RawFrame::Planar(Arc::new(PackedPlanar::new(
+                    crate::native_geometry::GeometryFrame{width:w,height:h,subsampling:Some(factors),data},current.depth,
+                    AvcColour{kr,kb,full:current.full_range})?))
+            },
+            _ => crate::playback_native::RawFrame::Planar8(Arc::new(
+                self.current_planes(current)?,
+            )),
+        };
+        Ok(raw)
+    }
+
+    /// Decode reference pictures during seek, but only pack the displayed
+    /// target for the renderer. Preroll pictures are never presented.
+    pub fn seek_to_frame_raw(&mut self, target_ns: i64) -> Result<Option<crate::playback_native::RawFrame>> {
+        let cached = self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).frame_at(target_ns.max(0) as u128);
+        if let Some(frame) = cached { return Ok(Some(self.show_cached(frame))); }
+        self.seek_to_cached_sync(target_ns)?;
+        let target = u128::try_from(target_ns.max(0)).unwrap_or(u128::MAX);
+        let result = (|| {
+            let mut last = None;
+            while let Some(current) = self.advance()? {
+                if self.end > target { return self.current_raw(&current).map(Some); }
+                last = Some(current);
+            }
+            last.as_ref().map(|current| self.current_raw(current)).transpose()
+        })();
+        if let Ok(Some(raw)) = &result {
+            if matches!(self.decoder, VideoDecoder::Vp9(_)) {
+                self.seek_cache.lock().unwrap_or_else(|p| p.into_inner()).insert_frame(
+                    self.start, self.end, self.dimensions, raw, None);
+                self.cache_previous_start = Some(self.start);
+            }
+        }
+        if result.is_err() { self.failed = true; }
+        result
+    }
+
     fn read_planes_inner(&mut self) -> Result<Option<Planar8>> {
         let Some(current) = self.advance()? else {
             return Ok(None);
@@ -1184,7 +1431,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.current_planes(&current).map(Some)
     }
     fn current_planes(&self, current: &CurrentFrame) -> Result<Planar8> {
-        if let Picture::Ffv1(p) = &current.decoded {
+        if let Picture::Packed(p) = &current.decoded {
             return p.to_planar8(self.rgb_budget);
         }
         if let Picture::Coded(p, colour) = &current.decoded {
@@ -1252,7 +1499,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             out
         };
         let planes = match &current.decoded {
-            Picture::Coded(_, _) | Picture::Ffv1(_) => unreachable!("coded planes handled above"),
+            Picture::Coded(_, _) | Picture::Packed(_) => unreachable!("coded planes handled above"),
             #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
             Picture::Surface(_, _) | Picture::Planar8(_) => unreachable!("hardware planes handled above"),
             Picture::Vp9(d) => d

@@ -155,6 +155,10 @@ pub mod hevc_poc;
 pub mod hevc_resample;
 #[path = "../../../src/codec/hevc_pps.rs"]
 pub mod hevc_pps;
+#[path = "../../../src/codec/hevc_depth_tables.rs"]
+pub mod hevc_depth_tables;
+#[path = "../../../src/codec/hevc_3d_syntax.rs"]
+pub mod hevc_3d_syntax;
 #[path = "../../../src/codec/hevc_profile.rs"]
 pub mod hevc_profile;
 #[path = "../../../src/codec/hevc_qp.rs"]
@@ -240,3 +244,12 @@ pub mod av1_tile_list;
 
 #[path = "../../../src/codec/hevc_vps_extension.rs"]
 mod hevc_vps_extension;
+
+#[path = "../../../src/codec/hevc_depth_dc.rs"]
+pub mod hevc_depth_dc;
+
+#[path = "../../../src/codec/hevc_depth_prediction.rs"]
+pub mod hevc_depth_prediction;
+
+#[path = "../../../src/codec/hevc_wedge.rs"]
+pub mod hevc_wedge;

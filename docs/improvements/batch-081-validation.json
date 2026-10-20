@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0103"
+  ],
+  "checked_at": "2026-10-16T02:53:19.237927+00:00",
+  "before": [
+    "evidence/batch-081-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-081-stable-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-081-final-variants.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-081-webm-reader.log",
+      "kind": "rust",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-081-mp4-reader.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-081-ac3-decoder.log",
+      "kind": "rust",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-081-worker.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-081-final-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-081-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Extension of103 adds zero IDs. Two authored120ms VP9/AC3 containers reproduce priming/padding mismatch: native Matroska5504samples versus reference5760 and MP45888versus5760, both gapped; EOF metadata117.000001/125.333333ms versus120ms. Both6frame videos decode natively, isolating audio errors.",
+    "A private container AC3 constructor preserves all PCM and remembers zero intrinsic trimming across resets; raw default256sample trim remains unchanged. Matroska applies CodecDelay/DiscardPadding once using known native frame counts and the existing exact sample-clock projection. MP4 routes AC3 edits through existing replay/silence timeline scheduling.",
+    "Final both formats have5760samples, correct120ms audio EOF and contiguous sample clocks. Matroska retains declared fallback duration until complete traversal and then publishes the native endpoint; completed metadata survives navigation. Actual workers verify full PCM on play/rewind, seek0, nonzero packet boundary and EOF.",
+    "Saved independent FFmpeg references are used only for testing. Both native/reference normalized RMS errors are0.0006774634538044981 and correlations0.9999997705216137. These are correctness measurements for the authored mono tone, not codec-wide quality/performance or physical-output claims.",
+    "Additional copied-media MP4 variant has20ms silence plus two repeated40ms source ranges starting at256samples. Native PCM is exactly zero960samples plus two copies of the native source1920sample range. Worker seek20/60/100ms and partial silence10ms preserve exact PCM/PTS; both full and edited videos still decode6pictures.",
+    "19 WebM/10 MP4 reader/10 AC3 decoder/32 worker units, related raw/CRC/truncation/EOF/budget integrations, saved-fixture hashes and player build pass. Ordinary tests never invoke FFmpeg or the network; its explicit generator authors only neutral video and tone, no private data.",
+    "External concurrent MPEG Layer II source work now uses exact-target full-history preroll. The older89test is updated to validate presented suffix/EOF rather than demand raw encoded-packet exhaustion for this path. External MPEG implementation and oracle adaptation count zero.",
+    "Intermediate failed logs batch-081-integration/final-integration are excluded: the first followed a partially applied source script and the second exposed the externally changed Layer II oracle. Only stable/final logs above qualify."
+  ],
+  "compatibility": "Containers now own AC3 priming/padding projection rather than also receiving the raw intrinsic trim. Raw behavior stays as103; container presentation windows, audio duration and seek become correct. Constructor option is crate-private; public signatures are unchanged.",
+  "counting": "Follow-up to103 across containers, silence/repeat edits and related timing proofs. accepted_count remains103; next unusedID104."
+}

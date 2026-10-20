@@ -1,0 +1,293 @@
+{
+  "provenance": "Owned PCM/CABAC four-layer MP4. Depth IV midpoint camera and same-AU source, source/target POC-0 temporal references. Exact on/off/index/intra/direct controls. No private media, FFmpeg, network or test-time generation.",
+  "cases": [
+    {
+      "file": "depth-iv-32-off-merge0.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": false,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-off-merge1.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": false,
+      "index": 1,
+      "shift": 1,
+      "motion": 0,
+      "reference": 1
+    },
+    {
+      "file": "depth-iv-32-off-merge2.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": false,
+      "index": 2,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-off-merge4.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": false,
+      "index": 4,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-off-intra-merge0.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": true,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-off-intra-merge1.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": true,
+      "index": 1,
+      "shift": 0,
+      "motion": 0,
+      "reference": 1
+    },
+    {
+      "file": "depth-iv-32-off-intra-merge2.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": true,
+      "index": 2,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-off-intra-merge4.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": false,
+      "intra_source": true,
+      "index": 4,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-on-merge0.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 0,
+      "shift": 1,
+      "motion": 1,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-on-merge1.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 1,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-on-merge2.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 2,
+      "shift": 1,
+      "motion": 0,
+      "reference": 1
+    },
+    {
+      "file": "depth-iv-32-on-merge4.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 4,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-on-intra-merge0.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": true,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-on-intra-merge1.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": true,
+      "index": 1,
+      "shift": 0,
+      "motion": 0,
+      "reference": 1
+    },
+    {
+      "file": "depth-iv-32-on-intra-merge2.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": true,
+      "index": 2,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-32-on-intra-merge4.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": true,
+      "index": 4,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-off-merge0.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "intra_source": false,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-off-intra-merge0.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": false,
+      "intra_source": true,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-on-merge0.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 0,
+      "shift": 1,
+      "motion": 1,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-on-intra-merge0.mp4",
+      "size": 128,
+      "direct": false,
+      "enabled": true,
+      "intra_source": true,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-off-direct-merge0.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "intra_source": false,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-off-intra-direct-merge0.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": false,
+      "intra_source": true,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-on-direct-merge0.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "intra_source": false,
+      "index": 0,
+      "shift": 1,
+      "motion": 1,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-128-on-intra-direct-merge0.mp4",
+      "size": 128,
+      "direct": true,
+      "enabled": true,
+      "intra_source": true,
+      "index": 0,
+      "shift": 0,
+      "motion": 0,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-camera-left.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 0,
+      "source_split": true,
+      "shift": 1,
+      "motion": 1,
+      "reference": 0
+    },
+    {
+      "file": "depth-iv-camera-right.mp4",
+      "size": 32,
+      "direct": false,
+      "enabled": true,
+      "intra_source": false,
+      "index": 0,
+      "source_split": true,
+      "shift": -1,
+      "motion": -1,
+      "reference": 0
+    }
+  ]
+}

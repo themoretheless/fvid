@@ -49,6 +49,9 @@ pub mod playback_native;
 #[path = "playback/audio/ogg_audio.rs"]
 pub mod playback_ogg_audio;
 #[cfg(feature = "player")]
+#[path = "playback/audio/ogg_opus.rs"]
+pub mod playback_ogg_opus;
+#[cfg(feature = "player")]
 #[path = "playback/audio/smf.rs"]
 pub mod playback_smf;
 #[path = "playback/runtime/spool.rs"]
@@ -135,3 +138,7 @@ pub mod native_audio_mix;
 mod native_audio_decoder;
 
 pub mod native_shuffleplanes;
+
+#[cfg(feature="player")]
+#[path="playback/audio/ogg_catalog.rs"]
+pub mod playback_ogg_catalog;

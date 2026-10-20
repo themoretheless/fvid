@@ -1,0 +1,159 @@
+{
+  "provenance": "Twenty-five authored RPN0PitchBendSensitivityinputs compare equivalent independently encoded default2semitone bends. Semitone/cents,active retune,LSB/MSBorder,null/NRPN/unknown selection,CC121selectorresetwithrangepreservation,channel15/isolation and127range small bend. NativeVP9/PCMcompanion,no private data/encoder/network.",
+  "cases": [
+    {
+      "file": "range-0.mid",
+      "control": "range-0-default.mid"
+    },
+    {
+      "file": "range-1.mid",
+      "control": "range-1-default.mid"
+    },
+    {
+      "file": "range-2.mid",
+      "control": "range-2-default.mid"
+    },
+    {
+      "file": "range-3.mid",
+      "control": "range-3-default.mid"
+    },
+    {
+      "file": "range-4.mid",
+      "control": "range-4-default.mid"
+    },
+    {
+      "file": "range-12.mid",
+      "control": "range-12-default.mid"
+    },
+    {
+      "file": "range-24.mid",
+      "control": "range-24-default.mid"
+    },
+    {
+      "file": "cents-0-50.mid",
+      "control": "cents-0-50-default.mid"
+    },
+    {
+      "file": "cents-2-25.mid",
+      "control": "cents-2-25-default.mid"
+    },
+    {
+      "file": "cents-12-75.mid",
+      "control": "cents-12-75-default.mid"
+    },
+    {
+      "file": "active-retune.mid",
+      "control": "active-retune-default.mid"
+    },
+    {
+      "file": "lsb-first.mid",
+      "control": "lsb-first-default.mid"
+    },
+    {
+      "file": "null-select.mid",
+      "control": "null-select-default.mid"
+    },
+    {
+      "file": "nrpn-takeover.mid",
+      "control": "nrpn-takeover-default.mid"
+    },
+    {
+      "file": "rpn-reselect-after-nrpn.mid",
+      "control": "rpn-reselect-after-nrpn-default.mid"
+    },
+    {
+      "file": "unknown-rpn.mid",
+      "control": "unknown-rpn-default.mid"
+    },
+    {
+      "file": "reset-selectors-preserve-range.mid",
+      "control": "reset-selectors-preserve-range-default.mid"
+    },
+    {
+      "file": "channel-isolation.mid",
+      "control": "channel-isolation-default.mid"
+    },
+    {
+      "file": "range127-small-bend.mid",
+      "control": "range127-small-bend-default.mid"
+    },
+    {
+      "file": "negative-12-0.mid",
+      "control": "negative-12-0-default.mid"
+    },
+    {
+      "file": "negative-2-50.mid",
+      "control": "negative-2-50-default.mid"
+    },
+    {
+      "file": "negative-127-0.mid",
+      "control": "negative-127-0-default.mid"
+    },
+    {
+      "file": "minus-ten-octaves.mid",
+      "control": "minus-ten-octaves-default.mid"
+    },
+    {
+      "file": "unselected-data.mid",
+      "control": "unselected-data-default.mid"
+    },
+    {
+      "file": "future-note.mid",
+      "control": "future-note-default.mid"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "range-0.mid": "608087d4ae629c7bb325f5bca64108742118e6ced7aaf694b8d0b652085692db",
+    "range-0-default.mid": "fe05c60cc0f02116b53b98675d47d956e56814e37f332c79ac3e39bdbae4abd2",
+    "range-1.mid": "0afee7497562d57fac9bc79fbaae40938b52b1db451fd204d699103fbc5aed66",
+    "range-1-default.mid": "3f8df75a59351e6135ab56e8cb1231217906784c45a54127869ce61c9490e996",
+    "range-2.mid": "6855ca03c380f4977e028e0e3cdb133031a0421cdcbbb096a5924b14965a5175",
+    "range-2-default.mid": "3f99a13cd9c3e7b480f9e486fe70d42b8935525c839b9dd86b9c0d590ea6fb62",
+    "range-3.mid": "4e34c586362ac4699d8ef815f599792ebe9b78fbebecc6afb0ce3c3b698508e8",
+    "range-3-default.mid": "05199b794e693def5d1e655ab2c1b9d94b04db2a9b76947a8a9dfa8574ad3ca6",
+    "range-4.mid": "c6e06f35ed5de0223475ec5f485e792f6ac0bd7ad7cabc9d34edbf1931cf7061",
+    "range-4-default.mid": "534596505fa8f842cf39bfabfd43e92d376a78d52803c9bdb35137e6be8eaea0",
+    "range-12.mid": "c8c44a76387fc83bf41f149fca8d5985649e99ca1abae8316971bfacddaa46f1",
+    "range-12-default.mid": "f8cc46ce02cb00c46adb78adac04496f6f3fb6e109ebedb8675a75b4c39deede",
+    "range-24.mid": "752c5d317aaa41cef677b3a90fd47b7748985867bdeeb3792da7ef7df5a4fa23",
+    "range-24-default.mid": "90cbaf8835ce9cd6c11e07b78525a04f52451a7c0dc543495d1843022a1f3689",
+    "cents-0-50.mid": "ce92dfde1832ecaa120dd347dfd196c3e9a68900f18d21595e3cc80f056558f7",
+    "cents-0-50-default.mid": "f215c6485269deeaddbbc9afc9f6cb57a967244de28b121698ad38ee0e53862b",
+    "cents-2-25.mid": "3baacb1e0030ac85cc964414740fe71ad7af4295433e7bfff3faf1e58c3e71e6",
+    "cents-2-25-default.mid": "96110df77d9c9c724d9cf8f9b6e70326d8147a1243ae4276a96980070dfc7a6e",
+    "cents-12-75.mid": "475a4fad925501ff83e3f948b1fd02cbc32362f7636469fc87451f6032f44d9f",
+    "cents-12-75-default.mid": "8cebed7e9b51a3ad06592474fa2d14939206624d7faf2d53488cb90948bde85f",
+    "active-retune.mid": "b21bd0a86294d1db1aa11c089c314e97ea3e58a64d20ba4058683086c65499ba",
+    "active-retune-default.mid": "878f0e1c5b7659a09252d77dc2f27135d1284067df77cda0bd854662cf3fbb64",
+    "lsb-first.mid": "3be7ed5b89e19f54f0dbc707a4984c228f5e4aa5b84fa8c71b7ce052cc8dac21",
+    "lsb-first-default.mid": "65d93e83830131709792109fd60c68ebbbd52785ecc707a12a1fec89a07d3318",
+    "null-select.mid": "d2e619092bb62229e312ceddedbf0924f93c0c10d73c991b3fa196a073e8249a",
+    "null-select-default.mid": "f8cc46ce02cb00c46adb78adac04496f6f3fb6e109ebedb8675a75b4c39deede",
+    "nrpn-takeover.mid": "33ff4f523b34c7877a83dd19fd8878ec5eca66697d1646de2e0abc805e40535c",
+    "nrpn-takeover-default.mid": "f8cc46ce02cb00c46adb78adac04496f6f3fb6e109ebedb8675a75b4c39deede",
+    "rpn-reselect-after-nrpn.mid": "5d6ebac2d792bfae895e4e0e1108a4995784ecd6ef24c77a05a75add60101b77",
+    "rpn-reselect-after-nrpn-default.mid": "534596505fa8f842cf39bfabfd43e92d376a78d52803c9bdb35137e6be8eaea0",
+    "unknown-rpn.mid": "cc89010cc552b64fe9a3781ec8d2d5ea74c03803e77c529700081dd3b0028e7c",
+    "unknown-rpn-default.mid": "3f99a13cd9c3e7b480f9e486fe70d42b8935525c839b9dd86b9c0d590ea6fb62",
+    "reset-selectors-preserve-range.mid": "31ca0e92bb6bcdf64a91091c7c7bbedab1c04e327bddbd9fca705b474227434e",
+    "reset-selectors-preserve-range-default.mid": "2cf6c6386a3c4e813bd9581885d5fbee5c42868a593179d09fb246ced140e065",
+    "channel-isolation.mid": "e6a9e96981da0aa40f038f20f58504cbec37709c36daf894d27021b11a98289a",
+    "channel-isolation-default.mid": "82b28b87f31d4f717ebb8885a74d7a81ed7b181fc3b5553d0b3266dc579c7dbc",
+    "range127-small-bend.mid": "d6fe3d52f78df85e0f76d15fb8b6991f86a13739f666a61947f5f61391639b8f",
+    "range127-small-bend-default.mid": "ed382783a75ecd6f2ba5e88895cfeb69955fd3c81c6c412a2d2c830ec993a81a",
+    "negative-12-0.mid": "7da364f772526999960b3df37c03a2bc801706c742471b8cbdd81855b89659fd",
+    "negative-12-0-default.mid": "251c9f32bb6ede91bf2967bedc1d8b194edb1d3aa4c37d8ff3e740f909abff3b",
+    "negative-2-50.mid": "d88ac5dac3f078680003788eacfd32eb16d00f1d66594ad969f9950a3c0dcaa4",
+    "negative-2-50-default.mid": "8b10af84367351dcf6ed4ad68601691937e355082a20675e8627ba58b5e3fd6e",
+    "negative-127-0.mid": "2e24bd1adf41c22e5e434ac6cb0a763f93847821f4804e857a6be2c46ac6c5b8",
+    "negative-127-0-default.mid": "37141807bf9b9eaf0a132b9c29362f56c1da704d481cd90a6953da300326d265",
+    "minus-ten-octaves.mid": "3134d5f43da7c2cf384415df06bc01f10ad821a98bcc90e2fb7891db28c43472",
+    "minus-ten-octaves-default.mid": "9fd2e56dbcdd6f7998529f8bab331795d898afa6679d55ab80ec1d276925c2c5",
+    "unselected-data.mid": "7f0aff05c66ea1eed77f0e9c716683aa121fa266e037ca8acb40b9b41dcbb89d",
+    "unselected-data-default.mid": "3f99a13cd9c3e7b480f9e486fe70d42b8935525c839b9dd86b9c0d590ea6fb62",
+    "future-note.mid": "99e47130fabe930bd1ea690095114df7712faf201572a206599c3eed3709e4f1",
+    "future-note-default.mid": "82232f55dd1e56ee6e138bdaace447d37c941fcd0306d9172a4f1ccd5ad562a5",
+    "range-resource.mid": "b622400a31e737c636a04bf149fad538da42f48270682b7f739095e56809b8ab"
+  }
+}

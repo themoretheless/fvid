@@ -31,11 +31,10 @@ impl LayeredVideoFrame {
     pub fn into_video_frame(self) -> Result<VideoFrame> {
         let p = &self.decoded.picture;
         let s = &self.decoded.binding.sps.sps;
-        let colour = crate::playback_native::AvcColour::from_hevc_vui(s.vui.as_ref())?;
-        let packed = Arc::new(crate::playback_native::hevc_picture(
+        let packed = Arc::new(crate::playback_native::hevc_picture_with_vui(
             p,
             s.chroma_format,
-            colour,
+            s.vui.as_ref(),
         )?);
         let picture = Arc::new(crate::codec::avc_picture::IntraPicture {
             coded_width: p.dimensions[0] as usize,
@@ -174,10 +173,8 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         // its native queue use half; emitted-but-unconsumed pictures a quarter.
         limits.packet_bytes = limits.packet_bytes.min(budget / 8);
         let demuxer = Mp4Reader::open(reader, limits)?;
-        let track_index = demuxer
-            .tracks()
-            .iter()
-            .position(|t| t.handler == *b"vide" && matches!(&t.codec, b"hvc1" | b"hev1"))
+        let track_index = demuxer.automatic_track_indices(&[*b"vide"]).into_iter()
+            .find(|&index| matches!(&demuxer.tracks()[index].codec, b"hvc1" | b"hev1"))
             .ok_or_else(|| invalid("MP4 has no HEVC video track"))?;
         Self::from_demuxer(demuxer, track_index, output_layer_set, highest_tid, budget)
     }

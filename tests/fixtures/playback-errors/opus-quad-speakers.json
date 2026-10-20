@@ -1,0 +1,33 @@
+{
+  "video": "hevc-opus-quad-companion.mkv",
+  "channels": 4,
+  "streams": 2,
+  "coupled_streams": 2,
+  "expected_wave_mask": 51,
+  "precision_fixtures": [
+    {
+      "file": "quad-rematrix-float32.wav",
+      "bits": 32,
+      "channels": 4,
+      "sample_frames": 2880,
+      "mask": 51,
+      "sha256": "5aca23ac94f4bad4b11d5622f2c3983255909ffead9f186e8be346713029e5e7"
+    },
+    {
+      "file": "quad-rematrix-float64.wav",
+      "bits": 64,
+      "channels": 4,
+      "sample_frames": 2880,
+      "mask": 51,
+      "sha256": "9d021b593d859a02b57335354e801a73c2c0ff1b598b2666e9e57b375df3926b"
+    }
+  ],
+  "source_six_channel_wave_indices": [
+    0,
+    1,
+    4,
+    5
+  ],
+  "sha256": "ba5d4e8f842be1632faa22904356b48628a918eaff2d6b55f23c18c0ef354974",
+  "provenance": "First two authored coupled Opus streams, removing the final self-delimited length. Owned HEVC PCM video, no private material or external codecs."
+}

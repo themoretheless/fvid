@@ -1,0 +1,50 @@
+[
+  {
+    "file": "vorbis-48000-448.ogg",
+    "exit_code": 183,
+    "frames": 0,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0x9dec50380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x9dec50380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x9dec50380] Setup header corrupt.\n[vorbis @ 0x9dec50380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x9dec50380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x9dec50380] Setup header corrupt.\n[vorbis @ 0x9dec50380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x9dec50380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x9dec50380] Setup header corrupt.\n[vorbis @ 0x9dec50e00] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x9dec50e00]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x9dec50e00] Setup header corrupt.\n[aist#0:0/vorbis @ 0x9df008300] [dec:vorbis @ 0x9df00c500] Error while opening decoder: Invalid data found when processing input\nError opening output file -.\nError opening output files: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-48000-446.ogg",
+    "exit_code": 183,
+    "frames": 0,
+    "expected_frames": 446,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0x722c70380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x722c70380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x722c70380] Setup header corrupt.\n[vorbis @ 0x722c70380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x722c70380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x722c70380] Setup header corrupt.\n[vorbis @ 0x722c70380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x722c70380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x722c70380] Setup header corrupt.\n[vorbis @ 0x722c70e00] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x722c70e00]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x722c70e00] Setup header corrupt.\n[aist#0:0/vorbis @ 0x723008300] [dec:vorbis @ 0x72300c500] Error while opening decoder: Invalid data found when processing input\nError opening output file -.\nError opening output files: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-44100-448.ogg",
+    "exit_code": 183,
+    "frames": 0,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0x88d03c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x88d03c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x88d03c380] Setup header corrupt.\n[vorbis @ 0x88d03c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x88d03c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x88d03c380] Setup header corrupt.\n[vorbis @ 0x88d03c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x88d03c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x88d03c380] Setup header corrupt.\n[vorbis @ 0x88d03ce00] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0x88d03ce00]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0x88d03ce00] Setup header corrupt.\n[aist#0:0/vorbis @ 0x88cc18300] [dec:vorbis @ 0x88cc20500] Error while opening decoder: Invalid data found when processing input\nError opening output file -.\nError opening output files: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-44100-447.ogg",
+    "exit_code": 183,
+    "frames": 0,
+    "expected_frames": 447,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0xba303c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xba303c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xba303c380] Setup header corrupt.\n[vorbis @ 0xba303c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xba303c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xba303c380] Setup header corrupt.\n[vorbis @ 0xba303c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xba303c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xba303c380] Setup header corrupt.\n[vorbis @ 0xba303ce00] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xba303ce00]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xba303ce00] Setup header corrupt.\n[aist#0:0/vorbis @ 0xba2c18300] [dec:vorbis @ 0xba2c1c500] Error while opening decoder: Invalid data found when processing input\nError opening output file -.\nError opening output files: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-96000-448.ogg",
+    "exit_code": 183,
+    "frames": 0,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0xa51058380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xa51058380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xa51058380] Setup header corrupt.\n[vorbis @ 0xa51058380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xa51058380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xa51058380] Setup header corrupt.\n[vorbis @ 0xa51058380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xa51058380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xa51058380] Setup header corrupt.\n[vorbis @ 0xa51058e00] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xa51058e00]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xa51058e00] Setup header corrupt.\n[aist#0:0/vorbis @ 0xa50c1c300] [dec:vorbis @ 0xa50c24500] Error while opening decoder: Invalid data found when processing input\nError opening output file -.\nError opening output files: Invalid data found when processing input\n"
+  },
+  {
+    "file": "vorbis-8000-448.ogg",
+    "exit_code": 183,
+    "frames": 0,
+    "expected_frames": 448,
+    "all_zero": true,
+    "stderr": "[vorbis @ 0xc8f03c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xc8f03c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xc8f03c380] Setup header corrupt.\n[vorbis @ 0xc8f03c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xc8f03c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xc8f03c380] Setup header corrupt.\n[vorbis @ 0xc8f03c380] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xc8f03c380]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xc8f03c380] Setup header corrupt.\n[vorbis @ 0xc8f03ce00] Floor value is too large for blocksize: 64 (32)\n[vorbis @ 0xc8f03ce00]  Vorbis setup header packet corrupt (floors). \n[vorbis @ 0xc8f03ce00] Setup header corrupt.\n[aist#0:0/vorbis @ 0xc8ec18300] [dec:vorbis @ 0xc8ec1c500] Error while opening decoder: Invalid data found when processing input\nError opening output file -.\nError opening output files: Invalid data found when processing input\n"
+  }
+]

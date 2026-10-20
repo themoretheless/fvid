@@ -1,0 +1,71 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0046"
+  ],
+  "checked_at": "2026-10-15T11:54:22.696382+00:00",
+  "before": "Correct20ms AVC field-pair frame presents10ms and binds to second-field timing; owned Matroska pipeline refuses PAFF. The same authored PCM/P/B fields pass MP4 controls.",
+  "result": "Retain first-field binding through native and owned decode, combine both durations with checked arithmetic, infer missing durations in visible-pair order and reset pending binding on seek/rewind.",
+  "qualification": [
+    "36 authored Matroska companions cover PCM/DC/P/B/residual/weights/fractional motion with explicit10+10, unequal7+13, default and absent durations, plus hidden decoded reference pairs.",
+    "Exact woven components, analytic RGB tolerance1, timeline duration before/after playback, first-field intervals, seek/rewind/EOF and36 flipped FFV1 exports pass. Full export preserves nonzero source timestamps; display normalizes to first visible picture.",
+    "Unpaired fields, visibility mismatch and pair-duration overflow each refuse with the intended specific error, never publish a frame/output, and reset still reproduces the corruption.",
+    "Packet limits1/2/3 count each compressed field and refuse without publication; four input packets admit two output pictures.",
+    "Former PAFF refusal unit now checks pending/pair binding acceptance. Related frame AVC, MP4 PAFF, native WebM and FFV1 export checks pass; public interfaces unchanged.",
+    "Tightened the earlier AVC resource test to use an absent output, proving media-policy refusal rather than early output-exists admission. This strengthens FVID0043 evidence without another ID."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-before-qualified.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-final-qualified.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-main-final.log",
+      "kind": "rust_overlap",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-native-unit-final.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-owner.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-frame-controls.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-ffv1.log",
+      "kind": "rust",
+      "passed": 13
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-024-avc-matroska-field-timing-player-final.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 44,
+  "distinct_python_tests_passed": 1,
+  "remaining": [
+    "New Matroska PAFF fixtures qualify software decoding and CAVLC; no hardware/CABAC acceptance claim.",
+    "Absent terminal durations are qualified with declared Segment end; undeclared terminal length remains a fallback estimate."
+  ],
+  "counting": "One Matroska AVC paired-field clock binding capability across native/owned paths.36 variants, invalid companions and tightened old test add no IDs."
+}

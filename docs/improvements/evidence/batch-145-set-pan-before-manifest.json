@@ -1,0 +1,108 @@
+{
+  "provenance": "Ten authored literal XM8xxcases compare with a second instrument holding identical signed16ramp PCM,rate,volume andloop butindependently assigned panning.0/64/128/192/255,onset,volume-column combination,persistence,return center andchannel isolation. Mono must stay unchanged; stereo follows existing instrument-pan law. No other unsupported features. Short authored VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "pan-0",
+      "file": "pan-0.xm",
+      "control": "pan-0-instrument.xm",
+      "without": "pan-0-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-64",
+      "file": "pan-64.xm",
+      "control": "pan-64-instrument.xm",
+      "without": "pan-64-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-128",
+      "file": "pan-128.xm",
+      "control": "pan-128-instrument.xm",
+      "without": "pan-128-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-192",
+      "file": "pan-192.xm",
+      "control": "pan-192-instrument.xm",
+      "without": "pan-192-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "pan-255",
+      "file": "pan-255.xm",
+      "control": "pan-255-instrument.xm",
+      "without": "pan-255-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "note-on",
+      "file": "note-on.xm",
+      "control": "note-on-instrument.xm",
+      "without": "note-on-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "volume-column",
+      "file": "volume-column.xm",
+      "control": "volume-column-instrument.xm",
+      "without": "volume-column-without.xm",
+      "seek": 1
+    },
+    {
+      "name": "persist",
+      "file": "persist.xm",
+      "control": "persist-instrument.xm",
+      "without": "persist-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "return-center",
+      "file": "return-center.xm",
+      "control": "return-center-instrument.xm",
+      "without": "return-center-without.xm",
+      "seek": 2
+    },
+    {
+      "name": "channel-isolation",
+      "file": "channel-isolation.xm",
+      "control": "channel-isolation-instrument.xm",
+      "without": "channel-isolation-without.xm",
+      "seek": 1
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "pan-0.xm": "3bb5a1424c3f46207fdad9c2b01ab5008a0e8646d899903d4a232cfd9ba565b1",
+    "pan-0-instrument.xm": "35f017c8fa68e40d2a8e475d4ac8a4396a1e81cf0c24c0158f121c8f6ffa8ae0",
+    "pan-0-without.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "pan-64.xm": "e7af42b4b6f2c80d89dc47405cb6f4debdcab77559bc960c808d9e6dba831485",
+    "pan-64-instrument.xm": "b117cf5f5c50b6a492775929f5589d963135662d3adac9a62fd21bd764525df8",
+    "pan-64-without.xm": "4c79c7b9b999c227c52be42c370218c11daec75ad947647b625545020910ea15",
+    "pan-128.xm": "bad9ffa8c319e28426ffb48beb7415287ce2e0bfe58b9531eccc95818bce2a09",
+    "pan-128-instrument.xm": "c84c216b1d71f62bee293e20fd880e1ae8371dcaeb3423d051c2208f35a44351",
+    "pan-128-without.xm": "5c5b5146f0f403f7eb31ed7e94db46dcc0d695d4bf2ef54ee81a27f7874f6a42",
+    "pan-192.xm": "108fcb49cef59929df821be5b9935f6f1536584dfbce6a480cf8bc5fda0ade02",
+    "pan-192-instrument.xm": "cfd144e3c36f7b58baf2963802a7f2f77b9970d740b2f47935f5945646f9c1e7",
+    "pan-192-without.xm": "08ed2e5012f1f98a7c8f45c806214b4b7e90fb811f48f7367b802aa810fc1080",
+    "pan-255.xm": "d947a011ff383c0e08e0f7f09643aeed5d420dce0ccc4395d7c8434e4633f264",
+    "pan-255-instrument.xm": "23891ad35a0907b55ac8f33b8482a26b8b0a99b6cd0aa4c5805d489abceda292",
+    "pan-255-without.xm": "1b7c33922087c8373c5be2a147f1e24b832db4698611ca696d2ed38a8efdc30e",
+    "note-on.xm": "ead2e1e14b2fe4277701dcff27ea3be17d82a0091e72bde48d3d15b68e98fb07",
+    "note-on-instrument.xm": "95ce5d4797b4244c0da726403479503d06dccfdd22dd21e31acfca9aa6072d84",
+    "note-on-without.xm": "ea17b0ce2d7517f908a402b1b58d7a6cb54a113d5f687aeb0d146058f175b9c8",
+    "volume-column.xm": "8d758724bcb7e4570ba959d88ba915760ec1473d71cca826e6f6e8648842b997",
+    "volume-column-instrument.xm": "35616bf0f266a4a37d130fa8ee374ec4041fcfa2a8c08b4fbbcdb2305de10c05",
+    "volume-column-without.xm": "040f43e30b2fb48758d8dd5d500325e764348729fd286a0a62fc30f07fcea6a2",
+    "persist.xm": "e26ac675944b37bf59fa925a40b3e46c2a5c9cc6c30d5bfc655f030678b27b39",
+    "persist-instrument.xm": "37a181f5b8c395b43e74349f0a7d2a562b8e714d566f6f8f02a4d85f933914ac",
+    "persist-without.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "return-center.xm": "ba06e5286b28f22ef5ca25547d6a82e4bf27c10857376b9189b2d12beb1d1abf",
+    "return-center-instrument.xm": "5a39ac3fa399a3a32ed2eb4107a6adb2ed3411c768bcfe336b5882a4a2121b2b",
+    "return-center-without.xm": "8511a57dd377f1f3ec12e92e8be9e04a6be3acd09b40558c56503442ff55380a",
+    "channel-isolation.xm": "cd5c6c79ee515b5492268ba4a8446e5b74c4913e26b3edbbb7ba1a19dc557637",
+    "channel-isolation-instrument.xm": "a1d0fab78337aabc5e8610e7c39201aec83b7caa9c320ac315309b7f2f1d9903",
+    "channel-isolation-without.xm": "8775da10cc1df7380854db3b8a24cdeca55857d7feafc217ccea1273db1dc6eb"
+  }
+}

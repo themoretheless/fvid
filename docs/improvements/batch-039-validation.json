@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0063"
+  ],
+  "checked_at": "2026-10-15T20:18:43.096431+00:00",
+  "before": [
+    "evidence/batch-039-stream-clock-before.log",
+    "evidence/batch-039-seek-ticks-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-039-clock-final.log",
+      "kind": "rust",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-039-audio-thread-final.log",
+      "kind": "rust",
+      "passed": 28
+    },
+    {
+      "log": "evidence/batch-039-reader-integration.log",
+      "kind": "rust",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-039-minimal-final.log",
+      "kind": "rust",
+      "passed": 15
+    },
+    {
+      "log": "evidence/batch-039-audio-fixtures.log",
+      "kind": "python",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-039-player-build-final.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored60ms VP9/PCM stores9000000000001000000ns in Matroska. Native3-frame video and480 PCM sample controls pass. Stream clock previously adds1358ns of floating-point rounding error.",
+    "Inverse seek at9000000000.001s previously sends9000000000000999424ticks rather than9000000000001000000. Exact integer conversion now preserves stored boundary in both directions.",
+    "Negative/zero/1ns/second-boundary/i64::MAX stream coordinates pass. Seek command tests preserve1ns and999999999ns and saturate Duration::MAX to i64::MAX. Public signatures unchanged.",
+    "Existing28 worker navigation/decoder tests, five reader targets and packet clock range pass. Reader integration predates the inverse-only change; final worker and clock tests/build cover the final source.",
+    "Stored origin is large but payload is short and authored. No claim of physical playback over a285-year timeline."
+  ],
+  "counting": "One rational stream/seek coordinate precision improvement; both directions and variants do not inflate IDs."
+}

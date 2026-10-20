@@ -1,0 +1,47 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0126"
+  ],
+  "checked_at": "2026-10-16T06:55:27.312468+00:00",
+  "before": [
+    "evidence/batch-107-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-107-integration.log",
+      "kind": "rust",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-107-parser.log",
+      "kind": "rust",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-107-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-107-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Five authored D00/D63/D64/D99/DFF inputs compare explicit played-row paths,source duration and every native PCM byte/PTS to independent expanded effect-free timelines. Pattern2has65rows,so D64both exposes illegal row64selection and contrasts with required row0fallback;D99/DFF previously discard pattern2entirely.",
+    "Before three inputs fail exact path,duration,PCM and actual fullplayback packet count. Two in-range controls pass. Worker failures stop at generation0,not a separate reached seek.",
+    "After all controls pass native and actual fullplay/rewind,coarse mid-row seek andEOF;ten actual worker targets.18parser units,11integrations,fixture reproduction and player build pass. BCD low nibble interpretation unchanged;only decoded values above63fallback to0.",
+    "This corrects independent Dxxboundary handling rather than recounting prior opcode namespace correction FVID-0119. Authored synthetic raw XM/VP9companion,no private source/FFmpeg/network/performance claim."
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+      "section": "patternBreak",
+      "rule": "Decode decimal row from two nibbles;values above63set break position0."
+    }
+  ],
+  "compatibility": "Previously wrong D64..DFFtimeline now follows row0fallback. Public APIs/default limits/other flow opcodes unchanged.",
+  "counting": "One pattern-break boundary problem;three failing variants andtwo controls add no IDs."
+}

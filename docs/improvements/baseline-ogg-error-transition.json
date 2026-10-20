@@ -1,0 +1,7 @@
+{
+  "counted_improvements": 0,
+  "observed_failure": "Three root player E0277 errors while concurrent Ogg ownership refactor temporarily exposed a different owned error type.",
+  "evidence": "evidence/baseline-ogg-owner-error-transition.log",
+  "current_state": "Concurrent work unified the Ogg error type; final player retry passes all11 MP4 selection regressions. No Ogg source changes authored for this batch.",
+  "validation": "batch-026-validation.json"
+}

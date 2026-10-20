@@ -1,0 +1,56 @@
+{
+  "provenance": "Six authored pattern-note plus sample-relative-tone controls. Totalpitch96healthy,97/108/119valid high registers,0/120explicit unsupported bounds. Signed16ramp loop andindependent originalXMlinear pitch waveform oracle;short authored VP9/PCM companion. No private media/encoder/network.",
+  "cases": [
+    {
+      "name": "note-84-relative-12",
+      "file": "note-84-relative-12.xm",
+      "note": 84,
+      "relative": 12,
+      "audible": true
+    },
+    {
+      "name": "note-96-relative-1",
+      "file": "note-96-relative-1.xm",
+      "note": 96,
+      "relative": 1,
+      "audible": true
+    },
+    {
+      "name": "note-96-relative-12",
+      "file": "note-96-relative-12.xm",
+      "note": 96,
+      "relative": 12,
+      "audible": true
+    },
+    {
+      "name": "note-96-relative-23",
+      "file": "note-96-relative-23.xm",
+      "note": 96,
+      "relative": 23,
+      "audible": true
+    },
+    {
+      "name": "note-96-relative-24",
+      "file": "note-96-relative-24.xm",
+      "note": 96,
+      "relative": 24,
+      "audible": false
+    },
+    {
+      "name": "note-1-relative--1",
+      "file": "note-1-relative--1.xm",
+      "note": 1,
+      "relative": -1,
+      "audible": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "note-84-relative-12.xm": "5db1d4617ff26576a1599c52447df1af7bacb1d44c399fcb970c786c91155566",
+    "note-96-relative-1.xm": "5d159fd2c2b6107e00c1bb75a9952193922fb89851e175d9dd5c4e0305078596",
+    "note-96-relative-12.xm": "d8e555ee84d5f6ffa45a4ff316e55f062e6940363bb696f1ba32ce3fecbf2bd5",
+    "note-96-relative-23.xm": "555267076059f00777cec16e4169f48b1350aa435c68864c58dfd45ff90f3c12",
+    "note-96-relative-24.xm": "e5552fe1dc9b86b68000e66d37e584bc04d82b220452f6885fca812ac38e4587",
+    "note-1-relative--1.xm": "d73c52609ba311b87f9b71a7952994bf0e71c7dc43d6bf49d371b07f857df45f"
+  }
+}

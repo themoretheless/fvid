@@ -1,0 +1,51 @@
+{
+  "provenance": "Authored native MIDI10byte event records for100ms decoder windows. Corrupt packet timing is injected into first packet of authored100ms note source; separate short native VP9/PCM video. No private input/encoder/network.",
+  "cases": [
+    {
+      "name": "normal",
+      "file": "normal.packet",
+      "bad": false
+    },
+    {
+      "name": "equal-time",
+      "file": "equal-time.packet",
+      "bad": false
+    },
+    {
+      "name": "last-microsecond",
+      "file": "last-microsecond.packet",
+      "bad": false
+    },
+    {
+      "name": "at-end",
+      "file": "at-end.packet",
+      "bad": true
+    },
+    {
+      "name": "after-end",
+      "file": "after-end.packet",
+      "bad": true
+    },
+    {
+      "name": "maximum-offset",
+      "file": "maximum-offset.packet",
+      "bad": true
+    },
+    {
+      "name": "descending",
+      "file": "descending.packet",
+      "bad": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "control.mid": "3a096c52b91d37f0f768dabcb70236d147b1a2d65bacc180c1d3a216a509e2f3",
+    "normal.packet": "95b437adaa32a8c2d91a92f6fdbc7437a713fd8effaf0730def95232bbb8c523",
+    "equal-time.packet": "c325a06a9eb61547e27c490154f8fa07f42f0ad40b053ae610a0176177de2172",
+    "last-microsecond.packet": "f2aa66c32b4f52c85865268dc11bfedfcc57656edb21883209ef4a96ec5923e1",
+    "at-end.packet": "15b0bcfb56a06fc0f080a880ee4548a237c059b76c2e6bfc2d9676874cdac90f",
+    "after-end.packet": "0bfcf621c6340e6e09a073569d0c206bbb92449984c3b4a81fcc6b68c374afd3",
+    "maximum-offset.packet": "cb28b5e78fe9074e7024fbf611c4402ecc01b65d572ffd7a8781d7635e52d89f",
+    "descending.packet": "a776c5ae8d0bb8c115a468f395222dcf65efcfd250489ed23ef4f647678cadac"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "provenance": "Six authored VP9/MS-ADPCM AVI sample-clock boundaries, independent literal PCM. Separate native Matroska video companion; AVI video playback not claimed. No encoder/network/private data.",
+  "cases": [
+    {
+      "file": "ms-44100-384.avi",
+      "expected": "ms-44100-384.avi.f32le",
+      "rate": 44100,
+      "samples": 384,
+      "end_ns": 8707482
+    },
+    {
+      "file": "ms-44100-192.avi",
+      "expected": "ms-44100-192.avi.f32le",
+      "rate": 44100,
+      "samples": 192,
+      "end_ns": 4353741
+    },
+    {
+      "file": "ms-48000-64.avi",
+      "expected": "ms-48000-64.avi.f32le",
+      "rate": 48000,
+      "samples": 64,
+      "end_ns": 1333333
+    },
+    {
+      "file": "ms-48000-128.avi",
+      "expected": "ms-48000-128.avi.f32le",
+      "rate": 48000,
+      "samples": 128,
+      "end_ns": 2666666
+    },
+    {
+      "file": "ms-96000-64.avi",
+      "expected": "ms-96000-64.avi.f32le",
+      "rate": 96000,
+      "samples": 64,
+      "end_ns": 666666
+    },
+    {
+      "file": "ms-8000-384.avi",
+      "expected": "ms-8000-384.avi.f32le",
+      "rate": 8000,
+      "samples": 384,
+      "end_ns": 48000000
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "ms-44100-384.avi": "c2546596402f1864bb7e48a07cf73b95849271f35f8b49f4450ffb091d27f869",
+    "ms-44100-384.avi.f32le": "5470f644c499657ab61276bee040279eb44c182884996de512ffb3fccf9bc754",
+    "ms-44100-192.avi": "e1b22fb81a7f703395cccdd20aeb37e07f395cd70eeeaba3d56b62683e184023",
+    "ms-44100-192.avi.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "ms-48000-64.avi": "88d7b90d383333f366aee777963c647e7301fd3853dd1ef71035c648de5e940e",
+    "ms-48000-64.avi.f32le": "f521dbc648eadbf6a83b90b978dbf7bddb6e5ace8ecf4a582059d1ec95c4ff1b",
+    "ms-48000-128.avi": "991acdb4075a0feca7e6342354dc47b53aad916a1c9896eca9c8120aa5f54faf",
+    "ms-48000-128.avi.f32le": "dd483a3dde1921ed70760380b3a300ffe612fd74ff95ec1292825b4e6204496f",
+    "ms-96000-64.avi": "e08aae1a6895e6dae8ed6a99f716cc99256daa3a24930eaee73e159b2da2dc8c",
+    "ms-96000-64.avi.f32le": "f521dbc648eadbf6a83b90b978dbf7bddb6e5ace8ecf4a582059d1ec95c4ff1b",
+    "ms-8000-384.avi": "d1d49f2a35a2e02407813aaa6332145ce9c6b25e5b8fae7a73084dcb74c8cbe5",
+    "ms-8000-384.avi.f32le": "5470f644c499657ab61276bee040279eb44c182884996de512ffb3fccf9bc754"
+  }
+}

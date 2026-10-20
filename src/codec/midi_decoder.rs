@@ -4,13 +4,21 @@
 //! reverse-engineering of a format but an instrument: it reads the packets the
 //! SMF container hands out - events placed inside a slice of the timeline - and
 //! plays them. What it has to get right is the same thing a player has to get
-//! right: which keys are down when, how loudly, and for how long.
+//! right: which keys are down when, how loudly, where in stereo, and for how long.
 //!
 //! The voice is a sine per key with a three-stage envelope, and every channel
 //! sounds on it. The program number a file states is kept and reported, because
 //! a listener switching tracks wants to see the file's own names, but no file
 //! owes anything beyond the number and no instrument table this player carries
-//! answers to it either.
+//! answers to it either. CC10 uses a centre-preserving linear stereo balance:
+//! 0 is left, 64 keeps the original dual-mono level, and 127 is right. Mono
+//! and legacy wider outputs keep the dry mix; pan LSB is not applied. RPN0
+//! sets channel bend sensitivity in semitones/cents for sounding and future
+//! notes. NRPN and unknown RPN data are ignored; CC121 nulls selection while
+//! preserving sensitivity and channel tuning. RPN1 adds14-bit fractional tuning
+//! over one semitone either side of center8192. RPN2 retunes active and future
+//! notes in whole semitones; data LSB is ignored. Decoder reset restores
+//! two-semitone bend sensitivity and centered fine/coarse tuning.
 
 use crate::audio::{AudioDecode, AudioPacket};
 use crate::container::smf::{self, Event};
@@ -27,9 +35,8 @@ const RELEASE_SECONDS: f32 = 0.04;
 /// Keys a performance can sound at once. Beyond this the longest-held is let go,
 /// which is what an instrument with too many fingers down does too.
 const MAX_VOICES: usize = 32;
-/// How far a full bend swings the pitch, in semitones: the two-byte range request
-/// that would say otherwise is not something a file carries.
-const BEND_SEMITONES: f32 = 2.0;
+/// Default bend sensitivity until the channel selects RPN0 and supplies data.
+const DEFAULT_BEND_SEMITONES: u8 = 2;
 /// The level of one key struck at full force, so that a chord of a dozen still
 /// has room before the scale is full.
 const VOICE_LEVEL: f32 = 0.18;
@@ -55,6 +62,8 @@ enum Stage {
 struct Voice {
     channel: u8,
     key: u8,
+    /// The key itself can be up while the sustain pedal keeps its envelope held.
+    key_down: bool,
     /// Cycles advanced per frame, so a bend can retune a note already sounding.
     step: f32,
     phase: f32,
@@ -77,23 +86,60 @@ struct Channel {
     /// MIDI's own defaults: the channel at full level and unshifted.
     volume: u8,
     expression: u8,
+    pan: u8,
+    gain: f32,
+    left_balance: f32,
+    right_balance: f32,
+    bend_semitones: u8,
+    bend_cents: u8,
+    coarse_semitones: i8,
+    fine_tuning: u16,
+    rpn_msb: u8,
+    rpn_lsb: u8,
+    rpn_active: bool,
     bend: u16,
+    sustain: bool,
 }
 
 impl Channel {
+    fn update_mix(&mut self) {
+        self.gain = f32::from(self.volume) / 127.0 * (f32::from(self.expression) / 127.0);
+        (self.left_balance, self.right_balance) = if self.pan <= 64 {
+            (1.0, f32::from(self.pan) / 64.0)
+        } else { (f32::from(127 - self.pan) / 63.0, 1.0) };
+    }
+
+    fn bend_range(self) -> f32 {
+        f32::from(self.bend_semitones) + f32::from(self.bend_cents) / 100.0
+    }
+
     fn unset() -> Self {
         Self {
             program: 0,
             volume: 127,
             expression: 127,
+            pan: 64,
+            gain: 1.0,
+            left_balance: 1.0,
+            right_balance: 1.0,
+            bend_semitones: DEFAULT_BEND_SEMITONES,
+            bend_cents: 0,
+            coarse_semitones: 0,
+            fine_tuning: BEND_CENTRE,
+            rpn_msb: 127,
+            rpn_lsb: 127,
+            rpn_active: false,
             bend: BEND_CENTRE,
+            sustain: false,
         }
     }
 }
 
-/// The two controllers that change how loud a channel is.
+/// Supported continuous channel controls.
 const CONTROLLER_VOLUME: u8 = 7;
 const CONTROLLER_EXPRESSION: u8 = 11;
+const CONTROLLER_PAN: u8 = 10;
+const CONTROLLER_SUSTAIN: u8 = 64;
 /// The two ways a file says "stop": let the notes go, and cut the sound.
 const CONTROLLER_ALL_NOTES_OFF: u8 = 123;
 const CONTROLLER_ALL_SOUND_OFF: u8 = 120;
@@ -106,11 +152,14 @@ fn slope_from(level: f32, seconds: f32, sample_rate: u32) -> f32 {
 }
 
 /// The cycle a key sounds at, bent the way its channel is bent.
-fn step_of(key: u8, bend: u16, sample_rate: u32) -> f32 {
-    let semitones = (i32::from(bend) - i32::from(BEND_CENTRE)) as f32 / BEND_SPAN * BEND_SEMITONES;
-    let hertz =
-        CONCERT_PITCH_HERTZ * 2.0f32.powf((f32::from(key) - CONCERT_PITCH_KEY + semitones) / 12.0);
-    hertz / (sample_rate as f32)
+fn step_of(key: u8, state: Channel, sample_rate: u32) -> f32 {
+    let bend = (i32::from(state.bend) - i32::from(BEND_CENTRE)) as f32 / BEND_SPAN * state.bend_range();
+    let tuning = f32::from(state.coarse_semitones)
+        + (i32::from(state.fine_tuning) - i32::from(BEND_CENTRE)) as f32 / BEND_SPAN;
+    let hertz = CONCERT_PITCH_HERTZ
+        * 2.0f32.powf((f32::from(key) - CONCERT_PITCH_KEY + bend + tuning) / 12.0);
+    // Fold whole cycles at retune, keeping every supported tuning bounded.
+    (hertz / (sample_rate as f32)).fract()
 }
 
 /// A synthesiser for the SMF packets `crate::container::smf` writes.
@@ -167,16 +216,15 @@ impl MidiDecoder {
                 if let Some(state) = self.state.get_mut(usize::from(channel)) {
                     state.bend = value;
                 }
-                // A bend retunes the keys already down on that channel.
-                let sample_rate = self.sample_rate;
-                for voice in self
-                    .voices
-                    .iter_mut()
-                    .filter(|voice| voice.channel == channel)
-                {
-                    voice.step = step_of(voice.key, value, sample_rate);
-                }
+                self.retune(channel);
             }
+        }
+    }
+
+    fn retune(&mut self, channel: u8) {
+        let Some(state) = self.state.get(usize::from(channel)).copied() else { return; };
+        for voice in self.voices.iter_mut().filter(|voice| voice.channel == channel) {
+            voice.step = step_of(voice.key, state, self.sample_rate);
         }
     }
 
@@ -194,13 +242,14 @@ impl MidiDecoder {
                 .map_or(0, |(index, _)| index);
             self.voices.remove(oldest);
         }
-        let bend = self.state[usize::from(channel & 15)].bend;
-        let step = step_of(key, bend, self.sample_rate);
+        let state = self.state[usize::from(channel & 15)];
+        let step = step_of(key, state, self.sample_rate);
         let started = self.rendered;
         let force = f32::from(velocity) / 127.0;
         self.voices.push(Voice {
             channel,
             key,
+            key_down: true,
             step,
             phase: 0.0,
             level: 0.0,
@@ -215,12 +264,14 @@ impl MidiDecoder {
 
     fn lift(&mut self, channel: u8, key: u8) {
         let sample_rate = self.sample_rate;
+        let sustain = self.state[usize::from(channel)].sustain;
         for voice in self
             .voices
             .iter_mut()
             .filter(|voice| voice.channel == channel && voice.key == key)
         {
-            if voice.stage != Stage::Release {
+            voice.key_down = false;
+            if !sustain && voice.stage != Stage::Release {
                 voice.stage = Stage::Release;
                 voice.slope = slope_from(voice.level, RELEASE_SECONDS, sample_rate);
             }
@@ -231,14 +282,30 @@ impl MidiDecoder {
     /// Every key on one channel, or on all of them with `channel` past the last.
     fn let_go(&mut self, channel: u8, cut: bool) {
         let sample_rate = self.sample_rate;
+        let state = self.state;
         for voice in self
             .voices
             .iter_mut()
             .filter(|voice| channel > 15 || voice.channel == channel)
         {
+            voice.key_down = false;
             if cut {
                 voice.level = 0.0;
-            } else if voice.stage != Stage::Release {
+                voice.stage = Stage::Release;
+            } else if !state[usize::from(voice.channel)].sustain && voice.stage != Stage::Release {
+                voice.stage = Stage::Release;
+                voice.slope = slope_from(voice.level, RELEASE_SECONDS, sample_rate);
+            }
+        }
+        self.drop_finished();
+    }
+
+    fn set_sustain(&mut self, channel: u8, enabled: bool) {
+        self.state[usize::from(channel)].sustain = enabled;
+        if enabled { return; }
+        let sample_rate = self.sample_rate;
+        for voice in self.voices.iter_mut().filter(|voice| voice.channel == channel && !voice.key_down) {
+            if voice.stage != Stage::Release {
                 voice.stage = Stage::Release;
                 voice.slope = slope_from(voice.level, RELEASE_SECONDS, sample_rate);
             }
@@ -248,48 +315,86 @@ impl MidiDecoder {
 
     fn control(&mut self, channel: u8, number: u8, value: u8) {
         match number {
-            CONTROLLER_VOLUME => self.state[channel as usize].volume = value,
-            CONTROLLER_EXPRESSION => self.state[channel as usize].expression = value,
+            100 | 101 => {
+                let state = &mut self.state[usize::from(channel)];
+                if number == 100 { state.rpn_lsb = value.min(127); }
+                else { state.rpn_msb = value.min(127); }
+                state.rpn_active = true;
+            }
+            98 | 99 => self.state[usize::from(channel)].rpn_active = false,
+            6 | 38 => {
+                let state = &mut self.state[usize::from(channel)];
+                if state.rpn_active && state.rpn_msb == 0 {
+                    let changed = match state.rpn_lsb {
+                        0 => {
+                            if number == 6 { state.bend_semitones = value.min(127); }
+                            else { state.bend_cents = value.min(127); }
+                            true
+                        }
+                        1 => {
+                            let value = u16::from(value.min(127));
+                            state.fine_tuning = if number == 6 {
+                                (state.fine_tuning & 127) | (value << 7)
+                            } else { (state.fine_tuning & !127) | value };
+                            true
+                        }
+                        // RPN2 is a signed semitone offset from MSB64; LSB is unused.
+                        2 if number == 6 => {
+                            state.coarse_semitones = (i16::from(value.min(127)) - 64) as i8;
+                            true
+                        }
+                        _ => false,
+                    };
+                    if changed { self.retune(channel); }
+                }
+            }
+            CONTROLLER_VOLUME | CONTROLLER_EXPRESSION | CONTROLLER_PAN => {
+                let state = &mut self.state[usize::from(channel)];
+                match number {
+                    CONTROLLER_VOLUME => state.volume = value,
+                    CONTROLLER_EXPRESSION => state.expression = value,
+                    _ => state.pan = value.min(127),
+                }
+                state.update_mix();
+            }
+            CONTROLLER_SUSTAIN => self.set_sustain(channel, value >= 64),
             CONTROLLER_ALL_NOTES_OFF => self.let_go(channel, false),
             // All sound off is a panic: what was sounding stops in the frame it
             // is told to, not over the release time it would have taken.
             CONTROLLER_ALL_SOUND_OFF => self.let_go(channel, true),
-            CONTROLLER_RESET => self.state[channel as usize] = Channel::unset(),
-            // The rest of the controllers a file can name - sustain pedal,
-            // modulation, pan - change how a note was played rather than which
-            // notes sound, and this instrument has one way to play.
+            CONTROLLER_RESET => {
+                // Reset expression and bend, preserving the selected program
+                // and channel volume. Center the sounding voices as well as
+                // the register used by notes triggered after this message.
+                self.set_sustain(channel, false);
+                self.state[channel as usize].expression = 127;
+                self.state[channel as usize].update_mix();
+                self.state[channel as usize].rpn_msb = 127;
+                self.state[channel as usize].rpn_lsb = 127;
+                self.state[channel as usize].rpn_active = false;
+                self.apply(Event::PitchBend { channel, value: BEND_CENTRE });
+            }
+            // Other controllers, including modulation and pan LSB, are outside
+            // this instrument's supported profile.
             _ => {}
         }
     }
 
-    fn drop_finished(&mut self) {
-        self.voices.retain(|voice| voice.level > 0.0);
-    }
-}
-
-impl AudioDecode for MidiDecoder {
-    /// Render one window of the timeline. The window is the packet's own length
-    /// in milliseconds, which the container fixes at 100.
-    fn decode_encoded(
+    fn render_frames<const CHECK_GAIN: bool>(
         &mut self,
-        data: &[u8],
-        pts: u64,
-        duration: u64,
-    ) -> Result<Option<AudioPacket>> {
-        let events = smf::read_window(data)?;
+        events: &[smf::WindowEvent],
+        output: &mut [f32],
+    ) -> usize {
         let sample_rate = self.sample_rate;
         let channels = usize::from(self.channels);
-        let frames = duration * u64::from(sample_rate) / 1_000;
-        let frames = usize::try_from(frames)
-            .map_err(|_| invalid("MIDI window is longer than any block this renderer writes"))?;
-        let mut output = vec![0.0f32; frames * channels];
+        let frames = output.len() / channels;
         // The container's records are already in timeline order, so one cursor
         // walks them as the frames go by.
         let mut next = 0usize;
         for frame in 0..frames {
             while next < events.len()
-                && u64::from(events[next].offset_microseconds) * u64::from(sample_rate) / 1_000_000
-                    <= frame as u64
+                && u128::from(events[next].offset_microseconds) * u128::from(sample_rate)
+                    <= frame as u128 * 1_000_000
             {
                 self.apply(events[next].event);
                 next += 1;
@@ -297,10 +402,11 @@ impl AudioDecode for MidiDecoder {
             if self.voices.is_empty() {
                 continue;
             }
-            // Copy of the settings so the mix can read them while the voices are
-            // being moved through their envelopes.
-            let state = self.state;
+            // Mixing coefficients change only with channel controls.
+            let state = &self.state;
             let mut mix = 0.0f32;
+            let mut left = 0.0f32;
+            let mut right = 0.0f32;
             self.voices.retain_mut(|voice| {
                 voice.level = match voice.stage {
                     Stage::Attack => {
@@ -331,36 +437,100 @@ impl AudioDecode for MidiDecoder {
                     return false;
                 }
                 let channel = &state[usize::from(voice.channel & 15)];
-                let gain =
-                    f32::from(channel.volume) / 127.0 * (f32::from(channel.expression) / 127.0);
-                mix += voice.level
-                    * voice.force
-                    * gain
-                    * VOICE_LEVEL
-                    * (std::f32::consts::TAU * voice.phase).sin();
+                if !CHECK_GAIN || channel.gain != 0.0 {
+                    let value = voice.level
+                        * voice.force
+                        * channel.gain
+                        * VOICE_LEVEL
+                        * (std::f32::consts::TAU * voice.phase).sin();
+                    mix += value;
+                    if channels == 2 {
+                        left += value * channel.left_balance;
+                        right += value * channel.right_balance;
+                    }
+                }
+                // Even muted voices retain exact per-sample phase/envelope history.
                 voice.phase += voice.step;
                 if voice.phase >= 1.0 {
                     voice.phase -= 1.0;
                 }
                 true
             });
-            // The same shape on every channel: a performance states no placement
-            // in the field beyond what this instrument does not have.
-            let sample = mix.clamp(-1.0, 1.0);
-            for channel in 0..channels {
-                output[frame * channels + channel] = sample;
+            if channels == 2 {
+                output[frame * 2] = left.clamp(-1.0, 1.0);
+                output[frame * 2 + 1] = right.clamp(-1.0, 1.0);
+            } else {
+                // Mono and legacy wider outputs keep the placement-free mix.
+                let sample = mix.clamp(-1.0, 1.0);
+                for channel in 0..channels {
+                    output[frame * channels + channel] = sample;
+                }
             }
         }
+        next
+    }
+
+    fn drop_finished(&mut self) {
+        self.voices.retain(|voice| voice.stage != Stage::Release || voice.level > 0.0);
+    }
+}
+
+impl AudioDecode for MidiDecoder {
+    /// Render one window of the timeline. The window is the packet's own length
+    /// in milliseconds, which the container fixes at 100.
+    fn decode_encoded(
+        &mut self,
+        data: &[u8],
+        pts: u64,
+        duration: u64,
+    ) -> Result<Option<AudioPacket>> {
+        let events = smf::read_window(data)?;
+        if events.windows(2).any(|pair| pair[0].offset_microseconds > pair[1].offset_microseconds) {
+            return Err(invalid("MIDI event offsets are not ordered"));
+        }
+        if events.iter().any(|event| u128::from(event.offset_microseconds) >= u128::from(duration) * 1_000) {
+            return Err(invalid("MIDI event offset exceeds its window"));
+        }
+        let sample_rate = self.sample_rate;
+        let channels = usize::from(self.channels);
+        let geometry_error = || invalid("MIDI PCM window geometry exceeds addressable storage");
+        let frames = usize::try_from(u128::from(duration) * u128::from(sample_rate) / 1_000)
+            .map_err(|_| geometry_error())?;
+        let samples = frames.checked_mul(channels)
+            .filter(|&samples| samples <= isize::MAX as usize / std::mem::size_of::<f32>())
+            .ok_or_else(geometry_error)?;
+        let byte_count = samples * std::mem::size_of::<f32>();
+        let mut output = Vec::new();
+        output.try_reserve_exact(samples)
+            .map_err(|_| invalid("MIDI PCM window sample allocation failed"))?;
+        // Reserve both buffers before any event or oscillator state is changed.
+        let mut bytes = Vec::new();
+        bytes.try_reserve_exact(byte_count)
+            .map_err(|_| invalid("MIDI PCM window byte allocation failed"))?;
+        output.resize(samples, 0.0f32);
+        // Choose once per packet. A zero-gain control later in the window
+        // requires the checked path even when all channels currently have gain.
+        let check_gain = self.state.iter().any(|channel| channel.gain == 0.0)
+            || events.iter().any(|event| matches!(event.event,
+                Event::Control { number: CONTROLLER_VOLUME | CONTROLLER_EXPRESSION, value: 0, .. }));
+        let next = if check_gain {
+            self.render_frames::<true>(&events, &mut output)
+        } else { self.render_frames::<false>(&events, &mut output) };
+        // Events after the final sample still precede the next window. Apply their
+        // state changes without advancing an oscillator or envelope a sample early.
+        for event in &events[next..] {
+            self.apply(event.event);
+        }
         self.rendered += frames as u64;
-        let bytes = output
-            .iter()
-            .flat_map(|sample| sample.to_le_bytes())
-            .collect::<Vec<_>>();
+        for sample in output {
+            bytes.extend_from_slice(&sample.to_le_bytes());
+        }
         Ok(Some(AudioPacket {
             data: bytes,
             pts,
             timebase_num: 1,
-            timebase_den: sample_rate,
+            // Source PTS and durations are milliseconds, independent of PCM rate.
+            timebase_den: 1_000,
         }))
     }
 
@@ -372,7 +542,7 @@ impl AudioDecode for MidiDecoder {
 
 #[cfg(test)]
 mod tests {
-    use super::{MAX_VOICES, MidiDecoder, RELEASE_SECONDS, SUSTAIN_LEVEL, VOICE_LEVEL};
+    use super::{BEND_CENTRE, MAX_VOICES, MidiDecoder, RELEASE_SECONDS, SUSTAIN_LEVEL, VOICE_LEVEL};
     use crate::audio::AudioDecode;
     use crate::container::smf::{self, Event, WINDOW_MILLISECONDS};
 
@@ -403,7 +573,7 @@ mod tests {
             .expect("MIDI always yields a packet");
         // A packet is 100 ms of the timeline, timed against the sample rate the
         // track was opened at.
-        assert_eq!((samples.timebase_num, samples.timebase_den), (1, 44_100));
+        assert_eq!((samples.timebase_num, samples.timebase_den), (1, 1_000));
         assert_eq!(samples.pts, window);
         samples
             .data
@@ -444,6 +614,69 @@ mod tests {
         let samples = render(&mut decoder, &packet(&[]), 0);
         // 100 ms at 44.1 kHz, two channels, four bytes a sample.
         assert_eq!(samples.len(), WINDOW_FRAMES * 2);
+    }
+
+    #[test]
+    fn maximum_bend_sensitivity_keeps_discrete_phase_bounded_and_resettable() {
+        let bytes = include_bytes!("../../tests/fixtures/playback-errors/midi-bend-range/range-resource.mid");
+        let file = smf::SmfFile::parse(bytes, &Default::default()).unwrap();
+        for rate in [8_000, 44_100] {
+            let mut decoder = MidiDecoder::new(rate, 2).unwrap();
+            let mut observed = 0;
+            for index in 0..file.windows() {
+                let output = decoder.decode_packet(&file.window_packet(index), index as i64 * 100, 100).unwrap().unwrap();
+                assert!(output.packet.data.chunks_exact(4).all(|sample| {
+                    let value = f32::from_le_bytes(sample.try_into().unwrap());
+                    value.is_finite() && value.abs() <= 1.0
+                }));
+                for voice in &decoder.voices {
+                    assert!((0.0..1.0).contains(&voice.phase));
+                    assert!((0.0..1.0).contains(&voice.step));
+                    observed += 1;
+                }
+                assert!(decoder.voices.len() <= MAX_VOICES);
+            }
+            assert!(observed >= 3);
+            decoder.reset();
+            assert_eq!(decoder.state[0].bend_range(), 2.0);
+            assert!(!decoder.state[0].rpn_active);
+            assert_eq!((decoder.state[0].rpn_msb, decoder.state[0].rpn_lsb), (127, 127));
+        }
+    }
+
+    #[test]
+    fn channel_tuning_extremes_preserve_note_identity_and_bounded_phase() {
+        for bytes in [
+            include_bytes!("../../tests/fixtures/playback-errors/midi-coarse-tuning/value-0.mid").as_slice(),
+            include_bytes!("../../tests/fixtures/playback-errors/midi-coarse-tuning/value-127.mid").as_slice(),
+            include_bytes!("../../tests/fixtures/playback-errors/midi-fine-tuning/value-0.mid").as_slice(),
+            include_bytes!("../../tests/fixtures/playback-errors/midi-fine-tuning/value-16383.mid").as_slice(),
+        ] {
+            let file = smf::SmfFile::parse(bytes, &Default::default()).unwrap();
+            for rate in [8_000, 44_100] {
+                let mut decoder = MidiDecoder::new(rate, 2).unwrap();
+                let mut observed = 0;
+                for index in 0..file.windows() {
+                    let output = decoder.decode_packet(&file.window_packet(index), index as i64 * 100, 100).unwrap().unwrap();
+                    assert!(output.packet.data.chunks_exact(4).all(|s| {
+                        let value = f32::from_le_bytes(s.try_into().unwrap());
+                        value.is_finite() && value.abs() <= 1.0
+                    }));
+                    for voice in &decoder.voices {
+                        assert_eq!(voice.key, 64, "NoteOff must retain the original key");
+                        assert!((0.0..1.0).contains(&voice.phase));
+                        assert!((0.0..1.0).contains(&voice.step));
+                        observed += 1;
+                    }
+                    assert!(decoder.voices.len() <= MAX_VOICES);
+                }
+                assert!(observed > 0);
+                decoder.reset();
+                assert_eq!(decoder.state[0].coarse_semitones, 0);
+                assert_eq!(decoder.state[0].fine_tuning, BEND_CENTRE);
+                assert_eq!(decoder.state[0].bend_range(), 2.0);
+            }
+        }
     }
 
     #[test]
@@ -772,6 +1005,21 @@ mod tests {
     }
 
     #[test]
+    fn sustain_keeps_the_existing_voice_budget_and_releases_unrendered_keys() {
+        let mut decoder = synth();
+        decoder.apply(Event::Control { channel: 0, number: 64, value: 127 });
+        for key in 0..=127 {
+            decoder.apply(Event::NoteOn { channel: 0, key, velocity: 127 });
+            decoder.apply(Event::NoteOff { channel: 0, key });
+            assert!(decoder.voices.len() <= MAX_VOICES);
+        }
+        assert_eq!(decoder.voices.len(), MAX_VOICES);
+        assert!(decoder.voices.iter().all(|voice| !voice.key_down));
+        decoder.apply(Event::Control { channel: 0, number: 64, value: 0 });
+        assert!(decoder.voices.is_empty());
+    }
+
+    #[test]
     fn a_reset_forgets_what_was_held() {
         let mut decoder = synth();
         render(&mut decoder, &packet(&[note(0, 60, 127)]), 0);
@@ -787,8 +1035,10 @@ mod tests {
             )]),
             100,
         );
+        decoder.apply(Event::Control { channel: 0, number: 64, value: 127 });
         decoder.reset();
         assert!(decoder.voices.is_empty());
+        assert!(!decoder.state[0].sustain);
         assert_eq!(decoder.state[0].volume, 127);
         let after = left(&render(&mut decoder, &packet(&[]), 200));
         assert!(after.iter().all(|sample| *sample == 0.0));

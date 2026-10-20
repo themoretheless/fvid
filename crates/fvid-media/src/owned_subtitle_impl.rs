@@ -294,7 +294,7 @@ pub fn try_convert(
                 .filter(|end| *end <= i64::MAX as u64)
                 .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
             bytes = bytes
-                .checked_add(packet.size)
+                .checked_add(reader.packet_payload_size(i)?)
                 .filter(|n| *n <= 64 << 20)
                 .ok_or_else(|| invalid("subtitle metadata exceeds 64 MiB"))?;
             let payload = reader.read_packet(i)?;
@@ -334,7 +334,7 @@ pub fn try_convert(
             .filter(|end| *end <= i64::MAX as u64)
             .ok_or_else(|| invalid("subtitle timestamp overflow"))?;
         bytes = bytes
-            .checked_add(packet.size)
+            .checked_add(reader.packet_payload_size(i)?)
             .ok_or_else(|| invalid("subtitle size overflow"))?;
         if bytes > 64 << 20 {
             return Err(invalid("subtitle metadata exceeds 64 MiB"));

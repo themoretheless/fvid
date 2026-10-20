@@ -61,7 +61,7 @@ fn clock(text: &str) -> Option<Duration> {
         }
         let digits: u64 = fraction.parse().ok()?;
         let scale = 10u64.checked_pow(fraction.len() as u32)?;
-        millis = digits * 1_000 / scale;
+        millis = (u128::from(digits) * 1_000 / u128::from(scale)) as u64;
     }
     let mut parts = times.split(':').rev();
     let seconds = parts.next()?.parse::<u64>().ok()?;
@@ -70,7 +70,11 @@ fn clock(text: &str) -> Option<Duration> {
     if parts.next().is_some() {
         return None;
     }
-    Duration::from_secs(hours * 3_600 + minutes * 60 + seconds)
+    Duration::from_secs(
+        hours.checked_mul(3_600)?
+            .checked_add(minutes.checked_mul(60)?)?
+            .checked_add(seconds)?,
+    )
         .checked_add(Duration::from_millis(millis))
 }
 
@@ -486,8 +490,8 @@ pub fn sidecars(video: &Path) -> Vec<std::path::PathBuf> {
             loose.push(path);
         }
     }
-    exact.sort();
-    loose.sort();
+    exact.sort_unstable();
+    loose.sort_unstable();
     exact.extend(loose);
     exact
 }

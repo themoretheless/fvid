@@ -244,11 +244,11 @@ pub fn add_difference(predictor: [i16; 2], difference: [i32; 2]) -> Result<[i16;
     Ok(out)
 }
 fn distance_scale(current: i64, reference0: i64, reference1: i64) -> Option<i32> {
-    let td = (i128::from(reference1) - i128::from(reference0)).clamp(-128, 127) as i32;
+    let td = reference1.saturating_sub(reference0).clamp(-128, 127) as i32;
     if td == 0 {
         return None;
     }
-    let tb = (i128::from(current) - i128::from(reference0)).clamp(-128, 127) as i32;
+    let tb = current.saturating_sub(reference0).clamp(-128, 127) as i32;
     let tx = (16384 + (td / 2).abs()) / td;
     Some(((tb * tx + 32) >> 6).clamp(-1024, 1023))
 }

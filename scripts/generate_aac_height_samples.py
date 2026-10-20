@@ -37,6 +37,7 @@ def crc(data):
             feedback=((value>>7)^((byte>>shift)&1))&1
             value=((value<<1)&255)^(7 if feedback else 0)
     return value
+cases['normal-ten']=([('front',True,i,0)for i in range(5)],list(range(10)),0)
 manifest={'cases':{}}
 for name,(elements,order,mask) in cases.items():
     flags=''.join(f'{height:02b}' for pos,pair,tag,height in elements if pos!='lfe')

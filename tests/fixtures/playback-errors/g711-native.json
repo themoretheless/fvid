@@ -1,0 +1,154 @@
+{
+  "generator": "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_g711_fixtures.py",
+  "reference": "https://www.rfc-editor.org/rfc/rfc3551.html#section-4.5.14",
+  "fixtures": [
+    {
+      "law": "alaw",
+      "channels": 1,
+      "sample_rate": 8000,
+      "sample_frames": 1024,
+      "avi_records": [
+        128,
+        257,
+        639
+      ],
+      "files": [
+        {
+          "file": "g711-alaw-1ch.wav",
+          "sha256": "55efcd18d84426f88268cbedc04bbff042f0f9fc884364795bcba7941c9d6989"
+        },
+        {
+          "file": "g711-alaw-1ch.avi",
+          "sha256": "1a6ce7765b06341d45dc3384dc38a56ef7a8c320d6cbe76794107aeca1cda8d1"
+        },
+        {
+          "file": "g711-alaw-1ch.au",
+          "sha256": "2436b2548621705ee316958ad1ceb5c81f58a811db88c401d58716430cbcf2ef"
+        },
+        {
+          "file": "g711-alaw-1ch.aifc",
+          "sha256": "7964e84baa38ab8988a421becc3cb6800501346fe4ead2d5d83483ba9fe53581"
+        },
+        {
+          "file": "g711-alaw-1ch.s16le",
+          "sha256": "dae917f6c01d029377cda59e9902099945277a5ee051051995f83d798ca34d1c"
+        },
+        {
+          "file": "g711-alaw-1ch-uppercase.aifc",
+          "sha256": "8cd6f832549457f0bce335eebd0e2fee59a82c2aeac04806234a5bd9e9a3bde3"
+        }
+      ]
+    },
+    {
+      "law": "alaw",
+      "channels": 2,
+      "sample_rate": 8000,
+      "sample_frames": 1024,
+      "avi_records": [
+        128,
+        257,
+        639
+      ],
+      "files": [
+        {
+          "file": "g711-alaw-2ch.wav",
+          "sha256": "b858ce061e4384bc3c7c4e1a5dc28191bcdf5a6377aa8b03fcfdcb4fcd12e8b5"
+        },
+        {
+          "file": "g711-alaw-2ch.avi",
+          "sha256": "bc718ce0b55f99df55a2130f64e5a0c52208c6b1ab71ef06d67d05e52297fb6f"
+        },
+        {
+          "file": "g711-alaw-2ch.au",
+          "sha256": "3f815bf6b24e932a32a8809882e89aef6355b2179147d037815db5f3c447bd19"
+        },
+        {
+          "file": "g711-alaw-2ch.aifc",
+          "sha256": "6fceacee7cbe75d29c9ac204ee2c3ed16bd960fce1f9c105fbcdc042f9531a9a"
+        },
+        {
+          "file": "g711-alaw-2ch.s16le",
+          "sha256": "40a2d846d4d504a7e4141cc8de7348129417292e7011ae32656ff5da53cbd27d"
+        },
+        {
+          "file": "g711-alaw-2ch-uppercase.aifc",
+          "sha256": "46832645b731cbbe323b56d9fe6957b47d37d20fa5d0192e7b1db6473febaffa"
+        }
+      ]
+    },
+    {
+      "law": "mulaw",
+      "channels": 1,
+      "sample_rate": 8000,
+      "sample_frames": 1024,
+      "avi_records": [
+        128,
+        257,
+        639
+      ],
+      "files": [
+        {
+          "file": "g711-mulaw-1ch.wav",
+          "sha256": "d1060201abf50666d055df7b583c0b026da1a69da33771fb1a9e64e69c2bc014"
+        },
+        {
+          "file": "g711-mulaw-1ch.avi",
+          "sha256": "7405735040bf098100a99912e6481377a6051f25bdee675bc1fc5ef25a423906"
+        },
+        {
+          "file": "g711-mulaw-1ch.au",
+          "sha256": "3bb7f097aa8d1b4dd24c73570be5ce2afb7e4745caac0d76815470c1075cae5f"
+        },
+        {
+          "file": "g711-mulaw-1ch.aifc",
+          "sha256": "5e78b4cfc6846f5375885f5350b256e97e04c878f02283bfd7540e74cf80637b"
+        },
+        {
+          "file": "g711-mulaw-1ch.s16le",
+          "sha256": "5b8fc29caa6aedd7ce726a7d7123e49bc6146ffed3a1ca89ed796194e5fd7397"
+        },
+        {
+          "file": "g711-mulaw-1ch-uppercase.aifc",
+          "sha256": "5374f385177b1efd0c91a0bfbfe415ef20b6e3aeadd39b19f0a89a804c35a082"
+        }
+      ]
+    },
+    {
+      "law": "mulaw",
+      "channels": 2,
+      "sample_rate": 8000,
+      "sample_frames": 1024,
+      "avi_records": [
+        128,
+        257,
+        639
+      ],
+      "files": [
+        {
+          "file": "g711-mulaw-2ch.wav",
+          "sha256": "d7d0408bcb628c1a8a74df187a46a3b24593b7870511844b702926364446fbec"
+        },
+        {
+          "file": "g711-mulaw-2ch.avi",
+          "sha256": "66d932fe09270a6c2bcea6adb47ec808781c008035fdba76437d6f2bb641f707"
+        },
+        {
+          "file": "g711-mulaw-2ch.au",
+          "sha256": "0f4c25a029a0f9e47f2a4cabde9df02a6d4b06d213009c43adb6245d1fe54fe3"
+        },
+        {
+          "file": "g711-mulaw-2ch.aifc",
+          "sha256": "f6b43c9536885c8930259184693c0307682feece869e2c25016aeb31a0909a8f"
+        },
+        {
+          "file": "g711-mulaw-2ch.s16le",
+          "sha256": "e0c8cc3db0280e8e1498ba5581948d34e92a6bed374bac618ae0aa9761c2d6bd"
+        },
+        {
+          "file": "g711-mulaw-2ch-uppercase.aifc",
+          "sha256": "4ba69eabc938072b41ab753ad326ce93672d6e6464059f90e279f475f43bc937"
+        }
+      ]
+    }
+  ]
+}

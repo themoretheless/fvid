@@ -12,12 +12,13 @@ fn synthetic_alac_delay_padding_gap_and_interval_match_frontend() {
         &Default::default(),
     )
     .unwrap();
-    let expected: Vec<u8> = [3, 4, 5, 6, 7, 0, 9, 10, 11, 12]
+    // Source starts at -1 sample; head trim of 2 leaves one silent timeline sample.
+    let expected: Vec<u8> = [0, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12]
         .iter()
         .flat_map(|&s| (s as f32 / 32768.0).to_le_bytes())
         .collect();
     assert_eq!(pcm, expected);
-    assert_eq!((stats.sample_frames, stats.decoded_frames), (10, 3));
+    assert_eq!((stats.sample_frames, stats.decoded_frames), (11, 3));
     let output =
         std::env::temp_dir().join(format!("fvid-alac-timeline-{}.f32le", std::process::id()));
     fvid::native_export::export_audio_pcm_selected(
@@ -48,7 +49,8 @@ fn synthetic_alac_delay_padding_gap_and_interval_match_frontend() {
         &options,
     )
     .unwrap();
-    assert_eq!(prefix, expected[..8]);
+    assert_eq!(prefix, expected[..12]);
+    assert_eq!(stats.sample_frames, 3);
     assert_eq!(stats.decoded_frames, 1);
     for options in [
         fvid_control::CopyOptions {
@@ -61,13 +63,15 @@ fn synthetic_alac_delay_padding_gap_and_interval_match_frontend() {
         },
     ] {
         let mut refused = Vec::new();
-        assert!(fvid_media::owned_matroska_alac::decode_matroska_alac_pcm(
-            Cursor::new(&bytes),
-            &mut refused,
-            None,
-            &options
-        )
-        .is_err());
+        assert!(
+            fvid_media::owned_matroska_alac::decode_matroska_alac_pcm(
+                Cursor::new(&bytes),
+                &mut refused,
+                None,
+                &options
+            )
+            .is_err()
+        );
         assert!(refused.is_empty());
     }
     let cancel = fvid_control::CancelFlag::default();
@@ -77,13 +81,15 @@ fn synthetic_alac_delay_padding_gap_and_interval_match_frontend() {
         ..Default::default()
     };
     let mut output = Vec::new();
-    assert!(fvid_media::owned_matroska_alac::decode_matroska_alac_pcm(
-        Cursor::new(&bytes),
-        &mut output,
-        None,
-        &options
-    )
-    .is_err());
+    assert!(
+        fvid_media::owned_matroska_alac::decode_matroska_alac_pcm(
+            Cursor::new(&bytes),
+            &mut output,
+            None,
+            &options
+        )
+        .is_err()
+    );
     assert!(output.is_empty());
 }
 
@@ -132,7 +138,7 @@ fn public_matroska_alac_file_export_uses_owned_dsp_and_atomic_publication() {
     file.seek(SeekFrom::Start(info.data_offset)).unwrap();
     let mut pcm = vec![0; info.data_bytes as usize];
     file.read_exact(&mut pcm).unwrap();
-    let expected: Vec<u8> = [7, 0, 9, 10]
+    let expected: Vec<u8> = [6, 7, 0, 9]
         .iter()
         .flat_map(|&v| (v as f32 / 65536.0).to_le_bytes())
         .collect();
@@ -153,13 +159,15 @@ fn public_matroska_alac_file_export_uses_owned_dsp_and_atomic_publication() {
         })),
         ..Default::default()
     };
-    assert!(fvid_media::owned_audio_export::decode_audio_transformed(
-        &source,
-        &failed,
-        Default::default(),
-        &options
-    )
-    .is_err());
+    assert!(
+        fvid_media::owned_audio_export::decode_audio_transformed(
+            &source,
+            &failed,
+            Default::default(),
+            &options
+        )
+        .is_err()
+    );
     assert!(!failed.exists());
 }
 

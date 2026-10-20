@@ -47,7 +47,7 @@
       "seed": "main-ipb",
       "kind": "three-d",
       "constraint": true,
-      "expectation": "refusal"
+      "expectation": "invalid"
     },
     {
       "file": "hevc-multilayer-sps-main10-ipb-unconstrained-synthetic.mp4",
@@ -96,7 +96,7 @@
       "seed": "main10-ipb",
       "kind": "three-d",
       "constraint": true,
-      "expectation": "refusal"
+      "expectation": "invalid"
     }
   ],
   "provenance": "Original synthetic I/P/B seeds documented in fixtures/hevc/README.md. Own SPS multilayer constraint, range-extension ordering, future-tail and malformed RBSP rewriting. This tests base-layer playback, not inter-layer prediction or 3D acceptance. No private media, parameter sets, external tool or network."

@@ -1,0 +1,52 @@
+{
+  "status": "accepted",
+  "accepted_ids": [],
+  "followup_ids": [
+    "FVID-0063"
+  ],
+  "checked_at": "2026-10-16T10:59:12.508320+00:00",
+  "before": [
+    "evidence/batch-130-before-clock-verified.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-130-integration.log",
+      "kind": "rust",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-130-media-integration.log",
+      "kind": "rust",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-130-reader-verified.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-130-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-130-player-build.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-130-independent-reference-final.json",
+      "kind": "external-raw-codec-reference",
+      "passed": 7
+    }
+  ],
+  "qualification": [
+    "Eight authored silent Ogg programs,sixVorbis andtwo linkedVorbis/Opus. Independent EOSsample counts andintegerendpoints,allPCM/PTS,directEOF,fullplay/rewind passbefore. Three publicdurations round1nsabove packetclock andthree actualgeneration2EOFseek targetsfail;fivehealthycontrols.",
+    "Use integerquotient/remainder for ownedVorbis.duration andthe shared exactsample_duration forjoint catalogadapter. After all eight PCM/count/PTS/publicEOFworker controls pass,alongwith standalone960frame Opuscontrol.14relatedrootintegrations,26media-libraryexport/catalog/chain tests,ninereaderunits,Pythonreproducibility andplayerbuildpass.",
+    "Independent FFmpeg confirms448rawzeroVorbisframes inall six configurations and960zeroOpusframes. FFmpeg doesnotapplythe authoredtwo/one-sample EOStail trims inthisinvocation anddoesnotsupport the mixed-codecchain switch; noexternalend-to-end presentation claim. Nativeexplicitgranule/sample totals andordinaryworkerregressions establish trim/chain behavior.",
+    "NativeOpus silencehas peak2.034587e-34 versusexternalexactzero. PCM oraclepermitsabsolute1e-30,stillrejecting nonfinite samples. Initialbyte/zero-exact assertions therefore failanunrelated insignificantfloatingDSPdifference; correctedclockbaseline isseparate. No Opusbug ornewIDclaimed.",
+    "Initialthree-/two-mode drafts wereinconclusive acrossFFmpeg andremainarchived. Uniform64sample setup initiallyretainedfloorendpoint64beyondhalfblock32;correctedto32alongwithresidueend32beforeacceptedbaseline. No clockclaimbasedonthose drafts. InitialreadercommandpassedtwoCargo filters incorrectly; corrected libtest command selects nineunits.",
+    "Fixtures/generationandordinarytestsareoffline withoutFFmpeg orprivate data. No physicalDAC,fullVorbis/Opusprofile,performance ornew codecinterop claim."
+  ],
+  "counting": "Zero-IDFVID-0063durationfamily continuation acrossownedVorbis andlinkedOggcatalog. Acceptedcount remains144."
+}

@@ -82,7 +82,18 @@ impl References {
         top: &[Option<u16>],
         left: &[Option<u16>],
     ) -> Result<Self> {
-        if !(2..=5).contains(&log2_size) || !(8..=16).contains(&bit_depth) {
+        Self::new_internal(log2_size,bit_depth,corner,top,left,5)
+    }
+    /// Annex I skip-intra prediction can use an unsplit 64x64 coding block.
+    pub(crate) fn new_depth_skip(
+        log2_size:u8, bit_depth:u8, corner:Option<u16>,top:&[Option<u16>],left:&[Option<u16>],
+    )->Result<Self> {
+        Self::new_internal(log2_size,bit_depth,corner,top,left,6)
+    }
+    fn new_internal(
+        log2_size:u8, bit_depth:u8, corner:Option<u16>,top:&[Option<u16>],left:&[Option<u16>],maximum:u8,
+    )->Result<Self> {
+        if !(2..=maximum).contains(&log2_size) || !(8..=16).contains(&bit_depth) {
             return Err(invalid("unsupported HEVC intra size or bit depth"));
         }
         let side = 1usize << log2_size;
@@ -127,6 +138,15 @@ impl References {
         })
     }
 
+    /// Already substituted, unfiltered neighbours for Annex I DIM prediction.
+    pub(crate) fn copy_depth_edges(&self,top:&mut [u16],left:&mut [u16])->Result<()> {
+        if top.len()!=2*self.side || left.len()!=2*self.side {
+            return Err(invalid("invalid HEVC depth neighbour buffers"));
+        }
+        for (target,&value) in top.iter_mut().zip(&self.top) {*target=value as u16;}
+        for (target,&value) in left.iter_mut().zip(&self.left) {*target=value as u16;}
+        Ok(())
+    }
     fn filtered(&self, mode: u8, chroma: bool, strong: bool) -> (i32, Vec<i32>, Vec<i32>) {
         let n = self.side;
         let distance = (i32::from(mode) - 26)

@@ -1,0 +1,51 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0095"
+  ],
+  "checked_at": "2026-10-16T01:55:51.514732+00:00",
+  "before": [
+    "evidence/batch-071-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-071-integration.log",
+      "kind": "rust",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-071-smf-parser.log",
+      "kind": "rust",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-071-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-071-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-071-wide-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-071-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Three authored PPQ3 note timelines have exact100000us duration but duplicate/changing/final tempo boundaries truncate each fractional segment. Baseline reports99999us and2PCM windows versus100000us/3windows for the same absolute note timing, moving note-off across the100ms boundary.",
+    "Tempo-map segments retain u128 PPQ-scaled cumulative time and divide once at absolute timestamp lookup. Checked u64 microsecond admission from94 is retained for segment boundaries and event/end lookups.",
+    "Four authored100ms note cases now share exact score duration and bit-identical full native PCM/PTS. Actual workers verify full playback/rewind and seek at100ms, preserving note state and complete release windows. A short native VP9/PCM companion decodes; no encoder/network/private input needed.",
+    "The94 wide-segment oracle is corrected from a sum of individually truncated terms to exact total numerator division, yielding563104541302792us instead of563104541302791us. This is the same fractional-carry correction; no extra ID. All wide-overflow controls still pass.",
+    "17 MIDI parser/5 reader tests, six related integration targets, both fixture reproducibility checks and player build pass. No physical DAC, performance or arbitrary reference-quality synthesis claim."
+  ],
+  "compatibility": "Tempo maps now preserve fractional accumulated phase; exact absolute event/window boundaries can move by previously lost microseconds. Ordinary integral timing and public interfaces remain unchanged.",
+  "counting": "One accumulated fractional-time loss problem. Tempo variants, affected audio window, wide-oracle correction and controls add no IDs."
+}

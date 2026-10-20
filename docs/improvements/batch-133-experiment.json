@@ -1,0 +1,19 @@
+{
+  "status": "rejected",
+  "accepted_ids": [],
+  "checked_at": "2026-10-16T11:29:40.674264+00:00",
+  "reason": "Reference-only channel-state access has no demonstrated release CPU benefit:15pairedruns median1.009516,bootstrapmedian95interval0.963550..1.024707. Reverted production block exactly to saved verifiedbaseline.",
+  "evidence": [
+    "evidence/batch-133-reference-timing-summary.json",
+    "evidence/batch-133-reference-pairs.jsonl",
+    "evidence/batch-133-reference-pcm-comparison.json",
+    "evidence/batch-133-correctness-before.log",
+    "evidence/batch-133-fixtures-verified.log"
+  ],
+  "qualification": [
+    "All529200PCMbytes match before/after. New authored1/8/32voice workloadcontrols passactualplay/rewind/midpoint/EOFtargets before candidate. No regression claimed orobserved.",
+    "Release CPUrenderbenchmark excludesfile/container/checksum/devicework. Hostloadnotisolated;alloutliersretained. Missingperformanceevidence preventsacceptance despite identicalPCM.",
+    "ProductionMIDI source afterrevert matchesbaselinebyte-for-byte. Useful standalonebenchmark/fixtures/regression remain asmeasurement infrastructure,countzero. No newacceptedID;count145."
+  ],
+  "reverted_source_sha256": "8d54b1f592981077eb8a158d313b8fac78e306ed73f4cf13f023a6374fa83c15"
+}

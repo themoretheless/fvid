@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0099"
+  ],
+  "checked_at": "2026-10-16T02:07:24.678386+00:00",
+  "before": [
+    "evidence/batch-075-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-075-integration.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-075-midi-decoder.log",
+      "kind": "rust",
+      "passed": 16
+    },
+    {
+      "log": "evidence/batch-075-smf-reader.log",
+      "kind": "rust",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-075-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-075-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Four authored native10byte MIDI event packets with100000/100001/MAX offsets or descending50000/25000us order are accepted for100ms windows, silently discarding or delaying events. Raw decoder baseline isolates timing rather than unknown tags/partial records.",
+    "Before synthesis/voice mutation, offsets must be nondecreasing and lie in the half-open duration window. Wide comparison avoids validation arithmetic overflow. Ties, zero and last-microsecond offsets remain accepted.",
+    "All four precise timing refusals are injected into the first packet of an authored native MIDI source; actual worker errors with zero queued PCM. Following a rejected packet, a normal packet equals a fresh synth, verifying state was not changed.",
+    "A normal authored source natively plays/rewinds/EOF-seeks; three raw boundary/tie controls preserve expected geometry/finite PCM. Short authored VP9/PCM companion decodes.16 MIDI decoder/5 reader tests, related integrations, fixtures and build pass.",
+    "Malformed native packet injection is decoder-boundary coverage, not a claim that a normal parsed SMF emits these records. No encoder/network/private media, physical DAC, performance or general packet-duration resource claim."
+  ],
+  "compatibility": "Malformed native MIDI event-window packets now return errors instead of silently altering event timing. Correct parser-produced windows, ties and public signatures remain unchanged.",
+  "counting": "One native MIDI event-window timing admission issue; four corrupt cases, boundary controls and state-atomicity checks add no IDs."
+}

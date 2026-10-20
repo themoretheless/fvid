@@ -1,0 +1,40 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0087"
+  ],
+  "checked_at": "2026-10-16T01:13:52.280644+00:00",
+  "before": [
+    "evidence/batch-063-channel-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-063-integration.log",
+      "kind": "rust",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-063-au.log",
+      "kind": "rust",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-063-fixtures.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-063-player-build.log",
+      "kind": "build",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Authored AU signed8 one-frame files have u32 channel geometry65536/65537/65538/131073 and bounded payloads<=131073bytes. Under a permissive channel budget, three are accepted as1/2/1channels with8.192125/4.096125/16.384125s instead of one frame.65536 already refuses after86 alignment, but for the wrong narrowed-zero geometry reason.",
+    "A checked u32-to-u16 conversion now refuses geometry outside AudioStream representation before stride/duration calculation. The ordinary32channel budget retains its existing earlier refusal. No channel count is silently clamped or aliased.",
+    "Mono/stereo numeric data and actual worker playback/rewind/EOF remain exact with permissive budgets and a short native VP9/PCM companion.65535channels at the representable boundary retain one frame and correct125us metadata/packet geometry; native scalar PCM decoding yields65535zero f32samples. This is not a physical65535channel device claim.",
+    "9 AU and related byte-budget/PCM alignment/EOF integrations, fixture reproducibility and player build pass. No public signatures, decoder core, rate conversion, performance or DAC claim."
+  ],
+  "compatibility": "Permissive parser channel budgets no longer allow unrepresentable AU geometry to wrap into another layout. Such inputs now report an unsupported audio-interface range; ordinary limits and representable channel layouts keep their behavior.",
+  "counting": "One AU channel narrowing admission problem. Aliases, wrong-field refusal, boundary and normal controls add no IDs."
+}

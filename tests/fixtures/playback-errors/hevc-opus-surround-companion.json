@@ -1,0 +1,70 @@
+{
+  "file": "hevc-opus-surround-companion.mkv",
+  "variants": [
+    {
+      "file": "hevc-opus-surround-companion.mkv",
+      "channels": 6,
+      "mapping_family": 1,
+      "sha256": "e3e6dfaf3ace85397f715d694c66385f245f0b53b6dc0aa55daf5a8030aefa3c"
+    },
+    {
+      "file": "hevc-opus-surround-no-duration.mkv",
+      "channels": 6,
+      "mapping_family": 1,
+      "sha256": "5a0a8e2f7c12eba3dc8ee35709ddeff0174f4bf59ec314f3e7576e3435066859"
+    },
+    {
+      "file": "hevc-opus-surround-padded-stream.mkv",
+      "channels": 6,
+      "mapping_family": 1,
+      "sha256": "2e2522d329bd27a22036b02a2aa42cf0b125c2c5ba3f159efbc4f75823cccae4"
+    },
+    {
+      "file": "hevc-opus-discrete-companion.mkv",
+      "channels": 6,
+      "mapping_family": 255,
+      "sha256": "fc176b396ccce823dc5dc80cee1d9b4563bb6138dd8879b5073fa1c812017c9c"
+    },
+    {
+      "file": "hevc-opus-remapped-surround.mkv",
+      "channels": 6,
+      "mapping_family": 1,
+      "sha256": "d672277f7c7343c5c684f5574977de7f0ca96930552d97ccc3230e351fd337d1"
+    },
+    {
+      "file": "hevc-opus-invalid-decoded-count.mkv",
+      "channels": 6,
+      "mapping_family": 255,
+      "sha256": "9bc7f9ee8388a5dec24ca079ff2d81bcca0fa3251f1553613400d136257d9626",
+      "stream_count": 254,
+      "coupled_count": 2,
+      "expected_error": "OpusHead declares more than 255 decoded channels"
+    },
+    {
+      "file": "hevc-opus-invalid-stream-duration.mkv",
+      "channels": 6,
+      "mapping_family": 1,
+      "sha256": "8015d1a3d65f65c2bdcaed3acf6ae3117c650be193994d01c69aa737b1eefe95",
+      "expected_error": "multistream packet durations disagree",
+      "changed_stream": 3
+    },
+    {
+      "file": "hevc-opus-discrete-9.mkv",
+      "channels": 9,
+      "mapping_family": 255,
+      "sha256": "0fe9dd706272f5562ea417959778931956e44fedf8f029994b84cce1f87648c9"
+    },
+    {
+      "file": "hevc-opus-discrete-255.mkv",
+      "channels": 255,
+      "mapping_family": 255,
+      "sha256": "9d4331f6fd5a00a503fd2102513d20850ce2978a1cf413343c5136b655c24bd2"
+    }
+  ],
+  "channels": 6,
+  "mapping_family": 1,
+  "video_frames": 3,
+  "audio_packets": 6,
+  "sha256": "e3e6dfaf3ace85397f715d694c66385f245f0b53b6dc0aa55daf5a8030aefa3c",
+  "provenance": "Owned PCM HEVC and six saved synthetic Opus family-1 packets, normalized 20 ms coded clock and explicit durations to isolate transport-header refusal. No private data, codecs run, FFmpeg or network."
+}

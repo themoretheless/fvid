@@ -1,0 +1,66 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0044"
+  ],
+  "checked_at": "2026-10-15T11:31:59.928034+00:00",
+  "before": "Eight equal-depth authored field controls pass; mixed8/10 field refuses with AVC I field configuration is not connected. The PCM reader also assumes luma precision for chroma.",
+  "result": "Validate both component depths and read PCM planes at their declared depth; existing general intra reconstruction already uses separate component precision.",
+  "qualification": [
+    "64 authored40ms top/bottom-first PAFF clips cover all8/10/12/14 depth pairs with PCM and filtered zero-residual DC. Independent woven arrays match exactly through decode/reset.",
+    "Native playback preserves exact components and analytic BT601 RGB within1 code. Exact paired intervals retain100Hz container time base, seek/rewind/EOF pass.",
+    "64 lossless horizontally flipped FFV1 exports match independent promoted component arrays and20ms intervals.",
+    "Four authored truncated-chroma PCM packet/video companions refuse before pair publication; error poisons decoder until reset. Memory admission and reset/recovery pass.",
+    "Existing decoder/field migration units and broad historical complementary-field MP4 oracle test pass. Ordinary tests use saved synthetic bytes with no network/FFmpeg.",
+    "Two intermediate gates observed concurrent OpusTags public-parser missing documentation. External work supplied the doc before inspection; retries pass. No changes/ID credited for that baseline episode."
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-022-avc-field-components-before-qualified.log",
+      "kind": "before",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-final-damage.log",
+      "kind": "rust",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-decoder-unit.log",
+      "kind": "rust",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-owner-fields-retry.log",
+      "kind": "rust",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-fixtures-final.log",
+      "kind": "python",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-player-final.log",
+      "kind": "build",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-owner-fields.log",
+      "kind": "baseline_failure",
+      "passed": 0
+    },
+    {
+      "log": "evidence/batch-022-avc-field-components-player.log",
+      "kind": "baseline_failure",
+      "passed": 0
+    }
+  ],
+  "distinct_rust_tests_passed": 15,
+  "distinct_python_tests_passed": 1,
+  "remaining": [
+    "Mixed-depth PAFF inter paths retain explicit admission guards.",
+    "CABAC PAFF is not independently qualified by the new fixture family."
+  ],
+  "counting": "One independent PAFF intra component-precision capability;64 variants, damage companions and baseline repair add no IDs."
+}

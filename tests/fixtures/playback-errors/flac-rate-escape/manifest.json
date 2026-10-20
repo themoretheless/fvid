@@ -1,0 +1,82 @@
+{
+  "provenance": "Four authored constant16bitFLACstreams compare8bitkHz versus16bit10Hz explicitrateheaders at1/8/254/255kHz.255islegal8bitvalue,notreserved. LiteralPCM/nativepacketcontrols andzero-header-rate geometryrefusal. VP9/PCMcompanion,no private media/encoder/network.",
+  "cases": [
+    {
+      "file": "rate-1000.flac",
+      "control": "rate-1000-10hz.flac",
+      "size": 64,
+      "rate": 1000,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "rate-1000-0.frame",
+        "rate-1000-1.frame"
+      ]
+    },
+    {
+      "file": "rate-8000.flac",
+      "control": "rate-8000-10hz.flac",
+      "size": 64,
+      "rate": 8000,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "rate-8000-0.frame",
+        "rate-8000-1.frame"
+      ]
+    },
+    {
+      "file": "rate-254000.flac",
+      "control": "rate-254000-10hz.flac",
+      "size": 64,
+      "rate": 254000,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "rate-254000-0.frame",
+        "rate-254000-1.frame"
+      ]
+    },
+    {
+      "file": "rate-255000.flac",
+      "control": "rate-255000-10hz.flac",
+      "size": 64,
+      "rate": 255000,
+      "levels": [
+        4096,
+        -4096
+      ],
+      "packets": [
+        "rate-255000-0.frame",
+        "rate-255000-1.frame"
+      ]
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "rate-1000.flac": "ed6940f84455e76f0fa6a08d668af3dd38769c75abd773f5c3842c36e0b74141",
+    "rate-1000-10hz.flac": "a9e17bdca965767d7339302026c3e164474b87fd6deb47ffe2c92a2dbeea9068",
+    "rate-1000-0.frame": "3aea33467f780ed32f78d2d8d14b5dd2046af8cbb31dbbf5d3a39bbe946a411b",
+    "rate-1000-1.frame": "fa4aa1d31e72f3c2522b552bf2749baf98029e132f2ea23254a75c4456e22af8",
+    "rate-8000.flac": "03de1d4088793b80608b6e5aa72fb216d3e641f15f3077c068e41e161c69a949",
+    "rate-8000-10hz.flac": "f366c8b3cd71a53a87df4606e7341413f68a0a6e7f7a7581406e7b12049a4289",
+    "rate-8000-0.frame": "84dfd22446191a499d5c4a782387cc81bd9940394d5facc141c2875b4a6ddc6c",
+    "rate-8000-1.frame": "128413a92ccb2711568802921e72936d3297083afd178d82c37e3f76b318501b",
+    "rate-254000.flac": "a2493af31d170b23193ccb51b8af3087d1d798cbe66d1e8e96f2de288efcc4ec",
+    "rate-254000-10hz.flac": "0238c4cd0e9716eb77f270aa58a1c2919259a123b22212d45303b94eb8e24103",
+    "rate-254000-0.frame": "22b130c20f5a3f7a5fc844a3660e25e4086d443790d4005e44d86294a17152a5",
+    "rate-254000-1.frame": "3146dc1502fd9a47be43db5bed88f98af130be7f1878b7799be42a14d6149942",
+    "rate-255000.flac": "59af6603cb4c874173f99248e1156f5ff3c07aab52f7a01e1ca85613899bf8ca",
+    "rate-255000-10hz.flac": "f22b4c7fd983e59da1ac9ba45ac7e486de11a9d5108143b9c83f200d472cb937",
+    "rate-255000-0.frame": "93f50a0bcc656e05d6b5f94ab9cbbfce1cb2fc07bc31b23e392b7b4cae644989",
+    "rate-255000-1.frame": "aec20893262d33ac4a0ae82b7d17244c8297448ee0b5f11203a4e3b14e254208",
+    "invalid-zero.frame": "d225b7772cb18a4c6f97aba312dcbe768e2533f847f97f4e34f092e5737b8bd7",
+    "invalid-zero.flac": "6a0439920056a6a3e2db58c9b3cd5f5b6f3218ebbc23633bb9bd4b2442764bb7"
+  }
+}
