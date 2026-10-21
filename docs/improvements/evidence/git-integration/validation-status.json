@@ -29,9 +29,12 @@
     "maximum_allowed_read_request": 65536,
     "decoder_budget": 33554432
   },
-  "accepted_improvements": 178,
+  "accepted_improvements": 179,
   "campaign_target": 1000,
   "improvements_added_by_git_delivery": 0,
   "performance_optimizations_accepted_by_delivery": 0,
-  "late_unqualified_drafts": "Preserved in separate refs and main ancestry; omitted from qualified runtime source. Live GPU work remains with its owning task."
+  "late_unqualified_drafts": "Preserved in separate refs and main ancestry; omitted from qualified runtime source. Live GPU work remains with its owning task.",
+  "campaign_acceptance_finalized_during_delivery": [
+    "FVID-0179"
+  ]
 }
