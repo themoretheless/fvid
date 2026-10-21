@@ -212517,5 +212517,154 @@
     "incoming": "29519207b1293f931ecfd380d38ff5d3824f54d5",
     "conflicts": {},
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-fvid-session-20261021-203652",
+    "incoming": "19d74b05e66bf985c073998a9b9e66bf12bf3c89",
+    "conflicts": {
+      "docs/CODEC_PROGRESS.md": {
+        "1": [
+          "100644",
+          "634ce3ebc0c8b13fba2c86518d77adfd054abfdb"
+        ],
+        "2": [
+          "100644",
+          "e6ff2681631734639e1c0408e880e5fc7f146292"
+        ],
+        "3": [
+          "100644",
+          "e3b9dfa74d11e3d55de0fa8289bc5ed7b0e4f45f"
+        ]
+      },
+      "docs/improvements/evidence/batch-172-before.log": {
+        "2": [
+          "100644",
+          "31842ce20f01ef694fed97486bd5108fefc58900"
+        ],
+        "3": [
+          "100644",
+          "14b80eed4e05a76f422b39c570303dcfaf344891"
+        ]
+      },
+      "docs/improvements/evidence/batch-172-tests-before.rs": {
+        "2": [
+          "100644",
+          "b6c07496d0bf7b53561585365048bff7ac8ab331"
+        ],
+        "3": [
+          "100644",
+          "8de8dc0cecdb0cec1543270ad8927c3bbce28402"
+        ]
+      },
+      "docs/improvements/evidence/batch-172-tests-candidate.rs": {
+        "2": [
+          "100644",
+          "a5a7dba1ab93889cd395a4f5dd4dcaccfe40b993"
+        ],
+        "3": [
+          "100644",
+          "eee171d298627327d2219154db4488c465fef4db"
+        ]
+      },
+      "scripts/generate_eac3_transient_native.py": {
+        "2": [
+          "100644",
+          "955ed756a2ffc7f016b1065f6a96475c2e86ac13"
+        ],
+        "3": [
+          "100644",
+          "bcf2677f52674e0b5c7f19d10a7fc287d18ffdb1"
+        ]
+      },
+      "src/codec/eac3_decoder.rs": {
+        "1": [
+          "100644",
+          "dda903f7a12a64d5cff841a14ae54c256e1e8875"
+        ],
+        "2": [
+          "100644",
+          "b667adad010f36c68c67bf9b6fd47011e10425bd"
+        ],
+        "3": [
+          "100644",
+          "02e29a5cc2ac792a41acc9d0ac19b9567db0cd0d"
+        ]
+      },
+      "src/codec/eac3_presentation.rs": {
+        "2": [
+          "100644",
+          "fc3497ddd9449bc309817f49585d0b5e93191b80"
+        ],
+        "3": [
+          "100644",
+          "2944e7b6654e9f4b1416d09e7e66625225a5b2cc"
+        ]
+      },
+      "src/codec/eac3_transient.rs": {
+        "2": [
+          "100644",
+          "aac2d9fb8137417125e2172be1b27e7343bb504a"
+        ],
+        "3": [
+          "100644",
+          "3040bdb2118d1fafa9e6f7f2576d152ee521a1d9"
+        ]
+      },
+      "tests/eac3_presentation.rs": {
+        "2": [
+          "100644",
+          "039280d02c40f71957691e8cf4821a987f545ca9"
+        ],
+        "3": [
+          "100644",
+          "ce2a6d3e4aefe68e5562c0ad9602ab60bf45f780"
+        ]
+      },
+      "tests/eac3_raw_presentation.rs": {
+        "2": [
+          "100644",
+          "61171c8df09ecc0194ac2bab40d48eb4f75bfe21"
+        ],
+        "3": [
+          "100644",
+          "dfd6fed49fa470074adfec20d02a0c3e2205c84a"
+        ]
+      },
+      "tests/fixtures/playback-errors/README.md": {
+        "1": [
+          "100644",
+          "08fd1051bab6b97a2f0e0d5b4f2573e1d6077554"
+        ],
+        "2": [
+          "100644",
+          "5d8a0c2afc6133d70d3ef22fb5d9b8b6a7e54929"
+        ],
+        "3": [
+          "100644",
+          "95fe766387b2e034dc7bba27fb0a7eaf2e98c38d"
+        ]
+      },
+      "tests/fixtures/playback-errors/eac3-transient-native/manifest.json": {
+        "2": [
+          "100644",
+          "45d936d2205b8096e3df08b7aeef87059ad2791a"
+        ],
+        "3": [
+          "100644",
+          "9be3bd13ec5fd2a46b42650ee747bbbcdb7e9400"
+        ]
+      },
+      "tests/mp4_signed_offset.rs": {
+        "2": [
+          "100644",
+          "a5a7dba1ab93889cd395a4f5dd4dcaccfe40b993"
+        ],
+        "3": [
+          "100644",
+          "bc173cfc6fa06275d10780e42292b53c02993f49"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
