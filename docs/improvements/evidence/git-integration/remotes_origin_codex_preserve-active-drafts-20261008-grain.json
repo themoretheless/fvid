@@ -1,0 +1,1750 @@
+[
+  {
+    "path": "crates/fvid-cpu/src/lib.rs",
+    "stages": {
+      "1": [
+        "100644",
+        "44e38b8a6fb25aee329bb170213af4ff4b5a13e1"
+      ],
+      "2": [
+        "100644",
+        "eef1721cf19728d879e72873c8d2bf3537ec1037"
+      ],
+      "3": [
+        "100644",
+        "55961988fb051c30188d45789f64da96b8d8e325"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "src/playback/video/webm.rs",
+    "stages": {
+      "1": [
+        "100644",
+        "3ca906ef2e7ea69167f7224fe3ad6406a89e7c40"
+      ],
+      "2": [
+        "100644",
+        "da235cdc3712c505faf2de8570ea7a4a86a63f9d"
+      ],
+      "3": [
+        "100644",
+        "80a42ab31d8bdc1e2bb8baf54c6afd3d42bb2ea2"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "src/player_gpu.rs",
+    "stages": {
+      "1": [
+        "100644",
+        "20db2ae9d7f372e7293576a48ee474269519d451"
+      ],
+      "2": [
+        "100644",
+        "7e3e0415b1608995adb965d6822ca4fca8bfb672"
+      ],
+      "3": [
+        "100644",
+        "269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/av1_chroma_grain.rs",
+    "stages": {
+      "2": [
+        "100644",
+        "6a15672fa0738fa45c550c3054514cf4ea26ef1d"
+      ],
+      "3": [
+        "100644",
+        "e2a69acdf180671790f306f69c67fd6fa7b7951f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-generated.json",
+    "stages": {
+      "2": [
+        "100644",
+        "10dad4e1224a8ada1f2c353d77fc80e7163fd9cd"
+      ],
+      "3": [
+        "100644",
+        "816711b4dd6b24dc845f46c92312388db3b5dfed"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "768d638590a534e147dcd7ba3e9e2b5b2d0ea383"
+      ],
+      "3": [
+        "100644",
+        "a8822c3f996ea06dec341183d8ad0abe442c2ed7"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset10.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "41bbf0e2247414f9a662cfbd1c47aa6bdf0b155f"
+      ],
+      "3": [
+        "100644",
+        "749091c47764c9c64aef4411466164de6e9a7fc4"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset11.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "a5779c399de17cd383810dba05e359c715798220"
+      ],
+      "3": [
+        "100644",
+        "466ced76a1113124610efa1ee75cd98f974a4d15"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset12.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "e26fd8fa96945178a73b456ab6620e045851c0db"
+      ],
+      "3": [
+        "100644",
+        "15e2b137778a6a52734847602829b1edfad93650"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset13.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "584f4b9f1f19e474f5cea34fc6aa705657cd3c5c"
+      ],
+      "3": [
+        "100644",
+        "82daf15d2e2f8dcf2cd0e04da3b5c220fa2711b8"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset14.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "7c1c43a5d50d8bc8f95075a52d9dff1b3a9ba460"
+      ],
+      "3": [
+        "100644",
+        "aefa720ce2a87f30f40642f717e6d9355e00df9e"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset15.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "dd656d3b86e4b6a82eefb0ab68e9b476d6b9b017"
+      ],
+      "3": [
+        "100644",
+        "2501aeb5f4b30016a7a3ecb218045248b0a8cf72"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset16.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "394ad50aac17b007642d8cb8964e01769855663f"
+      ],
+      "3": [
+        "100644",
+        "fb8cc27c82e1c67d644b3b458a6b260e949b60cd"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset2.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "cb9d992661c46ca8ee52b9bf44aabea5d0a3808d"
+      ],
+      "3": [
+        "100644",
+        "0860c190527c3ae7ce9cd2cfcf68d8d9e46b8524"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset3.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "602446b8152773a1543200a2b0f1e620271badc8"
+      ],
+      "3": [
+        "100644",
+        "30c087427ac560ac9b04eaedd9fdf060f482c610"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset4.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "4b222868d5d0fc7cc0ade11589aa53623d2356ca"
+      ],
+      "3": [
+        "100644",
+        "0bfe328f1c1ec964d445a52dc2a14921b5a3a69b"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset5.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0a05a0dfc7e6f067da943148abf5f333af26e5de"
+      ],
+      "3": [
+        "100644",
+        "a6f867d93c063c4b1420c2b0320b68d4951a5fe3"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset6.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "4ceb15475a33875e218b945b3c5d7b0baac91a8a"
+      ],
+      "3": [
+        "100644",
+        "f225c07bb5a42dbda68e99a7ed0dc615bb03a351"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset7.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0fc862e4453077c067220197cb844ace2c09ece9"
+      ],
+      "3": [
+        "100644",
+        "0faef699f4b224f007b1172b3e9256827c775a8a"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset8.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "978b4364608db8cc1dd49b48e8fefb818aec3794"
+      ],
+      "3": [
+        "100644",
+        "7cefda3d1539df9b6d139aee466e006e6fb5c68a"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth10-preset9.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "9dd266003c8cf13adc0bc671e017aeaddc3ccdaf"
+      ],
+      "3": [
+        "100644",
+        "5800dc428a98a73f0ae089dcd2d98cdb2269c84d"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "932baef1b1c9a95b108bf34b21af7af2d94e9f49"
+      ],
+      "3": [
+        "100644",
+        "a110259783f32faba3c075733c7be71becf61e0a"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset10.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "c27c7f93b0aa4bf5790cbcf1f16739aa9ab14eae"
+      ],
+      "3": [
+        "100644",
+        "85434d1223dced50da0f217dccc653ceae3509d1"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset11.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0d3f866977b9d261f037a282001d5edc47ebe051"
+      ],
+      "3": [
+        "100644",
+        "915be8ab8b9c104271541c2368c0cfa5eca1463c"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset12.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "276f7ab5e5fba85866d1369b27b72e77d003e64d"
+      ],
+      "3": [
+        "100644",
+        "4d17cbfad51752a4ae0a867a16fa90539087cc58"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset13.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "f47e9de1c4488d7a0f372d4c11b36cb6da65bf02"
+      ],
+      "3": [
+        "100644",
+        "ebc6151acf5c75ee3ce1634313f9ced4a7598215"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset14.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "817bff158122d6e28a2c2916c086a1d456ceb32f"
+      ],
+      "3": [
+        "100644",
+        "1d2348a6efcbe9309ce414feb0bd38574ca29972"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset15.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "6d7c300338dc3c73b25b1065fc55bc7a0fd7b49f"
+      ],
+      "3": [
+        "100644",
+        "1e80cfbd96feee588a3ec26eb45b244385d885b8"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset16.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "63144ac05d4aa65f75705a249ffca111a69ceca4"
+      ],
+      "3": [
+        "100644",
+        "808be525aa777c189d7c99b514247f42c27eb3dd"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset2.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1d578b4647f9a01831e9878c836a1a14adebe016"
+      ],
+      "3": [
+        "100644",
+        "d808b0b5406c159bf0e033152b8ca7f3f67ac054"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset3.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "2fcff75b736d35587178cc043da76656ac2dc8f4"
+      ],
+      "3": [
+        "100644",
+        "59c021128a1533a09fc7fd319d69b72e3465918d"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset4.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "56729e3e768c62b758e94627e15674c6290324e3"
+      ],
+      "3": [
+        "100644",
+        "606b7e5d048cb9aa013e348142c32d29da12f5d9"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset5.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0e9d0145158ba504e45c20e17c0cca35d43337f7"
+      ],
+      "3": [
+        "100644",
+        "34dd593b6495e52f7b3c28302e69fc577e26b8f9"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset6.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "351e3101728d72ec81971e952620d72f58970240"
+      ],
+      "3": [
+        "100644",
+        "955de0d49138b37765a4dfb5cf39251a34c1c3fd"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset7.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d2774a24895fda2b68f628a0383bfe791a461441"
+      ],
+      "3": [
+        "100644",
+        "88aeed2563f9baeca6fce475f2984f4410ca6345"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset8.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "f031b391057d36606107f250234025ad2e093bae"
+      ],
+      "3": [
+        "100644",
+        "484f81a96272516dc7e819e03cb61de6a0c3faee"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth12-preset9.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "03fdbe4a5b0b533ad1fced6d7b6013e741c45558"
+      ],
+      "3": [
+        "100644",
+        "c50f11a9b0904d55c18ce6527966329ca245e3b2"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d6dd38edc4a3cbd4ba770d5dd662411301ce7ec7"
+      ],
+      "3": [
+        "100644",
+        "67b2627f6814b561958caeb3400f941aab32da89"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset10.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "bb2db2ab0552a7636b3340aa61557a93c7a1f0c5"
+      ],
+      "3": [
+        "100644",
+        "0b3934a75336e40319632bd7aa8d1ffa7d02a3bc"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset11.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "8fd37481e80c6f08ab1358d7ce07e289903f8a70"
+      ],
+      "3": [
+        "100644",
+        "63d987876ad17c7c9e19c3f2a0ae74a0cae4fec9"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset12.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "eee674aa84be60e4d2e6d4c99cfbd90401aea9f0"
+      ],
+      "3": [
+        "100644",
+        "1ec1268f4e8a72e4d7945048ad24f06dbb3c5788"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset13.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "a4b2fe8ef11035761c347244b8b66b33b9126a1b"
+      ],
+      "3": [
+        "100644",
+        "dcd6f2993ef3f5f67f8d3879c942c3f99aab05e8"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset14.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "eefb50c7ace4aa8f8fe78cbfb30bc43c1bcd4e5e"
+      ],
+      "3": [
+        "100644",
+        "7c9987568dffd4c128738ed1a7685b90430b9fb1"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset15.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "c5f91fdf51f4aab3b74a3ba9582d36e284c5bce2"
+      ],
+      "3": [
+        "100644",
+        "eba857a7d4651c4f35db1b25a713cb027d69e034"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset16.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0dc9889dbb5644eace605194823f292372d799ce"
+      ],
+      "3": [
+        "100644",
+        "8d51770e58b5e2052333ec3af714c5ad45fdbe0e"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset2.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "5ed59787d75d47445dd76771ab32ae36c530645a"
+      ],
+      "3": [
+        "100644",
+        "450950f8d300a13b2f1b33d7e546585d0d577080"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset3.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "40e910b8265c0427118ca20ffb0451fc7a40b2d9"
+      ],
+      "3": [
+        "100644",
+        "b4556c5d2ce84bbf51bdc354b00c998995d7d258"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset4.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0c051cd7081ae9aee2598d3692d8580d6b8b8145"
+      ],
+      "3": [
+        "100644",
+        "7661c5e63da736b37439c97dae3bbab67def8b4d"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset5.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "9b6668b06bf6a1d9b71086cfeb6770634f4d7c39"
+      ],
+      "3": [
+        "100644",
+        "90dc3475a5f5a211552d0f62f0cb754f2ffd680d"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset6.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "ee9ac4d29d5949daa9eb65542430a7311a8049f3"
+      ],
+      "3": [
+        "100644",
+        "4742051840ed54926b791f6ba85bb420b7fd8f7e"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset7.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "f410502b1451b4cb7f817b29856b72e3b4e4b386"
+      ],
+      "3": [
+        "100644",
+        "19bfacb6ae72b85eda39182836cd0dc0724ab565"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset8.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1c726beff8d2c32a786d09a53eb56d072cf49bd6"
+      ],
+      "3": [
+        "100644",
+        "c070b7d96a5e9c4b611cdbf9b5831c53a5d03820"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout422-depth8-preset9.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "ebb4bcfb4b26938f082e7d6671787daca7dc10a3"
+      ],
+      "3": [
+        "100644",
+        "46586fd4c7de08b0a19c628dfeb8bece4d91ca73"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "e32c16a7f31a81719e8f84dd2981b55d841848dc"
+      ],
+      "3": [
+        "100644",
+        "b266131a54c029c54de4a7f8c019fef9ee41ef28"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset10.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "03de8dc302cfe4e67adc78f67499c505aa168d8a"
+      ],
+      "3": [
+        "100644",
+        "a42b580fae138163c86534b3de35c4c69c79ec84"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset11.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "7e87850261ad196911857d7fee6eec3b084eb7fa"
+      ],
+      "3": [
+        "100644",
+        "d7a7952f0c20845e9bd1a12a276683add823e0e2"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset12.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d7a3a4f2ef7dc8b56abfb2db9c6d4f27eea5cd93"
+      ],
+      "3": [
+        "100644",
+        "131991197302c5698a907ce5405f2843fe89f4ff"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset13.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "b3479ae67ae75c97ee463028d01864e674ddf9d9"
+      ],
+      "3": [
+        "100644",
+        "99c474c6d413bc75e6f3a0c1256574faffc0436f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset14.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "018b1bd432c5b71855fb48dbf38e58c023b90f25"
+      ],
+      "3": [
+        "100644",
+        "9d35afc05f9ab022e5a2b0b67cc3a5d13ddde928"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset15.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1ce322939170a5c8aa46e82cfe65d315a7a20cf1"
+      ],
+      "3": [
+        "100644",
+        "d03d506ec932864211e4d4ef60bda915314cf93e"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset16.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "7f5df046d47ffb9891d9882f1999592a056ad7fd"
+      ],
+      "3": [
+        "100644",
+        "7659f32c1c6e262326335b0c3799c8fa38c3a481"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset2.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "6510052179cdc40d31d1784011a27969d9f4b7f1"
+      ],
+      "3": [
+        "100644",
+        "c3720a3c7557bfbedf869e4675f0ce4f735b20a2"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset3.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "035d9c35b2ffdf032b33c0407d78a1c3a96d0e7b"
+      ],
+      "3": [
+        "100644",
+        "d2154d4ef2445bf8db7066d417f18ca5060a679b"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset4.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d91df2a37832ed057d069cc6558eaeb7875cf6e9"
+      ],
+      "3": [
+        "100644",
+        "6c60a2ae194b4624baad4c9cc532d291dd82f128"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset5.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "9c174c3e8b2c7032fe7839615820a9aa5e890cfb"
+      ],
+      "3": [
+        "100644",
+        "db9f649f48111979863e017bcb6292ec99e88a5c"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset6.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "54e305b5add935e72ba7d3a1f2f9d2c3db1d4e26"
+      ],
+      "3": [
+        "100644",
+        "12c29279b7362fa8368c0412bec7d70e9064f7d1"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset7.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "e48d3e4c45bde2630e08d8acf89daa65faaf578a"
+      ],
+      "3": [
+        "100644",
+        "c3901026271a40c0fa4bce316d3531f3ef11e818"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset8.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "42583c48ef746bee4b5e67ebd79da690d00641bc"
+      ],
+      "3": [
+        "100644",
+        "e1148785a686ce29263067b4ceb5eec7f757c481"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth10-preset9.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1056be8b8d6e8e6aa6098338a62c98d285652a91"
+      ],
+      "3": [
+        "100644",
+        "888913f5af3f03aea6bef1d2783af6f69ec9156f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1de4b79c61f851bd18fb22b8749ba9ff67641b5b"
+      ],
+      "3": [
+        "100644",
+        "a5889816ce74343bee9d3a7f211f8a3e3929b6c4"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset10.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "227a60ce1297f089cf705908be22f8e44dedc218"
+      ],
+      "3": [
+        "100644",
+        "15224bf00aab0a6c4ee360e4e0ebd48b1357fa59"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset11.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "f90d34ed12b0c462bcbe9dbb14b206509b3bab0f"
+      ],
+      "3": [
+        "100644",
+        "8e91449fbdf6cb1cae97281cebc81309b5f2654f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset12.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "4aa111f2c0f83c2432b87e16411e6e864c3c7043"
+      ],
+      "3": [
+        "100644",
+        "d083bf2439814f408a234a0d42127c1f165979f1"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset13.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "c758a69743cffe25144ac77c1d6bec723fa29d64"
+      ],
+      "3": [
+        "100644",
+        "b13c8a06211df9b76177b60c823bbe071aa425c8"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset14.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "45fcde8cd02487e4aeaf85222685ddb33cd7a83c"
+      ],
+      "3": [
+        "100644",
+        "4df4540c9a6cd76383fe7f9fbbc68257e0a533bb"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset15.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d08cafe8c1dfad688369ab89de0d4cba2baf3542"
+      ],
+      "3": [
+        "100644",
+        "3191d48c8fa57388b03d0860c0ace9a75a0355ba"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset16.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "81d6a78eb2e61eec2e6a2d4ee9b59872997a3820"
+      ],
+      "3": [
+        "100644",
+        "4ae0e986924a3de9e6805f5196801a6a63591582"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset2.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "b5e2b8ff316ecf106a6b4c683c32f1aa6ebfd562"
+      ],
+      "3": [
+        "100644",
+        "3193068193f0617d1d8f5241fbc7b71cb01a573f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset3.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "5aa015d3dc506a2d0022e81334b67ca0e2d51216"
+      ],
+      "3": [
+        "100644",
+        "20d694937a03b674c6d8798ff2222c16a7feb242"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset4.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "2ae79d52a466372c6c0f352e04a114bf8ddf01f1"
+      ],
+      "3": [
+        "100644",
+        "b47f401dfdc86380f52636219c47a924fee90650"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset5.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1bb05cc48ee59cb7ffb9e265f4ae5797d4ddc66a"
+      ],
+      "3": [
+        "100644",
+        "121a7b1e26efda5be567dfd016a78f85d8e7dce7"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset6.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "8d5b8886db8ad963fedda9836177bfcc62f12433"
+      ],
+      "3": [
+        "100644",
+        "ef1855c625cf15c2d0d83b47d6f8b14d969d99c7"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset7.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "ffbaa07aa2e9ef768aa82d2da16473c7582f5da3"
+      ],
+      "3": [
+        "100644",
+        "fb6255afa6a1a984712e2a3a7b9f6fcf2228289f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset8.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "9bfc185869c83051a0c127a823ee63b0e7ee93bb"
+      ],
+      "3": [
+        "100644",
+        "cc3a37c4aa421a25dfa4e0db47936245d4c41924"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth12-preset9.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "7013d94779942a5ed24ca1ae0e724796452f09d3"
+      ],
+      "3": [
+        "100644",
+        "376ae4982df7e8ddf008bf48a8d1328a37527c67"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "ad11f611fcecb711017183b06240d5a77f2d7c6e"
+      ],
+      "3": [
+        "100644",
+        "ab98d7bc4861281212f1733085a9e73c730146d0"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset10.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "a19a4b86b146705c9a5b7dd6837dabeb9bdccb77"
+      ],
+      "3": [
+        "100644",
+        "7d93b152532e03bd271d105949429c8873c90eed"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset11.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "983e8b68677ca1ca3cc5f9615233d4218ab5577a"
+      ],
+      "3": [
+        "100644",
+        "74c4cd28803863b758302cd553cc425e8b477f87"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset12.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0daff5e5b179c4a9abecc61194e2ebe304653955"
+      ],
+      "3": [
+        "100644",
+        "ee10726d51eeb954abca1d1e053239b7c25f605e"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset13.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "8a65b662976050727ec7c8b6d89312ec8aa108b3"
+      ],
+      "3": [
+        "100644",
+        "0c449bf401b694cc2ac99c05160886bd5c1891fa"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset14.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "e08a41b90bf45e929526c8d5856b16a0c8ba1bfb"
+      ],
+      "3": [
+        "100644",
+        "e565820b86ba28a68e403d0bfde10c375ff22773"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset15.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "37e3f2ce9505b630b4a9a5b9885824338315c0c7"
+      ],
+      "3": [
+        "100644",
+        "fafd8bb0f39d7753478fe984ad3b58433690bb5c"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset16.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "7cd625be09c32ff6a9abcf26ff9fa1d399897e46"
+      ],
+      "3": [
+        "100644",
+        "e8f9cda35f43090e664e4c6ed643d701a4888b11"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset2.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d9c033010ced19405d0191d4c845a072f8f746e1"
+      ],
+      "3": [
+        "100644",
+        "6fd10fb4ace4155b89d4a5dd29a6192211b86ff0"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset3.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "c9901f47796d2514d236c5b149fe71b05205fb69"
+      ],
+      "3": [
+        "100644",
+        "32de52bb0e1611d17b96e1a9a6fd642e9b88b1ed"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset4.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "8cae8feaeae66882c26c7b2118cdaed006a4e874"
+      ],
+      "3": [
+        "100644",
+        "db41a30d35491cefd4be913f38143a53b610aed1"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset5.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "5416e286f01383f9948e59045dc7db092a4b866b"
+      ],
+      "3": [
+        "100644",
+        "f8f6a21ab49490813ff3d4db8698016f6ddb3520"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset6.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "588561c2c1d821a0394c0170178f7edee4eb158f"
+      ],
+      "3": [
+        "100644",
+        "da28be8af92d9d1e24e9737fe71833ffdcb9f192"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset7.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "6a2b622bdfb0c165f5f7b182958c0c898a7495d0"
+      ],
+      "3": [
+        "100644",
+        "24aaafce3cf359b81a732a7a7f50c921f1d6e688"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset8.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1f36f1140033cd7a6a946c930bf29b73f714ed16"
+      ],
+      "3": [
+        "100644",
+        "da8554080d095c8efb204e1aa1069966d6748976"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-chroma-grain-tools-layout444-depth8-preset9.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "89ea68e2de8886f5891a80154aebf9f775b31b0d"
+      ],
+      "3": [
+        "100644",
+        "30a293ef1b2e37954fe8ca78a8c03a8be730f62f"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q48.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "eba388539fb5126342b5bc98b0b0e528ede7446d"
+      ],
+      "3": [
+        "100644",
+        "71bf918751c24cd5b0759aff2e517904f792e8bf"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q48.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "1eaf5cf70daf8f72322ba96bedeef1e393a8bf1a"
+      ],
+      "3": [
+        "100644",
+        "39d1812493c063774ca71d71255e266adad53cb7"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q48.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "211d6a3cbbfcbb01d42b7e7f7fd14c6f1d1b27b1"
+      ],
+      "3": [
+        "100644",
+        "937c721615570a6de1cb03232afd038f9227c922"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q48.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d78925fc3b1de1db3f2ecab234656faa50f57997"
+      ],
+      "3": [
+        "100644",
+        "ca2ab834ecd1280587aed14ecc106efa61c753eb"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-lossy-palette-probe.json",
+    "stages": {
+      "2": [
+        "100644",
+        "05630201344238738a4b10c8dcc32f9b4ccf10c0"
+      ],
+      "3": [
+        "100644",
+        "b76d5335261b7235353c20dab68e67379069afd0"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "2dd7261162291f77be1e2e634575585ff34f356a"
+      ],
+      "3": [
+        "100644",
+        "60023f3dc3916240fb3306a4c1e59e710b4c7e88"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d2bd6923c6543a3399c5291ceaae8952bab2a5f8"
+      ],
+      "3": [
+        "100644",
+        "c7b76ad373148cb7baa381d2b3848ed9b9ede17e"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "5229c5cd28d67cf0d9df7edefdf8b661c2d87141"
+      ],
+      "3": [
+        "100644",
+        "9161573528b47a18c90c92bfce10fa4ccaa63b29"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "309659530403dca33227de00805fba6eda67d1bb"
+      ],
+      "3": [
+        "100644",
+        "fa130578cb27fda1e0cfbb9630a18f2b402c6bc7"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "5a7bd5e18721823afee64d1277ea3c8b51a1c36f"
+      ],
+      "3": [
+        "100644",
+        "c0d93fb13bf6211788ef262c0acc7e797c2817eb"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "bb30294614bda373586bbfa97de2213044607adb"
+      ],
+      "3": [
+        "100644",
+        "8a28fe43451f361e6155a7d4df4296b571bb04a9"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "eaf9e573db41ab7794d27edd0d384b09012d8531"
+      ],
+      "3": [
+        "100644",
+        "a7c203f123eff23a50e535ad99e7d61e98c62acb"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "f29a2d0093ba01b4e437952dd4373f4e371110f4"
+      ],
+      "3": [
+        "100644",
+        "bad8e2a927af41a4beee56e82cef652bfed1e8e0"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "239de51e6a08d5401e385243a4d8f03795c83375"
+      ],
+      "3": [
+        "100644",
+        "0da813737c9d64903c9ac97c324d1ddb345349ca"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "d554fda19b98585d113233b1f82f09446ca5ad7f"
+      ],
+      "3": [
+        "100644",
+        "77d95510a442b515fe0f9672fbe618963716138b"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "14ea83a044cab20670b3618eca0c15002002ad34"
+      ],
+      "3": [
+        "100644",
+        "5196b59c6931ac6fe1af4bb43528a2a09b2a19bc"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "0e6f3a21ffbd87a4e8121a249af77db0855a379b"
+      ],
+      "3": [
+        "100644",
+        "cf31b65da1eac00e223bb2634dd0a5246e0821f9"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "52cc907eaeb4c399f61c339b177219810347d650"
+      ],
+      "3": [
+        "100644",
+        "0224dbc73c417f82e669d7458e29b0f126554512"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "2624dc9d461fae5b9fdd0f3faa7db18a3db2c8b0"
+      ],
+      "3": [
+        "100644",
+        "b47836cac7b96e74e095b416089cdf20112826f3"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "2ad995fd2034b2ef0040375ff859d4cae304c48a"
+      ],
+      "3": [
+        "100644",
+        "348b2df6b42dc56a12f92269caa2136e972ed34b"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "fb98e473bc2cf9e578a3b0e88ac32e27a12d79e0"
+      ],
+      "3": [
+        "100644",
+        "a265a2caa3844203d916791abc2029005b5549a6"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "82bc78c3f5f1ba9094ec2415b32b9bb52abaec73"
+      ],
+      "3": [
+        "100644",
+        "a03502e662d3198c7415f64cd2b13e72da25c140"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm",
+    "stages": {
+      "2": [
+        "100644",
+        "808ce120fdd7eb89e5069cc1b7f8a2ceec8c1fe4"
+      ],
+      "3": [
+        "100644",
+        "e98966d9050000a06fbcdac2a2a8563b04c36aef"
+      ]
+    },
+    "decision": "current superseding implementation / current paired fixture; incoming preserved by object hash and ancestry"
+  }
+]
