@@ -1,0 +1,249 @@
+[
+  {
+    "path": "crates/fvid-cpu/src/lib.rs",
+    "stages": {
+      "1": "44e38b8a6fb25aee329bb170213af4ff4b5a13e1",
+      "2": "eef1721cf19728d879e72873c8d2bf3537ec1037",
+      "3": "55961988fb051c30188d45789f64da96b8d8e325"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/55961988fb051c30188d45789f64da96b8d8e325",
+    "resolution": "retain current implementation: newer checked geometry, HEVC parameters, seek cache and alpha compositing include earlier branch capabilities"
+  },
+  {
+    "path": "src/codec/hevc_decoder.rs",
+    "stages": {
+      "1": "0f158fa4047af197c78743192c01d7f86f497803",
+      "2": "7ea52242e3428c1d297aa9115e19e338934ff894",
+      "3": "c2e9b48e92032a8a1aa05d04c89fb978fdde4ffd"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/c2e9b48e92032a8a1aa05d04c89fb978fdde4ffd",
+    "resolution": "retain current implementation: newer checked geometry, HEVC parameters, seek cache and alpha compositing include earlier branch capabilities"
+  },
+  {
+    "path": "src/playback/video/webm.rs",
+    "stages": {
+      "1": "de6798e14595a2b0e51e18d3bd5ce3d38303c452",
+      "2": "da235cdc3712c505faf2de8570ea7a4a86a63f9d",
+      "3": "79f93378654909ef484e2bff2206903b49aed588"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/79f93378654909ef484e2bff2206903b49aed588",
+    "resolution": "retain current implementation: newer checked geometry, HEVC parameters, seek cache and alpha compositing include earlier branch capabilities"
+  },
+  {
+    "path": "src/player_gpu.rs",
+    "stages": {
+      "1": "20db2ae9d7f372e7293576a48ee474269519d451",
+      "2": "7e3e0415b1608995adb965d6822ca4fca8bfb672",
+      "3": "269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c",
+    "resolution": "retain current implementation: newer checked geometry, HEVC parameters, seek cache and alpha compositing include earlier branch capabilities"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q48.webm",
+    "stages": {
+      "2": "eba388539fb5126342b5bc98b0b0e528ede7446d",
+      "3": "71bf918751c24cd5b0759aff2e517904f792e8bf"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/71bf918751c24cd5b0759aff2e517904f792e8bf",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q48.webm",
+    "stages": {
+      "2": "1eaf5cf70daf8f72322ba96bedeef1e393a8bf1a",
+      "3": "39d1812493c063774ca71d71255e266adad53cb7"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/39d1812493c063774ca71d71255e266adad53cb7",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q48.webm",
+    "stages": {
+      "2": "211d6a3cbbfcbb01d42b7e7f7fd14c6f1d1b27b1",
+      "3": "937c721615570a6de1cb03232afd038f9227c922"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/937c721615570a6de1cb03232afd038f9227c922",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q48.webm",
+    "stages": {
+      "2": "d78925fc3b1de1db3f2ecab234656faa50f57997",
+      "3": "ca2ab834ecd1280587aed14ecc106efa61c753eb"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/ca2ab834ecd1280587aed14ecc106efa61c753eb",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-lossy-palette-probe.json",
+    "stages": {
+      "2": "05630201344238738a4b10c8dcc32f9b4ccf10c0",
+      "3": "b76d5335261b7235353c20dab68e67379069afd0"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/b76d5335261b7235353c20dab68e67379069afd0",
+    "resolution": "retain current implementation: newer checked geometry, HEVC parameters, seek cache and alpha compositing include earlier branch capabilities"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm",
+    "stages": {
+      "2": "2dd7261162291f77be1e2e634575585ff34f356a",
+      "3": "60023f3dc3916240fb3306a4c1e59e710b4c7e88"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/60023f3dc3916240fb3306a4c1e59e710b4c7e88",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm",
+    "stages": {
+      "2": "d2bd6923c6543a3399c5291ceaae8952bab2a5f8",
+      "3": "c7b76ad373148cb7baa381d2b3848ed9b9ede17e"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/c7b76ad373148cb7baa381d2b3848ed9b9ede17e",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm",
+    "stages": {
+      "2": "5229c5cd28d67cf0d9df7edefdf8b661c2d87141",
+      "3": "9161573528b47a18c90c92bfce10fa4ccaa63b29"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/9161573528b47a18c90c92bfce10fa4ccaa63b29",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm",
+    "stages": {
+      "2": "309659530403dca33227de00805fba6eda67d1bb",
+      "3": "fa130578cb27fda1e0cfbb9630a18f2b402c6bc7"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/fa130578cb27fda1e0cfbb9630a18f2b402c6bc7",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm",
+    "stages": {
+      "2": "5a7bd5e18721823afee64d1277ea3c8b51a1c36f",
+      "3": "c0d93fb13bf6211788ef262c0acc7e797c2817eb"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/c0d93fb13bf6211788ef262c0acc7e797c2817eb",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm",
+    "stages": {
+      "2": "bb30294614bda373586bbfa97de2213044607adb",
+      "3": "8a28fe43451f361e6155a7d4df4296b571bb04a9"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/8a28fe43451f361e6155a7d4df4296b571bb04a9",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm",
+    "stages": {
+      "2": "eaf9e573db41ab7794d27edd0d384b09012d8531",
+      "3": "a7c203f123eff23a50e535ad99e7d61e98c62acb"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/a7c203f123eff23a50e535ad99e7d61e98c62acb",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm",
+    "stages": {
+      "2": "f29a2d0093ba01b4e437952dd4373f4e371110f4",
+      "3": "bad8e2a927af41a4beee56e82cef652bfed1e8e0"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/bad8e2a927af41a4beee56e82cef652bfed1e8e0",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm",
+    "stages": {
+      "2": "239de51e6a08d5401e385243a4d8f03795c83375",
+      "3": "0da813737c9d64903c9ac97c324d1ddb345349ca"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/0da813737c9d64903c9ac97c324d1ddb345349ca",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm",
+    "stages": {
+      "2": "d554fda19b98585d113233b1f82f09446ca5ad7f",
+      "3": "77d95510a442b515fe0f9672fbe618963716138b"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/77d95510a442b515fe0f9672fbe618963716138b",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm",
+    "stages": {
+      "2": "14ea83a044cab20670b3618eca0c15002002ad34",
+      "3": "5196b59c6931ac6fe1af4bb43528a2a09b2a19bc"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/5196b59c6931ac6fe1af4bb43528a2a09b2a19bc",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm",
+    "stages": {
+      "2": "0e6f3a21ffbd87a4e8121a249af77db0855a379b",
+      "3": "cf31b65da1eac00e223bb2634dd0a5246e0821f9"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/cf31b65da1eac00e223bb2634dd0a5246e0821f9",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm",
+    "stages": {
+      "2": "52cc907eaeb4c399f61c339b177219810347d650",
+      "3": "0224dbc73c417f82e669d7458e29b0f126554512"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/0224dbc73c417f82e669d7458e29b0f126554512",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm",
+    "stages": {
+      "2": "2624dc9d461fae5b9fdd0f3faa7db18a3db2c8b0",
+      "3": "b47836cac7b96e74e095b416089cdf20112826f3"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/b47836cac7b96e74e095b416089cdf20112826f3",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm",
+    "stages": {
+      "2": "2ad995fd2034b2ef0040375ff859d4cae304c48a",
+      "3": "348b2df6b42dc56a12f92269caa2136e972ed34b"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/348b2df6b42dc56a12f92269caa2136e972ed34b",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm",
+    "stages": {
+      "2": "fb98e473bc2cf9e578a3b0e88ac32e27a12d79e0",
+      "3": "a265a2caa3844203d916791abc2029005b5549a6"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/a265a2caa3844203d916791abc2029005b5549a6",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm",
+    "stages": {
+      "2": "82bc78c3f5f1ba9094ec2415b32b9bb52abaec73",
+      "3": "a03502e662d3198c7415f64cd2b13e72da25c140"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/a03502e662d3198c7415f64cd2b13e72da25c140",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  },
+  {
+    "path": "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm",
+    "stages": {
+      "2": "808ce120fdd7eb89e5069cc1b7f8a2ceec8c1fe4",
+      "3": "e98966d9050000a06fbcdac2a2a8563b04c36aef"
+    },
+    "incoming_preserved": "docs/improvements/evidence/git-integration/incoming-conflicts/e98966d9050000a06fbcdac2a2a8563b04c36aef",
+    "resolution": "retain current fixture container; incoming bytes preserved separately"
+  }
+]

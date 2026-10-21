@@ -1,6 +1,6 @@
 //! AV1 palette colors and diagonal color-index maps (spec 5.11.46–49).
-use super::{av1_cdfs, Cdfs, SymbolDecoder};
-use crate::{invalid, Result};
+use super::{Cdfs, SymbolDecoder, av1_cdfs};
+use crate::{Result, invalid};
 
 pub(super) fn colors(
     d: &mut SymbolDecoder<'_>,

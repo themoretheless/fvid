@@ -75,11 +75,7 @@ fn master(direction: usize, y: usize, x: usize) -> i32 {
     fn oblique(y: usize, x: usize) -> i32 {
         let shift = 16 - (y as i32 + 1) / 2;
         let index = (x as i32 - shift).clamp(0, 63) as usize;
-        if y & 1 == 0 {
-            EVEN[index]
-        } else {
-            ODD[index]
-        }
+        if y & 1 == 0 { EVEN[index] } else { ODD[index] }
     }
     match direction {
         0 => VERTICAL[y],
