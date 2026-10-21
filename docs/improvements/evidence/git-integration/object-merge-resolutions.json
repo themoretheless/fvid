@@ -212779,5 +212779,11 @@
     "incoming": "d06d70a40fe9dd67e7d78457ab8a373d6c9d9896",
     "conflicts": {},
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-rgb-lut-wip-20261006",
+    "incoming": "b2eb8f063f6eaaf951bfbc0be8778d27fba05f58",
+    "conflicts": {},
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
