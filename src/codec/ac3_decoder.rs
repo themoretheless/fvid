@@ -1417,6 +1417,30 @@ impl Folding {
     /// because the fold clamps instead and clamping only the rare peak keeps the
     /// level of ordinary programme up.
     pub(crate) fn new(header: Header, declared: usize) -> Option<Self> {
+        Self::for_output(header,declared,true)
+    }
+    /// Annex E.2.9: optional LFE injection belongs only to mono/stereo
+    /// output with no separate LFE. AC-3 and native/coded layouts stay distinct.
+    pub(crate) fn eac3(header:Header,declared:usize,lfe:Option<u8>,force_stereo:bool)->Option<Self> {
+        let native_selected=declared==header.native_channels() && !force_stereo;
+        if !header.lfeon || native_selected || !matches!(declared,1|2) || lfe.is_none() {
+            return Self::for_output(header,declared,!force_stereo);
+        }
+        let code=lfe.unwrap();
+        let mut stereo=Self::for_output(header,2,false)?;
+        let gain=10.0f64.powf((5.5-f64::from(code))/20.0) as f32;
+        stereo.weight[0][LFE]=gain;
+        stereo.weight[1][LFE]=gain;
+        if declared==1 {
+            let mono=10.0f64.powf(-6.0/20.0) as f32;
+            for plane in 0..PLANES {
+                stereo.weight[0][plane]=(stereo.weight[0][plane]+stereo.weight[1][plane])*mono;
+            }
+            stereo.width=1;
+        }
+        Some(stereo)
+    }
+    fn for_output(header:Header,declared:usize,allow_native:bool)->Option<Self> {
         let mut folding = Self {
             width: declared,
             weight: [[0.0; PLANES]; SLOTS],
@@ -1430,7 +1454,7 @@ impl Folding {
         if header.lfeon {
             plane_of[LFE_SLOT] = Some(LFE);
         }
-        if declared == native {
+        if allow_native && declared == native {
             // A layout names its channels by slot, and the slot numbers are not always
             // the first `native` ones: a 1/0 frame holds a centre, and a 1+2/0 frame
             // reaches as far as the right surround. The output is numbered from zero,
@@ -1450,7 +1474,7 @@ impl Folding {
             _ => None,
         };
         let (sl, sr) = if single.is_some() {
-            (single, None)
+            (single, single)
         } else {
             (plane_of[4], plane_of[5])
         };
@@ -2818,6 +2842,19 @@ mod speaker_assignment_regressions {
 #[cfg(test)]
 mod pre_fold_pcm_regressions {
     use super::*;
+    #[test]
+    fn single_surround_reaches_both_stereo_sides_and_the_full_mono_sum() {
+        let header=Header::annex_e(0,1024,4,false,0.707,0.707);
+        let mut pcm=[[0.0;SAMPLES];PLANES];pcm[2].fill(1.0);
+        let gain=0.707f32*0.7;
+        for width in [1,2] {
+            let mut out=Vec::new();Folding::new(header,width).unwrap().write_pcm(&pcm,&[1.0;PLANES],&mut out,false);
+            assert!(out.iter().all(|v|(*v-gain).abs()<1e-7));
+        }
+        let mut native=Vec::new();Folding::new(header,3).unwrap().write_pcm(&pcm,&[1.0;PLANES],&mut native,false);
+        assert!(native.chunks_exact(3).all(|p|p==[0.0,0.0,1.0]));
+    }
+
     #[test]
     fn corrected_native_planes_are_mixed_before_final_clamp() {
         let header=Header::annex_e(0,1024,7,true,0.5,0.25);

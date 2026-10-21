@@ -4508,3 +4508,7 @@ and offline;ordinary tests use saved bytes without FFmpeg or network access.
   external codecs/network. Tests exercise direct/root dispatch, exact source
   packet grouping, EOF/reset, split Matroska and worker rewind/seek. Sixteen-role
   qualification is PCM-level; it does not certify an extended hardware layout.
+  Fixed mapped configurations additionally have six-block MP4 samples and
+  six-programme control oracles. Eighteen cases cover active transient PCM/PTS,
+  EOF, rewind and worker seek in MP4; the changing-count and 16-role cases are
+  explicitly outside this MP4 subset.

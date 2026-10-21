@@ -175,6 +175,8 @@ pub struct Downmix {
     pub centre: Option<u8>,
     /// `lorosurmixlev`, present only for a mode with surround channels.
     pub surround: Option<u8>,
+    /// `lfemixlevcod`; absence disables LFE injection into mono/stereo.
+    pub lfe: Option<u8>,
 }
 
 /// Table D2.5, the Lo/Ro centre mix level per `lorocmixlev`.
@@ -875,11 +877,9 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize, st
     } else {
         None
     };
-    if lfeon && bits.bit()? {
-        bits.skip(5)?; // lfemixlevcod
-    }
+    let lfe=if lfeon && bits.bit()? {Some(bits.read(5)? as u8)}else{None};
     if stream_type != 0 {
-        return Ok(Some(Downmix { centre, surround }));
+        return Ok(Some(Downmix { centre, surround, lfe }));
     }
     if bits.bit()? {
         bits.skip(6)?; // pgmscl
@@ -924,7 +924,7 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize, st
             }
         }
     }
-    Ok(Some(Downmix { centre, surround }))
+    Ok(Some(Downmix { centre, surround, lfe }))
 }
 
 /// Step over the most flexible mixing definition: `mixdeflen` says how many bytes
@@ -1264,6 +1264,7 @@ pub struct Eac3Decoder {
     /// The channel count the container stated, which fixes what the folding has to
     /// produce.
     channels: usize,
+    force_stereo: bool,
     core: Core,
     /// Samples still owed to [`ENCODER_DELAY`], which the stream's first blocks pay off.
     lead: usize,
@@ -1307,6 +1308,7 @@ impl Eac3Decoder {
         Ok(Self {
             sample_rate,
             channels: usize::from(channels),
+            force_stereo:false,
             core: Core::new(),
             lead: ENCODER_DELAY,
             initial_lead: ENCODER_DELAY,
@@ -1321,6 +1323,15 @@ impl Eac3Decoder {
             frame_gains:[[1.0;2];BLOCKS],
             presentation:if channels>6 {Some(Box::new(presentation::PresentationDecoder::new(sample_rate,channels)?))}else{None},
         })
+    }
+
+    /// Explicit conventional L/R output. Unlike the native-first channel-count
+    /// constructor, this also folds a two-channel C+LFE input into stereo.
+    /// The result has the ordinary raw-stream priming; reset preserves the mode.
+    pub fn new_stereo(configuration:&[u8],sample_rate:u32)->Result<Self> {
+        let mut decoder=Self::new(configuration,sample_rate,2)?;
+        decoder.force_stereo=true;
+        Ok(decoder)
     }
 
     pub(crate) fn for_container(
@@ -1451,7 +1462,7 @@ impl Eac3Decoder {
         out: &mut Vec<f32>,
     ) -> Result<bool> {
         let header = Self::geometry(frame);
-        let folding=if frame.stream_type==1 || self.assembly_mode {Some(Folding::coded(header))}else{Folding::new(header,self.channels)};
+        let folding=if frame.stream_type==1 || self.assembly_mode {Some(Folding::coded(header))}else{Folding::eac3(header,self.channels,frame.downmix.and_then(|mix|mix.lfe),self.force_stereo)};
         let Some(folding) = folding else {
             return Ok(false);
         };

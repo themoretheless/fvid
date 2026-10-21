@@ -1,6 +1,6 @@
 use fvid::container::mp4::{Limits, Mp4Reader};
 use std::{
-    io::{self, BufRead, Read, Seek, SeekFrom},
+    io::{self, BufReader, Read, Seek, SeekFrom},
     path::PathBuf,
     sync::{
         Arc,
@@ -103,12 +103,6 @@ impl Read for Sparse {
         Ok(n)
     }
 }
-impl BufRead for Sparse {
-    fn fill_buf(&mut self) -> io::Result<&[u8]> {
-        Ok(&[])
-    }
-    fn consume(&mut self, _: usize) {}
-}
 impl Seek for Sparse {
     fn seek(&mut self, to: SeekFrom) -> io::Result<u64> {
         let at = match to {
@@ -207,7 +201,8 @@ mod playback {
     fn play(input: Sparse) {
         let stats = input.stats.clone();
         let size = input.size;
-        let mut s = NativeReader::software(input, 32 << 20).unwrap();
+        let mut s =
+            NativeReader::software(BufReader::with_capacity(1024, input), 32 << 20).unwrap();
         assert_eq!(s.duration(), Some(Duration::from_millis(60)));
         for i in 0..3 {
             frame(s.read_frame_raw().unwrap().unwrap());
@@ -244,7 +239,10 @@ mod playback {
     fn valid_min_displacement_plays_without_gigabyte_reads_and_corruption_refuses() {
         play(Sparse::virtual_file("valid-min"));
         let r = std::panic::catch_unwind(|| {
-            NativeReader::software(Sparse::file("min-underflow.mp4"), 32 << 20)
+            NativeReader::software(
+                BufReader::with_capacity(1024, Sparse::file("min-underflow.mp4")),
+                32 << 20,
+            )
         });
         assert!(
             r.is_ok(),

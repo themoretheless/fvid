@@ -10,7 +10,7 @@ COUNTS=[2,1,2,3,3,4,4,5]
 SLOTS=[[0,1],[2],[0,1],[0,2,1],[0,1,4],[0,2,1,4],[0,1,4,5],[0,2,1,4,5]]
 MAPS=[0xa000,0x4000,0xa000,0xe000,0xa100,0xe100,0xb800,0xf800]
 
-def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,blocks_override=None,gains=None,divisor=1,exponent=10,rate_code=0,allocated=True,block_allocation=None,transient_windows=None):
+def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,blocks_override=None,gains=None,divisor=1,exponent=10,rate_code=0,allocated=True,block_allocation=None,transient_windows=None,lfe_mix_code=None,mixing_metadata=False):
  nf=COUNTS[layout];blocks=blocks_override or (6 if nf<=2 else 3)
  if block_allocation is not None:
   assert len(block_allocation)==blocks and not mask, 'block SNR witnesses require conventional planes'
@@ -21,7 +21,21 @@ def packet(layout,lfe,identity,mask,basis,channel_map,dependent,*,last=True,bloc
  if dependent:
   w.put(int(channel_map is not None),1)
   if channel_map is not None:w.put(channel_map,16)
- w.zeros(2)
+ mix=mixing_metadata or lfe_mix_code is not None
+ if lfe_mix_code is not None:assert lfe and 0<=lfe_mix_code<=31
+ w.put(int(mix),1)
+ if mix:
+  if layout>2:w.zeros(2)
+  if layout>2 and layout&1:w.put(4,3).put(4,3)
+  if layout&4:w.put(4,3).put(4,3)
+  if lfe:
+   w.put(int(lfe_mix_code is not None),1)
+   if lfe_mix_code is not None:w.put(lfe_mix_code,5)
+  if not dependent:
+   w.zeros(1+int(layout==0)).put(0,1).zeros(2)
+   if layout<2:w.zeros(1+int(layout==0))
+   w.put(0,1)
+ w.put(0,1) # infomdate
  if not dependent and blocks!=6:w.put(0,1)
  w.put(0,1) # addbsi
  if blocks==6:w.put(1,1).put(int(dependent),1)

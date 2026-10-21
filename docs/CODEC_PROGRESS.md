@@ -16953,3 +16953,39 @@ implementation. Active transient playback is directly qualified in raw decoder
 and split Matroska routes; MP4 regression matrices in this gate exercise the
 existing expanded tools/DRC without transient windows, so active MP4 transient
 transport still merits its own acceptance witness.
+
+### Active expanded transient MP4 transport (2026-10-22)
+
+Added explicit active-transient MP4 acceptance for 18 mapped, fixed-configuration
+7.1/replacement/10-channel cases at 48/44.1 kHz, unity/varying DRC and final
+clipping. Each MP4 sample contains two three-block programmes (six decoded
+blocks); the three samples contain six programmes in total. The whole-buffer
+component oracle now reconstructs six consecutive control frames without
+resetting history at the former three-programme endpoint. This checks late
+metadata that corrects a prior programme, preserved per-sample source windows,
+EOF, exact PCM/PTS, placeholder sample-entry channelcount=2 overridden by actual
+layout, rewind and an audio-worker 40ms partial-sample seek.
+
+Added neutral VP9+EC-3 MP4s and six-frame component control movies. Generator
+output is now **342 artifacts / 9,250,442 bytes**, byte-identical with subprocess
+and sockets denied. Ordinary tests only consume these artifacts. The variable
+replacement-count robustness case and 16-role semantic/device cases are not
+claimed as MP4 transport acceptance by this set; their raw/Matroska qualifications
+remain separate. The new MP4 tests found no additional production decoder change
+necessary; this closes an explicit acceptance-evidence gap.
+
+Current target: **4 passed, zero failed/ignored**:
+`/tmp/fvid-expanded-transient-mp4-isolated.log` and
+`/tmp/fvid-expanded-transient-mp4-main.log`.
+
+The first main-tree attempt stopped at unrelated in-progress merge conflict
+markers in `fvid-cpu` (`/tmp/fvid-expanded-transient-mp4.log`); it did not execute
+media tests and is not a codec red reproduction. Qualification therefore first
+used an isolated checkout at `70483dda73e7c75f69809271624e4e2e132f6d6c` with exact
+copied inputs. All five E-AC-3 decoder/transient/presentation and MP4/Matroska audio
+source files were checked byte-identical against the main working tree. After
+those markers disappeared during the independent merge, the same four tests also
+passed in the main tree. Other merges continued concurrently afterwards, so this
+is not a claim that the final merged repository or full feature matrix has been
+requalified. The temporary verification checkout was archived recoverably; inputs
+also remain preserved at `/tmp/fvid-eac3-mp4-inputs-lpgeazcy` and in this repository.
