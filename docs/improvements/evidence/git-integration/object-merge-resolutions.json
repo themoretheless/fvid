@@ -4795,5 +4795,3484 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-active-lossy-palette-20261008",
+    "incoming": "40639894e5d6965a8bbccc6a50ef37c902ba0eaf",
+    "conflicts": {
+      "scripts/generate_av1_lossy_palette_samples.py": {
+        "2": [
+          "100644",
+          "5927b5345daed1fe73ad33af701740878aafc0ad"
+        ],
+        "3": [
+          "100644",
+          "f3782c03e8c44d64e11c50419815f482b2fe943f"
+        ]
+      },
+      "src/codec/av1_picture.rs": {
+        "1": [
+          "100644",
+          "9aa5c4afe97326e13a12079cafdead95d388425d"
+        ],
+        "2": [
+          "100644",
+          "d70ef73e15e9b9b10466869437e6c05d5c99ef55"
+        ],
+        "3": [
+          "100644",
+          "aadeb73bcd0070140bd8f56c0bf2c5a4a3dbd1c2"
+        ]
+      },
+      "src/codec/hevc_transform.rs": {
+        "1": [
+          "100644",
+          "4146483f5fe416874abbf51633060d630bbb0670"
+        ],
+        "2": [
+          "100644",
+          "1b4da8b6a7fb42f2b2b391f24835a2e8a70f4e69"
+        ],
+        "3": [
+          "100644",
+          "6eb542b0585e176ee264ab370e5f0c9ef1728ec9"
+        ]
+      },
+      "src/player_gpu.rs": {
+        "1": [
+          "100644",
+          "20db2ae9d7f372e7293576a48ee474269519d451"
+        ],
+        "2": [
+          "100644",
+          "7e3e0415b1608995adb965d6822ca4fca8bfb672"
+        ],
+        "3": [
+          "100644",
+          "269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c"
+        ]
+      },
+      "tests/av1_lossy_palette.rs": {
+        "2": [
+          "100644",
+          "4e23eae9f4fa2829d606ac1b1b6b3edb9ce63d8c"
+        ],
+        "3": [
+          "100644",
+          "6fe3cf11948d50cdf3ace6d927123ad3c9e99c5e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "e2247229281851e20ea0b3892043ceb888e3af9a"
+        ],
+        "3": [
+          "100644",
+          "23fabb95c11779f4b2e836cee5a4ac0ac2c32963"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f54e69f4587769e7171bd26ca716c48395f297e5"
+        ],
+        "3": [
+          "100644",
+          "fb37aeab4b2716048b5b8fab893871f5bfb03179"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "e2247229281851e20ea0b3892043ceb888e3af9a"
+        ],
+        "3": [
+          "100644",
+          "23fabb95c11779f4b2e836cee5a4ac0ac2c32963"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "f54e69f4587769e7171bd26ca716c48395f297e5"
+        ],
+        "3": [
+          "100644",
+          "fb37aeab4b2716048b5b8fab893871f5bfb03179"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "aea621c191bb8c80066823f86df8b0b5f2bd1d00"
+        ],
+        "3": [
+          "100644",
+          "1cd3e986f1249da5ea19414ea1d8c9090d12ad7c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "0555fc3edf2e17462a6f8118163faad799dc388a"
+        ],
+        "3": [
+          "100644",
+          "aa6868b83a82a5211a0155f1917bafbdf5f02382"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "aea621c191bb8c80066823f86df8b0b5f2bd1d00"
+        ],
+        "3": [
+          "100644",
+          "1cd3e986f1249da5ea19414ea1d8c9090d12ad7c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "0555fc3edf2e17462a6f8118163faad799dc388a"
+        ],
+        "3": [
+          "100644",
+          "aa6868b83a82a5211a0155f1917bafbdf5f02382"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "0cf6b0d3a39ac31ad3cb3889911eeee3d903c8f2"
+        ],
+        "3": [
+          "100644",
+          "74e7745e1ebeee46908922142e256de7b5b4ffaf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "6064bf04f91f34e99b0f80058758c9a5a6f539a6"
+        ],
+        "3": [
+          "100644",
+          "341610d79ace6166301a8940f3c53727b579436f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "de30345a5bf95869d6f977c7d1735df535988b97"
+        ],
+        "3": [
+          "100644",
+          "7e37d4c8b809879f4339a932d6fb5d49d1ff4e77"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "afd2f82169ae4c04f0a02a4e29ce69ee3c965896"
+        ],
+        "3": [
+          "100644",
+          "c6a80b7e40041b79c0e56487c61c44d69a15eddd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "8484a5b6e427e4b8b7f4e8678220d4c3dd6c5f97"
+        ],
+        "3": [
+          "100644",
+          "81b06740aed8644bdde0d9dec771b2da71df1ab5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "2280ffd19428f6d2ee8a83d01664778337345dc5"
+        ],
+        "3": [
+          "100644",
+          "2c060059d08f57bcc56545ce0d9742b47dc5bcb8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "75a9e10d43ce1ae50ff8fefbba81fbbcac588e0d"
+        ],
+        "3": [
+          "100644",
+          "3cc9d149bbd66befd4e1ca5811e6c40e50b013b0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors2-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "8c8d218604b4dde1816e210eb94d26b4259b9f0c"
+        ],
+        "3": [
+          "100644",
+          "3f6ccad9c23206864991545bc9de356e591aa753"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "2b32dffd20ad805d483a4dd73b87b5b69030538d"
+        ],
+        "3": [
+          "100644",
+          "e93bad176eac6407d5c693f5cbcc952a00f16a03"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "6a1028e86d836ec2532dd3d8398efe2e76b6b1a2"
+        ],
+        "3": [
+          "100644",
+          "b896e6c95dd684c62a693e61bb78d07638d2d0ea"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "2b32dffd20ad805d483a4dd73b87b5b69030538d"
+        ],
+        "3": [
+          "100644",
+          "e93bad176eac6407d5c693f5cbcc952a00f16a03"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "6a1028e86d836ec2532dd3d8398efe2e76b6b1a2"
+        ],
+        "3": [
+          "100644",
+          "b896e6c95dd684c62a693e61bb78d07638d2d0ea"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "2c1ebe9e2f1a12bc057cea72109b2088a886f4b2"
+        ],
+        "3": [
+          "100644",
+          "3739aa79e21893a5d234093a12b3aa70fdbd37c5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "101e624fcb7fabac62917436b1fdc6a62c266566"
+        ],
+        "3": [
+          "100644",
+          "4d61feb8e061c0d6cf41a79a1531668fcf70bfcd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "2c1ebe9e2f1a12bc057cea72109b2088a886f4b2"
+        ],
+        "3": [
+          "100644",
+          "3739aa79e21893a5d234093a12b3aa70fdbd37c5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "101e624fcb7fabac62917436b1fdc6a62c266566"
+        ],
+        "3": [
+          "100644",
+          "4d61feb8e061c0d6cf41a79a1531668fcf70bfcd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "0bcebcbf6c49bef8a67e3b56a56245b33b1d2f97"
+        ],
+        "3": [
+          "100644",
+          "c3f26a94ed7a02fe712dee7921a5ffdce643ddf9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "ac6940138b9acd231b5914b4e2a4c0bec121f7fa"
+        ],
+        "3": [
+          "100644",
+          "d3a9c4552a5098e0ca08fc872250536dfd585e8f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "38d1199f47b94a8146f49c6cd2eb0185e8345f3c"
+        ],
+        "3": [
+          "100644",
+          "e7158846da51cdba29baf2e8af02f830498cc0ce"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "f8091afcc757292ad2af1ea87451459cd4a32955"
+        ],
+        "3": [
+          "100644",
+          "c843d117a86df7ec75fec3daba5ea5fd5440096b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "fed3a0760444e6e37a8adefb081c2b3ff7ad6e11"
+        ],
+        "3": [
+          "100644",
+          "0e8af7a7f062c7807904d73222e4164647d7bb19"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "b3f8d884d52d12eb22832d4e69dd029ea37a525a"
+        ],
+        "3": [
+          "100644",
+          "905ba9db20d441c0f0fda6bba12953a7552d1aaa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "9abc0172466a48378d37df5bec8c076cd5d081a7"
+        ],
+        "3": [
+          "100644",
+          "038956e9ea2605da3a20bf47abf9e65c802a0511"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "470dc5c588edd9df5a84ab0c6aaee53ec55245aa"
+        ],
+        "3": [
+          "100644",
+          "5cd08e5e508279b2b52b67f2cbbd4fd0827c1de2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "5a662a7f31e4863885e01761f0b6bd402866b5db"
+        ],
+        "3": [
+          "100644",
+          "341ef0a3108c42b8306efaf575c122de95eb366d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "186f8d22d6842d44e3ca0b89f429df869b0fa0bb"
+        ],
+        "3": [
+          "100644",
+          "f9405d579fa2d114ce98d5a93a3475cc7be42555"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "5a662a7f31e4863885e01761f0b6bd402866b5db"
+        ],
+        "3": [
+          "100644",
+          "341ef0a3108c42b8306efaf575c122de95eb366d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "186f8d22d6842d44e3ca0b89f429df869b0fa0bb"
+        ],
+        "3": [
+          "100644",
+          "f9405d579fa2d114ce98d5a93a3475cc7be42555"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "19f4c1d38ffdebfe52a6ac31df0a626fdb2caee5"
+        ],
+        "3": [
+          "100644",
+          "2aca9a956c081037782c0404364c22250eb5c485"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "d3fa913fe7b53e1e598a77f6b5abcaf7181e020d"
+        ],
+        "3": [
+          "100644",
+          "2fd31fb8af853194f69104af1489801e6ffbef0d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "19f4c1d38ffdebfe52a6ac31df0a626fdb2caee5"
+        ],
+        "3": [
+          "100644",
+          "2aca9a956c081037782c0404364c22250eb5c485"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "d3fa913fe7b53e1e598a77f6b5abcaf7181e020d"
+        ],
+        "3": [
+          "100644",
+          "2fd31fb8af853194f69104af1489801e6ffbef0d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "e123e2ffe3fcd81cd5b21c5cd2e3c0b57be0fe53"
+        ],
+        "3": [
+          "100644",
+          "08534902def31a75d95736c25644d91f08ec4092"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "0dd3dda6e059ddb6e3ed92c78e73281a8c15724b"
+        ],
+        "3": [
+          "100644",
+          "7d0d76c5dfd1fd723639431c2874038a3dca15e3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "c416a113ef17b6161a8e54960c3e161382bbb689"
+        ],
+        "3": [
+          "100644",
+          "3f7c8e06b843d501b09e4df43474639f5b1f77f5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "9e785d47247435b97e0569628e96fcc5b3a19b6a"
+        ],
+        "3": [
+          "100644",
+          "be716296f4e6ded46b4d4fcc33b74216b9b3bc00"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "640e7d9fc8f091230a702aeb94d58b4f6a84c129"
+        ],
+        "3": [
+          "100644",
+          "8dc7b4f61c723c26f582f0b675df48a6d3e3093c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "4ec604b6fb552c51796b5bda719e61802305342a"
+        ],
+        "3": [
+          "100644",
+          "9716da8abdd44e447a87cb915b8b09835af8e27b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "6d7abcd6509dddfcad830f6ab7f8c27ab299eb16"
+        ],
+        "3": [
+          "100644",
+          "4bfe7bf62fda5fa817e3d502e4b368f31c0e0076"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors4-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "53f187c8ca21cbf140cf08fe4b1f8d6edaae8434"
+        ],
+        "3": [
+          "100644",
+          "ed937ed8024724ec9638389a4e4b2913409f54c5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "1d7fb08787bfaa6beffd346cbb2476edd52f2e5f"
+        ],
+        "3": [
+          "100644",
+          "b70c21f348b6722f01f3ff7f8c177c0705c8ceeb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "4b97f732c85335de03d82eab3c371190c6cfb336"
+        ],
+        "3": [
+          "100644",
+          "1827cde5e602f9a68e1c1fa20fe785748f32a473"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "1d7fb08787bfaa6beffd346cbb2476edd52f2e5f"
+        ],
+        "3": [
+          "100644",
+          "b70c21f348b6722f01f3ff7f8c177c0705c8ceeb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "4b97f732c85335de03d82eab3c371190c6cfb336"
+        ],
+        "3": [
+          "100644",
+          "1827cde5e602f9a68e1c1fa20fe785748f32a473"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "6223d38f8595b59b5469c45a365a588878024a69"
+        ],
+        "3": [
+          "100644",
+          "ff853438d49caa076012e1bd602b243688338dcf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "d38e4c53ec59d384e8cd0aa9a332dc6715ed6e56"
+        ],
+        "3": [
+          "100644",
+          "27866ab224c31b24c7df93f18a8015c619ab6f82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "6223d38f8595b59b5469c45a365a588878024a69"
+        ],
+        "3": [
+          "100644",
+          "ff853438d49caa076012e1bd602b243688338dcf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "d38e4c53ec59d384e8cd0aa9a332dc6715ed6e56"
+        ],
+        "3": [
+          "100644",
+          "27866ab224c31b24c7df93f18a8015c619ab6f82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "53a6e9b0b38280bd20c33e8168b13f8c4baaf8eb"
+        ],
+        "3": [
+          "100644",
+          "ba14ea522c0ba6990e48569798ab2907d8f4b337"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "1ae009e3a1efcb79208d45d599664c80673399ed"
+        ],
+        "3": [
+          "100644",
+          "d60a49a00b853fec7a7013e4f7cdd6228afe4c90"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "7c6b676394e51593e1feb22b62ddd6399671394d"
+        ],
+        "3": [
+          "100644",
+          "0a914114b608cdad70e1247411149313aa04127e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "6b921646e0dc1ae7c81c665b8d45c8cba3403a87"
+        ],
+        "3": [
+          "100644",
+          "dd37438f37f401a3ba52e48577cf2598a258fa1e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "b9fb7dc260b07f65a1df8e210a1dfb3c2c4fdf3e"
+        ],
+        "3": [
+          "100644",
+          "705f5814f44341f36c7f2a87cee3b478f9549378"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "9b3f18c4ac9d1b0b07621c4357a2f840d0f690d3"
+        ],
+        "3": [
+          "100644",
+          "8ddbbed8b3bfaa2f0e9d8389aa20afaf4255d92a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "2c27967ce0c5f8ee585a15e68709cd72e08b2494"
+        ],
+        "3": [
+          "100644",
+          "aa50bf4dccee11b6587fa24ca5a49cfd1cb39fc0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors5-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "bda115179a1fa742462b074f654cbffe91f2c6db"
+        ],
+        "3": [
+          "100644",
+          "4f63653623f22d05a9b8ee78feddaee0d547b4be"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "439e2c59fe81390197057659e5879d7f69f4f740"
+        ],
+        "3": [
+          "100644",
+          "b1e98eeb039feabee5111d4f70d1c7747bced780"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "c463c9503085557c88201d93748ca631909e1fe8"
+        ],
+        "3": [
+          "100644",
+          "0f126abe3d1525a0fa7eda26ebff31a0aed7c8a5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "439e2c59fe81390197057659e5879d7f69f4f740"
+        ],
+        "3": [
+          "100644",
+          "b1e98eeb039feabee5111d4f70d1c7747bced780"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "c463c9503085557c88201d93748ca631909e1fe8"
+        ],
+        "3": [
+          "100644",
+          "0f126abe3d1525a0fa7eda26ebff31a0aed7c8a5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "05bbb7113708644b3e17b9dab89f33111088afde"
+        ],
+        "3": [
+          "100644",
+          "1677062515b97b7f7a6dab617e856bf2ca1a373e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "916e7ebbee2a113929742da8e5a91283060e50e3"
+        ],
+        "3": [
+          "100644",
+          "927df061d24fa31feafac8dffb161b14b8fbf344"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "05bbb7113708644b3e17b9dab89f33111088afde"
+        ],
+        "3": [
+          "100644",
+          "1677062515b97b7f7a6dab617e856bf2ca1a373e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "916e7ebbee2a113929742da8e5a91283060e50e3"
+        ],
+        "3": [
+          "100644",
+          "927df061d24fa31feafac8dffb161b14b8fbf344"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "7c8506f481c4dc52f75ec46e76acae258c9f1cc1"
+        ],
+        "3": [
+          "100644",
+          "885c9a7637b527c90b59a61e1ccacffb74feae83"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "63cab99c3c5cdd3f8ec3e3f4f07239275daa341e"
+        ],
+        "3": [
+          "100644",
+          "50ea55f9636276f6110d8894cbbb62a4d2b57054"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "faf2681168d974db8c15694b5adc50d35acc23f3"
+        ],
+        "3": [
+          "100644",
+          "255d6d7f817e42965cc382bb82bfc5af2292e780"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "0d28c1893979c93cc964e39600eeb36517068b54"
+        ],
+        "3": [
+          "100644",
+          "2e631d409ba90d3d990a5786589854e8d5867907"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "5a0302860dc487005e0421f6bed47d7fe19eb226"
+        ],
+        "3": [
+          "100644",
+          "ff7f25f339aac47f167782f196cb9ca6be96c09a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "a31b6e60b3ae586e63ac62f0beb76a4ac9f4b06d"
+        ],
+        "3": [
+          "100644",
+          "0ecff6d45bf4cfd18b92303f7a4bd6ebe4ac13ab"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "9035b0b87484d157b675ba28863ee3de2174f282"
+        ],
+        "3": [
+          "100644",
+          "a193cbeb7b877c977bb98a5ec919e06e5077bf35"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors6-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "ce3c76636482365e1b32a8dd92a19161e3678302"
+        ],
+        "3": [
+          "100644",
+          "042bfb9a6a369f7916582f6265db875c6d5603be"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "99c429174ff421284441acc552373d9eb0675a79"
+        ],
+        "3": [
+          "100644",
+          "fa055cdc3801f39e057715a03a049f85277ed811"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "fedff39dd267dbbc9dd7ceeb60b73460abec82b9"
+        ],
+        "3": [
+          "100644",
+          "5727c14899d92e767da6d044da90d51fd8cdb2a0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "99c429174ff421284441acc552373d9eb0675a79"
+        ],
+        "3": [
+          "100644",
+          "fa055cdc3801f39e057715a03a049f85277ed811"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "fedff39dd267dbbc9dd7ceeb60b73460abec82b9"
+        ],
+        "3": [
+          "100644",
+          "5727c14899d92e767da6d044da90d51fd8cdb2a0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "17346337f174875df584b8cb475fc9c3cd71b5ec"
+        ],
+        "3": [
+          "100644",
+          "70438a4cdd506b79137b8f6747e5da0ccf20f28d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "dc13bd022ec21c5ec06b56e68a429a783930bd15"
+        ],
+        "3": [
+          "100644",
+          "50a09ddac1d12e13a5ff14b3dafd3a6d78e9dbcd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "17346337f174875df584b8cb475fc9c3cd71b5ec"
+        ],
+        "3": [
+          "100644",
+          "70438a4cdd506b79137b8f6747e5da0ccf20f28d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "dc13bd022ec21c5ec06b56e68a429a783930bd15"
+        ],
+        "3": [
+          "100644",
+          "50a09ddac1d12e13a5ff14b3dafd3a6d78e9dbcd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "fa4599201ddd2dc5c6fd9350ce18caba6807df51"
+        ],
+        "3": [
+          "100644",
+          "10e87b1d958c662bed77542799e7f78891592808"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "2ac65d6a85919cf3486cd6c9bebe0342d7ae6eda"
+        ],
+        "3": [
+          "100644",
+          "30f25a26c22e99394af00b65f43555c76d873c93"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "50649bfe84f5abca61ce0a80493b513e8a7434c4"
+        ],
+        "3": [
+          "100644",
+          "1f0c113bb3249ec5f87339a340b96a306beb10ab"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "d5d7433935932b40e8327f77a5cd781530ed7070"
+        ],
+        "3": [
+          "100644",
+          "c7d3c433f2a2ae03d0e1939b1f9b06699f3da43f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "e16133c325ebc432b98b8e7a0402c9ca22abeba0"
+        ],
+        "3": [
+          "100644",
+          "75cf1edf5150636ebbc546b68a7f5852cae0a30b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "d152f801c7c9211454c19cda6e3017718c6f12d5"
+        ],
+        "3": [
+          "100644",
+          "ca35c6997bf29de959969310be747da6a3188fb5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "459198f86a46d2470c381589b6f95540e561b726"
+        ],
+        "3": [
+          "100644",
+          "96c97dd02acc35f854a524555816b677d76671e6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors7-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "ce8f8fdec4fcc4d8fc81f7076488ba6e92bd8f8d"
+        ],
+        "3": [
+          "100644",
+          "722cd45129fb220bf6b196e0113e999bb8cdd25c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "5c96d68badac18a9de1dcbd2ca96bd33177d377e"
+        ],
+        "3": [
+          "100644",
+          "04ad2f1c6e327b1664480ea9c52ba0a69e215aae"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "d304fac9a77489b007dd86a668fbbeffe19989b7"
+        ],
+        "3": [
+          "100644",
+          "09945178d495ac22f35d9e7770397e7e0e6e9e21"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "5c96d68badac18a9de1dcbd2ca96bd33177d377e"
+        ],
+        "3": [
+          "100644",
+          "04ad2f1c6e327b1664480ea9c52ba0a69e215aae"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "d304fac9a77489b007dd86a668fbbeffe19989b7"
+        ],
+        "3": [
+          "100644",
+          "09945178d495ac22f35d9e7770397e7e0e6e9e21"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "56519cfd34468f49656261e646cd95dd56ae0d4f"
+        ],
+        "3": [
+          "100644",
+          "cb241822ea2ec663cdbfdd75c6ec4ade68ec484f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "eb3249d33a23132a876d47d930f28bf0df8c0116"
+        ],
+        "3": [
+          "100644",
+          "f20685eacec8b9e5785c0224094ba11ba91e6815"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "56519cfd34468f49656261e646cd95dd56ae0d4f"
+        ],
+        "3": [
+          "100644",
+          "cb241822ea2ec663cdbfdd75c6ec4ade68ec484f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "eb3249d33a23132a876d47d930f28bf0df8c0116"
+        ],
+        "3": [
+          "100644",
+          "f20685eacec8b9e5785c0224094ba11ba91e6815"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "7a67f30874902f8540b2343a07ab62e8d6327e03"
+        ],
+        "3": [
+          "100644",
+          "2fcdf7f6541f39defed1b623a96e21c2c4b43a62"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f2e12581c9aec81bc77f3275a956f3bd6ad95336"
+        ],
+        "3": [
+          "100644",
+          "f0abcc0190869798f68c4eb42629862e81e8db14"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "70d5f7357163c671aab0bf7ab45b86406ff1635a"
+        ],
+        "3": [
+          "100644",
+          "6139da22704035796d718bd945c1f0d012d33fac"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "84b960eaf67fd7aba2f914e02f7a4f41bb6b0a7a"
+        ],
+        "3": [
+          "100644",
+          "2faa68e8f5646e898c49ba5fcce04a35e29f81e7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "6951bcd87fba36c67ff2b6de67f53986ffb7845b"
+        ],
+        "3": [
+          "100644",
+          "e29c38757f5c9823393a0477fb0c885d5c9c99b0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "05d43c73baba7acaa0eb986e26eb847e90425e38"
+        ],
+        "3": [
+          "100644",
+          "4adf728b45732174af1e48fbdfeafbcb3b13c841"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "69ef15213ce5286d9449563e2aa4b89df2f34145"
+        ],
+        "3": [
+          "100644",
+          "edc996fb5989d7cd3239c9a549879ffbf7b98143"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors8-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "3fe4d783a18858223e0adcc0288d2fa5a7953573"
+        ],
+        "3": [
+          "100644",
+          "ba49ab8f2d58e4ef63bd5a19d5a3278988793f0a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "a7cc3469b0fbecbe66cbd557d8b3c7ed0a6f1942"
+        ],
+        "3": [
+          "100644",
+          "6e77288602c4e89b8e20e0c242f2ea4334c79502"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "01d0b5141473cd76be97db1a9512a9bd5c3bda5e"
+        ],
+        "3": [
+          "100644",
+          "9486f973a72d8d651d4926e7508db58651ec3e62"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "a7cc3469b0fbecbe66cbd557d8b3c7ed0a6f1942"
+        ],
+        "3": [
+          "100644",
+          "6e77288602c4e89b8e20e0c242f2ea4334c79502"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "01d0b5141473cd76be97db1a9512a9bd5c3bda5e"
+        ],
+        "3": [
+          "100644",
+          "9486f973a72d8d651d4926e7508db58651ec3e62"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "ab463361f1d37bcc85901a943ae9aaaa1dca1dd1"
+        ],
+        "3": [
+          "100644",
+          "3f25822549317f3b730d13073f8b1e0b139dff84"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "64c8c10e9a4b52236d7075660437288fcc048edf"
+        ],
+        "3": [
+          "100644",
+          "4872771d38e1cb47b0d4f3c2094600f35d43277e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "ab463361f1d37bcc85901a943ae9aaaa1dca1dd1"
+        ],
+        "3": [
+          "100644",
+          "3f25822549317f3b730d13073f8b1e0b139dff84"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "64c8c10e9a4b52236d7075660437288fcc048edf"
+        ],
+        "3": [
+          "100644",
+          "4872771d38e1cb47b0d4f3c2094600f35d43277e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "b25056952767a4f2770915b1f1cdc74235f04778"
+        ],
+        "3": [
+          "100644",
+          "e583138f50924e3807d688bae0fe49b32daa0daf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "3b3b06dee357d9a2ae0ea2bdb737d2a6174d9ca2"
+        ],
+        "3": [
+          "100644",
+          "98a80a9398f8477ff9ac2d5f4f426344c15f3070"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "668a71ce26a489d35b7283c11d2ca630d195721a"
+        ],
+        "3": [
+          "100644",
+          "80ecd26dfed532c4cd01b444fce76679b86be989"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "dfc1c9264ff9b68ec7cf67f18d8f2b691e814999"
+        ],
+        "3": [
+          "100644",
+          "0ba6bb9e1663b6628513121f584639d32cdb2835"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "b8311e826577110defa586fe0296f271ec51e14f"
+        ],
+        "3": [
+          "100644",
+          "44893718b87d64cb6c3582068622cd6c37cab457"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "51d6e37e5b4535ea9c620e5dd755466630f1f2a9"
+        ],
+        "3": [
+          "100644",
+          "0d3d74049387da906bb86e3e703b438883a240e7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "73db593a5c93a74babe099fb26b1beeb99b5938f"
+        ],
+        "3": [
+          "100644",
+          "fb8b6bb79124529e664e83e62c08731ae99a6208"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors2-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "0ca1cf89bb8592476681dc3b14f680e1bc923834"
+        ],
+        "3": [
+          "100644",
+          "b7d96314c12928f1bbf25f7bb486058f3b916284"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "a203208cd6fcd3a4c3afea2de7b0634d4716b02d"
+        ],
+        "3": [
+          "100644",
+          "38e2b9eb4ebf4f4dfc0583ffa4474f3c913a3765"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "96ba77143b3549ba23ba32123b36afed2fffa49c"
+        ],
+        "3": [
+          "100644",
+          "f69cac954bd16798f062555ea3455a2598842b8e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "a203208cd6fcd3a4c3afea2de7b0634d4716b02d"
+        ],
+        "3": [
+          "100644",
+          "38e2b9eb4ebf4f4dfc0583ffa4474f3c913a3765"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "96ba77143b3549ba23ba32123b36afed2fffa49c"
+        ],
+        "3": [
+          "100644",
+          "f69cac954bd16798f062555ea3455a2598842b8e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "e4ed75365a35480568c957bc499c0407e35a3e25"
+        ],
+        "3": [
+          "100644",
+          "4aa2a40187e8b3e245f669484e6b75dd6b0e6180"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "a1ab0fa2864376b6e6344c1f9a6216ce013e13fe"
+        ],
+        "3": [
+          "100644",
+          "6d899f74535b92975bf32ed869d5de9c090ef12e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "e4ed75365a35480568c957bc499c0407e35a3e25"
+        ],
+        "3": [
+          "100644",
+          "4aa2a40187e8b3e245f669484e6b75dd6b0e6180"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "a1ab0fa2864376b6e6344c1f9a6216ce013e13fe"
+        ],
+        "3": [
+          "100644",
+          "6d899f74535b92975bf32ed869d5de9c090ef12e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "96f1a456b0c8caaa5c5e24bcea33b8ba59369ade"
+        ],
+        "3": [
+          "100644",
+          "b82d3a9c4428f8df5b594d317b2b27cdbb80f216"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "460182daf9c1cfd80b032f0892571ead014027a3"
+        ],
+        "3": [
+          "100644",
+          "76dd7f7b8966228d0c5e82431378479f8cf02b59"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "966eaddf17c6c534b3172d419cacb4e20f44f2a3"
+        ],
+        "3": [
+          "100644",
+          "45f6066f8fce0fffa83b669612ec8e4beb0fdd5b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "7423f5f81cb777aeefdc2cd2c2a481f5a1170c47"
+        ],
+        "3": [
+          "100644",
+          "01869e115469c7fd78feb33c3421d2463ecb265e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "39f5bfcccf3e87aa7b990c45b4ab88d3cde2d94f"
+        ],
+        "3": [
+          "100644",
+          "16f3e5c4b33c9efae4c084d024ef468b52a55cc2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "4c4fc2e0999929a0dd07f638eea431414fb92011"
+        ],
+        "3": [
+          "100644",
+          "f7464452944c83e6ed220c30296452bbb4ae7317"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "d2158313044db5775e4bbb075cd81143feb0a1b0"
+        ],
+        "3": [
+          "100644",
+          "f864bc1235776bf86475b4ba9a26b8506f7e13f6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "a1a1dc92e36cfc1df36ca38a1f7bc192f9a75f46"
+        ],
+        "3": [
+          "100644",
+          "0bf784e18980c482d8a4d57deb33cb02112482e1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "be54257b2c0a2f4ceee8f3aafef3547ef571cb8e"
+        ],
+        "3": [
+          "100644",
+          "fa940f94e335844dabacb6d2c92b40142e3b8335"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "a30164d16eebdf4d3770740e6fb7203eab699657"
+        ],
+        "3": [
+          "100644",
+          "ac926b4151f58738b5b927f12c3cfa47b7fd1fa9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "be54257b2c0a2f4ceee8f3aafef3547ef571cb8e"
+        ],
+        "3": [
+          "100644",
+          "fa940f94e335844dabacb6d2c92b40142e3b8335"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "a30164d16eebdf4d3770740e6fb7203eab699657"
+        ],
+        "3": [
+          "100644",
+          "ac926b4151f58738b5b927f12c3cfa47b7fd1fa9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "cc86316511a0e0bba4b02add42e3171bc289732f"
+        ],
+        "3": [
+          "100644",
+          "3167789df037f98ca6531f4044ac4497e915c360"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "3ccc2e71fa3d3d8e8f9439e5afc517ee6f024c04"
+        ],
+        "3": [
+          "100644",
+          "ae1c76f2e638ae96384a1aee8e0e78b876138bb5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "cc86316511a0e0bba4b02add42e3171bc289732f"
+        ],
+        "3": [
+          "100644",
+          "3167789df037f98ca6531f4044ac4497e915c360"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "3ccc2e71fa3d3d8e8f9439e5afc517ee6f024c04"
+        ],
+        "3": [
+          "100644",
+          "ae1c76f2e638ae96384a1aee8e0e78b876138bb5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "5f2a014b5db26a329d2aeb739a1244a1a8beaee9"
+        ],
+        "3": [
+          "100644",
+          "0c66867036ecbc39de36bd6c3b630e8cc0a058f7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "49475a4e43469d763431628e1576a5c7653e4186"
+        ],
+        "3": [
+          "100644",
+          "07b49330380dccf8385399801d80a82bfa3c2cdb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "f561f81710829818e17c9f33fbd5a2432e322076"
+        ],
+        "3": [
+          "100644",
+          "a805a38ca17c0693302bb4ce16876901fcf4fe3f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "7c8b827c259da83f3df598981467d75c01874811"
+        ],
+        "3": [
+          "100644",
+          "edd870d4cfa52b14f562495a5db55807a22e7242"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "799bbc325d8457a6828d00713770cfc437f2bf1a"
+        ],
+        "3": [
+          "100644",
+          "de96db06ff55d72566c0c09d8940f213f757c989"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "85d6e1fd8867a6df5bc4e7cf85e8647360587ef5"
+        ],
+        "3": [
+          "100644",
+          "c121566c6271bcb98e05a8f9affc18909a3ef3a5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "6312bb77ce55b6c23a679fe6141873a660836466"
+        ],
+        "3": [
+          "100644",
+          "346b127baaa419b1d8a81042a7378a03f8678eb7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors4-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "def31b6f0d8ce093972da2ac86221c0b6bbe6623"
+        ],
+        "3": [
+          "100644",
+          "3370a585050e87f7f8b98106644001db32bae8e8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "2dccb06c09ea3536b3d3e98106db6fedcff2d9ff"
+        ],
+        "3": [
+          "100644",
+          "1e08741acb1baef524c5dbea7d2322584679f451"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "d5c393408ab614540908a84e915d5d8118bcaf0c"
+        ],
+        "3": [
+          "100644",
+          "44dd029f1b02be34ab12bbaab5a2a98eb1ddadb9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "2dccb06c09ea3536b3d3e98106db6fedcff2d9ff"
+        ],
+        "3": [
+          "100644",
+          "1e08741acb1baef524c5dbea7d2322584679f451"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "d5c393408ab614540908a84e915d5d8118bcaf0c"
+        ],
+        "3": [
+          "100644",
+          "44dd029f1b02be34ab12bbaab5a2a98eb1ddadb9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "02c373eca86b6144b67029d1f69c85fa193f984a"
+        ],
+        "3": [
+          "100644",
+          "effbb6d9f7ae9b1b7772265734643098ae089768"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "8364d681db6dfd427ee3a65664a031a0d91fdb06"
+        ],
+        "3": [
+          "100644",
+          "b7613b664ed0396e4ed463cd4a1cdbd46e7ce026"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "02c373eca86b6144b67029d1f69c85fa193f984a"
+        ],
+        "3": [
+          "100644",
+          "effbb6d9f7ae9b1b7772265734643098ae089768"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "8364d681db6dfd427ee3a65664a031a0d91fdb06"
+        ],
+        "3": [
+          "100644",
+          "b7613b664ed0396e4ed463cd4a1cdbd46e7ce026"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "d11e60825a1ba84b4fae10045c1f0477960e3df5"
+        ],
+        "3": [
+          "100644",
+          "4dc4b4dc42826d319b7c5158105d31961e25b1ff"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "1bd3c1558630b227d68085f808f059a5faf829e7"
+        ],
+        "3": [
+          "100644",
+          "7bd1247ad8403ca539575b448e48ea161912e1aa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "fe119f0ef4c91ba4c798d11933c0fa59ef294e79"
+        ],
+        "3": [
+          "100644",
+          "c1002ad5b442f0e53e583906e1c94c3ed8ea54bd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "b0d0b61b3745e3a078a961f642336b8406cfd368"
+        ],
+        "3": [
+          "100644",
+          "62e5b2450fa5d2590eeab3f81155b416732a0216"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "65f4ce8c65dc14245b7a155483ad1b2941bdeed8"
+        ],
+        "3": [
+          "100644",
+          "282c6b74b4c786b3965570ffaa77f29c517e4ffa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "80a81861a88aeb4662007cb4e863244f8c11e147"
+        ],
+        "3": [
+          "100644",
+          "10144b83a3401b3b862b3abd839c9733e2b69d54"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "8bc9caeb6c38f27c350255623570ed8ee2d99c9b"
+        ],
+        "3": [
+          "100644",
+          "07c4a6007a46cbeaf91674f02ff7321e07212360"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors5-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "4b459d501d9b5b656accca91dcf92f3d9b5caf42"
+        ],
+        "3": [
+          "100644",
+          "6c72769c2754edc28bf20113ca2f1d38244b1368"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "5c1eaf89702ab56ed1977ee9b5e1d92f7594dc3e"
+        ],
+        "3": [
+          "100644",
+          "d012aea07acc9b03fd72d0fbe3774796c4aeb1e8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f802a8ae2e0843bf992230c7c11a1a482b5d1ca6"
+        ],
+        "3": [
+          "100644",
+          "469b2ccec70c0099308cd93205277781f93654a1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "5c1eaf89702ab56ed1977ee9b5e1d92f7594dc3e"
+        ],
+        "3": [
+          "100644",
+          "d012aea07acc9b03fd72d0fbe3774796c4aeb1e8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "f802a8ae2e0843bf992230c7c11a1a482b5d1ca6"
+        ],
+        "3": [
+          "100644",
+          "469b2ccec70c0099308cd93205277781f93654a1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "c05bebb6c2d2d1426f3f23f1c155c428d46519c0"
+        ],
+        "3": [
+          "100644",
+          "a08b27e17f01d26a52b56b82c2ee9207ee9dc186"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "8e0370f91ce645cf38b4848f913ae6ef5d9dfbca"
+        ],
+        "3": [
+          "100644",
+          "d7ae94dd2e10cfb516cd58ed8d91752b330a0974"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "c05bebb6c2d2d1426f3f23f1c155c428d46519c0"
+        ],
+        "3": [
+          "100644",
+          "a08b27e17f01d26a52b56b82c2ee9207ee9dc186"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "8e0370f91ce645cf38b4848f913ae6ef5d9dfbca"
+        ],
+        "3": [
+          "100644",
+          "d7ae94dd2e10cfb516cd58ed8d91752b330a0974"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "63ffea9ef0bfa412dd64b2d71dc06455d6c069be"
+        ],
+        "3": [
+          "100644",
+          "0ba901433c840eae237e752096f86b2fa40ded89"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "b27771a4f1f13e128d774f45b940d4d0e6e95f11"
+        ],
+        "3": [
+          "100644",
+          "854c3af4d6465912159e8ac50f8578fdcdbcc5f9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "0b35a71398c26b79cf41812238d9f3855e9ca7f7"
+        ],
+        "3": [
+          "100644",
+          "bbaaa1429d6780989ae40f323321dc578188436c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "37467c782f18506b6e304073d9424b3a1442a63f"
+        ],
+        "3": [
+          "100644",
+          "9821460ad3043491eb9cafd789fbb1f965196281"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "6c001516a7b39f8b0a97d4d6405dcf0aed504887"
+        ],
+        "3": [
+          "100644",
+          "81e7973229e7b4bd2ec3f145d373c43b443fd5d2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "bbe7c8f6bcb29035c78011480acbc77f8c63801e"
+        ],
+        "3": [
+          "100644",
+          "2a0f0f633ca7ccad8684b5510ad8100bec878811"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "1123d02b4e6a2fff440d65af2716d075df8aef1d"
+        ],
+        "3": [
+          "100644",
+          "e454a67f4c5b3e5f577893071d3fea81615a7a31"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors6-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "807e9274ad4c16659c92423e82d3fcdb929a2456"
+        ],
+        "3": [
+          "100644",
+          "374a115d3eee9bd8f43f71d170dd67a518c9d543"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "81d85ee64f5bef8fda15c5297b46bd366d8ed8fd"
+        ],
+        "3": [
+          "100644",
+          "e77c352409cc76e29145014cb7624617dd5bbc82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "607e222ae03bf3d35507b3fa79923bf435eb7a6b"
+        ],
+        "3": [
+          "100644",
+          "09e941c335b4c6f57a698205576f7adbc1e57de6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "81d85ee64f5bef8fda15c5297b46bd366d8ed8fd"
+        ],
+        "3": [
+          "100644",
+          "e77c352409cc76e29145014cb7624617dd5bbc82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "607e222ae03bf3d35507b3fa79923bf435eb7a6b"
+        ],
+        "3": [
+          "100644",
+          "09e941c335b4c6f57a698205576f7adbc1e57de6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "ae8d7f72489149005aa86576d9771d80b902f9dd"
+        ],
+        "3": [
+          "100644",
+          "b898e742884005ce19489ec6d376f9591b449800"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f9ca93c03c0acf657ce3fa4955e34a1acdf9d325"
+        ],
+        "3": [
+          "100644",
+          "01f6db3e1dfac2439c27098955a78b225ab9b824"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "ae8d7f72489149005aa86576d9771d80b902f9dd"
+        ],
+        "3": [
+          "100644",
+          "b898e742884005ce19489ec6d376f9591b449800"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "f9ca93c03c0acf657ce3fa4955e34a1acdf9d325"
+        ],
+        "3": [
+          "100644",
+          "01f6db3e1dfac2439c27098955a78b225ab9b824"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "11429cec5e84b029689304695b6e0886c684e97b"
+        ],
+        "3": [
+          "100644",
+          "ce564a07e0bf6025bbdfa13828c7aca1d4ec9f50"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "c7f4852be1003f85bd4cdc918adc7c8521e25ff8"
+        ],
+        "3": [
+          "100644",
+          "b33b7a7fe9cd1ccca078409a08b9598ab5fb2243"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "f77432496880ecc2a8e1c0107fb9b416303602ba"
+        ],
+        "3": [
+          "100644",
+          "64e8739a0b72edc13fdcde7aba21689e3dcf79c6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "cc9cafaed841f64c06934dbe62f18ac615bbbceb"
+        ],
+        "3": [
+          "100644",
+          "285cee690422d195a44686b3ecf444218ebce5fc"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "ffe828a2b0689dc4c1d776057450002411baef18"
+        ],
+        "3": [
+          "100644",
+          "d8049ecf7d2cc213d534db76161a3c10f3d2b78c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "80979382347a7d53247d9b7a9ef530753b18818e"
+        ],
+        "3": [
+          "100644",
+          "350e9193b7e1ccf6ad222d6fbc53051657f254c1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "6ba6948d0f11ebe9cb1f3e956b5ba8961819c553"
+        ],
+        "3": [
+          "100644",
+          "62f1e1d19d1e15429746f4f7f294aef0c026189c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors7-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "dad75b33bb897896b4ea4adc0cbbdbf6fdb9226a"
+        ],
+        "3": [
+          "100644",
+          "3782c88969cfff835b8b1caa4030c5ae78ad7c74"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "36817b8262fe31efec22391cf0c6d0a898cb8f95"
+        ],
+        "3": [
+          "100644",
+          "bf1b34131efff87f5159e27105e6ac54fdceccfa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "df2d1ca26319d9dc6a7ba6879a793a818575e075"
+        ],
+        "3": [
+          "100644",
+          "999e9065fffaaa18f9f8f84805ce8450109c2f28"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "36817b8262fe31efec22391cf0c6d0a898cb8f95"
+        ],
+        "3": [
+          "100644",
+          "bf1b34131efff87f5159e27105e6ac54fdceccfa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "df2d1ca26319d9dc6a7ba6879a793a818575e075"
+        ],
+        "3": [
+          "100644",
+          "999e9065fffaaa18f9f8f84805ce8450109c2f28"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "2c5db9a7e0a00e7fb93362832416d90af680ba18"
+        ],
+        "3": [
+          "100644",
+          "bd44c57d8013fe7afa2648218e82b6af0195829e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "cd5ae6ca4c46bf5a9b5e478f732cca9b94d781cf"
+        ],
+        "3": [
+          "100644",
+          "09d33222b90653049866dcbce44285be5d03b081"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "2c5db9a7e0a00e7fb93362832416d90af680ba18"
+        ],
+        "3": [
+          "100644",
+          "bd44c57d8013fe7afa2648218e82b6af0195829e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "cd5ae6ca4c46bf5a9b5e478f732cca9b94d781cf"
+        ],
+        "3": [
+          "100644",
+          "09d33222b90653049866dcbce44285be5d03b081"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "c043db795e8df8fb5b6bdc42c6fbac90012eb52e"
+        ],
+        "3": [
+          "100644",
+          "dd7ba2cdf3dbfb607143a9119a9d56f6bb5da28e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "e61d70b251c1103a5d95a05fd1c1576e01ea796d"
+        ],
+        "3": [
+          "100644",
+          "318b342082727a4ad37f26827ea1e51a986d2baa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "5661aa711e7c291005dbd059742cb70d37fd43db"
+        ],
+        "3": [
+          "100644",
+          "49d778a4bbfb261df48c41d69215b981b8a1d912"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "62c0c612cebdfdc8c9b7bb40764e15edf4d2bed7"
+        ],
+        "3": [
+          "100644",
+          "609a3afe0997fcf2d4fab5297f3e27743aeabd08"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "6da393434b4fea9c3c6ef4a89b8cf884dfc7769a"
+        ],
+        "3": [
+          "100644",
+          "41f9c71cc5297ae490cf14aa605c3fe3fa51b046"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "47b9a4d6c057d0fcefe7bc0834967a0c20f60d4f"
+        ],
+        "3": [
+          "100644",
+          "aa36f9777bf4136aa398bb1f5d708186d39b19f4"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "5d16bc98f17bfab1d70d5a51d10d8408be442230"
+        ],
+        "3": [
+          "100644",
+          "48dad816c5672bfcb492d6229c5f467cfd8b1081"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors8-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "0270bcbd2688435899730f13ab658adaef093d97"
+        ],
+        "3": [
+          "100644",
+          "6f387d71a9051f751f66ea9a4b23e028da0a0f31"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "c3f39a691f5e85bc0d533d7f39594dbce35d6721"
+        ],
+        "3": [
+          "100644",
+          "de726d46c92e97431fa5c896a67fcd90319335bb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "307125f6e18dedea3fb48ec358c28452a5539e94"
+        ],
+        "3": [
+          "100644",
+          "ce0af1d7f2ba961006a1985920d06644d1763caf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "c3f39a691f5e85bc0d533d7f39594dbce35d6721"
+        ],
+        "3": [
+          "100644",
+          "de726d46c92e97431fa5c896a67fcd90319335bb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "307125f6e18dedea3fb48ec358c28452a5539e94"
+        ],
+        "3": [
+          "100644",
+          "ce0af1d7f2ba961006a1985920d06644d1763caf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "73874ed9502f2951a397e91d34974157f30fb3bf"
+        ],
+        "3": [
+          "100644",
+          "73421d7468d8ad7dbd6a29fb3eb1811af0a9d0ee"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "8ce44fb09b817fac442f69d38a81afa8138cd220"
+        ],
+        "3": [
+          "100644",
+          "db094784f653935d35624fdbd09ecf8cdf0bf0dc"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "73874ed9502f2951a397e91d34974157f30fb3bf"
+        ],
+        "3": [
+          "100644",
+          "73421d7468d8ad7dbd6a29fb3eb1811af0a9d0ee"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "8ce44fb09b817fac442f69d38a81afa8138cd220"
+        ],
+        "3": [
+          "100644",
+          "db094784f653935d35624fdbd09ecf8cdf0bf0dc"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "bdf88f8f54ebdf0c278f17feb233d7da372f4080"
+        ],
+        "3": [
+          "100644",
+          "4538b66da990cc05f7b6a994f4ebc940d0893450"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "4397065eb17db9132cf267f99c9449926ce1e01f"
+        ],
+        "3": [
+          "100644",
+          "5e0d1bd7001ff29c4080e3a54b741fb9bbd52111"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "dc9b3d27f1e060359b7a8d155de44b3e1ce13d02"
+        ],
+        "3": [
+          "100644",
+          "cd2cc0f979ba88df42faca7cf0e29aab23b61585"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "17bafc0266bba6a40760be1c636232490724dd18"
+        ],
+        "3": [
+          "100644",
+          "f7ce117dd2409b5ede81401cb1da4e7647f6beec"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "04794d18493a4335553ff1ecf0891ad02b35f618"
+        ],
+        "3": [
+          "100644",
+          "96db33b89806ec6662a6cd4648b601adf84f25b7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f54d8ab09f3a38960ed2772fccbe1d1c29b4d028"
+        ],
+        "3": [
+          "100644",
+          "9cc1a884c1fe00a072b45782dfe5c79a134f0a35"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "ea309948a21900c33fab8fb03415a1010db33ff7"
+        ],
+        "3": [
+          "100644",
+          "8e2578dfd84c72d781301edf8c173ab8b8af04a7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors2-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "cc59a894e382b4203b5c16b340bee2f9f378dd9f"
+        ],
+        "3": [
+          "100644",
+          "339108c4f6d1cfa88ac3d613c0f68d68102b55c3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "b87e68e873c33065ee44465d3319d6910574fed2"
+        ],
+        "3": [
+          "100644",
+          "f5bc1d668260c828f6e8a29605512d6d48295ca6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "8fd9dae0adbe9893fc3bd34d6aa187e0978b4fd7"
+        ],
+        "3": [
+          "100644",
+          "9b5e918edffc8cc4dcc8c5ded991c69f47f9bb9d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "b87e68e873c33065ee44465d3319d6910574fed2"
+        ],
+        "3": [
+          "100644",
+          "f5bc1d668260c828f6e8a29605512d6d48295ca6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "8fd9dae0adbe9893fc3bd34d6aa187e0978b4fd7"
+        ],
+        "3": [
+          "100644",
+          "9b5e918edffc8cc4dcc8c5ded991c69f47f9bb9d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "2c3f2d7795b79a923b8ac145f5235f2221af9cf1"
+        ],
+        "3": [
+          "100644",
+          "576907827836268c9e462761676c135c5a224303"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "76a1b3e397bb50a4eca4c98b45aa17e3bb59b8ee"
+        ],
+        "3": [
+          "100644",
+          "88832f4c3f9af1aae4314a428f71b5f8865bc2cf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "2c3f2d7795b79a923b8ac145f5235f2221af9cf1"
+        ],
+        "3": [
+          "100644",
+          "576907827836268c9e462761676c135c5a224303"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "76a1b3e397bb50a4eca4c98b45aa17e3bb59b8ee"
+        ],
+        "3": [
+          "100644",
+          "88832f4c3f9af1aae4314a428f71b5f8865bc2cf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "2f64bdc1987c5a6dd25fa6760f07a67daba8d256"
+        ],
+        "3": [
+          "100644",
+          "38d23ba51f90f87a2e512858c2cacafd9d8851eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "8b076d75f7a45415341b87eeea5e796af3514fa8"
+        ],
+        "3": [
+          "100644",
+          "d5b373b5fa463e37bb48c78de0be0803af7b6b51"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "37c67872cb261e3ce4160c61446a5aa2ea2b3df7"
+        ],
+        "3": [
+          "100644",
+          "19958c55ffc651e4e8284e604051b54d648402e7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "9c804a5519fa7b2ae367e5010d15dd7ff115087c"
+        ],
+        "3": [
+          "100644",
+          "68016546f9b0e500df0e8c8adf6aeeeacafcbcb3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "e3987d630a3bbf5d2898b76cc67e72eac271cbdc"
+        ],
+        "3": [
+          "100644",
+          "d209f704d9001227d2e673b4e3bfca26533a35ca"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "03b7d95018b0b3c3cee10b97d0d98975b4163a42"
+        ],
+        "3": [
+          "100644",
+          "f0208e578ee8b0c371f4006bbbdf5002b86162ae"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "8f917bc921cb87e08d5983ea6b8a08a171b134ef"
+        ],
+        "3": [
+          "100644",
+          "782988308e8c68924d7b6ff000f3df41d4e834a6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.obu": {
+        "2": [
+          "100644",
+          "74f2bc99ec208d1a75c0966dd35c7b3c9ac7999e"
+        ],
+        "3": [
+          "100644",
+          "fc911b50530b1af8fa1eddc721f643654d78c93c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "399e7dbc91de9e9d98bb193989413092e7bd510e"
+        ],
+        "3": [
+          "100644",
+          "744da8037dfbb7f0c178fce794bec8d42d326aaf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.yuv": {
+        "2": [
+          "100644",
+          "81de9e7f24466bdd1731c3abc531cb0a14f00d72"
+        ],
+        "3": [
+          "100644",
+          "fa7675628c1ae5da503523728c6e7efa9877b90c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "a6a70889aab3ec7a731d89036d9c52668d09e556"
+        ],
+        "3": [
+          "100644",
+          "2f9407a69daf172c4e49a5f28b72dfab14df85f0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "138923541a5ea1582b821eae24ebdd84beed0f22"
+        ],
+        "3": [
+          "100644",
+          "c63d50303dc392f93df0e73c549a60d97c04fe2e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "138db2c7a5edd480dab50471f25bc10201fcecaa"
+        ],
+        "3": [
+          "100644",
+          "da2653382200bbcc0b219c19bf920d2966fed641"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "138923541a5ea1582b821eae24ebdd84beed0f22"
+        ],
+        "3": [
+          "100644",
+          "c63d50303dc392f93df0e73c549a60d97c04fe2e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "138db2c7a5edd480dab50471f25bc10201fcecaa"
+        ],
+        "3": [
+          "100644",
+          "da2653382200bbcc0b219c19bf920d2966fed641"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "9b4221c45330ca24d5a37de6c181d00b311cf009"
+        ],
+        "3": [
+          "100644",
+          "2158dac31ee9c985450676845d4d15a2c2aeb979"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "5e57ffa4d1c6f0ce2abb41372cd377eb61d84213"
+        ],
+        "3": [
+          "100644",
+          "0322f678724182fb632ead2de2e09f8d327c23a2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "9b4221c45330ca24d5a37de6c181d00b311cf009"
+        ],
+        "3": [
+          "100644",
+          "2158dac31ee9c985450676845d4d15a2c2aeb979"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "5e57ffa4d1c6f0ce2abb41372cd377eb61d84213"
+        ],
+        "3": [
+          "100644",
+          "0322f678724182fb632ead2de2e09f8d327c23a2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "f1d6bac81021498693f2b2e0815cc9e9e8abb395"
+        ],
+        "3": [
+          "100644",
+          "24185e58437f598ff97d6f0db52fdbc548c1f1a6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "8c67901c24dcb4a2cb82a0918470699d562b6373"
+        ],
+        "3": [
+          "100644",
+          "e6309dc99140c54203b083e9c229dfce708fdf1a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "734b2f557448438bcaae617ecccac17f4812dd61"
+        ],
+        "3": [
+          "100644",
+          "6e37d8076ebc1eb2a9fc15074f3183eeaba938e8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "32562d0a63de49230b318b5c342bcb29972f371b"
+        ],
+        "3": [
+          "100644",
+          "e1680a1717c304b1c264478de8e60c7125300a23"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "e1c8e24be965b7fdd31c706c7bbdb133927a8612"
+        ],
+        "3": [
+          "100644",
+          "3c6b03acd8e2ef9b62ed1523d09262ec6188636e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f4952c509999c735c728349f0d030ca6506a2747"
+        ],
+        "3": [
+          "100644",
+          "c44802c806d65ba05945a21414738554c0723f04"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "773c4a36ce4de21d7816265b70285d74d8206116"
+        ],
+        "3": [
+          "100644",
+          "e4647df9f5a26fe407f1ee2383c3cf237ba89b52"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors4-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "fef9c5cf1776fd0d5ea3157a3a2ded02077a4af0"
+        ],
+        "3": [
+          "100644",
+          "8dfa88d8559c618abce8d6779980f53ebe27b595"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "a1afb21e36fb2ed8db76fd500f1aeb28aa240d73"
+        ],
+        "3": [
+          "100644",
+          "0434a88bf1d23df3dc986822de3bdf2dba4ec057"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "07aef60545d015f737bc089931df3eec6a972435"
+        ],
+        "3": [
+          "100644",
+          "924ea0d4a2b1bf83e553ba3b02bef0752ea75cbf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "a1afb21e36fb2ed8db76fd500f1aeb28aa240d73"
+        ],
+        "3": [
+          "100644",
+          "0434a88bf1d23df3dc986822de3bdf2dba4ec057"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "07aef60545d015f737bc089931df3eec6a972435"
+        ],
+        "3": [
+          "100644",
+          "924ea0d4a2b1bf83e553ba3b02bef0752ea75cbf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "bbb628ddf3423fa9341397b3690c627323363881"
+        ],
+        "3": [
+          "100644",
+          "ea47d1e7216d894bf1dc5705401326b575412260"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "9d890dc63e9c73fd8674c1df86681f93e503c7a6"
+        ],
+        "3": [
+          "100644",
+          "b5e78bed40db45927cb686793d20343bfc37b3b5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "bbb628ddf3423fa9341397b3690c627323363881"
+        ],
+        "3": [
+          "100644",
+          "ea47d1e7216d894bf1dc5705401326b575412260"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "9d890dc63e9c73fd8674c1df86681f93e503c7a6"
+        ],
+        "3": [
+          "100644",
+          "b5e78bed40db45927cb686793d20343bfc37b3b5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "add6aa8bcdffcd5357d7c6e9ad7183e0ec25b36a"
+        ],
+        "3": [
+          "100644",
+          "327e2e432e864b4d94be31b91b48f44b32158770"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "81878f36ba4b0213aa1b0757603aa08de76b2f85"
+        ],
+        "3": [
+          "100644",
+          "2f0843d6f675e0714ff8118af5d33884bf5ef65e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "235599a282fb8e040c09ccc04c3a7c826ca5b18f"
+        ],
+        "3": [
+          "100644",
+          "c73ec3ebcd04fa50f18771b4a5274818e63ce700"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "74ea860a029b390a8c8efc24657fd82c1074c3e8"
+        ],
+        "3": [
+          "100644",
+          "3a1d6aed9e194ac40115542d1016df0634e0c2ad"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "ccaedb47ce3c42d1db05003870094388efbb1a78"
+        ],
+        "3": [
+          "100644",
+          "7297ace2f9099329394eba4c8d102025ae538d8c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "ba8e28c58b81667d471c6c1106271691787e4ab0"
+        ],
+        "3": [
+          "100644",
+          "79fcd92007d1788b30e31100a1427ccf32879aea"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "6a600b634a7695c7170b44eb27516fa5ad733e7e"
+        ],
+        "3": [
+          "100644",
+          "528f82d03c7eddcd0690f1656aea2ff8328f1582"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors5-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "b0d8b2eceace9a82268ddedcf206e296022c7bff"
+        ],
+        "3": [
+          "100644",
+          "9489580f9871f373e36bfae12aba1ce576cb3897"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "6179300159fcab962002450c5d1e55196417946e"
+        ],
+        "3": [
+          "100644",
+          "ad80039eb27c74f4b0ba7226b30104d100aebe44"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "ea2063d6f73988d1aa0f67d44da95fa1daad8384"
+        ],
+        "3": [
+          "100644",
+          "30427ca50377d3ae9681538cd0ea362742a36e36"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "6179300159fcab962002450c5d1e55196417946e"
+        ],
+        "3": [
+          "100644",
+          "ad80039eb27c74f4b0ba7226b30104d100aebe44"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "ea2063d6f73988d1aa0f67d44da95fa1daad8384"
+        ],
+        "3": [
+          "100644",
+          "30427ca50377d3ae9681538cd0ea362742a36e36"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "a1446be9870a489859a70ebed63c22d4bfb1e2d0"
+        ],
+        "3": [
+          "100644",
+          "51a86a2d5d39aa8ee25b289fa37a5202ccc81172"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "9ab8fa01384c467d8337a22fdfe9dd46f5b71ae4"
+        ],
+        "3": [
+          "100644",
+          "f2e8551d2af87e5748afff8ee70b2a6eb908eb2e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "a1446be9870a489859a70ebed63c22d4bfb1e2d0"
+        ],
+        "3": [
+          "100644",
+          "51a86a2d5d39aa8ee25b289fa37a5202ccc81172"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "9ab8fa01384c467d8337a22fdfe9dd46f5b71ae4"
+        ],
+        "3": [
+          "100644",
+          "f2e8551d2af87e5748afff8ee70b2a6eb908eb2e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "f84ba2f58197a94056331799ea197e2ca31e6e02"
+        ],
+        "3": [
+          "100644",
+          "6bad9432c6bb55146232c89132217b3261d435b2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "9ab8e98bf7a56c0d868c8fa4ee56259268f1de52"
+        ],
+        "3": [
+          "100644",
+          "f294dd1465544a015dba3d06f1e8709ad0fe08a0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "1cb6858d94b21beccb985e4a5c9e08c63068f938"
+        ],
+        "3": [
+          "100644",
+          "d361ce30d66bc1039b8ea05967335b8ddf9fe417"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "1ce6fae783e399185c9c9b178ece5c874d95effc"
+        ],
+        "3": [
+          "100644",
+          "e792c19599c2ffdd66efea8060dead8d1a392b82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "d2def4099c5ceb491b0d2f83b1d779626e2137a0"
+        ],
+        "3": [
+          "100644",
+          "deb04f085cb4a17e1ac6f7c3705e8b438d3bc7ae"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "f4d1f1d52d62a26a43015e78fed0ab4b98dc8d6f"
+        ],
+        "3": [
+          "100644",
+          "0410f66b28f5e6e391bd954c60a92901542382f8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "26501cff2491165753b5544f067da3bbc9a4f08a"
+        ],
+        "3": [
+          "100644",
+          "2e0d50b49875a15ca57b3e62f2592bb1f188acc9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors6-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "36e1493418e514f2e5e23f0349105140573bfa1a"
+        ],
+        "3": [
+          "100644",
+          "6d788fe11238f9d30ab1491019a50cf39c2781fe"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "223d007735979e4cddeeebf8ddad653a3cbebad1"
+        ],
+        "3": [
+          "100644",
+          "cd234727464596a5ce8db6c4d8a9eec229997d54"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "ca5c63486543cb3e48e17f029f565f496d200cf4"
+        ],
+        "3": [
+          "100644",
+          "17a06164fdee61c4456b0d3658dbbf586739ac64"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "223d007735979e4cddeeebf8ddad653a3cbebad1"
+        ],
+        "3": [
+          "100644",
+          "cd234727464596a5ce8db6c4d8a9eec229997d54"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "ca5c63486543cb3e48e17f029f565f496d200cf4"
+        ],
+        "3": [
+          "100644",
+          "17a06164fdee61c4456b0d3658dbbf586739ac64"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "a7d7e46b0fa3018d968385b3e55795419dbe430b"
+        ],
+        "3": [
+          "100644",
+          "86db12f4beec2b55e925459969e4411ab8f69b22"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "0ef78011c73ea6257a3b4c54ff6d6b68439b66c6"
+        ],
+        "3": [
+          "100644",
+          "1b142f030cda2b16f926b25d02a5897898192b40"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "a7d7e46b0fa3018d968385b3e55795419dbe430b"
+        ],
+        "3": [
+          "100644",
+          "86db12f4beec2b55e925459969e4411ab8f69b22"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "0ef78011c73ea6257a3b4c54ff6d6b68439b66c6"
+        ],
+        "3": [
+          "100644",
+          "1b142f030cda2b16f926b25d02a5897898192b40"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "5c0ab5ca7297c0e86eb7f2f1433106d1c79c9f58"
+        ],
+        "3": [
+          "100644",
+          "03f8b1bed82d0b0b1eba8d599a96d478ef7753d6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "14ef1de2a16f665ef1b8be3b6d3d1ad7fc64ee1f"
+        ],
+        "3": [
+          "100644",
+          "d3e92ea47161b948a6f47cdf1c5cc548c4599228"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "da7417206959ea95bd9b723fff69fef4dc9f64b9"
+        ],
+        "3": [
+          "100644",
+          "c1230530a367062b8161ada3e4fcc7d8b952eee8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "0a23608e816dc2f21d396a123fcced4c0c4e55ab"
+        ],
+        "3": [
+          "100644",
+          "89c7432ea93027f106a0dea8b8e55e554441b4f2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "6062e85461d07551cfabe746da5fad0ef219894e"
+        ],
+        "3": [
+          "100644",
+          "945fc5da7dc4a2c420853783f02ca33cee804e00"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "196cc21262e333765797630aa1f62bbe91665f92"
+        ],
+        "3": [
+          "100644",
+          "6d7ee5011bbf1fd02b927822dee3d10822fbe6a2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "b7f8459bca7914f53fa753cf35558cd8a1b0a487"
+        ],
+        "3": [
+          "100644",
+          "7d0a1aabe91f2f7cd7c7fdbdc5917b749b0c8fd2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors7-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "1c3514bceb648aa4600dfe5356b24aace549b26b"
+        ],
+        "3": [
+          "100644",
+          "cd9ed3b827e88286d2e6b01f9296f2b24020606c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "12aac8e1f3b747f5a9b917d6e5fa20d17a3e931c"
+        ],
+        "3": [
+          "100644",
+          "605143fe613abbdd4f73ea4a71e20d5955a93664"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "5159f33d47c1abcea0acdc9213a3695a72090d52"
+        ],
+        "3": [
+          "100644",
+          "7889a9f3ce511acebbb6b0e4a66af09f3b096eb0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "12aac8e1f3b747f5a9b917d6e5fa20d17a3e931c"
+        ],
+        "3": [
+          "100644",
+          "605143fe613abbdd4f73ea4a71e20d5955a93664"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "5159f33d47c1abcea0acdc9213a3695a72090d52"
+        ],
+        "3": [
+          "100644",
+          "7889a9f3ce511acebbb6b0e4a66af09f3b096eb0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "744a749c99daaeba93697d8b36d0c473c64fb710"
+        ],
+        "3": [
+          "100644",
+          "d513eb6b54f5a53d01b8437994a5bc20ddc26a09"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "d8f96cf60b13e57d4dcb9cb0dfa515c012221b60"
+        ],
+        "3": [
+          "100644",
+          "b6a2f0ab0255f6c51471d316dbb56aad2c92f924"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "744a749c99daaeba93697d8b36d0c473c64fb710"
+        ],
+        "3": [
+          "100644",
+          "d513eb6b54f5a53d01b8437994a5bc20ddc26a09"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma0-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "d8f96cf60b13e57d4dcb9cb0dfa515c012221b60"
+        ],
+        "3": [
+          "100644",
+          "b6a2f0ab0255f6c51471d316dbb56aad2c92f924"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout0-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "f8b646e87445fd89ebdeee2f2d0190faff8363a7"
+        ],
+        "3": [
+          "100644",
+          "d60cb42ab3e0d2e44d228170678346f4bbd50b77"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout0-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "e9d5dc7ce35da0a85a6a8834a4a3af02d4579df8"
+        ],
+        "3": [
+          "100644",
+          "42a2491b62eacd9d1aae682a7a045f9da8cb9a0c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout0-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "0a2ae0d4f0bbaea9be752b1b1d917c8e9455219d"
+        ],
+        "3": [
+          "100644",
+          "5740d3b5415e3615b61add1b522b53a0d9f7e08f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout0-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "662113ddf2404717b38a1c48cc229e96ac3c0768"
+        ],
+        "3": [
+          "100644",
+          "a8402e04dae64c93960ade5a46586099d022946e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout1-vflip0-q32.webm": {
+        "2": [
+          "100644",
+          "1dac03b2688bac9dda43a6a4da084e934ae8e200"
+        ],
+        "3": [
+          "100644",
+          "5615a33fa0ca3f124470d5dfd49a6772f10faaa2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout1-vflip0-q8.webm": {
+        "2": [
+          "100644",
+          "2574a816d3fe7d76ff0492a81a1d39a605882eb7"
+        ],
+        "3": [
+          "100644",
+          "00b0dbc624dd055da01c0ab26075b448871902eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "3f106a25d7788132d0008017963dcb44ed27c509"
+        ],
+        "3": [
+          "100644",
+          "1fc6be90f405e1df4921bb1bc934b47e7d411ed3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors8-chroma1-layout1-vflip1-q8.webm": {
+        "2": [
+          "100644",
+          "e4d47615ea682dc63afff5768da7614ba3bb7317"
+        ],
+        "3": [
+          "100644",
+          "f3e643138170abc621464bbaca169da3c9f5da58"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-generated.json": {
+        "2": [
+          "100644",
+          "b0ba22e5ea63fbe9ee34b445f929eb6532927713"
+        ],
+        "3": [
+          "100644",
+          "fc83fba8b1639275678b6c259828be67694a950b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-probe.json": {
+        "2": [
+          "100644",
+          "05630201344238738a4b10c8dcc32f9b4ccf10c0"
+        ],
+        "3": [
+          "100644",
+          "3808675da54bcbcb710c1cad63701a1867c7000e"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
