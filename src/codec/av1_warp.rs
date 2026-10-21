@@ -3,13 +3,9 @@ use super::{
     av1_picture::Picture,
     av1_tables::{DIV_LUT, WARPED_FILTERS},
 };
-use crate::{invalid, Result};
+use crate::{Result, invalid};
 fn round(v: i64, n: u32) -> i64 {
-    if n == 0 {
-        v
-    } else {
-        (v + (1 << (n - 1))) >> n
-    }
+    if n == 0 { v } else { (v + (1 << (n - 1))) >> n }
 }
 fn signed(v: i64, n: u32) -> i64 {
     v.signum() * round(v.abs(), n)

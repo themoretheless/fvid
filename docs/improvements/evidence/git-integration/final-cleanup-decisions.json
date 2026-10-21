@@ -1,0 +1,14 @@
+{
+  "source_restored_to_checked_main": [
+    "crates/fvid-media/src/owned_play_controls_impl.rs",
+    "crates/fvid-media/src/owned_yuv_rgb.rs",
+    "crates/fvid-media/src/play.rs",
+    "src/codec/av1_warp.rs"
+  ],
+  "diagnostic_probes_removed": [
+    "tests/av1_delta_lf_tile_probe.rs",
+    "tests/av1_lossy_probe.rs"
+  ],
+  "reason": "Reject unmeasured LUT/prefetch and unverified old buffer UI drafts, omit formatting-only changes, remove temporary external-sweep probes. Full originals preserved in merged ancestry. Keep all real fixture regressions and recorded proofs.",
+  "accepted_improvement_count_unchanged": 178
+}
