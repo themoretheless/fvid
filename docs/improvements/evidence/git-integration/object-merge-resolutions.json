@@ -212511,5 +212511,11 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-field-longterm-progress-20261006",
+    "incoming": "29519207b1293f931ecfd380d38ff5d3824f54d5",
+    "conflicts": {},
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
