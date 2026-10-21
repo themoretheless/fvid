@@ -184,31 +184,6 @@ fn ordinary_negative_and_adjacent_boundary_controls_keep_exact_packets() {
     refusal(Sparse::file("adjacent-underflow.mp4"));
 }
 #[test]
-fn baseline_min_offset_panics_for_both_corrupt_and_legal_inputs() {
-    for s in [
-        Sparse::file("min-underflow.mp4"),
-        Sparse::virtual_file("valid-min"),
-    ] {
-        let r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            Mp4Reader::open(s, Default::default())
-        }));
-        let p = match r {
-            Err(e) => e,
-            Ok(_) => panic!("baseline no longer reproduces MIN negation panic"),
-        };
-        let message = p
-            .downcast_ref::<&str>()
-            .copied()
-            .or_else(|| p.downcast_ref::<String>().map(|s| s.as_str()))
-            .unwrap();
-        assert!(
-            message.contains("attempt to negate with overflow"),
-            "{message}"
-        );
-    }
-}
-#[test]
-#[ignore = "enable with overflow-free signed offset resolution"]
 fn the_entire_signed_range_resolves_or_refuses_without_panicking() {
     refusal(Sparse::file("min-underflow.mp4"));
     indexed(Sparse::virtual_file("valid-min"));
@@ -266,7 +241,6 @@ mod playback {
         play(Sparse::virtual_file("valid-adjacent"));
     }
     #[test]
-    #[ignore = "enable with overflow-free signed offset resolution"]
     fn valid_min_displacement_plays_without_gigabyte_reads_and_corruption_refuses() {
         play(Sparse::virtual_file("valid-min"));
         let r = std::panic::catch_unwind(|| {

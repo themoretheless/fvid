@@ -459,3 +459,28 @@ warning: function `covered_span` is never used
 
 warning: `fvid` (lib) generated 4 warnings
    Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16m 12s
+     Running tests/mp4_signed_offset.rs (target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1)
+
+running 5 tests
+test playback::valid_min_displacement_plays_without_gigabyte_reads_and_corruption_refuses ... ignored, enable with overflow-free signed offset resolution
+test the_entire_signed_range_resolves_or_refuses_without_panicking ... ignored, enable with overflow-free signed offset resolution
+
+thread 'baseline_min_offset_panics_for_both_corrupt_and_legal_inputs' (31712620) panicked at src/container/mp4.rs:1718:60:
+attempt to negate with overflow
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'baseline_min_offset_panics_for_both_corrupt_and_legal_inputs' (31712620) panicked at src/container/mp4.rs:1718:60:
+attempt to negate with overflow
+logical 13160 bytes:native PCM-free VP9 full playback/navigation read71141 actual bytes
+logical 13160 bytes:index and3 exact packets read13144 actual bytes in9 calls
+logical 13160 bytes:index and3 exact packets read13144 actual bytes in9 calls
+test baseline_min_offset_panics_for_both_corrupt_and_legal_inputs ... ok
+logical 13160 bytes:native PCM-free VP9 full playback/navigation read71141 actual bytes
+logical 2147484381 bytes:index and3 exact packets read13152 actual bytes in10 calls
+test ordinary_negative_and_adjacent_boundary_controls_keep_exact_packets ... ok
+logical 2147484381 bytes:native PCM-free VP9 full playback/navigation read71149 actual bytes
+test playback::ordinary_and_adjacent_offsets_keep_analytic_playback_and_public_navigation ... ok
+
+test result: ok. 3 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

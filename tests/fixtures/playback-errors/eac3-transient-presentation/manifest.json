@@ -48,7 +48,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-48000-unity-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-48000-unity-stream1.ec3",
@@ -70,7 +71,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-48000-unity-stream1-control-six.mkv"
         }
       ],
       "gains": [
@@ -79,7 +81,8 @@
         1
       ],
       "scale": 1,
-      "mode": "unity"
+      "mode": "unity",
+      "mp4": "7.1-48000-unity.mp4"
     },
     {
       "name": "7.1-48000-vary",
@@ -129,7 +132,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-48000-vary-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-48000-vary-stream1.ec3",
@@ -151,7 +155,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-48000-vary-stream1-control-six.mkv"
         }
       ],
       "gains": [
@@ -160,7 +165,8 @@
         0.5
       ],
       "scale": 1,
-      "mode": "vary"
+      "mode": "vary",
+      "mp4": "7.1-48000-vary.mp4"
     },
     {
       "name": "7.1-48000-clip",
@@ -210,7 +216,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-48000-clip-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-48000-clip-stream1.ec3",
@@ -232,7 +239,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-48000-clip-stream1-control-six.mkv"
         }
       ],
       "gains": [
@@ -241,7 +249,8 @@
         8
       ],
       "scale": 1024,
-      "mode": "clip"
+      "mode": "clip",
+      "mp4": "7.1-48000-clip.mp4"
     },
     {
       "name": "7.1-44100-unity",
@@ -291,7 +300,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-44100-unity-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-44100-unity-stream1.ec3",
@@ -313,7 +323,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-44100-unity-stream1-control-six.mkv"
         }
       ],
       "gains": [
@@ -322,7 +333,8 @@
         1
       ],
       "scale": 1,
-      "mode": "unity"
+      "mode": "unity",
+      "mp4": "7.1-44100-unity.mp4"
     },
     {
       "name": "7.1-44100-vary",
@@ -372,7 +384,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-44100-vary-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-44100-vary-stream1.ec3",
@@ -394,7 +407,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-44100-vary-stream1-control-six.mkv"
         }
       ],
       "gains": [
@@ -403,7 +417,8 @@
         0.5
       ],
       "scale": 1,
-      "mode": "vary"
+      "mode": "vary",
+      "mp4": "7.1-44100-vary.mp4"
     },
     {
       "name": "7.1-44100-clip",
@@ -453,7 +468,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-44100-clip-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-44100-clip-stream1.ec3",
@@ -475,7 +491,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-44100-clip-stream1-control-six.mkv"
         }
       ],
       "gains": [
@@ -484,7 +501,8 @@
         8
       ],
       "scale": 1024,
-      "mode": "clip"
+      "mode": "clip",
+      "mp4": "7.1-44100-clip.mp4"
     },
     {
       "name": "7.1-replace-48000-unity",
@@ -534,7 +552,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-unity-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-replace-48000-unity-stream1.ec3",
@@ -559,7 +578,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-unity-stream1-control-six.mkv"
         },
         {
           "raw": "7.1-replace-48000-unity-stream2.ec3",
@@ -581,7 +601,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-unity-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -590,7 +611,8 @@
         1
       ],
       "scale": 1,
-      "mode": "unity"
+      "mode": "unity",
+      "mp4": "7.1-replace-48000-unity.mp4"
     },
     {
       "name": "7.1-replace-48000-vary",
@@ -640,7 +662,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-vary-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-replace-48000-vary-stream1.ec3",
@@ -665,7 +688,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-vary-stream1-control-six.mkv"
         },
         {
           "raw": "7.1-replace-48000-vary-stream2.ec3",
@@ -687,7 +711,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-vary-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -696,7 +721,8 @@
         0.5
       ],
       "scale": 1,
-      "mode": "vary"
+      "mode": "vary",
+      "mp4": "7.1-replace-48000-vary.mp4"
     },
     {
       "name": "7.1-replace-48000-clip",
@@ -746,7 +772,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-clip-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-replace-48000-clip-stream1.ec3",
@@ -771,7 +798,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-clip-stream1-control-six.mkv"
         },
         {
           "raw": "7.1-replace-48000-clip-stream2.ec3",
@@ -793,7 +821,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-48000-clip-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -802,7 +831,8 @@
         8
       ],
       "scale": 1024,
-      "mode": "clip"
+      "mode": "clip",
+      "mp4": "7.1-replace-48000-clip.mp4"
     },
     {
       "name": "7.1-replace-44100-unity",
@@ -852,7 +882,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-unity-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-replace-44100-unity-stream1.ec3",
@@ -877,7 +908,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-unity-stream1-control-six.mkv"
         },
         {
           "raw": "7.1-replace-44100-unity-stream2.ec3",
@@ -899,7 +931,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-unity-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -908,7 +941,8 @@
         1
       ],
       "scale": 1,
-      "mode": "unity"
+      "mode": "unity",
+      "mp4": "7.1-replace-44100-unity.mp4"
     },
     {
       "name": "7.1-replace-44100-vary",
@@ -958,7 +992,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-vary-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-replace-44100-vary-stream1.ec3",
@@ -983,7 +1018,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-vary-stream1-control-six.mkv"
         },
         {
           "raw": "7.1-replace-44100-vary-stream2.ec3",
@@ -1005,7 +1041,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-vary-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1014,7 +1051,8 @@
         0.5
       ],
       "scale": 1,
-      "mode": "vary"
+      "mode": "vary",
+      "mp4": "7.1-replace-44100-vary.mp4"
     },
     {
       "name": "7.1-replace-44100-clip",
@@ -1064,7 +1102,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-clip-stream0-control-six.mkv"
         },
         {
           "raw": "7.1-replace-44100-clip-stream1.ec3",
@@ -1089,7 +1128,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-clip-stream1-control-six.mkv"
         },
         {
           "raw": "7.1-replace-44100-clip-stream2.ec3",
@@ -1111,7 +1151,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "7.1-replace-44100-clip-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1120,7 +1161,8 @@
         8
       ],
       "scale": 1024,
-      "mode": "clip"
+      "mode": "clip",
+      "mp4": "7.1-replace-44100-clip.mp4"
     },
     {
       "name": "10-48000-unity",
@@ -1172,7 +1214,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "10-48000-unity-stream0-control-six.mkv"
         },
         {
           "raw": "10-48000-unity-stream1.ec3",
@@ -1194,7 +1237,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-48000-unity-stream1-control-six.mkv"
         },
         {
           "raw": "10-48000-unity-stream2.ec3",
@@ -1216,7 +1260,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-48000-unity-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1225,7 +1270,8 @@
         1
       ],
       "scale": 1,
-      "mode": "unity"
+      "mode": "unity",
+      "mp4": "10-48000-unity.mp4"
     },
     {
       "name": "10-48000-vary",
@@ -1277,7 +1323,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "10-48000-vary-stream0-control-six.mkv"
         },
         {
           "raw": "10-48000-vary-stream1.ec3",
@@ -1299,7 +1346,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "10-48000-vary-stream1-control-six.mkv"
         },
         {
           "raw": "10-48000-vary-stream2.ec3",
@@ -1321,7 +1369,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "10-48000-vary-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1330,7 +1379,8 @@
         0.5
       ],
       "scale": 1,
-      "mode": "vary"
+      "mode": "vary",
+      "mp4": "10-48000-vary.mp4"
     },
     {
       "name": "10-48000-clip",
@@ -1382,7 +1432,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "10-48000-clip-stream0-control-six.mkv"
         },
         {
           "raw": "10-48000-clip-stream1.ec3",
@@ -1404,7 +1455,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-48000-clip-stream1-control-six.mkv"
         },
         {
           "raw": "10-48000-clip-stream2.ec3",
@@ -1426,7 +1478,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-48000-clip-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1435,7 +1488,8 @@
         8
       ],
       "scale": 1024,
-      "mode": "clip"
+      "mode": "clip",
+      "mp4": "10-48000-clip.mp4"
     },
     {
       "name": "10-44100-unity",
@@ -1487,7 +1541,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "10-44100-unity-stream0-control-six.mkv"
         },
         {
           "raw": "10-44100-unity-stream1.ec3",
@@ -1509,7 +1564,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-44100-unity-stream1-control-six.mkv"
         },
         {
           "raw": "10-44100-unity-stream2.ec3",
@@ -1531,7 +1587,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-44100-unity-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1540,7 +1597,8 @@
         1
       ],
       "scale": 1,
-      "mode": "unity"
+      "mode": "unity",
+      "mp4": "10-44100-unity.mp4"
     },
     {
       "name": "10-44100-vary",
@@ -1592,7 +1650,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "10-44100-vary-stream0-control-six.mkv"
         },
         {
           "raw": "10-44100-vary-stream1.ec3",
@@ -1614,7 +1673,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "10-44100-vary-stream1-control-six.mkv"
         },
         {
           "raw": "10-44100-vary-stream2.ec3",
@@ -1636,7 +1696,8 @@
               "location": 0,
               "length": 255
             }
-          ]
+          ],
+          "mp4_control_video": "10-44100-vary-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1645,7 +1706,8 @@
         0.5
       ],
       "scale": 1,
-      "mode": "vary"
+      "mode": "vary",
+      "mp4": "10-44100-vary.mp4"
     },
     {
       "name": "10-44100-clip",
@@ -1697,7 +1759,8 @@
             null,
             null,
             null
-          ]
+          ],
+          "mp4_control_video": "10-44100-clip-stream0-control-six.mkv"
         },
         {
           "raw": "10-44100-clip-stream1.ec3",
@@ -1719,7 +1782,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-44100-clip-stream1-control-six.mkv"
         },
         {
           "raw": "10-44100-clip-stream2.ec3",
@@ -1741,7 +1805,8 @@
               "location": 1600,
               "length": 31
             }
-          ]
+          ],
+          "mp4_control_video": "10-44100-clip-stream2-control-six.mkv"
         }
       ],
       "gains": [
@@ -1750,7 +1815,8 @@
         8
       ],
       "scale": 1024,
-      "mode": "clip"
+      "mode": "clip",
+      "mp4": "10-44100-clip.mp4"
     },
     {
       "name": "16-48000-unity",

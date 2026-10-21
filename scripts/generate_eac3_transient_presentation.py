@@ -74,6 +74,28 @@ def generate():
     files[name+'.mkv']=split_movie(parts,blocks,len(speakers),rate)
     cases.append(dict(name=name,file=name+'.ec3',video=name+'.mkv',rate=rate,blocks=blocks,channels=len(speakers),wave_mask=wave,speakers=speakers,components=components,gains=gains,scale=2**(10-exponent),mode=mode))
  add_replacement_gap(files,cases)
+ # EC-3 MP4 samples contain six blocks: pair two three-block programmes.
+ # Keep the changing-substream-count robustness case separate from this fixed
+ # dec3 configuration, and keep extended physical layouts explicitly unqualified.
+ from generate_eac3_mp4_presentation import rewrite
+ from generate_eac3_aht_lfe import audiovisual
+ from generate_eac3_playback import BitWriter
+ for c in cases:
+  if c['wave_mask'] is None or any('active_frames' in p for p in c['components']):continue
+  assert c['blocks']==3
+  bundle=b''.join(files[p['raw']]for p in c['components'])
+  bitrate=(len(bundle)*2*8*c['rate']+1535999)//1536000
+  w=BitWriter().put(bitrate,13).put(0,3).put({48000:0,44100:1}[c['rate']],2).put(16,5).zeros(5).put(7,3).put(1,1).zeros(3).put(len(c['components'])-1,4).put(2|(64 if c['channels']==10 else 0),9)
+  assert len(w.bits)==48
+  config=bytes(sum(w.bits[i+j]<<(7-j)for j in range(8))for i in range(0,48,8))
+  c['mp4']=c['name']+'.mp4'
+  files[c['mp4']]=rewrite(audiovisual([bundle*2]*3),config,c['rate'])
+  for p in c['components']:
+   name=p['raw'][:-4]+'-control-six.mkv'
+   control=files[p['raw'][:-4]+'-control.ec3'][:4096]
+   assert len(control)==4096
+   files[name]=movie([control]*6,blocks=3,channels=len(p['roles']),rate=c['rate'])
+   p['mp4_control_video']=name
  files['manifest.json']=(json.dumps(dict(cases=cases,expanded_transient_accepted=True),indent=2)+'\n').encode()
  return files
 if __name__=='__main__':

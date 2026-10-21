@@ -1715,7 +1715,7 @@ fn index_fragments(
                         let shift = u32be(bytes, at)? as i32;
                         at += 4;
                         if shift < 0 {
-                            base.checked_sub(u64::try_from(-shift).unwrap_or(u64::MAX))
+                            base.checked_sub(u64::from(shift.unsigned_abs()))
                                 .ok_or_else(|| {
                                     invalid("MP4 fragment data offset before its base")
                                 })?

@@ -54,12 +54,20 @@ fn packets(s: &mut dyn AudioStream) -> Vec<(Duration, Vec<u8>)> {
     out
 }
 fn expected(c: &serde_json::Value, correct: bool) -> Vec<u8> {
+    expected_cycles(c, correct, 1)
+}
+fn expected_cycles(c: &serde_json::Value, correct: bool, cycles: usize) -> Vec<u8> {
     let width = c["channels"].as_u64().unwrap() as usize;
     let frame_samples = c["blocks"].as_u64().unwrap() as usize * 256;
-    let count = frame_samples * 3;
+    let count = frame_samples * 3 * cycles;
     let mut mixed = vec![0.0f32; count * width];
     for part in c["components"].as_array().unwrap() {
-        let control = packets(&mut *open(part["control_video"].as_str().unwrap()));
+        let key = if cycles == 1 {
+            "control_video"
+        } else {
+            "mp4_control_video"
+        };
+        let control = packets(&mut *open(part[key].as_str().unwrap()));
         let control: Vec<f32> = control
             .into_iter()
             .flat_map(|(_, b)| {
@@ -69,10 +77,13 @@ fn expected(c: &serde_json::Value, correct: bool) -> Vec<u8> {
             })
             .collect();
         let roles = part["roles"].as_array().unwrap();
-        let active: Vec<usize> = part["active_frames"]
+        let base_active: Vec<usize> = part["active_frames"]
             .as_array()
             .map(|v| v.iter().map(|n| n.as_u64().unwrap() as usize).collect())
             .unwrap_or_else(|| vec![0, 1, 2]);
+        let active: Vec<usize> = (0..cycles)
+            .flat_map(|cycle| base_active.iter().map(move |f| cycle * 3 + f))
+            .collect();
         assert_eq!(control.len(), frame_samples * active.len() * roles.len());
         assert!(
             control.iter().all(|v| v.abs() < 0.9),
@@ -91,7 +102,10 @@ fn expected(c: &serde_json::Value, correct: bool) -> Vec<u8> {
             if correct && !part["windows"][coded].is_null() {
                 let loc = part["windows"][coded]["location"].as_i64().unwrap();
                 let len = part["windows"][coded]["length"].as_u64().unwrap() as u8;
-                pcm.resize(1536 + count.max(frame_samples * 2 + loc as usize), 0.0);
+                pcm.resize(
+                    1536 + count.max(frame_samples * (3 * cycles - 1) + loc as usize),
+                    0.0,
+                );
                 for &f in &active {
                     apply_window(&mut pcm, -1536, f as i64 * frame_samples as i64 + loc, len)
                         .unwrap();
@@ -275,4 +289,67 @@ fn expanded_transient_packet_groups_are_atomic_and_reset_discards_pending_work()
         "reset must discard captured PCM and identities"
     );
     assert!(d.finish_packet().unwrap().is_none());
+}
+
+#[test]
+fn active_transient_mp4_samples_preserve_both_programmes_eof_and_worker_seek() {
+    let m: serde_json::Value = serde_json::from_slice(&read("manifest.json")).unwrap();
+    let cases: Vec<_> = m["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["mp4"].is_string())
+        .collect();
+    assert_eq!(cases.len(), 18);
+    for c in cases {
+        let rate = c["rate"].as_u64().unwrap();
+        let width = c["channels"].as_u64().unwrap() as usize;
+        let stride = width * 4;
+        let bytes = expected_cycles(c, true, 2);
+        assert_eq!(bytes.len(), 4608 * stride);
+        let wanted: Vec<_> = (0..3)
+            .map(|i| {
+                (
+                    Duration::from_nanos(i as u64 * 1536 * 1_000_000_000 / rate),
+                    bytes[i * 1536 * stride..(i + 1) * 1536 * stride].to_vec(),
+                )
+            })
+            .collect();
+        let open_mp4 = || -> Box<dyn AudioStream> {
+            Box::new(
+                fvid::playback_mp4_audio::Mp4AudioReader::open(
+                    Cursor::new(read(c["mp4"].as_str().unwrap())),
+                    Default::default(),
+                )
+                .unwrap(),
+            )
+        };
+        let mut stream = open_mp4();
+        assert_eq!(
+            stream.channels() as usize,
+            width,
+            "placeholder channelcount must not truncate the mix"
+        );
+        assert_eq!(
+            stream.speaker_mask().unwrap(),
+            c["wave_mask"].as_u64().map(|v| v as u32)
+        );
+        let got = packets(&mut *stream);
+        assert!(got == wanted, "{} MP4 PCM/source windows", c["name"]);
+        stream.rewind();
+        assert!(packets(&mut *stream) == wanted, "{} MP4 rewind", c["name"]);
+        let seek = Duration::from_millis(40);
+        let first = (rate / 25) as usize;
+        let after = vec![
+            (seek, bytes[first * stride..3072 * stride].to_vec()),
+            (wanted[2].0, bytes[3072 * stride..].to_vec()),
+        ];
+        capture::worker_check_with_layout_and_seek_expected(
+            open_mp4(),
+            &wanted,
+            seek,
+            &after,
+            c["wave_mask"].as_u64().unwrap() as u32,
+        );
+    }
 }

@@ -16920,13 +16920,36 @@ The whole-buffer correction oracle reuses separately scalar-qualified
 `apply_window`; these tests do not claim an independent normative full decoder.
 Sixteen-role cases qualify PCM, not an extended physical output device.
 
-Broader regression commands are preserved in live sessions 52301/12653. Both
-were externally suspended by the user-authorized common benchmark window:
-SIGSTOP on cargo PIDs 55135/55518, recorded in Voxy's
-`docs/architecture-performance/2026-10-22-full-frame-shared-generation/paused-common-builds.json`.
-No stop/resume signal was sent by this task. Their elapsed time includes that
-suspension and is not performance evidence. Until those exact processes resume
-and finish, the expanded AHT/coupling/SPX/container matrices and full library
-requalification remain pending. Existing dual-programme expanded DRC, changing
-speaker assignments, extended hardware mappings and other codec/profile gaps
-are not declared complete by this implementation.
+Broader qualification completed successfully in the original sessions
+52301/12653. They were temporarily suspended by the user-authorized common
+benchmark window (SIGSTOP on cargo PIDs 55135/55518, recorded in Voxy's
+`docs/architecture-performance/2026-10-22-full-frame-shared-generation/paused-common-builds.json`)
+and subsequently resumed by that coordinator's identity-checked SIGCONT
+(`resumed-common-builds.json`). Both original sessions exited zero; no restart or
+stop/resume signal was sent by this task. Elapsed time includes suspension and
+is not performance evidence.
+
+Final scoped gates:
+
+- **21 integration tests across six targets, zero failed/ignored**:
+  `/tmp/fvid-expanded-transient-matrix.log`. Targets are
+  `eac3_transient_presentation`, `eac3_presentation`, `eac3_expanded_aht`,
+  `eac3_mp4_aht`, `eac3_raw_presentation`, and `eac3_transient_playback`.
+  This includes the existing expanded AHT/coupling/enhanced-coupling/SPX,
+  role replacement/common DRC, raw/MP4/split-Matroska, rewind/seek matrices,
+  plus the new active transient cases. Old split-input and truncated-source
+  helpers now drain delayed output while retaining their original PCM, timing
+  and refusal assertions.
+- **Full player-feature library: 1026 passed, zero failed, 26 ignored**:
+  `/tmp/fvid-expanded-transient-library.log`.
+- Fixture generation stays separate from tests. Both generators regenerated
+  byte-identical outputs with process/socket creation denied; no FFmpeg, network,
+  private media or copied private codec parameters were used.
+
+These finite gates do not prove complete codec/profile coverage. Existing
+unequal dual-programme expanded DRC, changing speaker assignments, extended
+hardware mappings and other codec/profile gaps are not declared complete by this
+implementation. Active transient playback is directly qualified in raw decoder
+and split Matroska routes; MP4 regression matrices in this gate exercise the
+existing expanded tools/DRC without transient windows, so active MP4 transient
+transport still merits its own acceptance witness.
