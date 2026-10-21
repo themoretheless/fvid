@@ -1,7 +1,7 @@
 {
   "source_hashes": {
     "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "27543a3d0f6be31a77657db04a7cb1852107e0fd845f0f2f86f21aa889f01fc4",
-    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_signed_offset.rs": "c0474215213174d2c452d338affda812b1457749d687c44ecae77eec294cd7b1",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_signed_offset.rs": "3ad36ec2840504c31bd39de23b966d44d817251518302d2c70e1a8e003143e40",
     "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_signed_offset_regressions.py": "7d928d13d264b6be7e7398967d757d72492ac81eb37c853744a85e25815d9962",
     "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-signed-offset/manifest.json": "9e59d16144cef6c23a1eaf62df819b6bd5b232b4d710a19f3adb2aba491079ab"
   },
@@ -86,6 +86,34 @@
       ],
       "exit_code": 0,
       "log": "docs/improvements/evidence/batch-172-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-172-player-build.log"
+    },
+    {
+      "name": "fixtures-after",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts",
+        "-p",
+        "test_mp4_signed_offset_regressions.py"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-172-fixtures-after.log"
     }
   ]
 }

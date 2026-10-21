@@ -1,84 +1,24 @@
-   Compiling fvid-cpu v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-cpu)
-warning: associated function `new` is never used
-  --> crates/fvid-cuda/src/nvenc_session.rs:63:19
-   |
-62 | impl FunctionTable {
-   | ------------------ associated function in this implementation
-63 |     pub(crate) fn new() -> Self {
-   |                   ^^^
-   |
-   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
-
-warning: function `validate_surface` is never used
-   --> crates/fvid-cuda/src/nvenc_session.rs:950:4
-    |
-950 | fn validate_surface(
-    |    ^^^^^^^^^^^^^^^^
-
-warning: associated function `unpack` is never used
- --> crates/fvid-cuda/src/nvenc.rs:9:8
-  |
-8 | impl NvencVersion {
-  | ----------------- associated function in this implementation
-9 |     fn unpack(value: u32) -> Result<Self, String> {
-  |        ^^^^^^
-
-warning: function `query_result` is never used
-   --> crates/fvid-cuda/src/nvenc.rs:116:4
-    |
-116 | fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
-    |    ^^^^^^^^^^^^
-
-warning: field `sample_bytes` is never read
-  --> crates/fvid-cuda/src/nv12_buffer.rs:36:5
-   |
-31 | pub struct Nv12Buffer {
-   |            ---------- field in this struct
-...
-36 |     sample_bytes: u32,
-   |     ^^^^^^^^^^^^
-
-warning: function `layout` is never used
-   --> crates/fvid-cuda/src/nv12_buffer.rs:299:4
-    |
-299 | fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
-    |    ^^^^^^
-
-warning: function `make_view` is never used
-   --> crates/fvid-cuda/src/nv12_buffer.rs:323:4
-    |
-323 | fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
-    |    ^^^^^^^^^
-
-warning: function `make_view_format` is never used
-   --> crates/fvid-cuda/src/nv12_buffer.rs:326:4
-    |
-326 | fn make_view_format(
-    |    ^^^^^^^^^^^^^^^^
-
-warning: `fvid-cuda` (lib) generated 8 warnings
-   Compiling fvid-codecs v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-codecs)
 warning: unreachable pattern
    --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
     |
-492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
-    |       ^ no value can reach this
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
     |
 note: multiple earlier patterns match some of the same values
    --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
     |
-482 | ...             merge_order::Selection::Initial(i)=>{
-    |                 ---------------------------------- matches some of the same values
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
 ...
-486 | ...             merge_order::Selection::ViewSynthesis=>return Ok(Resolv...
-    |                 ------------------------------------- matches some of the same values
-487 | ...             merge_order::Selection::Texture=>return Ok(Resolved::Te...
-    |                 ------------------------------- matches some of the same values
-488 | ...             merge_order::Selection::InterView=>{selected_iv=1;(spec...
-    |                 --------------------------------- matches some of the same values
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
 ...
-492 | ...             _=>return Err(invalid("unexpected HEVC depth IV merge s...
-    |                 ^ ...and 3 other patterns collectively make this unreachable
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
     = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
 
 warning: function `intra_plane` is never used
@@ -92,7 +32,7 @@ warning: function `intra_plane` is never used
 warning: function `read_inter_coefficients_422` is never used
   --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
    |
-34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,patter...
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 warning: function `candidates` is never used
@@ -154,11 +94,68 @@ warning: struct `Run` is never constructed
 warning: function `expand_runs` is never used
    --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
     |
-431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run])...
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
     |               ^^^^^^^^^^^
 
-   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
+warning: associated function `new` is never used
+  --> crates/fvid-cuda/src/nvenc_session.rs:63:19
+   |
+62 | impl FunctionTable {
+   | ------------------ associated function in this implementation
+63 |     pub(crate) fn new() -> Self {
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `validate_surface` is never used
+   --> crates/fvid-cuda/src/nvenc_session.rs:950:4
+    |
+950 | fn validate_surface(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: associated function `unpack` is never used
+ --> crates/fvid-cuda/src/nvenc.rs:9:8
+  |
+8 | impl NvencVersion {
+  | ----------------- associated function in this implementation
+9 |     fn unpack(value: u32) -> Result<Self, String> {
+  |        ^^^^^^
+
+warning: function `query_result` is never used
+   --> crates/fvid-cuda/src/nvenc.rs:116:4
+    |
+116 | fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
+    |    ^^^^^^^^^^^^
+
+warning: field `sample_bytes` is never read
+  --> crates/fvid-cuda/src/nv12_buffer.rs:36:5
+   |
+31 | pub struct Nv12Buffer {
+   |            ---------- field in this struct
+...
+36 |     sample_bytes: u32,
+   |     ^^^^^^^^^^^^
+
+warning: function `layout` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:299:4
+    |
+299 | fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
+    |    ^^^^^^
+
+warning: function `make_view` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:323:4
+    |
+323 | fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
+    |    ^^^^^^^^^
+
+warning: function `make_view_format` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:326:4
+    |
+326 | fn make_view_format(
+    |    ^^^^^^^^^^^^^^^^
+
 warning: `fvid-codecs` (lib) generated 12 warnings
+warning: `fvid-cuda` (lib) generated 8 warnings
 warning: variable does not need to be mutable
    --> crates/fvid-media/src/owned_xfade.rs:325:5
     |
@@ -225,19 +222,19 @@ warning: associated function `identifiers` is never used
 warning: function `try_mp4_as` is never used
   --> crates/fvid-media/src/owned_probe.rs:61:15
    |
-61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Op...
+61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
    |               ^^^^^^^^^^
 
 warning: function `try_webm_as` is never used
   --> crates/fvid-media/src/owned_probe.rs:82:15
    |
-82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<O...
+82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
    |               ^^^^^^^^^^^
 
 warning: function `try_adts_as` is never used
    --> crates/fvid-media/src/owned_probe.rs:102:15
     |
-102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<...
+102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
     |               ^^^^^^^^^^^
 
 warning: function `supports` is never used
@@ -261,7 +258,7 @@ warning: function `supports` is never used
 warning: function `supports` is never used
   --> crates/fvid-media/src/owned_wave_remux.rs:22:15
    |
-22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &Copy...
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
    |               ^^^^^^^^
 
 warning: function `supports_concat` is never used
@@ -294,7 +291,7 @@ warning: method `nul_name` is never used
  6 |           impl PixelFormat {
    |           ---------------- method in this implementation
 ...
- 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
    |                             ^^^^^^^^
 ...
 16 | / formats! {
@@ -335,7 +332,7 @@ warning: function `inspect` is never used
 warning: function `geometry` is never used
   --> crates/fvid-media/src/owned_raw_flac.rs:75:15
    |
-75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(...
+75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
    |               ^^^^^^^^
 
 warning: function `supports` is never used
@@ -359,7 +356,7 @@ warning: function `supports` is never used
 warning: function `geometry` is never used
   --> crates/fvid-media/src/owned_matroska_alac_export.rs:95:15
    |
-95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u...
+95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,options...
    |               ^^^^^^^^
 
 warning: function `supports` is never used
@@ -432,19 +429,18 @@ warning: function `supports` is never used
    |               ^^^^^^^^
 
 warning: `fvid-media` (lib) generated 40 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
-   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
 warning: unused import: `FRAME_LENGTH`
   --> src/codec/alac_decoder.rs:69:60
    |
-69 | ...   AlacDecoder, Bits, COOKIE_CHANNELS, COOKIE_FIELDS, FRAME_LENGTH, F...
-   |                                                          ^^^^^^^^^^^^
+69 |         AlacDecoder, Bits, COOKIE_CHANNELS, COOKIE_FIELDS, FRAME_LENGTH, FULL_SCALE, Params,
+   |                                                            ^^^^^^^^^^^^
    |
    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
 
 warning: value assigned to `core` is never read
-    --> src/codec/ac3_decoder.rs:2844:9
+    --> src/codec/ac3_decoder.rs:2881:9
      |
-2844 |         core.strategy.gain=[0.25,0.125];
+2881 |         core.strategy.gain=[0.25,0.125];
      |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      |
      = help: maybe it is overwritten before being read?
@@ -461,16 +457,16 @@ warning: method `iter` is never used
    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
 warning: `fvid` (lib test) generated 3 warnings (run `cargo fix --lib -p fvid --tests` to apply 1 suggestion)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 4m 32s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.81s
      Running unittests src/lib.rs (target/debug/deps/fvid-7dbacfbd28f9219f)
 
 running 17 tests
 test container::mp4::tests::the_coding_s_block_is_two_or_one_bytes_a_channel_and_six_samples_whichever_it_is ... ok
 test container::mp4::tests::tags_this_reader_cannot_read_leave_the_file_unstated ... ok
 test container::mp4::tests::the_rights_and_the_note_read_from_their_atoms_both_ways ... ok
+test container::mp4::tests::the_movie_tags_name_it_in_either_writers_spelling ... ok
 test container::mp4::tests::a_disc_and_the_albums_own_artist_read_from_their_boxes ... ok
 test container::mp4::tests::colr_reads_both_writers_spellings_of_the_cicp_triple ... ok
-test container::mp4::tests::the_movie_tags_name_it_in_either_writers_spelling ... ok
 test container::mp4::tests::a_track_number_reads_from_its_binary_box_both_writers_spell_it ... ok
 test container::mp4::tests::the_wave_record_sits_where_the_entry_version_puts_the_children ... ok
 test container::mp4::tests::a_fragment_that_leaves_out_its_decode_time_continues_the_track ... ok
@@ -481,8 +477,7 @@ test container::mp4::tests::every_fragmented_sample_reads_the_bytes_its_index_po
 test container::mp4::tests::a_mace_table_that_does_not_divide_into_blocks_is_refused ... ok
 test container::mp4::tests::a_mace_track_is_indexed_in_blocks_though_its_table_counts_samples ... ok
 test container::mp4::tests::the_sound_a_fragment_indexes_is_the_sound_the_player_hears ... ok
-test container::mp4::tests::the_picture_a_fragment_indexes_reaches_the_picture_route has been running for over 60 seconds
 test container::mp4::tests::the_picture_a_fragment_indexes_reaches_the_picture_route ... ok
 
-test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 1036 filtered out; finished in 67.33s
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 1037 filtered out; finished in 53.56s
 

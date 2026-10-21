@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 178,
-  "next_id": "FVID-0179",
+  "accepted_count": 179,
+  "next_id": "FVID-0180",
   "entries": [
     {
       "id": "FVID-0001",
@@ -470,7 +470,7 @@
       "source": "src/codec/avc_mbaff_picture.rs",
       "regression": "tests/avc_mbaff_pcm_memory.rs",
       "before": "Actual decoder allocation probe for128-square PCM frame reports274 allocations and3_320_590 requested bytes; the same packet needs no neighbor prediction.",
-      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274\u219218 allocations and3_320_590\u2192109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
+      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274→18 allocations and3_320_590→109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
       "status": "accepted",
       "validation": "batch-019-validation.json"
     },
@@ -554,11 +554,11 @@
     {
       "id": "FVID-0049",
       "batch": 27,
-      "title": "Preserve effective disabled-track usability through MP4\u2192Matroska copy and filtered video export",
+      "title": "Preserve effective disabled-track usability through MP4→Matroska copy and filtered video export",
       "source": "crates/fvid-media/src/owned_mp4_matroska_impl.rs",
       "regression": "tests/mp4_matroska_usability.rs",
       "before": "Equal-priority/legacy controls match; copying disabled-first dual AVC drops its usability flag and selects a different video, changing decoded pixels.",
-      "result": "MP4\u2192Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
+      "result": "MP4→Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
       "status": "accepted",
       "validation": "batch-027-validation.json"
     },
@@ -590,7 +590,7 @@
       "title": "Preserve MP4 non-AAC media clocks independently of codec sample rate",
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_audio_clocks.rs",
-      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms\u21921.25ms.",
+      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms→1.25ms.",
       "result": "MP4 non-AAC decoded audio now retains source media units independently of codec sample rate and clips negative composition preroll exactly. Twelve authored PCM/ALAC clips pass samples, clocks, seek/replay/EOF through actual worker;40 Rust and1 Python test plus player binary build pass.",
       "status": "accepted",
       "validation": "batch-029-validation.json"
@@ -1881,7 +1881,7 @@
       "title": "Convert whole XM tick spans before microsecond rounding",
       "source": "src/container/xm.rs",
       "regression": "tests/xm_tick_span.rs",
-      "before": "Eight authored equal-tempo scores lose10\u201372us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
+      "before": "Eight authored equal-tempo scores lose10–72us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
       "result": "Row duration and delayed deadlines share a whole-span conversion.40 full PCM pairs,16 fixed-window pairs,20 worker targets,20 integrations,35 player units,18 core units,2 core regressions,fixture checks and player build pass. Public one-tick behavior and packet units remain unchanged.",
       "status": "accepted",
       "validation": "batch-158-validation.json"
@@ -2017,6 +2017,17 @@
       "result": "Resolve tfhd over trex and refuse unsupported effective0 only for populated runs;unused overridden defaults and empty runs remain valid.4 focused/54 related integrations,17 units,25 core checks,40 native seek targets,fixture reproduction and player build pass.",
       "status": "accepted",
       "validation": "batch-171-validation.json"
+    },
+    {
+      "id": "FVID-0179",
+      "batch": 172,
+      "title": "Resolve i32::MIN fragmented MP4 trun data offsets without negation overflow",
+      "source": "src/container/mp4.rs",
+      "regression": "tests/mp4_signed_offset.rs",
+      "before": "Signed trun.data_offset = i32::MIN (-2147483648) panics with 'attempt to negate with overflow' at -shift on both corrupt short min-underflow.mp4 and legal virtual 2 GiB valid-min inputs. Both forced acceptance gates fail at that panic.",
+      "result": "u64::from(shift.unsigned_abs()) resolves the full signed 32-bit range before checked_sub: short underflow refuses as Invalid without unwind, and legal -2 GiB virtual fMP4 indexes and plays exact VP9 frames/clocks/seeks in 13,152 index read bytes / 75,630 buffered native read bytes. 4 focused/58 related integrations, 17 units, 27 core checks, fixture unittest and player build pass. Delivery follow-up uses a real 1 KiB BufReader with unchanged read caps; see git-integration/validation-status.json.",
+      "status": "accepted",
+      "validation": "batch-172-validation.json"
     }
   ]
 }
