@@ -460,3 +460,4 @@ warning: function `covered_span` is never used
      |    ^^^^^^^^^^^^
 
 warning: `fvid` (lib) generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8m 14s

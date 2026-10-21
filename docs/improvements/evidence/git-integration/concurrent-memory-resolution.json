@@ -4,5 +4,7 @@
   "parent": "449630ac666798aa7753092f68b148ac5343480a",
   "working_module": "src/memory.rs",
   "resolution": "Use explicit #[path = \"memory.rs\"], restore crate::buffer export. Keep unfinished allocator API detached; preserve its originals in the WIP branch and keep live untracked source files.",
-  "accepted_improvements_added": 0
+  "accepted_improvements_added": 0,
+  "merge_commit": "958c150e85fc0b303d0d1feb95f39d820dd0595b",
+  "merge_tree_preserves_checked_main": true
 }
