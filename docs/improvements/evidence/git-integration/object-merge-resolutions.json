@@ -212484,5 +212484,32 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-dependent-sbr-draft-20261009",
+    "incoming": "7fa7ec731bdc82156a09d63bc6da2cb9593415bb",
+    "conflicts": {
+      "scripts/generate_he_aac_dependent_coupling_fixtures.py": {
+        "2": [
+          "100644",
+          "864908753d3a8672eaa8466dea2e570793c157f9"
+        ],
+        "3": [
+          "100644",
+          "5de00805165322a3dd75679c31b14d6da7ac4136"
+        ]
+      },
+      "tests/he_aac_dependent_coupling.rs": {
+        "2": [
+          "100644",
+          "90ef75bd26a3a7aaaacfca1447f132fd7580cbdc"
+        ],
+        "3": [
+          "100644",
+          "04b83a30f4d44b7f180968ca7eca90dc1c06b4c4"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
