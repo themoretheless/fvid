@@ -1,0 +1,96 @@
+{
+  "provenance": "Pure Python authored16x16 neutral VP9 fMP4,3 independent20ms frames. Effective trex/tfhd description-zero probes versus explicit/inherited1,overridden unused0 default,and empty unused0 tfhd. iso5 brand,whole moof/traf/trun/mdat geometry,known all128 planes and independently authored regular MP4 control. No private codec parameters,encoder,FFmpeg or network. Only supported direct stsd indexing is qualified;future stsd sample-group mappings are not implemented.",
+  "cases": [
+    {
+      "file": "inherited-zero.mp4",
+      "default": 0,
+      "descriptions": [
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "file": "explicit-zero.mp4",
+      "default": 1,
+      "descriptions": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "file": "middle-zero.mp4",
+      "default": 1,
+      "descriptions": [
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "file": "late-zero.mp4",
+      "default": 1,
+      "descriptions": [
+        1,
+        1,
+        0
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "file": "inherited-one.mp4",
+      "default": 1,
+      "descriptions": [
+        null,
+        null,
+        null
+      ],
+      "empty_zero": false
+    },
+    {
+      "file": "explicit-one.mp4",
+      "default": 1,
+      "descriptions": [
+        1,
+        1,
+        1
+      ],
+      "empty_zero": false
+    },
+    {
+      "file": "overridden-zero-default.mp4",
+      "default": 0,
+      "descriptions": [
+        1,
+        1,
+        1
+      ],
+      "empty_zero": false
+    },
+    {
+      "file": "empty-zero-description.mp4",
+      "default": 1,
+      "descriptions": [
+        null,
+        null,
+        null
+      ],
+      "empty_zero": true
+    }
+  ],
+  "sha256": {
+    "regular.mp4": "e98393bb08dedd0b6f34eb73546111d11686b6f2daffa7cb83828e9d62ff27cb",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "inherited-one.mp4": "abd9464dee64c69b9786c3caebbb448d4409d7c2d5c8cfe421a2d4966d7f3e89",
+    "explicit-one.mp4": "bfed1b7fbf8e16191ef7410028edf2341570687e5979902cd89942238e885083",
+    "overridden-zero-default.mp4": "579d14b0e362ecca0c5afc4b80176df59c6c757585ceb1f40108c26d04d2fc87",
+    "empty-zero-description.mp4": "087a7bec5788c36d023ef931d4b1973ec57aed768e479a624b98d6a810f8cfba",
+    "inherited-zero.mp4": "86a8c9edafa64fefe29301acdb8a57102d32b76e2ac55b64a8af5010b1d6c151",
+    "explicit-zero.mp4": "9baf795ec95c580217cf30d015b4d165debbd65ab4718880c4c99901509e2513",
+    "middle-zero.mp4": "e347102fc5152711c97c0c5a989fd2b4ca6397c55a1f2693b903904c4c4a7aed",
+    "late-zero.mp4": "bca5ff8f5a82002c0ba7508e173f63197fe669eddd578e621da278fedd87c853",
+    "explicit-two.mp4": "7ae5b9759783c54ac488d1e77f7f00006645c1305c03027fecbb1d1da33102bc"
+  }
+}

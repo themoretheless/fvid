@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0166"
+  ],
+  "checked_at": "2026-10-21T02:23:31.831987+00:00",
+  "sources": [
+    "src/container/xm.rs",
+    "src/codec/xm_decoder.rs"
+  ],
+  "before": [
+    "evidence/batch-158-before.log",
+    "evidence/batch-158-acceptance-before.log",
+    "evidence/batch-158-container-before.rs",
+    "evidence/batch-158-decoder-before.rs"
+  ],
+  "primary_reference": "batch-158-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-158-after.log",
+      "passed": 20,
+      "new_full_pcm_combinations": 40,
+      "new_fixed_window_deadline_combinations": 16,
+      "new_worker_target_variants": 20
+    },
+    {
+      "log": "evidence/batch-158-units-after.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-158-core-after.log",
+      "passed": 18,
+      "scope": "Core parser units. The module-name filter selected0 integration tests;this is not core media acceptance."
+    },
+    {
+      "log": "evidence/batch-158-core-media-after.log",
+      "passed": 2,
+      "scope": "Correct unfiltered core timeline/seek regression invocation."
+    },
+    {
+      "log": "evidence/batch-158-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-158-player-build.log",
+      "exit": 0
+    }
+  ],
+  "qualification": [
+    "Eight authored timing failures and two healthy controls use equivalent tempo/speed ratios. Controls at BPM100/125 have exact integer-microsecond ticks and literal expected score/end durations. Tempo/speed changes and K03/EC3 versus K02/EC2 are included.",
+    "The native baseline loses10\u201372us per score,publishes PCM1ms short,and chooses the next row at99999us where the control is still in row0. Actual-worker generation0 packet0 differs in length34920 versus35280 bytes. All inputs decode with zero ignored features.",
+    "A separate fixed100ms presentation-window test isolates deadline placement from source row length. At44100Hz the old multi-tick deadline cuts at sample2204 instead of2205. Its explicit window is supplementary to full-source PCM/duration and actual-worker regressions.",
+    "One private span conversion multiplies before integer division and is shared by row durations and delayed deadlines. Public one-tick helper behavior,packet clock units and API types remain unchanged.",
+    "All7 new player regressions,40 full-source PCM pairs,16 direct deadline pairs,20 worker targets,20 integrations,35 player units,18 core units,2 core regressions,fixture reproduction and player build pass.",
+    "This fixes premature per-tick rounding within the existing microsecond-clock profile. Legacy-hardware or fully sample-exact FT2 timing,arbitrary sub-microsecond precision,performance and physical audio listening are not claimed."
+  ],
+  "counting": "One whole-tick-span conversion defect. Row durations,delayed Kxx/ECx sites,ten scores,configurations and test variants add zero extra IDs."
+}

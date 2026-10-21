@@ -1,0 +1,23 @@
+{
+  "status": "visually-verified",
+  "checked_at": "2026-10-21T00:29:18.765701+00:00",
+  "source": "src/player.rs",
+  "source_sha256": "9eb1063f09e68b83dd032e632f8d259d6ddd8fa14b57b1581a7d101e1b94b5f9",
+  "binary_sha256": "097357a92326934161533f6299ce20e68299dca69e96e080360671a806357195",
+  "before": "evidence/batch-151-ui-proof.json",
+  "after": {
+    "paused_frame": "00:00:01.500 encoded in authored VP9 picture; visible controls; two separately centered lines Первая α / строка, white glyphs with black outline, entirely above panel backing.",
+    "playing_frame": "00:00:02.233 encoded in advancing authored picture after Space; controls hidden; same two centered lines with visible black outline, lower requested bottom placement.",
+    "cua_calls": [
+      "captionVerification160Temp.getAXStateAndScreenshot()",
+      "captionVerification160Temp.pressKey(space);getAXStateAndScreenshot()"
+    ],
+    "input": "Owned subtitle-painting/video.webm and two-lines.srt copied byte-for-byte to /private/tmp/fvid-caption-ui-160-temp/video.webm and video.srt.",
+    "eof": "Final authored encoded time00:00:10.16,progress at end,paused;no caption after9s clear."
+  },
+  "qualification": [
+    "Physical two-line windowed review and frame progression only; wide/narrow wrapping/color primitives are covered by automated tests. Fullscreen and arbitrarily tall captions are not claimed.",
+    "First launch used files under Documents and stayed waiting before obtaining source data until diagnostic cleanup. No success is claimed for that launch. An independent same-binary launch with authored inputs in /private/tmp opens immediately. The exact cause of Documents-path waiting is not proven and no security permission was changed."
+  ],
+  "cleanup": "Own diagnostic windows were closed with Escape. A subsequent AX read could reopen the original bundle;the re-opened process was also closed and its terminal state verified through ps. No process was killed and no user app was closed."
+}

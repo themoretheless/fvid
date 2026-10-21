@@ -1,0 +1,15 @@
+note-off-note-only: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+k00-note-only: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+note-off-volume-only: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+k00-volume-only: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+note-off-instrument-only: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+note-off-fine-volume: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+explicit-instrument-control: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+no-restore-control: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+explicit-volume-note-control: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+global-volume-control: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+k03-note-only: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+note-off-same-row-volume: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+k00-same-row-instrument: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+natural-end-control: baseline matches classification;four candidate PCM comparisons and four unchanged-control comparisons passed
+56 exact PCM combinations passed;56 reference PCM streams unchanged. Standalone adapter audit only;Cargo and actual worker gates remain required.

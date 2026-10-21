@@ -1,0 +1,20 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0177",
+  "source": "src/playback/audio/aiff.rs",
+  "source_sha256": "3ee5b6a6d590cdeeabe1260263e87557594f280acdd29387fc84f077b920fba4",
+  "before_snapshot": "evidence/batch-169-aiff-before.rs",
+  "problem": "Incomplete AIFC COMM compressionType18..21 bytes silently defaults to NONE big-endian PCM. Authored little-endian sowt bytes are reinterpreted with the wrong byte order instead of refusing the unknown coding.",
+  "reference": "https://dev.os9.ca/techpubs/mac/Sound/Sound-61.html",
+  "reference_provenance": "Apple Inside Macintosh:Sound,Common Chunk,mirrored original text. AIFC explicitly adds mandatory4byte compressionType to the18byte plain AIFF geometry;NONE explicitly identifies uncompressed data.",
+  "fixtures": "tests/fixtures/playback-errors/aifc-compression-type",
+  "scope": "16 incomplete type cases:integer16mono/stereo,24mono,32stereo \u00d7COMM18/19/20/21.16 healthy AIFF/AIFC NONE/sowt/minimal22-byte sowt controls. Manual literal intended PCM and independently computed wrong big-endian reinterpretation oracle.",
+  "requirements": [
+    "Confirm malformed programs open and reach wrong PCM EOF matching independent big-endian reinterpretation,while intended little-endian controls match gold.",
+    "Require complete4byte AIFC compressionType and exact Invalid header refusal before source/decoder admission. Preserve plain AIFF implied NONE and complete22-byte type compatibility;do not tighten compressionName or FVER policies.",
+    "Test healthy exact samples,PTS,duration,negative/interior/EOF/MAX seeks,real rewind,32 actual worker target variants and byte/channel budgets. Generation separate,offline,no private media."
+  ],
+  "implementation_plan": "Replace the AIFC length-dependent NONE fallback with a checked18..22 slice. No decoder arithmetic,packetization,public API or performance change.",
+  "counting": "One AIFC mandatory codec identification integrity fix. No IDs for COMM lengths,PCM widths/channels,oracles or controls.",
+  "validation": "batch-169-validation.json"
+}

@@ -31,26 +31,25 @@
 //! does not have yet is a missing feature and not a broken file, and the caller
 //! cannot tell them apart unless the decoder can:
 //!
-//! * a stream type other than independent - a dependent substream states nothing of
-//!   its own and leans on the independent frame before it, and a converted one
-//!   repeats AC-3's header, so both need a reader this one is not yet;
-//! * a second substream of the same presentation, which is the other half of a pair
-//!   the first point refuses;
-//! * `bsid` other than 16, which is Annex E's own mark: below it the frame is AC-3,
-//!   above it a revision not transcribed;
-//! * a frame of one, two or three blocks, which is the shape that carries AC-3's
-//!   conversion layer and with it the three-way block switching this decoder will
-//!   not have to solve while six-block frames are what exists;
-//! * the reduced rates `fscod` = 3 names, whose band edges and thresholds the AC-3
-//!   tables this core reuses are keyed to the three full rates;
-//! * `ahte`, the adaptive hybrid transform, whose coefficients are windowed and
-//!   quantized by rules of their own that reach into every block of the frame;
-//! * `blkswe`, which lets a block of the frame switch to AC-3's short transform;
-//! * `spxattene`, the spectral extension attenuation data, which is the flag that
-//!   high bands were reconstructed rather than coded.
+//! * reserved stream types are refused. Base-programme playback decodes native or
+//!   converted independent substream 0 and skips other programmes and dependent
+//!   streams, as Annex E.2.8 requires for output up to 5.1. Expanded output uses
+//!   owned presentation assembly and explicit speaker identities; programme
+//!   selection and some extended device maps remain unimplemented;
+//! * `bsid` outside 11 through 16: AC-3/reserved identifiers below that range
+//!   do not name this syntax; greater values require a later decoder revision;
+//! Adaptive hybrid transform planes use owned high-efficiency allocation,
+//! VQ/GAQ reconstruction and six-block inverse DCT before exponent scaling.
 //!
 //! The constants and field layouts are transcribed from the public ATSC A/52:2012
 //! text, Annex E, sections 2.2.1 to 2.3.2.
+
+#[path = "eac3_aht.rs"]
+pub(super) mod aht;
+#[path = "eac3_enhanced_coupling.rs"]
+mod enhanced_coupling;
+#[path = "eac3_presentation.rs"]
+pub mod presentation;
 
 use crate::audio::{AudioDecode, AudioPacket, AudioSpec, SampleFormat};
 use crate::codec::ac3_decoder::{
@@ -62,7 +61,8 @@ use crate::{Error, Result, invalid, unsupported};
 
 /// The 16-bit mark a syncframe opens with, shared with AC-3 by Table E1.1.
 const SYNCWORD: u32 = 0x0B77;
-/// The `bsid` that says the syntax is Annex E's rather than AC-3's, section 2.1.
+/// Latest supported Annex E version; 11..=16 share backward-compatible syntax.
+/// ETSI TS 102 366 E.1.3.1.6 requires version-16 decoders to accept 11..15.
 const EAC3_BSID: u32 = 16;
 /// Rates the 2-bit `fscod` names, Table E2.2.
 const SAMPLE_RATES: [u32; 3] = [48_000, 44_100, 32_000];
@@ -79,10 +79,25 @@ const BLOCKS: usize = 6;
 /// The most full-bandwidth channels an `acmod` names: 5.1 without its LFE.
 const CHANS: usize = 5;
 
-/// What a syncframe says about itself before any audio is read: its geometry from
-/// `syncinfo` and `bsi`, and the frame-level state `audfrm` writes ahead of blocks.
+#[path = "eac3_transient.rs"]
+pub mod transient;
+
+/// Per-full-bandwidth-channel E.1.3.2 transient pre-noise parameters.
+/// Locations are PCM samples relative to the frame and may name a later frame.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TransientWindow {
+    pub location: u16,
+    pub length: u8,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+/// Geometry and frame-level state read before the audio blocks.
 pub struct Frame {
+    /// Native independent (0), dependent (1), or AC-3-converted (2).
+    /// The primary `frame()` probe only returns independent programme 0.
+    pub stream_type: u8,
+    /// Per-plane adaptive hybrid transform use, after conditional flag parsing.
+    pub aht: [bool; PLANES],
     /// The rate the frame's audio plays back at, from `fscod`.
     pub sample_rate: u32,
     /// `fscod` itself. The rate in hertz is what a caller plays at; the band edges and
@@ -134,6 +149,12 @@ pub struct Frame {
     pub snr_offsets: Option<SnrOffsets>,
     /// What the frame tells its blocks they may state for themselves.
     pub blocks_state: BlocksState,
+    /// `spxattncod[ch]`: optional 5-bit spectral extension boundary attenuation code per
+    /// full-bandwidth channel when `spxattene` and `chinspxatten[ch]` are set.
+    pub spx_attenuation: [Option<u8>; CHANS],
+    /// Native and expanded decoding apply these per substream before gain,
+    /// channel replacement/folding and clipping, with bounded lookahead.
+    pub transient_windows: [Option<TransientWindow>; CHANS],
     /// `blkstrt[blk]`: the bit each block after the first begins at, in order, for a
     /// frame that states them. `None` when it does not, which is what an encoder
     /// writes when it is content for the blocks to divide what the header leaves.
@@ -398,6 +419,10 @@ pub struct SnrOffsets {
 /// The `audfrm` flags that say what each of the frame's blocks writes for itself.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct BlocksState {
+    /// `blkswe`: each block states per-channel `blksw[ch]` flags to switch to the
+    /// short 256-sample transform. Otherwise every block keeps the long 512-sample
+    /// transform (`blksw[ch] = 0`).
+    pub block_switching: bool,
     /// `dithflage`: each block states its own dither flags. Otherwise no block says
     /// so, and every block dithers, which is what AC-3's own default is.
     pub dither_flags: bool,
@@ -412,7 +437,7 @@ pub struct BlocksState {
     /// `skipflde`: each block states the full skip fields.
     pub skip_fields: bool,
     /// `transproce`: at least one channel carries a transient pre-noise processing
-    /// window, whose location and length this reader steps over.
+    /// window, whose parameters are retained in `Frame::transient_windows`.
     pub transient_processing: bool,
     /// `snroffststr`: 0 when the blocks take the offsets the frame states, and the
     /// other three codes name the ways a block states its own.
@@ -428,9 +453,61 @@ pub fn frame(bytes: &[u8]) -> Option<Frame> {
     header(&mut BitReader::new(bytes)).ok()
 }
 
+/// Length of an unselected programme/dependent syncframe. Annex E.2.8 requires
+/// base-programme output to skip these without decoding their channel syntax.
+/// This validates the envelope, not the skipped stream's audio payload.
+pub(crate) fn skipped_substream_bytes(bytes: &[u8]) -> Result<Option<usize>> {
+    if bytes.len()<6 || bytes[..2]!=[0x0b,0x77] || !(11..=16).contains(&(bytes[5]>>3)) {
+        return Ok(None);
+    }
+    let kind=bytes[2]>>6;
+    let id=(bytes[2]>>3)&7;
+    if kind==3 {return Err(unsupported("E-AC-3 reserved stream type 3"));}
+    if kind!=1 && id==0 {return Ok(None);}
+    let size=(usize::from(bytes[2]&7)*256+usize::from(bytes[3])+1)*2;
+    if size<6 || size>bytes.len() {return Err(invalid("truncated skipped E-AC-3 substream"));}
+    Ok(Some(size))
+}
+
+/// Geometry for automatic container setup, requiring a complete first frame
+/// and the same CRC criterion used by decode. `frame` remains a lightweight
+/// syntax probe; neither function changes silence concealment at decode time.
+pub fn checked_frame(bytes: &[u8]) -> Option<Frame> {
+    let header=frame(bytes)?;
+    let complete=bytes.get(..header.frame_bytes)?;
+    crate::codec::ac3_decoder::frame_crc_valid(complete).then_some(header)
+}
+
+/// Speaker assignment follows decoded Folding order, including native LFE.
+pub fn speaker_mask(data: &[u8], channels: u16) -> Result<u32> {
+    let h = header(&mut BitReader::new(data))?;
+    if channels>6 {return presentation::packet_speakers(data,channels)?.wave_mask().ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"));}
+    crate::codec::ac3_decoder::decoded_speaker_mask(usize::from(h.layout),h.low_frequency,channels)
+}
+
 /// Read `syncinfo`, step over `bsi` and read `audfrm`, Tables E1.1 to E1.3, leaving
 /// the frame's blocks ahead of the reader.
 fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
+    read_substream_header(bits,false).map(|(frame,_,_,_)|frame)
+}
+
+/// A dependent stream's own geometry and custom channel map, before assembly
+/// with its independent programme. PCM from DependentDecoder is in coded order.
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub struct DependentFrame {
+    pub frame: Frame,
+    pub substream_id: u8,
+    pub channel_map: Option<u16>,
+    pub compression_present: bool,
+}
+
+pub fn dependent_frame(data:&[u8])->Result<DependentFrame> {
+    let (frame,substream_id,channel_map,compression_present)=read_substream_header(&mut BitReader::new(data),true)?;
+    if frame.stream_type!=1 {return Err(invalid("expected an E-AC-3 dependent substream"));}
+    Ok(DependentFrame {frame,substream_id,channel_map,compression_present})
+}
+
+fn read_substream_header(bits:&mut BitReader<'_>,extensions:bool)->Result<(Frame,u8,Option<u16>,bool)> {
     if bits.read(16)? != SYNCWORD {
         return Err(invalid("no E-AC-3 syncword at the start of the syncframe"));
     }
@@ -438,12 +515,13 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
     // kinds that are not this decoder's are named before anything else is read, so
     // that a stream needing them fails here rather than half a block later.
     let strmtyp = bits.read(2)?;
-    if strmtyp != 0 {
+    if strmtyp == 3 || (strmtyp == 1 && !extensions) {
         return Err(unsupported(&format!(
             "E-AC-3 stream type {strmtyp}, which is not an independent substream"
         )));
     }
-    if bits.read(3)? != 0 {
+    let substream_id=bits.read(3)? as u8;
+    if substream_id != 0 && !extensions {
         return Err(unsupported("a second E-AC-3 substream of the same presentation"));
     }
     // `frmsiz` counts 16-bit words in the syncframe, itself included.
@@ -463,19 +541,29 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
     let acmod = bits.read(3)? as usize;
     let lfeon = bits.bit()?;
     let bsid = bits.read(5)?;
-    if bsid != EAC3_BSID {
+    if !(11..=EAC3_BSID).contains(&bsid) {
         return Err(unsupported(&format!(
             "an E-AC-3 stream marked with bsid {bsid}, which names {}",
-            if bsid < EAC3_BSID { "AC-3's own syntax" } else { "a later revision" }
+            if bsid <= 8 { "AC-3's own syntax" } else if bsid <= 10 { "a reserved identification" } else { "a later revision" }
         )));
     }
-    let downmix = bsi(bits, acmod, lfeon, blocks, reduced_rate)?;
-    let audio = audfrm(bits, acmod, lfeon, blocks, frame_bytes)?;
+    let mut channel_map=None;
+    let (downmix,compression_present) = bsi(bits, acmod, lfeon, blocks, reduced_rate, strmtyp,&mut channel_map)?;
+    if let Some(map)=channel_map {
+        // Table E.1.4: six location bits name pairs, all other bits singletons.
+        let pairs=0x0400u16|0x0200|0x0040|0x0020|0x0010|0x0004;
+        let count=map.count_ones()+(map & pairs).count_ones();
+        if count as usize!=NFCHANS[acmod]+usize::from(lfeon) {
+            return Err(invalid("E-AC-3 dependent channel map disagrees with coded channel count"));
+        }
+    }
+    let audio = audfrm(bits, acmod, lfeon, blocks, frame_bytes, strmtyp)?;
     let position = bits.position();
     if position > frame_bytes * 8 {
         return Err(invalid("an E-AC-3 header longer than the frame that carries it"));
     }
-    Ok(Frame {
+    Ok((Frame {
+        stream_type: strmtyp as u8,
         sample_rate: rate,
         rate_code,
         layout: acmod as u8,
@@ -492,8 +580,11 @@ fn header(bits: &mut BitReader<'_>) -> Result<Frame> {
         converter_strategies: audio.converter_strategies,
         snr_offsets: audio.snr_offsets,
         blocks_state: audio.blocks_state,
+        spx_attenuation: audio.spx_attenuation,
+        transient_windows: audio.transient_windows,
+        aht: audio.aht,
         block_starts: audio.block_starts,
-    })
+    },substream_id,channel_map,compression_present))
 }
 
 /// The part of a `Frame` that `audfrm` states, kept apart so that [`header`] can
@@ -506,6 +597,9 @@ struct Audio {
     converter_strategies: [u8; CHANS],
     snr_offsets: Option<SnrOffsets>,
     blocks_state: BlocksState,
+    spx_attenuation: [Option<u8>; CHANS],
+    transient_windows: [Option<TransientWindow>; CHANS],
+    aht: [bool; PLANES],
     block_starts: Option<[usize; BLOCKS - 1]>,
 }
 
@@ -517,19 +611,12 @@ fn audfrm(
     lfeon: bool,
     blocks: usize,
     frame_bytes: usize,
+    stream_type: u32,
 ) -> Result<Audio> {
     let nfchans = NFCHANS[acmod];
-    let expstre = if blocks == BLOCKS {
-        let expstre = bits.bit()?;
-        if bits.bit()? {
-            return Err(unsupported(
-                "an E-AC-3 frame whose blocks carry the adaptive hybrid transform",
-            ));
-        }
-        expstre
-    } else {
-        true
-    };
+    let (expstre, parse_aht) = if blocks == BLOCKS {
+        (bits.bit()?, bits.bit()?)
+    } else { (true, false) };
     let snr_strategy = bits.read(2)? as u8;
     if snr_strategy == 3 {
         return Err(unsupported(
@@ -537,21 +624,13 @@ fn audfrm(
         ));
     }
     let transient_processing = bits.bit()?;
-    if bits.bit()? {
-        return Err(unsupported(
-            "an E-AC-3 frame that switches its blocks to the short transform",
-        ));
-    }
+    let block_switching = bits.bit()?;
     let dither_flags = bits.bit()?;
     let bit_allocation = bits.bit()?;
     let gain_codes = bits.bit()?;
     let dynamic_parameters = bits.bit()?;
     let skip_fields = bits.bit()?;
-    if bits.bit()? {
-        return Err(unsupported(
-            "an E-AC-3 frame that attenuates a reconstructed high band",
-        ));
-    }
+    let spx_attenuation_enabled = bits.bit()?;
 
     // Coupling: the first block states its own flag, and a later block that does not
     // state one keeps the flag of the block before it.
@@ -604,7 +683,9 @@ fn audfrm(
         }
     }
     let mut converter_strategies = [0u8; CHANS];
-    let convexpstre = if blocks == BLOCKS {
+    let convexpstre = if stream_type != 0 {
+        false
+    } else if blocks == BLOCKS {
         true
     } else {
         bits.bit()?
@@ -615,6 +696,24 @@ fn audfrm(
         }
     }
 
+    let mut aht = [false; PLANES];
+    if parse_aht {
+        let reused = |plane: usize| (1..BLOCKS).all(|blk| {
+            if plane == LFE { return !low_frequency_strategies[blk]; }
+            let strategy = match exponents {
+                Exponents::PerBlock {coupling,channels} => if plane==CPL {coupling[blk]}else{channels[blk][plane]},
+                Exponents::PerFrame {coupling,channels} => {
+                    let code=if plane==CPL {coupling.unwrap_or(0)}else{channels[plane]};
+                    return Strategy::per_frame(code,blk)==Strategy::Reuse;
+                }
+            };
+            strategy==0
+        });
+        if coupling.iter().all(|&v|v) && !coupling_stated[1..].iter().any(|&v|v) && reused(CPL) {aht[CPL]=bits.bit()?;}
+        for plane in 0..nfchans {if reused(plane) {aht[plane]=bits.bit()?;}}
+        if lfeon && reused(LFE) {aht[LFE]=bits.bit()?;}
+    }
+
     let snr_offsets = if snr_strategy == 0 {
         Some(SnrOffsets {
             coarse: bits.read(6)? as u8,
@@ -623,11 +722,19 @@ fn audfrm(
     } else {
         None
     };
+    let mut transient_windows=[None; CHANS];
     if transient_processing {
-        for _ in 0..nfchans {
+        for window in transient_windows.iter_mut().take(nfchans) {
             if bits.bit()? {
-                bits.skip(10)?; // transprocloc
-                bits.skip(8)?; // transproclen
+                *window=Some(TransientWindow {location:(bits.read(10)? as u16)*4,length:bits.read(8)? as u8});
+            }
+        }
+    }
+    let mut spx_attenuation = [None; CHANS];
+    if spx_attenuation_enabled {
+        for code in spx_attenuation[..nfchans].iter_mut() {
+            if bits.bit()? {
+                *code = Some(bits.read(5)? as u8);
             }
         }
     }
@@ -651,6 +758,7 @@ fn audfrm(
         converter_strategies,
         snr_offsets,
         blocks_state: BlocksState {
+            block_switching,
             dither_flags,
             bit_allocation,
             gain_codes,
@@ -659,6 +767,9 @@ fn audfrm(
             transient_processing,
             snr_offsets: snr_strategy,
         },
+        spx_attenuation,
+        transient_windows,
+        aht,
         block_starts,
     })
 }
@@ -705,9 +816,12 @@ fn bsi(
     lfeon: bool,
     blocks: usize,
     reduced_rate: bool,
-) -> Result<Option<Downmix>> {
+    stream_type: u32,
+    channel_map: &mut Option<u16>,
+) -> Result<(Option<Downmix>,bool)> {
     bits.skip(5)?; // dialnorm
-    if bits.bit()? {
+    let compression_present=bits.bit()?;
+    if compression_present {
         bits.skip(8)?; // compr
     }
     if acmod == 0 {
@@ -717,28 +831,35 @@ fn bsi(
             bits.skip(8)?; // compr2
         }
     }
+    if stream_type==1 && bits.bit()? {*channel_map=Some(bits.read(16)? as u16);}
     let downmix = if bits.bit()? {
-        mixing(bits, acmod, lfeon, blocks)?
+        mixing(bits, acmod, lfeon, blocks, stream_type)?
     } else {
         None
     };
     if bits.bit()? {
         information(bits, acmod, reduced_rate)?;
     }
-    if blocks != BLOCKS {
+    if stream_type == 0 && blocks != BLOCKS {
         bits.skip(1)?; // convsync
+    }
+    if stream_type == 2 && (blocks == BLOCKS || bits.bit()?) {
+        // Original AC-3 frame-size metadata does not control this E-AC-3 frame.
+        if bits.read(6)? > 37 {
+            return Err(invalid("reserved AC-3 frame size code in converted E-AC-3"));
+        }
     }
     if bits.bit()? {
         let length = bits.read(6)? as usize;
         bits.skip((length + 1) * 8)?; // addbsi
     }
-    Ok(downmix)
+    Ok((downmix,compression_present))
 }
 
 /// Step over the mixing metadata of Table E1.2, and take the two Lo/Ro coefficients a
 /// stream's own fold reads from it. Each sits behind its Lt/Rt twin, which is for a
 /// stream encoded to surround-aware decoding rather than to a stereo container.
-fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) -> Result<Option<Downmix>> {
+fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize, stream_type: u32) -> Result<Option<Downmix>> {
     if acmod > 2 {
         bits.skip(2)?; // dmixmod
     }
@@ -756,6 +877,9 @@ fn mixing(bits: &mut BitReader<'_>, acmod: usize, lfeon: bool, blocks: usize) ->
     };
     if lfeon && bits.bit()? {
         bits.skip(5)?; // lfemixlevcod
+    }
+    if stream_type != 0 {
+        return Ok(Some(Downmix { centre, surround }));
     }
     if bits.bit()? {
         bits.skip(6)?; // pgmscl
@@ -1149,13 +1273,25 @@ pub struct Eac3Decoder {
     spx: Spx,
     /// The state of the [`dice_noise`] walk, which is high bands' only randomness.
     noise_state: u32,
+    aht_cache: [Vec<[f32; 6]>; PLANES],
+    // Allocation belongs to the six-block payload, while dithflag is per block.
+    // Retain its zero-bit bins instead of consulting a later recomputed bap.
+    aht_zero_bits: [[bool; 256]; PLANES],
+    enhanced: enhanced_coupling::Enhanced,
+    assembly_mode: bool,
+    // Transactional native output used by the delayed transient path.
+    native_capture: Option<Vec<transient::NativeBlock>>,
+    native_packets: transient::NativePackets,
+    frame_gains: [[f32;2];BLOCKS],
+    presentation: Option<Box<presentation::PresentationDecoder>>,
 }
 
 impl Eac3Decoder {
     /// Open an Enhanced AC-3 stream. `configuration` holds nothing this codec needs,
     /// since the geometry is in the frames themselves, and is only taken to match the
     /// other decoders' signature. The rate has to be one Annex E names and the channel
-    /// count one the folding can reach; anything else is refused by name.
+    /// count one the folding or expanded presentation can reach; unsupported
+    /// geometry is refused by name.
     pub fn new(configuration: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
         let _ = configuration;
         if !ALL_SAMPLE_RATES.contains(&sample_rate) {
@@ -1163,7 +1299,7 @@ impl Eac3Decoder {
                 "E-AC-3 track at {sample_rate} Hz is outside Annex E's 48000, 44100, 32000, 24000, 22050 and 16000 Hz"
             )));
         }
-        if !(1..=6).contains(&channels) {
+        if !(1..=16).contains(&channels) {
             return Err(invalid(&format!(
                 "E-AC-3 track of {channels} channels has neither a native layout nor a downmix here"
             )));
@@ -1176,6 +1312,14 @@ impl Eac3Decoder {
             initial_lead: ENCODER_DELAY,
             spx: Spx::default(),
             noise_state: NOISE_SEED,
+            aht_cache: std::array::from_fn(|_|Vec::new()),
+            aht_zero_bits: [[false; 256]; PLANES],
+            enhanced: Default::default(),
+            assembly_mode:false,
+            native_capture:None,
+            native_packets:Default::default(),
+            frame_gains:[[1.0;2];BLOCKS],
+            presentation:if channels>6 {Some(Box::new(presentation::PresentationDecoder::new(sample_rate,channels)?))}else{None},
         })
     }
 
@@ -1187,6 +1331,7 @@ impl Eac3Decoder {
         let mut decoder = Self::new(configuration, sample_rate, channels)?;
         decoder.lead = 0;
         decoder.initial_lead = 0;
+        if let Some(p)=decoder.presentation.as_mut(){p.set_priming(0);}
         Ok(decoder)
     }
 
@@ -1220,12 +1365,25 @@ impl Eac3Decoder {
     /// rather than the packet's timing, while a frame that names syntax this module does
     /// not read ends the packet with the error that says so: a missing feature is not a
     /// broken file, and only the caller can keep them apart.
-    fn frames(&mut self, data: &[u8], out: &mut Vec<f32>) -> Result<()> {
+    fn frames(&mut self, data: &[u8], out: &mut Vec<f32>, dependent:Option<u8>) -> Result<()> {
         let mut offset = 0usize;
         let mut decoded = 0usize;
+        let mut skipped = 0usize;
         while offset < data.len() {
             let raw = &data[offset..];
-            let frame = match header(&mut BitReader::new(raw)) {
+            if dependent.is_none() && let Some(size)=skipped_substream_bytes(raw)? {
+                offset+=size;
+                skipped+=1;
+                continue;
+            }
+            let parsed=if let Some(id)=dependent {
+                let h=dependent_frame(raw)?;
+                if h.substream_id!=id || usize::from(h.frame.channels)!=self.channels {
+                    return Err(invalid("E-AC-3 dependent substream ID or coded channel count changed"));
+                }
+                Ok(h.frame)
+            }else{header(&mut BitReader::new(raw))};
+            let frame = match parsed {
                 Ok(frame) => frame,
                 Err(reason @ Error::Unsupported(_)) => return Err(reason),
                 // A header that runs off the end of the packet is the stream ending.
@@ -1247,8 +1405,17 @@ impl Eac3Decoder {
             // follows the packet.
             let mut bits = Bits::at(&raw[..usable], frame.audio_bit);
             let mut samples = Vec::with_capacity(silence);
+            let capture_start=self.native_capture.as_ref().map(Vec::len);
             let sound = protected
                 && self.syncframe(&frame, &mut bits, &mut samples)?;
+            if !sound && let (Some(start),Some(capture))=(capture_start,self.native_capture.as_mut()) {
+                // A late syntax fault conceals the whole frame, including
+                // already reconstructed blocks, before anything is queued.
+                capture.truncate(start);
+                for _ in 0..frame.blocks {
+                    capture.push(transient::NativeBlock::silence(self.channels));
+                }
+            }
             if std::env::var("EAC3_TRACE").is_ok() {
                 eprintln!(
                     "frame@{offset} bytes={} bits={} audio_bit={} ends={} overrun={} sound={sound}",
@@ -1269,7 +1436,7 @@ impl Eac3Decoder {
             offset += frame.frame_bytes;
             decoded += 1;
         }
-        if decoded == 0 {
+        if decoded == 0 && skipped == 0 {
             return Err(invalid("E-AC-3 packet holds no syncframe"));
         }
         Ok(())
@@ -1284,13 +1451,18 @@ impl Eac3Decoder {
         out: &mut Vec<f32>,
     ) -> Result<bool> {
         let header = Self::geometry(frame);
-        let Some(folding) = Folding::new(header, self.channels) else {
+        let folding=if frame.stream_type==1 || self.assembly_mode {Some(Folding::coded(header))}else{Folding::new(header,self.channels)};
+        let Some(folding) = folding else {
             return Ok(false);
         };
         // Reuse is a within-frame promise, and so is the coupling state a block
         // inherits when its frame says it states nothing.
         self.core.begin_frame();
+        // Both tools may appear in one frame. Keep ordinary banding initialized
+        // even when the first coupled block uses the enhanced tool.
+        self.core.strategy.bndstrc=DEF_CPL_BNDSTRC;
         self.spx.begin_frame();
+        self.enhanced = Default::default();
         let starts = frame.block_starts;
         for blk in 0..frame.blocks {
             if let Some(starts) = starts {
@@ -1326,10 +1498,13 @@ impl Eac3Decoder {
         let state = frame.blocks_state;
         let mut strategy = std::mem::take(&mut self.core.strategy);
 
-        // Block switching went out with the `blkswe` refusal that closed the frame, so
-        // no block says anything here and every one keeps the frame's long window.
+        // Block switching is gated by `blkswe`: when off, every block keeps the
+        // frame's long 512-sample window (`blksw[ch] = 0`).
         // Dither is the frame's choice too: a block that states no flags dithers, which
         // is Table E1.4's own `dithflag[ch] = 1`.
+        for ch in 0..nfchans {
+            strategy.blksw[ch] = if state.block_switching { bits.flag() } else { false };
+        }
         for ch in 0..nfchans {
             strategy.dither[ch] = if state.dither_flags { bits.flag() } else { true };
         }
@@ -1343,6 +1518,7 @@ impl Eac3Decoder {
         if header.acmod == 0 && bits.flag() {
             strategy.gain[1] = dynrng_gain(bits.take(8));
         }
+        self.frame_gains[blk]=strategy.gain;
         say("dynrng", blk, bits.pos);
         // Spectral extension: `spxstre` is implicit at block 0, and a block that puts
         // SPX in use rebuilds its high bands by rules of their own. It is the only
@@ -1369,15 +1545,10 @@ impl Eac3Decoder {
         strategy.cpl_moved = false;
         if frame.coupling_stated[blk] {
             let continued = strategy.cplinu;
+            let previous_coupling_range=(strategy.start[CPL],strategy.end[CPL]);
             if frame.coupling[blk] {
-                // Enhanced coupling describes an amplitude and an angle per band in
-                // place of one coordinate, which is a decoder of its own rather than a
-                // variant of this one.
-                if bits.flag() {
-                    return Err(unsupported(
-                        "an E-AC-3 block that couples by enhanced coupling",
-                    ));
-                }
+                let was_enhanced=self.enhanced.active;
+                self.enhanced.active=bits.flag();
                 strategy.incpl = [false; FBW];
                 if header.acmod == 2 {
                     // A 2/0 block that couples couples both channels, and says so with
@@ -1388,29 +1559,42 @@ impl Eac3Decoder {
                         strategy.incpl[ch] = bits.flag();
                     }
                 }
-                strategy.phsflginu = header.acmod == 2 && bits.flag();
-                let begin = bits.take(4) as usize;
-                // Section E3.3.1: the block that synthesises the bands above coupling
-                // leaves the end of coupling to the spectral extension begin frequency,
-                // and sends no code for it.
-                let end = if self.spx.in_use {
-                    self.spx.coupling_end()
+                if self.enhanced.active {
+                    ok=self.enhanced.open(header,&mut strategy,bits,
+                        self.spx.in_use.then_some(self.spx.beginf),continued,was_enhanced);
                 } else {
-                    bits.take(4) as i32
-                };
-                let banding = bits.flag(); // `cplbndstrce`
-                if !banding && !continued {
-                    // Section E2.3.3.15: a frame's first coupled block that sends no
-                    // banding structure means Table E2.12's, while any other reuses the
-                    // structure the block before it settled on - which is already here.
-                    strategy.bndstrc = DEF_CPL_BNDSTRC;
+                    strategy.phsflginu = header.acmod == 2 && bits.flag();
+                    let begin = bits.take(4) as usize;
+                    // Section E3.3.1: the block that synthesises the bands above coupling
+                    // leaves the end of coupling to the spectral extension begin frequency,
+                    // and sends no code for it.
+                    let end = if self.spx.in_use {
+                        self.spx.coupling_end()
+                    } else {
+                        bits.take(4) as i32
+                    };
+                    let banding = bits.flag(); // `cplbndstrce`
+                    if !banding && !continued {
+                        // Section E2.3.3.15: a frame's first coupled block that sends no
+                        // banding structure means Table E2.12's, while any other reuses the
+                        // structure the block before it settled on - which is already here.
+                        strategy.bndstrc = DEF_CPL_BNDSTRC;
+                    }
+                    ok = strategy.open_coupling(header, continued, begin, end, banding, bits);
+                    // The enhanced tool has its own frequency codes. Compare
+                    // actual bin ranges when switching back, not stale ordinary
+                    // codes, and preserve the coordinate-exists bit history.
+                    strategy.cpl_moved=continued && previous_coupling_range != (
+                        (37+12*begin).min(256),
+                        (37+12*(end+3)).clamp(0,256) as usize,
+                    );
                 }
-                ok = strategy.open_coupling(header, continued, begin, end, banding, bits);
             } else {
                 // A block that does not couple leaves every coupling parameter off, and
                 // the next block that couples owes its coordinates and its leaks to
                 // itself rather than to a bit saying that it does.
                 strategy.cplinu = false;
+                self.enhanced.active=false;
                 strategy.incpl = [false; FBW];
                 strategy.phsflginu = false;
                 strategy.firstcplcos = [true; FBW];
@@ -1421,11 +1605,14 @@ impl Eac3Decoder {
         if ok && strategy.cplinu {
             // Annex E's one change to the coordinates: a channel whose coordinates no
             // block has delivered yet states them without paying a `cplcoe` bit.
-            ok = strategy.coupling_coordinates(header, bits, true);
+            ok = if self.enhanced.active {
+                self.enhanced.coordinates(header,&mut strategy,bits)
+            } else {strategy.coupling_coordinates(header, bits, true)};
         }
         say("cplcoords", blk, bits.pos);
         if header.acmod == 2 {
-            strategy.rematrix.reshape(strategy.cplinu, strategy.cplbegf);
+            if self.enhanced.active {self.enhanced.rematrix(&mut strategy);}
+            else {strategy.rematrix.reshape(strategy.cplinu, strategy.cplbegf);}
             if !strategy.cplinu && self.spx.in_use {
                 // Section E3.3.2: a 2/0 block that synthesises its high bands and couples
                 // none of them states one band fewer above the copy region than one that
@@ -1522,6 +1709,7 @@ impl Eac3Decoder {
             // from a bandwidth code it never sent.
             self.spx.reach(header, &mut strategy);
         }
+        if self.enhanced.active {self.enhanced.measure(header,&mut strategy);}
         if strategy.expstr[CPL] != 0 {
             // Section 7.1.3: the coupling plane's absolute exponent is a reference
             // rather than a coefficient's, and arrives doubled.
@@ -1620,8 +1808,8 @@ impl Eac3Decoder {
         }
         // The offsets of the AC-3 syncframes this stream converts to, which no player
         // that sounds E-AC-3 out as itself reads. They are there for every independent
-        // stream, which is every stream this decoder opens.
-        if bits.flag() {
+        // stream; converted streams carry no converter-offset flag.
+        if frame.stream_type == 0 && bits.flag() {
             bits.skip(10); // convsnroffst
         }
         strategy.params.leaks = false;
@@ -1656,17 +1844,42 @@ impl Eac3Decoder {
         // the transform, and the fold into the channels the track plays.
         self.core.strategy = strategy;
         if self.core.strategy.needs_allocation(header) {
-            self.core.allocate_all(header);
+            self.core.allocate_all_aht(header, frame.aht);
         }
         say("mantissas", blk, bits.pos);
-        self.core.mantissas(header, bits);
+        self.core.begin_mantissas();
+        let mut coupled = false;
+        for plane in 0..header.nfchans {
+            self.mantissa_plane(plane, blk, frame, bits)?;
+            if self.core.strategy.cplinu && self.core.strategy.incpl[plane] && !coupled {
+                self.mantissa_plane(CPL, blk, frame, bits)?;
+                coupled=true;
+            }
+        }
+        if header.lfeon {self.mantissa_plane(LFE, blk, frame, bits)?;}
+
         say("after mantissa", blk, bits.pos);
-        self.core.decouple(header);
+        if self.enhanced.active {self.enhanced.restore(header,&mut self.core);}
+        else {self.core.decouple(header);}
         if self.spx.in_use {
-            self.synthesise(header);
+            self.synthesise(header, &frame.spx_attenuation);
         }
         self.core.rematrix_restore(header);
-        self.core.spectrum_to_sound(header, folding, out);
+        if let Some(capture)=self.native_capture.as_mut() {
+            let gains=if self.assembly_mode {[1.0;PLANES]}else{self.core.output_gains(header)};
+            let reconstructed=self.core.inverse_planes(header);
+            let mut pcm=[[0.0;SAMPLES];PLANES];
+            pcm[..header.nfchans].copy_from_slice(&reconstructed[..header.nfchans]);
+            if header.lfeon {pcm[LFE]=reconstructed[LFE];}
+            let windows=if blk==0 {frame.transient_windows}else{[None;CHANS]};
+            folding.write_pcm(&pcm,&gains,out,!self.assembly_mode);
+            capture.push(transient::NativeBlock {pcm,windows,mixing:*folding,gains,clip:!self.assembly_mode});
+        } else if self.assembly_mode {
+            let gains=self.core.strategy.gain;
+            self.core.strategy.gain=[1.0;2];
+            self.core.spectrum_to_sound_unclipped(header,folding,out);
+            self.core.strategy.gain=gains;
+        }else{self.core.spectrum_to_sound(header, folding, out);}
         Ok(true)
     }
 
@@ -1680,71 +1893,54 @@ impl Eac3Decoder {
     /// The scaling is what makes the region right: the noise is the standard's own
     /// freedom, so a decoder's high bands match a reference decode band for band rather
     /// than sample for sample.
-    fn synthesise(&mut self, header: Header) {
-        let spx = self.spx;
-        for ch in 0..header.nfchans {
-            if !spx.channels[ch] {
-                continue;
-            }
-            let coefficients = self.core.coefficients(ch);
-            // Section E3.6.4.1: the copy walks up from `spxstrtf` while the insert walks
-            // up from the begin frequency, and a band that would copy past the coded
-            // region restarts the copy at its bottom.
-            let mut copy = spx.copy_first;
-            let mut insert = spx.first;
-            for bnd in 0..spx.count {
-                let size = spx.bands[bnd];
-                if copy + size > spx.first {
-                    copy = spx.copy_first;
-                }
-                for _ in 0..size {
-                    if copy == spx.first {
-                        copy = spx.copy_first;
-                    }
-                    let value = coefficients[copy];
-                    coefficients[insert] = value;
-                    insert += 1;
-                    copy += 1;
+    fn mantissa_plane(&mut self, plane:usize, block:usize, frame:&Frame, bits:&mut Bits<'_>)->Result<()> {
+        if !frame.aht[plane] {self.core.plane_mantissas(bits,plane);return Ok(());}
+        let start=self.core.strategy.start[plane];let end=self.core.strategy.end[plane];
+        if block==0 {
+            let pointers=self.core.strategy.bap[plane][start..end].to_vec();
+            if plane < FBW || plane == LFE {
+                self.aht_zero_bits[plane].fill(false);
+                for (i,&pointer) in pointers.iter().enumerate() {
+                    self.aht_zero_bits[plane][i]=pointer==0;
                 }
             }
-            let mut noise_state = self.noise_state;
-            let mut start = spx.first;
-            for bnd in 0..spx.count {
-                let size = spx.bands[bnd];
-                // Section E3.6.4.2.2: the band's own energy is what the noise is scaled
-                // to, so that blending it in changes the band's character and not its
-                // level.
-                let mut accum = 0.0f64;
-                for bin in start..start + size {
-                    let value = f64::from(coefficients[bin]);
-                    accum += value * value;
-                }
-                let energy = (accum / size as f64).sqrt() as f32 * spx.noise[ch][bnd];
-                let signal = spx.signal[ch][bnd];
-                let scale = spx.scale[ch][bnd];
-                for bin in start..start + size {
-                    let copied = coefficients[bin];
-                    coefficients[bin] =
-                        (copied * signal + dice_noise(&mut noise_state) * energy) * scale;
-                }
-                start += size;
+            self.aht_cache[plane]=aht::read_plane(bits,&pointers,||self.core.aht_noise())?;
+            for (i,values) in self.aht_cache[plane].iter_mut().enumerate() {
+                let scale=2.0f32.powi(-self.core.strategy.exp[plane][start+i].clamp(0,24));
+                for v in values {*v*=scale;}
             }
-            self.noise_state = noise_state;
         }
+        if self.aht_cache[plane].len()!=end-start {return Err(invalid("E-AC-3 AHT geometry changed inside frame"));}
+        for (i,values) in self.aht_cache[plane].iter().enumerate() {
+            // Suppress only substituted noise, after inverse AHT. Keeping the
+            // cache intact lets a later block turn dither back on, and lets the
+            // ordinary overlap tail finish naturally after it turns off.
+            // LFE has no dither flag and keeps the conventional true-zero
+            // substitution. Coded LFE mantissas still pass through inverse AHT.
+            let disabled=self.aht_zero_bits[plane][i]
+                && (plane==LFE || (plane<FBW && !self.core.strategy.dither[plane]));
+            self.core.coefficients(plane)[start+i]=if disabled {0.0}else{values[block]};
+        }
+        Ok(())
     }
-}
 
-impl AudioDecode for Eac3Decoder {
-    /// Decode every syncframe of the packet. A packet is normally one frame or a few,
-    /// and each contributes its 1536 samples per channel.
-    fn decode_encoded(
-        &mut self,
-        data: &[u8],
-        pts: u64,
-        _duration: u64,
-    ) -> Result<Option<AudioPacket>> {
+    /// Reconstruct native blocks transactionally, before transient correction,
+    /// gain/folding and packet delay accounting. Damaged frames become native
+    /// silence; incomplete reconstructions are never released to the adapter.
+    #[allow(dead_code)]
+    fn reconstruct_native(&mut self,data:&[u8],dependent:Option<u8>)->Result<Vec<transient::NativeBlock>> {
+        if self.channels>6 {return Err(invalid("native substream reconstruction requires at most six coded channels"));}
+        self.native_capture=Some(Vec::new());
+        let result=self.frames(data,&mut Vec::new(),dependent);
+        let captured=self.native_capture.take().unwrap();
+        result.map(|()|captured)
+    }
+
+    #[cfg(test)]
+    fn decode_mode(&mut self,data:&[u8],pts:u64,dependent:Option<u8>)->Result<Option<AudioPacket>> {
         let mut samples = Vec::new();
-        self.frames(data, &mut samples)?;
+        self.frames(data, &mut samples, dependent)?;
+        if samples.is_empty() {return Ok(None);}
         // The padding the encoder put at the head of the stream is not sound, and a
         // player that plays it starts every track behind the picture.
         let frames = samples.len() / self.channels;
@@ -1763,6 +1959,113 @@ impl AudioDecode for Eac3Decoder {
             timebase_num: 1,
             timebase_den: self.sample_rate,
         }))
+
+    }
+
+    fn synthesise(&mut self, header: Header, spx_attenuation: &[Option<u8>; CHANS]) {
+        let spx = self.spx;
+        for ch in 0..header.nfchans {
+            if !spx.channels[ch] {
+                continue;
+            }
+            let coefficients = self.core.coefficients(ch);
+            // Section E3.6.4.1: the copy walks up from `spxstrtf` while the insert walks
+            // up from the begin frequency, and a band that would copy past the coded
+            // region restarts the copy at its bottom.
+            let mut copy = spx.copy_first;
+            let mut insert = spx.first;
+            let mut wraps = [false; SPX_BANDS];
+            for bnd in 0..spx.count {
+                let size = spx.bands[bnd];
+                if copy + size > spx.first {
+                    copy = spx.copy_first;
+                    wraps[bnd] = true;
+                }
+                for _ in 0..size {
+                    if copy == spx.first {
+                        copy = spx.copy_first;
+                    }
+                    let value = coefficients[copy];
+                    coefficients[insert] = value;
+                    insert += 1;
+                    copy += 1;
+                }
+            }
+            // Section E3.6.4.2.2: compute each band's RMS energy before optional
+            // boundary attenuation so the noise blend matches the unattenuated band level.
+            let mut rms_energy = [0.0f32; SPX_BANDS];
+            let mut start = spx.first;
+            for bnd in 0..spx.count {
+                let size = spx.bands[bnd];
+                let mut accum = 0.0f64;
+                for bin in start..start + size {
+                    let value = f64::from(coefficients[bin]);
+                    accum += value * value;
+                }
+                rms_energy[bnd] = (accum / size as f64).sqrt() as f32 * spx.noise[ch][bnd];
+                start += size;
+            }
+            // ETSI E.2.6.4.2.3 / Table E.2.12: when `chinspxatten[ch]` is set, attenuate
+            // the 5-bin notch (`[w0, w1, w2, w1, w0]`) around `spx.first` (`bnd == 0`)
+            // and around each subsequent band boundary where the copy wrapped.
+            if let Some(code) = spx_attenuation[ch] {
+                let step = f32::from((code & 0x1F) + 1);
+                let w0 = 2.0f32.powf(-step / 15.0);
+                let w1 = 2.0f32.powf(-2.0 * step / 15.0);
+                let w2 = 2.0f32.powf(-3.0 * step / 15.0);
+                let mut boundary = spx.first;
+                for bnd in 0..spx.count {
+                    if (bnd == 0 || wraps[bnd]) && boundary >= 2 && boundary + 2 < coefficients.len() {
+                        coefficients[boundary - 2] *= w0;
+                        coefficients[boundary - 1] *= w1;
+                        coefficients[boundary] *= w2;
+                        coefficients[boundary + 1] *= w1;
+                        coefficients[boundary + 2] *= w0;
+                    }
+                    boundary += spx.bands[bnd];
+                }
+            }
+            let mut noise_state = self.noise_state;
+            let mut start = spx.first;
+            for bnd in 0..spx.count {
+                let size = spx.bands[bnd];
+                let energy = rms_energy[bnd];
+                let signal = spx.signal[ch][bnd];
+                let scale = spx.scale[ch][bnd];
+                for bin in start..start + size {
+                    let copied = coefficients[bin];
+                    coefficients[bin] =
+                        (copied * signal + dice_noise(&mut noise_state) * energy) * scale;
+                }
+                start += size;
+            }
+            self.noise_state = noise_state;
+        }
+    }
+}
+
+impl AudioDecode for Eac3Decoder {
+    fn decode_packet(&mut self,data:&[u8],pts:i64,duration:u64)->Result<Option<crate::audio::DecodedAudio>> {
+        if let Some(p)=self.presentation.as_mut(){return p.decode_packet(data,pts,duration);}
+        let blocks=self.reconstruct_native(data,None)?;
+        self.native_packets.push(blocks,pts,duration)?;
+        Ok(self.native_packets.pop(self.sample_rate,self.channels,&mut self.lead))
+    }
+    fn finish_packet(&mut self)->Result<Option<crate::audio::DecodedAudio>> {
+        if let Some(p)=self.presentation.as_mut(){return p.finish_packet();}
+        self.native_packets.finish()?;
+        Ok(self.native_packets.pop(self.sample_rate,self.channels,&mut self.lead))
+    }
+
+    /// Decode every syncframe, with 256 samples per coding block. Lookahead
+    /// can retain the packet until later input; drain `finish_packet` at EOF.
+    fn decode_encoded(
+        &mut self,
+        data: &[u8],
+        pts: u64,
+        _duration: u64,
+    ) -> Result<Option<AudioPacket>> {
+        self.decode_packet(data,pts.min(i64::MAX as u64) as i64,_duration).map(|p|p.map(|p|p.packet))
     }
 
     /// A seek starts a new frame, and every frame states its own strategies, so the
@@ -1771,9 +2074,46 @@ impl AudioDecode for Eac3Decoder {
     /// after a seek the same packet rather than the same signal plus different noise.
     fn reset(&mut self) {
         self.core = Core::new();
+        self.native_capture=None;
+        self.native_packets=Default::default();
         self.lead = self.initial_lead;
         self.spx.begin_frame();
+        self.noise_state = NOISE_SEED;
+        self.enhanced=Default::default();
+        if let Some(p)=self.presentation.as_mut(){p.reset();}
     }
+}
+
+/// Decode one dependent stream to coded-order PCM. This is a reconstruction
+/// layer for presentation assembly, not a replacement for the independent mix.
+/// The caller must retain channel_map, associate by stream order, and assemble
+/// the programme before choosing its final speaker layout and DRC metadata.
+pub struct DependentDecoder {
+    decoder:Eac3Decoder,
+    substream_id:u8,
+}
+impl DependentDecoder {
+    pub fn new(sample_rate:u32,channels:u16,substream_id:u8)->Result<Self> {
+        if !(1..=6).contains(&channels){return Err(invalid("E-AC-3 dependent coded channel count must be 1..6"));}
+        if substream_id>7 {return Err(invalid("E-AC-3 dependent substream ID exceeds 7"));}
+        Ok(Self {decoder:Eac3Decoder::new(&[],sample_rate,channels)?,substream_id})
+    }
+    pub fn spec(&self)->AudioSpec {self.decoder.spec()}
+}
+impl AudioDecode for DependentDecoder {
+    fn decode_packet(&mut self,data:&[u8],pts:i64,duration:u64)->Result<Option<crate::audio::DecodedAudio>> {
+        let blocks=self.decoder.reconstruct_native(data,Some(self.substream_id))?;
+        self.decoder.native_packets.push(blocks,pts,duration)?;
+        Ok(self.decoder.native_packets.pop(self.decoder.sample_rate,self.decoder.channels,&mut self.decoder.lead))
+    }
+    fn finish_packet(&mut self)->Result<Option<crate::audio::DecodedAudio>> {
+        self.decoder.native_packets.finish()?;
+        Ok(self.decoder.native_packets.pop(self.decoder.sample_rate,self.decoder.channels,&mut self.decoder.lead))
+    }
+    fn decode_encoded(&mut self,data:&[u8],pts:u64,_duration:u64)->Result<Option<AudioPacket>> {
+        self.decode_packet(data,pts.min(i64::MAX as u64) as i64,_duration).map(|p|p.map(|p|p.packet))
+    }
+    fn reset(&mut self) {self.decoder.reset();}
 }
 
 #[cfg(test)]
@@ -1928,7 +2268,7 @@ mod tests {
         let acmod = bits.read(3).unwrap() as usize;
         let lfeon = bits.bit().unwrap();
         assert_eq!(bits.read(5).unwrap(), EAC3_BSID, "bsid");
-        bsi(&mut bits, acmod, lfeon, BLOCKS, false).unwrap();
+        bsi(&mut bits, acmod, lfeon, BLOCKS, false, 0, &mut None).unwrap();
         let position = bits.position();
         assert_eq!(
             bits.read(16).unwrap(),
@@ -2016,12 +2356,21 @@ mod tests {
                 sink.zeros(BLOCKS); // lfeexpstr
             }
             sink.zeros(5 * channels); // convexpstr
+            if self.ahte {
+                if coupling {sink.put(0,1);}
+                sink.zeros(channels + usize::from(lfeon)); // eligible planes decline AHT
+            }
             if self.snroffststr == 0 {
                 sink.zeros(10); // frmcsnroffst and frmfsnroffst
             }
             if self.transproce {
                 for _ in 0..channels {
                     sink.put(1, 1).zeros(18); // a window, with its place and length
+                }
+            }
+            if self.spxattene {
+                for ch in 0..channels {
+                    sink.put(1, 1).put((ch as u32 + 3) & 0x1F, 5); // chinspxatten + spxattncod
                 }
             }
             sink.put(u32::from(self.block_starts), 1);
@@ -2056,6 +2405,8 @@ mod tests {
         assert_eq!(
             frames[0],
             Frame {
+                stream_type: 0,
+                aht: [false; PLANES],
                 sample_rate: 48_000,
                 rate_code: 0,
                 layout: 2,
@@ -2075,6 +2426,7 @@ mod tests {
                 converter_strategies: [16, 16, 0, 0, 0],
                 snr_offsets: Some(SnrOffsets { coarse: 26, fast: 2 }),
                 blocks_state: BlocksState {
+                    block_switching: false,
                     dither_flags: false,
                     bit_allocation: false,
                     gain_codes: false,
@@ -2083,6 +2435,8 @@ mod tests {
                     transient_processing: false,
                     snr_offsets: 0,
                 },
+                spx_attenuation: [None; CHANS],
+                transient_windows: [None; CHANS],
                 block_starts: None,
             }
         );
@@ -2099,6 +2453,8 @@ mod tests {
         assert_eq!(
             frames[0],
             Frame {
+                stream_type: 0,
+                aht: [false; PLANES],
                 sample_rate: 48_000,
                 rate_code: 0,
                 layout: 7,
@@ -2120,6 +2476,7 @@ mod tests {
                 converter_strategies: [16, 16, 16, 16, 16],
                 snr_offsets: Some(SnrOffsets { coarse: 24, fast: 4 }),
                 blocks_state: BlocksState {
+                    block_switching: false,
                     dither_flags: false,
                     bit_allocation: false,
                     gain_codes: false,
@@ -2128,6 +2485,8 @@ mod tests {
                     transient_processing: false,
                     snr_offsets: 0,
                 },
+                spx_attenuation: [None; CHANS],
+                transient_windows: [None; CHANS],
                 block_starts: None,
             }
         );
@@ -2157,22 +2516,24 @@ mod tests {
 
     /// The two syntaxes share their first two bytes and disagree on every bit after
     /// them, and AC-3 packs them the other way round, so an AC-3 frame walked as
-    /// Annex E falls over on the first field past the syncword. Either of the two
-    /// refusals is a good outcome; what matters is that no geometry is invented.
+    /// Annex E fails its type, substream or version checks before publishing
+    /// geometry. A converted-stream tag alone does not make AC-3 syntax E-AC-3.
     #[test]
     fn an_ac_three_frame_is_refused_before_it_is_misread() {
         let error = header(&mut BitReader::new(AC3)).unwrap_err();
         assert!(matches!(error, crate::Error::Unsupported(_)), "{error}");
         let said = error.to_string();
         assert!(
-            said.contains("stream type") || said.contains("bsid"),
-            "{said} names neither of the two marks that tell the syntaxes apart"
+            said.contains("stream type") || said.contains("bsid") || said.contains("second"),
+            "{said} does not name the incompatible type, program or syntax"
         );
     }
 
     #[test]
-    fn a_stream_that_is_not_the_independent_one_is_named_not_guessed_at() {
-        for (kind, words) in [(1u32, "type 1"), (2, "type 2")] {
+    fn reconstruction_header_refuses_unselected_or_reserved_streams() {
+        // The packet walker skips unselected envelopes before calling this
+        // base-programme reconstruction parser. It must never decode one as 0.
+        for (kind, words) in [(1u32, "type 1"), (3, "type 3")] {
             let mut bytes = STEREO.to_vec();
             // The stream type is the frame's first two bits past the syncword.
             bytes[2] = (bytes[2] & 0x3F) | u8::try_from(kind << 6).unwrap();
@@ -2374,24 +2735,27 @@ mod tests {
         assert_eq!(stopped, 75);
     }
 
-    /// The three shapes of Table E1.3 that reach into every block of a frame rather
-    /// than sit in front of them: the adaptive hybrid transform, switching a block
-    /// over to AC-3's short transform, and the attenuation data of a reconstructed
-    /// high band. A stream that needs one is a missing decoder rather than a broken
-    /// file, and the two cannot be told apart unless the refusal names the syntax.
+    /// Tool flags preserve the conditional header offsets. An AHT-enabled header
+    /// may legitimately decline AHT on every eligible plane.
     #[test]
-    fn an_audio_frame_beyond_this_walk_is_refused_by_the_syntax_it_needs() {
-        let shapes: [(&str, fn(&mut Written)); 3] = [
-            ("hybrid", |written| written.ahte = true),
-            ("short transform", |written| written.blkswe = true),
-            ("high band", |written| written.spxattene = true),
-        ];
-        for (said, write) in shapes {
-            let bytes = audio_frame(7, true, write);
-            let error = header(&mut BitReader::new(&bytes)).unwrap_err();
-            assert!(matches!(error, crate::Error::Unsupported(_)), "{error}");
-            assert!(error.to_string().contains(said), "{error} does not name {said}");
-        }
+    fn audio_frame_tool_flags_preserve_conditional_offsets() {
+        let bytes = audio_frame(7, true, |written| written.ahte = true);
+        let parsed = walked(&bytes);
+        assert_eq!(parsed.aht, [false; PLANES]);
+
+        let blksw = walked(&audio_frame(2, false, |written| {
+            written.couple = true;
+            written.blkswe = true;
+        }));
+        assert!(blksw.blocks_state.block_switching);
+        assert_eq!(blksw.audio_bit, 108);
+
+        let spx_atten = walked(&audio_frame(2, false, |written| {
+            written.couple = true;
+            written.spxattene = true;
+        }));
+        assert_eq!(spx_atten.spx_attenuation[..2], [Some(3), Some(4)]);
+        assert_eq!(spx_atten.audio_bit, 108 + 2 * 6);
     }
 
     /// `expstre`: the frame hands every block a 2-bit strategy of its own instead of
@@ -2546,6 +2910,7 @@ mod tests {
     fn the_flags_a_block_reads_are_handed_to_it_by_its_frame() {
         let read = walked(&audio_frame(2, false, |written| {
             written.couple = true;
+            written.blkswe = true;
             written.dithflage = true;
             written.bamode = true;
             written.gain_codes = true;
@@ -2555,6 +2920,7 @@ mod tests {
         assert_eq!(
             read.blocks_state,
             BlocksState {
+                block_switching: true,
                 dither_flags: true,
                 bit_allocation: true,
                 gain_codes: true,
@@ -2569,15 +2935,16 @@ mod tests {
 
     /// `transproce` says some channel of the frame carries a transient pre-noise
     /// processing window, and then every channel says whether it does. This reader
-    /// applies no such processing, so the windows are stepped over - but stepped over
-    /// at their right width, since the audio begins where the last of them ends.
+    /// does not yet apply PCM correction, but retains the parameters without
+    /// changing where the audio blocks begin.
     #[test]
-    fn transient_processing_windows_are_stepped_over_not_kept() {
+    fn transient_processing_windows_are_kept_without_moving_the_audio_boundary() {
         let read = walked(&audio_frame(2, false, |written| {
             written.couple = true;
             written.transproce = true;
         }));
         assert!(read.blocks_state.transient_processing);
+        assert_eq!(&read.transient_windows[..2], &[Some(TransientWindow {location:0,length:0});2]);
         assert_eq!(
             read.audio_bit,
             108 + 2 * 19,
@@ -2797,5 +3164,349 @@ mod walker_trace {
             (squared / floats.len().max(1) as f64).sqrt() as f32,
             floats.iter().filter(|x| **x != 0.0).count(),
         );
+    }
+}
+
+#[cfg(test)]
+mod spx_notch_regressions {
+    use super::*;
+    #[test]
+    fn specification_notches_cover_initial_border_and_only_later_wraps() {
+        // Literal Table E.2.12 entries, independent of the exponent formula.
+        for (code, weights) in [
+            (0, [0.954841604f32, 0.911722489, 0.870550563]),
+            (14, [0.5, 0.25, 0.125]),
+            (31, [0.227930622, 0.051952369, 0.011841536]),
+        ] {
+            let mut decoder = Eac3Decoder::new(&[], 48000, 2).unwrap();
+            decoder.spx.channels[0] = true;
+            decoder.spx.copy_first = 37;
+            decoder.spx.first = 61;
+            decoder.spx.last = 97;
+            decoder.spx.count = 3;
+            decoder.spx.bands[..3].fill(12);
+            decoder.spx.scale[0][..3].fill(1.0);
+            decoder.spx.signal[0][..3].fill(1.0);
+            decoder.spx.noise[0][..3].fill(0.0);
+            decoder.core.coefficients(0).fill(1.0);
+            let header = Header {rate:0,frame_bytes:1024,acmod:2,nfchans:2,lfeon:false,clev:1.0,slev:1.0};
+            let mut attenuation = [None; CHANS];
+            attenuation[0] = Some(code);
+            decoder.synthesise(header, &attenuation);
+            let coefficients = decoder.core.coefficients(0);
+            for bin in 0usize..97 {
+                let mut expected = 1.0;
+                for border in [61usize, 85] {
+                    let distance = bin.abs_diff(border);
+                    if distance <= 2 { expected = weights[2-distance]; }
+                }
+                assert!((coefficients[bin]-expected).abs() < 0.0000001,
+                    "code={code} bin={bin}: got {} expected {expected}", coefficients[bin]);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod mixed_zero_allocation_regressions {
+    use super::*;
+    #[test]
+    fn authored_delta_segments_really_mix_zero_vq_and_gaq_allocations() {
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-aht-mixed-zero");
+        let m:serde_json::Value=serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        let cases=m["cases"].as_array().unwrap();assert_eq!(cases.len(),272);
+        let mut covered=std::collections::BTreeSet::new();
+        for c in cases {
+            let raw=std::fs::read(root.join(c["file"].as_str().unwrap())).unwrap();
+            let mut d=Eac3Decoder::new(&[],48000,2).unwrap();
+            d.decode_encoded(&raw[..4096],0,0).unwrap();
+            for ch in 0..2 {
+                let expected:Vec<_>=c["pointers"][ch].as_array().unwrap().iter().map(|p|p.as_u64().unwrap() as u8).collect();
+                assert!(expected.contains(&0) && expected.iter().any(|&p|p>=8));
+                assert_eq!(&d.core.strategy.bap[ch][..73],&expected,"{} channel {ch}: actual allocation differs from the analytic author",c["name"]);
+                covered.extend(expected);
+            }
+        }
+        assert_eq!(covered,(0..15).collect::<std::collections::BTreeSet<u8>>());
+    }
+}
+
+#[cfg(test)]
+mod zero_coupling_regressions {
+    use super::*;
+    #[test]
+    fn coupled_zero_bins_obey_flags_before_transform_and_do_not_share_noise() {
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-coupling-zero");
+        let m:serde_json::Value=serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        let cases=m["cases"].as_array().unwrap();assert_eq!(cases.len(),448);
+        for c in cases {
+            let raw=std::fs::read(root.join(c["file"].as_str().unwrap())).unwrap();
+            let mut d=Eac3Decoder::new(&[],48000,2).unwrap();
+            d.decode_encoded(&raw[..4096],0,0).unwrap();
+            assert!(d.core.strategy.cplinu);
+            let start=d.core.strategy.start[CPL];let end=d.core.strategy.end[CPL];
+            assert!(end>start);
+            assert!(d.core.strategy.bap[CPL][start..end].iter().all(|&p|p==0));
+            let mut spectra=Vec::new();
+            for ch in 0..2 {
+                let enabled=c["flags"][5][ch].as_u64()==Some(1);
+                assert_eq!(d.core.strategy.dither[ch],enabled);
+                let v=d.core.coefficients(ch)[start..end].to_vec();
+                if enabled {assert!(v.iter().any(|&x|x!=0.0),"{} ch{ch}: missing coupled noise",c["name"]);}
+                else {assert!(v.iter().all(|&x|x==0.0),"{} ch{ch}: forbidden coupled noise",c["name"]);}
+                spectra.push(v);
+            }
+            if c["pattern"]=="on" {
+                let (mut xx,mut yy,mut xy)=(0.0f64,0.0f64,0.0f64);
+                for (&x,&y) in spectra[0].iter().zip(&spectra[1]) {
+                    let (x,y)=(f64::from(x),f64::from(y));xx+=x*x;yy+=y*y;xy+=x*y;
+                }
+                assert!((xy/(xx*yy).sqrt()).abs()<0.8,"{} correlated coupled noise",c["name"]);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod enhanced_noise_regressions {
+    use super::*;
+    #[test]
+    fn enhanced_zero_bins_apply_all_amplitudes_to_independent_channel_noise() {
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-enhanced-noise");
+        let m:serde_json::Value=serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        let cases=m["cases"].as_array().unwrap();assert_eq!(cases.len(),224);
+        let mut covered=std::collections::BTreeSet::new();
+        for c in cases {
+            let raw=std::fs::read(root.join(c["file"].as_str().unwrap())).unwrap();
+            let unity=std::fs::read(root.join(c["unity"].as_str().unwrap())).unwrap();
+            let mut d=Eac3Decoder::new(&[],48000,2).unwrap();
+            let mut u=Eac3Decoder::new(&[],48000,2).unwrap();
+            d.decode_encoded(&raw[..4096],0,0).unwrap();
+            u.decode_encoded(&unity,0,0).unwrap();
+            assert!(d.enhanced.active && u.enhanced.active);
+            let start=c["start"].as_u64().unwrap() as usize;
+            let end=c["end"].as_u64().unwrap() as usize;
+            assert_eq!((d.core.strategy.start[CPL],d.core.strategy.end[CPL]),(start,end));
+            assert!(d.core.strategy.bap[CPL][start..end].iter().all(|&p|p==0));
+            let mut spectra=Vec::new();
+            for ch in 0..2 {
+                let enabled=c["flags"][5][ch].as_u64()==Some(1);
+                assert_eq!(d.core.strategy.dither[ch],enabled);
+                let actual=d.core.coefficients(ch)[..end].to_vec();
+                let baseline=u.core.coefficients(ch)[..end].to_vec();
+                assert_eq!(&actual[..start],&baseline[..start]);
+                for i in start..end {
+                    let gain=c["gains"][ch][i-start].as_f64().unwrap() as f32;
+                    let code=c["codes"][ch][i-start].as_u64().unwrap();covered.insert(code);
+                    assert_eq!(actual[i],baseline[i]*gain,"{} ch{ch} bin{i} code{code}",c["name"]);
+                    if !enabled || code==31 {assert_eq!(actual[i],0.0);}
+                    if enabled {assert!(baseline[i].is_finite());}
+                }
+                spectra.push(baseline[start..end].to_vec());
+            }
+            if c["pattern"]=="on" {
+                let (mut xx,mut yy,mut xy)=(0.0f64,0.0f64,0.0f64);
+                for (&x,&y) in spectra[0].iter().zip(&spectra[1]) {
+                    let (x,y)=(f64::from(x),f64::from(y));xx+=x*x;yy+=y*y;xy+=x*y;
+                }
+                assert!(xx>0.0 && yy>0.0);
+                assert!((xy/(xx*yy).sqrt()).abs()<0.8,"{} shared enhanced noise",c["name"]);
+            }
+        }
+        assert_eq!(covered,(0..32).collect());
+    }
+}
+
+#[cfg(test)]
+mod lfe_zero_allocation_regressions {
+    use super::*;
+    #[test]
+    fn lfe_witnesses_really_select_zero_or_coded_allocation() {
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-lfe-zero");
+        let m:serde_json::Value=serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        let cases=m["cases"].as_array().unwrap();assert_eq!(cases.len(),96);
+        for c in cases {
+            let b=std::fs::read(root.join(c["file"].as_str().unwrap())).unwrap();
+            let mut d=Eac3Decoder::new(&[],48000,3).unwrap();
+            d.decode_encoded(&b[..4096],0,0).unwrap();
+            assert_eq!((d.core.strategy.start[LFE],d.core.strategy.end[LFE]),(0,7));
+            let allocated=c["allocated"].as_bool().unwrap();
+            let pointer=if allocated {if c["mask"].as_u64().unwrap()&4!=0 {19}else{15}}else{0};
+            assert!(d.core.strategy.bap[LFE][..7].iter().all(|&p|p==pointer),"{} incorrect LFE allocation",c["name"]);
+            let coef=d.core.coefficients(LFE);
+            if allocated {assert!(coef[..7].iter().any(|&x|x!=0.0));}
+            else {assert!(coef[..7].iter().all(|&x|x==0.0),"{} nonzero LFE before transform",c["name"]);}
+        }
+    }
+}
+
+#[cfg(test)]
+mod substream_routing_regressions {
+    use super::*;
+    #[test]
+    fn authored_envelopes_name_each_skipped_programme_and_dependent_stream() {
+        let root=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/eac3-substreams");
+        let m:serde_json::Value=serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
+        let cases=m["cases"].as_array().unwrap();assert_eq!(cases.len(),88);
+        for c in cases {
+            let extra=std::fs::read(root.join(c["extra"].as_str().unwrap())).unwrap();
+            let entries=c["streams"].as_array().unwrap();assert_eq!(extra.len(),entries.len()*4096);
+            let mut independent=1u64;
+            let mut dependent=0u64;
+            for (bytes,entry) in extra.chunks_exact(4096).zip(entries) {
+                assert_eq!(u64::from(bytes[2]>>6),entry[0].as_u64().unwrap());
+                assert_eq!(u64::from((bytes[2]>>3)&7),entry[1].as_u64().unwrap());
+                if bytes[2]>>6==1 {
+                    assert_eq!(entry[1].as_u64().unwrap(),dependent,"dependent IDs restart after each independent programme");
+                    dependent+=1;
+                }else{
+                    assert_eq!(entry[1].as_u64().unwrap(),independent,"independent IDs must be sequential");
+                    independent+=1;
+                    dependent=0;
+                }
+                assert_eq!(skipped_substream_bytes(bytes).unwrap(),Some(4096));
+                assert!(crate::codec::ac3_decoder::frame_crc_valid(bytes));
+                // The reconstruction parser still refuses extension syntax;
+                // base-programme playback must take the envelope route instead.
+                assert!(matches!(header(&mut BitReader::new(bytes)),Err(Error::Unsupported(_))));
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod native_transient_reconstruction_tests {
+    use super::*;
+    fn witness(name:&str)->Vec<u8> {
+        std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/eac3-transient-native").join(name)).unwrap()
+    }
+    fn fold(blocks:&[transient::NativeBlock])->Vec<f32> {
+        let mut out=Vec::new();
+        for b in blocks {b.mixing.write_pcm(&b.pcm,&b.gains,&mut out,b.clip);}
+        out
+    }
+    #[test]
+    fn coded_transient_native_reconstruction_matches_control_before_correction() {
+        for name in ["stereo","dual","mono-lfe"] {
+            let raw=witness(&format!("{name}.ec3"));
+            let control=witness(&format!("{name}-control.ec3"));
+            let h=checked_frame(&raw).unwrap();
+            // Exercise the committed video container rather than just raw bytes.
+            use crate::audio::AudioStream;
+            let mut movie=crate::playback_webm_audio::WebmAudioReader::open(
+                std::io::Cursor::new(witness(&format!("{name}.mkv"))),Default::default()).unwrap();
+            for _ in 0..3 {
+                let packet=movie.next_packet().unwrap().unwrap();
+                assert_eq!(packet.data,&raw[..h.frame_bytes]);
+            }
+            assert!(movie.next_packet().unwrap().is_none());
+            let mut captured=Eac3Decoder::for_container(&[],48_000,h.channels).unwrap();
+            let blocks=captured.reconstruct_native(&raw,None).unwrap();
+            assert!(captured.native_capture.is_none());
+            assert_eq!(blocks.len(),18);
+            let mut plain=Eac3Decoder::for_container(&[],48_000,h.channels).unwrap();
+            let expected=plain.reconstruct_native(&control,None).unwrap();
+            let mut direct=Eac3Decoder::for_container(&[],48_000,h.channels).unwrap();
+            let ordinary=direct.decode_mode(&control,0,None).unwrap().unwrap();
+            assert_eq!(fold(&blocks).iter().flat_map(|v|v.to_le_bytes()).collect::<Vec<_>>(),ordinary.data);
+            assert!(blocks.iter().any(|b|b.pcm.iter().flatten().any(|v|v.abs()>1e-5)));
+            for (i,(b,c)) in blocks.iter().zip(&expected).enumerate() {
+                assert_eq!(b.pcm,c.pcm,"{name} block {i}: metadata must not move the coded audio boundary");
+                assert_eq!(b.gains,c.gains);
+                assert_eq!(b.windows,if i%6==0 {h.transient_windows}else{[None;5]});
+                for plane in Eac3Decoder::geometry(&h).nfchans..5 {assert!(b.pcm[plane].iter().all(|v|*v==0.0));}
+                assert!(b.pcm[CPL].iter().all(|v|*v==0.0));
+                if !h.low_frequency {assert!(b.pcm[LFE].iter().all(|v|*v==0.0));}
+            }
+            let mut adapter=transient::NativeBlocks::default();
+            let mut corrected=Vec::new();
+            for (i,b) in blocks.iter().enumerate() {
+                corrected.extend(adapter.push(&b.pcm,b.windows,b.mixing,b.gains,b.clip,i).unwrap());
+            }
+            corrected.extend(adapter.finish().unwrap());
+            assert_eq!(corrected.len(),blocks.len());
+            assert!(corrected.iter().enumerate().all(|(i,(source,_))|i==*source));
+            let corrected:Vec<f32>=corrected.into_iter().flat_map(|(_,v)|v).collect();
+            assert_eq!(corrected.len(),fold(&blocks).len());
+            assert!(corrected.iter().zip(fold(&blocks)).any(|(a,b)|(a-b).abs()>1e-6),"{name}: correction must be audible, not a silent metadata witness");
+            captured.reset();
+            assert_eq!(fold(&captured.reconstruct_native(&raw,None).unwrap()),fold(&blocks));
+        }
+    }
+    #[test]
+    fn bad_crc_native_reconstruction_conceals_whole_frame_without_transient_metadata() {
+        for name in ["stereo","dual","mono-lfe"] {
+            let raw=witness(&format!("{name}-crc.ec3"));
+            let h=frame(&raw).unwrap();
+            assert!(checked_frame(&raw).is_none());
+            let mut decoder=Eac3Decoder::for_container(&[],48_000,h.channels).unwrap();
+            let blocks=decoder.reconstruct_native(&raw,None).unwrap();
+            assert_eq!(blocks.len(),18);
+            for b in &blocks[..6] {
+                assert_eq!(b.windows,[None;5]);
+                assert!(b.pcm.iter().flatten().all(|v|*v==0.0));
+            }
+            let mut direct=Eac3Decoder::for_container(&[],48_000,h.channels).unwrap();
+            assert_eq!(fold(&blocks).iter().flat_map(|v|v.to_le_bytes()).collect::<Vec<_>>(),direct.decode_mode(&raw,0,None).unwrap().unwrap().data);
+            assert!(blocks[6].windows[0].is_some());
+        }
+    }
+}
+
+#[cfg(test)]
+mod transient_packet_timing_tests {
+    use super::*;
+    #[test]
+    fn transient_reset_drops_pending_source_windows_and_restores_priming() {
+        let frame=&include_bytes!("../../tests/fixtures/playback-errors/eac3-transient-native/stereo.ec3")[..4096];
+        let mut baseline=Eac3Decoder::new(&[],48_000,2).unwrap();
+        assert!(baseline.decode_packet(frame,999,1536).unwrap().is_none());
+        let wanted=baseline.finish_packet().unwrap().unwrap().packet.data;
+        let mut d=Eac3Decoder::new(&[],48_000,2).unwrap();
+        assert!(d.decode_packet(frame,-37,111).unwrap().is_none());
+        d.reset();
+        assert!(d.decode_packet(frame,999,1536).unwrap().is_none());
+        // A rejected empty input must not erase the earlier retained packet.
+        assert!(d.decode_packet(&[],2222,1).is_err());
+        let got=d.finish_packet().unwrap().unwrap();
+        assert_eq!((got.source_pts,got.source_duration),(999,1536));
+        assert_eq!(got.packet.data,wanted);
+        assert_eq!(got.packet.data.len(),(1536-ENCODER_DELAY)*8);
+        assert!(d.finish_packet().unwrap().is_none());
+    }
+    #[test]
+    fn default_transient_decoder_keeps_source_windows_priming_drain_and_reset() {
+        let raw=include_bytes!("../../tests/fixtures/playback-errors/eac3-transient-native/stereo.ec3");
+        let mut reference=Eac3Decoder::for_container(&[],48_000,2).unwrap();
+        let blocks=reference.reconstruct_native(raw,None).unwrap();
+        let mut adapter=transient::NativeBlocks::default();let mut expected=Vec::new();
+        for b in blocks {expected.extend(adapter.push(&b.pcm,b.windows,b.mixing,b.gains,b.clip,()).unwrap().into_iter().flat_map(|(_,v)|v));}
+        expected.extend(adapter.finish().unwrap().into_iter().flat_map(|(_,v)|v));
+        let expected:Vec<u8>=expected.into_iter().flat_map(f32::to_le_bytes).collect();
+        for priming in [0,ENCODER_DELAY] {
+            let mut d=if priming==0 {Eac3Decoder::for_container(&[],48_000,2)}else{Eac3Decoder::new(&[],48_000,2)}.unwrap();
+            for _ in 0..2 {
+                let mut outputs=Vec::new();
+                let origins=[(-37,1511),(1536,1499),(3333,1337)];
+                for (i,(pts,duration)) in origins.into_iter().enumerate() {
+                    let output=d.decode_packet(&raw[i*4096..(i+1)*4096],pts,duration).unwrap();
+                    if i==0 {assert!(output.is_none(),"lookahead must retain the first packet");}
+                    outputs.extend(output);
+                }
+                while let Some(p)=d.finish_packet().unwrap() {outputs.push(p);}
+                assert!(d.finish_packet().unwrap().is_none());
+                assert_eq!(outputs.len(),3);
+                for (i,p) in outputs.iter().enumerate() {
+                    assert_eq!((p.source_pts,p.source_duration),origins[i]);
+                    assert_eq!(p.packet.pts,origins[i].0.max(0) as u64);
+                    assert_eq!((p.packet.timebase_num,p.packet.timebase_den),(1,48_000));
+                    assert_eq!(p.packet.data.len(),(1536-if i==0 {priming}else{0})*8);
+                }
+                assert_eq!(outputs.into_iter().flat_map(|p|p.packet.data).collect::<Vec<_>>(),expected[priming*8..]);
+                assert!(d.decode_packet(&raw[..4096],0,1536).is_err());
+                d.reset();
+            }
+        }
     }
 }

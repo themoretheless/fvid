@@ -1,0 +1,2724 @@
+{
+  "cases": [
+    {
+      "name": "a0-t0-m0-ind1",
+      "file": "a0-t0-m0-ind1.ec3",
+      "control": "a0-t0-m0-ind1-control.ec3",
+      "video": "a0-t0-m0-ind1.mkv",
+      "control_video": "a0-t0-m0-ind1-control.mkv",
+      "extra": "a0-t0-m0-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-ind2",
+      "file": "a0-t0-m0-ind2.ec3",
+      "control": "a0-t0-m0-ind2-control.ec3",
+      "video": "a0-t0-m0-ind2.mkv",
+      "control_video": "a0-t0-m0-ind2-control.mkv",
+      "extra": "a0-t0-m0-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-ind3",
+      "file": "a0-t0-m0-ind3.ec3",
+      "control": "a0-t0-m0-ind3-control.ec3",
+      "video": "a0-t0-m0-ind3.mkv",
+      "control_video": "a0-t0-m0-ind3-control.mkv",
+      "extra": "a0-t0-m0-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-ind4",
+      "file": "a0-t0-m0-ind4.ec3",
+      "control": "a0-t0-m0-ind4-control.ec3",
+      "video": "a0-t0-m0-ind4.mkv",
+      "control_video": "a0-t0-m0-ind4-control.mkv",
+      "extra": "a0-t0-m0-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-ind5",
+      "file": "a0-t0-m0-ind5.ec3",
+      "control": "a0-t0-m0-ind5-control.ec3",
+      "video": "a0-t0-m0-ind5.mkv",
+      "control_video": "a0-t0-m0-ind5-control.mkv",
+      "extra": "a0-t0-m0-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-ind6",
+      "file": "a0-t0-m0-ind6.ec3",
+      "control": "a0-t0-m0-ind6-control.ec3",
+      "video": "a0-t0-m0-ind6.mkv",
+      "control_video": "a0-t0-m0-ind6-control.mkv",
+      "extra": "a0-t0-m0-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-ind7",
+      "file": "a0-t0-m0-ind7.ec3",
+      "control": "a0-t0-m0-ind7-control.ec3",
+      "video": "a0-t0-m0-ind7.mkv",
+      "control_video": "a0-t0-m0-ind7-control.mkv",
+      "extra": "a0-t0-m0-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-dep",
+      "file": "a0-t0-m0-dep.ec3",
+      "control": "a0-t0-m0-dep-control.ec3",
+      "video": "a0-t0-m0-dep.mkv",
+      "control_video": "a0-t0-m0-dep-control.mkv",
+      "extra": "a0-t0-m0-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-depmap",
+      "file": "a0-t0-m0-depmap.ec3",
+      "control": "a0-t0-m0-depmap-control.ec3",
+      "video": "a0-t0-m0-depmap.mkv",
+      "control_video": "a0-t0-m0-depmap-control.mkv",
+      "extra": "a0-t0-m0-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-programmes",
+      "file": "a0-t0-m0-programmes.ec3",
+      "control": "a0-t0-m0-programmes-control.ec3",
+      "video": "a0-t0-m0-programmes.mkv",
+      "control_video": "a0-t0-m0-programmes-control.mkv",
+      "extra": "a0-t0-m0-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m0-mixed",
+      "file": "a0-t0-m0-mixed.ec3",
+      "control": "a0-t0-m0-mixed-control.ec3",
+      "video": "a0-t0-m0-mixed.mkv",
+      "control_video": "a0-t0-m0-mixed-control.mkv",
+      "extra": "a0-t0-m0-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind1",
+      "file": "a0-t0-m3-ind1.ec3",
+      "control": "a0-t0-m3-ind1-control.ec3",
+      "video": "a0-t0-m3-ind1.mkv",
+      "control_video": "a0-t0-m3-ind1-control.mkv",
+      "extra": "a0-t0-m3-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind2",
+      "file": "a0-t0-m3-ind2.ec3",
+      "control": "a0-t0-m3-ind2-control.ec3",
+      "video": "a0-t0-m3-ind2.mkv",
+      "control_video": "a0-t0-m3-ind2-control.mkv",
+      "extra": "a0-t0-m3-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind3",
+      "file": "a0-t0-m3-ind3.ec3",
+      "control": "a0-t0-m3-ind3-control.ec3",
+      "video": "a0-t0-m3-ind3.mkv",
+      "control_video": "a0-t0-m3-ind3-control.mkv",
+      "extra": "a0-t0-m3-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind4",
+      "file": "a0-t0-m3-ind4.ec3",
+      "control": "a0-t0-m3-ind4-control.ec3",
+      "video": "a0-t0-m3-ind4.mkv",
+      "control_video": "a0-t0-m3-ind4-control.mkv",
+      "extra": "a0-t0-m3-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind5",
+      "file": "a0-t0-m3-ind5.ec3",
+      "control": "a0-t0-m3-ind5-control.ec3",
+      "video": "a0-t0-m3-ind5.mkv",
+      "control_video": "a0-t0-m3-ind5-control.mkv",
+      "extra": "a0-t0-m3-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind6",
+      "file": "a0-t0-m3-ind6.ec3",
+      "control": "a0-t0-m3-ind6-control.ec3",
+      "video": "a0-t0-m3-ind6.mkv",
+      "control_video": "a0-t0-m3-ind6-control.mkv",
+      "extra": "a0-t0-m3-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-ind7",
+      "file": "a0-t0-m3-ind7.ec3",
+      "control": "a0-t0-m3-ind7-control.ec3",
+      "video": "a0-t0-m3-ind7.mkv",
+      "control_video": "a0-t0-m3-ind7-control.mkv",
+      "extra": "a0-t0-m3-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-dep",
+      "file": "a0-t0-m3-dep.ec3",
+      "control": "a0-t0-m3-dep-control.ec3",
+      "video": "a0-t0-m3-dep.mkv",
+      "control_video": "a0-t0-m3-dep-control.mkv",
+      "extra": "a0-t0-m3-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-depmap",
+      "file": "a0-t0-m3-depmap.ec3",
+      "control": "a0-t0-m3-depmap-control.ec3",
+      "video": "a0-t0-m3-depmap.mkv",
+      "control_video": "a0-t0-m3-depmap-control.mkv",
+      "extra": "a0-t0-m3-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-programmes",
+      "file": "a0-t0-m3-programmes.ec3",
+      "control": "a0-t0-m3-programmes-control.ec3",
+      "video": "a0-t0-m3-programmes.mkv",
+      "control_video": "a0-t0-m3-programmes-control.mkv",
+      "extra": "a0-t0-m3-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t0-m3-mixed",
+      "file": "a0-t0-m3-mixed.ec3",
+      "control": "a0-t0-m3-mixed-control.ec3",
+      "video": "a0-t0-m3-mixed.mkv",
+      "control_video": "a0-t0-m3-mixed-control.mkv",
+      "extra": "a0-t0-m3-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind1",
+      "file": "a0-t2-m0-ind1.ec3",
+      "control": "a0-t2-m0-ind1-control.ec3",
+      "video": "a0-t2-m0-ind1.mkv",
+      "control_video": "a0-t2-m0-ind1-control.mkv",
+      "extra": "a0-t2-m0-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind2",
+      "file": "a0-t2-m0-ind2.ec3",
+      "control": "a0-t2-m0-ind2-control.ec3",
+      "video": "a0-t2-m0-ind2.mkv",
+      "control_video": "a0-t2-m0-ind2-control.mkv",
+      "extra": "a0-t2-m0-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind3",
+      "file": "a0-t2-m0-ind3.ec3",
+      "control": "a0-t2-m0-ind3-control.ec3",
+      "video": "a0-t2-m0-ind3.mkv",
+      "control_video": "a0-t2-m0-ind3-control.mkv",
+      "extra": "a0-t2-m0-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind4",
+      "file": "a0-t2-m0-ind4.ec3",
+      "control": "a0-t2-m0-ind4-control.ec3",
+      "video": "a0-t2-m0-ind4.mkv",
+      "control_video": "a0-t2-m0-ind4-control.mkv",
+      "extra": "a0-t2-m0-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind5",
+      "file": "a0-t2-m0-ind5.ec3",
+      "control": "a0-t2-m0-ind5-control.ec3",
+      "video": "a0-t2-m0-ind5.mkv",
+      "control_video": "a0-t2-m0-ind5-control.mkv",
+      "extra": "a0-t2-m0-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind6",
+      "file": "a0-t2-m0-ind6.ec3",
+      "control": "a0-t2-m0-ind6-control.ec3",
+      "video": "a0-t2-m0-ind6.mkv",
+      "control_video": "a0-t2-m0-ind6-control.mkv",
+      "extra": "a0-t2-m0-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-ind7",
+      "file": "a0-t2-m0-ind7.ec3",
+      "control": "a0-t2-m0-ind7-control.ec3",
+      "video": "a0-t2-m0-ind7.mkv",
+      "control_video": "a0-t2-m0-ind7-control.mkv",
+      "extra": "a0-t2-m0-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-dep",
+      "file": "a0-t2-m0-dep.ec3",
+      "control": "a0-t2-m0-dep-control.ec3",
+      "video": "a0-t2-m0-dep.mkv",
+      "control_video": "a0-t2-m0-dep-control.mkv",
+      "extra": "a0-t2-m0-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-depmap",
+      "file": "a0-t2-m0-depmap.ec3",
+      "control": "a0-t2-m0-depmap-control.ec3",
+      "video": "a0-t2-m0-depmap.mkv",
+      "control_video": "a0-t2-m0-depmap-control.mkv",
+      "extra": "a0-t2-m0-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-programmes",
+      "file": "a0-t2-m0-programmes.ec3",
+      "control": "a0-t2-m0-programmes-control.ec3",
+      "video": "a0-t2-m0-programmes.mkv",
+      "control_video": "a0-t2-m0-programmes-control.mkv",
+      "extra": "a0-t2-m0-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m0-mixed",
+      "file": "a0-t2-m0-mixed.ec3",
+      "control": "a0-t2-m0-mixed-control.ec3",
+      "video": "a0-t2-m0-mixed.mkv",
+      "control_video": "a0-t2-m0-mixed-control.mkv",
+      "extra": "a0-t2-m0-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind1",
+      "file": "a0-t2-m3-ind1.ec3",
+      "control": "a0-t2-m3-ind1-control.ec3",
+      "video": "a0-t2-m3-ind1.mkv",
+      "control_video": "a0-t2-m3-ind1-control.mkv",
+      "extra": "a0-t2-m3-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind2",
+      "file": "a0-t2-m3-ind2.ec3",
+      "control": "a0-t2-m3-ind2-control.ec3",
+      "video": "a0-t2-m3-ind2.mkv",
+      "control_video": "a0-t2-m3-ind2-control.mkv",
+      "extra": "a0-t2-m3-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind3",
+      "file": "a0-t2-m3-ind3.ec3",
+      "control": "a0-t2-m3-ind3-control.ec3",
+      "video": "a0-t2-m3-ind3.mkv",
+      "control_video": "a0-t2-m3-ind3-control.mkv",
+      "extra": "a0-t2-m3-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind4",
+      "file": "a0-t2-m3-ind4.ec3",
+      "control": "a0-t2-m3-ind4-control.ec3",
+      "video": "a0-t2-m3-ind4.mkv",
+      "control_video": "a0-t2-m3-ind4-control.mkv",
+      "extra": "a0-t2-m3-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind5",
+      "file": "a0-t2-m3-ind5.ec3",
+      "control": "a0-t2-m3-ind5-control.ec3",
+      "video": "a0-t2-m3-ind5.mkv",
+      "control_video": "a0-t2-m3-ind5-control.mkv",
+      "extra": "a0-t2-m3-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind6",
+      "file": "a0-t2-m3-ind6.ec3",
+      "control": "a0-t2-m3-ind6-control.ec3",
+      "video": "a0-t2-m3-ind6.mkv",
+      "control_video": "a0-t2-m3-ind6-control.mkv",
+      "extra": "a0-t2-m3-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-ind7",
+      "file": "a0-t2-m3-ind7.ec3",
+      "control": "a0-t2-m3-ind7-control.ec3",
+      "video": "a0-t2-m3-ind7.mkv",
+      "control_video": "a0-t2-m3-ind7-control.mkv",
+      "extra": "a0-t2-m3-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-dep",
+      "file": "a0-t2-m3-dep.ec3",
+      "control": "a0-t2-m3-dep-control.ec3",
+      "video": "a0-t2-m3-dep.mkv",
+      "control_video": "a0-t2-m3-dep-control.mkv",
+      "extra": "a0-t2-m3-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-depmap",
+      "file": "a0-t2-m3-depmap.ec3",
+      "control": "a0-t2-m3-depmap-control.ec3",
+      "video": "a0-t2-m3-depmap.mkv",
+      "control_video": "a0-t2-m3-depmap-control.mkv",
+      "extra": "a0-t2-m3-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-programmes",
+      "file": "a0-t2-m3-programmes.ec3",
+      "control": "a0-t2-m3-programmes-control.ec3",
+      "video": "a0-t2-m3-programmes.mkv",
+      "control_video": "a0-t2-m3-programmes-control.mkv",
+      "extra": "a0-t2-m3-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a0-t2-m3-mixed",
+      "file": "a0-t2-m3-mixed.ec3",
+      "control": "a0-t2-m3-mixed-control.ec3",
+      "video": "a0-t2-m3-mixed.mkv",
+      "control_video": "a0-t2-m3-mixed-control.mkv",
+      "extra": "a0-t2-m3-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind1",
+      "file": "a1-t0-m0-ind1.ec3",
+      "control": "a1-t0-m0-ind1-control.ec3",
+      "video": "a1-t0-m0-ind1.mkv",
+      "control_video": "a1-t0-m0-ind1-control.mkv",
+      "extra": "a1-t0-m0-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind2",
+      "file": "a1-t0-m0-ind2.ec3",
+      "control": "a1-t0-m0-ind2-control.ec3",
+      "video": "a1-t0-m0-ind2.mkv",
+      "control_video": "a1-t0-m0-ind2-control.mkv",
+      "extra": "a1-t0-m0-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind3",
+      "file": "a1-t0-m0-ind3.ec3",
+      "control": "a1-t0-m0-ind3-control.ec3",
+      "video": "a1-t0-m0-ind3.mkv",
+      "control_video": "a1-t0-m0-ind3-control.mkv",
+      "extra": "a1-t0-m0-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind4",
+      "file": "a1-t0-m0-ind4.ec3",
+      "control": "a1-t0-m0-ind4-control.ec3",
+      "video": "a1-t0-m0-ind4.mkv",
+      "control_video": "a1-t0-m0-ind4-control.mkv",
+      "extra": "a1-t0-m0-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind5",
+      "file": "a1-t0-m0-ind5.ec3",
+      "control": "a1-t0-m0-ind5-control.ec3",
+      "video": "a1-t0-m0-ind5.mkv",
+      "control_video": "a1-t0-m0-ind5-control.mkv",
+      "extra": "a1-t0-m0-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind6",
+      "file": "a1-t0-m0-ind6.ec3",
+      "control": "a1-t0-m0-ind6-control.ec3",
+      "video": "a1-t0-m0-ind6.mkv",
+      "control_video": "a1-t0-m0-ind6-control.mkv",
+      "extra": "a1-t0-m0-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-ind7",
+      "file": "a1-t0-m0-ind7.ec3",
+      "control": "a1-t0-m0-ind7-control.ec3",
+      "video": "a1-t0-m0-ind7.mkv",
+      "control_video": "a1-t0-m0-ind7-control.mkv",
+      "extra": "a1-t0-m0-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-dep",
+      "file": "a1-t0-m0-dep.ec3",
+      "control": "a1-t0-m0-dep-control.ec3",
+      "video": "a1-t0-m0-dep.mkv",
+      "control_video": "a1-t0-m0-dep-control.mkv",
+      "extra": "a1-t0-m0-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-depmap",
+      "file": "a1-t0-m0-depmap.ec3",
+      "control": "a1-t0-m0-depmap-control.ec3",
+      "video": "a1-t0-m0-depmap.mkv",
+      "control_video": "a1-t0-m0-depmap-control.mkv",
+      "extra": "a1-t0-m0-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-programmes",
+      "file": "a1-t0-m0-programmes.ec3",
+      "control": "a1-t0-m0-programmes-control.ec3",
+      "video": "a1-t0-m0-programmes.mkv",
+      "control_video": "a1-t0-m0-programmes-control.mkv",
+      "extra": "a1-t0-m0-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m0-mixed",
+      "file": "a1-t0-m0-mixed.ec3",
+      "control": "a1-t0-m0-mixed-control.ec3",
+      "video": "a1-t0-m0-mixed.mkv",
+      "control_video": "a1-t0-m0-mixed-control.mkv",
+      "extra": "a1-t0-m0-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind1",
+      "file": "a1-t0-m3-ind1.ec3",
+      "control": "a1-t0-m3-ind1-control.ec3",
+      "video": "a1-t0-m3-ind1.mkv",
+      "control_video": "a1-t0-m3-ind1-control.mkv",
+      "extra": "a1-t0-m3-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind2",
+      "file": "a1-t0-m3-ind2.ec3",
+      "control": "a1-t0-m3-ind2-control.ec3",
+      "video": "a1-t0-m3-ind2.mkv",
+      "control_video": "a1-t0-m3-ind2-control.mkv",
+      "extra": "a1-t0-m3-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind3",
+      "file": "a1-t0-m3-ind3.ec3",
+      "control": "a1-t0-m3-ind3-control.ec3",
+      "video": "a1-t0-m3-ind3.mkv",
+      "control_video": "a1-t0-m3-ind3-control.mkv",
+      "extra": "a1-t0-m3-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind4",
+      "file": "a1-t0-m3-ind4.ec3",
+      "control": "a1-t0-m3-ind4-control.ec3",
+      "video": "a1-t0-m3-ind4.mkv",
+      "control_video": "a1-t0-m3-ind4-control.mkv",
+      "extra": "a1-t0-m3-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind5",
+      "file": "a1-t0-m3-ind5.ec3",
+      "control": "a1-t0-m3-ind5-control.ec3",
+      "video": "a1-t0-m3-ind5.mkv",
+      "control_video": "a1-t0-m3-ind5-control.mkv",
+      "extra": "a1-t0-m3-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind6",
+      "file": "a1-t0-m3-ind6.ec3",
+      "control": "a1-t0-m3-ind6-control.ec3",
+      "video": "a1-t0-m3-ind6.mkv",
+      "control_video": "a1-t0-m3-ind6-control.mkv",
+      "extra": "a1-t0-m3-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-ind7",
+      "file": "a1-t0-m3-ind7.ec3",
+      "control": "a1-t0-m3-ind7-control.ec3",
+      "video": "a1-t0-m3-ind7.mkv",
+      "control_video": "a1-t0-m3-ind7-control.mkv",
+      "extra": "a1-t0-m3-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-dep",
+      "file": "a1-t0-m3-dep.ec3",
+      "control": "a1-t0-m3-dep-control.ec3",
+      "video": "a1-t0-m3-dep.mkv",
+      "control_video": "a1-t0-m3-dep-control.mkv",
+      "extra": "a1-t0-m3-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-depmap",
+      "file": "a1-t0-m3-depmap.ec3",
+      "control": "a1-t0-m3-depmap-control.ec3",
+      "video": "a1-t0-m3-depmap.mkv",
+      "control_video": "a1-t0-m3-depmap-control.mkv",
+      "extra": "a1-t0-m3-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-programmes",
+      "file": "a1-t0-m3-programmes.ec3",
+      "control": "a1-t0-m3-programmes-control.ec3",
+      "video": "a1-t0-m3-programmes.mkv",
+      "control_video": "a1-t0-m3-programmes-control.mkv",
+      "extra": "a1-t0-m3-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t0-m3-mixed",
+      "file": "a1-t0-m3-mixed.ec3",
+      "control": "a1-t0-m3-mixed-control.ec3",
+      "video": "a1-t0-m3-mixed.mkv",
+      "control_video": "a1-t0-m3-mixed-control.mkv",
+      "extra": "a1-t0-m3-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind1",
+      "file": "a1-t2-m0-ind1.ec3",
+      "control": "a1-t2-m0-ind1-control.ec3",
+      "video": "a1-t2-m0-ind1.mkv",
+      "control_video": "a1-t2-m0-ind1-control.mkv",
+      "extra": "a1-t2-m0-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind2",
+      "file": "a1-t2-m0-ind2.ec3",
+      "control": "a1-t2-m0-ind2-control.ec3",
+      "video": "a1-t2-m0-ind2.mkv",
+      "control_video": "a1-t2-m0-ind2-control.mkv",
+      "extra": "a1-t2-m0-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind3",
+      "file": "a1-t2-m0-ind3.ec3",
+      "control": "a1-t2-m0-ind3-control.ec3",
+      "video": "a1-t2-m0-ind3.mkv",
+      "control_video": "a1-t2-m0-ind3-control.mkv",
+      "extra": "a1-t2-m0-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind4",
+      "file": "a1-t2-m0-ind4.ec3",
+      "control": "a1-t2-m0-ind4-control.ec3",
+      "video": "a1-t2-m0-ind4.mkv",
+      "control_video": "a1-t2-m0-ind4-control.mkv",
+      "extra": "a1-t2-m0-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind5",
+      "file": "a1-t2-m0-ind5.ec3",
+      "control": "a1-t2-m0-ind5-control.ec3",
+      "video": "a1-t2-m0-ind5.mkv",
+      "control_video": "a1-t2-m0-ind5-control.mkv",
+      "extra": "a1-t2-m0-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind6",
+      "file": "a1-t2-m0-ind6.ec3",
+      "control": "a1-t2-m0-ind6-control.ec3",
+      "video": "a1-t2-m0-ind6.mkv",
+      "control_video": "a1-t2-m0-ind6-control.mkv",
+      "extra": "a1-t2-m0-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-ind7",
+      "file": "a1-t2-m0-ind7.ec3",
+      "control": "a1-t2-m0-ind7-control.ec3",
+      "video": "a1-t2-m0-ind7.mkv",
+      "control_video": "a1-t2-m0-ind7-control.mkv",
+      "extra": "a1-t2-m0-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-dep",
+      "file": "a1-t2-m0-dep.ec3",
+      "control": "a1-t2-m0-dep-control.ec3",
+      "video": "a1-t2-m0-dep.mkv",
+      "control_video": "a1-t2-m0-dep-control.mkv",
+      "extra": "a1-t2-m0-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-depmap",
+      "file": "a1-t2-m0-depmap.ec3",
+      "control": "a1-t2-m0-depmap-control.ec3",
+      "video": "a1-t2-m0-depmap.mkv",
+      "control_video": "a1-t2-m0-depmap-control.mkv",
+      "extra": "a1-t2-m0-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-programmes",
+      "file": "a1-t2-m0-programmes.ec3",
+      "control": "a1-t2-m0-programmes-control.ec3",
+      "video": "a1-t2-m0-programmes.mkv",
+      "control_video": "a1-t2-m0-programmes-control.mkv",
+      "extra": "a1-t2-m0-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m0-mixed",
+      "file": "a1-t2-m0-mixed.ec3",
+      "control": "a1-t2-m0-mixed-control.ec3",
+      "video": "a1-t2-m0-mixed.mkv",
+      "control_video": "a1-t2-m0-mixed-control.mkv",
+      "extra": "a1-t2-m0-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind1",
+      "file": "a1-t2-m3-ind1.ec3",
+      "control": "a1-t2-m3-ind1-control.ec3",
+      "video": "a1-t2-m3-ind1.mkv",
+      "control_video": "a1-t2-m3-ind1-control.mkv",
+      "extra": "a1-t2-m3-ind1-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind2",
+      "file": "a1-t2-m3-ind2.ec3",
+      "control": "a1-t2-m3-ind2-control.ec3",
+      "video": "a1-t2-m3-ind2.mkv",
+      "control_video": "a1-t2-m3-ind2-control.mkv",
+      "extra": "a1-t2-m3-ind2-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind3",
+      "file": "a1-t2-m3-ind3.ec3",
+      "control": "a1-t2-m3-ind3-control.ec3",
+      "video": "a1-t2-m3-ind3.mkv",
+      "control_video": "a1-t2-m3-ind3-control.mkv",
+      "extra": "a1-t2-m3-ind3-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind4",
+      "file": "a1-t2-m3-ind4.ec3",
+      "control": "a1-t2-m3-ind4-control.ec3",
+      "video": "a1-t2-m3-ind4.mkv",
+      "control_video": "a1-t2-m3-ind4-control.mkv",
+      "extra": "a1-t2-m3-ind4-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind5",
+      "file": "a1-t2-m3-ind5.ec3",
+      "control": "a1-t2-m3-ind5-control.ec3",
+      "video": "a1-t2-m3-ind5.mkv",
+      "control_video": "a1-t2-m3-ind5-control.mkv",
+      "extra": "a1-t2-m3-ind5-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind6",
+      "file": "a1-t2-m3-ind6.ec3",
+      "control": "a1-t2-m3-ind6-control.ec3",
+      "video": "a1-t2-m3-ind6.mkv",
+      "control_video": "a1-t2-m3-ind6-control.mkv",
+      "extra": "a1-t2-m3-ind6-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-ind7",
+      "file": "a1-t2-m3-ind7.ec3",
+      "control": "a1-t2-m3-ind7-control.ec3",
+      "video": "a1-t2-m3-ind7.mkv",
+      "control_video": "a1-t2-m3-ind7-control.mkv",
+      "extra": "a1-t2-m3-ind7-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-dep",
+      "file": "a1-t2-m3-dep.ec3",
+      "control": "a1-t2-m3-dep-control.ec3",
+      "video": "a1-t2-m3-dep.mkv",
+      "control_video": "a1-t2-m3-dep-control.mkv",
+      "extra": "a1-t2-m3-dep-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-depmap",
+      "file": "a1-t2-m3-depmap.ec3",
+      "control": "a1-t2-m3-depmap-control.ec3",
+      "video": "a1-t2-m3-depmap.mkv",
+      "control_video": "a1-t2-m3-depmap-control.mkv",
+      "extra": "a1-t2-m3-depmap-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-programmes",
+      "file": "a1-t2-m3-programmes.ec3",
+      "control": "a1-t2-m3-programmes-control.ec3",
+      "video": "a1-t2-m3-programmes.mkv",
+      "control_video": "a1-t2-m3-programmes-control.mkv",
+      "extra": "a1-t2-m3-programmes-extra.ec3",
+      "streams": [
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ]
+      ]
+    },
+    {
+      "name": "a1-t2-m3-mixed",
+      "file": "a1-t2-m3-mixed.ec3",
+      "control": "a1-t2-m3-mixed-control.ec3",
+      "video": "a1-t2-m3-mixed.mkv",
+      "control_video": "a1-t2-m3-mixed-control.mkv",
+      "extra": "a1-t2-m3-mixed-extra.ec3",
+      "streams": [
+        [
+          1,
+          0,
+          true
+        ],
+        [
+          0,
+          1,
+          false
+        ],
+        [
+          0,
+          2,
+          false
+        ],
+        [
+          0,
+          3,
+          false
+        ],
+        [
+          0,
+          4,
+          false
+        ],
+        [
+          0,
+          5,
+          false
+        ],
+        [
+          0,
+          6,
+          false
+        ],
+        [
+          0,
+          7,
+          false
+        ],
+        [
+          1,
+          0,
+          false
+        ]
+      ]
+    }
+  ]
+}

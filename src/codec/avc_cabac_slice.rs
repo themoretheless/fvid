@@ -9,6 +9,8 @@ use super::{
     avc_slice::{SliceHeader, SliceType},
 };
 use crate::{Result, invalid};
+#[path = "avc_444_cabac_slice.rs"]
+mod colour444;
 pub struct InterCabacSlice<'a> {
     reader: IntraCabacReader<'a>,
     motion: CabacMotionContexts,
@@ -23,7 +25,7 @@ pub struct InterCabacSlice<'a> {
 }
 impl<'a> InterCabacSlice<'a> {
     pub fn new(header: &'a SliceHeader, sps: &'a Sps, pps: &'a Pps, budget: usize) -> Result<Self> {
-        Self::new_impl(header, sps, pps, budget, false)
+        Self::new_impl(header, sps, pps, budget, false, None)
     }
     pub fn new_mbaff(
         header: &'a SliceHeader,
@@ -37,7 +39,7 @@ impl<'a> InterCabacSlice<'a> {
         {
             return Err(invalid("MBAFF CABAC dispatcher requires a P/B frame slice"));
         }
-        Self::new_impl(header, sps, pps, budget, true)
+        Self::new_impl(header, sps, pps, budget, true, None)
     }
     fn new_impl(
         header: &'a SliceHeader,
@@ -45,9 +47,10 @@ impl<'a> InterCabacSlice<'a> {
         pps: &'a Pps,
         budget: usize,
         mbaff: bool,
+        colour_depth: Option<u8>,
     ) -> Result<Self> {
         if !matches!(header.slice_type, SliceType::P | SliceType::B)
-            && !(header.slice_type == SliceType::I && header.field_pic && !mbaff)
+            && !(header.slice_type == SliceType::I && ((header.field_pic && !mbaff) || colour_depth.is_some()))
         {
             return Err(invalid("CABAC dispatcher requires P/B or an I field slice"));
         }
@@ -76,7 +79,9 @@ impl<'a> InterCabacSlice<'a> {
         } else {
             CabacMotionContexts::new(sps.width_mbs as usize, height, remaining)?
         };
-        let reader = if mbaff {
+        let reader = if let Some(depth)=colour_depth {
+            IntraCabacReader::new_444(header,sps,pps,count,depth)?
+        } else if mbaff {
             IntraCabacReader::new_context_mbaff(header, sps, pps, count)?
         } else {
             IntraCabacReader::new_context(header, sps, pps, count)?

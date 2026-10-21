@@ -5,12 +5,14 @@ use super::{
     cabac::{Cabac, Context},
 };
 use crate::{Result, invalid};
+#[path = "avc_cabac_444_init.rs"]
+mod colour444_init;
 
 #[derive(Clone)]
 pub struct AvcCabac<'a> {
     rbsp: &'a [u8],
     engine: Cabac<'a>,
-    contexts: [Option<Context>; 460],
+    contexts: [Option<Context>; 1024],
 }
 impl<'a> AvcCabac<'a> {
     pub fn new(
@@ -31,8 +33,41 @@ impl<'a> AvcCabac<'a> {
         Ok(Self {
             rbsp,
             engine: Cabac::new(rbsp, bit_offset)?,
-            contexts: INIT[group].map(|pair| pair.map(|(m, n)| Context::avc(m, n, qp))),
+            contexts: std::array::from_fn(|i| {
+                INIT[group]
+                    .get(i)
+                    .copied()
+                    .flatten()
+                    .map(|(m, n)| Context::avc(m, n, qp))
+            }),
         })
+    }
+    /// Full nonseparate 4:4:4 residual bank. Ordinary AVC keeps 460..1023 unused.
+    pub(crate) fn new_444(
+        rbsp: &'a [u8],
+        bit_offset: usize,
+        slice_type: SliceType,
+        init_idc: u8,
+        qp: i32,
+    ) -> Result<Self> {
+        let mut decoder = Self::new(rbsp, bit_offset, slice_type, init_idc, qp)?;
+        let group = if matches!(slice_type, SliceType::I | SliceType::Si) {
+            0
+        } else {
+            usize::from(init_idc) + 1
+        };
+        for (at, &(m, n)) in colour444_init::INIT_444[group].iter().enumerate() {
+            decoder.contexts[460 + at] = Some(Context::avc(m, n, qp));
+        }
+        Ok(decoder)
+    }
+    pub(crate) fn residual_444(
+        &mut self,
+        category: ResidualCategory,
+        inc: u8,
+        field: bool,
+    ) -> Result<Residual<64>> {
+        read_residual_impl::<64>(self, category, inc, field, false, true)
     }
     pub fn decision(&mut self, index: usize) -> Result<bool> {
         let context = self
@@ -56,17 +91,38 @@ impl<'a> AvcCabac<'a> {
         luma_depth: u8,
         chroma_depth: u8,
     ) -> Result<super::avc_macroblock::IntraLuma> {
-        self.pcm_components(luma_depth,chroma_depth,true)
+        self.pcm_components(luma_depth, chroma_depth, true)
     }
-    pub(super) fn pcm_components(&mut self,luma_depth:u8,chroma_depth:u8,has_chroma:bool)->Result<super::avc_macroblock::IntraLuma> {
-        let (y,[cb,cr])=self.pcm_raw::<64>(luma_depth,chroma_depth,has_chroma)?;
-        Ok(super::avc_macroblock::IntraLuma::Pcm {y,cb,cr})
+    pub(super) fn pcm_components(
+        &mut self,
+        luma_depth: u8,
+        chroma_depth: u8,
+        has_chroma: bool,
+    ) -> Result<super::avc_macroblock::IntraLuma> {
+        let (y, [cb, cr]) = self.pcm_raw::<64>(luma_depth, chroma_depth, has_chroma)?;
+        Ok(super::avc_macroblock::IntraLuma::Pcm { y, cb, cr })
     }
-    pub(super) fn pcm422(&mut self,luma_depth:u8,chroma_depth:u8)->Result<(super::avc_macroblock::IntraLuma,[[u16;128];2])> {
-        let (y,chroma)=self.pcm_raw::<128>(luma_depth,chroma_depth,true)?;
-        Ok((super::avc_macroblock::IntraLuma::Pcm {y,cb:[0;64],cr:[0;64]},chroma))
+    pub(super) fn pcm422(
+        &mut self,
+        luma_depth: u8,
+        chroma_depth: u8,
+    ) -> Result<(super::avc_macroblock::IntraLuma, [[u16; 128]; 2])> {
+        let (y, chroma) = self.pcm_raw::<128>(luma_depth, chroma_depth, true)?;
+        Ok((
+            super::avc_macroblock::IntraLuma::Pcm {
+                y,
+                cb: [0; 64],
+                cr: [0; 64],
+            },
+            chroma,
+        ))
     }
-    pub(super) fn pcm_raw<const C:usize>(&mut self,luma_depth:u8,chroma_depth:u8,has_chroma:bool)->Result<([u16;256],[[u16;C];2])> {
+    pub(super) fn pcm_raw<const C: usize>(
+        &mut self,
+        luma_depth: u8,
+        chroma_depth: u8,
+        has_chroma: bool,
+    ) -> Result<([u16; 256], [[u16; C]; 2])> {
         if !self.engine.is_terminated()
             || !(8..=14).contains(&luma_depth)
             || !(8..=14).contains(&chroma_depth)
@@ -82,15 +138,19 @@ impl<'a> AvcCabac<'a> {
         // (unlike CAVLC); PCM starts at the next byte, as in the JM decoder.
         bits.skip((8 - bits.position() % 8) % 8)?;
         let mut y = [0; 256];
-        let mut chroma = [[0; C];2];
+        let mut chroma = [[0; C]; 2];
         for sample in &mut y {
             *sample = bits.read(luma_depth)? as u16;
         }
-        for sample in chroma.iter_mut().flatten().take(if has_chroma {2*C}else{0}) {
+        for sample in chroma
+            .iter_mut()
+            .flatten()
+            .take(if has_chroma { 2 * C } else { 0 })
+        {
             *sample = bits.read(chroma_depth)? as u16;
         }
         self.engine = Cabac::new(self.rbsp, bits.position())?;
-        Ok((y,chroma))
+        Ok((y, chroma))
     }
     pub fn finish_slice(&self) -> Result<()> {
         if !self.engine.is_terminated() {
@@ -140,6 +200,14 @@ pub enum ResidualCategory {
     ChromaDc,
     ChromaAc,
     Luma8,
+    CbDc,
+    CbAc,
+    Cb4,
+    Cb8,
+    CrDc,
+    CrAc,
+    Cr4,
+    Cr8,
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct Residual<const N: usize = 16> {
@@ -165,14 +233,32 @@ fn read_residual<const N: usize>(
     field: bool,
     chroma422: bool,
 ) -> Result<Residual<N>> {
+    read_residual_impl(bins, category, coded_context, field, chroma422, false)
+}
+fn read_residual_impl<const N: usize>(
+    bins: &mut impl Bins,
+    category: ResidualCategory,
+    coded_context: u8,
+    field: bool,
+    chroma422: bool,
+    explicit8: bool,
+) -> Result<Residual<N>> {
     if coded_context > 3 {
         return Err(invalid("invalid coded-block neighbour context"));
     }
     let cat = category as usize;
     let count = match category {
-        ResidualCategory::Luma8 => 64,
-        ResidualCategory::LumaDc | ResidualCategory::Luma4 => 16,
-        ResidualCategory::LumaAc | ResidualCategory::ChromaAc => 15,
+        ResidualCategory::Luma8 | ResidualCategory::Cb8 | ResidualCategory::Cr8 => 64,
+        ResidualCategory::LumaDc
+        | ResidualCategory::Luma4
+        | ResidualCategory::CbDc
+        | ResidualCategory::Cb4
+        | ResidualCategory::CrDc
+        | ResidualCategory::Cr4 => 16,
+        ResidualCategory::LumaAc
+        | ResidualCategory::ChromaAc
+        | ResidualCategory::CbAc
+        | ResidualCategory::CrAc => 15,
         ResidualCategory::ChromaDc => {
             if chroma422 {
                 8
@@ -188,20 +274,35 @@ fn read_residual<const N: usize>(
         coefficients: [0; N],
         total_coefficients: 0,
     };
-    if cat != 5 && !bins.context(85 + 4 * cat + usize::from(coded_context))? {
+    let cbf = [
+        85, 89, 93, 97, 101, 1012, 460, 464, 468, 1016, 472, 476, 480, 1020,
+    ][cat];
+    if (cat != 5 || explicit8) && !bins.context(cbf + usize::from(coded_context))? {
         return Ok(out);
     }
-    let offset = [0, 15, 29, 44, 47, 0][cat];
-    let significant = if cat == 5 {
-        if field { 436 } else { 402 }
+    // H.264 tables 9-34/9-40: component-specific full-resolution categories.
+    let significant = if field {
+        [
+            277, 292, 306, 321, 324, 436, 776, 791, 805, 675, 820, 835, 849, 733,
+        ][cat]
     } else {
-        (if field { 277 } else { 105 }) + offset
+        [
+            105, 120, 134, 149, 152, 402, 484, 499, 513, 660, 528, 543, 557, 718,
+        ][cat]
     };
-    let last = if cat == 5 {
-        if field { 451 } else { 417 }
+    let last = if field {
+        [
+            338, 353, 367, 382, 385, 451, 864, 879, 893, 699, 908, 923, 937, 757,
+        ][cat]
     } else {
-        (if field { 338 } else { 166 }) + offset
+        [
+            166, 181, 195, 210, 213, 417, 572, 587, 601, 690, 616, 631, 645, 748,
+        ][cat]
     };
+    let eight = matches!(
+        category,
+        ResidualCategory::Luma8 | ResidualCategory::Cb8 | ResidualCategory::Cr8
+    );
     let mut positions = [0; N];
     for pos in 0..count {
         let inc = if cat == 3 {
@@ -209,7 +310,7 @@ fn read_residual<const N: usize>(
         } else {
             pos
         };
-        let (sig_inc, last_inc) = if cat == 5 && pos < 63 {
+        let (sig_inc, last_inc) = if eight && pos < 63 {
             let row = super::avc_8x8_tables::SIGNIFICANCE[pos];
             (row[usize::from(field)], row[2])
         } else {
@@ -223,7 +324,9 @@ fn read_residual<const N: usize>(
             }
         }
     }
-    let base = 227 + [0, 10, 20, 30, 39, 199][cat];
+    let base = [
+        227, 237, 247, 257, 266, 426, 952, 962, 972, 708, 982, 992, 1002, 766,
+    ][cat];
     let (mut ones, mut greater) = (0usize, 0usize);
     for &pos in positions[..usize::from(out.total_coefficients)]
         .iter()
@@ -283,6 +386,73 @@ mod tests {
             let (expected, bin) = self.0.pop_front().expect("extra bypass bin");
             assert_eq!(expected, None);
             Ok(bin)
+        }
+    }
+    #[test]
+    fn extended_444_bank_is_opt_in_and_preserves_base_contexts() {
+        let ordinary = AvcCabac::new(&[0; 16], 0, SliceType::I, 0, 26).unwrap();
+        let extended = AvcCabac::new_444(&[0; 16], 0, SliceType::I, 0, 26).unwrap();
+        assert_eq!(&ordinary.contexts[..460], &extended.contexts[..460]);
+        assert!(ordinary.contexts[460..].iter().all(Option::is_none));
+        assert!(extended.contexts[460..].iter().all(Option::is_some));
+        assert!(extended.contexts[276].is_none());
+        // Normative table sentinels, including the corrected index label in 9-26.
+        assert_eq!(
+            colour444_init::INIT_444.map(|g| g[0]),
+            [(-17, 123), (-7, 92), (0, 80), (11, 80)]
+        );
+        assert_eq!(colour444_init::INIT_444[0][541 - 460], (0, 61));
+        assert_eq!(colour444_init::INIT_444[0][641 - 460], (10, 55));
+        assert_eq!(colour444_init::INIT_444[0][1023 - 460], (-30, 127));
+    }
+    #[test]
+    fn full_resolution_categories_use_component_and_field_contexts() {
+        let categories = [
+            (ResidualCategory::CbDc, 460, 484, 572, 776, 864, 952),
+            (ResidualCategory::CbAc, 464, 499, 587, 791, 879, 962),
+            (ResidualCategory::Cb4, 468, 513, 601, 805, 893, 972),
+            (ResidualCategory::Cb8, 1016, 660, 690, 675, 699, 708),
+            (ResidualCategory::CrDc, 472, 528, 616, 820, 908, 982),
+            (ResidualCategory::CrAc, 476, 543, 631, 835, 923, 992),
+            (ResidualCategory::Cr4, 480, 557, 645, 849, 937, 1002),
+            (ResidualCategory::Cr8, 1020, 718, 748, 733, 757, 766),
+            (ResidualCategory::Luma8, 1012, 402, 417, 436, 451, 426),
+        ];
+        for (category, cbf, sig, last, sig_field, last_field, absolute) in categories {
+            for field in [false, true] {
+                for inc in 0..4 {
+                    let mut zero = Trace(VecDeque::from([(Some(cbf + inc), false)]));
+                    assert_eq!(
+                        read_residual_impl::<64>(
+                            &mut zero, category, inc as u8, field, false, true
+                        )
+                        .unwrap()
+                        .total_coefficients,
+                        0
+                    );
+                    assert!(zero.0.is_empty());
+                    let mut nonzero = Trace(VecDeque::from([
+                        (Some(cbf + inc), true),
+                        (Some(if field { sig_field } else { sig }), true),
+                        (Some(if field { last_field } else { last }), true),
+                        (Some(absolute + 1), false),
+                        (None, false),
+                    ]));
+                    let r = read_residual_impl::<64>(
+                        &mut nonzero,
+                        category,
+                        inc as u8,
+                        field,
+                        false,
+                        true,
+                    )
+                    .unwrap();
+                    assert_eq!(r.total_coefficients, 1);
+                    assert_eq!(r.coefficients[0], 1);
+                    assert!(r.coefficients[1..].iter().all(|v| *v == 0));
+                    assert!(nonzero.0.is_empty());
+                }
+            }
         }
     }
     #[test]

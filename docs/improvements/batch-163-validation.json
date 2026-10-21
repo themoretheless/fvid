@@ -1,0 +1,72 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0171"
+  ],
+  "checked_at": "2026-10-21T04:24:40.927861+00:00",
+  "sources": [
+    "crates/fvid-media/src/owned_ogg.rs",
+    "crates/fvid-opus/src/ogg/reader.rs"
+  ],
+  "regressions": [
+    "tests/ogg_continuation_boundary.rs",
+    "crates/fvid-opus/tests/ogg_continuation_boundary.rs"
+  ],
+  "before": [
+    "evidence/batch-163-before.log",
+    "evidence/batch-163-acceptance-before.log",
+    "evidence/batch-163-opus-before.log",
+    "evidence/batch-163-opus-acceptance-before.log",
+    "evidence/batch-163-ogg-before.rs",
+    "evidence/batch-163-opus-reader-before.rs"
+  ],
+  "primary_reference": "batch-163-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-163-after.log",
+      "passed": 38
+    },
+    {
+      "log": "evidence/batch-163-root-units.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-163-media-units.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-163-media.log",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-163-core.log",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-163-opus-after.log",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-163-opus-units.log",
+      "passed": 65
+    },
+    {
+      "log": "evidence/batch-163-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-163-fixture-test.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "The corrected baseline passes4 tests with4 intended acceptances ignored;forcing them fails all4 at specific packet counts or malformed continuation admission. Native wrong clocks are10/60ms for malformed flags and30/40ms for joined fragments. Two empty false packets already refuse at the codec layer and are explicitly distinguished.",
+    "All authored pages are CRC-valid with consecutive counters. Independent libopus packet checks confirm the authored padded packet durations. Decoder-accepted nonzero padding is not claimed as conforming encoder output.",
+    "Canonical assembly distinguishes known prefixes from unknown joined tails. Fresh nonempty pages cannot bypass an unfinished packet;unknown fragments are discarded through the terminating lace while later whole packets retain granules. Empty-page compatibility remains intact.",
+    "The standalone reader already refused malformed flags but also refused valid joined prefixes. It now accepts those prefixes by dropping only their unavailable packet;all three variants replay correctly through repeated rewinds. Discard-only pages advance the counter checkpoint without accumulating fragment bytes across pages.",
+    "Eight complete/prefix controls and three valid joined captures preserve independent raw-packet PCM.22 actual worker target variants cover mid-packet and EOF navigation,play and rewind. The owned VP9/PCM video companion is verified separately;it is not claimed to reproduce the audio-container defect itself.",
+    "38 root integrations,19 root units,7 shared-media units,9 shared-media integrations,5 core and5 streaming regressions,65 Opus/Ogg units,fixture reproduction and player build pass. No physical audio-device,GUI,performance or universal codec qualification is claimed.",
+    "Initial raw-reference clock units,direct-rustc environment/doc-placement probes,and one mistyped Cargo target were repaired as harness maintenance. Their errors and originals remain archived. They add no improvement IDs."
+  ],
+  "counting": "One cohesive Ogg packet-continuation state improvement,including both readers and rewind. No extra IDs for flag directions,fragment layouts,clock variants,fixtures,tests or documentation."
+}

@@ -9,6 +9,10 @@ fn open(kind: &str, bytes: Vec<u8>) -> fvid::Result<Box<dyn AudioStream>> {
             Cursor::new(bytes),
             Default::default(),
         )?),
+        "aiff" => Box::new(fvid::playback_aiff::AiffAudioReader::open(
+            Cursor::new(bytes),
+            Default::default(),
+        )?),
         "au" => Box::new(fvid::playback_au::AuAudioReader::open(
             Cursor::new(bytes),
             Default::default(),

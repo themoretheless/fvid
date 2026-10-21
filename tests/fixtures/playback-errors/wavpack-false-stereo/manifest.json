@@ -1,0 +1,2418 @@
+{
+  "provenance": "Owned WavPack mono-coded stereo, integer fixup, and Matroska packet mapping.\nAll entropy streams are literal zero runs with nonzero predictor seeds.\nNo external encoder/decoder, subprocess, network, private data or old fixture.\n",
+  "cases": [
+    {
+      "name": "d8-t1-neg0-none",
+      "rate": 8000,
+      "depth": 8,
+      "file": "d8-t1-neg0-none.mkv",
+      "oracle": "d8-t1-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t1-neg0-none-0.wv",
+          "mono": "d8-t1-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t1-neg0-none-1.wv",
+          "mono": "d8-t1-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d8-t1-neg0-none-2.wv",
+          "mono": "d8-t1-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d8-t1-neg1-none",
+      "rate": 48000,
+      "depth": 8,
+      "file": "d8-t1-neg1-none.mkv",
+      "oracle": "d8-t1-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t1-neg1-none-0.wv",
+          "mono": "d8-t1-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t1-neg1-none-1.wv",
+          "mono": "d8-t1-neg1-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d8-t1-neg1-none-2.wv",
+          "mono": "d8-t1-neg1-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d8-t2-neg0-none",
+      "rate": 37500,
+      "depth": 8,
+      "file": "d8-t2-neg0-none.mkv",
+      "oracle": "d8-t2-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t2-neg0-none-0.wv",
+          "mono": "d8-t2-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t2-neg0-none-1.wv",
+          "mono": "d8-t2-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d8-t2-neg0-none-2.wv",
+          "mono": "d8-t2-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d8-t2-neg1-none",
+      "rate": 8000,
+      "depth": 8,
+      "file": "d8-t2-neg1-none.mkv",
+      "oracle": "d8-t2-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t2-neg1-none-0.wv",
+          "mono": "d8-t2-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t2-neg1-none-1.wv",
+          "mono": "d8-t2-neg1-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d8-t2-neg1-none-2.wv",
+          "mono": "d8-t2-neg1-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d8-t8-neg0-none",
+      "rate": 48000,
+      "depth": 8,
+      "file": "d8-t8-neg0-none.mkv",
+      "oracle": "d8-t8-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t8-neg0-none-0.wv",
+          "mono": "d8-t8-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t8-neg0-none-1.wv",
+          "mono": "d8-t8-neg0-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d8-t8-neg0-none-2.wv",
+          "mono": "d8-t8-neg0-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d8-t8-neg1-none",
+      "rate": 37500,
+      "depth": 8,
+      "file": "d8-t8-neg1-none.mkv",
+      "oracle": "d8-t8-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t8-neg1-none-0.wv",
+          "mono": "d8-t8-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t8-neg1-none-1.wv",
+          "mono": "d8-t8-neg1-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d8-t8-neg1-none-2.wv",
+          "mono": "d8-t8-neg1-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d8-t17-neg0-none",
+      "rate": 8000,
+      "depth": 8,
+      "file": "d8-t17-neg0-none.mkv",
+      "oracle": "d8-t17-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t17-neg0-none-0.wv",
+          "mono": "d8-t17-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t17-neg0-none-1.wv",
+          "mono": "d8-t17-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d8-t17-neg0-none-2.wv",
+          "mono": "d8-t17-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d8-t18-neg0-none",
+      "rate": 48000,
+      "depth": 8,
+      "file": "d8-t18-neg0-none.mkv",
+      "oracle": "d8-t18-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d8-t18-neg0-none-0.wv",
+          "mono": "d8-t18-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d8-t18-neg0-none-1.wv",
+          "mono": "d8-t18-neg0-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d8-t18-neg0-none-2.wv",
+          "mono": "d8-t18-neg0-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d16-t1-neg0-none",
+      "rate": 37500,
+      "depth": 16,
+      "file": "d16-t1-neg0-none.mkv",
+      "oracle": "d16-t1-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t1-neg0-none-0.wv",
+          "mono": "d16-t1-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t1-neg0-none-1.wv",
+          "mono": "d16-t1-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d16-t1-neg0-none-2.wv",
+          "mono": "d16-t1-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d16-t1-neg1-none",
+      "rate": 8000,
+      "depth": 16,
+      "file": "d16-t1-neg1-none.mkv",
+      "oracle": "d16-t1-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t1-neg1-none-0.wv",
+          "mono": "d16-t1-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t1-neg1-none-1.wv",
+          "mono": "d16-t1-neg1-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d16-t1-neg1-none-2.wv",
+          "mono": "d16-t1-neg1-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d16-t2-neg0-none",
+      "rate": 48000,
+      "depth": 16,
+      "file": "d16-t2-neg0-none.mkv",
+      "oracle": "d16-t2-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t2-neg0-none-0.wv",
+          "mono": "d16-t2-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t2-neg0-none-1.wv",
+          "mono": "d16-t2-neg0-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d16-t2-neg0-none-2.wv",
+          "mono": "d16-t2-neg0-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d16-t2-neg1-none",
+      "rate": 37500,
+      "depth": 16,
+      "file": "d16-t2-neg1-none.mkv",
+      "oracle": "d16-t2-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t2-neg1-none-0.wv",
+          "mono": "d16-t2-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t2-neg1-none-1.wv",
+          "mono": "d16-t2-neg1-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d16-t2-neg1-none-2.wv",
+          "mono": "d16-t2-neg1-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d16-t8-neg0-none",
+      "rate": 8000,
+      "depth": 16,
+      "file": "d16-t8-neg0-none.mkv",
+      "oracle": "d16-t8-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t8-neg0-none-0.wv",
+          "mono": "d16-t8-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t8-neg0-none-1.wv",
+          "mono": "d16-t8-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d16-t8-neg0-none-2.wv",
+          "mono": "d16-t8-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d16-t8-neg1-none",
+      "rate": 48000,
+      "depth": 16,
+      "file": "d16-t8-neg1-none.mkv",
+      "oracle": "d16-t8-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t8-neg1-none-0.wv",
+          "mono": "d16-t8-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t8-neg1-none-1.wv",
+          "mono": "d16-t8-neg1-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d16-t8-neg1-none-2.wv",
+          "mono": "d16-t8-neg1-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d16-t17-neg0-none",
+      "rate": 37500,
+      "depth": 16,
+      "file": "d16-t17-neg0-none.mkv",
+      "oracle": "d16-t17-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t17-neg0-none-0.wv",
+          "mono": "d16-t17-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t17-neg0-none-1.wv",
+          "mono": "d16-t17-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d16-t17-neg0-none-2.wv",
+          "mono": "d16-t17-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d16-t18-neg0-none",
+      "rate": 8000,
+      "depth": 16,
+      "file": "d16-t18-neg0-none.mkv",
+      "oracle": "d16-t18-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d16-t18-neg0-none-0.wv",
+          "mono": "d16-t18-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d16-t18-neg0-none-1.wv",
+          "mono": "d16-t18-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d16-t18-neg0-none-2.wv",
+          "mono": "d16-t18-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d24-t1-neg0-none",
+      "rate": 48000,
+      "depth": 24,
+      "file": "d24-t1-neg0-none.mkv",
+      "oracle": "d24-t1-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t1-neg0-none-0.wv",
+          "mono": "d24-t1-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t1-neg0-none-1.wv",
+          "mono": "d24-t1-neg0-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d24-t1-neg0-none-2.wv",
+          "mono": "d24-t1-neg0-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d24-t1-neg1-none",
+      "rate": 37500,
+      "depth": 24,
+      "file": "d24-t1-neg1-none.mkv",
+      "oracle": "d24-t1-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t1-neg1-none-0.wv",
+          "mono": "d24-t1-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t1-neg1-none-1.wv",
+          "mono": "d24-t1-neg1-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d24-t1-neg1-none-2.wv",
+          "mono": "d24-t1-neg1-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d24-t2-neg0-none",
+      "rate": 8000,
+      "depth": 24,
+      "file": "d24-t2-neg0-none.mkv",
+      "oracle": "d24-t2-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t2-neg0-none-0.wv",
+          "mono": "d24-t2-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t2-neg0-none-1.wv",
+          "mono": "d24-t2-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d24-t2-neg0-none-2.wv",
+          "mono": "d24-t2-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d24-t2-neg1-none",
+      "rate": 48000,
+      "depth": 24,
+      "file": "d24-t2-neg1-none.mkv",
+      "oracle": "d24-t2-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t2-neg1-none-0.wv",
+          "mono": "d24-t2-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t2-neg1-none-1.wv",
+          "mono": "d24-t2-neg1-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d24-t2-neg1-none-2.wv",
+          "mono": "d24-t2-neg1-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d24-t8-neg0-none",
+      "rate": 37500,
+      "depth": 24,
+      "file": "d24-t8-neg0-none.mkv",
+      "oracle": "d24-t8-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t8-neg0-none-0.wv",
+          "mono": "d24-t8-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t8-neg0-none-1.wv",
+          "mono": "d24-t8-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d24-t8-neg0-none-2.wv",
+          "mono": "d24-t8-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d24-t8-neg1-none",
+      "rate": 8000,
+      "depth": 24,
+      "file": "d24-t8-neg1-none.mkv",
+      "oracle": "d24-t8-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t8-neg1-none-0.wv",
+          "mono": "d24-t8-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t8-neg1-none-1.wv",
+          "mono": "d24-t8-neg1-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d24-t8-neg1-none-2.wv",
+          "mono": "d24-t8-neg1-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d24-t17-neg0-none",
+      "rate": 48000,
+      "depth": 24,
+      "file": "d24-t17-neg0-none.mkv",
+      "oracle": "d24-t17-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t17-neg0-none-0.wv",
+          "mono": "d24-t17-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t17-neg0-none-1.wv",
+          "mono": "d24-t17-neg0-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d24-t17-neg0-none-2.wv",
+          "mono": "d24-t17-neg0-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d24-t18-neg0-none",
+      "rate": 37500,
+      "depth": 24,
+      "file": "d24-t18-neg0-none.mkv",
+      "oracle": "d24-t18-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d24-t18-neg0-none-0.wv",
+          "mono": "d24-t18-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d24-t18-neg0-none-1.wv",
+          "mono": "d24-t18-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d24-t18-neg0-none-2.wv",
+          "mono": "d24-t18-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-none",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t1-neg0-none.mkv",
+      "oracle": "d32-t1-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-none-0.wv",
+          "mono": "d32-t1-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-none-1.wv",
+          "mono": "d32-t1-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t1-neg0-none-2.wv",
+          "mono": "d32-t1-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-zeros",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t1-neg0-zeros.mkv",
+      "oracle": "d32-t1-neg0-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-zeros-0.wv",
+          "mono": "d32-t1-neg0-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-zeros-1.wv",
+          "mono": "d32-t1-neg0-zeros-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t1-neg0-zeros-2.wv",
+          "mono": "d32-t1-neg0-zeros-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-ones",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t1-neg0-ones.mkv",
+      "oracle": "d32-t1-neg0-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-ones-0.wv",
+          "mono": "d32-t1-neg0-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-ones-1.wv",
+          "mono": "d32-t1-neg0-ones-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t1-neg0-ones-2.wv",
+          "mono": "d32-t1-neg0-ones-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t1-neg0-dups.mkv",
+      "oracle": "d32-t1-neg0-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-dups-0.wv",
+          "mono": "d32-t1-neg0-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-dups-1.wv",
+          "mono": "d32-t1-neg0-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t1-neg0-dups-2.wv",
+          "mono": "d32-t1-neg0-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-sent",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t1-neg0-sent.mkv",
+      "oracle": "d32-t1-neg0-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-sent-0.wv",
+          "mono": "d32-t1-neg0-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-sent-1.wv",
+          "mono": "d32-t1-neg0-sent-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t1-neg0-sent-2.wv",
+          "mono": "d32-t1-neg0-sent-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-sent-zeros",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t1-neg0-sent-zeros.mkv",
+      "oracle": "d32-t1-neg0-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-sent-zeros-0.wv",
+          "mono": "d32-t1-neg0-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-sent-zeros-1.wv",
+          "mono": "d32-t1-neg0-sent-zeros-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t1-neg0-sent-zeros-2.wv",
+          "mono": "d32-t1-neg0-sent-zeros-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-sent-ones",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t1-neg0-sent-ones.mkv",
+      "oracle": "d32-t1-neg0-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-sent-ones-0.wv",
+          "mono": "d32-t1-neg0-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-sent-ones-1.wv",
+          "mono": "d32-t1-neg0-sent-ones-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t1-neg0-sent-ones-2.wv",
+          "mono": "d32-t1-neg0-sent-ones-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg0-sent-dups",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t1-neg0-sent-dups.mkv",
+      "oracle": "d32-t1-neg0-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg0-sent-dups-0.wv",
+          "mono": "d32-t1-neg0-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg0-sent-dups-1.wv",
+          "mono": "d32-t1-neg0-sent-dups-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t1-neg0-sent-dups-2.wv",
+          "mono": "d32-t1-neg0-sent-dups-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-none",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t1-neg1-none.mkv",
+      "oracle": "d32-t1-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-none-0.wv",
+          "mono": "d32-t1-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-none-1.wv",
+          "mono": "d32-t1-neg1-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t1-neg1-none-2.wv",
+          "mono": "d32-t1-neg1-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-zeros",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t1-neg1-zeros.mkv",
+      "oracle": "d32-t1-neg1-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-zeros-0.wv",
+          "mono": "d32-t1-neg1-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-zeros-1.wv",
+          "mono": "d32-t1-neg1-zeros-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t1-neg1-zeros-2.wv",
+          "mono": "d32-t1-neg1-zeros-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-ones",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t1-neg1-ones.mkv",
+      "oracle": "d32-t1-neg1-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-ones-0.wv",
+          "mono": "d32-t1-neg1-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-ones-1.wv",
+          "mono": "d32-t1-neg1-ones-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t1-neg1-ones-2.wv",
+          "mono": "d32-t1-neg1-ones-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-dups",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t1-neg1-dups.mkv",
+      "oracle": "d32-t1-neg1-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-dups-0.wv",
+          "mono": "d32-t1-neg1-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-dups-1.wv",
+          "mono": "d32-t1-neg1-dups-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t1-neg1-dups-2.wv",
+          "mono": "d32-t1-neg1-dups-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-sent",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t1-neg1-sent.mkv",
+      "oracle": "d32-t1-neg1-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-sent-0.wv",
+          "mono": "d32-t1-neg1-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-sent-1.wv",
+          "mono": "d32-t1-neg1-sent-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t1-neg1-sent-2.wv",
+          "mono": "d32-t1-neg1-sent-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-sent-zeros",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t1-neg1-sent-zeros.mkv",
+      "oracle": "d32-t1-neg1-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-sent-zeros-0.wv",
+          "mono": "d32-t1-neg1-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-sent-zeros-1.wv",
+          "mono": "d32-t1-neg1-sent-zeros-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t1-neg1-sent-zeros-2.wv",
+          "mono": "d32-t1-neg1-sent-zeros-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-sent-ones",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t1-neg1-sent-ones.mkv",
+      "oracle": "d32-t1-neg1-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-sent-ones-0.wv",
+          "mono": "d32-t1-neg1-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-sent-ones-1.wv",
+          "mono": "d32-t1-neg1-sent-ones-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t1-neg1-sent-ones-2.wv",
+          "mono": "d32-t1-neg1-sent-ones-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t1-neg1-sent-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t1-neg1-sent-dups.mkv",
+      "oracle": "d32-t1-neg1-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t1-neg1-sent-dups-0.wv",
+          "mono": "d32-t1-neg1-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t1-neg1-sent-dups-1.wv",
+          "mono": "d32-t1-neg1-sent-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t1-neg1-sent-dups-2.wv",
+          "mono": "d32-t1-neg1-sent-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-none",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t2-neg0-none.mkv",
+      "oracle": "d32-t2-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-none-0.wv",
+          "mono": "d32-t2-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-none-1.wv",
+          "mono": "d32-t2-neg0-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t2-neg0-none-2.wv",
+          "mono": "d32-t2-neg0-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-zeros",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t2-neg0-zeros.mkv",
+      "oracle": "d32-t2-neg0-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-zeros-0.wv",
+          "mono": "d32-t2-neg0-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-zeros-1.wv",
+          "mono": "d32-t2-neg0-zeros-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t2-neg0-zeros-2.wv",
+          "mono": "d32-t2-neg0-zeros-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-ones",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t2-neg0-ones.mkv",
+      "oracle": "d32-t2-neg0-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-ones-0.wv",
+          "mono": "d32-t2-neg0-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-ones-1.wv",
+          "mono": "d32-t2-neg0-ones-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t2-neg0-ones-2.wv",
+          "mono": "d32-t2-neg0-ones-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-dups",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t2-neg0-dups.mkv",
+      "oracle": "d32-t2-neg0-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-dups-0.wv",
+          "mono": "d32-t2-neg0-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-dups-1.wv",
+          "mono": "d32-t2-neg0-dups-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t2-neg0-dups-2.wv",
+          "mono": "d32-t2-neg0-dups-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-sent",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t2-neg0-sent.mkv",
+      "oracle": "d32-t2-neg0-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-sent-0.wv",
+          "mono": "d32-t2-neg0-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-sent-1.wv",
+          "mono": "d32-t2-neg0-sent-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t2-neg0-sent-2.wv",
+          "mono": "d32-t2-neg0-sent-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-sent-zeros",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t2-neg0-sent-zeros.mkv",
+      "oracle": "d32-t2-neg0-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-sent-zeros-0.wv",
+          "mono": "d32-t2-neg0-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-sent-zeros-1.wv",
+          "mono": "d32-t2-neg0-sent-zeros-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t2-neg0-sent-zeros-2.wv",
+          "mono": "d32-t2-neg0-sent-zeros-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-sent-ones",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t2-neg0-sent-ones.mkv",
+      "oracle": "d32-t2-neg0-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-sent-ones-0.wv",
+          "mono": "d32-t2-neg0-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-sent-ones-1.wv",
+          "mono": "d32-t2-neg0-sent-ones-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t2-neg0-sent-ones-2.wv",
+          "mono": "d32-t2-neg0-sent-ones-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg0-sent-dups",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t2-neg0-sent-dups.mkv",
+      "oracle": "d32-t2-neg0-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg0-sent-dups-0.wv",
+          "mono": "d32-t2-neg0-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg0-sent-dups-1.wv",
+          "mono": "d32-t2-neg0-sent-dups-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t2-neg0-sent-dups-2.wv",
+          "mono": "d32-t2-neg0-sent-dups-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-none",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t2-neg1-none.mkv",
+      "oracle": "d32-t2-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-none-0.wv",
+          "mono": "d32-t2-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-none-1.wv",
+          "mono": "d32-t2-neg1-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t2-neg1-none-2.wv",
+          "mono": "d32-t2-neg1-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-zeros",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t2-neg1-zeros.mkv",
+      "oracle": "d32-t2-neg1-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-zeros-0.wv",
+          "mono": "d32-t2-neg1-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-zeros-1.wv",
+          "mono": "d32-t2-neg1-zeros-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t2-neg1-zeros-2.wv",
+          "mono": "d32-t2-neg1-zeros-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-ones",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t2-neg1-ones.mkv",
+      "oracle": "d32-t2-neg1-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-ones-0.wv",
+          "mono": "d32-t2-neg1-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-ones-1.wv",
+          "mono": "d32-t2-neg1-ones-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t2-neg1-ones-2.wv",
+          "mono": "d32-t2-neg1-ones-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t2-neg1-dups.mkv",
+      "oracle": "d32-t2-neg1-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-dups-0.wv",
+          "mono": "d32-t2-neg1-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-dups-1.wv",
+          "mono": "d32-t2-neg1-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t2-neg1-dups-2.wv",
+          "mono": "d32-t2-neg1-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-sent",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t2-neg1-sent.mkv",
+      "oracle": "d32-t2-neg1-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-sent-0.wv",
+          "mono": "d32-t2-neg1-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-sent-1.wv",
+          "mono": "d32-t2-neg1-sent-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t2-neg1-sent-2.wv",
+          "mono": "d32-t2-neg1-sent-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-sent-zeros",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t2-neg1-sent-zeros.mkv",
+      "oracle": "d32-t2-neg1-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-sent-zeros-0.wv",
+          "mono": "d32-t2-neg1-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-sent-zeros-1.wv",
+          "mono": "d32-t2-neg1-sent-zeros-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t2-neg1-sent-zeros-2.wv",
+          "mono": "d32-t2-neg1-sent-zeros-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-sent-ones",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t2-neg1-sent-ones.mkv",
+      "oracle": "d32-t2-neg1-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-sent-ones-0.wv",
+          "mono": "d32-t2-neg1-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-sent-ones-1.wv",
+          "mono": "d32-t2-neg1-sent-ones-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t2-neg1-sent-ones-2.wv",
+          "mono": "d32-t2-neg1-sent-ones-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t2-neg1-sent-dups",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t2-neg1-sent-dups.mkv",
+      "oracle": "d32-t2-neg1-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t2-neg1-sent-dups-0.wv",
+          "mono": "d32-t2-neg1-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t2-neg1-sent-dups-1.wv",
+          "mono": "d32-t2-neg1-sent-dups-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t2-neg1-sent-dups-2.wv",
+          "mono": "d32-t2-neg1-sent-dups-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-none",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t8-neg0-none.mkv",
+      "oracle": "d32-t8-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-none-0.wv",
+          "mono": "d32-t8-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-none-1.wv",
+          "mono": "d32-t8-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t8-neg0-none-2.wv",
+          "mono": "d32-t8-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-zeros",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t8-neg0-zeros.mkv",
+      "oracle": "d32-t8-neg0-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-zeros-0.wv",
+          "mono": "d32-t8-neg0-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-zeros-1.wv",
+          "mono": "d32-t8-neg0-zeros-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t8-neg0-zeros-2.wv",
+          "mono": "d32-t8-neg0-zeros-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-ones",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t8-neg0-ones.mkv",
+      "oracle": "d32-t8-neg0-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-ones-0.wv",
+          "mono": "d32-t8-neg0-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-ones-1.wv",
+          "mono": "d32-t8-neg0-ones-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t8-neg0-ones-2.wv",
+          "mono": "d32-t8-neg0-ones-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-dups",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t8-neg0-dups.mkv",
+      "oracle": "d32-t8-neg0-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-dups-0.wv",
+          "mono": "d32-t8-neg0-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-dups-1.wv",
+          "mono": "d32-t8-neg0-dups-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t8-neg0-dups-2.wv",
+          "mono": "d32-t8-neg0-dups-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-sent",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t8-neg0-sent.mkv",
+      "oracle": "d32-t8-neg0-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-sent-0.wv",
+          "mono": "d32-t8-neg0-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-sent-1.wv",
+          "mono": "d32-t8-neg0-sent-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t8-neg0-sent-2.wv",
+          "mono": "d32-t8-neg0-sent-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-sent-zeros",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t8-neg0-sent-zeros.mkv",
+      "oracle": "d32-t8-neg0-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-sent-zeros-0.wv",
+          "mono": "d32-t8-neg0-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-sent-zeros-1.wv",
+          "mono": "d32-t8-neg0-sent-zeros-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t8-neg0-sent-zeros-2.wv",
+          "mono": "d32-t8-neg0-sent-zeros-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-sent-ones",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t8-neg0-sent-ones.mkv",
+      "oracle": "d32-t8-neg0-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-sent-ones-0.wv",
+          "mono": "d32-t8-neg0-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-sent-ones-1.wv",
+          "mono": "d32-t8-neg0-sent-ones-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t8-neg0-sent-ones-2.wv",
+          "mono": "d32-t8-neg0-sent-ones-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg0-sent-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t8-neg0-sent-dups.mkv",
+      "oracle": "d32-t8-neg0-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg0-sent-dups-0.wv",
+          "mono": "d32-t8-neg0-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg0-sent-dups-1.wv",
+          "mono": "d32-t8-neg0-sent-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t8-neg0-sent-dups-2.wv",
+          "mono": "d32-t8-neg0-sent-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-none",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t8-neg1-none.mkv",
+      "oracle": "d32-t8-neg1-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-none-0.wv",
+          "mono": "d32-t8-neg1-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-none-1.wv",
+          "mono": "d32-t8-neg1-none-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t8-neg1-none-2.wv",
+          "mono": "d32-t8-neg1-none-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-zeros",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t8-neg1-zeros.mkv",
+      "oracle": "d32-t8-neg1-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-zeros-0.wv",
+          "mono": "d32-t8-neg1-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-zeros-1.wv",
+          "mono": "d32-t8-neg1-zeros-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t8-neg1-zeros-2.wv",
+          "mono": "d32-t8-neg1-zeros-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-ones",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t8-neg1-ones.mkv",
+      "oracle": "d32-t8-neg1-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-ones-0.wv",
+          "mono": "d32-t8-neg1-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-ones-1.wv",
+          "mono": "d32-t8-neg1-ones-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t8-neg1-ones-2.wv",
+          "mono": "d32-t8-neg1-ones-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-dups",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t8-neg1-dups.mkv",
+      "oracle": "d32-t8-neg1-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-dups-0.wv",
+          "mono": "d32-t8-neg1-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-dups-1.wv",
+          "mono": "d32-t8-neg1-dups-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t8-neg1-dups-2.wv",
+          "mono": "d32-t8-neg1-dups-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-sent",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t8-neg1-sent.mkv",
+      "oracle": "d32-t8-neg1-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-sent-0.wv",
+          "mono": "d32-t8-neg1-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-sent-1.wv",
+          "mono": "d32-t8-neg1-sent-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t8-neg1-sent-2.wv",
+          "mono": "d32-t8-neg1-sent-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-sent-zeros",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t8-neg1-sent-zeros.mkv",
+      "oracle": "d32-t8-neg1-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-sent-zeros-0.wv",
+          "mono": "d32-t8-neg1-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-sent-zeros-1.wv",
+          "mono": "d32-t8-neg1-sent-zeros-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t8-neg1-sent-zeros-2.wv",
+          "mono": "d32-t8-neg1-sent-zeros-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-sent-ones",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t8-neg1-sent-ones.mkv",
+      "oracle": "d32-t8-neg1-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-sent-ones-0.wv",
+          "mono": "d32-t8-neg1-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-sent-ones-1.wv",
+          "mono": "d32-t8-neg1-sent-ones-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t8-neg1-sent-ones-2.wv",
+          "mono": "d32-t8-neg1-sent-ones-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t8-neg1-sent-dups",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t8-neg1-sent-dups.mkv",
+      "oracle": "d32-t8-neg1-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t8-neg1-sent-dups-0.wv",
+          "mono": "d32-t8-neg1-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t8-neg1-sent-dups-1.wv",
+          "mono": "d32-t8-neg1-sent-dups-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t8-neg1-sent-dups-2.wv",
+          "mono": "d32-t8-neg1-sent-dups-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-none",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t17-neg0-none.mkv",
+      "oracle": "d32-t17-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-none-0.wv",
+          "mono": "d32-t17-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-none-1.wv",
+          "mono": "d32-t17-neg0-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t17-neg0-none-2.wv",
+          "mono": "d32-t17-neg0-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-zeros",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t17-neg0-zeros.mkv",
+      "oracle": "d32-t17-neg0-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-zeros-0.wv",
+          "mono": "d32-t17-neg0-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-zeros-1.wv",
+          "mono": "d32-t17-neg0-zeros-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t17-neg0-zeros-2.wv",
+          "mono": "d32-t17-neg0-zeros-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-ones",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t17-neg0-ones.mkv",
+      "oracle": "d32-t17-neg0-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-ones-0.wv",
+          "mono": "d32-t17-neg0-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-ones-1.wv",
+          "mono": "d32-t17-neg0-ones-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t17-neg0-ones-2.wv",
+          "mono": "d32-t17-neg0-ones-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t17-neg0-dups.mkv",
+      "oracle": "d32-t17-neg0-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-dups-0.wv",
+          "mono": "d32-t17-neg0-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-dups-1.wv",
+          "mono": "d32-t17-neg0-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t17-neg0-dups-2.wv",
+          "mono": "d32-t17-neg0-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-sent",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t17-neg0-sent.mkv",
+      "oracle": "d32-t17-neg0-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-sent-0.wv",
+          "mono": "d32-t17-neg0-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-sent-1.wv",
+          "mono": "d32-t17-neg0-sent-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t17-neg0-sent-2.wv",
+          "mono": "d32-t17-neg0-sent-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-sent-zeros",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t17-neg0-sent-zeros.mkv",
+      "oracle": "d32-t17-neg0-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-sent-zeros-0.wv",
+          "mono": "d32-t17-neg0-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-sent-zeros-1.wv",
+          "mono": "d32-t17-neg0-sent-zeros-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t17-neg0-sent-zeros-2.wv",
+          "mono": "d32-t17-neg0-sent-zeros-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-sent-ones",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t17-neg0-sent-ones.mkv",
+      "oracle": "d32-t17-neg0-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-sent-ones-0.wv",
+          "mono": "d32-t17-neg0-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-sent-ones-1.wv",
+          "mono": "d32-t17-neg0-sent-ones-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t17-neg0-sent-ones-2.wv",
+          "mono": "d32-t17-neg0-sent-ones-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t17-neg0-sent-dups",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t17-neg0-sent-dups.mkv",
+      "oracle": "d32-t17-neg0-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t17-neg0-sent-dups-0.wv",
+          "mono": "d32-t17-neg0-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t17-neg0-sent-dups-1.wv",
+          "mono": "d32-t17-neg0-sent-dups-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t17-neg0-sent-dups-2.wv",
+          "mono": "d32-t17-neg0-sent-dups-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-none",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t18-neg0-none.mkv",
+      "oracle": "d32-t18-neg0-none.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-none-0.wv",
+          "mono": "d32-t18-neg0-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-none-1.wv",
+          "mono": "d32-t18-neg0-none-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t18-neg0-none-2.wv",
+          "mono": "d32-t18-neg0-none-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-zeros",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t18-neg0-zeros.mkv",
+      "oracle": "d32-t18-neg0-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-zeros-0.wv",
+          "mono": "d32-t18-neg0-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-zeros-1.wv",
+          "mono": "d32-t18-neg0-zeros-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t18-neg0-zeros-2.wv",
+          "mono": "d32-t18-neg0-zeros-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-ones",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t18-neg0-ones.mkv",
+      "oracle": "d32-t18-neg0-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-ones-0.wv",
+          "mono": "d32-t18-neg0-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-ones-1.wv",
+          "mono": "d32-t18-neg0-ones-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t18-neg0-ones-2.wv",
+          "mono": "d32-t18-neg0-ones-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-dups",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t18-neg0-dups.mkv",
+      "oracle": "d32-t18-neg0-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-dups-0.wv",
+          "mono": "d32-t18-neg0-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-dups-1.wv",
+          "mono": "d32-t18-neg0-dups-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t18-neg0-dups-2.wv",
+          "mono": "d32-t18-neg0-dups-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-sent",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t18-neg0-sent.mkv",
+      "oracle": "d32-t18-neg0-sent.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-sent-0.wv",
+          "mono": "d32-t18-neg0-sent-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-sent-1.wv",
+          "mono": "d32-t18-neg0-sent-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t18-neg0-sent-2.wv",
+          "mono": "d32-t18-neg0-sent-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-sent-zeros",
+      "rate": 48000,
+      "depth": 32,
+      "file": "d32-t18-neg0-sent-zeros.mkv",
+      "oracle": "d32-t18-neg0-sent-zeros.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-sent-zeros-0.wv",
+          "mono": "d32-t18-neg0-sent-zeros-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-sent-zeros-1.wv",
+          "mono": "d32-t18-neg0-sent-zeros-1-mono.wv",
+          "pts": 960
+        },
+        {
+          "file": "d32-t18-neg0-sent-zeros-2.wv",
+          "mono": "d32-t18-neg0-sent-zeros-2-mono.wv",
+          "pts": 1920
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-sent-ones",
+      "rate": 37500,
+      "depth": 32,
+      "file": "d32-t18-neg0-sent-ones.mkv",
+      "oracle": "d32-t18-neg0-sent-ones.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-sent-ones-0.wv",
+          "mono": "d32-t18-neg0-sent-ones-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-sent-ones-1.wv",
+          "mono": "d32-t18-neg0-sent-ones-1-mono.wv",
+          "pts": 750
+        },
+        {
+          "file": "d32-t18-neg0-sent-ones-2.wv",
+          "mono": "d32-t18-neg0-sent-ones-2-mono.wv",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "d32-t18-neg0-sent-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "d32-t18-neg0-sent-dups.mkv",
+      "oracle": "d32-t18-neg0-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "d32-t18-neg0-sent-dups-0.wv",
+          "mono": "d32-t18-neg0-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "d32-t18-neg0-sent-dups-1.wv",
+          "mono": "d32-t18-neg0-sent-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "d32-t18-neg0-sent-dups-2.wv",
+          "mono": "d32-t18-neg0-sent-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d8-t8-none",
+      "rate": 8000,
+      "depth": 8,
+      "file": "large-d8-t8-none.mkv",
+      "oracle": "large-d8-t8-none.f32le",
+      "frames": [
+        {
+          "file": "large-d8-t8-none-0.wv",
+          "mono": "large-d8-t8-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d8-t8-none-1.wv",
+          "mono": "large-d8-t8-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d8-t8-none-2.wv",
+          "mono": "large-d8-t8-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d8-t17-none",
+      "rate": 8000,
+      "depth": 8,
+      "file": "large-d8-t17-none.mkv",
+      "oracle": "large-d8-t17-none.f32le",
+      "frames": [
+        {
+          "file": "large-d8-t17-none-0.wv",
+          "mono": "large-d8-t17-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d8-t17-none-1.wv",
+          "mono": "large-d8-t17-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d8-t17-none-2.wv",
+          "mono": "large-d8-t17-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d16-t8-none",
+      "rate": 8000,
+      "depth": 16,
+      "file": "large-d16-t8-none.mkv",
+      "oracle": "large-d16-t8-none.f32le",
+      "frames": [
+        {
+          "file": "large-d16-t8-none-0.wv",
+          "mono": "large-d16-t8-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d16-t8-none-1.wv",
+          "mono": "large-d16-t8-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d16-t8-none-2.wv",
+          "mono": "large-d16-t8-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d16-t17-none",
+      "rate": 8000,
+      "depth": 16,
+      "file": "large-d16-t17-none.mkv",
+      "oracle": "large-d16-t17-none.f32le",
+      "frames": [
+        {
+          "file": "large-d16-t17-none-0.wv",
+          "mono": "large-d16-t17-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d16-t17-none-1.wv",
+          "mono": "large-d16-t17-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d16-t17-none-2.wv",
+          "mono": "large-d16-t17-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d24-t8-none",
+      "rate": 8000,
+      "depth": 24,
+      "file": "large-d24-t8-none.mkv",
+      "oracle": "large-d24-t8-none.f32le",
+      "frames": [
+        {
+          "file": "large-d24-t8-none-0.wv",
+          "mono": "large-d24-t8-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d24-t8-none-1.wv",
+          "mono": "large-d24-t8-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d24-t8-none-2.wv",
+          "mono": "large-d24-t8-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d24-t17-none",
+      "rate": 8000,
+      "depth": 24,
+      "file": "large-d24-t17-none.mkv",
+      "oracle": "large-d24-t17-none.f32le",
+      "frames": [
+        {
+          "file": "large-d24-t17-none-0.wv",
+          "mono": "large-d24-t17-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d24-t17-none-1.wv",
+          "mono": "large-d24-t17-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d24-t17-none-2.wv",
+          "mono": "large-d24-t17-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d32-t8-none",
+      "rate": 8000,
+      "depth": 32,
+      "file": "large-d32-t8-none.mkv",
+      "oracle": "large-d32-t8-none.f32le",
+      "frames": [
+        {
+          "file": "large-d32-t8-none-0.wv",
+          "mono": "large-d32-t8-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d32-t8-none-1.wv",
+          "mono": "large-d32-t8-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d32-t8-none-2.wv",
+          "mono": "large-d32-t8-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d32-t8-sent-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "large-d32-t8-sent-dups.mkv",
+      "oracle": "large-d32-t8-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "large-d32-t8-sent-dups-0.wv",
+          "mono": "large-d32-t8-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d32-t8-sent-dups-1.wv",
+          "mono": "large-d32-t8-sent-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d32-t8-sent-dups-2.wv",
+          "mono": "large-d32-t8-sent-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d32-t17-none",
+      "rate": 8000,
+      "depth": 32,
+      "file": "large-d32-t17-none.mkv",
+      "oracle": "large-d32-t17-none.f32le",
+      "frames": [
+        {
+          "file": "large-d32-t17-none-0.wv",
+          "mono": "large-d32-t17-none-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d32-t17-none-1.wv",
+          "mono": "large-d32-t17-none-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d32-t17-none-2.wv",
+          "mono": "large-d32-t17-none-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "large-d32-t17-sent-dups",
+      "rate": 8000,
+      "depth": 32,
+      "file": "large-d32-t17-sent-dups.mkv",
+      "oracle": "large-d32-t17-sent-dups.f32le",
+      "frames": [
+        {
+          "file": "large-d32-t17-sent-dups-0.wv",
+          "mono": "large-d32-t17-sent-dups-0-mono.wv",
+          "pts": 0
+        },
+        {
+          "file": "large-d32-t17-sent-dups-1.wv",
+          "mono": "large-d32-t17-sent-dups-1-mono.wv",
+          "pts": 160
+        },
+        {
+          "file": "large-d32-t17-sent-dups-2.wv",
+          "mono": "large-d32-t17-sent-dups-2-mono.wv",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "transition",
+      "rate": 8000,
+      "depth": 16,
+      "file": "transition.mkv",
+      "oracle": "transition.f32le",
+      "frames": [
+        {
+          "file": "transition-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "transition-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "transition-2.wv",
+          "pts": 320
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "mono-and-false.wv",
+      "message": "both mono and false stereo",
+      "movie": "mono-and-false.mkv"
+    },
+    {
+      "file": "wrong-crc.wv",
+      "message": "checksum",
+      "movie": "wrong-crc.mkv"
+    },
+    {
+      "file": "extra-crc.wv",
+      "message": "extra bits do not match their checksum",
+      "rate": 37500,
+      "depth": 32,
+      "movie": "extra-crc.mkv"
+    },
+    {
+      "file": "extra-padding.wv",
+      "message": "padding is not all ones",
+      "rate": 37500,
+      "depth": 32,
+      "movie": "extra-padding.mkv"
+    },
+    {
+      "file": "extra-trailing.wv",
+      "message": "leaves its extra bits unread",
+      "rate": 37500,
+      "depth": 32,
+      "movie": "extra-trailing.mkv"
+    },
+    {
+      "file": "extra-truncated.wv",
+      "message": "ends inside its samples",
+      "rate": 37500,
+      "depth": 32,
+      "movie": "extra-truncated.mkv"
+    }
+  ]
+}

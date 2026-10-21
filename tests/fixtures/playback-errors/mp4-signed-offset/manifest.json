@@ -1,0 +1,62 @@
+{
+  "provenance": "Pure own VP9:3 independent16x16 neutral keyframes at50Hz. Positive and negative in-file trun controls;small MIN/adjacent underflow faults. Stored sparse prefix/footer plans describe valid -2147483648/-2147483647 displacements over a standard ignored free box,without a2GiB stored file. Test adapters only interpret stored media segments;encoded-media generation is separate. All defaults/description IDs1,mdat bounds and sample clocks authored consistently. No private media,external codec,FFmpeg or network.",
+  "controls": [
+    "positive.mp4",
+    "negative.mp4"
+  ],
+  "malformed": [
+    {
+      "file": "min-underflow.mp4",
+      "offset": -2147483648,
+      "panics_before": true
+    },
+    {
+      "file": "adjacent-underflow.mp4",
+      "offset": -2147483647,
+      "panics_before": false
+    }
+  ],
+  "virtual": [
+    {
+      "name": "valid-min",
+      "size": 2147484382,
+      "offset": -2147483648,
+      "segments": [
+        {
+          "file": "valid-min-prefix.bin",
+          "offset": 0
+        },
+        {
+          "file": "valid-min-footer.bin",
+          "offset": 2147484286
+        }
+      ]
+    },
+    {
+      "name": "valid-adjacent",
+      "size": 2147484381,
+      "offset": -2147483647,
+      "segments": [
+        {
+          "file": "valid-adjacent-prefix.bin",
+          "offset": 0
+        },
+        {
+          "file": "valid-adjacent-footer.bin",
+          "offset": 2147484285
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "positive.mp4": "495838952c7d503194d56baeae7b211d7925ac5dc7a5fa08259cc075ea614275",
+    "negative.mp4": "a67028f1eb39aaefcd6e1cafbe116cdf87dd34da37d9ebb54075fd8515cc7f28",
+    "frame.vp9": "217afe48bb42caed59231aa00430f154f7adfafe525e25e02e2d983c1513ad2c",
+    "min-underflow.mp4": "b832030b90d8027ebf4057a4865633ed5886c624fbd199fb5c3ef4a006aa2f92",
+    "adjacent-underflow.mp4": "2e9aeccae2d16dc7a2640252421d6a536b7c7f0b58407a84182eafb419ae36c1",
+    "valid-min-prefix.bin": "2c48602c9a042d1489c8a0db125fec9d28edec2c191e4fea49025658f5549965",
+    "valid-min-footer.bin": "1dd9bf0a41dc47152729e7ea6ee8fba97de3ab8039769f8ef21bf4ad2c82f8ed",
+    "valid-adjacent-prefix.bin": "8f537813398d7a34d98ab3109459afcc4a0aebfa90c8c74bd0227cc30e438814",
+    "valid-adjacent-footer.bin": "92f60b6e0c4b5f5bd55eb32e6212e0c3d19b7bf4fb8b978f015ae98e2df5ceb9"
+  }
+}

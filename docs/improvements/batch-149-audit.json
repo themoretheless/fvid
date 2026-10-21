@@ -1,0 +1,18 @@
+{
+  "status": "accepted-via-batch-149",
+  "accepted_ids": [
+    "FVID-0157"
+  ],
+  "issue": "SAMI BR names are incorrectly case sensitive",
+  "before": "evidence/batch-149-audit-before.log",
+  "regression": "tests/sami_break_case.rs",
+  "scope": "Three variants have correct 1..2s timestamps but concatenate text lines; a lowercase control already passes. A separate five-frame raw Y4M companion isolates this issue from missing Sync timing. No production fix yet.",
+  "prototype": "evidence/batch-149-prototype-after.log",
+  "prototype_units": "evidence/batch-149-prototype-units.log",
+  "cargo_before": "evidence/batch-149-before.log",
+  "cargo_forced_acceptance": "evidence/batch-149-acceptance-before.log",
+  "reproduction": "Normal Cargo reproduction passes with intended acceptance ignored. Forced intended acceptance decodes valid five-frame Y4M,then fails at upper-case BR concatenation with matching1..2s caption clocks. Thus the break defect is isolated from Sync timing.",
+  "next_native_before_log": "evidence/batch-149-native-before.log",
+  "implementation_batch": 149,
+  "validation": "batch-149-validation.json"
+}

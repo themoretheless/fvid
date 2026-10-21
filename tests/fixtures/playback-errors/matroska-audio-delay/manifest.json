@@ -31,15 +31,15 @@
           "frames": 160
         },
         {
-          "pts_ns": 19999999,
+          "pts_ns": 20000000,
           "frames": 160
         },
         {
-          "pts_ns": 39999999,
+          "pts_ns": 40000000,
           "frames": 160
         }
       ],
-      "end_ns": 59999999
+      "end_ns": 60000000
     },
     {
       "file": "ten-ms.mkv",
@@ -103,6 +103,13 @@
         }
       ],
       "end_ns": 40000000
+    },
+    {
+      "file": "all-padding.mkv",
+      "oracle": "all-padding.f32le",
+      "delay_ns": 0,
+      "packets": [],
+      "end_ns": 0
     }
   ],
   "invalid": "overflow-delay.mkv",
@@ -119,6 +126,8 @@
     "all-preroll.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "padding-overlap.mkv": "b9acd3d9dbe0c6bf2202617fafc40183573783c8eef1e3c38d914f3fda7dbe28",
     "padding-overlap.f32le": "1af7b8333c247f7203b9bd665fc659b03bef4b3635bafc4a8e807a56e669c56b",
+    "all-padding.mkv": "221417836f27dcc60b6be5cbfe1773326c55988b2f2a7cdbb1dd79454d9c5c1e",
+    "all-padding.f32le": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "overflow-delay.mkv": "70038f7665b052afb31b0dc573d5358142985669bad1a6857df933fb1dd200e5"
   }
 }

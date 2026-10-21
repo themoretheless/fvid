@@ -1,0 +1,8 @@
+{
+  "status": "audit-only-unaccepted",
+  "source": "src/container/mp4.rs",
+  "finding": "trun supports first_sample_flags and sample_flags simultaneously without validating their mutual exclusion. The row parser consumes both but chooses per-sample flags,discarding the first-sample statement. No production change/accepted ID yet.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "Mirrored ISO/IEC14496-12:2015,8.8.8:when first-sample-flags flag/field is used,sample-flags must not be present. This is trun field exclusivity,not trex/tfhd description selection.",
+  "next_gate": "After prior validation,author owned VP9 fMP4 controls with default/first-only/per-row-only flags and populated/empty both-flags contradictions. Confirm old parser consumes both and native playback succeeds for actual coded data;then require precise Invalid combination refusal before index/decoder publication. Keep literal planes/RGB,PTS,public clamped seek/rewind/EOF and existing description-selection controls."
+}

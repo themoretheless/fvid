@@ -1,0 +1,86 @@
+{
+  "provenance": "Four authored CRC-valid Ogg/Opus counter failures include an actually missing first audio page:the remaining granules mimic a legitimate positive origin and hide20ms loss. Six complete controls cover legal positive origin,chaining,interleaving,and existing-reader arbitrary initial/wrapping counter compatibility. Standard authored mono20ms DTX packets and owned VP9/PCM companion. No encoder,private media or network.",
+  "cases": [
+    {
+      "file": "lost-first-audio.ogg",
+      "before_frames": 1920,
+      "packets": 4,
+      "loss": true
+    },
+    {
+      "file": "gap.ogg",
+      "before_frames": 2880,
+      "packets": 5,
+      "loss": false
+    },
+    {
+      "file": "duplicate.ogg",
+      "before_frames": 2880,
+      "packets": 5,
+      "loss": false
+    },
+    {
+      "file": "backward.ogg",
+      "before_frames": 2880,
+      "packets": 5,
+      "loss": false
+    }
+  ],
+  "controls": [
+    {
+      "file": "complete-control.ogg",
+      "frames": 2880,
+      "chains": 1,
+      "packets": 5,
+      "native": true
+    },
+    {
+      "file": "positive-origin-control.ogg",
+      "frames": 1920,
+      "chains": 1,
+      "packets": 4,
+      "native": true
+    },
+    {
+      "file": "legacy-counter-control.ogg",
+      "frames": 2880,
+      "chains": 1,
+      "packets": 5,
+      "native": true
+    },
+    {
+      "file": "wrapped-counter-control.ogg",
+      "frames": 2880,
+      "chains": 1,
+      "packets": 5,
+      "native": true
+    },
+    {
+      "file": "chained-control.ogg",
+      "frames": 5760,
+      "chains": 2,
+      "packets": 10,
+      "native": true
+    },
+    {
+      "file": "interleaved-control.ogg",
+      "frames": 2880,
+      "chains": 2,
+      "packets": 10,
+      "native": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "complete-control.ogg": "53a06edb2d0abbccce5b9a84577c9e0a50874f1a6771b4fef13cf6983883b3ce",
+    "positive-origin-control.ogg": "87316460efb0c52a28a7cee72f37e90b8905dc1337f6159cd38f682c878b2a4b",
+    "legacy-counter-control.ogg": "db0d3f05dd50ee8003f3b46ace784a663a660740c3753705d23f01cdfce00900",
+    "wrapped-counter-control.ogg": "16b238129ac02ce7b335935e0b705e65ef22b356d83c3cae38d7bebc3d13b633",
+    "chained-control.ogg": "6feee2b0c08b5513d49ba3bafc2ad219d1de2d6c5ca620a79da3e2f56b4e79f7",
+    "interleaved-control.ogg": "e753ba983ac1a1c102d345296c3cef1436c90068a89734841d143adf3c33b0a4",
+    "lost-first-audio.ogg": "ee829e2b06e6572d99cb6247a5ccb255feba8770736e05133363c064b48cb7e0",
+    "gap.ogg": "43ae06028c2ffc26bd0db946e71c512172dcbeadf13cc5201daa2a0518e27bdf",
+    "duplicate.ogg": "7ddede8175fe551048bb378b661bebb0f27f05ce11e86594b3ced6f03d999d3b",
+    "backward.ogg": "484e919dc3cdaeb1f4da5fad4f0e6a0722a2b0096efd75a91b52bd9c66933413"
+  }
+}

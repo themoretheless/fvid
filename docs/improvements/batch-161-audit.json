@@ -1,0 +1,65 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0169",
+  "problem": "Bare FLAC packet indexing parses canonical coded frame/sample numbers but discards them,constructing cumulative timestamps even if a checksum-valid stream contains clock gaps,overlap or changes blocking strategy.",
+  "reference": {
+    "url": "https://www.rfc-editor.org/rfc/rfc9639.html",
+    "sections": [
+      "9.1",
+      "9.1.5"
+    ],
+    "finding": "A coded frame number equals the count of preceding frames; a coded sample number equals the count of preceding samples. Blocking strategy is constant within the audio stream."
+  },
+  "before_snapshot": "evidence/batch-161-flac-before.rs",
+  "before_sha256": "364e092618fd13bf8b95fff16c05bec86d9d145eb0e3a109a8ea1834a8dd1f1f",
+  "fixtures": "tests/fixtures/playback-errors/flac-number-timeline",
+  "requirements": [
+    "Eleven checksum-valid streams must reproduce actual false file-clock admission,not a header CRC or PCM error.",
+    "Four legal streams retain literal PCM and worker play/rewind/seek/EOF,including variable block sizes,short final blocks and multi-byte numbers.",
+    "Keep independent single-frame codec decoding:only whole-stream structural clock contradictions must refuse.",
+    "Core and player regressions,related FLAC units/integrations,fixture reproduction and affected builds must pass."
+  ],
+  "rejected_audit_hypotheses": [
+    {
+      "hypothesis": "Reserved depth code3 can pass frame_header helper as inherited precision.",
+      "result": "Source audit shows the structural frame_size decoder already rejects reserved depth before complete file admission. No complete media failure confirmed,no change,no ID."
+    }
+  ],
+  "fixture_review": "Before running the baseline,local generation explicitly excludes the final block from STREAMINFO minimum block size per RFC9639 section8.2. Legal fixed/variable controls end with7 samples;variable bounds cover all nonfinal sizes. Existing shared generators are preserved. This is fixture preparation,not an improvement ID.",
+  "counting_distinction": "FVID0137 corrected UTF8-like coded-number byte length/canonical encoding. All new failing values are already canonical,including single-byte failures. This audit concerns whole-stream clock relationships and strategy consistency;the encoding algorithm remains unchanged.",
+  "independent_controls": {
+    "log": "evidence/batch-161-libflac-controls.log",
+    "tool": "flac1.5.0 --test --silent",
+    "result": "All four legal complete controls pass independently,including actual PCM MD5. The authored STREAMINFO MD5 covers literal signed16 little-endian samples. This explicit reference check is not part of ordinary tests/generation."
+  },
+  "confirmed_before": {
+    "normal": "evidence/batch-161-before.log:4 passed,2 ignored. Eleven contradictory clocks are admitted and reindexed to0/64/128 despite canonical,CRC-valid headers. Full sources decode literal PCM;four legal controls retain actual-worker navigation and resource bounds.",
+    "forced": "evidence/batch-161-acceptance-before.log:2 failed,exit101. Core/parser and player/source intended clock refusals both fail because the invalid whole stream is admitted."
+  },
+  "implementation": "Retain coded number and blocking strategy in the parsed header. Before adding a bare-FLAC packet,validate strategy consistency and compare the coded number against preceding frame/sample count. UTF8-like encoding,subframe decoding,Frame index layout and public clock units are unchanged.",
+  "related_gate_investigation": {
+    "failed_log": "evidence/batch-161-root-units-after.log",
+    "failure": "CPAL explicit_flac_speaker_route_regressions:mono-unassigned actual-1 versus expected0. FLAC parser/source,codec and new clock tests pass. No acceptance until baseline/replay investigation.",
+    "baseline_replay": "evidence/batch-161-cpal-baseline-replay.log",
+    "scope": "Replay only the same failing CPAL test with exact frozen pre-fix owned_flac.rs. The execution script restores candidate bytes after Cargo exits,using equality guards.",
+    "unchanged_sources": [
+      "evidence/batch-161-cpal-baseline.rs",
+      "evidence/batch-161-routing-policy-baseline.rs"
+    ],
+    "confirmed_baseline": "Exact same mono-unassigned:-1 vs0 failure reproduced with the pre-fix FLAC parser;baseline script exited as expected and restored candidate source.",
+    "routing_policy_is_unchanged_HEAD": true,
+    "routing_policy_sha256": "e8bd9c9c68f6bb83d7fbef34f4718989697e3666c946e804a9f5681038f6d0e4",
+    "routing_contract": "Committed stereo_coefficients explicitly duplicates unknown mono,keeps unknown stereo by index,and averages larger unknown layouts when mask=0. The old tests still expect zero. Routing production code and media oracles are being checked separately;no new ID.",
+    "additional_reproductions": [
+      "evidence/batch-161-layout-oracle-before.log:mono-unassigned/flac:-0.00024414063 versus0",
+      "evidence/batch-161-router-oracle-before.log:directout[1,2] versus old expected[0,0]"
+    ],
+    "zero_id_oracle_migration": "Update only test references to the already committed mask0 policy:mono duplication,stereo identity,larger-layout average. Nonzero speaker masks keep the existing independent weights. Native integer PCM files,metadata,production stereo_coefficients and routing behavior are unchanged. Source snapshots retain all old tests and initial failed logs. This maintenance adds no ID.",
+    "corrected_snapshots": [
+      "evidence/batch-161-cpal-oracle-candidate.rs",
+      "evidence/batch-161-layout-tests-candidate.rs",
+      "evidence/batch-161-router-tests-candidate.rs"
+    ]
+  },
+  "validation": "batch-161-validation.json"
+}

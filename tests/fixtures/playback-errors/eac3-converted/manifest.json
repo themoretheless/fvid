@@ -1,0 +1,536 @@
+{
+  "cases": [
+    {
+      "name": "b1-long-id11-mix0",
+      "file": "b1-long-id11-mix0.ec3",
+      "control": "b1-long-id11-mix0-control.ec3",
+      "video": "b1-long-id11-mix0.mkv",
+      "control_video": "b1-long-id11-mix0-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-long-id11-mix1",
+      "file": "b1-long-id11-mix1.ec3",
+      "control": "b1-long-id11-mix1-control.ec3",
+      "video": "b1-long-id11-mix1.mkv",
+      "control_video": "b1-long-id11-mix1-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-long-id16-mix0",
+      "file": "b1-long-id16-mix0.ec3",
+      "control": "b1-long-id16-mix0-control.ec3",
+      "video": "b1-long-id16-mix0.mkv",
+      "control_video": "b1-long-id16-mix0-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-long-id16-mix1",
+      "file": "b1-long-id16-mix1.ec3",
+      "control": "b1-long-id16-mix1-control.ec3",
+      "video": "b1-long-id16-mix1.mkv",
+      "control_video": "b1-long-id16-mix1-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-short-id11-mix0",
+      "file": "b1-short-id11-mix0.ec3",
+      "control": "b1-short-id11-mix0-control.ec3",
+      "video": "b1-short-id11-mix0.mkv",
+      "control_video": "b1-short-id11-mix0-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-short-id11-mix1",
+      "file": "b1-short-id11-mix1.ec3",
+      "control": "b1-short-id11-mix1-control.ec3",
+      "video": "b1-short-id11-mix1.mkv",
+      "control_video": "b1-short-id11-mix1-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-short-id16-mix0",
+      "file": "b1-short-id16-mix0.ec3",
+      "control": "b1-short-id16-mix0-control.ec3",
+      "video": "b1-short-id16-mix0.mkv",
+      "control_video": "b1-short-id16-mix0-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-short-id16-mix1",
+      "file": "b1-short-id16-mix1.ec3",
+      "control": "b1-short-id16-mix1-control.ec3",
+      "video": "b1-short-id16-mix1.mkv",
+      "control_video": "b1-short-id16-mix1-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-mixed-id11-mix0",
+      "file": "b1-mixed-id11-mix0.ec3",
+      "control": "b1-mixed-id11-mix0-control.ec3",
+      "video": "b1-mixed-id11-mix0.mkv",
+      "control_video": "b1-mixed-id11-mix0-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-mixed-id11-mix1",
+      "file": "b1-mixed-id11-mix1.ec3",
+      "control": "b1-mixed-id11-mix1-control.ec3",
+      "video": "b1-mixed-id11-mix1.mkv",
+      "control_video": "b1-mixed-id11-mix1-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-mixed-id16-mix0",
+      "file": "b1-mixed-id16-mix0.ec3",
+      "control": "b1-mixed-id16-mix0-control.ec3",
+      "video": "b1-mixed-id16-mix0.mkv",
+      "control_video": "b1-mixed-id16-mix0-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-mixed-id16-mix1",
+      "file": "b1-mixed-id16-mix1.ec3",
+      "control": "b1-mixed-id16-mix1-control.ec3",
+      "video": "b1-mixed-id16-mix1.mkv",
+      "control_video": "b1-mixed-id16-mix1-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b2-long-id11-mix0",
+      "file": "b2-long-id11-mix0.ec3",
+      "control": "b2-long-id11-mix0-control.ec3",
+      "video": "b2-long-id11-mix0.mkv",
+      "control_video": "b2-long-id11-mix0-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-long-id11-mix1",
+      "file": "b2-long-id11-mix1.ec3",
+      "control": "b2-long-id11-mix1-control.ec3",
+      "video": "b2-long-id11-mix1.mkv",
+      "control_video": "b2-long-id11-mix1-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-long-id16-mix0",
+      "file": "b2-long-id16-mix0.ec3",
+      "control": "b2-long-id16-mix0-control.ec3",
+      "video": "b2-long-id16-mix0.mkv",
+      "control_video": "b2-long-id16-mix0-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-long-id16-mix1",
+      "file": "b2-long-id16-mix1.ec3",
+      "control": "b2-long-id16-mix1-control.ec3",
+      "video": "b2-long-id16-mix1.mkv",
+      "control_video": "b2-long-id16-mix1-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-short-id11-mix0",
+      "file": "b2-short-id11-mix0.ec3",
+      "control": "b2-short-id11-mix0-control.ec3",
+      "video": "b2-short-id11-mix0.mkv",
+      "control_video": "b2-short-id11-mix0-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-short-id11-mix1",
+      "file": "b2-short-id11-mix1.ec3",
+      "control": "b2-short-id11-mix1-control.ec3",
+      "video": "b2-short-id11-mix1.mkv",
+      "control_video": "b2-short-id11-mix1-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-short-id16-mix0",
+      "file": "b2-short-id16-mix0.ec3",
+      "control": "b2-short-id16-mix0-control.ec3",
+      "video": "b2-short-id16-mix0.mkv",
+      "control_video": "b2-short-id16-mix0-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-short-id16-mix1",
+      "file": "b2-short-id16-mix1.ec3",
+      "control": "b2-short-id16-mix1-control.ec3",
+      "video": "b2-short-id16-mix1.mkv",
+      "control_video": "b2-short-id16-mix1-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-mixed-id11-mix0",
+      "file": "b2-mixed-id11-mix0.ec3",
+      "control": "b2-mixed-id11-mix0-control.ec3",
+      "video": "b2-mixed-id11-mix0.mkv",
+      "control_video": "b2-mixed-id11-mix0-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-mixed-id11-mix1",
+      "file": "b2-mixed-id11-mix1.ec3",
+      "control": "b2-mixed-id11-mix1-control.ec3",
+      "video": "b2-mixed-id11-mix1.mkv",
+      "control_video": "b2-mixed-id11-mix1-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-mixed-id16-mix0",
+      "file": "b2-mixed-id16-mix0.ec3",
+      "control": "b2-mixed-id16-mix0-control.ec3",
+      "video": "b2-mixed-id16-mix0.mkv",
+      "control_video": "b2-mixed-id16-mix0-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-mixed-id16-mix1",
+      "file": "b2-mixed-id16-mix1.ec3",
+      "control": "b2-mixed-id16-mix1-control.ec3",
+      "video": "b2-mixed-id16-mix1.mkv",
+      "control_video": "b2-mixed-id16-mix1-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b3-long-id11-mix0",
+      "file": "b3-long-id11-mix0.ec3",
+      "control": "b3-long-id11-mix0-control.ec3",
+      "video": "b3-long-id11-mix0.mkv",
+      "control_video": "b3-long-id11-mix0-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-long-id11-mix1",
+      "file": "b3-long-id11-mix1.ec3",
+      "control": "b3-long-id11-mix1-control.ec3",
+      "video": "b3-long-id11-mix1.mkv",
+      "control_video": "b3-long-id11-mix1-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-long-id16-mix0",
+      "file": "b3-long-id16-mix0.ec3",
+      "control": "b3-long-id16-mix0-control.ec3",
+      "video": "b3-long-id16-mix0.mkv",
+      "control_video": "b3-long-id16-mix0-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-long-id16-mix1",
+      "file": "b3-long-id16-mix1.ec3",
+      "control": "b3-long-id16-mix1-control.ec3",
+      "video": "b3-long-id16-mix1.mkv",
+      "control_video": "b3-long-id16-mix1-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-short-id11-mix0",
+      "file": "b3-short-id11-mix0.ec3",
+      "control": "b3-short-id11-mix0-control.ec3",
+      "video": "b3-short-id11-mix0.mkv",
+      "control_video": "b3-short-id11-mix0-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-short-id11-mix1",
+      "file": "b3-short-id11-mix1.ec3",
+      "control": "b3-short-id11-mix1-control.ec3",
+      "video": "b3-short-id11-mix1.mkv",
+      "control_video": "b3-short-id11-mix1-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-short-id16-mix0",
+      "file": "b3-short-id16-mix0.ec3",
+      "control": "b3-short-id16-mix0-control.ec3",
+      "video": "b3-short-id16-mix0.mkv",
+      "control_video": "b3-short-id16-mix0-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-short-id16-mix1",
+      "file": "b3-short-id16-mix1.ec3",
+      "control": "b3-short-id16-mix1-control.ec3",
+      "video": "b3-short-id16-mix1.mkv",
+      "control_video": "b3-short-id16-mix1-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-mixed-id11-mix0",
+      "file": "b3-mixed-id11-mix0.ec3",
+      "control": "b3-mixed-id11-mix0-control.ec3",
+      "video": "b3-mixed-id11-mix0.mkv",
+      "control_video": "b3-mixed-id11-mix0-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-mixed-id11-mix1",
+      "file": "b3-mixed-id11-mix1.ec3",
+      "control": "b3-mixed-id11-mix1-control.ec3",
+      "video": "b3-mixed-id11-mix1.mkv",
+      "control_video": "b3-mixed-id11-mix1-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-mixed-id16-mix0",
+      "file": "b3-mixed-id16-mix0.ec3",
+      "control": "b3-mixed-id16-mix0-control.ec3",
+      "video": "b3-mixed-id16-mix0.mkv",
+      "control_video": "b3-mixed-id16-mix0-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-mixed-id16-mix1",
+      "file": "b3-mixed-id16-mix1.ec3",
+      "control": "b3-mixed-id16-mix1-control.ec3",
+      "video": "b3-mixed-id16-mix1.mkv",
+      "control_video": "b3-mixed-id16-mix1-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b6-long-id11-mix0",
+      "file": "b6-long-id11-mix0.ec3",
+      "control": "b6-long-id11-mix0-control.ec3",
+      "video": "b6-long-id11-mix0.mkv",
+      "control_video": "b6-long-id11-mix0-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-long-id11-mix1",
+      "file": "b6-long-id11-mix1.ec3",
+      "control": "b6-long-id11-mix1-control.ec3",
+      "video": "b6-long-id11-mix1.mkv",
+      "control_video": "b6-long-id11-mix1-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-long-id16-mix0",
+      "file": "b6-long-id16-mix0.ec3",
+      "control": "b6-long-id16-mix0-control.ec3",
+      "video": "b6-long-id16-mix0.mkv",
+      "control_video": "b6-long-id16-mix0-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-long-id16-mix1",
+      "file": "b6-long-id16-mix1.ec3",
+      "control": "b6-long-id16-mix1-control.ec3",
+      "video": "b6-long-id16-mix1.mkv",
+      "control_video": "b6-long-id16-mix1-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-short-id11-mix0",
+      "file": "b6-short-id11-mix0.ec3",
+      "control": "b6-short-id11-mix0-control.ec3",
+      "video": "b6-short-id11-mix0.mkv",
+      "control_video": "b6-short-id11-mix0-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-short-id11-mix1",
+      "file": "b6-short-id11-mix1.ec3",
+      "control": "b6-short-id11-mix1-control.ec3",
+      "video": "b6-short-id11-mix1.mkv",
+      "control_video": "b6-short-id11-mix1-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-short-id16-mix0",
+      "file": "b6-short-id16-mix0.ec3",
+      "control": "b6-short-id16-mix0-control.ec3",
+      "video": "b6-short-id16-mix0.mkv",
+      "control_video": "b6-short-id16-mix0-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-short-id16-mix1",
+      "file": "b6-short-id16-mix1.ec3",
+      "control": "b6-short-id16-mix1-control.ec3",
+      "video": "b6-short-id16-mix1.mkv",
+      "control_video": "b6-short-id16-mix1-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-mixed-id11-mix0",
+      "file": "b6-mixed-id11-mix0.ec3",
+      "control": "b6-mixed-id11-mix0-control.ec3",
+      "video": "b6-mixed-id11-mix0.mkv",
+      "control_video": "b6-mixed-id11-mix0-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-mixed-id11-mix1",
+      "file": "b6-mixed-id11-mix1.ec3",
+      "control": "b6-mixed-id11-mix1-control.ec3",
+      "video": "b6-mixed-id11-mix1.mkv",
+      "control_video": "b6-mixed-id11-mix1-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-mixed-id16-mix0",
+      "file": "b6-mixed-id16-mix0.ec3",
+      "control": "b6-mixed-id16-mix0-control.ec3",
+      "video": "b6-mixed-id16-mix0.mkv",
+      "control_video": "b6-mixed-id16-mix0-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b6-mixed-id16-mix1",
+      "file": "b6-mixed-id16-mix1.ec3",
+      "control": "b6-mixed-id16-mix1-control.ec3",
+      "video": "b6-mixed-id16-mix1.mkv",
+      "control_video": "b6-mixed-id16-mix1-control.mkv",
+      "blocks": 6
+    },
+    {
+      "name": "b1-long-id11-continuation",
+      "file": "b1-long-id11-continuation.ec3",
+      "control": "b1-long-id11-continuation-control.ec3",
+      "video": "b1-long-id11-continuation.mkv",
+      "control_video": "b1-long-id11-continuation-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-long-id16-continuation",
+      "file": "b1-long-id16-continuation.ec3",
+      "control": "b1-long-id16-continuation-control.ec3",
+      "video": "b1-long-id16-continuation.mkv",
+      "control_video": "b1-long-id16-continuation-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-short-id11-continuation",
+      "file": "b1-short-id11-continuation.ec3",
+      "control": "b1-short-id11-continuation-control.ec3",
+      "video": "b1-short-id11-continuation.mkv",
+      "control_video": "b1-short-id11-continuation-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-short-id16-continuation",
+      "file": "b1-short-id16-continuation.ec3",
+      "control": "b1-short-id16-continuation-control.ec3",
+      "video": "b1-short-id16-continuation.mkv",
+      "control_video": "b1-short-id16-continuation-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-mixed-id11-continuation",
+      "file": "b1-mixed-id11-continuation.ec3",
+      "control": "b1-mixed-id11-continuation-control.ec3",
+      "video": "b1-mixed-id11-continuation.mkv",
+      "control_video": "b1-mixed-id11-continuation-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b1-mixed-id16-continuation",
+      "file": "b1-mixed-id16-continuation.ec3",
+      "control": "b1-mixed-id16-continuation-control.ec3",
+      "video": "b1-mixed-id16-continuation.mkv",
+      "control_video": "b1-mixed-id16-continuation-control.mkv",
+      "blocks": 1
+    },
+    {
+      "name": "b2-long-id11-continuation",
+      "file": "b2-long-id11-continuation.ec3",
+      "control": "b2-long-id11-continuation-control.ec3",
+      "video": "b2-long-id11-continuation.mkv",
+      "control_video": "b2-long-id11-continuation-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-long-id16-continuation",
+      "file": "b2-long-id16-continuation.ec3",
+      "control": "b2-long-id16-continuation-control.ec3",
+      "video": "b2-long-id16-continuation.mkv",
+      "control_video": "b2-long-id16-continuation-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-short-id11-continuation",
+      "file": "b2-short-id11-continuation.ec3",
+      "control": "b2-short-id11-continuation-control.ec3",
+      "video": "b2-short-id11-continuation.mkv",
+      "control_video": "b2-short-id11-continuation-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-short-id16-continuation",
+      "file": "b2-short-id16-continuation.ec3",
+      "control": "b2-short-id16-continuation-control.ec3",
+      "video": "b2-short-id16-continuation.mkv",
+      "control_video": "b2-short-id16-continuation-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-mixed-id11-continuation",
+      "file": "b2-mixed-id11-continuation.ec3",
+      "control": "b2-mixed-id11-continuation-control.ec3",
+      "video": "b2-mixed-id11-continuation.mkv",
+      "control_video": "b2-mixed-id11-continuation-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b2-mixed-id16-continuation",
+      "file": "b2-mixed-id16-continuation.ec3",
+      "control": "b2-mixed-id16-continuation-control.ec3",
+      "video": "b2-mixed-id16-continuation.mkv",
+      "control_video": "b2-mixed-id16-continuation-control.mkv",
+      "blocks": 2
+    },
+    {
+      "name": "b3-long-id11-continuation",
+      "file": "b3-long-id11-continuation.ec3",
+      "control": "b3-long-id11-continuation-control.ec3",
+      "video": "b3-long-id11-continuation.mkv",
+      "control_video": "b3-long-id11-continuation-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-long-id16-continuation",
+      "file": "b3-long-id16-continuation.ec3",
+      "control": "b3-long-id16-continuation-control.ec3",
+      "video": "b3-long-id16-continuation.mkv",
+      "control_video": "b3-long-id16-continuation-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-short-id11-continuation",
+      "file": "b3-short-id11-continuation.ec3",
+      "control": "b3-short-id11-continuation-control.ec3",
+      "video": "b3-short-id11-continuation.mkv",
+      "control_video": "b3-short-id11-continuation-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-short-id16-continuation",
+      "file": "b3-short-id16-continuation.ec3",
+      "control": "b3-short-id16-continuation-control.ec3",
+      "video": "b3-short-id16-continuation.mkv",
+      "control_video": "b3-short-id16-continuation-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-mixed-id11-continuation",
+      "file": "b3-mixed-id11-continuation.ec3",
+      "control": "b3-mixed-id11-continuation-control.ec3",
+      "video": "b3-mixed-id11-continuation.mkv",
+      "control_video": "b3-mixed-id11-continuation-control.mkv",
+      "blocks": 3
+    },
+    {
+      "name": "b3-mixed-id16-continuation",
+      "file": "b3-mixed-id16-continuation.ec3",
+      "control": "b3-mixed-id16-continuation-control.ec3",
+      "video": "b3-mixed-id16-continuation.mkv",
+      "control_video": "b3-mixed-id16-continuation-control.mkv",
+      "blocks": 3
+    }
+  ],
+  "invalid": [
+    "reserved-size38.ec3",
+    "reserved-size63.ec3"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "status": "audit-only-unaccepted",
+  "related_id": "FVID-0086",
+  "counting": "0 additional IDs;follow-up to existing fixed-frame orphan-byte cause,previously qualified only WAV/AU.",
+  "source": "src/playback/audio/aiff.rs",
+  "finding": "Aiff::parse constructs frames by integer division without validating sample bytes modulo encoded frame stride. Packet alignment rounds the remainder away;validate_eof only compares rounded frames with declared_frames,so a declared complete9-frame run plus an explicitly stored orphan byte can still report successful native EOF.",
+  "next_gate": "After prior batch acceptance,extend the existing pure pcm-run-alignment generator/test with AIFF/AIFC integer,float,G711 layouts. Preserve every existing WAV/AU fixture byte and case. Prove current native source loses explicitly declared orphan bytes,then apply fixed-frame admission check and related tests. Keep valid odd mono8 padding and MACE semantics distinct."
+}

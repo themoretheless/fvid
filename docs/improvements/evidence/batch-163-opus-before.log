@@ -1,0 +1,12 @@
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-opus)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests/ogg_continuation_boundary.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_continuation_boundary-5732918a0a6a889d)
+
+running 4 tests
+test joined_prefix_discards_every_fragment_then_rewind_repeats_the_whole_audio ... ignored, enable with joined-prefix fragment handling
+test baseline_joined_prefix_is_refused_instead_of_publishing_its_fragment ... ok
+test malformed_missing_continuation_remains_an_explicit_refusal ... ok
+test complete_packets_and_nil_termination_keep_exact_payloads ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,8 @@
+{
+  "status": "audit-only-unaccepted",
+  "source": "src/container/mp4.rs",
+  "finding": "trex.default_sample_description_index and present tfhd.sample_description_index reject values>1 but accept0,then unconditionally decode with the sole stsd description. Fragment metadata can therefore reference no supported one-based description while samples are still published. No production edit/accepted ID yet.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "Mirrored ISO/IEC14496-12:2015,8.7.4.3 sample-description indices1..stsd_count;8.8.3 trex defaults and8.8.7 tfhd override. Do not confuse sample-group sgpd zero semantics with sample-entry indexing. Future stsd-group mappings are outside current single-description profile.",
+  "next_gate": "After prior validation,purely author fragmented MP4 around existing owned VP9;no external codec/private parameters. Reproduce inherited trex0 and explicit tfhd0 admission. Preserve explicit1 override of an unused trex0 default,so validate effective description per active fragment rather than banning harmless overridden defaults. Compare native RGB/clocks/seek/EOF with independently built nonfragmented control and preserve index/packet budgets."
+}

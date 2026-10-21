@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0160"
+  ],
+  "issue": "Caption painter destroys hard breaks,misaligns wrapped rows and uses ineffective outline color; captions overlap visible controls",
+  "before_ui": "evidence/batch-151-ui-proof.json",
+  "source_sha256": "6cbd25a27bc2feb54552039480ccd20ca6599bf7613d9f85a4e6d1994dbf320f",
+  "regression": "src/player_subtitle_tests.rs",
+  "fixtures": "tests/fixtures/playback-errors/subtitle-painting",
+  "counting": "One caption-paint correctness repair; row,color,geometry and native playback variants do not add separate IDs.",
+  "primary_api": {
+    "egui": "0.36.2",
+    "layout": "LayoutJob defaults to left alignment and preserves hard newlines unless caller replaces them; centered galley coordinates straddle x=0.",
+    "color": "Painter::galley uses fallback only for PLACEHOLDER glyph colors; explicit white requires galley_with_override_text_color for black outline.",
+    "sources": [
+      "https://docs.rs/egui/0.36.2/egui/struct.Painter.html",
+      "https://docs.rs/epaint/0.36.2/epaint/text/struct.Galley.html"
+    ]
+  },
+  "test_sha256": "54a3565ebf53b4e70e95d47d1585ca0bb89ecc2eb7c2a6945d35cb617996178e",
+  "harness_corrections": [
+    "Initial --bin target was canceled as wrong target; no painter proof claimed.",
+    "Initial --lib native test reaches valid decoded video and fails at 1 vs 2 painted rows. Four headless graphic cases first failed at an unhandled egui texture delta; their harness now explicitly clears deltas and unchanged production is being retested."
+  ],
+  "before_verified": "evidence/batch-153-before-verified.log",
+  "before_result": "Five failures: explicit newline loss,off-center row bounds,missing black mesh vertices,visible panel overlap,and actual decoded native cue painted in one row.",
+  "candidate_sha256": "9eb1063f09e68b83dd032e632f8d259d6ddd8fa14b57b1581a7d101e1b94b5f9",
+  "qualification": [
+    "The existing screenshot proves a valid decoded frame and single-line,right-shifted caption in the physical window.",
+    "All five corrected baseline tests fail on the intended output assertions; no texture-harness error remains.",
+    "One caption-paint correctness repair; all fixture variants and four seek times count as zero additional improvements.",
+    "No performance claim or public API change. Very tall captions in very small viewports are not qualified by this ordinary-caption matrix."
+  ],
+  "after": {
+    "log": "evidence/batch-153-after.log",
+    "passed": 5,
+    "related_passed": 34,
+    "related_ignored": 1,
+    "ignored_reason": "pre-existing physical Metal/VideoToolbox mux test",
+    "build": "evidence/batch-153-player-build.log",
+    "build_exit": 0
+  },
+  "validation": "batch-153-validation.json",
+  "ui": "evidence/batch-153-ui-proof.json"
+}

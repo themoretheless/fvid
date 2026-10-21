@@ -40,6 +40,34 @@ pub struct Weights {
     pub l0: Vec<Weight>,
     pub l1: Vec<Weight>,
 }
+/// Owned residual RBSP associated with a partition-A slice.
+#[derive(Debug)]
+pub struct ResidualPartition {
+    pub rbsp: Vec<u8>,
+    pub entropy_bit_offset: usize,
+}
+#[derive(Debug)]
+pub struct DataPartitions {
+    pub slice_id: u32,
+    pub intra: Option<ResidualPartition>,
+    pub inter: Option<ResidualPartition>,
+}
+pub(super) struct PartitionCursor<'a> {
+    pub bits: BitReader<'a>,
+    present: bool,
+    start: usize,
+}
+impl PartitionCursor<'_> {
+    pub fn finish(&mut self) -> Result<()> {
+        if self.present {
+            if self.bits.position() == self.start {
+                return Err(invalid("AVC residual partition present without residual syntax"));
+            }
+            self.bits.finish_rbsp()?;
+        }
+        Ok(())
+    }
+}
 #[derive(Debug)]
 pub struct SliceHeader {
     pub nal_ref_idc: u8,
@@ -79,6 +107,7 @@ pub struct SliceHeader {
     pub rbsp: Vec<u8>,
     pub header_bits: usize,
     pub entropy_bit_offset: usize,
+    pub data_partitions: Option<DataPartitions>,
 }
 fn ue(b: &mut BitReader<'_>, max: u32) -> Result<u32> {
     let n = b.unsigned_golomb()?;
@@ -143,11 +172,19 @@ fn weight_list(
     Ok(result)
 }
 impl SliceHeader {
+    pub(super) fn partition_cursor(&self, intra: bool) -> Result<Option<PartitionCursor<'_>>> {
+        let Some(partitions) = &self.data_partitions else { return Ok(None); };
+        let source = if intra { &partitions.intra } else { &partitions.inter };
+        let mut bits = BitReader::new(source.as_ref().map_or(&[][..], |p| p.rbsp.as_slice()));
+        if let Some(source) = source { bits.skip(source.entropy_bit_offset)?; }
+        let start = bits.position();
+        Ok(Some(PartitionCursor { bits, present: source.is_some(), start }))
+    }
     /// Retrieve the PPS ID before choosing the referenced PPS/SPS pair.
     pub fn parameter_set_id(nal: &[u8]) -> Result<u32> {
         if nal
             .first()
-            .is_none_or(|h| h & 0x80 != 0 || !matches!(h & 31, 1 | 5))
+            .is_none_or(|h| h & 0x80 != 0 || !matches!(h & 31, 1 | 2 | 5))
         {
             return Err(invalid("expected AVC coded slice NAL"));
         }
@@ -163,7 +200,7 @@ impl SliceHeader {
     pub fn parse(nal: &[u8], sps: &Sps, pps: &Pps) -> Result<Self> {
         if nal
             .first()
-            .is_none_or(|h| h & 0x80 != 0 || !matches!(h & 31, 1 | 5))
+            .is_none_or(|h| h & 0x80 != 0 || !matches!(h & 31, 1 | 2 | 5))
         {
             return Err(invalid("expected AVC coded slice NAL"));
         }
@@ -378,6 +415,22 @@ impl SliceHeader {
         } else {
             None
         };
+        let data_partitions = if nal[0] & 31 == 2 {
+            if sps.profile != 88 {
+                return Err(invalid("AVC data partitioning is forbidden by this profile"));
+            }
+            if pps.cabac {
+                return Err(invalid("AVC data partitioning requires CAVLC"));
+            }
+            let picture_mbs = u64::from(sps.width_mbs) * u64::from(sps.height_map_units)
+                * if !sps.frame_mbs_only && !field_pic {2} else {1};
+            let units = picture_mbs / if !sps.frame_mbs_only && sps.mb_adaptive_frame_field && !field_pic {2} else {1};
+            let slice_id = b.unsigned_golomb()?;
+            if u64::from(slice_id) >= units {
+                return Err(invalid("AVC data partition slice_id outside picture"));
+            }
+            Some(DataPartitions { slice_id, intra: None, inter: None })
+        } else { None };
         let header_bits = b.position();
         if pps.cabac {
             while !b.position().is_multiple_of(8) {
@@ -426,6 +479,7 @@ impl SliceHeader {
             slice_group_change_cycle,
             header_bits,
             entropy_bit_offset,
+            data_partitions,
             rbsp,
         })
     }

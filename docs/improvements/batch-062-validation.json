@@ -58,5 +58,8 @@
     "Initial Player factory/worker/build checks caught a concurrent owned_raw_mp3.rs AudioDecodeStats import/type mismatch. The current file had already been corrected outside this work; no edits or improvement ID were taken for that repair. Final reruns pass, and the initial failure logs remain separate."
   ],
   "compatibility": "Present orphan bytes in fixed-frame WAV/AU audio no longer disappear silently. Producers must provide complete sample/channel frames; outside-run word padding, annotations and footers retain existing behavior.",
-  "counting": "One container-level fixed-frame run admission problem. Formats, widths, laws, orphan lengths, boundary controls and concurrent baseline repair add no IDs."
+  "counting": "One container-level fixed-frame run admission problem. Formats, widths, laws, orphan lengths, boundary controls and concurrent baseline repair add no IDs.",
+  "follow_up_validations": [
+    "batch-170-validation.json"
+  ]
 }

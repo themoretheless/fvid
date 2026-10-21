@@ -70,6 +70,9 @@ impl OggPacket {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum PacketPhase { Headers, FirstAudio, DiscardingPrefix, Regular }
+
 /// Reads Opus packets out of an Ogg stream (RFC 7845).
 ///
 /// The constructor consumes the two header packets, so [`head`](Self::head) and
@@ -128,10 +131,13 @@ impl OggPacket {
 /// [`Trim`](super::Trim) needs replacing, or the second pass begins with the
 /// first one's state and counts.
 pub struct OggOpusReader<R: Read> {
+    phase: PacketPhase,
     source: Counted<R>,
     head: OpusHead,
     tags: OpusTags,
     serial: u32,
+    /// Expected counter after the first accepted page, including wraparound.
+    next_sequence: Option<u32>,
 
     /// The packets completed on the last page read, back to back, followed by
     /// the start of any packet that continues onto the next page. Reused for
@@ -157,6 +163,8 @@ pub struct OggOpusReader<R: Read> {
     /// `saw_eos` as it stood there: set when the header pages ended the
     /// stream, so a rewind does not read on past its end.
     audio_start_eos: bool,
+    /// Counter checkpoint for rewinding directly to the first audio page.
+    audio_start_sequence: Option<u32>,
 }
 
 /// Shows where the reader has got to in the stream.
@@ -185,6 +193,7 @@ impl<R: Read> OggOpusReader<R> {
     /// libopusfile refuses the same streams.
     pub fn new(source: R) -> Result<Self> {
         let mut r = OggOpusReader {
+            phase: PacketPhase::Headers,
             source: Counted {
                 inner: source,
                 position: 0,
@@ -192,6 +201,7 @@ impl<R: Read> OggOpusReader<R> {
             head: OpusHead::new(1, 0)?,
             tags: OpusTags::new(),
             serial: 0,
+            next_sequence: None,
             packets: Vec::new(),
             ends: Vec::with_capacity(MAX_SEGMENTS),
             taken: 0,
@@ -201,6 +211,7 @@ impl<R: Read> OggOpusReader<R> {
             exhausted: false,
             audio_start: 0,
             audio_start_eos: false,
+            audio_start_sequence: None,
         };
 
         let first = r
@@ -221,8 +232,10 @@ impl<R: Read> OggOpusReader<R> {
                 "comment header does not finish its page",
             ));
         }
+        r.phase = PacketPhase::FirstAudio;
         r.audio_start = r.source.position;
         r.audio_start_eos = r.saw_eos;
+        r.audio_start_sequence = r.next_sequence;
 
         Ok(r)
     }
@@ -328,7 +341,7 @@ impl<R: Read> OggOpusReader<R> {
             if self.saw_eos || self.exhausted {
                 // A packet still pending was cut off by the end of the stream;
                 // report that rather than returning it as if complete.
-                if self.packets.len() > self.partial_start() {
+                if self.packets.len() > self.partial_start() || self.phase == PacketPhase::DiscardingPrefix {
                     self.packets.clear();
                     self.ends.clear();
                     self.taken = 0;
@@ -394,8 +407,22 @@ impl<R: Read> OggOpusReader<R> {
             return Err(Error::InvalidStream("page CRC mismatch"));
         }
 
-        if header.is_bos() {
+        if self.next_sequence.is_some_and(|next| header.sequence != next) {
+            self.packets.clear();
+            return Err(Error::InvalidStream("page sequence number is discontinuous"));
+        }
+
+        if self.next_sequence.is_none() {
+            if !header.is_bos() {
+                self.packets.clear();
+                return Err(Error::InvalidStream("logical stream must start with a BOS page"));
+            }
             self.serial = header.serial;
+        } else if header.is_bos() {
+            // Another BOS belongs to a new decoding context. This reader owns
+            // one logical stream; never relabel its already parsed OpusHead.
+            self.packets.clear();
+            return Err(Error::InvalidStream("unexpected BOS page in a single logical stream"));
         } else if header.serial != self.serial {
             // Multiplexed or chained streams are out of scope: a second logical
             // stream would need its own decoder state and pre-skip.
@@ -405,21 +432,48 @@ impl<R: Read> OggOpusReader<R> {
             ));
         }
 
-        // A page that claims to continue a packet when none is pending — or that
-        // starts fresh while one is pending — means pages were lost or reordered.
-        if header.is_continued() == (base == 0) {
+        // RFC 7845 section 3 permits joining at an audio-page boundary.
+        // Its first continued packet has no available prefix: discard its
+        // entire tail, even across pages, before publishing whole packets.
+        if self.phase == PacketPhase::FirstAudio {
+            self.phase = if header.is_continued() {
+                PacketPhase::DiscardingPrefix
+            } else {
+                PacketPhase::Regular
+            };
+        }
+        let mut first_segment = 0;
+        let mut active_base = base;
+        if self.phase == PacketPhase::DiscardingPrefix {
+            if !header.is_continued() {
+                self.packets.clear();
+                return Err(Error::InvalidStream("page continuation flag does not match the pending packet"));
+            }
+            let mut discarded = 0;
+            for &lace in segments.iter() {
+                discarded += lace as usize;
+                first_segment += 1;
+                if lace < 255 {
+                    self.phase = PacketPhase::Regular;
+                    break;
+                }
+            }
+            self.packets.drain(..discarded);
+            active_base = 0;
+        } else if header.is_continued() == (base == 0) {
             self.packets.clear();
             return Err(Error::InvalidStream(
                 "page continuation flag does not match the pending packet",
             ));
         }
 
+        self.next_sequence = Some(header.sequence.wrapping_add(1));
         self.saw_eos = header.is_eos();
         self.page_granule = header.granule_position;
 
         let mut start = 0usize;
-        let mut end = base;
-        for (i, &lace) in segments.iter().enumerate() {
+        let mut end = active_base;
+        for (i, &lace) in segments.iter().enumerate().skip(first_segment) {
             end += lace as usize;
             if end - start > MAX_OGG_PACKET_BYTES {
                 self.packets.truncate(start);
@@ -503,6 +557,8 @@ impl<R: Read + Seek> OggOpusReader<R> {
         self.taken = 0;
         self.last_is_eos = false;
         self.saw_eos = self.audio_start_eos;
+        self.next_sequence = self.audio_start_sequence;
+        self.phase = PacketPhase::FirstAudio;
         self.exhausted = false;
         Ok(())
     }

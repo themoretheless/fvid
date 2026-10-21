@@ -30,6 +30,9 @@ pub mod playback_au;
 #[path = "playback/audio/avi_audio.rs"]
 pub mod playback_avi_audio;
 #[cfg(feature = "player")]
+#[path = "playback/audio/wavpack.rs"]
+pub mod playback_wavpack;
+#[cfg(feature = "player")]
 #[path = "playback/audio/flac.rs"]
 pub mod playback_flac;
 #[cfg(feature = "player")]

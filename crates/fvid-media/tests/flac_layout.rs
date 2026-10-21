@@ -125,7 +125,17 @@ fn authored_flac_layouts_downmix_to_exact_speaker_policy_oracles() {
             }
             let mut expected = Vec::new();
             for frame in samples.chunks_exact(channels).skip(16).take(32) {
-                let mut stereo = [0f32; 2];
+                // A zero mask names no roles. Preserve the committed audible
+                // fallback independently of the production routing function.
+                let mut stereo = if mask == 0 {
+                    match channels {
+                        1 => [frame[0]; 2],
+                        2 => [frame[0], frame[1]],
+                        _ => [frame.iter().sum::<f32>() / channels as f32; 2],
+                    }
+                } else {
+                    [0f32; 2]
+                };
                 let mut bits = mask;
                 for &value in frame {
                     if bits == 0 {

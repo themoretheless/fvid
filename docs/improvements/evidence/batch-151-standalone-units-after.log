@@ -1,0 +1,24 @@
+
+running 19 tests
+test tests::a_cue_is_live_between_its_times ... ok
+test tests::a_mark_at_the_head_of_a_file_names_its_encoding ... ok
+test tests::a_sami_file_shows_the_language_it_captions_in ... ok
+test tests::a_sami_line_inherits_the_time_it_was_given ... ok
+test tests::a_script_line_of_another_field_list_shows_nothing ... ok
+test tests::a_stated_length_outlines_the_line_it_states ... ok
+test tests::a_windows_1251_file_reads_as_the_text_it_holds ... ok
+test tests::an_ass_block_gives_up_its_text_whichever_fields_it_keeps ... ok
+test tests::an_end_before_the_start_is_not_a_cue ... ok
+test tests::an_old_sami_sync_names_a_clock ... ok
+test tests::ass_events_keep_text_after_the_tenth_field ... ok
+test tests::clocks_accept_both_separators_and_the_short_form ... ok
+test tests::delay_shifts_the_whole_file ... ok
+test tests::a_sami_paragraph_carries_its_own_clock ... ok
+test tests::sniffing_picks_the_format_by_its_header ... ok
+test tests::subrip_cues_keep_their_counter_and_blank_lines ... ok
+test tests::webvtt_skips_its_header_notes_and_cue_settings ... ok
+test tests::a_sidecar_in_a_legacy_encoding_loads_with_its_text ... ok
+test tests::sidecars_sort_exact_names_before_loose_ones ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

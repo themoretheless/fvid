@@ -23,7 +23,7 @@ fn samples(count: usize) -> Result<Vec<u16>> {
 /// Decode compact field planes. The budget covers output samples and coverage;
 /// caller-owned headers/RBSP and other pictures are excluded. Separate colour
 /// planes use independent monochrome reconstruction. Nonseparate 444 fields
-/// currently use PCM; the other component formats also admit compressed intra.
+/// share intra modes and keep independent full-resolution residual contexts.
 pub fn decode_intra_slices(
     headers: &[&SliceHeader],
     sps: &Sps,
@@ -70,8 +70,7 @@ pub fn decode_intra_slices(
     ordered.sort_by_key(|h| h.first_mb);
     if ordered.iter().all(|h| {
         h.slice_type == SliceType::I
-            && (h.disable_deblocking_filter_idc == 1
-                || (sps.chroma_format == 3 && h.disable_deblocking_filter_idc <= 2))
+            && h.disable_deblocking_filter_idc == 1
     }) {
         match decode_pcm_slices(&ordered, sps, pps, budget) {
             Ok(field) => return Ok(field),
@@ -79,10 +78,9 @@ pub fn decode_intra_slices(
             Err(error) => return Err(error),
         }
     }
-    if sps.chroma_format == 3 {
-        return Err(unsupported("AVC 444 compressed I fields are not connected"));
-    }
-    let picture = if sps.chroma_format==1 {
+    let picture = if sps.chroma_format==3 {
+        super::avc_picture::decode_full_resolution_intra_slices(&ordered,sps,pps,budget)?
+    } else if sps.chroma_format==1 {
         super::avc_picture::decode_intra_slices(&ordered, sps, pps, budget)?
     } else {
         super::avc_picture::decode_component_intra_slices(&ordered,sps,pps,budget)?
@@ -212,6 +210,7 @@ pub fn decode_pcm_slices(
         }
         let mut bits = BitReader::new(&header.rbsp);
         bits.skip(header.entropy_bit_offset)?;
+        let mut partition_b = header.partition_cursor(true)?;
         while bits.more_rbsp_data() {
             if seen >= count {
                 return Err(invalid("AVC PCM field macroblock exceeds picture"));
@@ -220,6 +219,10 @@ pub fn decode_pcm_slices(
                 return Err(unsupported(
                     "non-PCM AVC field reconstruction is not connected",
                 ));
+            }
+            // mb_type stays in A; alignment and all PCM samples are category3.
+            if let Some(partition) = &mut partition_b {
+                std::mem::swap(&mut bits, &mut partition.bits);
             }
             while bits.position() % 8 != 0 {
                 if bits.bit()? {
@@ -240,10 +243,15 @@ pub fn decode_pcm_slices(
                     }
                 }
             }
+            if let Some(partition) = &mut partition_b {
+                std::mem::swap(&mut bits, &mut partition.bits);
+            }
             covered[seen] = 1;
             seen += 1;
         }
         bits.finish_rbsp()?;
+        if let Some(partition) = &mut partition_b { partition.finish()?; }
+        if let Some(mut partition) = header.partition_cursor(false)? { partition.finish()?; }
     }
     if covered.iter().any(|v| *v == 0) {
         return Err(invalid("incomplete AVC PCM field"));
@@ -541,6 +549,10 @@ pub fn decode_skip_field(
         ));
     }
     bits.finish_rbsp()?;
+    // A pure skip slice has no category3/4 data; reject surplus B/C streams.
+    for intra in [true, false] {
+        if let Some(mut partition) = h.partition_cursor(intra)? { partition.finish()?; }
+    }
     let mut y = samples(pixels)?;
     let mut cb = samples(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?;
     let mut cr = samples(if sps.chroma_format==0 {0}else if sps.chroma_format==2 {pixels/2}else{pixels/4})?;
@@ -705,6 +717,7 @@ pub(super) fn decode_inter_field_impl(
     let (w, height) = sps.coded_dimensions();
     let count = w as usize / 16 * (height as usize / 32);
     if !pps.cabac
+        && (sps.chroma_format!=3 || sps.separate_colour_plane)
         && matches!(pps.slice_groups, SliceGroups::Single)
         && h.slice_type == SliceType::P
         && headers.len() == 1
@@ -831,6 +844,9 @@ pub(super) fn decode_inter_field_impl(
         .coded_width
         .checked_mul(reference.picture.coded_height)
         .ok_or_else(|| invalid("AVC P field size overflow"))?;
+    if sps.chroma_format==3 && !sps.separate_colour_plane {
+        return super::avc_inter_picture::decode_full_resolution_inter_fields(headers,sps,pps,references,implicit,direct,budget,retain_motion);
+    }
     if sps.separate_colour_plane {
         if reference.picture.coded_width != w as usize
             || reference.picture.coded_height != height as usize / 2
@@ -1172,6 +1188,7 @@ pub(super) fn decode_inter_field_impl(
         let mut ready = crate::buffer(pixels / 16)?;
         let mut bits = BitReader::new(&h.rbsp);
         bits.skip(h.entropy_bit_offset)?;
+        let mut partition_c = h.partition_cursor(false)?;
         let mut address = h.first_mb as usize;
         while (if fmo { address < count } else { address < end })
             && (pps.cabac || bits.more_rbsp_data())
@@ -1403,9 +1420,13 @@ pub(super) fn decode_inter_field_impl(
                         };
                         let header =
                             super::avc_inter::read_inter_header_field(&mut bits, &syntax, true)?;
+                        let coefficient_bits = match &mut partition_c {
+                            Some(partition) => &mut partition.bits,
+                            None => &mut bits,
+                        };
                         let c=if sps.chroma_format==2 {
-                            super::avc_inter_coefficients::read_inter_coefficients_422_field(&mut bits,header.residual.pattern,header.residual.transform8,coefficients.neighbours(address,slice_id)?,coefficients.neighbours_422(address,slice_id)?,true)?
-                        }else{super::avc_inter_coefficients::read_inter_coefficients_field(&mut bits,header.residual.pattern,header.residual.transform8,coefficients.neighbours(address,slice_id)?,true)?};
+                            super::avc_inter_coefficients::read_inter_coefficients_422_field(coefficient_bits,header.residual.pattern,header.residual.transform8,coefficients.neighbours(address,slice_id)?,coefficients.neighbours_422(address,slice_id)?,true)?
+                        }else{super::avc_inter_coefficients::read_inter_coefficients_field(coefficient_bits,header.residual.pattern,header.residual.transform8,coefficients.neighbours(address,slice_id)?,true)?};
                         (header, c)
                     };
                     if sps.chroma_format==2 {
@@ -1719,6 +1740,8 @@ pub(super) fn decode_inter_field_impl(
         }
         if !pps.cabac {
             bits.finish_rbsp()?;
+            if let Some(partition) = &mut partition_c { partition.finish()?; }
+            if let Some(reader) = &mut intra { reader.finish_partition()?; }
         } else if cabac.as_mut().unwrap().read_macroblock()?.is_some() {
             return Err(invalid("CABAC field slice exceeds coverage"));
         }

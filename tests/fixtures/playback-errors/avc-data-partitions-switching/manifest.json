@@ -1,0 +1,341 @@
+{
+  "cases": [
+    {
+      "name": "sp-primary-signed0-split0",
+      "kind": "sp-primary",
+      "signed": false,
+      "file": "sp-primary-signed0-split0.mp4",
+      "oracle": "sp-primary-signed0-split0.yuv",
+      "frames": [
+        {
+          "packet": "sp-primary-signed0-split0-1.packet",
+          "control": "sp-primary-signed0-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-primary-signed0-split0-2.packet",
+          "control": "sp-primary-signed0-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-primary-signed0-split0-3.packet",
+          "control": "sp-primary-signed0-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-primary-signed0-split1",
+      "kind": "sp-primary",
+      "signed": false,
+      "file": "sp-primary-signed0-split1.mp4",
+      "oracle": "sp-primary-signed0-split1.yuv",
+      "frames": [
+        {
+          "packet": "sp-primary-signed0-split1-1.packet",
+          "control": "sp-primary-signed0-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-primary-signed0-split1-2.packet",
+          "control": "sp-primary-signed0-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-primary-signed0-split1-3.packet",
+          "control": "sp-primary-signed0-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-primary-signed1-split0",
+      "kind": "sp-primary",
+      "signed": true,
+      "file": "sp-primary-signed1-split0.mp4",
+      "oracle": "sp-primary-signed1-split0.yuv",
+      "frames": [
+        {
+          "packet": "sp-primary-signed1-split0-1.packet",
+          "control": "sp-primary-signed1-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-primary-signed1-split0-2.packet",
+          "control": "sp-primary-signed1-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-primary-signed1-split0-3.packet",
+          "control": "sp-primary-signed1-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-primary-signed1-split1",
+      "kind": "sp-primary",
+      "signed": true,
+      "file": "sp-primary-signed1-split1.mp4",
+      "oracle": "sp-primary-signed1-split1.yuv",
+      "frames": [
+        {
+          "packet": "sp-primary-signed1-split1-1.packet",
+          "control": "sp-primary-signed1-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-primary-signed1-split1-2.packet",
+          "control": "sp-primary-signed1-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-primary-signed1-split1-3.packet",
+          "control": "sp-primary-signed1-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-secondary-signed0-split0",
+      "kind": "sp-secondary",
+      "signed": false,
+      "file": "sp-secondary-signed0-split0.mp4",
+      "oracle": "sp-secondary-signed0-split0.yuv",
+      "frames": [
+        {
+          "packet": "sp-secondary-signed0-split0-1.packet",
+          "control": "sp-secondary-signed0-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-secondary-signed0-split0-2.packet",
+          "control": "sp-secondary-signed0-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-secondary-signed0-split0-3.packet",
+          "control": "sp-secondary-signed0-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-secondary-signed0-split1",
+      "kind": "sp-secondary",
+      "signed": false,
+      "file": "sp-secondary-signed0-split1.mp4",
+      "oracle": "sp-secondary-signed0-split1.yuv",
+      "frames": [
+        {
+          "packet": "sp-secondary-signed0-split1-1.packet",
+          "control": "sp-secondary-signed0-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-secondary-signed0-split1-2.packet",
+          "control": "sp-secondary-signed0-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-secondary-signed0-split1-3.packet",
+          "control": "sp-secondary-signed0-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-secondary-signed1-split0",
+      "kind": "sp-secondary",
+      "signed": true,
+      "file": "sp-secondary-signed1-split0.mp4",
+      "oracle": "sp-secondary-signed1-split0.yuv",
+      "frames": [
+        {
+          "packet": "sp-secondary-signed1-split0-1.packet",
+          "control": "sp-secondary-signed1-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-secondary-signed1-split0-2.packet",
+          "control": "sp-secondary-signed1-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-secondary-signed1-split0-3.packet",
+          "control": "sp-secondary-signed1-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "sp-secondary-signed1-split1",
+      "kind": "sp-secondary",
+      "signed": true,
+      "file": "sp-secondary-signed1-split1.mp4",
+      "oracle": "sp-secondary-signed1-split1.yuv",
+      "frames": [
+        {
+          "packet": "sp-secondary-signed1-split1-1.packet",
+          "control": "sp-secondary-signed1-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "sp-secondary-signed1-split1-2.packet",
+          "control": "sp-secondary-signed1-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "sp-secondary-signed1-split1-3.packet",
+          "control": "sp-secondary-signed1-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "si-switching-signed0-split0",
+      "kind": "si-switching",
+      "signed": false,
+      "file": "si-switching-signed0-split0.mp4",
+      "oracle": "si-switching-signed0-split0.yuv",
+      "frames": [
+        {
+          "packet": "si-switching-signed0-split0-1.packet",
+          "control": "si-switching-signed0-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "si-switching-signed0-split0-2.packet",
+          "control": "si-switching-signed0-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "si-switching-signed0-split0-3.packet",
+          "control": "si-switching-signed0-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "si-switching-signed0-split1",
+      "kind": "si-switching",
+      "signed": false,
+      "file": "si-switching-signed0-split1.mp4",
+      "oracle": "si-switching-signed0-split1.yuv",
+      "frames": [
+        {
+          "packet": "si-switching-signed0-split1-1.packet",
+          "control": "si-switching-signed0-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "si-switching-signed0-split1-2.packet",
+          "control": "si-switching-signed0-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "si-switching-signed0-split1-3.packet",
+          "control": "si-switching-signed0-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "si-switching-signed1-split0",
+      "kind": "si-switching",
+      "signed": true,
+      "file": "si-switching-signed1-split0.mp4",
+      "oracle": "si-switching-signed1-split0.yuv",
+      "frames": [
+        {
+          "packet": "si-switching-signed1-split0-1.packet",
+          "control": "si-switching-signed1-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "si-switching-signed1-split0-2.packet",
+          "control": "si-switching-signed1-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "si-switching-signed1-split0-3.packet",
+          "control": "si-switching-signed1-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "si-switching-signed1-split1",
+      "kind": "si-switching",
+      "signed": true,
+      "file": "si-switching-signed1-split1.mp4",
+      "oracle": "si-switching-signed1-split1.yuv",
+      "frames": [
+        {
+          "packet": "si-switching-signed1-split1-1.packet",
+          "control": "si-switching-signed1-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "si-switching-signed1-split1-2.packet",
+          "control": "si-switching-signed1-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "si-switching-signed1-split1-3.packet",
+          "control": "si-switching-signed1-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "si-ordinary-signed0-split0",
+      "kind": "si-ordinary",
+      "signed": false,
+      "file": "si-ordinary-signed0-split0.mp4",
+      "oracle": "si-ordinary-signed0-split0.yuv",
+      "frames": [
+        {
+          "packet": "si-ordinary-signed0-split0-1.packet",
+          "control": "si-ordinary-signed0-split0-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "si-ordinary-signed0-split0-2.packet",
+          "control": "si-ordinary-signed0-split0-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "si-ordinary-signed0-split0-3.packet",
+          "control": "si-ordinary-signed0-split0-3-control.packet",
+          "qs": 51
+        }
+      ]
+    },
+    {
+      "name": "si-ordinary-signed0-split1",
+      "kind": "si-ordinary",
+      "signed": false,
+      "file": "si-ordinary-signed0-split1.mp4",
+      "oracle": "si-ordinary-signed0-split1.yuv",
+      "frames": [
+        {
+          "packet": "si-ordinary-signed0-split1-1.packet",
+          "control": "si-ordinary-signed0-split1-1-control.packet",
+          "qs": 0
+        },
+        {
+          "packet": "si-ordinary-signed0-split1-2.packet",
+          "control": "si-ordinary-signed0-split1-2-control.packet",
+          "qs": 26
+        },
+        {
+          "packet": "si-ordinary-signed0-split1-3.packet",
+          "control": "si-ordinary-signed0-split1-3-control.packet",
+          "qs": 51
+        }
+      ]
+    }
+  ],
+  "provenance": "Owned Extended SP/SI A/B/C; independent integer matrix luma/chroma switching oracle; QS0/26/51; no private media, external commands or network."
+}

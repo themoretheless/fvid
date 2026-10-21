@@ -1,0 +1,12 @@
+{
+  "status": "candidate-not-accepted",
+  "accepted_ids": [],
+  "issue": "Canonical Sync Start captions are omitted",
+  "before": "evidence/batch-148-matrix-before.log",
+  "prototype": "evidence/batch-148-prototype-malformed-after.log",
+  "regression": "tests/sami_sync.rs",
+  "scope": "Six authored Sync inputs versus literal SRT clocks. Prototype only; production unchanged for this capability. Includes selected-language persistence across other-language-only events. Initial uppercase BR failure retained; canonical fixture uses lowercase br and the independent case defect is isolated under batch149. A malformed overflowing timestamp must skip its own paragraph rather than inherit the prior clock.",
+  "pending_cargo_session": 23759,
+  "prototype_units": "evidence/batch-148-prototype-units-verified.log",
+  "prototype_attribute_controls": "evidence/batch-148-prototype-attribute-controls-verified.log"
+}

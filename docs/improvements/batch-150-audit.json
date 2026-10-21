@@ -1,0 +1,22 @@
+{
+  "status": "accepted-via-batch-149",
+  "accepted_ids": [
+    "FVID-0158"
+  ],
+  "issue": "Supported .sami captions are omitted by automatic sidecar discovery",
+  "regression": "tests/sami_sidecar_extension.rs",
+  "before": [
+    "evidence/batch-150-audit-before.log",
+    "evidence/batch-150-acceptance-before.log"
+  ],
+  "fixtures": "tests/fixtures/playback-errors/sami-sidecar-extension",
+  "scope": "Three failing discovery variants (.sami,.SAMI,loose language suffix) load explicitly with exact1..2s text; .smi control already works. Unrelated captions must stay excluded. Authored Y4M companions and separate generator. No production extension change or accepted ID yet.",
+  "reference": "https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0#file-name-extension",
+  "prototype": "evidence/batch-150-prototype-after.log",
+  "prototype_scope": "Standalone candidate found all four expected captions; the same extension mutation is now implemented in batch149 and awaiting full gates.",
+  "cargo_before_log": "evidence/batch-150-before.log",
+  "cargo_forced_before_log": "evidence/batch-150-cargo-acceptance-before.log",
+  "native_before_log": "evidence/batch-149-native-before.log",
+  "implementation_batch": 149,
+  "validation": "batch-149-validation.json"
+}

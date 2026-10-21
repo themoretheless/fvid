@@ -1,0 +1,596 @@
+[
+  {
+    "name": "filter-y8-c8-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y8-c8-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y8-c8-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y8-c8-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y8-c8-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y8-c8-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y8-c8-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y8-c8-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y8-c8-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y8-c8-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y8-c8-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y8-c8-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y8-c8-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y8-c8-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y8-c8-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y8-c8-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y8-c8-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y8-c8-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y10-c12-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y10-c12-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y10-c12-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y10-c12-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y10-c12-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y10-c12-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y10-c12-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y10-c12-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y10-c12-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y10-c12-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y10-c12-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y10-c12-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y10-c12-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y10-c12-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y10-c12-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y10-c12-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y10-c12-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y10-c12-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y14-c8-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y14-c8-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y14-c8-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y14-c8-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y14-c8-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y14-c8-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y14-c8-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y14-c8-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y14-c8-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y14-c8-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y14-c8-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y14-c8-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y14-c8-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y14-c8-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y14-c8-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "filter-y14-c8-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "filter-y14-c8-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "filter-y14-c8-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  }
+]

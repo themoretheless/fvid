@@ -1,0 +1,30 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-opus)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.47s
+     Running tests/ogg_continuation_boundary.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_continuation_boundary-5732918a0a6a889d)
+
+running 3 tests
+test malformed_missing_continuation_remains_an_explicit_refusal ... ok
+test joined_prefix_discards_every_fragment_then_rewind_repeats_the_whole_audio ... ok
+test complete_packets_and_nil_termination_keep_exact_payloads ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ogg_page_sequence.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_page_sequence-23fcb96e296dcec8)
+
+running 2 tests
+test streaming_reader_reports_discontinuity_without_publishing_the_bad_page ... ok
+test monostream_packets_and_rewind_preserve_origins_and_wrapped_counters ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/ogg_stream_identity.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_stream_identity-f5a206b5f39a06e1)
+
+running 2 tests
+test missing_or_repeated_bos_is_refused_before_publishing_or_replacing_identity ... ok
+test healthy_stream_identity_and_zero_serial_survive_both_packet_apis_and_rewind ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

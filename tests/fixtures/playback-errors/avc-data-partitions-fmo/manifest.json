@@ -1,0 +1,3365 @@
+{
+  "cases": [
+    {
+      "name": "map0-dir0-coded-aso0",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-coded-aso0.mp4",
+      "oracle": "map0-dir0-coded-aso0.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map0-dir0-coded-aso0-1.packet",
+          "control": "map0-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-coded-aso0-2.packet",
+          "control": "map0-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-coded-aso0-multislice",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map0-dir0-coded-aso0-multislice.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map0-dir0-coded-aso0-multislice-1.packet",
+          "control": "map0-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-coded-aso0-multislice-2.packet",
+          "control": "map0-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-coded-aso1",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-coded-aso1.mp4",
+      "oracle": "map0-dir0-coded-aso1.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map0-dir0-coded-aso1-1.packet",
+          "control": "map0-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-coded-aso1-2.packet",
+          "control": "map0-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-coded-aso1-multislice",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map0-dir0-coded-aso1-multislice.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map0-dir0-coded-aso1-multislice-1.packet",
+          "control": "map0-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-coded-aso1-multislice-2.packet",
+          "control": "map0-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-mixed-aso0",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-mixed-aso0.mp4",
+      "oracle": "map0-dir0-mixed-aso0.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map0-dir0-mixed-aso0-1.packet",
+          "control": "map0-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-mixed-aso0-2.packet",
+          "control": "map0-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-mixed-aso0-multislice",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map0-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map0-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map0-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map0-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-mixed-aso1",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-mixed-aso1.mp4",
+      "oracle": "map0-dir0-mixed-aso1.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map0-dir0-mixed-aso1-1.packet",
+          "control": "map0-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-mixed-aso1-2.packet",
+          "control": "map0-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-mixed-aso1-multislice",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map0-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map0-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map0-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map0-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-skipmixed-aso0",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-skipmixed-aso0.mp4",
+      "oracle": "map0-dir0-skipmixed-aso0.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map0-dir0-skipmixed-aso0-1.packet",
+          "control": "map0-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-skipmixed-aso0-2.packet",
+          "control": "map0-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-skipmixed-aso0-multislice",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map0-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map0-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map0-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map0-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-skipmixed-aso1",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-skipmixed-aso1.mp4",
+      "oracle": "map0-dir0-skipmixed-aso1.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map0-dir0-skipmixed-aso1-1.packet",
+          "control": "map0-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-skipmixed-aso1-2.packet",
+          "control": "map0-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map0-dir0-skipmixed-aso1-multislice",
+      "configuration": "map0-dir0.avcc",
+      "seed": "map0-dir0-seed.packet",
+      "file": "map0-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map0-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 0,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map0-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map0-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map0-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map0-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-coded-aso0",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-coded-aso0.mp4",
+      "oracle": "map1-dir0-coded-aso0.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map1-dir0-coded-aso0-1.packet",
+          "control": "map1-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-coded-aso0-2.packet",
+          "control": "map1-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-coded-aso0-multislice",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map1-dir0-coded-aso0-multislice.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map1-dir0-coded-aso0-multislice-1.packet",
+          "control": "map1-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-coded-aso0-multislice-2.packet",
+          "control": "map1-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-coded-aso1",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-coded-aso1.mp4",
+      "oracle": "map1-dir0-coded-aso1.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map1-dir0-coded-aso1-1.packet",
+          "control": "map1-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-coded-aso1-2.packet",
+          "control": "map1-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-coded-aso1-multislice",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map1-dir0-coded-aso1-multislice.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map1-dir0-coded-aso1-multislice-1.packet",
+          "control": "map1-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-coded-aso1-multislice-2.packet",
+          "control": "map1-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-mixed-aso0",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-mixed-aso0.mp4",
+      "oracle": "map1-dir0-mixed-aso0.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map1-dir0-mixed-aso0-1.packet",
+          "control": "map1-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-mixed-aso0-2.packet",
+          "control": "map1-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-mixed-aso0-multislice",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map1-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map1-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map1-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map1-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-mixed-aso1",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-mixed-aso1.mp4",
+      "oracle": "map1-dir0-mixed-aso1.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map1-dir0-mixed-aso1-1.packet",
+          "control": "map1-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-mixed-aso1-2.packet",
+          "control": "map1-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-mixed-aso1-multislice",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map1-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map1-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map1-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map1-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-skipmixed-aso0",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-skipmixed-aso0.mp4",
+      "oracle": "map1-dir0-skipmixed-aso0.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map1-dir0-skipmixed-aso0-1.packet",
+          "control": "map1-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-skipmixed-aso0-2.packet",
+          "control": "map1-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-skipmixed-aso0-multislice",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map1-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map1-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map1-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map1-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-skipmixed-aso1",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-skipmixed-aso1.mp4",
+      "oracle": "map1-dir0-skipmixed-aso1.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map1-dir0-skipmixed-aso1-1.packet",
+          "control": "map1-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-skipmixed-aso1-2.packet",
+          "control": "map1-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map1-dir0-skipmixed-aso1-multislice",
+      "configuration": "map1-dir0.avcc",
+      "seed": "map1-dir0-seed.packet",
+      "file": "map1-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map1-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 1,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map1-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map1-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map1-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map1-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-coded-aso0",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-coded-aso0.mp4",
+      "oracle": "map2-dir0-coded-aso0.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map2-dir0-coded-aso0-1.packet",
+          "control": "map2-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-coded-aso0-2.packet",
+          "control": "map2-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-coded-aso0-multislice",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map2-dir0-coded-aso0-multislice.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map2-dir0-coded-aso0-multislice-1.packet",
+          "control": "map2-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-coded-aso0-multislice-2.packet",
+          "control": "map2-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-coded-aso1",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-coded-aso1.mp4",
+      "oracle": "map2-dir0-coded-aso1.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map2-dir0-coded-aso1-1.packet",
+          "control": "map2-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-coded-aso1-2.packet",
+          "control": "map2-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-coded-aso1-multislice",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map2-dir0-coded-aso1-multislice.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map2-dir0-coded-aso1-multislice-1.packet",
+          "control": "map2-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-coded-aso1-multislice-2.packet",
+          "control": "map2-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-mixed-aso0",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-mixed-aso0.mp4",
+      "oracle": "map2-dir0-mixed-aso0.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map2-dir0-mixed-aso0-1.packet",
+          "control": "map2-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-mixed-aso0-2.packet",
+          "control": "map2-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-mixed-aso0-multislice",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map2-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map2-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map2-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map2-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-mixed-aso1",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-mixed-aso1.mp4",
+      "oracle": "map2-dir0-mixed-aso1.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map2-dir0-mixed-aso1-1.packet",
+          "control": "map2-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-mixed-aso1-2.packet",
+          "control": "map2-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-mixed-aso1-multislice",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map2-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map2-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map2-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map2-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-skipmixed-aso0",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-skipmixed-aso0.mp4",
+      "oracle": "map2-dir0-skipmixed-aso0.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map2-dir0-skipmixed-aso0-1.packet",
+          "control": "map2-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-skipmixed-aso0-2.packet",
+          "control": "map2-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-skipmixed-aso0-multislice",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map2-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map2-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map2-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map2-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-skipmixed-aso1",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-skipmixed-aso1.mp4",
+      "oracle": "map2-dir0-skipmixed-aso1.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map2-dir0-skipmixed-aso1-1.packet",
+          "control": "map2-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-skipmixed-aso1-2.packet",
+          "control": "map2-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map2-dir0-skipmixed-aso1-multislice",
+      "configuration": "map2-dir0.avcc",
+      "seed": "map2-dir0-seed.packet",
+      "file": "map2-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map2-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 2,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map2-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map2-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map2-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map2-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-coded-aso0",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-coded-aso0.mp4",
+      "oracle": "map3-dir0-coded-aso0.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir0-coded-aso0-1.packet",
+          "control": "map3-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-coded-aso0-2.packet",
+          "control": "map3-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-coded-aso0-multislice",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map3-dir0-coded-aso0-multislice.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir0-coded-aso0-multislice-1.packet",
+          "control": "map3-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-coded-aso0-multislice-2.packet",
+          "control": "map3-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-coded-aso1",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-coded-aso1.mp4",
+      "oracle": "map3-dir0-coded-aso1.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir0-coded-aso1-1.packet",
+          "control": "map3-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-coded-aso1-2.packet",
+          "control": "map3-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-coded-aso1-multislice",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map3-dir0-coded-aso1-multislice.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir0-coded-aso1-multislice-1.packet",
+          "control": "map3-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-coded-aso1-multislice-2.packet",
+          "control": "map3-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-mixed-aso0",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-mixed-aso0.mp4",
+      "oracle": "map3-dir0-mixed-aso0.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir0-mixed-aso0-1.packet",
+          "control": "map3-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-mixed-aso0-2.packet",
+          "control": "map3-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-mixed-aso0-multislice",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map3-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map3-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map3-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-mixed-aso1",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-mixed-aso1.mp4",
+      "oracle": "map3-dir0-mixed-aso1.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir0-mixed-aso1-1.packet",
+          "control": "map3-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-mixed-aso1-2.packet",
+          "control": "map3-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-mixed-aso1-multislice",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map3-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map3-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map3-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-skipmixed-aso0",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-skipmixed-aso0.mp4",
+      "oracle": "map3-dir0-skipmixed-aso0.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir0-skipmixed-aso0-1.packet",
+          "control": "map3-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-skipmixed-aso0-2.packet",
+          "control": "map3-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-skipmixed-aso0-multislice",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map3-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map3-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map3-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-skipmixed-aso1",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-skipmixed-aso1.mp4",
+      "oracle": "map3-dir0-skipmixed-aso1.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir0-skipmixed-aso1-1.packet",
+          "control": "map3-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-skipmixed-aso1-2.packet",
+          "control": "map3-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir0-skipmixed-aso1-multislice",
+      "configuration": "map3-dir0.avcc",
+      "seed": "map3-dir0-seed.packet",
+      "file": "map3-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map3-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 3,
+      "direction": false,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map3-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map3-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-coded-aso0",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-coded-aso0.mp4",
+      "oracle": "map3-dir1-coded-aso0.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir1-coded-aso0-1.packet",
+          "control": "map3-dir1-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-coded-aso0-2.packet",
+          "control": "map3-dir1-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-coded-aso0-multislice",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-coded-aso0-multislice.mp4",
+      "oracle": "map3-dir1-coded-aso0-multislice.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir1-coded-aso0-multislice-1.packet",
+          "control": "map3-dir1-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-coded-aso0-multislice-2.packet",
+          "control": "map3-dir1-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-coded-aso1",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-coded-aso1.mp4",
+      "oracle": "map3-dir1-coded-aso1.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir1-coded-aso1-1.packet",
+          "control": "map3-dir1-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-coded-aso1-2.packet",
+          "control": "map3-dir1-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-coded-aso1-multislice",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-coded-aso1-multislice.mp4",
+      "oracle": "map3-dir1-coded-aso1-multislice.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir1-coded-aso1-multislice-1.packet",
+          "control": "map3-dir1-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-coded-aso1-multislice-2.packet",
+          "control": "map3-dir1-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-mixed-aso0",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-mixed-aso0.mp4",
+      "oracle": "map3-dir1-mixed-aso0.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir1-mixed-aso0-1.packet",
+          "control": "map3-dir1-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-mixed-aso0-2.packet",
+          "control": "map3-dir1-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-mixed-aso0-multislice",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-mixed-aso0-multislice.mp4",
+      "oracle": "map3-dir1-mixed-aso0-multislice.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir1-mixed-aso0-multislice-1.packet",
+          "control": "map3-dir1-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-mixed-aso0-multislice-2.packet",
+          "control": "map3-dir1-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-mixed-aso1",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-mixed-aso1.mp4",
+      "oracle": "map3-dir1-mixed-aso1.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir1-mixed-aso1-1.packet",
+          "control": "map3-dir1-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-mixed-aso1-2.packet",
+          "control": "map3-dir1-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-mixed-aso1-multislice",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-mixed-aso1-multislice.mp4",
+      "oracle": "map3-dir1-mixed-aso1-multislice.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir1-mixed-aso1-multislice-1.packet",
+          "control": "map3-dir1-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-mixed-aso1-multislice-2.packet",
+          "control": "map3-dir1-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-skipmixed-aso0",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-skipmixed-aso0.mp4",
+      "oracle": "map3-dir1-skipmixed-aso0.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir1-skipmixed-aso0-1.packet",
+          "control": "map3-dir1-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-skipmixed-aso0-2.packet",
+          "control": "map3-dir1-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-skipmixed-aso0-multislice",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-skipmixed-aso0-multislice.mp4",
+      "oracle": "map3-dir1-skipmixed-aso0-multislice.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir1-skipmixed-aso0-multislice-1.packet",
+          "control": "map3-dir1-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-skipmixed-aso0-multislice-2.packet",
+          "control": "map3-dir1-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-skipmixed-aso1",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-skipmixed-aso1.mp4",
+      "oracle": "map3-dir1-skipmixed-aso1.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map3-dir1-skipmixed-aso1-1.packet",
+          "control": "map3-dir1-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-skipmixed-aso1-2.packet",
+          "control": "map3-dir1-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map3-dir1-skipmixed-aso1-multislice",
+      "configuration": "map3-dir1.avcc",
+      "seed": "map3-dir1-seed.packet",
+      "file": "map3-dir1-skipmixed-aso1-multislice.mp4",
+      "oracle": "map3-dir1-skipmixed-aso1-multislice.yuv",
+      "map_type": 3,
+      "direction": true,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map3-dir1-skipmixed-aso1-multislice-1.packet",
+          "control": "map3-dir1-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map3-dir1-skipmixed-aso1-multislice-2.packet",
+          "control": "map3-dir1-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-coded-aso0",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-coded-aso0.mp4",
+      "oracle": "map4-dir0-coded-aso0.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir0-coded-aso0-1.packet",
+          "control": "map4-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-coded-aso0-2.packet",
+          "control": "map4-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-coded-aso0-multislice",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map4-dir0-coded-aso0-multislice.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir0-coded-aso0-multislice-1.packet",
+          "control": "map4-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-coded-aso0-multislice-2.packet",
+          "control": "map4-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-coded-aso1",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-coded-aso1.mp4",
+      "oracle": "map4-dir0-coded-aso1.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir0-coded-aso1-1.packet",
+          "control": "map4-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-coded-aso1-2.packet",
+          "control": "map4-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-coded-aso1-multislice",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map4-dir0-coded-aso1-multislice.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir0-coded-aso1-multislice-1.packet",
+          "control": "map4-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-coded-aso1-multislice-2.packet",
+          "control": "map4-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-mixed-aso0",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-mixed-aso0.mp4",
+      "oracle": "map4-dir0-mixed-aso0.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir0-mixed-aso0-1.packet",
+          "control": "map4-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-mixed-aso0-2.packet",
+          "control": "map4-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-mixed-aso0-multislice",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map4-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map4-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map4-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-mixed-aso1",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-mixed-aso1.mp4",
+      "oracle": "map4-dir0-mixed-aso1.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir0-mixed-aso1-1.packet",
+          "control": "map4-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-mixed-aso1-2.packet",
+          "control": "map4-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-mixed-aso1-multislice",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map4-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map4-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map4-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-skipmixed-aso0",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-skipmixed-aso0.mp4",
+      "oracle": "map4-dir0-skipmixed-aso0.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir0-skipmixed-aso0-1.packet",
+          "control": "map4-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-skipmixed-aso0-2.packet",
+          "control": "map4-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-skipmixed-aso0-multislice",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map4-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map4-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map4-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-skipmixed-aso1",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-skipmixed-aso1.mp4",
+      "oracle": "map4-dir0-skipmixed-aso1.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir0-skipmixed-aso1-1.packet",
+          "control": "map4-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-skipmixed-aso1-2.packet",
+          "control": "map4-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir0-skipmixed-aso1-multislice",
+      "configuration": "map4-dir0.avcc",
+      "seed": "map4-dir0-seed.packet",
+      "file": "map4-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map4-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 4,
+      "direction": false,
+      "mapping": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map4-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map4-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-coded-aso0",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-coded-aso0.mp4",
+      "oracle": "map4-dir1-coded-aso0.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir1-coded-aso0-1.packet",
+          "control": "map4-dir1-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-coded-aso0-2.packet",
+          "control": "map4-dir1-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-coded-aso0-multislice",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-coded-aso0-multislice.mp4",
+      "oracle": "map4-dir1-coded-aso0-multislice.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir1-coded-aso0-multislice-1.packet",
+          "control": "map4-dir1-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-coded-aso0-multislice-2.packet",
+          "control": "map4-dir1-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-coded-aso1",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-coded-aso1.mp4",
+      "oracle": "map4-dir1-coded-aso1.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir1-coded-aso1-1.packet",
+          "control": "map4-dir1-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-coded-aso1-2.packet",
+          "control": "map4-dir1-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-coded-aso1-multislice",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-coded-aso1-multislice.mp4",
+      "oracle": "map4-dir1-coded-aso1-multislice.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir1-coded-aso1-multislice-1.packet",
+          "control": "map4-dir1-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-coded-aso1-multislice-2.packet",
+          "control": "map4-dir1-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-mixed-aso0",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-mixed-aso0.mp4",
+      "oracle": "map4-dir1-mixed-aso0.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir1-mixed-aso0-1.packet",
+          "control": "map4-dir1-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-mixed-aso0-2.packet",
+          "control": "map4-dir1-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-mixed-aso0-multislice",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-mixed-aso0-multislice.mp4",
+      "oracle": "map4-dir1-mixed-aso0-multislice.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir1-mixed-aso0-multislice-1.packet",
+          "control": "map4-dir1-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-mixed-aso0-multislice-2.packet",
+          "control": "map4-dir1-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-mixed-aso1",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-mixed-aso1.mp4",
+      "oracle": "map4-dir1-mixed-aso1.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir1-mixed-aso1-1.packet",
+          "control": "map4-dir1-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-mixed-aso1-2.packet",
+          "control": "map4-dir1-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-mixed-aso1-multislice",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-mixed-aso1-multislice.mp4",
+      "oracle": "map4-dir1-mixed-aso1-multislice.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir1-mixed-aso1-multislice-1.packet",
+          "control": "map4-dir1-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-mixed-aso1-multislice-2.packet",
+          "control": "map4-dir1-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-skipmixed-aso0",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-skipmixed-aso0.mp4",
+      "oracle": "map4-dir1-skipmixed-aso0.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir1-skipmixed-aso0-1.packet",
+          "control": "map4-dir1-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-skipmixed-aso0-2.packet",
+          "control": "map4-dir1-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-skipmixed-aso0-multislice",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-skipmixed-aso0-multislice.mp4",
+      "oracle": "map4-dir1-skipmixed-aso0-multislice.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir1-skipmixed-aso0-multislice-1.packet",
+          "control": "map4-dir1-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-skipmixed-aso0-multislice-2.packet",
+          "control": "map4-dir1-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-skipmixed-aso1",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-skipmixed-aso1.mp4",
+      "oracle": "map4-dir1-skipmixed-aso1.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map4-dir1-skipmixed-aso1-1.packet",
+          "control": "map4-dir1-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-skipmixed-aso1-2.packet",
+          "control": "map4-dir1-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map4-dir1-skipmixed-aso1-multislice",
+      "configuration": "map4-dir1.avcc",
+      "seed": "map4-dir1-seed.packet",
+      "file": "map4-dir1-skipmixed-aso1-multislice.mp4",
+      "oracle": "map4-dir1-skipmixed-aso1-multislice.yuv",
+      "map_type": 4,
+      "direction": true,
+      "mapping": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map4-dir1-skipmixed-aso1-multislice-1.packet",
+          "control": "map4-dir1-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map4-dir1-skipmixed-aso1-multislice-2.packet",
+          "control": "map4-dir1-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-coded-aso0",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-coded-aso0.mp4",
+      "oracle": "map5-dir0-coded-aso0.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir0-coded-aso0-1.packet",
+          "control": "map5-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-coded-aso0-2.packet",
+          "control": "map5-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-coded-aso0-multislice",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map5-dir0-coded-aso0-multislice.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir0-coded-aso0-multislice-1.packet",
+          "control": "map5-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-coded-aso0-multislice-2.packet",
+          "control": "map5-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-coded-aso1",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-coded-aso1.mp4",
+      "oracle": "map5-dir0-coded-aso1.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir0-coded-aso1-1.packet",
+          "control": "map5-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-coded-aso1-2.packet",
+          "control": "map5-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-coded-aso1-multislice",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map5-dir0-coded-aso1-multislice.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir0-coded-aso1-multislice-1.packet",
+          "control": "map5-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-coded-aso1-multislice-2.packet",
+          "control": "map5-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-mixed-aso0",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-mixed-aso0.mp4",
+      "oracle": "map5-dir0-mixed-aso0.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir0-mixed-aso0-1.packet",
+          "control": "map5-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-mixed-aso0-2.packet",
+          "control": "map5-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-mixed-aso0-multislice",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map5-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map5-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map5-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-mixed-aso1",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-mixed-aso1.mp4",
+      "oracle": "map5-dir0-mixed-aso1.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir0-mixed-aso1-1.packet",
+          "control": "map5-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-mixed-aso1-2.packet",
+          "control": "map5-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-mixed-aso1-multislice",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map5-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map5-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map5-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-skipmixed-aso0",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-skipmixed-aso0.mp4",
+      "oracle": "map5-dir0-skipmixed-aso0.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir0-skipmixed-aso0-1.packet",
+          "control": "map5-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-skipmixed-aso0-2.packet",
+          "control": "map5-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-skipmixed-aso0-multislice",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map5-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map5-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map5-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-skipmixed-aso1",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-skipmixed-aso1.mp4",
+      "oracle": "map5-dir0-skipmixed-aso1.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir0-skipmixed-aso1-1.packet",
+          "control": "map5-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-skipmixed-aso1-2.packet",
+          "control": "map5-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir0-skipmixed-aso1-multislice",
+      "configuration": "map5-dir0.avcc",
+      "seed": "map5-dir0-seed.packet",
+      "file": "map5-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map5-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 5,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map5-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map5-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-coded-aso0",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-coded-aso0.mp4",
+      "oracle": "map5-dir1-coded-aso0.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir1-coded-aso0-1.packet",
+          "control": "map5-dir1-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-coded-aso0-2.packet",
+          "control": "map5-dir1-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-coded-aso0-multislice",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-coded-aso0-multislice.mp4",
+      "oracle": "map5-dir1-coded-aso0-multislice.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir1-coded-aso0-multislice-1.packet",
+          "control": "map5-dir1-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-coded-aso0-multislice-2.packet",
+          "control": "map5-dir1-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-coded-aso1",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-coded-aso1.mp4",
+      "oracle": "map5-dir1-coded-aso1.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir1-coded-aso1-1.packet",
+          "control": "map5-dir1-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-coded-aso1-2.packet",
+          "control": "map5-dir1-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-coded-aso1-multislice",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-coded-aso1-multislice.mp4",
+      "oracle": "map5-dir1-coded-aso1-multislice.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir1-coded-aso1-multislice-1.packet",
+          "control": "map5-dir1-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-coded-aso1-multislice-2.packet",
+          "control": "map5-dir1-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-mixed-aso0",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-mixed-aso0.mp4",
+      "oracle": "map5-dir1-mixed-aso0.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir1-mixed-aso0-1.packet",
+          "control": "map5-dir1-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-mixed-aso0-2.packet",
+          "control": "map5-dir1-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-mixed-aso0-multislice",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-mixed-aso0-multislice.mp4",
+      "oracle": "map5-dir1-mixed-aso0-multislice.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir1-mixed-aso0-multislice-1.packet",
+          "control": "map5-dir1-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-mixed-aso0-multislice-2.packet",
+          "control": "map5-dir1-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-mixed-aso1",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-mixed-aso1.mp4",
+      "oracle": "map5-dir1-mixed-aso1.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir1-mixed-aso1-1.packet",
+          "control": "map5-dir1-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-mixed-aso1-2.packet",
+          "control": "map5-dir1-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-mixed-aso1-multislice",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-mixed-aso1-multislice.mp4",
+      "oracle": "map5-dir1-mixed-aso1-multislice.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir1-mixed-aso1-multislice-1.packet",
+          "control": "map5-dir1-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-mixed-aso1-multislice-2.packet",
+          "control": "map5-dir1-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-skipmixed-aso0",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-skipmixed-aso0.mp4",
+      "oracle": "map5-dir1-skipmixed-aso0.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir1-skipmixed-aso0-1.packet",
+          "control": "map5-dir1-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-skipmixed-aso0-2.packet",
+          "control": "map5-dir1-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-skipmixed-aso0-multislice",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-skipmixed-aso0-multislice.mp4",
+      "oracle": "map5-dir1-skipmixed-aso0-multislice.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir1-skipmixed-aso0-multislice-1.packet",
+          "control": "map5-dir1-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-skipmixed-aso0-multislice-2.packet",
+          "control": "map5-dir1-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-skipmixed-aso1",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-skipmixed-aso1.mp4",
+      "oracle": "map5-dir1-skipmixed-aso1.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map5-dir1-skipmixed-aso1-1.packet",
+          "control": "map5-dir1-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-skipmixed-aso1-2.packet",
+          "control": "map5-dir1-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map5-dir1-skipmixed-aso1-multislice",
+      "configuration": "map5-dir1.avcc",
+      "seed": "map5-dir1-seed.packet",
+      "file": "map5-dir1-skipmixed-aso1-multislice.mp4",
+      "oracle": "map5-dir1-skipmixed-aso1-multislice.yuv",
+      "map_type": 5,
+      "direction": true,
+      "mapping": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map5-dir1-skipmixed-aso1-multislice-1.packet",
+          "control": "map5-dir1-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map5-dir1-skipmixed-aso1-multislice-2.packet",
+          "control": "map5-dir1-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-coded-aso0",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-coded-aso0.mp4",
+      "oracle": "map6-dir0-coded-aso0.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map6-dir0-coded-aso0-1.packet",
+          "control": "map6-dir0-coded-aso0-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-coded-aso0-2.packet",
+          "control": "map6-dir0-coded-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-coded-aso0-multislice",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-coded-aso0-multislice.mp4",
+      "oracle": "map6-dir0-coded-aso0-multislice.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map6-dir0-coded-aso0-multislice-1.packet",
+          "control": "map6-dir0-coded-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-coded-aso0-multislice-2.packet",
+          "control": "map6-dir0-coded-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-coded-aso1",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-coded-aso1.mp4",
+      "oracle": "map6-dir0-coded-aso1.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map6-dir0-coded-aso1-1.packet",
+          "control": "map6-dir0-coded-aso1-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-coded-aso1-2.packet",
+          "control": "map6-dir0-coded-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-coded-aso1-multislice",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-coded-aso1-multislice.mp4",
+      "oracle": "map6-dir0-coded-aso1-multislice.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "coded",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map6-dir0-coded-aso1-multislice-1.packet",
+          "control": "map6-dir0-coded-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-coded-aso1-multislice-2.packet",
+          "control": "map6-dir0-coded-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-mixed-aso0",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-mixed-aso0.mp4",
+      "oracle": "map6-dir0-mixed-aso0.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map6-dir0-mixed-aso0-1.packet",
+          "control": "map6-dir0-mixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-mixed-aso0-2.packet",
+          "control": "map6-dir0-mixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-mixed-aso0-multislice",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-mixed-aso0-multislice.mp4",
+      "oracle": "map6-dir0-mixed-aso0-multislice.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map6-dir0-mixed-aso0-multislice-1.packet",
+          "control": "map6-dir0-mixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-mixed-aso0-multislice-2.packet",
+          "control": "map6-dir0-mixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-mixed-aso1",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-mixed-aso1.mp4",
+      "oracle": "map6-dir0-mixed-aso1.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map6-dir0-mixed-aso1-1.packet",
+          "control": "map6-dir0-mixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-mixed-aso1-2.packet",
+          "control": "map6-dir0-mixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-mixed-aso1-multislice",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-mixed-aso1-multislice.mp4",
+      "oracle": "map6-dir0-mixed-aso1-multislice.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "mixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map6-dir0-mixed-aso1-multislice-1.packet",
+          "control": "map6-dir0-mixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-mixed-aso1-multislice-2.packet",
+          "control": "map6-dir0-mixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-skipmixed-aso0",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-skipmixed-aso0.mp4",
+      "oracle": "map6-dir0-skipmixed-aso0.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map6-dir0-skipmixed-aso0-1.packet",
+          "control": "map6-dir0-skipmixed-aso0-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-skipmixed-aso0-2.packet",
+          "control": "map6-dir0-skipmixed-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-skipmixed-aso0-multislice",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-skipmixed-aso0-multislice.mp4",
+      "oracle": "map6-dir0-skipmixed-aso0-multislice.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": false,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map6-dir0-skipmixed-aso0-multislice-1.packet",
+          "control": "map6-dir0-skipmixed-aso0-multislice-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-skipmixed-aso0-multislice-2.packet",
+          "control": "map6-dir0-skipmixed-aso0-multislice-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-skipmixed-aso1",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-skipmixed-aso1.mp4",
+      "oracle": "map6-dir0-skipmixed-aso1.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": false,
+      "frames": [
+        {
+          "packet": "map6-dir0-skipmixed-aso1-1.packet",
+          "control": "map6-dir0-skipmixed-aso1-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-skipmixed-aso1-2.packet",
+          "control": "map6-dir0-skipmixed-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "map6-dir0-skipmixed-aso1-multislice",
+      "configuration": "map6-dir0.avcc",
+      "seed": "map6-dir0-seed.packet",
+      "file": "map6-dir0-skipmixed-aso1-multislice.mp4",
+      "oracle": "map6-dir0-skipmixed-aso1-multislice.yuv",
+      "map_type": 6,
+      "direction": false,
+      "mapping": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "mode": "skipmixed",
+      "aso": true,
+      "multislice": true,
+      "frames": [
+        {
+          "packet": "map6-dir0-skipmixed-aso1-multislice-1.packet",
+          "control": "map6-dir0-skipmixed-aso1-multislice-1-control.packet"
+        },
+        {
+          "packet": "map6-dir0-skipmixed-aso1-multislice-2.packet",
+          "control": "map6-dir0-skipmixed-aso1-multislice-2-control.packet"
+        }
+      ]
+    }
+  ],
+  "provenance": "Owned Extended-profile FMO types0-6, literal four-MB group maps and signed group-specific scalar pixel basis. No private data/external commands/network."
+}

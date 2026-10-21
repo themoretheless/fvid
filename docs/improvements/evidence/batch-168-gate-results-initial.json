@@ -1,0 +1,54 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/avi.rs": "9b9da43d31394a1ec472517dc9d7d38698d74d170b71605db669337fa2967e89",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/avi_chunk_extent.rs": "1837a53b3d991ad85e38921d0869db647ff4ce963cb8a7a5b31cc85f19ccabeb"
+  },
+  "checks": [
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "avi_pcm",
+        "--test",
+        "avi_adpcm_grouped",
+        "--test",
+        "avi_riff_boundary",
+        "--test",
+        "avi_index_origin",
+        "--test",
+        "avi_main_header_bounds",
+        "--test",
+        "avi_audio_eof",
+        "--test",
+        "avi_duration_grid",
+        "--test",
+        "audio_read_limit",
+        "--test",
+        "g711_native"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-168-related-after.log"
+    },
+    {
+      "name": "root-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--lib",
+        "avi"
+      ],
+      "exit_code": 101,
+      "log": "docs/improvements/evidence/batch-168-root-units.log"
+    }
+  ]
+}

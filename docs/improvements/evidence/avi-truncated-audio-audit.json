@@ -1,0 +1,11 @@
+{
+  "status": "audit-only-unaccepted",
+  "problem": "Known audio chunks can advertise a body longer than their enclosing movi run;records() silently substitutes its available prefix. If that prefix is whole ADPCM blocks,dwLength and decoding checks can miss the truncation.",
+  "source": "src/container/avi.rs",
+  "source_sha256": "2bfe1b83a5c42800751381fafd43edc5dc4e4ce1314dd53840c111f64d4c5180",
+  "probe": "Pure Rust temporary standalone parser probe:authored ima/ms avi-audio-eof fixtures final01wb size8 changed to16 with root/list unchanged. Both parse successfully and publish original8-byte clipped record. No production edits.",
+  "reference": "https://learn.microsoft.com/en-us/windows/win32/directshow/avi-riff-file-reference",
+  "reference_finding": "ckSize states the size of valid chunk data,excluding header/padding. A child body cannot contain unavailable bytes outside its enclosing list.",
+  "next_gate": "After previous batch gates pass,author checked-in synthetic variants and parser/source regressions. Prove old source successful admission and native playback,then require targeted Invalid truncation refusal. Healthy forms,clamped outer RIFF,unknown chunks and complete ADPCM/PCM remain controls.",
+  "counting": "0;hypothesis/probe only,no accepted ID yet."
+}

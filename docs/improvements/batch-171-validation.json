@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0178"
+  ],
+  "checked_at": "2026-10-21T17:43:29.824107+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_fragment_description.rs"
+  ],
+  "before": [
+    "evidence/batch-171-mp4-before.rs",
+    "evidence/batch-171-tests-before.rs",
+    "evidence/batch-171-before.log",
+    "evidence/batch-171-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-171-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-171-related-after.log",
+      "passed": 54
+    },
+    {
+      "log": "evidence/batch-171-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-171-core.log",
+      "passed": 25
+    },
+    {
+      "log": "evidence/batch-171-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-171-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "aa8e4936e837e38646647b79d0404332536393b57c65e4db4b63b35e8f6ce08f",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_fragment_description.rs": "e11b49fceb90e8b88b73b0115f181e301b7b34e17874cff46dbe4846840108d6",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_fragment_description_regressions.py": "1324dc76376728b1bdecc9ba5c53998306613e2bd55a0093fd6454cf61af2153",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-fragment-description/manifest.json": "05bac897ff579ea9091883badcdece882f5c94748577d530996ad45926605642"
+  },
+  "qualification": [
+    "Four authored fMP4 effective-description0 paths inherited/explicit/middle/late silently index3 packets and reach exact native128planes/RGB130 with clocks0/1/2 at50Hz. Corrected baseline4pass/2ignored;both forced parser/native-source refusal gates fail at unsupported description0 being guessed as1,not another codec/offset error.",
+    "Private trex description defaults and tfhd overrides now resolve the effective selection before publishing a nonempty run. Effective0 refuses as Unsupported within the current direct single-stsd profile. Unused0 default overridden by1 and an empty0 run remain accepted;existing explicit2 refusal is preserved. This does not claim all possible future sample-group mappings are malformed.",
+    "Four focused regressions retain complete coded packets and exact analytic planes/RGB,PTS,duration and sample/packet budgets. Five healthy profiles include independent regular MP4,inherited1,explicit1,overridden0 default,and empty-unused0 description.40 actual native public seek targets,rewind,natural EOF and repeated EOF after clamped final-frame seeks pass.",
+    "The initial native harness incorrectly expected video seek at/beyondEOF to returnNone. Existing public clamped-to-stream contract intentionally returns the final frame. Initial failure/tests are archived;only that oracle was corrected to require exact final pixels,40..60ms interval,currentPTS and two subsequentEOF reads. No image/clock/interior/resource/refusal checks were disabled. This is zero-ID harness maintenance,not a player seek fix.",
+    "54 related integrations cover MP4 packet/metadata mutation limits,enabled tracks,audio clocks/PCM choices,seek I/O faults,HLS assembly and VP9 chroma.17 MP4 units and25 minimal-configuration checks plus fixture reproduction and player build pass. No prior tests were skipped or relaxed.",
+    "ISO/IEC14496-12:2015,8.7.4.3/8.8.3/8.8.7 defines sample-entry indexing and fragment defaults/overrides. Current zero-description mappings require supported resolution instead of silent reuse of description1. No public API or codec arithmetic change;no performance,physical-device or GUI qualification.",
+    "New VP9/fMP4/regular MP4 bytes are purely authored offline with iso5 fragment branding. Ordinary tests read stored bytes without encoder,FFmpeg or network. No private codec parameters or media were copied."
+  ],
+  "counting": "One effective fragment sample-description resolution integrity fix. No extra IDs for defaults/overrides,zero positions,empty runs,fixtures or seek-oracle correction."
+}

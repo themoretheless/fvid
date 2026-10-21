@@ -1,0 +1,22 @@
+
+running 17 tests
+test avi::tests::a_chunk_that_overclaims_ends_where_the_run_does ... ok
+test avi::tests::a_file_that_is_not_an_avi_is_not_a_file_with_no_audio ... ok
+test avi::tests::a_stream_holding_nothing_is_not_a_file_holding_nothing ... ok
+test avi::tests::a_record_with_no_bytes_in_it_is_refused ... ok
+test avi::tests::only_a_streams_own_id_names_its_records ... ok
+test avi::tests::a_group_that_states_no_format_describes_no_stream_this_reader_reads ... ok
+test avi::tests::a_file_without_an_index_is_read_by_its_records_alone ... ok
+test avi::tests::a_header_or_a_format_that_stops_short_is_refused ... ok
+test avi::tests::a_movi_list_shorter_than_it_claims_is_read_to_its_end ... ok
+test avi::tests::a_records_own_group_does_not_move_it_in_the_timeline ... ok
+test avi::tests::the_main_header_and_the_stream_groups_have_to_agree ... ok
+test avi::tests::the_headers_of_a_real_audio_stream_are_the_streams_own ... ok
+test avi::tests::an_id_that_claims_a_picture_stream_is_audio_is_a_disagreement ... ok
+test avi::tests::an_index_that_disagrees_with_the_records_is_refused ... ok
+test avi::tests::a_geometry_that_cannot_be_laid_out_is_refused ... ok
+test avi::tests::a_picture_stream_in_front_does_not_take_the_audios_number ... ok
+test avi::tests::the_readers_own_budgets_are_its_to_set ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

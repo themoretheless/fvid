@@ -1,0 +1,28 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0168",
+  "problem": "AVI main stream count is read against the file buffer rather than the declared avih extent. Later JUNK payload or size can supply the missing dwStreams.",
+  "reference": {
+    "url": "https://learn.microsoft.com/en-us/previous-versions/ms779632(v=vs.85)",
+    "finding": "AVIMAINHEADER.cb excludes the initial8 bytes; dwStreams follows six DWORD fields in the avih body. The count must belong to that declared body."
+  },
+  "fixtures": "tests/fixtures/playback-errors/avi-main-header-bounds",
+  "requirements": [
+    "Six0/16/20-byte headers across IMA/MS show specific false admission,not unrelated refusal.",
+    "Four complete56/64-byte controls keep literal PCM,actual-worker play/rewind/seek/EOF.",
+    "Enable intended refusal tests with fix;ordinary tests remain offline and separate from generation.",
+    "Do not claim that malformed inputs should play or AVI video support."
+  ],
+  "supplementary_before": {
+    "adapter": "evidence/batch-160-header-audit-before.rs",
+    "log": "evidence/batch-160-header-audit-before.log",
+    "result": "Six malformed headers falsely accepted by frozen actual AVI parser,four complete controls accepted. Adapter intentionally uses the pre159 parser;new index-origin changes do not affect these unindexed inputs. Cargo/PCM/refusal gates still required."
+  },
+  "before_sha256": "cda96fe9e2d6323042a9b00a11c4f4b929590e141180eacd8346689be7598210",
+  "confirmed_before": {
+    "normal": "evidence/batch-160-before.log:4 passed,2 ignored. Six falsely admitted headers decode exact predictor PCM;four full/padded controls retain worker navigation.",
+    "forced": "evidence/batch-160-acceptance-before.log:2 failed,exit101. Parser and source intended refusals fail because the fabricated stream count is accepted."
+  },
+  "implementation": "Require MAIN_STREAMS+4 bytes within the clamped avih extent before reading dwStreams;no stronger full-header-size requirement or public API change.",
+  "validation": "batch-160-validation.json"
+}

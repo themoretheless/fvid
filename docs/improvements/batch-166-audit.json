@@ -1,0 +1,81 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0174",
+  "problem": "AVI ADPCM framing equates physical chunks with fixed-size samples. Legal chunks grouping multiple blocks are refused because dwLength counts blocks,not chunk headers.",
+  "source": "src/playback/audio/avi_audio.rs",
+  "source_sha256": "c0ef4970aa98bef2e0e13af3fb208ce2f4a2e30ae1f9b453096bedc695da7118",
+  "before_snapshot": "evidence/batch-166-reader-before.rs",
+  "references": [
+    {
+      "url": "https://learn.microsoft.com/en-us/previous-versions/ms779638(v=vs.85)",
+      "finding": "A nonzero dwSampleSize permits grouping samples in one chunk;audio uses nBlockAlign. Rate/scale and dwLength refer to stream samples."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/multimedia/positioning-in-streams",
+      "finding": "An AVI ADPCM stream sample is one compressed block rather than one decoded PCM sample. End position lies after all rendered data."
+    }
+  ],
+  "fixtures": "tests/fixtures/playback-errors/avi-adpcm-grouped",
+  "fixture_scope": "14 grouped fixed-size IMA/MS cases:10 mono2+1/1+2/3/nested/indexed plus4 stereo3/indexed. Four mono/stereo single-block controls and4 malformed controls. Block bytes8/16,sample size8/16,declared3 blocks;opposite-channel literal stereo PCM.",
+  "requirements": [
+    "Confirm source admission fails specifically at treating dwLength3 as a raw chunk count. Generic parser must already preserve raw chunks,index addresses and every compressed byte.",
+    "Expose each whole ADPCM block as a logical packet with original per-block clock,independent predictor decode,rewind,block-rounded seek and exact EOF.",
+    "Keep the original raw-chunk view for container/index consistency and G.711. Do not feed several blocks as if one packet duration.",
+    "Check expanded logical packet count against Limits.records before allocating its block view. Keep complete blocks only and retain declared block-count refusal.",
+    "Validate exact literal PCM,encoded packet clocks,actual mid-block requested seek with block-rounded landing,EOF and resource limits. Ordinary tests remain offline and do not generate fixtures."
+  ],
+  "implementation_plan": "A private optional Vec<Record> maps grouped chunks to independently coded blocks. Count/validate whole blocks with a preallocation budget check;the one-block common path and G.711 retain their existing record view. No public API or performance claim.",
+  "test_oracle_repair": {
+    "source": "evidence/batch-166-tests-initial.rs",
+    "log": "evidence/batch-166-initial-before.log",
+    "finding": "The initial worker oracle incorrectly clipped a mid-block seek to1.25ms;the source contract explicitly returns the preceding block at1.125ms. Fix only the expected packet list and assert the rounded return. No production seek change or additional improvement ID.",
+    "scope": "The baseline malformed controls currently only show refusal within the restricted profile,which can precede their intended partial-block/count contradiction. After enabling grouped framing,the test must assert the precise incomplete-block or wrong-block-count error."
+  },
+  "planned_unit_migration": "The old unit that halves1024-byte block geometry to512 is no longer a valid one-block-per-chunk refusal target. Retarget it to a truly nonintegral1016-byte block,keep its explicit error assertion,and update block-count terminology. No skipped negative tests or extra IDs.",
+  "counting": "One grouped fixed-block AVI ADPCM capability. No separate IDs for grouping,IMA/MS,nested/indexed layout,seek,clock/resource support,test repair or samples.",
+  "confirmed_before": {
+    "normal": "evidence/batch-166-before.log:4 passed,4 ignored",
+    "forced": "evidence/batch-166-acceptance-before.log:4 forced acceptances fail at the exact states3 records/run2 admission",
+    "controls": "All4 mono/stereo controls decode exact literal PCM and8 actual worker target variants with the correct block-rounded landing.14 grouped cases are explicitly refused in the old profile;generic parser keeps their exact compressed bytes and raw index.",
+    "extension": "Mono logs/generator/manifest were preserved before adding stereo8-to16-byte stride coverage. All former mono media hashes remain identical;this adds no ID."
+  },
+  "candidate_sha256": {
+    "src/playback/audio/avi_audio.rs": "d1c0c2e0673a07d750830921a1e6dff0d5fbacbfb5e7d26230ad672596ac7b28",
+    "tests/avi_adpcm_grouped.rs": "66c71db484f7c74dbce3376c23cc8116321de81ea78d27fd44c750e90cf7fd69"
+  },
+  "focused_after": {
+    "log": "evidence/batch-166-focused-after.log",
+    "passed": 7,
+    "ignored": 0,
+    "actual_worker_target_variants": 36,
+    "resource": "Every grouped source admits exact logical packet budget3 and refuses budget2 specifically before publication.",
+    "malformed": "After enabling the feature,partial-block and wrong declared-block-count controls assert specific errors,not the former unrelated grouping refusal."
+  },
+  "g711_preservation": "The existing laid_out_g711 body remains byte-identical after removing the new private block_records:None initializer. The related G.711 container/native regression remains required.",
+  "unit_after": {
+    "log": "evidence/batch-166-root-units.log",
+    "passed": 34,
+    "ignored": 0,
+    "note": "Existing block-count and clock assertions keep their exact values with block terminology. The obsolete one-block-per-chunk refusal now uses a nonintegral1016-byte block geometry;the original negative coverage remains active."
+  },
+  "completed_gates": {
+    "focused-after": {
+      "log": "evidence/batch-166-focused-after.log",
+      "passed": 7
+    },
+    "related-after": {
+      "log": "evidence/batch-166-related-after.log",
+      "passed": 18
+    },
+    "root-units": {
+      "log": "evidence/batch-166-root-units.log",
+      "passed": 34
+    },
+    "core": {
+      "log": "evidence/batch-166-core.log",
+      "passed": 8
+    }
+  },
+  "accepted_id": "FVID-0174",
+  "validation": "batch-166-validation.json"
+}

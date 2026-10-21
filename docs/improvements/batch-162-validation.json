@@ -1,0 +1,74 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0170"
+  ],
+  "checked_at": "2026-10-21T03:58:54.121914+00:00",
+  "sources": [
+    "crates/fvid-media/src/owned_ogg.rs",
+    "crates/fvid-opus/src/ogg/reader.rs"
+  ],
+  "regressions": [
+    "tests/ogg_page_sequence.rs",
+    "crates/fvid-opus/tests/ogg_page_sequence.rs"
+  ],
+  "before": [
+    "evidence/batch-162-before.log",
+    "evidence/batch-162-acceptance-before.log",
+    "evidence/batch-162-ogg-before.rs",
+    "evidence/batch-162-tests-before.rs",
+    "evidence/batch-162-opus-before.log",
+    "evidence/batch-162-opus-acceptance-before.log",
+    "evidence/batch-162-opus-reader-before.rs"
+  ],
+  "primary_reference": "batch-162-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-162-final-after.log",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-162-final-root-units.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-162-final-media-units.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-162-final-media.log",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-162-final-core.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-162-opus-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-162-opus-units-after.log",
+      "passed": 65
+    },
+    {
+      "log": "evidence/batch-162-final-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-162-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "Four CRC-valid counter discontinuities were silently admitted. An authored actually removed first audio page is hidden as a positive Opus granule origin;the native worker reaches successful40ms EOF instead of the original60ms. Corrected baseline5 passed/2 ignored,and forced parser/source refusals both fail at admission.",
+    "The independent standalone streaming reader also returns missing audio through successful EOS. Its baseline2 passed/1 ignored;forced refusal fails when the bad page is published. Both readers are fixed under this one ID.",
+    "Track wrapping counters per open logical stream. The standalone reader checkpoints its expected counter after headers and restores it on rewind. It reports errors before overwriting caller packets;previous valid streaming prefixes can already have been emitted. Canonical whole-file parsing refuses before exposing an object.",
+    "Six parser controls preserve positive origins,chaining,per-serial interleaving and existing arbitrary initial/wrapped counter compatibility. Five native controls keep exact independent raw-packet PCM and10 worker target variants. Four monostream public-reader controls keep both packet APIs and repeated rewinds.",
+    "32 root integrations,19 root units,7 media units,9 media integrations,2 core regressions,2 streaming regressions,65 Opus/Ogg units,fixture reproduction and player build pass on the composed final sources.",
+    "This is explicit refusal of unsupported transport discontinuity in the existing strict file-integrity profile,not universal classification of every gap as malformed. Pasted-header live captures with counter gaps require coherent reframing/resequencing. Positive granule origin alone remains supported;PLC or reconstruction of missing audio is not claimed.",
+    "Initial harness mistakes assumed bitwise-zero DTX and omitted an AudioStep variant. Their failed logs/sources are archived;raw-packet controls now preserve exact finite near-silent PCM and all real scheduling steps. No production Opus synthesis was changed and these repairs add no IDs.",
+    "A final build encountered AV1 hdr_with_fallback method metadata inconsistent with current canonical source. Touching only codec-entry mtime forced a fresh package build and all final gates passed without AV1 source edits. This build-verification maintenance adds no IDs."
+  ],
+  "counting": "One Ogg transport page-sequence integrity defect,including both reader implementations and rewind restoration. No extra IDs for counter variants,profiles,harness repairs,build freshness or tests."
+}

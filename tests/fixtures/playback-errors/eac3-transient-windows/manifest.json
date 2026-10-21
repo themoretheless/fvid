@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "name": "left",
+      "windows": [
+        {
+          "location": 1200,
+          "length": 48
+        },
+        null
+      ]
+    },
+    {
+      "name": "future",
+      "windows": [
+        {
+          "location": 4092,
+          "length": 255
+        },
+        {
+          "location": 0,
+          "length": 0
+        }
+      ]
+    },
+    {
+      "name": "right",
+      "windows": [
+        null,
+        {
+          "location": 2000,
+          "length": 1
+        }
+      ]
+    }
+  ],
+  "pcm_processing_accepted": false
+}

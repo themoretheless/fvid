@@ -448,7 +448,7 @@ def scatter_mbaff_plane(pair_mbs_list, topology):
     return plane
 
 
-def deblock_mbaff_plane(source, depth, topology, deblock_idc, is_intra):
+def deblock_mbaff_plane(source, depth, topology, deblock_idc, is_intra, transform8=True, qp=26, active=True, edge_strength=None):
     out = list(source)
     if deblock_idc == 1:
         return out
@@ -466,8 +466,8 @@ def deblock_mbaff_plane(source, depth, topology, deblock_idc, is_intra):
                     owners[r * 32 + c] = len(locations) - 1
     for address, (ox, rows, field, pair) in enumerate(locations):
         for vertical in [True, False]:
-            # Because transform8 = True for all macroblocks, odd 4x4 edges (1, 3 -> offsets 4, 12) are skipped!
-            for edge in [0, 8]:
+            # An 8x8 transform skips odd 4x4 edges; the shared author also covers 4x4 grids.
+            for edge in ([0, 8] if transform8 else [0, 4, 8, 12]):
                 if edge == 0 and (ox == 0 if vertical else rows[0] < (2 if field else 1)):
                     continue
                 mixed_top = not vertical and edge == 0 and not field and locations[owners[(rows[0] - 1) * 32 + ox]][2]
@@ -480,18 +480,23 @@ def deblock_mbaff_plane(source, depth, topology, deblock_idc, is_intra):
                         neighbour = owners[at - step]
                         if deblock_idc == 2 and locations[neighbour][3] != pair:
                             continue
-                        if is_intra:
+                        if edge_strength is not None:
+                            py,px=divmod(at-step,32);nx,nrows,nfield,_=locations[neighbour]
+                            strength=edge_strength(neighbour,(px-nx,(py-nrows[0])//(2 if nfield else 1)),address,(x-ox,(y-rows[0])//(2 if field else 1)))
+                        elif is_intra:
                             strength = (
                                 4
                                 if edge == 0 and (vertical or (not field and not locations[neighbour][2]))
                                 else 3
                             )
                         else:
-                            # In our P-frame, every 8x8 block has a nonzero coefficient, so bS = 2 everywhere!
-                            strength = 2
+                            # Active planes use bS=2; zero planes retain mixed frame/field bS=1.
+                            strength = 2 if active else int(field != locations[neighbour][2])
+                        if strength == 0:
+                            continue
                         p = [out[at - (i + 1) * step] for i in range(4)]
                         q = [out[at + i * step] for i in range(4)]
-                        np, nq = filter_edge_sample(p, q, 26, depth, strength)
+                        np, nq = filter_edge_sample(p, q, qp, depth, strength)
                         for i in range(3):
                             out[at - (i + 1) * step] = np[i]
                             out[at + i * step] = nq[i]

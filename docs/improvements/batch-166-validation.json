@@ -1,0 +1,57 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0174"
+  ],
+  "checked_at": "2026-10-21T11:21:00.317386+00:00",
+  "sources": [
+    "src/playback/audio/avi_audio.rs"
+  ],
+  "regressions": [
+    "tests/avi_adpcm_grouped.rs"
+  ],
+  "before": [
+    "evidence/batch-166-reader-before.rs",
+    "evidence/batch-166-tests-before.rs",
+    "evidence/batch-166-before.log",
+    "evidence/batch-166-acceptance-before.log"
+  ],
+  "primary_reference": "batch-166-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-166-focused-after.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-166-related-after.log",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-166-root-units.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-166-core.log",
+      "passed": 8
+    },
+    {
+      "log": "evidence/batch-166-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-166-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "Fourteen valid fixed-size IMA/MS mono/stereo programs group several samples in one AVI chunk;the old source interprets dwLength3 as chunk count and refuses1/2-chunk programs. Generic AVI parsing already preserves raw chunk/index bytes. Four plain controls decode independent literal predictor PCM and8 worker target variants. Baseline4 passed/4 ignored;all4 forced acceptance gates fail at the exact record-count admission.",
+    "Private logical-block views expose one independently coded ADPCM block per packet without changing raw container/index addresses. dwLength is checked against total blocks;logical packet limits are checked before allocating the optional view. One-block chunks and G.711 retain their existing raw-record view. No public signatures or codec arithmetic change.",
+    "Fourteen grouped layouts include2+1/1+2/3,nested rec and idx1 with8/16-byte block sizes. Opposite-channel stereo predictor PCM detects byte-stride and channel loss. All18 valid programs retain exact literal PCM and packet clocks;36 actual worker target variants cover requested mid-block seek,rewind and EOF. Encoded seek probes include negative,interior,end,beyond-end and i64MAX targets.",
+    "Seek intentionally preserves the existing block-rounded landing contract. The initial test oracle wrongly expected sample clipping at1.25ms instead of the declared1.125ms block landing;only the oracle was repaired,and its failure/source are archived. This is not an exact-seek improvement or extra ID.",
+    "Every grouped case accepts exact logical packet budget3 and refuses budget2 specifically. After feature admission,the4 malformed controls assert actual partial-block or declared-block-count contradictions rather than the former unrelated grouping refusal.",
+    "The obsolete unit requiring exactly one block per chunk now targets a truly nonintegral1016-byte block in a1024-byte record. Existing count/clock values remain asserted with block terminology;no negative tests were skipped. Existing G.711 constructor body is byte-identical apart from initializing the new private view to None,and its native container/seek regression passes.",
+    "7 focused and18 related integrations,34 related root units,8 core checks,fixture reproduction and player build pass. Owned AVI contains synthetic VP9;the separate Matroska companion is decoded independently. No AVI-video GUI,physical audio-device,full-format or performance qualification is claimed.",
+    "Stereo fixtures extended coverage after preserving the earlier mono generator/manifest/logs. All former mono media hashes remain unchanged. Generation is pure,explicit and offline;ordinary tests do not use FFmpeg,network or fixture generation."
+  ],
+  "counting": "One grouped fixed-block AVI ADPCM capability. No extra IDs for codings,channel widths,group/index variants,packet clocks,seek/resource support,tests or harness maintenance."
+}

@@ -1,0 +1,709 @@
+{
+  "cases": [
+    {
+      "name": "l0-pcm-spatial1-split0",
+      "file": "l0-pcm-spatial1-split0.mp4",
+      "oracle": "l0-pcm-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "l0-pcm-spatial1-split0-1.packet",
+          "control": "l0-pcm-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "l0-pcm-spatial1-split0-2.packet",
+          "control": "l0-pcm-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "l0-pcm-spatial1-split1",
+      "file": "l0-pcm-spatial1-split1.mp4",
+      "oracle": "l0-pcm-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "l0-pcm-spatial1-split1-1.packet",
+          "control": "l0-pcm-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "l0-pcm-spatial1-split1-2.packet",
+          "control": "l0-pcm-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "pcm-l1-spatial1-split0",
+      "file": "pcm-l1-spatial1-split0.mp4",
+      "oracle": "pcm-l1-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "pcm-l1-spatial1-split0-1.packet",
+          "control": "pcm-l1-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "pcm-l1-spatial1-split0-2.packet",
+          "control": "pcm-l1-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "pcm-l1-spatial1-split1",
+      "file": "pcm-l1-spatial1-split1.mp4",
+      "oracle": "pcm-l1-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "pcm-l1-spatial1-split1-1.packet",
+          "control": "pcm-l1-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "pcm-l1-spatial1-split1-2.packet",
+          "control": "pcm-l1-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "bi-bi-spatial1-split0",
+      "file": "bi-bi-spatial1-split0.mp4",
+      "oracle": "bi-bi-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "bi-bi-spatial1-split0-1.packet",
+          "control": "bi-bi-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "bi-bi-spatial1-split0-2.packet",
+          "control": "bi-bi-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "bi-bi-spatial1-split1",
+      "file": "bi-bi-spatial1-split1.mp4",
+      "oracle": "bi-bi-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "bi-bi-spatial1-split1-1.packet",
+          "control": "bi-bi-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "bi-bi-spatial1-split1-2.packet",
+          "control": "bi-bi-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "l0-l1-spatial1-split0",
+      "file": "l0-l1-spatial1-split0.mp4",
+      "oracle": "l0-l1-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "l0-l1-spatial1-split0-1.packet",
+          "control": "l0-l1-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "l0-l1-spatial1-split0-2.packet",
+          "control": "l0-l1-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "l0-l1-spatial1-split1",
+      "file": "l0-l1-spatial1-split1.mp4",
+      "oracle": "l0-l1-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "l0-l1-spatial1-split1-1.packet",
+          "control": "l0-l1-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "l0-l1-spatial1-split1-2.packet",
+          "control": "l0-l1-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "direct-pcm-spatial0-split0",
+      "file": "direct-pcm-spatial0-split0.mp4",
+      "oracle": "direct-pcm-spatial0-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "direct-pcm-spatial0-split0-1.packet",
+          "control": "direct-pcm-spatial0-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "direct-pcm-spatial0-split0-2.packet",
+          "control": "direct-pcm-spatial0-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "direct-pcm-spatial0-split1",
+      "file": "direct-pcm-spatial0-split1.mp4",
+      "oracle": "direct-pcm-spatial0-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "direct-pcm-spatial0-split1-1.packet",
+          "control": "direct-pcm-spatial0-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "direct-pcm-spatial0-split1-2.packet",
+          "control": "direct-pcm-spatial0-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "direct-pcm-spatial1-split0",
+      "file": "direct-pcm-spatial1-split0.mp4",
+      "oracle": "direct-pcm-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "direct-pcm-spatial1-split0-1.packet",
+          "control": "direct-pcm-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "direct-pcm-spatial1-split0-2.packet",
+          "control": "direct-pcm-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "direct-pcm-spatial1-split1",
+      "file": "direct-pcm-spatial1-split1.mp4",
+      "oracle": "direct-pcm-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "direct-pcm-spatial1-split1-1.packet",
+          "control": "direct-pcm-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "direct-pcm-spatial1-split1-2.packet",
+          "control": "direct-pcm-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-skip-spatial0-split0",
+      "file": "skip-skip-spatial0-split0.mp4",
+      "oracle": "skip-skip-spatial0-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-skip-spatial0-split0-1.packet",
+          "control": "skip-skip-spatial0-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-skip-spatial0-split0-2.packet",
+          "control": "skip-skip-spatial0-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-skip-spatial0-split1",
+      "file": "skip-skip-spatial0-split1.mp4",
+      "oracle": "skip-skip-spatial0-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-skip-spatial0-split1-1.packet",
+          "control": "skip-skip-spatial0-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-skip-spatial0-split1-2.packet",
+          "control": "skip-skip-spatial0-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-skip-spatial1-split0",
+      "file": "skip-skip-spatial1-split0.mp4",
+      "oracle": "skip-skip-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-skip-spatial1-split0-1.packet",
+          "control": "skip-skip-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-skip-spatial1-split0-2.packet",
+          "control": "skip-skip-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-skip-spatial1-split1",
+      "file": "skip-skip-spatial1-split1.mp4",
+      "oracle": "skip-skip-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-skip-spatial1-split1-1.packet",
+          "control": "skip-skip-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-skip-spatial1-split1-2.packet",
+          "control": "skip-skip-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-bi-spatial0-split0",
+      "file": "skip-bi-spatial0-split0.mp4",
+      "oracle": "skip-bi-spatial0-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-bi-spatial0-split0-1.packet",
+          "control": "skip-bi-spatial0-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-bi-spatial0-split0-2.packet",
+          "control": "skip-bi-spatial0-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-bi-spatial0-split1",
+      "file": "skip-bi-spatial0-split1.mp4",
+      "oracle": "skip-bi-spatial0-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-bi-spatial0-split1-1.packet",
+          "control": "skip-bi-spatial0-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-bi-spatial0-split1-2.packet",
+          "control": "skip-bi-spatial0-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-bi-spatial1-split0",
+      "file": "skip-bi-spatial1-split0.mp4",
+      "oracle": "skip-bi-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-bi-spatial1-split0-1.packet",
+          "control": "skip-bi-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-bi-spatial1-split0-2.packet",
+          "control": "skip-bi-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "skip-bi-spatial1-split1",
+      "file": "skip-bi-spatial1-split1.mp4",
+      "oracle": "skip-bi-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "skip-bi-spatial1-split1-1.packet",
+          "control": "skip-bi-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "skip-bi-spatial1-split1-2.packet",
+          "control": "skip-bi-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "intra4-pcm-spatial1-split0",
+      "file": "intra4-pcm-spatial1-split0.mp4",
+      "oracle": "intra4-pcm-spatial1-split0.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "intra4-pcm-spatial1-split0-1.packet",
+          "control": "intra4-pcm-spatial1-split0-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "intra4-pcm-spatial1-split0-2.packet",
+          "control": "intra4-pcm-spatial1-split0-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    },
+    {
+      "name": "intra4-pcm-spatial1-split1",
+      "file": "intra4-pcm-spatial1-split1.mp4",
+      "oracle": "intra4-pcm-spatial1-split1.yuv",
+      "frames": [
+        {
+          "packet": "seed.packet",
+          "control": "seed.packet",
+          "presentation": 0
+        },
+        {
+          "packet": "future.packet",
+          "control": "future.packet",
+          "presentation": 3
+        },
+        {
+          "packet": "intra4-pcm-spatial1-split1-1.packet",
+          "control": "intra4-pcm-spatial1-split1-1-control.packet",
+          "presentation": 1
+        },
+        {
+          "packet": "intra4-pcm-spatial1-split1-2.packet",
+          "control": "intra4-pcm-spatial1-split1-2-control.packet",
+          "presentation": 2
+        },
+        {
+          "packet": "successor.packet",
+          "control": "successor.packet",
+          "presentation": 4
+        }
+      ]
+    }
+  ],
+  "provenance": "Owned Extended two-reference B A/B/C streams; literal scalar prediction offsets and transform basis, no external tools/private media."
+}

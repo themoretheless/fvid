@@ -1,0 +1,184 @@
+{
+  "cases": [
+    {
+      "name": "none-blend31",
+      "file": "none-blend31.ec3",
+      "video": "none-blend31.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 31,
+      "attenuation": null,
+      "noise": false
+    },
+    {
+      "name": "none-blend0",
+      "file": "none-blend0.ec3",
+      "video": "none-blend0.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 0,
+      "attenuation": null,
+      "noise": true
+    },
+    {
+      "name": "none-blend8",
+      "file": "none-blend8.ec3",
+      "video": "none-blend8.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 8,
+      "attenuation": null,
+      "noise": true
+    },
+    {
+      "name": "none-blend16",
+      "file": "none-blend16.ec3",
+      "video": "none-blend16.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 16,
+      "attenuation": null,
+      "noise": true
+    },
+    {
+      "name": "none-blend24",
+      "file": "none-blend24.ec3",
+      "video": "none-blend24.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 24,
+      "attenuation": null,
+      "noise": true
+    },
+    {
+      "name": "notch-blend31",
+      "file": "notch-blend31.ec3",
+      "video": "notch-blend31.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 31,
+      "attenuation": [
+        5,
+        12
+      ],
+      "noise": false
+    },
+    {
+      "name": "notch-blend0",
+      "file": "notch-blend0.ec3",
+      "video": "notch-blend0.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 0,
+      "attenuation": [
+        5,
+        12
+      ],
+      "noise": true
+    },
+    {
+      "name": "notch-blend8",
+      "file": "notch-blend8.ec3",
+      "video": "notch-blend8.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 8,
+      "attenuation": [
+        5,
+        12
+      ],
+      "noise": true
+    },
+    {
+      "name": "notch-blend16",
+      "file": "notch-blend16.ec3",
+      "video": "notch-blend16.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 16,
+      "attenuation": [
+        5,
+        12
+      ],
+      "noise": true
+    },
+    {
+      "name": "notch-blend24",
+      "file": "notch-blend24.ec3",
+      "video": "notch-blend24.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 24,
+      "attenuation": [
+        5,
+        12
+      ],
+      "noise": true
+    },
+    {
+      "name": "edge-blend31",
+      "file": "edge-blend31.ec3",
+      "video": "edge-blend31.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 31,
+      "attenuation": [
+        15,
+        31
+      ],
+      "noise": false
+    },
+    {
+      "name": "edge-blend0",
+      "file": "edge-blend0.ec3",
+      "video": "edge-blend0.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 0,
+      "attenuation": [
+        15,
+        31
+      ],
+      "noise": true
+    },
+    {
+      "name": "edge-blend8",
+      "file": "edge-blend8.ec3",
+      "video": "edge-blend8.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 8,
+      "attenuation": [
+        15,
+        31
+      ],
+      "noise": true
+    },
+    {
+      "name": "edge-blend16",
+      "file": "edge-blend16.ec3",
+      "video": "edge-blend16.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 16,
+      "attenuation": [
+        15,
+        31
+      ],
+      "noise": true
+    },
+    {
+      "name": "edge-blend24",
+      "file": "edge-blend24.ec3",
+      "video": "edge-blend24.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "blend": 24,
+      "attenuation": [
+        15,
+        31
+      ],
+      "noise": true
+    }
+  ]
+}

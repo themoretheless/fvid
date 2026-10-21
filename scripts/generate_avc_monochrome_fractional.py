@@ -4,15 +4,15 @@ from pathlib import Path
 from generate_avc_pcm_formats import configuration,Writer,mux
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/avc-monochrome-fractional'
 TAPS=[1,-5,20,20,-5,1]
-def prediction(source,depth,mv):
+def prediction(source,depth,mv,height=16):
     maximum=(1<<depth)-1
-    sample=lambda x,y:source[max(0,min(15,y))*32+max(0,min(31,x))]
+    sample=lambda x,y:source[max(0,min(height-1,y))*32+max(0,min(31,x))]
     clip=lambda n:max(0,min(maximum,n))
     def h(x,y):return clip((sum(t*sample(x+i-2,y)for i,t in enumerate(TAPS))+16)//32)
     def v(x,y):return clip((sum(t*sample(x,y+i-2)for i,t in enumerate(TAPS))+16)//32)
     def d(x,y):return clip((sum(a*b*sample(x+i-2,y+j-2)for i,a in enumerate(TAPS)for j,b in enumerate(TAPS))+512)//1024)
     out=[];fx,fy=mv[0]%4,mv[1]%4
-    for row in range(16):
+    for row in range(height):
         for col in range(32):
             x,y=col+mv[0]//4,row+mv[1]//4
             if fx==fy==0:value=sample(x,y)

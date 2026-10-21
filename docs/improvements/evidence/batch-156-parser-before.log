@@ -1,0 +1,7 @@
+last-29: specific short-header refusal: instrument 1 states a header of 29 bytes, shorter than the 241 up to its fadeout
+first-29: specific short-header refusal: instrument 0 states a header of 29 bytes, shorter than the 241 up to its fadeout
+middle-29: specific short-header refusal: instrument 1 states a header of 29 bytes, shorter than the 241 up to its fadeout
+padded-64: specific short-header refusal: instrument 1 states a header of 64 bytes, shorter than the 241 up to its fadeout
+padded-240: specific short-header refusal: instrument 1 states a header of 240 bytes, shorter than the 241 up to its fadeout
+empty-only-29: specific short-header refusal: instrument 0 states a header of 29 bytes, shorter than the 241 up to its fadeout
+Six intended short-header refusals,two accepted full-header cases,eight valid independent controls and four malformed refusals. Standalone actual-parser audit;not Cargo/media/worker acceptance.

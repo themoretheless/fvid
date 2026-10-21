@@ -1,0 +1,82 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/aiff.rs": "6523b4729da8f546ff9c92f337de48224e4e6db780b55a6e61dabe05a469f589",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/pcm_run_alignment.rs": "1b68c0a05f822479973bae960d0bea616b012c6e05976a59b4d852aebb90580e",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_pcm_run_alignment_regressions.py": "6559315684ee857a7fa0a3952201cffe9ed57daa8dde5ee3a8b8dd1ac6fcc12a"
+  },
+  "checks": [
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "aifc_compression_type",
+        "--test",
+        "aifc_float_native",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "pcm_exact_seek",
+        "--test",
+        "g711_native",
+        "--test",
+        "audio_truncated_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "audio_read_limit",
+        "--test",
+        "audio_duplicate_chunks"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-170-related-after.log"
+    },
+    {
+      "name": "aiff-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-170-aiff-units.log"
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "aifc_compression_type"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-170-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-170-player-build.log"
+    }
+  ]
+}

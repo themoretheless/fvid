@@ -1,0 +1,5618 @@
+[
+  {
+    "name": "field-filter-y8-c8-e-1-r0-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r0-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e-1-r1-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r0-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e0-r1-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r0-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e1-r1-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r0-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-all-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-all-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-all-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-all-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-all-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-all-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cb-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cb-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cb-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cb-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cb-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cb-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cr-o0-0-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cr-o0-0-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cr-o0-0-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cr-o-6-6-f0",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cr-o-6-6-f1",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y8-c8-e2-r1-cr-o-6-6-f2",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r0-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e-1-r1-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r0-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e0-r1-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r0-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e1-r1-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r0-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-all-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-all-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-all-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-all-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-all-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-all-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cb-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cb-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cb-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cb-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cb-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cb-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cr-o0-0-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cr-o0-0-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cr-o0-0-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cr-o-6-6-f0",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cr-o-6-6-f1",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y10-c12-e2-r1-cr-o-6-6-f2",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r0-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e-1-r1-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r0-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e0-r1-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r0-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e1-r1-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r0-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-all-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-all-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-all-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-all-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-all-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-all-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "all",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cb-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cb-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cb-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cb-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cb-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cb-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cb",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cr-o0-0-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cr-o0-0-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cr-o0-0-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      0,
+      0
+    ],
+    "mode": 2
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cr-o-6-6-f0",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 0
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cr-o-6-6-f1",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 1
+  },
+  {
+    "name": "field-filter-y14-c8-e2-r1-cr-o-6-6-f2",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "activity": "cr",
+    "offsets": [
+      -6,
+      6
+    ],
+    "mode": 2
+  }
+]

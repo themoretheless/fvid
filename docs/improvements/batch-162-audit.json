@@ -1,0 +1,75 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0170",
+  "problem": "Ogg parser verifies each page CRC but ignores the per-serial page counter. An actually lost first Opus audio page may be mistaken for a valid positive granule origin,masking20ms of missing audio.",
+  "references": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc3533",
+      "section": "6,page_sequence_number",
+      "finding": "Counters identify page loss and advance separately for each logical bitstream."
+    },
+    {
+      "url": "https://xiph.org/ogg/doc/framing.html",
+      "section": "page sequence no",
+      "finding": "The counter detects lost pages,including while reassembling packet fragments."
+    }
+  ],
+  "before_snapshot": "evidence/batch-162-ogg-before.rs",
+  "before_sha256": "a887609d7dfa8d60d8a949cabee9796818cabfb447d42724b929a46f3b88a9ea",
+  "fixtures": "tests/fixtures/playback-errors/ogg-page-sequence",
+  "requirements": [
+    "Reproduce CRC-valid page-gap/repeat/backward admission and real60ms-to40ms loss hidden by granule origin.",
+    "Intended behavior is an explicit sequence refusal,not invented missing PCM or a packet-loss concealment claim.",
+    "Retain legitimate positive granule origin,chaining,per-serial interleaving,packet budgets and existing arbitrary-initial/wrapped counter compatibility.",
+    "Track continuity from the first accepted BOS counter without introducing an unrelated zero-start requirement.",
+    "Core,actual native PCM/worker,related Ogg suites,shared media checks and affected builds must pass before accepting."
+  ],
+  "supplementary_before": {
+    "adapter": "evidence/batch-162-parser-before-replay.rs",
+    "log": "evidence/batch-162-parser-before-replay.log",
+    "result": "Frozen actual Ogg parser admits all four CRC-valid counter contradictions and six controls. This is parser proof only;Cargo/audio/worker gates remain required."
+  },
+  "initial_harness_repair": {
+    "log": "evidence/batch-162-initial-before.log",
+    "source": "evidence/batch-162-tests-initial.rs",
+    "problem": "Initial PCM oracle incorrectly assumed Opus DTX was bitwise zero. Codec emits finite deterministic near-silence. Also use AudioStep reset handling across chained logical streams. These are harness repairs,not production changes or accepted improvements.",
+    "replacement": "Independent raw-packet decode from authored mono.head/20ms.packet,with reset at chain boundaries;finite/near-silent bounds plus exact packet PTS/bytes. All ten Ogg programs and companion bytes remain SHA-identical.",
+    "generator": "evidence/batch-162-generator-initial.py",
+    "compile_followup": "The first step-aware reference renderer omitted the AudioStep::Pcm arm. Actual compiler E0004 is archived in evidence/batch-162-step-harness-build.log;helper now handles all three real AudioStep variants. No production change or defect ID."
+  },
+  "confirmed_before": {
+    "normal": "evidence/batch-162-before.log:5 passed,2 ignored after the documented harness repair. Four counter faults are CRC-valid and admitted;actual worker consumes a lost-page input and reaches40ms EOF instead of full60ms. Six parser controls and five native programs remain healthy.",
+    "forced": "evidence/batch-162-acceptance-before.log:2 failed,exit101;both parser and source admit the same missing-page case."
+  },
+  "implementation": "Track expected32-bit counters independently in each open logical stream,anchored to its first accepted BOS and advanced with wrapping addition. Validate before packet publication;do not reject the legitimate positive granule-origin profile.",
+  "alternate_reader_audit": {
+    "source": "crates/fvid-opus/src/ogg/reader.rs",
+    "before": "evidence/batch-162-opus-reader-before.rs",
+    "sha256": "c5b22d93dab06e21f4de2a1bc40d639e08ac978aa3c5a8f9caadbd1d0bb0417e",
+    "finding": "The separate public streaming OggOpusReader also parses but ignores the same counter. Add an independently reproduced fix here under the SAME ID,including restoration of its expected counter when rewind skips header pages. No extra improvement count.",
+    "confirmed_before": {
+      "normal": "evidence/batch-162-opus-before.log:2 passed,1 ignored. All four contradictory sequences are read through successful EOS;the lost page removes960samples. Four healthy monostream controls survive both packet APIs and repeated rewind.",
+      "forced": "evidence/batch-162-opus-acceptance-before.log:1 failed,exit101;lost-page packet is published instead of a sequence error."
+    },
+    "implementation": "Keep an expected wrapping page counter and checkpoint it after the header pages. Restore the checkpoint on rewind. Reject a bad page before updating the caller packet;valid prefixes already emitted by the streaming API remain explicit."
+  },
+  "profile_qualification": {
+    "reference": "https://www.rfc-editor.org/rfc/rfc7845.html#section-3",
+    "policy": "The existing file readers are strict about integrity(CRC errors already refuse). A detected page-counter discontinuity now refuses rather than silently treating missing content as verified complete media. This is not universal classification of every counter gap as malformed:manually pasted-header live captures can also be discontinuous and remain outside this strict profile.",
+    "compatibility": "Positive granule origins with continuous counters,per-serial interleaving/chaining,and arbitrary initial/wrapped counters are preserved. To feed an intentionally joined live capture to this strict profile,reframe/resequence its pages coherently while preserving granules/continuation markers. No packet-loss concealment or reconstruction of missing samples is claimed.",
+    "followup_audit": "RFC7845 permits a first audio continuation fragment with no available prefix and forbids decoding that fragment. Audit this packet-boundary state separately;do not assume every initial continuation is malformed."
+  },
+  "build_freshness_investigation": {
+    "failed_log": "evidence/batch-162-av1-build-mismatch.log",
+    "finding": "Terminal E0599 at MP4/WebM AV1 hdr_with_fallback calls,but the canonical source currently contains that public method. The codec crate imports it through an external #[path] module. No Ogg source calls this method.",
+    "current_av1_sha256": "3f1609a69c8ab9f5f2339c7e8fdfbb83016b0fe59f25b279d90a8d66a34abf50",
+    "current_av1_mtime_ns": 1792553545215395680,
+    "action": "Touch only fvid-codecs src/lib.rs mtime to require rebuilding the codec package from current canonical sources. Entry bytes verified identical;no AV1 source edits or cache deletion.",
+    "codec_entry_sha256": "acdf52bcaf60e4c767ee78a753cbac1889da177312114891d82ba926d4690d4f",
+    "old_entry_mtime_ns": 1792113091721763099,
+    "new_entry_mtime_ns": 1792554120802804000,
+    "counting": "Build verification maintenance,zero IDs.",
+    "result": "A fresh codec rebuild passed all final composed-source gates without AV1 content changes. Exact external source-edit timing is not established;no new AV1/build-system defect ID is claimed."
+  },
+  "validation": "batch-162-validation.json"
+}

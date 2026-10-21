@@ -1,0 +1,7 @@
+ima-short-0.avi: falsely accepted 2 streams and3 audio records with dwStreams outside the 0-byte avih
+ima-short-16.avi: falsely accepted 2 streams and3 audio records with dwStreams outside the 16-byte avih
+ima-short-20.avi: falsely accepted 2 streams and3 audio records with dwStreams outside the 20-byte avih
+ms-short-0.avi: falsely accepted 2 streams and3 audio records with dwStreams outside the 0-byte avih
+ms-short-16.avi: falsely accepted 2 streams and3 audio records with dwStreams outside the 16-byte avih
+ms-short-20.avi: falsely accepted 2 streams and3 audio records with dwStreams outside the 20-byte avih
+Six invalid header admissions,four healthy controls. Actual frozen container source;not decoder/worker acceptance.

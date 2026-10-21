@@ -234,12 +234,11 @@ pub fn make_audio_decoder(
             sample_rate,
             channels,
         )?),
-        // WavPack's own lossless coding, spelled the way both this build's raw `.wv`
-        // reader and Matroska name it. Everything the decoder needs - the terms, the
-        // weights, the depth, the rate - is in the block it is handed, and a block whose
-        // own channel count disagrees with the track's is refused rather than reshaped,
-        // so this arm takes the geometry only to make the two say the same thing.
-        "A_WAVPACK4" | "wavpack" => Box::new(wavpack_decoder::WavpackDecoder::new(channels)?),
+        // Matroska removes the wvpk header fields and keeps the version in
+        // CodecPrivate. Raw packets retain the complete self-contained block.
+        // Both routes validate decoded output channels against the container.
+        "A_WAVPACK4" => Box::new(wavpack_decoder::WavpackDecoder::for_matroska(extra_data,sample_rate,channels)?),
+        "wavpack" => Box::new(wavpack_decoder::WavpackDecoder::new(channels)?),
         other => return Err(crate::invalid(&format!("unsupported audio codec {other}"))),
     };
     Ok(decoder)

@@ -1,0 +1,11 @@
+{
+  "provenance": "Authored UTF8 captions, literal SubRip clocks and five raw Y4M frames; no private media or external tools.",
+  "cases": [
+    "invalid-clock",
+    "clear",
+    "replace",
+    "quoted",
+    "language-gap",
+    "lines"
+  ]
+}

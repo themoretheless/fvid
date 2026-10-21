@@ -1,0 +1,42 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0159"
+  ],
+  "issue": "A body closing token inside a quoted value or comment discards valid captions",
+  "regression": "tests/sami_body_boundaries.rs",
+  "before": [
+    "evidence/batch-151-matrix-before.log",
+    "evidence/batch-151-acceptance-before.log",
+    "evidence/batch-151-pre-sync-reproduction.log"
+  ],
+  "scope": "Four authored failing legacy P-clock inputs (quoted attribute,comment,Title raw text,Style raw text) and two healthy controls share independent1..2s SRT and five-frame raw Y4M. All four failures also reproduce before Sync support,so this is pre-existing. The candidate remains prototype-only and adds no accepted ID.",
+  "cause": "sami_tags uses an unqualified folded.find(\"</body\") before scanning whole tags/comments.",
+  "prototype": "evidence/batch-151-prototype-after.log",
+  "prototype_source": "evidence/batch-151-prototype.rs",
+  "prototype_note": "Prototype was based on the post-Sync parser before the pending BR/.sami fixes. Apply only body-boundary logic later; never replace production with this full snapshot.",
+  "reference": {
+    "sami_header": "https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0",
+    "html_text_elements": "https://html.spec.whatwg.org/multipage/syntax.html",
+    "html_tokenizer": "https://html.spec.whatwg.org/multipage/parsing.html"
+  },
+  "prototype_checks": [
+    {
+      "log": "evidence/batch-151-prototype-after.log",
+      "passed_cases": 6
+    },
+    {
+      "log": "evidence/batch-151-prototype-units.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-151-prototype-sync-controls.log",
+      "passed_cases": 6
+    },
+    {
+      "log": "evidence/batch-151-prototype-attribute-controls.log",
+      "passed_cases": 12
+    }
+  ],
+  "validation": "batch-151-validation.json"
+}

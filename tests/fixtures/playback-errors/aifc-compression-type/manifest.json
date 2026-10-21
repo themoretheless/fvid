@@ -1,0 +1,338 @@
+{
+  "provenance": "16 authored AIFC COMM18/19/20/21-byte incomplete sowt IDs;16 controls include plain AIFF,AIFC NONE/sowt with names and complete22-byte nameless sowt compatibility. Asymmetric manual integer16/24/32 mono/stereo PCM and independent big-endian reinterpretation oracle prove wrong decoder byte order. All FORM/chunk sizes,FVER,SSND offset and sample counts are authored correctly. Separate own VP9 companion. No private media,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "int16-1ch-short-18.aiff",
+      "control": "int16-1ch-sowt.aiff",
+      "expected": "int16-1ch.f32le",
+      "wrong": "int16-1ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int16-1ch-short-19.aiff",
+      "control": "int16-1ch-sowt.aiff",
+      "expected": "int16-1ch.f32le",
+      "wrong": "int16-1ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 19
+    },
+    {
+      "file": "int16-1ch-short-20.aiff",
+      "control": "int16-1ch-sowt.aiff",
+      "expected": "int16-1ch.f32le",
+      "wrong": "int16-1ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 20
+    },
+    {
+      "file": "int16-1ch-short-21.aiff",
+      "control": "int16-1ch-sowt.aiff",
+      "expected": "int16-1ch.f32le",
+      "wrong": "int16-1ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 21
+    },
+    {
+      "file": "int16-2ch-short-18.aiff",
+      "control": "int16-2ch-sowt.aiff",
+      "expected": "int16-2ch.f32le",
+      "wrong": "int16-2ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int16-2ch-short-19.aiff",
+      "control": "int16-2ch-sowt.aiff",
+      "expected": "int16-2ch.f32le",
+      "wrong": "int16-2ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 19
+    },
+    {
+      "file": "int16-2ch-short-20.aiff",
+      "control": "int16-2ch-sowt.aiff",
+      "expected": "int16-2ch.f32le",
+      "wrong": "int16-2ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 20
+    },
+    {
+      "file": "int16-2ch-short-21.aiff",
+      "control": "int16-2ch-sowt.aiff",
+      "expected": "int16-2ch.f32le",
+      "wrong": "int16-2ch-wrong-big.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 21
+    },
+    {
+      "file": "int24-1ch-short-18.aiff",
+      "control": "int24-1ch-sowt.aiff",
+      "expected": "int24-1ch.f32le",
+      "wrong": "int24-1ch-wrong-big.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int24-1ch-short-19.aiff",
+      "control": "int24-1ch-sowt.aiff",
+      "expected": "int24-1ch.f32le",
+      "wrong": "int24-1ch-wrong-big.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 19
+    },
+    {
+      "file": "int24-1ch-short-20.aiff",
+      "control": "int24-1ch-sowt.aiff",
+      "expected": "int24-1ch.f32le",
+      "wrong": "int24-1ch-wrong-big.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 20
+    },
+    {
+      "file": "int24-1ch-short-21.aiff",
+      "control": "int24-1ch-sowt.aiff",
+      "expected": "int24-1ch.f32le",
+      "wrong": "int24-1ch-wrong-big.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 21
+    },
+    {
+      "file": "int32-2ch-short-18.aiff",
+      "control": "int32-2ch-sowt.aiff",
+      "expected": "int32-2ch.f32le",
+      "wrong": "int32-2ch-wrong-big.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int32-2ch-short-19.aiff",
+      "control": "int32-2ch-sowt.aiff",
+      "expected": "int32-2ch.f32le",
+      "wrong": "int32-2ch-wrong-big.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 19
+    },
+    {
+      "file": "int32-2ch-short-20.aiff",
+      "control": "int32-2ch-sowt.aiff",
+      "expected": "int32-2ch.f32le",
+      "wrong": "int32-2ch-wrong-big.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 20
+    },
+    {
+      "file": "int32-2ch-short-21.aiff",
+      "control": "int32-2ch-sowt.aiff",
+      "expected": "int32-2ch.f32le",
+      "wrong": "int32-2ch-wrong-big.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 21
+    }
+  ],
+  "controls": [
+    {
+      "file": "int16-1ch-aiff.aiff",
+      "expected": "int16-1ch.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int16-1ch-none.aiff",
+      "expected": "int16-1ch.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int16-1ch-sowt.aiff",
+      "expected": "int16-1ch.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int16-1ch-sowt-minimal.aiff",
+      "expected": "int16-1ch.f32le",
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 22
+    },
+    {
+      "file": "int16-2ch-aiff.aiff",
+      "expected": "int16-2ch.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int16-2ch-none.aiff",
+      "expected": "int16-2ch.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int16-2ch-sowt.aiff",
+      "expected": "int16-2ch.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int16-2ch-sowt-minimal.aiff",
+      "expected": "int16-2ch.f32le",
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 22
+    },
+    {
+      "file": "int24-1ch-aiff.aiff",
+      "expected": "int24-1ch.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int24-1ch-none.aiff",
+      "expected": "int24-1ch.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int24-1ch-sowt.aiff",
+      "expected": "int24-1ch.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int24-1ch-sowt-minimal.aiff",
+      "expected": "int24-1ch.f32le",
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "comm_bytes": 22
+    },
+    {
+      "file": "int32-2ch-aiff.aiff",
+      "expected": "int32-2ch.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 18
+    },
+    {
+      "file": "int32-2ch-none.aiff",
+      "expected": "int32-2ch.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int32-2ch-sowt.aiff",
+      "expected": "int32-2ch.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 24
+    },
+    {
+      "file": "int32-2ch-sowt-minimal.aiff",
+      "expected": "int32-2ch.f32le",
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "comm_bytes": 22
+    }
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "int16-1ch.f32le": "0599622b5ae4d378f2719f5881634d37823dc777726a6cb1dfe860fe61e5df53",
+    "int16-1ch-wrong-big.f32le": "f948969a24cf0b2b073e87bb62b2d44365492a5de3a13d7cc5637f4a9a9fac04",
+    "int16-1ch-aiff.aiff": "be969f24786558ecd71fe4fb99482c7120009235ea3a0f648e78fdd496a460d0",
+    "int16-1ch-none.aiff": "2428b233ffafb1e3b72965e26fe7fb1132398db0dcd3fba9fbc935573647d19e",
+    "int16-1ch-sowt.aiff": "4f14274e336d7fe3da290f26e3ff4233bb5f1c859d2eefb30dc0d610a7aaed04",
+    "int16-1ch-sowt-minimal.aiff": "8f167b7afb18850d1a689e8b705cf94c6fa8d2b145f70f8d1c9278d5aa361ae2",
+    "int16-1ch-short-18.aiff": "de85f6cd3916c992fa56a555758b783f9ae3aae94a23560ad74996600b7167d8",
+    "int16-1ch-short-19.aiff": "be28aadd81bc42ea9f972d8b9a815aab597f353fcdbb7beb75a50e86647f068f",
+    "int16-1ch-short-20.aiff": "397b603236c888494bdc4c15bb60dc409d32bee512fa475a264d7b69aab02cd7",
+    "int16-1ch-short-21.aiff": "dd65bcc326d6f46ee460a503e3c8bf4b8864412e1a0425d1e34a019b301054e0",
+    "int16-2ch.f32le": "7a2cbaaf1e08f95e128fb132574459f4ff2859f71e25009aac22868f16cb0916",
+    "int16-2ch-wrong-big.f32le": "967e2fd18104204d6d7a1903371d7a95848b4ed7b0cf771c6ddde2f2982e4fc3",
+    "int16-2ch-aiff.aiff": "4860781f2e5caa58e6d0270b7b5592522534ecfdefb3fce013523cdfd1fa3351",
+    "int16-2ch-none.aiff": "23e19880e94d5b93d9b80a8b0aaf588e7429eb6288610b64b78494d60b98b0f0",
+    "int16-2ch-sowt.aiff": "1970c779bc5c7a71bc4ee1734a0f5521d8fb8539f4780c6472869b77b519b11b",
+    "int16-2ch-sowt-minimal.aiff": "a69b38a2e8c7db908f74a3792e121921020725c5be1be74329fe67ab5a0d6af5",
+    "int16-2ch-short-18.aiff": "9d79349fb67ee6e4c4f84dfa7ff5ec27143ea5de714c0eac9ec266cb1168f476",
+    "int16-2ch-short-19.aiff": "81139426c789f9c2ac6e8f50b8fa2704f0512ebd07fe16fc10f7cc45b7734a87",
+    "int16-2ch-short-20.aiff": "82055f043c047f0ba463e580f807c1a9c838b8e80d0afeb61c66a913905b00dd",
+    "int16-2ch-short-21.aiff": "34410e53ffe77c8b4581d469b141e4da2efb41dffb2d4741ff0e48d8bfb67772",
+    "int24-1ch.f32le": "3e8237a66a2aefcee8c1a9f36c77ec60bbbe987ce7b920ccc080da5812be12a5",
+    "int24-1ch-wrong-big.f32le": "a7db486959955e3c498415b950aeadfbf29b4a294bb112f56392fa8c1025f74f",
+    "int24-1ch-aiff.aiff": "330c3268de20103d66f5fe7e710b90167033743a7716ed8e02c274c832d840bb",
+    "int24-1ch-none.aiff": "37636d6a70f19ecb60c5ee25546596ddad6c8be47d81edd1f95e3039b4a80b86",
+    "int24-1ch-sowt.aiff": "7270863863a94d612bc3be93bb6a6e1b3a8b997f85c04873e2861c62e47ed811",
+    "int24-1ch-sowt-minimal.aiff": "e20083a26c532227f8eaf7fea11b227338a9960821651dd2fc3205b4644e124b",
+    "int24-1ch-short-18.aiff": "78827b3b58428af3f6717f878cb43da3827a8342c1a407cc1eb2d46e1567b3f1",
+    "int24-1ch-short-19.aiff": "ff6bee2134678e96f7572733c02c7b5b46a17427f6da60faabe3959d13df5835",
+    "int24-1ch-short-20.aiff": "fce3ecdaeebfd20195413810e2b585359fc96952d9ccabdebe4e08db10243ca5",
+    "int24-1ch-short-21.aiff": "817c986622c155b75617b816b1a3ae37b165fab74aaf41e7d172f530e346b2fb",
+    "int32-2ch.f32le": "4b13b99008c21c6de96f0e6ce917bc0bd7419f03f6c31a9143166a66b180f2fa",
+    "int32-2ch-wrong-big.f32le": "11ee224cc0271a6dce67d6795b95f12c7fcb43d3853d21d1f2e29d2e902b29b3",
+    "int32-2ch-aiff.aiff": "11ab2280b91a0f93da0d738c09267671349b7266b1b4b318426cdfb21050f7da",
+    "int32-2ch-none.aiff": "8e4f6776127087e2a17e80bfa2dc37f76aa385274402c6777b0a8fbf3f6eab97",
+    "int32-2ch-sowt.aiff": "8af26aa28282240ff8707c2fe99e973425f6e7d462bab4d0771963456b31d078",
+    "int32-2ch-sowt-minimal.aiff": "0a3fbea2730a53e63f6c97d193607f47d5823d74515d3f0a89ecd0613f68e2f6",
+    "int32-2ch-short-18.aiff": "9843cfff06cdacd74f8823dda29e9b5d7890bf00dddc0ff32ae82e8c015d479d",
+    "int32-2ch-short-19.aiff": "810e839597d960da099a1dfa437c1aeebaf28d409dface5b736c6440ebba4514",
+    "int32-2ch-short-20.aiff": "d1130016f3e9f50a892a076ccf43d355ee7502de97b8634fdec530b214ea336b",
+    "int32-2ch-short-21.aiff": "b71fc2d9688364a20b3b7a03683d6627b7247cbcf4ba582b1ae8d489d9f58ee2"
+  }
+}

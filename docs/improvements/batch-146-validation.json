@@ -1,0 +1,45 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0154"
+  ],
+  "checked_at": "2026-10-20T22:02:33.849265+00:00",
+  "before": [
+    "evidence/batch-146-before.log",
+    "evidence/batch-146-acceptance-before.log",
+    "evidence/batch-146-container-before.rs",
+    "evidence/batch-146-decoder-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-146-integration-verified.log",
+      "passed": 21
+    },
+    {
+      "log": "evidence/batch-146-units-verified.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-146-minimal-verified.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-146-fixtures-verified.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-146-player-build.log",
+      "passed": 0
+    }
+  ],
+  "qualification": [
+    "Native XM now expands finite E6x pattern loops using per-channel start markers and repeat counters. It distinguishes local row repetition from the existing one-pass global order-entry policy. Counters survive order changes; flow commands share the resume row in channel order, including FT2 next-pattern start-row behavior and destination bounds. Primary inspection is recorded in evidence/batch-146-reference.json.",
+    "Before: 13 loop-bearing scores reported ignored effects; 11 of the 14 authored scores had different literal traces and PCM from independent expanded-score controls. Marker-only, jump-overrides-loop and no-loop controls already had correct traces/PCM. Forced intended acceptance and expanded-row checks failed specifically on the missing repeats.",
+    "After: all 14 literal traces and 56 combinations of mono/stereo and 11025/44100Hz match independently flattened score PCM exactly. Cases cover default/explicit starts,1/2/15 repeats,channel-local counters,tempo replay,global backward jumps,command precedence,counter lifetime across orders and short destination fallback.28 actual worker targets verify full playback,rewind,seek and EOF against independent score bytes. Authored VP9/PCM companion decodes.",
+    "Every expanded timeline row is admitted against Limits.rows before insertion. Exact budgets pass and one-row-short budgets refuse for all 14 scores. Two bytes of transient loop state per channel are reserved fallibly; this is not a total heap-byte or RSS guarantee. No public signature,packet format or default limit changed.",
+    "35 parser/decoder/reader units,nine related integration targets,minimal no-default-features regression,fixture reproduction and player build pass. Ordinary tests and generation require no FFmpeg,network or private media. No performance improvement is claimed.",
+    "Initial gates encountered an unrelated HEVC module-path compile error,already corrected externally before passing reruns. No HEVC edit or ID was made here. Only the verified logs support acceptance; earlier failed attempts remain archived.",
+    "Scope is finite pattern loops within the native renderer profile. Other unsupported effects,envelopes/fadeout synthesis and full bit-exact FT2 fidelity remain outside qualification."
+  ],
+  "counting": "One finite pattern-loop capability. Fourteen scores,repeat counts,flow interactions,resource probes and decoder ignored-effect classification add zero extra IDs."
+}

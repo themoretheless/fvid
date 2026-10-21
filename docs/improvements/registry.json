@@ -1,8 +1,8 @@
 {
   "target": 1000,
   "counting_rule": "One independently confirmed problem or useful capability; fixture variants and baseline integration repairs are excluded. Only accepted entries count.",
-  "accepted_count": 153,
-  "next_id": "FVID-0154",
+  "accepted_count": 178,
+  "next_id": "FVID-0179",
   "entries": [
     {
       "id": "FVID-0001",
@@ -470,7 +470,7 @@
       "source": "src/codec/avc_mbaff_picture.rs",
       "regression": "tests/avc_mbaff_pcm_memory.rs",
       "before": "Actual decoder allocation probe for128-square PCM frame reports274 allocations and3_320_590 requested bytes; the same packet needs no neighbor prediction.",
-      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274→18 allocations and3_320_590→109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
+      "result": "Direct PCM publication preserves validated frame/field footprints and readiness. Six alternating pairs repeat exact allocator savings:128-square frame274\u219218 allocations and3_320_590\u2192109_326 cumulative bytes; native pixels, clocks, seek, atomicity and41 distinct Rust regressions pass. No release-speed/RSS claim.",
       "status": "accepted",
       "validation": "batch-019-validation.json"
     },
@@ -554,11 +554,11 @@
     {
       "id": "FVID-0049",
       "batch": 27,
-      "title": "Preserve effective disabled-track usability through MP4→Matroska copy and filtered video export",
+      "title": "Preserve effective disabled-track usability through MP4\u2192Matroska copy and filtered video export",
       "source": "crates/fvid-media/src/owned_mp4_matroska_impl.rs",
       "regression": "tests/mp4_matroska_usability.rs",
       "before": "Equal-priority/legacy controls match; copying disabled-first dual AVC drops its usability flag and selects a different video, changing decoded pixels.",
-      "result": "MP4→Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
+      "result": "MP4\u2192Matroska copy and filtered FFV1/AAC export preserve effective disabled-track status through source/output reorder. Exact packet bytes, decoded video/clocks/seek, AAC silence and atomic refusal pass;23 Rust tests,1 Python integrity check and player build pass. Legacy fallback retained.",
       "status": "accepted",
       "validation": "batch-027-validation.json"
     },
@@ -590,7 +590,7 @@
       "title": "Preserve MP4 non-AAC media clocks independently of codec sample rate",
       "source": "src/playback/audio/mp4_audio.rs",
       "regression": "tests/mp4_audio_clocks.rs",
-      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms→1.25ms.",
+      "before": "Matching8kHz clock control passes. A20ms packet in1000/44100/48000/90000 media clocks is presented as2.5/110.25/120/225ms. Signed-ctts companion independently fails10ms\u21921.25ms.",
       "result": "MP4 non-AAC decoded audio now retains source media units independently of codec sample rate and clips negative composition preroll exactly. Twelve authored PCM/ALAC clips pass samples, clocks, seek/replay/EOF through actual worker;40 Rust and1 Python test plus player binary build pass.",
       "status": "accepted",
       "validation": "batch-029-validation.json"
@@ -971,7 +971,7 @@
       "source": "src/playback/audio/wav.rs",
       "regression": "tests/pcm_run_alignment.rs",
       "before": "Twenty-four authored integer/float/G711 WAV/AU cases accept explicitly declared orphan channel/sample bytes, round them out of packets and report successful160-frame native playback/EOF without the strict decoder ever seeing the malformed tail.",
-      "result": "WAV/AU fixed-frame audio rejects orphan bytes before packet rounding.24 precise failures now refuse;18 native controls, actual workers/Player routing,33 WAV/9 AU/31 worker tests, related integrations, fixtures and final build pass.",
+      "result": "WAV/AU fixed-frame audio rejects orphan bytes before packet rounding.24 precise failures now refuse;18 native controls, actual workers/Player routing,33 WAV/9 AU/31 worker tests, related integrations, fixtures and final build pass. Zero-ID batch170 extends the same invariant to AIFF/AIFC:12 before false EOF admissions now refuse;all36 malformed/27 numeric controls,14 related integrations,14 AIFF units,1 core check and player build pass. Prior WAV/AU media hashes remain identical. See batch-170-validation.json.",
       "status": "accepted",
       "validation": "batch-062-validation.json"
     },
@@ -1739,6 +1739,284 @@
       "result": "Retain active sample ownership and defaults until a note triggers the selected instrument; exact PCM,missing-selection diagnosis and actual worker regressions pass.",
       "status": "accepted",
       "validation": "batch-145-validation.json"
+    },
+    {
+      "id": "FVID-0154",
+      "batch": 146,
+      "title": "Expand finite XM E6x pattern loops with bounded channel-local state",
+      "source": "src/container/xm.rs",
+      "related_sources": [
+        "src/codec/xm_decoder.rs"
+      ],
+      "regression": "tests/xm_pattern_loop.rs",
+      "before": "E6x was ignored; finite repeats,played row traces,durations and PCM differed from independent expanded scores.",
+      "result": "Schedule channel-local repeat counters with native global one-pass policy and row-budget admission;literal traces,exact PCM and actual playback/seek pass.",
+      "status": "accepted",
+      "validation": "batch-146-validation.json"
+    },
+    {
+      "id": "FVID-0155",
+      "batch": 147,
+      "title": "SAMI attributes consume whole names and matching quoted values",
+      "source": "src/subtitles.rs",
+      "regression": "tests/sami_attribute_values.rs",
+      "before": "Eight authored cases changed clocks, language selection or untimed skipping because attribute-looking text inside other values or partial names was treated as a real attribute. Forced acceptance failed at start0s versus1s; native playback presented video then showed a caption incorrectly at500ms. Four healthy controls were retained.",
+      "result": "Whole attribute names and complete matching-quoted values preserve caption clocks and language ownership. Twelve paired authored fixtures,33 related Cargo units,native VP9 presentation and seek regression,and player build pass. Untimed text is correctly skipped; fixture and test-construction repairs add no IDs.",
+      "status": "accepted",
+      "validation": "batch-147-validation.json"
+    },
+    {
+      "id": "FVID-0156",
+      "batch": 148,
+      "title": "Read canonical SAMI Sync Start clocks and clear events",
+      "source": "src/subtitles.rs",
+      "regression": "tests/sami_sync.rs",
+      "before": "Six authored Sync Start sequences produced no captions. Forced media acceptance decoded valid companion video then failed against the first independent1..2s SRT caption.",
+      "result": "Canonical Sync clocks and selected-language clear events match six independent SRT references; overflowing clocks skip their own paragraphs.11 focused Cargo tests,33 related units,14 native Player seek targets,fixture reproduction and player build pass. Legacy paragraph clocks remain supported.",
+      "status": "accepted",
+      "validation": "batch-148-validation.json"
+    },
+    {
+      "id": "FVID-0157",
+      "batch": 149,
+      "title": "Preserve SAMI line breaks with uppercase and mixed-case BR tags",
+      "source": "src/subtitles.rs",
+      "regression": "tests/sami_break_case.rs",
+      "before": "Three authored break tag cases concatenate text with correct1..2s clocks; lowercase control passes. Forced media regression and actual native Player caption assertion fail at missing newline.",
+      "result": "Case-insensitive BR recognition preserves all four authored multiline inputs. Independent SRT and video regressions,native presentation and four seek targets pass,alongside the earlier SAMI regressions,33 related units and player build.",
+      "status": "accepted",
+      "validation": "batch-149-validation.json"
+    },
+    {
+      "id": "FVID-0158",
+      "batch": 149,
+      "title": "Discover supported .sami subtitle sidecars",
+      "source": "src/subtitles.rs",
+      "regression": "tests/sami_sidecar_extension.rs",
+      "before": "Three .sami filename variants parse successfully but automatic discovery returns none; .smi and unrelated filename controls isolate matching. Forced media acceptance and native Player selection fail specifically at the missing sidecar.",
+      "result": "The existing case-insensitive sidecar extension list includes .sami. All four discovery cases,unrelated-name exclusion,native automatic selection and four seek targets pass. Existing matching/sorting policies,earlier SAMI regressions,33 related units and player build pass.",
+      "status": "accepted",
+      "validation": "batch-149-validation.json"
+    },
+    {
+      "id": "FVID-0159",
+      "batch": 151,
+      "title": "Find SAMI body boundaries outside quoted values,comments and header text",
+      "source": "src/subtitles.rs",
+      "regression": "tests/sami_body_boundaries.rs",
+      "before": "Four authored quoted/comment/Title/Style contexts prematurely ended the document and lost valid captions. Two healthy controls pass. Forced media and native Player regressions fail specifically at missing caption text after valid video decoding/presentation.",
+      "result": "A whole-tag/comment/raw-header scan preserves all six independent caption controls.20 focused tests,33 related units,native seeks,player build and physical caption-survival/clear review pass. Existing caption renderer layout problems are recorded separately;this ID covers body-boundary discovery only.",
+      "status": "accepted",
+      "validation": "batch-151-validation.json"
+    },
+    {
+      "id": "FVID-0160",
+      "batch": 153,
+      "title": "Preserve,center and outline subtitle rows above visible playback controls",
+      "source": "src/player.rs",
+      "regression": "src/player_subtitle_tests.rs",
+      "before": "Authored two-line subtitles are flattened; default left alignment starts at frame center and overflows right; fallback black fails to recolor white glyphs; panel backing overlaps captions. Five corrected regressions fail at those exact outputs,including native decoded video.",
+      "result": "The actual painter retains newlines,centers each wrapped row,overrides outline glyph color and clears visible controls while preserving hidden-control margin. Five regressions,34 related tests,fixture reproduction,player build and physical paused/playing/EOF review pass.",
+      "status": "accepted",
+      "validation": "batch-153-validation.json"
+    },
+    {
+      "id": "FVID-0161",
+      "batch": 152,
+      "title": "Cut no-envelope XM key-off channel volume while retaining recoverable sample phase",
+      "source": "src/codec/xm_decoder.rs",
+      "regression": "tests/xm_key_off_volume_state.rs",
+      "before": "Nine authored scores wrongly revive note-only releases or block explicit volume/default restores after note97,K00 or delayed K03. Five healthy controls isolate natural end and supported commands. Verified forced acceptance fails at PCM with valid video and matching packet clocks.",
+      "result": "Immediate/delayed key-off cuts no-envelope volume0 without terminating sample phase.56 exact independent PCM combinations,28 worker seek/EOF targets,35 units,21 related tests,two fixture checks and player build pass. The obsolete permanent-release lifetime control is migrated without weakening phase/worker assertions.",
+      "status": "accepted",
+      "validation": "batch-152-validation.json"
+    },
+    {
+      "id": "FVID-0162",
+      "batch": 154,
+      "title": "Clear stale XM gain when an out-of-range sample offset stops a voice",
+      "source": "src/codec/xm_decoder.rs",
+      "regression": "tests/xm_offset_silence.rs",
+      "before": "Two authored looping9FF/C00-or-volume-zero scores emit a transient after a muted note-only retrigger. Exact earlier prefixes and literal-silent controls isolate stale gain;two healthy controls already pass. Forced PCM and actual-worker acceptance fail at the intended post-row bytes.",
+      "result": "Stopping an out-of-range9xx voice clears its gain,matching natural-end cleanup.16 exact PCM combinations,8 new worker seek/EOF targets,9 focused/related tests,35 XM units,fixture reproduction and player build pass.",
+      "status": "accepted",
+      "validation": "batch-154-validation.json"
+    },
+    {
+      "id": "FVID-0163",
+      "batch": 155,
+      "title": "Select valid empty XM instrument slots instead of replaying the prior sample",
+      "source": "src/codec/xm_decoder.rs",
+      "regression": "tests/xm_empty_slot.rs",
+      "before": "Six authored slot2/9/128 note and instrument-only cases replay the old instrument instead of matching explicitly empty instruments. Prefixes match and four healthy controls pass. Forced PCM and actual-worker acceptance fail at the intended note packet.",
+      "result": "Valid unpopulated slots replace the next selection while active sample ownership remains intact until a note.40 exact PCM comparisons,20 worker target variants,15 integrations,35 units,fixture reproduction and player build pass. Valid missing selection/note pairs share one missing report.",
+      "status": "accepted",
+      "validation": "batch-155-validation.json"
+    },
+    {
+      "id": "FVID-0164",
+      "batch": 156,
+      "title": "Read short zero-sample XM instrument headers without borrowing later data",
+      "source": "src/container/xm.rs",
+      "regression": "tests/xm_empty_header.rs",
+      "before": "Six authored XM1.04 empty headers of29/64/240 bytes fail at the unconditional241-byte requirement. Two full-header cases,eight independent full controls and four malformed refusals isolate the admission defect. Forced intended playback gates fail at XM source parsing after valid video decode.",
+      "result": "A29-byte core admits sample-free instruments,skips declared padding and supplies neutral metadata;nonempty short headers still refuse.32 exact PCM combinations,16 worker targets,13 focused/related integrations,35 player units,18 core units,final player/core media regressions,fixture checks and player build pass.",
+      "status": "accepted",
+      "validation": "batch-156-validation.json"
+    },
+    {
+      "id": "FVID-0165",
+      "batch": 157,
+      "title": "Ignore invalid XM instrument components without restoring channel defaults",
+      "source": "src/codec/xm_decoder.rs",
+      "regression": "tests/xm_invalid_defaults.rs",
+      "before": "Eight authored stereo cases with invalid129/255 components unmute,reset pan or override K00; six controls preserve valid restores and notes. Six mute/pan faults also reproduce on the pre-FVID0161 decoder. Forced PCM and actual-worker gates fail at the intended packet bytes.",
+      "result": "A shared accepted-instrument predicate gates selection and defaults.56 exact PCM pairs,28 worker target variants,20 integrations,35 units,56 unchanged reference streams,fixture checks and player build pass. Invalid components remain diagnosed and valid notes/effects execute.",
+      "status": "accepted",
+      "validation": "batch-157-validation.json"
+    },
+    {
+      "id": "FVID-0166",
+      "batch": 158,
+      "title": "Convert whole XM tick spans before microsecond rounding",
+      "source": "src/container/xm.rs",
+      "regression": "tests/xm_tick_span.rs",
+      "before": "Eight authored equal-tempo scores lose10\u201372us,publish PCM1ms short and shift a microsecond seek boundary. A fixed-window test isolates Kxx/ECx cutting one sample early at44100Hz. Four forced acceptances fail at timing,PCM and actual-worker packet length.",
+      "result": "Row duration and delayed deadlines share a whole-span conversion.40 full PCM pairs,16 fixed-window pairs,20 worker targets,20 integrations,35 player units,18 core units,2 core regressions,fixture checks and player build pass. Public one-tick behavior and packet units remain unchanged.",
+      "status": "accepted",
+      "validation": "batch-158-validation.json"
+    },
+    {
+      "id": "FVID-0167",
+      "batch": 159,
+      "title": "Validate AVI idx1 offsets from either documented origin consistently",
+      "source": "src/container/avi.rs",
+      "regression": "tests/avi_index_origin.rs",
+      "before": "Four authored AVI files using file-origin idx1 offsets refuse at the address check while relative/unindexed controls decode exact predictor PCM. Two forced acceptances fail at the same parser admission.",
+      "result": "One consistent movi/file origin is checked across audio index entries. Eight indexed PCM streams,16 worker target variants,7 integrations,34 related units,2 core regressions,fixture reproduction and player build pass;corrupted/mixed addresses still refuse.",
+      "status": "accepted",
+      "validation": "batch-159-validation.json"
+    },
+    {
+      "id": "FVID-0168",
+      "batch": 160,
+      "title": "Keep AVI main-header stream count inside its declared chunk",
+      "source": "src/container/avi.rs",
+      "regression": "tests/avi_main_header_bounds.rs",
+      "before": "Six authored0/16/20-byte avih headers borrow dwStreams from later JUNK and falsely reach parser admission and exact native PCM. Forced parser/source refusal tests fail;four complete controls pass.",
+      "result": "Validate avih extent before reading its stream count. Six malformed inputs refuse;four complete controls retain PCM and8 worker targets.11 integrations,34 related units,4 core regressions,fixture reproduction and player build pass.",
+      "status": "accepted",
+      "validation": "batch-160-validation.json"
+    },
+    {
+      "id": "FVID-0169",
+      "batch": 161,
+      "title": "Validate FLAC coded clocks before building the packet index",
+      "source": "crates/fvid-media/src/owned_flac.rs",
+      "regression": "tests/flac_number_timeline.rs",
+      "before": "Eleven checksum-valid streams with contradictory frame/sample numbers or changing strategy are silently reindexed and decoded as complete PCM. Forced parser/source refusal tests fail;four legal controls pass native and libFLAC checks.",
+      "result": "Keep coded numbers and strategy,validate preceding frame/sample counts and reject contradictions. Legal PCM and8 worker targets,10 root integrations,26 root units,4 media units,10 media integrations,2 core regressions and build pass. Three pre-existing mask0 test oracles were repaired without changing routing or adding IDs.",
+      "status": "accepted",
+      "validation": "batch-161-validation.json"
+    },
+    {
+      "id": "FVID-0170",
+      "batch": 162,
+      "title": "Validate Ogg page counters in both file and streaming readers",
+      "source": "crates/fvid-media/src/owned_ogg.rs",
+      "regression": "tests/ogg_page_sequence.rs",
+      "before": "Four CRC-valid page counter faults silently pass both readers. An actually removed page reaches successful40ms native EOF instead of original60ms;forced parser/source/streaming refusals fail. Healthy origins and counter profiles remain intact.",
+      "result": "Per-logical-stream wrapping counters and streaming rewind checkpoints detect discontinuities.32 integrations,19 root/7 media units,9 media integrations,2 core and2 streaming regressions,65 Opus/Ogg units,10 worker targets and player build pass. Strict-profile refusal and live-capture migration are documented.",
+      "status": "accepted",
+      "validation": "batch-162-validation.json"
+    },
+    {
+      "id": "FVID-0171",
+      "batch": 163,
+      "title": "Honor Ogg packet continuation boundaries and discard unavailable joined prefixes",
+      "source": "crates/fvid-media/src/owned_ogg.rs",
+      "regression": "tests/ogg_continuation_boundary.rs",
+      "before": "CRC-valid consecutive pages publish unknown fragments as full codec packets or bypass unfinished packets,changing native clocks to10/30/40/60ms. Four forced acceptances fail;standalone valid joined prefixes also refuse.",
+      "result": "Track known versus missing prefixes and streaming audio phases,discard only orphan fragments and restore phase on rewind.38 integrations,19 root/7 media units,9 media integrations,5 core/5 streaming regressions,65 Opus/Ogg units,22 new worker targets,fixture reproduction and player build pass.",
+      "status": "accepted",
+      "validation": "batch-163-validation.json"
+    },
+    {
+      "id": "FVID-0172",
+      "batch": 164,
+      "title": "Lock streaming Ogg logical identity to the initial BOS page",
+      "source": "crates/fvid-opus/src/ogg/reader.rs",
+      "regression": "crates/fvid-opus/tests/ogg_stream_identity.rs",
+      "before": "Five CRC-valid missing/repeated/foreign BOS cases decode1920 samples;foreign BOS silently replaces serial while retaining the original OpusHead. Forced intended refusal fails at audio admission.",
+      "result": "Require initial BOS and refuse another inside the active stream before publishing or relabeling.40 integrations,19 root/7 media units,9 media integrations,6 core/7 streaming regressions,65 Opus/Ogg units,4 new worker targets,fixture reproduction and player build pass. Existing stop-at-first-EOS behavior remains.",
+      "status": "accepted",
+      "validation": "batch-164-validation.json"
+    },
+    {
+      "id": "FVID-0173",
+      "batch": 165,
+      "title": "Keep AVI child parsing inside the declared outer RIFF form",
+      "source": "src/container/avi.rs",
+      "regression": "tests/avi_riff_boundary.rs",
+      "before": "Eight undersized RIFF forms falsely admit outside lists and decode literal PCM;two outside indices wrongly refuse the completed first RIFF. Four forced acceptances fail at those exact parser/source behaviors.",
+      "result": "Bound the child run by declared RIFF end while preserving clamped oversized roots and whole-input budgets.17 integrations,34 related units,7 core checks,16 worker targets,fixture reproduction and player build pass. Old zero-size unit fixtures were repaired without extra IDs.",
+      "status": "accepted",
+      "validation": "batch-165-validation.json"
+    },
+    {
+      "id": "FVID-0174",
+      "batch": 166,
+      "title": "Frame grouped AVI ADPCM samples as bounded independent block packets",
+      "source": "src/playback/audio/avi_audio.rs",
+      "regression": "tests/avi_adpcm_grouped.rs",
+      "before": "Fourteen legal mono/stereo grouped-sample programs refuse because dwLength3 is compared with1/2 physical chunks. Four plain controls retain literal PCM;four forced acceptance gates fail at that source admission.",
+      "result": "A private block view preserves per-block clocks,raw indices and block-rounded seek with a preallocation logical packet budget.7 focused/18 related integrations,34 units,8 core checks,36 worker targets,fixture reproduction and player build pass. G.711 remains unchanged.",
+      "status": "accepted",
+      "validation": "batch-166-validation.json"
+    },
+    {
+      "id": "FVID-0175",
+      "batch": 167,
+      "title": "Frame classic AVI integer and IEEE PCM with bounded sample windows",
+      "source": "src/playback/audio/avi_audio.rs",
+      "regression": "tests/avi_pcm.rs",
+      "before": "Thirteen valid PCM programs are refused despite native WAV controls decoding exact literal PCM. All4 forced acceptance gates fail specifically at missing AVI record framing.",
+      "result": "Native PCM mapping,full interleaved stride and2048-frame packet windows preserve exact clocks,seek and rewind.7 focused/25 related integrations,34 units,9 core checks,26 worker targets,fixture reproduction and player build pass.",
+      "status": "accepted",
+      "validation": "batch-167-validation.json"
+    },
+    {
+      "id": "FVID-0176",
+      "batch": 168,
+      "title": "Reject known AVI audio records whose bodies escape their enclosing run",
+      "source": "src/container/avi.rs",
+      "regression": "tests/avi_chunk_extent.rs",
+      "before": "Sixteen final audio chunks overclaim their available body;parser silently clips them and native decoding reaches exact literal PCM and successful EOF. Both forced parser/source refusal gates fail.",
+      "result": "Enforce the private truncation marker before publishing known audio records.4 focused/32 related integrations,34 units,11 core checks,24 control worker targets,fixture reproduction and player build pass;outer RIFF sentinel controls remain valid.",
+      "status": "accepted",
+      "validation": "batch-168-validation.json"
+    },
+    {
+      "id": "FVID-0177",
+      "batch": 169,
+      "title": "Require a complete AIFC compression type instead of silently guessing NONE",
+      "source": "src/playback/audio/aiff.rs",
+      "regression": "tests/aifc_compression_type.rs",
+      "before": "Sixteen incomplete18..21-byte COMM programs silently choose NONE big-endian PCM;literal native output matches independent wrong-endian oracle instead of intended sowt samples. Both forced parser/source refusal gates fail.",
+      "result": "Require the complete4-byte AIFC type while retaining plain AIFF and complete22-byte type compatibility.5 focused/9 related integrations,14 AIFF units,1 core check,32 worker targets,fixture reproduction and player build pass.",
+      "status": "accepted",
+      "validation": "batch-169-validation.json"
+    },
+    {
+      "id": "FVID-0178",
+      "batch": 171,
+      "title": "Resolve effective fragment descriptions before publishing MP4 samples",
+      "source": "src/container/mp4.rs",
+      "regression": "tests/mp4_fragment_description.rs",
+      "before": "Four unsupported effective-description0 paths silently use description1,index all3 packets and reach native analytic VP9 playback. Both intended parser/source refusal gates fail after preserving the documented clamped-video-seek contract.",
+      "result": "Resolve tfhd over trex and refuse unsupported effective0 only for populated runs;unused overridden defaults and empty runs remain valid.4 focused/54 related integrations,17 units,25 core checks,40 native seek targets,fixture reproduction and player build pass.",
+      "status": "accepted",
+      "validation": "batch-171-validation.json"
     }
   ]
 }

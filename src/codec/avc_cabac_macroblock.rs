@@ -9,6 +9,8 @@ use super::{
     avc_transform::inverse_scan_4x4,
 };
 use crate::{Result, invalid};
+#[path = "avc_cabac_444_macroblock.rs"]
+mod colour444;
 
 /// Decoded inter/skip state needed by subsequent embedded intra blocks.
 pub struct InterNeighbourContext {
@@ -41,6 +43,7 @@ pub struct IntraCabacReader<'a> {
     mbaff: bool,
     field_picture: bool,
     pair_fields: Vec<u8>,
+    colour444: Option<Box<colour444::State>>,
 }
 
 #[cfg(test)]
@@ -451,6 +454,7 @@ impl<'a> IntraCabacReader<'a> {
             mbaff,
             field_picture: header.field_pic,
             pair_fields: if mbaff { grid(count / 2)? } else { Vec::new() },
+            colour444:None,
         })
     }
     pub fn pair_field(&self, pair: usize) -> Option<bool> {
@@ -725,7 +729,7 @@ impl<'a> IntraCabacReader<'a> {
             chroma_ac: [[[0; 16]; 4]; 2],
         };
         if mb_type == 25 {
-            if let Some(wide)=&mut mb.chroma422 {
+            if self.colour444.is_some() {self.pcm_444(&mut mb)?;} else if let Some(wide)=&mut mb.chroma422 {
                 let (luma,chroma)=self.cabac.pcm422(self.sps.bit_depth_luma,self.sps.bit_depth_chroma)?;
                 mb.luma=luma;wide.pcm=chroma;
             } else {mb.luma = self
@@ -871,8 +875,10 @@ impl<'a> IntraCabacReader<'a> {
             chroma_dc: [[0; 4]; 2],
             chroma_ac: [[[0; 16]; 4]; 2],
         };
-        self.read_coefficients(&mut mb, 0, false)?;
+        // Explicit 444 8x8 CBF contexts can refer to an earlier transform in
+        // this same macroblock; it must already be classified as inter.
         self.types[at] = 254;
+        self.read_coefficients(&mut mb, 0, false)?;
         self.chroma_modes[at] = 0;
         for y in 0..4 {
             for x in 0..4 {
@@ -1008,11 +1014,14 @@ impl<'a> IntraCabacReader<'a> {
         if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
             for block in 0..4 {
                 let coded = mb.coded_block_pattern & (1 << block) != 0;
+                let mut actual=coded;
                 if coded {
-                    levels[block] = super::avc_transform8::inverse_scan_8x8(
-                        &self.cabac.residual8(field)?.coefficients,
-                        field,
-                    );
+                    let r=if self.colour444.is_some() {
+                        let inc=self.coded_context_4448(&self.luma,mx*4+block%2*2,my*4+block/2*2,intra)?;
+                        self.cabac.residual_444(Cat::Luma8,inc,field)?
+                    }else {self.cabac.residual8(field)?};
+                    actual=r.total_coefficients!=0;
+                    levels[block]=super::avc_transform8::inverse_scan_8x8(&r.coefficients,field);
                 }
                 for by in 0..2 {
                     for bx in 0..2 {
@@ -1021,7 +1030,7 @@ impl<'a> IntraCabacReader<'a> {
                             4,
                             mx * 4 + block % 2 * 2 + bx,
                             my * 4 + block / 2 * 2 + by,
-                        )] = u8::from(coded);
+                        )] = u8::from(actual);
                     }
                 }
             }
@@ -1052,6 +1061,10 @@ impl<'a> IntraCabacReader<'a> {
                 }
                 self.luma[block_index(w, 4, x, y)] = coded;
             }
+        }
+        if self.colour444.is_some() {
+            self.read_444_coefficients(mb,mb_type,intra)?;
+            return Ok(());
         }
         for component in 0..2 {
             let inc = self.macro_coded_context(&self.dc[component + 1], intra)?;

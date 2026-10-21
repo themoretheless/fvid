@@ -1,0 +1,7 @@
+lower: explicit caption loaded; discovered=[]
+
+thread 'main' (2213411) panicked at /private/tmp/fvid-sami-sidecar-audit.rs:12:14:
+assertion `left == right` failed: lower
+  left: []
+ right: ["tests/fixtures/playback-errors/sami-sidecar-extension/lower/video.sami"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

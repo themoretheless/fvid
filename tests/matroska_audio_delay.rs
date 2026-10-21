@@ -43,6 +43,15 @@ fn check(name: &str) {
             AudioStream::rewind(&mut audio);
             decoder.reset();
         }
+        if pass == 2 && case["packets"].as_array().unwrap().is_empty() {
+            // Exact PCM seek can finish at EOF when every indexed window is
+            // inaudible; it need not return an arbitrary negative source packet.
+            assert_eq!(audio.seek_to(target), target);
+            assert!(audio.next_packet().unwrap().is_none());
+            audio.validate_eof().unwrap();
+            assert_eq!(audio.duration(), Some(Duration::ZERO));
+            continue;
+        }
         if pass == 2 {
             assert_eq!(
                 audio.seek_to(target),
@@ -124,6 +133,10 @@ fn whole_packet_delay() {
 #[test]
 fn entirely_negative_audio() {
     check("all-preroll");
+}
+#[test]
+fn entirely_padded_audio_retains_known_zero_duration() {
+    check("all-padding");
 }
 #[test]
 fn delay_overlaps_signed_padding() {

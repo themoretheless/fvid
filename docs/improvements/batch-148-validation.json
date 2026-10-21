@@ -1,0 +1,54 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0156"
+  ],
+  "checked_at": "2026-10-20T22:51:23.729950+00:00",
+  "before": [
+    "evidence/batch-148-before.log",
+    "evidence/batch-148-acceptance-before.log",
+    "evidence/batch-148-matrix-before.log",
+    "evidence/batch-148-subtitles-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-148-standalone-after.log",
+      "passed_cases": 6
+    },
+    {
+      "log": "evidence/batch-148-standalone-units-after.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-148-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-148-units-after.log",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-148-malformed-audit.log",
+      "probes": 7959,
+      "scope": "Bounded UTF8 truncation,deletion and markup insertion audit; no-panic only,not caption correctness or total-resource proof."
+    },
+    {
+      "log": "evidence/batch-148-after.log",
+      "passed": 11,
+      "scope": "Seven SAMI/native Player units plus two attribute and two Sync integration regressions."
+    },
+    {
+      "log": "evidence/batch-148-player-build.log",
+      "passed": 0,
+      "scope": "Completed player build."
+    }
+  ],
+  "qualification": [
+    "Canonical Sync Start clocks in milliseconds were unsupported: all six inputs produced no captions. Forced acceptance decoded the five-frame raw Y4M companion then failed specifically at missing1..2s caption versus independent SRT.",
+    "The parser carries valid Sync clocks through whole tags, retains selected-language blank events as end boundaries,and skips malformed overflowing clock groups. Legacy paragraph clocks and the existing majority/tie-first language policy remain supported.",
+    "The native Player gate uses the authored indexed VP9 clip and independent SRT cue references for fourteen forward/backward seeks across language-gap and malformed-clock cases. It passed,including fresh-generation frame assertions and independent caption lookup at each target.",
+    "No performance claim,total-resource bound,full HTML entity decoding,CSS-defined language selection,physical GUI glyph rendering,hardware decoding or full SAMI conformance is claimed. Uppercase BR handling is a separate independently confirmed issue in batch149; initial prototype failure is retained.",
+    "All11 focused Cargo tests,33 related subtitle units,fixture reproduction and player build pass. The no-panic mutation audit is supplementary and does not add accepted IDs. The independent body-boundary defect recorded in batch151 also reproduces on the pre-Sync parser snapshot and remains outside this acceptance."
+  ],
+  "counting": "One canonical SAMI clock/clear capability; six inputs,malformed clock handling,independent controls and native target variants add zero extra IDs."
+}

@@ -28,7 +28,14 @@ fn rounded_padding_metadata_removes_the_known_sample_count_without_losing_a_neig
         }else{
             fvid_media::owned_matroska_pcm::decode_matroska_pcm(Cursor::new(bytes.clone()),&mut owned,None,&Default::default()).unwrap();
         }
-        assert_eq!(owned,expected,"{name} independent owned reference");
+        // The PCM interval API renders from container time zero, whereas the
+        // packet API below returns only the audible window at its timestamp.
+        let mut owned_expected=if head{vec![0;trim*4]}else{Vec::new()};
+        owned_expected.extend_from_slice(&expected);
+        assert_eq!(owned.len(),owned_expected.len(),"{name} owned container timeline length");
+        for (sample,(actual,wanted)) in owned.chunks_exact(4).zip(owned_expected.chunks_exact(4)).enumerate(){
+            assert_eq!(actual,wanted,"{name} owned container sample {sample}");
+        }
         let (actual,raw)=packet(bytes.clone());
         if case["opus"].as_bool().unwrap(){assert_eq!(raw,opus,"{name} untrimmed control");}
         else{assert_eq!(raw,std::fs::read(base.join(format!("{name}-source.f32le"))).unwrap(),"{name} untrimmed control");}

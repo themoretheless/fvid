@@ -1,0 +1,4740 @@
+{
+  "cases": [
+    {
+      "name": "a0-e8-t0-m0-off",
+      "file": "a0-e8-t0-m0-off.ec3",
+      "video": "a0-e8-t0-m0-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m0-on",
+      "file": "a0-e8-t0-m0-on.ec3",
+      "video": "a0-e8-t0-m0-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m0-left",
+      "file": "a0-e8-t0-m0-left.ec3",
+      "video": "a0-e8-t0-m0-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m0-right",
+      "file": "a0-e8-t0-m0-right.ec3",
+      "video": "a0-e8-t0-m0-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m0-late",
+      "file": "a0-e8-t0-m0-late.ec3",
+      "video": "a0-e8-t0-m0-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m0-early",
+      "file": "a0-e8-t0-m0-early.ec3",
+      "video": "a0-e8-t0-m0-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m0-alternating",
+      "file": "a0-e8-t0-m0-alternating.ec3",
+      "video": "a0-e8-t0-m0-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-off",
+      "file": "a0-e8-t0-m1-off.ec3",
+      "video": "a0-e8-t0-m1-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-on",
+      "file": "a0-e8-t0-m1-on.ec3",
+      "video": "a0-e8-t0-m1-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-left",
+      "file": "a0-e8-t0-m1-left.ec3",
+      "video": "a0-e8-t0-m1-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-right",
+      "file": "a0-e8-t0-m1-right.ec3",
+      "video": "a0-e8-t0-m1-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-late",
+      "file": "a0-e8-t0-m1-late.ec3",
+      "video": "a0-e8-t0-m1-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-early",
+      "file": "a0-e8-t0-m1-early.ec3",
+      "video": "a0-e8-t0-m1-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m1-alternating",
+      "file": "a0-e8-t0-m1-alternating.ec3",
+      "video": "a0-e8-t0-m1-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-off",
+      "file": "a0-e8-t0-m2-off.ec3",
+      "video": "a0-e8-t0-m2-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-on",
+      "file": "a0-e8-t0-m2-on.ec3",
+      "video": "a0-e8-t0-m2-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-left",
+      "file": "a0-e8-t0-m2-left.ec3",
+      "video": "a0-e8-t0-m2-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-right",
+      "file": "a0-e8-t0-m2-right.ec3",
+      "video": "a0-e8-t0-m2-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-late",
+      "file": "a0-e8-t0-m2-late.ec3",
+      "video": "a0-e8-t0-m2-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-early",
+      "file": "a0-e8-t0-m2-early.ec3",
+      "video": "a0-e8-t0-m2-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m2-alternating",
+      "file": "a0-e8-t0-m2-alternating.ec3",
+      "video": "a0-e8-t0-m2-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-off",
+      "file": "a0-e8-t0-m3-off.ec3",
+      "video": "a0-e8-t0-m3-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-on",
+      "file": "a0-e8-t0-m3-on.ec3",
+      "video": "a0-e8-t0-m3-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-left",
+      "file": "a0-e8-t0-m3-left.ec3",
+      "video": "a0-e8-t0-m3-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-right",
+      "file": "a0-e8-t0-m3-right.ec3",
+      "video": "a0-e8-t0-m3-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-late",
+      "file": "a0-e8-t0-m3-late.ec3",
+      "video": "a0-e8-t0-m3-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-early",
+      "file": "a0-e8-t0-m3-early.ec3",
+      "video": "a0-e8-t0-m3-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t0-m3-alternating",
+      "file": "a0-e8-t0-m3-alternating.ec3",
+      "video": "a0-e8-t0-m3-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-off",
+      "file": "a0-e8-t2-m0-off.ec3",
+      "video": "a0-e8-t2-m0-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-on",
+      "file": "a0-e8-t2-m0-on.ec3",
+      "video": "a0-e8-t2-m0-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-left",
+      "file": "a0-e8-t2-m0-left.ec3",
+      "video": "a0-e8-t2-m0-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-right",
+      "file": "a0-e8-t2-m0-right.ec3",
+      "video": "a0-e8-t2-m0-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-late",
+      "file": "a0-e8-t2-m0-late.ec3",
+      "video": "a0-e8-t2-m0-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-early",
+      "file": "a0-e8-t2-m0-early.ec3",
+      "video": "a0-e8-t2-m0-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m0-alternating",
+      "file": "a0-e8-t2-m0-alternating.ec3",
+      "video": "a0-e8-t2-m0-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-off",
+      "file": "a0-e8-t2-m1-off.ec3",
+      "video": "a0-e8-t2-m1-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-on",
+      "file": "a0-e8-t2-m1-on.ec3",
+      "video": "a0-e8-t2-m1-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-left",
+      "file": "a0-e8-t2-m1-left.ec3",
+      "video": "a0-e8-t2-m1-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-right",
+      "file": "a0-e8-t2-m1-right.ec3",
+      "video": "a0-e8-t2-m1-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-late",
+      "file": "a0-e8-t2-m1-late.ec3",
+      "video": "a0-e8-t2-m1-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-early",
+      "file": "a0-e8-t2-m1-early.ec3",
+      "video": "a0-e8-t2-m1-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m1-alternating",
+      "file": "a0-e8-t2-m1-alternating.ec3",
+      "video": "a0-e8-t2-m1-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-off",
+      "file": "a0-e8-t2-m2-off.ec3",
+      "video": "a0-e8-t2-m2-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-on",
+      "file": "a0-e8-t2-m2-on.ec3",
+      "video": "a0-e8-t2-m2-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-left",
+      "file": "a0-e8-t2-m2-left.ec3",
+      "video": "a0-e8-t2-m2-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-right",
+      "file": "a0-e8-t2-m2-right.ec3",
+      "video": "a0-e8-t2-m2-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-late",
+      "file": "a0-e8-t2-m2-late.ec3",
+      "video": "a0-e8-t2-m2-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-early",
+      "file": "a0-e8-t2-m2-early.ec3",
+      "video": "a0-e8-t2-m2-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m2-alternating",
+      "file": "a0-e8-t2-m2-alternating.ec3",
+      "video": "a0-e8-t2-m2-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-off",
+      "file": "a0-e8-t2-m3-off.ec3",
+      "video": "a0-e8-t2-m3-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-on",
+      "file": "a0-e8-t2-m3-on.ec3",
+      "video": "a0-e8-t2-m3-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-left",
+      "file": "a0-e8-t2-m3-left.ec3",
+      "video": "a0-e8-t2-m3-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-right",
+      "file": "a0-e8-t2-m3-right.ec3",
+      "video": "a0-e8-t2-m3-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-late",
+      "file": "a0-e8-t2-m3-late.ec3",
+      "video": "a0-e8-t2-m3-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-early",
+      "file": "a0-e8-t2-m3-early.ec3",
+      "video": "a0-e8-t2-m3-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e8-t2-m3-alternating",
+      "file": "a0-e8-t2-m3-alternating.ec3",
+      "video": "a0-e8-t2-m3-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-off",
+      "file": "a0-e12-t0-m0-off.ec3",
+      "video": "a0-e12-t0-m0-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-on",
+      "file": "a0-e12-t0-m0-on.ec3",
+      "video": "a0-e12-t0-m0-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-left",
+      "file": "a0-e12-t0-m0-left.ec3",
+      "video": "a0-e12-t0-m0-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-right",
+      "file": "a0-e12-t0-m0-right.ec3",
+      "video": "a0-e12-t0-m0-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-late",
+      "file": "a0-e12-t0-m0-late.ec3",
+      "video": "a0-e12-t0-m0-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-early",
+      "file": "a0-e12-t0-m0-early.ec3",
+      "video": "a0-e12-t0-m0-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m0-alternating",
+      "file": "a0-e12-t0-m0-alternating.ec3",
+      "video": "a0-e12-t0-m0-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-off",
+      "file": "a0-e12-t0-m1-off.ec3",
+      "video": "a0-e12-t0-m1-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-on",
+      "file": "a0-e12-t0-m1-on.ec3",
+      "video": "a0-e12-t0-m1-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-left",
+      "file": "a0-e12-t0-m1-left.ec3",
+      "video": "a0-e12-t0-m1-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-right",
+      "file": "a0-e12-t0-m1-right.ec3",
+      "video": "a0-e12-t0-m1-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-late",
+      "file": "a0-e12-t0-m1-late.ec3",
+      "video": "a0-e12-t0-m1-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-early",
+      "file": "a0-e12-t0-m1-early.ec3",
+      "video": "a0-e12-t0-m1-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m1-alternating",
+      "file": "a0-e12-t0-m1-alternating.ec3",
+      "video": "a0-e12-t0-m1-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-off",
+      "file": "a0-e12-t0-m2-off.ec3",
+      "video": "a0-e12-t0-m2-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-on",
+      "file": "a0-e12-t0-m2-on.ec3",
+      "video": "a0-e12-t0-m2-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-left",
+      "file": "a0-e12-t0-m2-left.ec3",
+      "video": "a0-e12-t0-m2-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-right",
+      "file": "a0-e12-t0-m2-right.ec3",
+      "video": "a0-e12-t0-m2-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-late",
+      "file": "a0-e12-t0-m2-late.ec3",
+      "video": "a0-e12-t0-m2-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-early",
+      "file": "a0-e12-t0-m2-early.ec3",
+      "video": "a0-e12-t0-m2-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m2-alternating",
+      "file": "a0-e12-t0-m2-alternating.ec3",
+      "video": "a0-e12-t0-m2-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-off",
+      "file": "a0-e12-t0-m3-off.ec3",
+      "video": "a0-e12-t0-m3-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-on",
+      "file": "a0-e12-t0-m3-on.ec3",
+      "video": "a0-e12-t0-m3-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-left",
+      "file": "a0-e12-t0-m3-left.ec3",
+      "video": "a0-e12-t0-m3-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-right",
+      "file": "a0-e12-t0-m3-right.ec3",
+      "video": "a0-e12-t0-m3-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-late",
+      "file": "a0-e12-t0-m3-late.ec3",
+      "video": "a0-e12-t0-m3-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-early",
+      "file": "a0-e12-t0-m3-early.ec3",
+      "video": "a0-e12-t0-m3-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t0-m3-alternating",
+      "file": "a0-e12-t0-m3-alternating.ec3",
+      "video": "a0-e12-t0-m3-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-off",
+      "file": "a0-e12-t2-m0-off.ec3",
+      "video": "a0-e12-t2-m0-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-on",
+      "file": "a0-e12-t2-m0-on.ec3",
+      "video": "a0-e12-t2-m0-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-left",
+      "file": "a0-e12-t2-m0-left.ec3",
+      "video": "a0-e12-t2-m0-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-right",
+      "file": "a0-e12-t2-m0-right.ec3",
+      "video": "a0-e12-t2-m0-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-late",
+      "file": "a0-e12-t2-m0-late.ec3",
+      "video": "a0-e12-t2-m0-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-early",
+      "file": "a0-e12-t2-m0-early.ec3",
+      "video": "a0-e12-t2-m0-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m0-alternating",
+      "file": "a0-e12-t2-m0-alternating.ec3",
+      "video": "a0-e12-t2-m0-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-off",
+      "file": "a0-e12-t2-m1-off.ec3",
+      "video": "a0-e12-t2-m1-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-on",
+      "file": "a0-e12-t2-m1-on.ec3",
+      "video": "a0-e12-t2-m1-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-left",
+      "file": "a0-e12-t2-m1-left.ec3",
+      "video": "a0-e12-t2-m1-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-right",
+      "file": "a0-e12-t2-m1-right.ec3",
+      "video": "a0-e12-t2-m1-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-late",
+      "file": "a0-e12-t2-m1-late.ec3",
+      "video": "a0-e12-t2-m1-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-early",
+      "file": "a0-e12-t2-m1-early.ec3",
+      "video": "a0-e12-t2-m1-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m1-alternating",
+      "file": "a0-e12-t2-m1-alternating.ec3",
+      "video": "a0-e12-t2-m1-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-off",
+      "file": "a0-e12-t2-m2-off.ec3",
+      "video": "a0-e12-t2-m2-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-on",
+      "file": "a0-e12-t2-m2-on.ec3",
+      "video": "a0-e12-t2-m2-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-left",
+      "file": "a0-e12-t2-m2-left.ec3",
+      "video": "a0-e12-t2-m2-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-right",
+      "file": "a0-e12-t2-m2-right.ec3",
+      "video": "a0-e12-t2-m2-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-late",
+      "file": "a0-e12-t2-m2-late.ec3",
+      "video": "a0-e12-t2-m2-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-early",
+      "file": "a0-e12-t2-m2-early.ec3",
+      "video": "a0-e12-t2-m2-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m2-alternating",
+      "file": "a0-e12-t2-m2-alternating.ec3",
+      "video": "a0-e12-t2-m2-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-off",
+      "file": "a0-e12-t2-m3-off.ec3",
+      "video": "a0-e12-t2-m3-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-on",
+      "file": "a0-e12-t2-m3-on.ec3",
+      "video": "a0-e12-t2-m3-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-left",
+      "file": "a0-e12-t2-m3-left.ec3",
+      "video": "a0-e12-t2-m3-left.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "left",
+      "flags": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-right",
+      "file": "a0-e12-t2-m3-right.ec3",
+      "video": "a0-e12-t2-m3-right.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "right",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-late",
+      "file": "a0-e12-t2-m3-late.ec3",
+      "video": "a0-e12-t2-m3-late.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "late",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-early",
+      "file": "a0-e12-t2-m3-early.ec3",
+      "video": "a0-e12-t2-m3-early.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "early",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a0-e12-t2-m3-alternating",
+      "file": "a0-e12-t2-m3-alternating.ec3",
+      "video": "a0-e12-t2-m3-alternating.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 12,
+      "allocated": false,
+      "pattern": "alternating",
+      "flags": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m0-off",
+      "file": "a1-e8-t0-m0-off.ec3",
+      "video": "a1-e8-t0-m0-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m0-on",
+      "file": "a1-e8-t0-m0-on.ec3",
+      "video": "a1-e8-t0-m0-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m1-off",
+      "file": "a1-e8-t0-m1-off.ec3",
+      "video": "a1-e8-t0-m1-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m1-on",
+      "file": "a1-e8-t0-m1-on.ec3",
+      "video": "a1-e8-t0-m1-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m2-off",
+      "file": "a1-e8-t0-m2-off.ec3",
+      "video": "a1-e8-t0-m2-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m2-on",
+      "file": "a1-e8-t0-m2-on.ec3",
+      "video": "a1-e8-t0-m2-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m3-off",
+      "file": "a1-e8-t0-m3-off.ec3",
+      "video": "a1-e8-t0-m3-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t0-m3-on",
+      "file": "a1-e8-t0-m3-on.ec3",
+      "video": "a1-e8-t0-m3-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m0-off",
+      "file": "a1-e8-t2-m0-off.ec3",
+      "video": "a1-e8-t2-m0-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m0-on",
+      "file": "a1-e8-t2-m0-on.ec3",
+      "video": "a1-e8-t2-m0-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 0,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m1-off",
+      "file": "a1-e8-t2-m1-off.ec3",
+      "video": "a1-e8-t2-m1-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m1-on",
+      "file": "a1-e8-t2-m1-on.ec3",
+      "video": "a1-e8-t2-m1-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 1,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m2-off",
+      "file": "a1-e8-t2-m2-off.ec3",
+      "video": "a1-e8-t2-m2-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m2-on",
+      "file": "a1-e8-t2-m2-on.ec3",
+      "video": "a1-e8-t2-m2-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 2,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m3-off",
+      "file": "a1-e8-t2-m3-off.ec3",
+      "video": "a1-e8-t2-m3-off.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "off",
+      "flags": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    {
+      "name": "a1-e8-t2-m3-on",
+      "file": "a1-e8-t2-m3-on.ec3",
+      "video": "a1-e8-t2-m3-on.mkv",
+      "blocks": 6,
+      "channels": 2,
+      "mask": 3,
+      "exponent": 8,
+      "allocated": true,
+      "pattern": "on",
+      "flags": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
+  ]
+}

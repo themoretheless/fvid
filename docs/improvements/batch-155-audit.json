@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0163"
+  ],
+  "issue": "A syntactically valid XM instrument slot absent from the loaded instrument list may incorrectly replay the prior instrument.",
+  "source": "src/codec/xm_decoder.rs",
+  "primary_reference": "evidence/batch-152-reference.json",
+  "observations": [
+    "apply_cell currently retains the previous selection when cell.instrument exceeds module.instruments.len(). A unit explicitly expects missing slot9 to replay the prior instrument.",
+    "Pinned FT2 getNewNote accepts instrNum up toMAX_INST independently of loaded instruments;triggerNote uses placeholder instrument0 when instr[slot] isNULL. Slots beyondMAX_INST are ignored.",
+    "Need distinguish valid but empty instrument slots,new-note versus instrument-only cells,active sample ownership,future note-only triggers,and out-of-format slot controls. Do not infer all unknown byte values should silence."
+  ],
+  "qualification": [
+    "No native media reproduction or new production change yet. Existing unit expectation alone is not proof of correct XM semantics.",
+    "Any fix must preserve active sample continuity on instrument-only rows and compatibility of ignored diagnostics,or explicitly document a necessary semantic migration."
+  ],
+  "slot_range_reference": {
+    "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/923829b28946d5504eea2168655c2ac3f7c67ace/src/ft2_replayer.h",
+    "sha256": "23f3f9ba72701899e592faea725c8f705260658b2ca6130f67fb169da97065be",
+    "MAX_INST_lines": [
+      [
+        59,
+        "#define MAX_INST 128"
+      ],
+      [
+        270,
+        "\tchar name[20+1], instrName[1+MAX_INST][22+1];"
+      ]
+    ]
+  },
+  "proposed_oracle": "Compare an absent valid slot in a one-instrument module against the same rows in a module with an explicitly authored empty instrument at that slot. This isolates missing selection from unsupported effects,while instrument-only rows must preserve the active sample until the next note. Include>128 ignored-slot controls and valid-instrument recovery. Verify actual PCM and diagnostics separately.",
+  "range_qualification": "Pinned primary header explicitly defines MAX_INST128. Do not silently narrow any extended module limit profile already admitted by fvid. No implementation chosen yet.",
+  "regression": "tests/xm_empty_slot.rs",
+  "fixtures": "tests/fixtures/playback-errors/xm-empty-slot",
+  "matrix": "Ten scores:six suspected PCM failures at valid slots2/9/128 under immediate notes or instrument-only selection,plus populated,initially empty and>128 ignored-slot controls. Explicit instrument1 recovers;actual and reference durations must match.",
+  "source_sha256": "23974aff63dbee2f09884ca79c74f1b1922cc10443ef34ab5e95439213cdc7be",
+  "before": [
+    "evidence/batch-155-before-verified.log",
+    "evidence/batch-155-acceptance-before-verified.log"
+  ],
+  "fixture_correction": "Initial explicit-empty controls used valid29-byte empty headers,rejected by the existing parser. The initial failed log and generator/control are retained. Full243-byte controls now isolate slot selection: six exact PCM failures,four healthy controls,and forced worker packet1 mismatch. Short empty headers are tracked separately in batch156 and are not acceptance evidence here.",
+  "candidate_sha256": "17706b64bf31e2b30af0e3b9a0a213bfbdb794d5fc79a1e666798a5f71225bd6",
+  "future_hypotheses": [
+    "Raw out-of-format instrument IDs129/255 retain the prior selection,but the later default-volume/panning block still checks raw cell.instrument!=0. Pinned FT2 normalizes these IDs to local inst0 before resetVolumes. The present default-level controls pass and do not qualify muted or shifted-pan cases. No reproduction or fix for that distinct side-effect hypothesis yet."
+  ],
+  "diagnostic_scope": "Valid absent-slot events report once per cell:selection-only absence and a later failed note are separate events. The initial-empty healthy PCM control previously double-counted the first combined cell;the fix reports two missing events for two affected cells,instead of three. Existing held-channel missing-note unit remains one event,and now correctly requires silence.",
+  "validation": "batch-155-validation.json"
+}

@@ -552,7 +552,7 @@ impl AvcDecoder {
         for nal in NalUnits::new(packet, self.length_size)? {
             let nal = nal?;
             let kind = nal[0] & 31;
-            seen_slice |= matches!(kind, 1 | 5);
+            seen_slice |= matches!(kind, 1..=5);
             let params = updated.as_ref().unwrap_or(&self.params);
             match kind {
                 7 => {
@@ -571,15 +571,13 @@ impl AvcDecoder {
                     }
                 }
                 8 => {
-                    let new = params
-                        .sets
-                        .iter()
-                        .find_map(|s| Pps::parse(nal, s).ok())
-                        .ok_or_else(|| invalid("AVC in-band PPS has no valid SPS"))?;
+                    // Contextual syntax (notably 8x8 scaling-list count) must
+                    // use the completed prefix bank, not a stale same-ID SPS.
+                    let (id, _) = Pps::identifiers(nal)?;
                     if params
                         .pps_nals
                         .iter()
-                        .any(|(id, bytes)| *id == new.id && bytes == nal)
+                        .any(|(old, bytes)| *old == id && bytes == nal)
                     {
                         continue;
                     }
@@ -587,10 +585,10 @@ impl AvcDecoder {
                         return Err(invalid("AVC changed PPS follows picture slices"));
                     }
                     let params = updated.get_or_insert_with(|| self.params.clone());
-                    if let Some(old) = params.pps_nals.iter_mut().find(|(id, _)| *id == new.id) {
+                    if let Some(old) = params.pps_nals.iter_mut().find(|(old, _)| *old == id) {
                         old.1 = nal.to_vec();
                     } else {
-                        params.pps_nals.push((new.id, nal.to_vec()));
+                        params.pps_nals.push((id, nal.to_vec()));
                     }
                 }
                 _ => {}
@@ -611,6 +609,23 @@ impl AvcDecoder {
         }
         Ok(updated)
     }
+    /// Restore received parameters after reset, without decoding earlier pictures.
+    /// Each priming packet is bounded by the configured decode budget.
+    /// Any malformed update requires another reset before decoding or priming.
+    pub fn prime_parameters(&mut self, packet: &[u8]) -> Result<()> {
+        if self.failed { return Err(invalid("AVC decoder requires reset after an error")); }
+        if self.decoded_sps.is_some() {
+            return Err(invalid("AVC parameter priming requires a reset decoder"));
+        }
+        let result = if packet.len() > self.budget {
+            Err(invalid("AVC parameter priming packet exceeds decode budget"))
+        } else { self.updated_parameters(packet) };
+        match result {
+            Ok(Some(params)) => { self.params = params; Ok(()) }
+            Ok(None) => Ok(()),
+            Err(error) => { self.failed = true; Err(error) }
+        }
+    }
     fn decode_inner(
         &mut self,
         packet: &[u8],
@@ -620,17 +635,22 @@ impl AvcDecoder {
             self.params = params;
         }
         let mut coded = None;
+        let mut residual_partition = false;
         for nal in NalUnits::new(packet, self.length_size)? {
             let nal = nal?;
             match nal[0] & 31 {
-                1 | 5 => {
+                1 | 2 | 5 => {
                     coded.get_or_insert(nal);
                 }
+                3 | 4 => { residual_partition = true; }
                 6 | 7 | 8 | 9 | 10 | 11 | 12 => {}
                 _ => return Err(invalid("unsupported in-band AVC NAL")),
             }
         }
         let Some(nal) = coded else {
+            if residual_partition {
+                return Err(invalid("AVC residual partition precedes partition A"));
+            }
             return Ok(None);
         };
         let id = SliceHeader::parameter_set_id(nal)?;
@@ -644,8 +664,12 @@ impl AvcDecoder {
         // owner. Its smaller reconstruction budget must not reject the full
         // three-plane packet before selecting its own slices.
         let packet_limit = if self.colour_plane.is_some() { packet.len() } else { self.budget };
-        let mut slices =
-            super::avc_access_unit::prepare(packet, self.length_size, sps, pps, packet_limit)?;
+        let prepared = super::avc_access_unit::prepare_for_decode(
+            packet, self.length_size, sps, pps, &self.params.pairs, packet_limit, self.budget,
+        )?;
+        let (sps, pps) = self.params.pairs.iter().find(|(_, p)| p.id == prepared.pps_id)
+            .ok_or_else(|| invalid("unknown selected AVC recovery PPS"))?;
+        let mut slices = prepared.slices;
         if sps.separate_colour_plane && self.colour_plane.is_none() {
             let source = sps.clone();
             return self.decode_separate(packet, allow_reordering, &source, &slices[0].header, pps.clone());

@@ -9,15 +9,15 @@ from generate_avc_422_inter import chroma
 from generate_avc_monochrome_fractional import prediction
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/avc-422-b-motion'
 def mc(planes,depths,vector):return [prediction(planes[0],depths[0],vector),chroma(planes[1],depths[1],vector),chroma(planes[2],depths[2],vector)]
-def future_packet(cabac,vector,colour_plane=None,chroma=True):
+def future_packet(cabac,vector,colour_plane=None,chroma=True,init_idc=0):
     b=Writer();b.ue(0);b.ue(0);b.ue(0)
     if colour_plane is not None:b.u(colour_plane,2)
     b.u(1,4);b.u(6,4);b.u(0);b.u(0);b.u(0)
-    if cabac:b.ue(0)
+    if cabac:b.ue(init_idc)
     b.se(0);b.ue(1)
     if cabac:
         while len(b.bits)%8:b.u(1)
-        c=CabacWriter(0,26)
+        c=CabacWriter(init_idc,26)
         for address in range(2):
             c.decision(11+int(address>0),0)
             for ctx in [14,15,16]:c.decision(ctx,0)
@@ -30,7 +30,7 @@ def future_packet(cabac,vector,colour_plane=None,chroma=True):
         for address in range(2):b.ue(0);b.ue(0);b.se(vector[0]if address==0 else 0);b.se(vector[1]if address==0 else 0);b.ue(0)
     nal=b.nal(0x41,trailing=not cabac);return len(nal).to_bytes(4,'big')+nal
 
-def b_packet(cabac,bipred,mode,vectors,colour_plane=None,chroma=True):
+def b_packet(cabac,bipred,mode,vectors,colour_plane=None,chroma=True,full_resolution=False,init_idc=0):
     b=Writer();b.ue(0);b.ue(1);b.ue(0)
     if colour_plane is not None:b.u(colour_plane,2)
     b.u(2,4);b.u(2,4);b.u(int(mode=='spatial' or mode=='bi'));b.u(0);b.u(0);b.u(0)
@@ -42,11 +42,11 @@ def b_packet(cabac,bipred,mode,vectors,colour_plane=None,chroma=True):
             if chroma:
                 b.u(1)
                 for p in [1,2]:b.se(WEIGHTS[l][p]);b.se(OFFSETS[l][p])
-    if cabac:b.ue(0)
+    if cabac:b.ue(init_idc)
     b.se(0);b.ue(1)
     if cabac:
         while len(b.bits)%8:b.u(1)
-        c=CabacWriter(0,26)
+        c=CabacWriter(init_idc,26)
         for address in range(2):
             c.decision(24+int(address>0 and mode!='skip'),int(mode=='skip'))
             if mode!='skip':
@@ -55,7 +55,7 @@ def b_packet(cabac,bipred,mode,vectors,colour_plane=None,chroma=True):
                     for vector in vectors:
                         for component in range(2):c.mvd(component,vector[component]if address==0 else 0,abs(vector[component])if address else 0)
                 for ctx in ([73,74,75,76]if address==0 else[74,74,76,76]):c.decision(ctx,0)
-                if chroma:c.decision(77,0)
+                if chroma and not full_resolution:c.decision(77,0)
             if address==0:c.range-=2;c.renormalize()
         b.bits.extend(c.finish())
     elif mode=='skip':b.ue(2)

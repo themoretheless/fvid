@@ -1,0 +1,278 @@
+{
+  "seed": "hevc-pcm-reference-rext8",
+  "frames": 3,
+  "hdr": [
+    {
+      "primaries": [
+        [
+          8500,
+          39850
+        ],
+        [
+          6550,
+          2300
+        ],
+        [
+          35400,
+          14600
+        ]
+      ],
+      "white": [
+        15635,
+        16450
+      ],
+      "maximum": 10000000,
+      "minimum": 1,
+      "cll": 1000,
+      "fall": 400
+    },
+    {
+      "primaries": [
+        [
+          13250,
+          34500
+        ],
+        [
+          7500,
+          3000
+        ],
+        [
+          34000,
+          16000
+        ]
+      ],
+      "white": [
+        15635,
+        16450
+      ],
+      "maximum": 15000000,
+      "minimum": 10,
+      "cll": 0,
+      "fall": 0
+    },
+    {
+      "primaries": [
+        [
+          8500,
+          39850
+        ],
+        [
+          6550,
+          2300
+        ],
+        [
+          35400,
+          14600
+        ]
+      ],
+      "white": [
+        15635,
+        16450
+      ],
+      "maximum": 8000000,
+      "minimum": 2,
+      "cll": 750,
+      "fall": 250
+    }
+  ],
+  "cases": [
+    {
+      "file": "inline-hvc1.mp4",
+      "kind": "mp4",
+      "layout": "inline",
+      "indices": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ]
+    },
+    {
+      "file": "inline-hev1.mp4",
+      "kind": "mp4",
+      "layout": "inline",
+      "indices": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ]
+    },
+    {
+      "file": "inline.mkv",
+      "kind": "mkv",
+      "layout": "inline",
+      "indices": [
+        [
+          0,
+          1,
+          2
+        ],
+        [
+          3,
+          4,
+          5
+        ],
+        [
+          6,
+          7,
+          8
+        ]
+      ]
+    },
+    {
+      "file": "prefix-hvc1.mp4",
+      "kind": "mp4",
+      "layout": "prefix",
+      "indices": [
+        [
+          1,
+          2,
+          3
+        ],
+        [
+          5,
+          6,
+          7
+        ],
+        [
+          9,
+          10,
+          11
+        ]
+      ]
+    },
+    {
+      "file": "prefix-hev1.mp4",
+      "kind": "mp4",
+      "layout": "prefix",
+      "indices": [
+        [
+          1,
+          2,
+          3
+        ],
+        [
+          5,
+          6,
+          7
+        ],
+        [
+          9,
+          10,
+          11
+        ]
+      ]
+    },
+    {
+      "file": "prefix.mkv",
+      "kind": "mkv",
+      "layout": "prefix",
+      "indices": [
+        [
+          1,
+          2,
+          3
+        ],
+        [
+          5,
+          6,
+          7
+        ],
+        [
+          9,
+          10,
+          11
+        ]
+      ]
+    },
+    {
+      "file": "split-hvc1.mp4",
+      "kind": "mp4",
+      "layout": "split",
+      "indices": [
+        [
+          2,
+          3,
+          4
+        ],
+        [
+          7,
+          8,
+          9
+        ],
+        [
+          12,
+          13,
+          14
+        ]
+      ]
+    },
+    {
+      "file": "split-hev1.mp4",
+      "kind": "mp4",
+      "layout": "split",
+      "indices": [
+        [
+          2,
+          3,
+          4
+        ],
+        [
+          7,
+          8,
+          9
+        ],
+        [
+          12,
+          13,
+          14
+        ]
+      ]
+    },
+    {
+      "file": "split.mkv",
+      "kind": "mkv",
+      "layout": "split",
+      "indices": [
+        [
+          2,
+          3,
+          4
+        ],
+        [
+          7,
+          8,
+          9
+        ],
+        [
+          12,
+          13,
+          14
+        ]
+      ]
+    }
+  ]
+}

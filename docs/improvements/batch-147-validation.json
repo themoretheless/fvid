@@ -1,0 +1,64 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0155"
+  ],
+  "checked_at": "2026-10-20T22:41:17.586947+00:00",
+  "before": [
+    "evidence/batch-147-before.log",
+    "evidence/batch-147-acceptance-before.log",
+    "evidence/batch-147-player-before-verified.log",
+    "evidence/batch-147-subtitles-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-147-standalone-units.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-147-standalone-after.log",
+      "passed_cases": 12
+    },
+    {
+      "log": "evidence/batch-147-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-147-integration-direct-after.log",
+      "passed": 2,
+      "scope": "Compiled Cargo integration binary invoked directly; includes raw video decode and twelve caption/control pairs."
+    },
+    {
+      "log": "evidence/batch-147-units-after.log",
+      "passed": 33,
+      "scope": "Cargo --features player --lib subtitles::; parser,reader and embedded subtitle units."
+    },
+    {
+      "log": "evidence/batch-147-after-verified.log",
+      "passed": 3,
+      "scope": "Cargo native player presentation and seek unit plus both media integration regressions."
+    },
+    {
+      "log": "evidence/batch-147-native-direct-verified.log",
+      "passed": 1,
+      "scope": "Independent invocation of the compiled native player regression."
+    },
+    {
+      "log": "evidence/batch-147-player-build.log",
+      "passed": 0,
+      "scope": "Completed player build."
+    }
+  ],
+  "qualification": [
+    "Eight failing attribute cases and four healthy controls were classified before the fix. Forced acceptance failed specifically at the incorrect start clock. Native video opened and presented before the 500ms caption lookup failed: actual text versus expected none.",
+    "The lexer consumes complete attributes and closes values at matching quotes; full key names prevent data-begin/data_begin from becoming Begin. Twelve authored pairs include language selection and a correct skip of untimed text.",
+    "No performance claim or physical GUI glyph verification. Source tree is shared and existing unrelated changes are preserved. The initial player-before attempt had an unrelated test namespace compilation error; only the later verified baseline supports reproduction.",
+    "Initial after-fix native test passed caption clocks but attempted unsupported Y4M seeking; NativeReader::seek_raw explicitly refuses Y4M. The 10s seek timeout is a test-construction failure, not an accepted media fix. The corrected native gate reuses the authored indexed vp9-long-gop-seek.webm for presentation and seek, with explicit worker error assertions. The Y4M companion remains the parsing fixture.",
+    "After: both authored caption variants present actual VP9 frames and complete seeks to1s and3s,with cue lookups before,during,between and after captions. Hardware session initialization refused on this host and software VP9 fallback was exercised. No hardware decoding,pixel-perfect caption drawing,physical audio output,seek precision benchmark or full SAMI conformance is claimed.33 related Cargo units and the player build pass. Ordinary regressions require no FFmpeg or network."
+  ],
+  "counting": "One SAMI attribute tokenization issue; variants and test construction add zero extra IDs.",
+  "failed_after_attempts": [
+    "evidence/batch-147-after.log",
+    "evidence/batch-147-native-diagnostic-after.log"
+  ]
+}

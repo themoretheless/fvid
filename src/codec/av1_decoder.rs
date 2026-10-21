@@ -37,6 +37,7 @@ pub struct Decoder {
     initial_sequence: Option<Sequence>,
     configuration_fields: Option<[u8; 2]>,
     initial_hdr: HdrMetadata,
+    initial_cll_received: bool,
     references: [Option<Decoded>; 8],
     showable: [bool; 8],
     reference_types: [u8; 8],
@@ -44,6 +45,7 @@ pub struct Decoder {
     headers: [Option<Arc<Header>>; 8],
     cdfs: [Option<Arc<Cdfs>>; 8],
     hdr: HdrMetadata,
+    cll_received: bool,
     budget: usize,
     failed: bool,
     pending: Option<PendingFrame>,
@@ -64,6 +66,7 @@ impl Decoder {
             initial_sequence: None,
             configuration_fields: None,
             initial_hdr: HdrMetadata::default(),
+            initial_cll_received: false,
             references: std::array::from_fn(|_| None),
             showable: [false; 8],
             reference_types: [0; 8],
@@ -71,6 +74,7 @@ impl Decoder {
             headers: std::array::from_fn(|_| None),
             cdfs: std::array::from_fn(|_| None),
             hdr: HdrMetadata::default(),
+            cll_received: false,
             budget,
             failed: false,
             pending: None,
@@ -135,6 +139,7 @@ impl Decoder {
             }
             decoder.initial_sequence = decoder.sequence.clone();
             decoder.initial_hdr = decoder.hdr;
+            decoder.initial_cll_received = decoder.cll_received;
         }
         Ok(decoder)
     }
@@ -142,6 +147,7 @@ impl Decoder {
         let sequence = self.initial_sequence.clone();
         let configuration_fields = self.configuration_fields;
         let hdr = self.initial_hdr;
+        let cll_received = self.initial_cll_received;
         let operating_point = self.operating_point;
         *self = Self::new(self.budget);
         self.operating_point = operating_point;
@@ -150,6 +156,8 @@ impl Decoder {
         self.initial_sequence = sequence;
         self.hdr = hdr;
         self.initial_hdr = hdr;
+        self.cll_received = cll_received;
+        self.initial_cll_received = cll_received;
     }
     /// The colour the stream's own sequence header states, once one has been
     /// read. An AV1 picture says what it is coded in where the container says
@@ -164,6 +172,15 @@ impl Decoder {
     /// panel asks the coding as well as the file.
     pub fn hdr(&self) -> HdrMetadata {
         self.hdr
+    }
+    /// Fill absent HDR fields from opening metadata without replacing an
+    /// explicitly received zero CLL statement with older nonzero light levels.
+    pub fn hdr_with_fallback(&self, fallback: HdrMetadata) -> HdrMetadata {
+        let mut hdr = self.hdr.filled_with(fallback);
+        if self.cll_received {
+            hdr.light = self.hdr.light;
+        }
+        hdr
     }
     /// Validate stream completion when the transport reaches end of input.
     /// Packet boundaries alone do not end a frame split across tile-group OBUs.
@@ -461,6 +478,7 @@ impl Decoder {
                         self.headers.fill(None);
                         self.cdfs.fill(None);
                         self.hdr = HdrMetadata::default();
+                        self.cll_received = false;
                     }
                     self.sequence = Some(sequence);
                 }
@@ -468,9 +486,7 @@ impl Decoder {
                 5 => {
                     // A metadata OBU this module cannot read costs the
                     // guidance, never the picture it travels with.
-                    if let Some(hdr) = av1_metadata::hdr_from_obu(&obu) {
-                        self.hdr.merge(hdr);
-                    }
+                    self.cll_received |= av1_metadata::update_hdr(&mut self.hdr, &obu);
                 }
                 7 => {
                     let pending = self

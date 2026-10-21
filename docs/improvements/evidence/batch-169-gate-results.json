@@ -1,0 +1,79 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/aiff.rs": "b0e2ceb956a50ace96a6db93971d6ac26035c8e2b25bcb456978500adf50888c",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/aifc_compression_type.rs": "bc7d7ad9562f046cc1074a8ab7065cbcaf3640fc975b3037d7059c538ea740ca"
+  },
+  "checks": [
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "aifc_float_native",
+        "--test",
+        "audio_reader_eof",
+        "--test",
+        "pcm_exact_seek",
+        "--test",
+        "g711_native",
+        "--test",
+        "audio_truncated_eof",
+        "--test",
+        "block_audio_eof",
+        "--test",
+        "audio_read_limit",
+        "--test",
+        "audio_duplicate_chunks"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-169-related-after.log"
+    },
+    {
+      "name": "aiff-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--lib",
+        "playback_aiff"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-169-aiff-units.log"
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "aifc_compression_type"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-169-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-169-player-build.log"
+    }
+  ]
+}

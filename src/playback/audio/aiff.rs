@@ -168,6 +168,11 @@ impl Aiff {
                 limits.data_bytes
             )));
         }
+        if matches!(pcm.coding, Coding::Pcm(_) | Coding::ALaw | Coding::MuLaw)
+            && !samples.len().is_multiple_of(pcm.block_align())
+        {
+            return Err(invalid("AIFF PCM sample run ends in an incomplete channel frame"));
+        }
         Ok(Self {
             pcm,
             declared_frames,
@@ -215,10 +220,10 @@ fn parse_comm(body: &[u8], aifc: bool, limits: &Limits) -> Result<(Pcm, usize)> 
     let frames = usize::try_from(u32_at(2)).unwrap_or(usize::MAX);
     let bits = u16_at(6);
     let sample_rate = read_extended_rate(&body[8..18])?;
-    // Only an AIFC header has a compression type to state, and only a COMM chunk long
-    // enough to hold one states it; a short AIFC chunk is the plain geometry.
-    let kind = if aifc && body.len() >= 22 {
-        &body[18..22]
+    // AIFC identifies its coding explicitly; only plain AIFF implies NONE.
+    let kind = if aifc {
+        body.get(18..22)
+            .ok_or_else(|| invalid("AIFC COMM chunk has no complete compression type"))?
     } else {
         NONE
     };

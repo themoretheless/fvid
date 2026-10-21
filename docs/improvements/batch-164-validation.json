@@ -1,0 +1,70 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0172"
+  ],
+  "checked_at": "2026-10-21T04:38:32.494520+00:00",
+  "sources": [
+    "crates/fvid-opus/src/ogg/reader.rs"
+  ],
+  "regressions": [
+    "crates/fvid-opus/tests/ogg_stream_identity.rs",
+    "tests/ogg_stream_identity.rs"
+  ],
+  "before": [
+    "evidence/batch-164-opus-before.log",
+    "evidence/batch-164-opus-acceptance-before.log",
+    "evidence/batch-164-opus-reader-before.rs",
+    "evidence/batch-164-opus-tests-before.rs",
+    "evidence/batch-164-root-controls-before.log"
+  ],
+  "primary_reference": "batch-164-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-164-after.log",
+      "passed": 40
+    },
+    {
+      "log": "evidence/batch-164-root-units.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-164-media-units.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-164-media.log",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-164-core.log",
+      "passed": 6
+    },
+    {
+      "log": "evidence/batch-164-opus-after.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-164-opus-units.log",
+      "passed": 65
+    },
+    {
+      "log": "evidence/batch-164-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-164-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "Five authored CRC-valid consecutive-counter cases with missing/repeated/foreign BOS all decode1920 samples under the original mono header before the fix. Foreign BOS mutates reader.serial() without replacing the stored OpusHead. Baseline2 passed/1 ignored;forced intended refusal fails at missing-BOS audio admission.",
+    "The initial BOS establishes serial ownership once. Another BOS encountered before the active stream ends refuses before publishing its payload or changing identity. Existing sequence state identifies the initial accepted page;no public signature or allocation limit changes.",
+    "This fixes the standalone single-stream reader. Canonical missing/repeated same-serial BOS refusals are existing controls and add no ID. Generic foreign streams are not universally malformed:their separate decoding ownership remains outside this specialized streaming reader.",
+    "Both packet APIs,three-pass rewind,zero/nonzero serials,arbitrary initial/wrapped counter profiles and joined-prefix handling pass. Error checks preserve the caller packet and established serial. Existing stop-at-first-EOS behavior,including later chains in the source,is preserved.",
+    "Two healthy fixtures retain independent raw-packet PCM and4 actual worker target variants. The owned VP9/PCM video companion is separately decoded;it does not itself reproduce this audio-container defect. All fixture generation is explicit,pure and offline;ordinary tests use checked-in bytes.",
+    "40 root integrations,19 root units,7 shared-media units,9 shared-media integrations,6 core/7 streaming regressions,65 Opus/Ogg units,fixture reproduction and player build pass. No physical-device,GUI,performance or full-streaming-multiplexer claim.",
+    "An initial root control assertion compared Option<Duration> with Duration. The compiler error and original test are archived;the40ms literal was wrapped in Some. This test-harness repair adds zero IDs. Inputs previously silently admitted through missing/repeated BOS now return explicit framing errors;the documented migration requires correctly framed headers and separate ownership for additional logical streams."
+  ],
+  "counting": "One immutable logical-stream identity/BOS-boundary defect. No separate IDs for initial/repeated flags,header/audio placement,foreign serials,tests or documentation."
+}

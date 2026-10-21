@@ -1,0 +1,695 @@
+{
+  "provenance": "Frozen encoded audio only from the original authored 240 ms / 48 kHz 440 Hz tone references. Codec-private bytes are synthetic configuration, not private source media. No container/video bytes are stored. External reference refresh: benches/generate_matroska_audio_sample_clock_reference.py.",
+  "cases": [
+    {
+      "name": "flac",
+      "reference_encoder": "flac",
+      "source_movie_sha256": "6caa7ec16acdc6f50eb3dce623ac9667c0349eb64154109721c8a003d362bfcc",
+      "codec": "A_FLAC",
+      "sample_rate": 48000,
+      "channels": 1,
+      "bit_depth": 32,
+      "codec_delay_ns": 0,
+      "seek_preroll_ns": 0,
+      "default_duration_ns": 21333333,
+      "timestamp_scale_ns": 1000000,
+      "duration_ticks": 240.0,
+      "packets": [
+        {
+          "offset": 0,
+          "size": 2288,
+          "timestamp_ticks": 0,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 2288,
+          "size": 2237,
+          "timestamp_ticks": 21,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 4525,
+          "size": 2294,
+          "timestamp_ticks": 43,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 6819,
+          "size": 2250,
+          "timestamp_ticks": 64,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 9069,
+          "size": 2178,
+          "timestamp_ticks": 85,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 11247,
+          "size": 2113,
+          "timestamp_ticks": 107,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 13360,
+          "size": 2165,
+          "timestamp_ticks": 128,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 15525,
+          "size": 2043,
+          "timestamp_ticks": 149,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 17568,
+          "size": 2221,
+          "timestamp_ticks": 171,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 19789,
+          "size": 2296,
+          "timestamp_ticks": 192,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 22085,
+          "size": 2336,
+          "timestamp_ticks": 213,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 24421,
+          "size": 633,
+          "timestamp_ticks": 235,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 5,
+          "discard_padding_ns": 0
+        }
+      ],
+      "payload_file": "flac.packets",
+      "payload_sha256": "fcaa51d8eb285663fb474c8b7ca0c9194a872462943e834a78ebaca6229084ee",
+      "private_file": "flac.private",
+      "private_sha256": "d6c6578ee1571a6f1cc369782dc70b19d98651c634341aed2606cc594120bfb4"
+    },
+    {
+      "name": "alac",
+      "reference_encoder": "alac",
+      "source_movie_sha256": "2fae9dca675199eed1b49c3b30b2f464b0bec1048f9c7ee924db029be6480ea0",
+      "codec": "A_ALAC",
+      "sample_rate": 48000,
+      "channels": 1,
+      "bit_depth": 24,
+      "codec_delay_ns": 0,
+      "seek_preroll_ns": 0,
+      "default_duration_ns": 85333333,
+      "timestamp_scale_ns": 1000000,
+      "duration_ticks": 240.0,
+      "packets": [
+        {
+          "offset": 0,
+          "size": 5895,
+          "timestamp_ticks": 0,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 5895,
+          "size": 5895,
+          "timestamp_ticks": 85,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 11790,
+          "size": 4829,
+          "timestamp_ticks": 171,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 69,
+          "discard_padding_ns": 0
+        }
+      ],
+      "payload_file": "alac.packets",
+      "payload_sha256": "94ba70013008577a9388e32a1f40d120c7d1b9b2fc14e1848e8ff71683794099",
+      "private_file": "alac.private",
+      "private_sha256": "6301b1a9ef3ccea9f272c9c70767535d0286f363f2110a81743bb8299b5208ee"
+    },
+    {
+      "name": "mp3",
+      "reference_encoder": "libmp3lame",
+      "source_movie_sha256": "c478ffd795ee5fdf1c76d3d16645c1e62a2e048ccff2d99c6a44512b053b56b2",
+      "codec": "A_MPEG/L3",
+      "sample_rate": 48000,
+      "channels": 1,
+      "bit_depth": 32,
+      "codec_delay_ns": 23020833,
+      "seek_preroll_ns": 0,
+      "default_duration_ns": 24000000,
+      "timestamp_scale_ns": 1000000,
+      "duration_ticks": 263.0,
+      "packets": [
+        {
+          "offset": 0,
+          "size": 192,
+          "timestamp_ticks": 0,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 192,
+          "size": 192,
+          "timestamp_ticks": 24,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 384,
+          "size": 192,
+          "timestamp_ticks": 48,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 576,
+          "size": 192,
+          "timestamp_ticks": 72,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 768,
+          "size": 192,
+          "timestamp_ticks": 96,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 960,
+          "size": 192,
+          "timestamp_ticks": 120,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1152,
+          "size": 192,
+          "timestamp_ticks": 144,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1344,
+          "size": 192,
+          "timestamp_ticks": 168,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1536,
+          "size": 192,
+          "timestamp_ticks": 192,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1728,
+          "size": 192,
+          "timestamp_ticks": 216,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1920,
+          "size": 192,
+          "timestamp_ticks": 240,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 23,
+          "discard_padding_ns": 979167
+        }
+      ],
+      "payload_file": "mp3.packets",
+      "payload_sha256": "49d24978e12506fce81b6ba9c7561fefc324ed98e0368a150bb6e0be1e0d40fa",
+      "private_file": "mp3.private",
+      "private_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mp2",
+      "reference_encoder": "mp2",
+      "source_movie_sha256": "d3ba45d24362bddea48d5725a12b274f1900420dd38ffcc32e1568e7ee5e9e24",
+      "codec": "A_MPEG/L2",
+      "sample_rate": 48000,
+      "channels": 1,
+      "bit_depth": 16,
+      "codec_delay_ns": 10020833,
+      "seek_preroll_ns": 0,
+      "default_duration_ns": 24000000,
+      "timestamp_scale_ns": 1000000,
+      "duration_ticks": 240.0,
+      "packets": [
+        {
+          "offset": 0,
+          "size": 384,
+          "timestamp_ticks": 0,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 384,
+          "size": 384,
+          "timestamp_ticks": 24,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 768,
+          "size": 384,
+          "timestamp_ticks": 48,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1152,
+          "size": 384,
+          "timestamp_ticks": 72,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1536,
+          "size": 384,
+          "timestamp_ticks": 96,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1920,
+          "size": 384,
+          "timestamp_ticks": 120,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 2304,
+          "size": 384,
+          "timestamp_ticks": 144,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 2688,
+          "size": 384,
+          "timestamp_ticks": 168,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 3072,
+          "size": 384,
+          "timestamp_ticks": 192,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 3456,
+          "size": 384,
+          "timestamp_ticks": 216,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        }
+      ],
+      "payload_file": "mp2.packets",
+      "payload_sha256": "a33105c37ca48129c57871c09d6caea1c49232b5eb843d71406992703f6bef83",
+      "private_file": "mp2.private",
+      "private_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "vorbis",
+      "reference_encoder": "vorbis",
+      "source_movie_sha256": "0d351273a159e944f6e42bf22ea292bddfd57c82d403118e60b7c8288bf32dc4",
+      "codec": "A_VORBIS",
+      "sample_rate": 48000,
+      "channels": 2,
+      "bit_depth": 32,
+      "codec_delay_ns": 21333333,
+      "seek_preroll_ns": 0,
+      "default_duration_ns": 1333333,
+      "timestamp_scale_ns": 1000000,
+      "duration_ticks": 261.0,
+      "packets": [
+        {
+          "offset": 0,
+          "size": 164,
+          "timestamp_ticks": 0,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 164,
+          "size": 85,
+          "timestamp_ticks": 21,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 249,
+          "size": 80,
+          "timestamp_ticks": 42,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 329,
+          "size": 78,
+          "timestamp_ticks": 64,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 407,
+          "size": 78,
+          "timestamp_ticks": 85,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 485,
+          "size": 81,
+          "timestamp_ticks": 106,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 566,
+          "size": 79,
+          "timestamp_ticks": 128,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 645,
+          "size": 77,
+          "timestamp_ticks": 149,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 722,
+          "size": 79,
+          "timestamp_ticks": 170,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 801,
+          "size": 79,
+          "timestamp_ticks": 192,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 880,
+          "size": 86,
+          "timestamp_ticks": 213,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 966,
+          "size": 311,
+          "timestamp_ticks": 234,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1277,
+          "size": 420,
+          "timestamp_ticks": 256,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 5,
+          "discard_padding_ns": 16000000
+        }
+      ],
+      "payload_file": "vorbis.packets",
+      "payload_sha256": "999fa94dda26c095ad20d2f001c38d5ef5e802843dc49ff73098c61e16ad779a",
+      "private_file": "vorbis.private",
+      "private_sha256": "3e492a731571d5a169288e76d08dfbc324d1780da03a20db0f48db0b5054aa78"
+    },
+    {
+      "name": "ac3",
+      "reference_encoder": "ac3",
+      "source_movie_sha256": "4337f7088d37caf8eba4b93d3dc39a128273b7cbfd25a752102ca0a32a769a99",
+      "codec": "A_AC3",
+      "sample_rate": 48000,
+      "channels": 1,
+      "bit_depth": 32,
+      "codec_delay_ns": 5333333,
+      "seek_preroll_ns": 0,
+      "default_duration_ns": 32000000,
+      "timestamp_scale_ns": 1000000,
+      "duration_ticks": 245.0,
+      "packets": [
+        {
+          "offset": 0,
+          "size": 384,
+          "timestamp_ticks": 0,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 384,
+          "size": 384,
+          "timestamp_ticks": 32,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 768,
+          "size": 384,
+          "timestamp_ticks": 64,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1152,
+          "size": 384,
+          "timestamp_ticks": 96,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1536,
+          "size": 384,
+          "timestamp_ticks": 128,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 1920,
+          "size": 384,
+          "timestamp_ticks": 160,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 2304,
+          "size": 384,
+          "timestamp_ticks": 192,
+          "group": false,
+          "flags": 128,
+          "references_ticks": [],
+          "duration_ticks": null,
+          "discard_padding_ns": 0
+        },
+        {
+          "offset": 2688,
+          "size": 384,
+          "timestamp_ticks": 224,
+          "group": true,
+          "flags": 0,
+          "references_ticks": [],
+          "duration_ticks": 21,
+          "discard_padding_ns": 10666667
+        }
+      ],
+      "payload_file": "ac3.packets",
+      "payload_sha256": "1776c0c5bb1b8ec63ee226fddcef291217f9acb570c6de8611f6f309f0aef2a0",
+      "private_file": "ac3.private",
+      "private_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

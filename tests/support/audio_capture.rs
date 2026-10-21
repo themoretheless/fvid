@@ -5,11 +5,26 @@ struct Capture {
     packets: std::sync::Arc<std::sync::Mutex<Vec<(Duration, Vec<u8>)>>>,
     spec: Option<fvid::audio::AudioSpec>,
     at: Duration,
+    wanted_mask: Option<u32>,
 }
 impl fvid::audio::AudioBackend for Capture {
     fn start(&mut self, spec: fvid::audio::AudioSpec) -> Result<(), fvid::audio::AudioError> {
         self.spec = Some(spec);
         Ok(())
+    }
+    fn start_with_layout(
+        &mut self,
+        spec: fvid::audio::AudioSpec,
+        mask: Option<u32>,
+    ) -> Result<(), fvid::audio::AudioError> {
+        if let Some(wanted) = self.wanted_mask {
+            if mask != Some(wanted) {
+                return Err(fvid::audio::AudioError::InitFailed(format!(
+                    "speaker mask {mask:?}, expected {wanted:#x}"
+                )));
+            }
+        }
+        self.start(spec)
     }
     fn push(&mut self, packet: fvid::audio::AudioPacket) -> Result<(), fvid::audio::AudioError> {
         let spec = self.spec.unwrap();
@@ -52,7 +67,7 @@ pub fn worker_check_with_seek(
     expected: &[(Duration, Vec<u8>)],
     seek: Option<Duration>,
 ) {
-    worker_check_impl(audio, expected, seek, None);
+    worker_check_impl(audio, expected, seek, None, None);
 }
 #[allow(dead_code)]
 pub fn worker_check_with_seek_expected(
@@ -61,13 +76,24 @@ pub fn worker_check_with_seek_expected(
     seek: Duration,
     expected_seek: &[(Duration, Vec<u8>)],
 ) {
-    worker_check_impl(audio, expected, Some(seek), Some(expected_seek));
+    worker_check_impl(audio, expected, Some(seek), Some(expected_seek), None);
+}
+#[allow(dead_code)]
+pub fn worker_check_with_layout_and_seek_expected(
+    audio: Box<dyn AudioStream>,
+    expected: &[(Duration, Vec<u8>)],
+    seek: Duration,
+    expected_seek: &[(Duration, Vec<u8>)],
+    mask: u32,
+) {
+    worker_check_impl(audio, expected, Some(seek), Some(expected_seek), Some(mask));
 }
 fn worker_check_impl(
     audio: Box<dyn AudioStream>,
     expected: &[(Duration, Vec<u8>)],
     seek: Option<Duration>,
     expected_seek: Option<&[(Duration, Vec<u8>)]>,
+    wanted_mask: Option<u32>,
 ) {
     let spec = (audio.sample_rate(), audio.channels());
     let captured = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
@@ -77,6 +103,7 @@ fn worker_check_impl(
             packets: sink,
             spec: None,
             at: Duration::ZERO,
+            wanted_mask,
         })
     });
     for generation in 0..if seek.is_some() { 3 } else { 2 } {
@@ -158,6 +185,7 @@ pub fn worker_refusal(audio: Box<dyn AudioStream>, needle: &str) {
             packets: sink,
             spec: None,
             at: Duration::ZERO,
+            wanted_mask: None,
         })
     });
     playback.play();

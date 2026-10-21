@@ -1,0 +1,1 @@
+Candidate source type-checks and preserves8 controls;3 joined fragments discard,3 missing flags refuse,and4 counter failures remain refused. Standalone core preflight only;production source not changed and Cargo/runtime gates still required.

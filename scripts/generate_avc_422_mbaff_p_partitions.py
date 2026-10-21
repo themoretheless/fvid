@@ -47,16 +47,17 @@ def state(topology,mode,negative):
     assert len(vectors)==128 and len(set(vectors.values()))>1
     return vectors,differences
 
-def packet(cabac,topology,aso,opposite,mode,negative,qp=26,filter_mode=1,luma_residual=False):
+def packet(cabac,topology,aso,opposite,mode,negative,qp=26,filter_mode=1,luma_residual=False,full_resolution=False,init=0):
+    assert not(full_resolution and luma_residual)
     code,subcodes,parts=partitions(mode);vectors,differences=state(topology,mode,negative);nals=[]
     for pair,field in enumerate(MODES[topology]):
         b=Writer();b.ue(pair);b.ue(0);b.ue(0);b.u(1,4);b.u(0);b.u(2,4);b.u(0);b.u(0);b.u(0)
-        if cabac:b.ue(0)
+        if cabac:b.ue(init)
         b.se(qp-26);b.ue(filter_mode)
         if filter_mode!=1:b.se(0);b.se(0)
         if cabac:
             while len(b.bits)%8:b.u(1)
-            c=CabacWriter(0,qp)
+            c=CabacWriter(init,qp)
         refs={};mags={}
         for parity in range(2):
             address=pair*2+parity;ox=pair%2*16;oy=pair//2*32+(parity if field else parity*16);step=2 if field else 1;bottom=parity==1 and not field
@@ -104,7 +105,7 @@ def packet(cabac,topology,aso,opposite,mode,negative,qp=26,filter_mode=1,luma_re
                         b.u(1,2);b.u((pair+parity+bx+by+int(negative))%2);b.u(1)
             else:
                 for ctx in ([73]*4 if luma_residual else [75,76,75,76] if bottom else [73,74,75,76]):c.decision(ctx,int(luma_residual))
-                c.decision(77,0)
+                if not full_resolution:c.decision(77,0)
                 if luma_residual:
                     c.decision(60,0)
                     for block in range(16):

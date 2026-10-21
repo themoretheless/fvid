@@ -1,0 +1,61 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0086"
+  ],
+  "additional_accepted_ids": [],
+  "accepted_count_delta": 0,
+  "checked_at": "2026-10-21T12:29:57.960498+00:00",
+  "production_sources": [
+    "src/playback/audio/aiff.rs"
+  ],
+  "regressions": [
+    "tests/pcm_run_alignment.rs"
+  ],
+  "before": [
+    "evidence/batch-170-aiff-before.rs",
+    "evidence/batch-170-generator-before.py",
+    "evidence/batch-170-tests-extended-before.rs",
+    "evidence/batch-170-manifest-before.json",
+    "evidence/batch-170-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-170-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-170-related-after.log",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-170-aiff-units.log",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-170-core.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-170-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-170-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/aiff.rs": "6523b4729da8f546ff9c92f337de48224e4e6db780b55a6e61dabe05a469f589",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/pcm_run_alignment.rs": "1b68c0a05f822479973bae960d0bea616b012c6e05976a59b4d852aebb90580e",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_pcm_run_alignment_regressions.py": "6559315684ee857a7fa0a3952201cffe9ed57daa8dde5ee3a8b8dd1ac6fcc12a"
+  },
+  "qualification": [
+    "This is zero-ID AIFF/AIFC coverage of existing FVID0086 fixed-frame orphan-byte cause. Prior WAV/AU numeric layouts and every media hash remain identical. Nine added AIFF/AIFC layouts include integer16/24stereo/32,float32stereo/64,int8stereo,G711stereo laws,and valid odd mono8 IFF padding.",
+    "Before fix,all12 newly declared orphan runs silently discard1..7 bytes,decode expected160 complete frames,pass validate_eof and actual native worker playback. Extended regression fails only because those12 false admissions reach successful EOF;existing24 WAV/AU malformed cases retain precise refusal.",
+    "AIFF now validates encoded-frame byte divisibility for PCM/G711 before packet rounding. MACE block/count semantics are untouched. All36 malformed cases refuse specifically as incomplete channel frames;27 complete numeric controls,including9 added actual worker EOF/rewind targets,preserve PCM and clocks.",
+    "Extended native regression1,14 related integrations including AIFC mandatory codec type and float/seek/G711/metadata/truncated EOF/read limits,14 AIFF units,1 minimal fixture geometry check,fixture reproduction and player build pass. No prior expectations skipped or relaxed.",
+    "Pure explicit offline generation remains separate from ordinary tests. Own synthetic VP9 companion is actually decoded;no private media,external encoder,network,physical-device/GUI or performance qualification."
+  ],
+  "counting": "0 new accepted changes. Extends FVID-0086 rather than counting the same fixed-frame alignment cause separately for AIFF."
+}

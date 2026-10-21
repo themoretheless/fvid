@@ -1,0 +1,49 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0168"
+  ],
+  "checked_at": "2026-10-21T02:48:20.205469+00:00",
+  "sources": [
+    "src/container/avi.rs"
+  ],
+  "before": [
+    "evidence/batch-160-before.log",
+    "evidence/batch-160-acceptance-before.log",
+    "evidence/batch-160-container-before.rs",
+    "evidence/batch-160-tests-before.rs",
+    "evidence/batch-160-header-audit-before.log"
+  ],
+  "primary_reference": "batch-160-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-160-after.log",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-160-units-after.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-160-core-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-160-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-160-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "Six malformed IMA/MS AVIs declare0/16/20-byte main headers. Before the fix,the stream count comes from later JUNK payload or length,allowing parser admission and exact native PCM despite missing avih data.",
+    "Before:4 passed,2 ignored;forced parser/source refusal tests fail because the invalid headers are accepted. The frozen source adapter independently reproduces six invalid admissions.",
+    "Require the field to fit inside the actual avih extent before reading. This is a field-boundary check,not a new requirement that every header have the full56-byte standard size. Public APIs and admission limits are unchanged.",
+    "Six parser/source refusals now pass. Four full/padded controls keep literal native PCM and8 actual-worker midstream/EOF target variants with play/rewind. Existing index-origin compatibility,corrupt indices,record limits and AVI EOF/duration regressions pass.",
+    "Eleven integration tests,34 related units,4 core regressions (2 new,2 index-origin),fixture reproduction and player build pass.",
+    "This is successful refusal of malformed input. Intended playback is established only for the complete controls. Owned VP9 video is checked through the companion;AVI picture playback and performance are not claimed."
+  ],
+  "counting": "One AVI main-header field-boundary defect. Header lengths,codecs,source/parser paths and test configurations add no extra IDs."
+}

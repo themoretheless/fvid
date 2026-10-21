@@ -1,0 +1,33 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0166"
+  ],
+  "issue": "XM whole-tick intervals multiply an already rounded one-tick microsecond value.",
+  "source": [
+    "src/container/xm.rs",
+    "src/codec/xm_decoder.rs"
+  ],
+  "regression": "tests/xm_tick_span.rs",
+  "fixtures": "tests/fixtures/playback-errors/xm-tick-span",
+  "before": [
+    "evidence/batch-158-before.log",
+    "evidence/batch-158-acceptance-before.log"
+  ],
+  "matrix": "Ten scores:eight timing failures,two exact-period controls. Independent controls at BPM100/125 have exact integer-microsecond ticks and identical intended row/event times. Actual tempo/speed changes are included.",
+  "observed": "Score timelines lose10\u201372us in the authored cases;published audio/PCM ends1ms early. K03/EC3 at BPM150 cuts at sample2204 instead of2205 at44100Hz when a shared100ms presentation window isolates deadline rounding.",
+  "rejected_hypothesis": "No frame-partition scheduler defect:current decoder already uses absolute PTS plus microsecond deadlines. The confirmed issue is rounding a single tick before scaling a multi-tick interval. No separate ID for the rejected hypothesis.",
+  "reference": {
+    "replayer_url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/923829b28946d5504eea2168655c2ac3f7c67ace/src/ft2_replayer.c",
+    "audio_url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/923829b28946d5504eea2168655c2ac3f7c67ace/src/ft2_audio.c",
+    "audio_sha256": "17f2c6d0093d68664c33821921e642445945e450a4ef876754b165fe6ed29078",
+    "scope": "Precise BPM mode uses BPM/2.5 and carries fractional tick samples. Fvid documents the same ideal tempo law;the proposed fix stays within its existing microsecond clock and does not claim legacy-hardware FT2 timing or full sample-exact replay."
+  },
+  "qualification": "The fixed-window decoder test is explicitly separate from full-source duration/PCM and actual-worker gates,so the row-length error does not mask the subrow deadline error.",
+  "implementation": "A private whole-tick-span conversion multiplies before division. Row durations and delayed Kxx/ECx deadlines share it;the public one-tick helper and packet timebase retain their existing signatures/units.",
+  "candidate_sha256": {
+    "src/container/xm.rs": "a7640578a954beaa43960a92d42a9c1cf2637f6a4ac9c0ea897d312088cfdc90",
+    "src/codec/xm_decoder.rs": "d5578bcdc3c97e5ee2e1ac654deb1059d0f4ba6d8b054ce513f484ded881db79"
+  },
+  "validation": "batch-158-validation.json"
+}

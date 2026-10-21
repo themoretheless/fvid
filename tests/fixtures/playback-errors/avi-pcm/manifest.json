@@ -1,0 +1,272 @@
+{
+  "provenance": "13 authored classic AVI PCM programs:unsigned8,signed16/24/32,float32/64 mono/stereo plus8193-frame bounded-window control. Independent WAV wrappers and literal dyadic f32 PCM;6 malformed/unsupported controls. All AVI contain owned VP9 with separate Matroska control. Pure Python,no private data,encoder or network. No WAVEFORMATEXTENSIBLE or performance claim.",
+  "cases": [
+    {
+      "file": "int8-1ch.avi",
+      "control": "int8-1ch.wav",
+      "expected": "int8-1ch.f32le",
+      "tag": 1,
+      "bits": 8,
+      "channels": 1,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 1
+    },
+    {
+      "file": "int8-2ch.avi",
+      "control": "int8-2ch.wav",
+      "expected": "int8-2ch.f32le",
+      "tag": 1,
+      "bits": 8,
+      "channels": 2,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 2
+    },
+    {
+      "file": "int16-1ch.avi",
+      "control": "int16-1ch.wav",
+      "expected": "int16-1ch.f32le",
+      "tag": 1,
+      "bits": 16,
+      "channels": 1,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 2
+    },
+    {
+      "file": "int16-2ch.avi",
+      "control": "int16-2ch.wav",
+      "expected": "int16-2ch.f32le",
+      "tag": 1,
+      "bits": 16,
+      "channels": 2,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 4
+    },
+    {
+      "file": "int24-1ch.avi",
+      "control": "int24-1ch.wav",
+      "expected": "int24-1ch.f32le",
+      "tag": 1,
+      "bits": 24,
+      "channels": 1,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 3
+    },
+    {
+      "file": "int24-2ch.avi",
+      "control": "int24-2ch.wav",
+      "expected": "int24-2ch.f32le",
+      "tag": 1,
+      "bits": 24,
+      "channels": 2,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 6
+    },
+    {
+      "file": "int32-1ch.avi",
+      "control": "int32-1ch.wav",
+      "expected": "int32-1ch.f32le",
+      "tag": 1,
+      "bits": 32,
+      "channels": 1,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 4
+    },
+    {
+      "file": "int32-2ch.avi",
+      "control": "int32-2ch.wav",
+      "expected": "int32-2ch.f32le",
+      "tag": 1,
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 8
+    },
+    {
+      "file": "float32-1ch.avi",
+      "control": "float32-1ch.wav",
+      "expected": "float32-1ch.f32le",
+      "tag": 3,
+      "bits": 32,
+      "channels": 1,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 4
+    },
+    {
+      "file": "float32-2ch.avi",
+      "control": "float32-2ch.wav",
+      "expected": "float32-2ch.f32le",
+      "tag": 3,
+      "bits": 32,
+      "channels": 2,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 8
+    },
+    {
+      "file": "float64-1ch.avi",
+      "control": "float64-1ch.wav",
+      "expected": "float64-1ch.f32le",
+      "tag": 3,
+      "bits": 64,
+      "channels": 1,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 8
+    },
+    {
+      "file": "float64-2ch.avi",
+      "control": "float64-2ch.wav",
+      "expected": "float64-2ch.f32le",
+      "tag": 3,
+      "bits": 64,
+      "channels": 2,
+      "frames": 9,
+      "parts": [
+        2,
+        3,
+        4
+      ],
+      "frame_bytes": 16
+    },
+    {
+      "file": "float32-2ch-window.avi",
+      "control": "float32-2ch-window.wav",
+      "expected": "float32-2ch-window.f32le",
+      "tag": 3,
+      "bits": 32,
+      "channels": 2,
+      "frames": 8193,
+      "parts": [
+        8193
+      ],
+      "frame_bytes": 8
+    }
+  ],
+  "malformed": [
+    {
+      "file": "int16-1ch-bad-clock.avi",
+      "reason": "clock"
+    },
+    {
+      "file": "int16-1ch-bad-unsupported-depth.avi",
+      "reason": "unsupported-depth"
+    },
+    {
+      "file": "int16-2ch-bad-partial.avi",
+      "reason": "partial"
+    },
+    {
+      "file": "int24-2ch-bad-align.avi",
+      "reason": "align"
+    },
+    {
+      "file": "float32-1ch-bad-byte-rate.avi",
+      "reason": "byte-rate"
+    },
+    {
+      "file": "float64-2ch-bad-count.avi",
+      "reason": "count"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "int8-1ch.avi": "0391795e3bb875aa56688a0c85bd2c323782caaed08f086a26fb18dce36bda32",
+    "int8-1ch.wav": "4e04b5fe0bbfc282670e290372745d25817b5f956b81082243ce25e256e082f7",
+    "int8-1ch.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "int8-2ch.avi": "a86cfad81bd99f958946498241a346ebc72956ef66626aa2e6928e44e40be73b",
+    "int8-2ch.wav": "a84445b23bb7ea960fd6b18bcfeb04f78e4293616faa28c6619af6320ae7d83f",
+    "int8-2ch.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "int16-1ch.avi": "89f178f26a41cf36e55bf7c48b7db41916be828cea2424a456d6bfe2575401f2",
+    "int16-1ch.wav": "dc8a1c6f4e7a0eda93341cf09192e3292cf17ff6cb25ebbf55bde53ba9ccf46d",
+    "int16-1ch.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "int16-1ch-bad-clock.avi": "c0fa9c4515e1c0806e4dae3a3233abf19b705e21d5fbe9954ff6a454b5be731c",
+    "int16-1ch-bad-unsupported-depth.avi": "d6fbe99069d5f0c006d39ff9d109ddcbb5c5812180e3eb4ec64dd44fffa09835",
+    "int16-2ch.avi": "8e2ba233ca3f7ad0af78316b24188ad3c6b3c136dbe23f97ac4355cbd9243cd7",
+    "int16-2ch.wav": "6d0194bb15b96251474df16a616eff5440f2942ae4c09ba2e64008dd9dea1edd",
+    "int16-2ch.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "int16-2ch-bad-partial.avi": "35e410e6234543694709b6c96d4a18cd053d14b22f11fb5d73d3f760dc9f09f5",
+    "int24-1ch.avi": "9f5516688c0e8bc50f65cee559ce4cb82d8b0ee6c5a320591fe9ac23dcaa0020",
+    "int24-1ch.wav": "3e8fd5200e43a2675a9c4ada687ad433410ce90f5e5f28efb4896b69c5919e98",
+    "int24-1ch.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "int24-2ch.avi": "697b8f66817644e6f43186c0eceaf27d9f3242ac21b6d1a311a0ce912b41fca3",
+    "int24-2ch.wav": "600315c406d3233a8829e7f5228a38d8548e4c37cf98276d795e5edf18fe815a",
+    "int24-2ch.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "int24-2ch-bad-align.avi": "d886608bcce7276fcd38f4571706707df732c1dbc4649ce75d86eddf8d5b3c34",
+    "int32-1ch.avi": "8ece3e8584f7a98eeddaaa16b62319e58a43bace21c22259fa2dc2fe4c2a3193",
+    "int32-1ch.wav": "efd871933aa733d99d2a8f87fba794e3768c74d43ec2021f3b89e05e520f0497",
+    "int32-1ch.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "int32-2ch.avi": "4f777c9ded0a16e92a3a90d68ef27259d90b9b228e9288f4e7f861ce266c22aa",
+    "int32-2ch.wav": "20e04168f9b04ca7f4f948d5d47bb918f2ef6b9a5b1d9ae73946aaafd815ef14",
+    "int32-2ch.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "float32-1ch.avi": "ed6590278b9ba2d5916b85e294317fff69665ae10525f4bc1afcdc5c4bb6fd85",
+    "float32-1ch.wav": "3e5010c5f28d76955789c6102fd3a3c63cc2dd9d20bff1b6d228dd95db7a2356",
+    "float32-1ch.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "float32-1ch-bad-byte-rate.avi": "58e74d8dec9706c24f477c9c9fd412ee175e2b76b4b6d207a5fe8fd09c87880c",
+    "float32-2ch.avi": "e2e9635d498acda0bb803bdf6e49338bfa9f72a0653fd7cbdf4284788f49f36f",
+    "float32-2ch.wav": "46a45a470ee1bc437fd21e5807091be8b38d96e902fbcbd4a33754384d8c5bc1",
+    "float32-2ch.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "float64-1ch.avi": "b9ef67bd5de92e6977e389ad1ff43565e63bdc318ba13744a3cb5c45390071e6",
+    "float64-1ch.wav": "646ffab23f7754755e72b47da2509b1706bbedf74f07efcbd0a796a4356c4617",
+    "float64-1ch.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "float64-2ch.avi": "86cab906c944427cccce00476e6af5547a347bc7676b6e8119b8ca33eb5421cc",
+    "float64-2ch.wav": "689e55bc7af85621cc20bcb7a878d6341ba7e01b14465daca602ae9a8c5597e0",
+    "float64-2ch.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "float64-2ch-bad-count.avi": "eddc7d959d9105b8458106428e6f8276793ce31fb7be4ea777459478e3df5f0a",
+    "float32-2ch-window.avi": "511dde9183f14f57b99ea9c8500881d1f27cc2aaf6a9af23feb087b3230cc37d",
+    "float32-2ch-window.wav": "148a8373a51798a44d2278430e65b2c6e84095372be2c132c9e1c1a5ef29c4e7",
+    "float32-2ch-window.f32le": "70352c9bf4da20c063000e3c17e056f23d82f6a60f3ba96aa5bf9e48bc06ccb9"
+  }
+}

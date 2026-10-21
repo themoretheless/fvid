@@ -1,0 +1,7 @@
+quoted-body-close: None; SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+
+thread 'main' (2311238) panicked at /private/tmp/fvid-sami-body-audit.rs:9:43:
+assertion `left == right` failed: quoted-body-close
+  left: None
+ right: Some([Cue { start: 1s, end: 2s, text: "Строка α" }])
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,0 +1,1 @@
+12822 bounded authored UTF8 truncation/deletion/markup-insertion probes completed without panic. This audit does not prove arbitrary malformed-caption correctness or total-resource bounds.

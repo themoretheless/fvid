@@ -1,0 +1,2747 @@
+{
+  "cases": [
+    {
+      "name": "7.1-48000-unity",
+      "file": "7.1-48000-unity.ec3",
+      "video": "7.1-48000-unity.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-48000-unity-stream0.ec3",
+          "control_video": "7.1-48000-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-48000-unity-stream1.ec3",
+          "control_video": "7.1-48000-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "7.1-48000-vary",
+      "file": "7.1-48000-vary.ec3",
+      "video": "7.1-48000-vary.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-48000-vary-stream0.ec3",
+          "control_video": "7.1-48000-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-48000-vary-stream1.ec3",
+          "control_video": "7.1-48000-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "7.1-48000-clip",
+      "file": "7.1-48000-clip.ec3",
+      "video": "7.1-48000-clip.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-48000-clip-stream0.ec3",
+          "control_video": "7.1-48000-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-48000-clip-stream1.ec3",
+          "control_video": "7.1-48000-clip-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "7.1-44100-unity",
+      "file": "7.1-44100-unity.ec3",
+      "video": "7.1-44100-unity.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-44100-unity-stream0.ec3",
+          "control_video": "7.1-44100-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-44100-unity-stream1.ec3",
+          "control_video": "7.1-44100-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "7.1-44100-vary",
+      "file": "7.1-44100-vary.ec3",
+      "video": "7.1-44100-vary.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-44100-vary-stream0.ec3",
+          "control_video": "7.1-44100-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-44100-vary-stream1.ec3",
+          "control_video": "7.1-44100-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "7.1-44100-clip",
+      "file": "7.1-44100-clip.ec3",
+      "video": "7.1-44100-clip.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-44100-clip-stream0.ec3",
+          "control_video": "7.1-44100-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-44100-clip-stream1.ec3",
+          "control_video": "7.1-44100-clip-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "7.1-replace-48000-unity",
+      "file": "7.1-replace-48000-unity.ec3",
+      "video": "7.1-replace-48000-unity.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replace-48000-unity-stream0.ec3",
+          "control_video": "7.1-replace-48000-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replace-48000-unity-stream1.ec3",
+          "control_video": "7.1-replace-48000-unity-stream1-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replace-48000-unity-stream2.ec3",
+          "control_video": "7.1-replace-48000-unity-stream2-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "7.1-replace-48000-vary",
+      "file": "7.1-replace-48000-vary.ec3",
+      "video": "7.1-replace-48000-vary.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replace-48000-vary-stream0.ec3",
+          "control_video": "7.1-replace-48000-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replace-48000-vary-stream1.ec3",
+          "control_video": "7.1-replace-48000-vary-stream1-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replace-48000-vary-stream2.ec3",
+          "control_video": "7.1-replace-48000-vary-stream2-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "7.1-replace-48000-clip",
+      "file": "7.1-replace-48000-clip.ec3",
+      "video": "7.1-replace-48000-clip.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replace-48000-clip-stream0.ec3",
+          "control_video": "7.1-replace-48000-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replace-48000-clip-stream1.ec3",
+          "control_video": "7.1-replace-48000-clip-stream1-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replace-48000-clip-stream2.ec3",
+          "control_video": "7.1-replace-48000-clip-stream2-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "7.1-replace-44100-unity",
+      "file": "7.1-replace-44100-unity.ec3",
+      "video": "7.1-replace-44100-unity.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replace-44100-unity-stream0.ec3",
+          "control_video": "7.1-replace-44100-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replace-44100-unity-stream1.ec3",
+          "control_video": "7.1-replace-44100-unity-stream1-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replace-44100-unity-stream2.ec3",
+          "control_video": "7.1-replace-44100-unity-stream2-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "7.1-replace-44100-vary",
+      "file": "7.1-replace-44100-vary.ec3",
+      "video": "7.1-replace-44100-vary.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replace-44100-vary-stream0.ec3",
+          "control_video": "7.1-replace-44100-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replace-44100-vary-stream1.ec3",
+          "control_video": "7.1-replace-44100-vary-stream1-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replace-44100-vary-stream2.ec3",
+          "control_video": "7.1-replace-44100-vary-stream2-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "7.1-replace-44100-clip",
+      "file": "7.1-replace-44100-clip.ec3",
+      "video": "7.1-replace-44100-clip.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replace-44100-clip-stream0.ec3",
+          "control_video": "7.1-replace-44100-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replace-44100-clip-stream1.ec3",
+          "control_video": "7.1-replace-44100-clip-stream1-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replace-44100-clip-stream2.ec3",
+          "control_video": "7.1-replace-44100-clip-stream2-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "10-48000-unity",
+      "file": "10-48000-unity.ec3",
+      "video": "10-48000-unity.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 10,
+      "wave_mask": 22079,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs",
+        "Vhl",
+        "Vhr"
+      ],
+      "components": [
+        {
+          "raw": "10-48000-unity-stream0.ec3",
+          "control_video": "10-48000-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "10-48000-unity-stream1.ec3",
+          "control_video": "10-48000-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "10-48000-unity-stream2.ec3",
+          "control_video": "10-48000-unity-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "10-48000-vary",
+      "file": "10-48000-vary.ec3",
+      "video": "10-48000-vary.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 10,
+      "wave_mask": 22079,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs",
+        "Vhl",
+        "Vhr"
+      ],
+      "components": [
+        {
+          "raw": "10-48000-vary-stream0.ec3",
+          "control_video": "10-48000-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "10-48000-vary-stream1.ec3",
+          "control_video": "10-48000-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "10-48000-vary-stream2.ec3",
+          "control_video": "10-48000-vary-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "10-48000-clip",
+      "file": "10-48000-clip.ec3",
+      "video": "10-48000-clip.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 10,
+      "wave_mask": 22079,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs",
+        "Vhl",
+        "Vhr"
+      ],
+      "components": [
+        {
+          "raw": "10-48000-clip-stream0.ec3",
+          "control_video": "10-48000-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "10-48000-clip-stream1.ec3",
+          "control_video": "10-48000-clip-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "10-48000-clip-stream2.ec3",
+          "control_video": "10-48000-clip-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "10-44100-unity",
+      "file": "10-44100-unity.ec3",
+      "video": "10-44100-unity.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 10,
+      "wave_mask": 22079,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs",
+        "Vhl",
+        "Vhr"
+      ],
+      "components": [
+        {
+          "raw": "10-44100-unity-stream0.ec3",
+          "control_video": "10-44100-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "10-44100-unity-stream1.ec3",
+          "control_video": "10-44100-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "10-44100-unity-stream2.ec3",
+          "control_video": "10-44100-unity-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "10-44100-vary",
+      "file": "10-44100-vary.ec3",
+      "video": "10-44100-vary.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 10,
+      "wave_mask": 22079,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs",
+        "Vhl",
+        "Vhr"
+      ],
+      "components": [
+        {
+          "raw": "10-44100-vary-stream0.ec3",
+          "control_video": "10-44100-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "10-44100-vary-stream1.ec3",
+          "control_video": "10-44100-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "10-44100-vary-stream2.ec3",
+          "control_video": "10-44100-vary-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "10-44100-clip",
+      "file": "10-44100-clip.ec3",
+      "video": "10-44100-clip.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 10,
+      "wave_mask": 22079,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs",
+        "Vhl",
+        "Vhr"
+      ],
+      "components": [
+        {
+          "raw": "10-44100-clip-stream0.ec3",
+          "control_video": "10-44100-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "10-44100-clip-stream1.ec3",
+          "control_video": "10-44100-clip-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "10-44100-clip-stream2.ec3",
+          "control_video": "10-44100-clip-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "16-48000-unity",
+      "file": "16-48000-unity.ec3",
+      "video": "16-48000-unity.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 16,
+      "wave_mask": null,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Lc",
+        "Rc",
+        "Ls",
+        "Rs",
+        "Ts",
+        "Vhl",
+        "Vhc",
+        "Vhr",
+        "Lw",
+        "Rw"
+      ],
+      "components": [
+        {
+          "raw": "16-48000-unity-stream0.ec3",
+          "control_video": "16-48000-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "16-48000-unity-stream1.ec3",
+          "control_video": "16-48000-unity-stream1-control.mkv",
+          "roles": [
+            "Lc",
+            "Rc",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-48000-unity-stream2.ec3",
+          "control_video": "16-48000-unity-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr",
+            "Vhc"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-48000-unity-stream3.ec3",
+          "control_video": "16-48000-unity-stream3-control.mkv",
+          "roles": [
+            "Ts",
+            "Lw",
+            "Rw"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "16-48000-vary",
+      "file": "16-48000-vary.ec3",
+      "video": "16-48000-vary.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 16,
+      "wave_mask": null,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Lc",
+        "Rc",
+        "Ls",
+        "Rs",
+        "Ts",
+        "Vhl",
+        "Vhc",
+        "Vhr",
+        "Lw",
+        "Rw"
+      ],
+      "components": [
+        {
+          "raw": "16-48000-vary-stream0.ec3",
+          "control_video": "16-48000-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "16-48000-vary-stream1.ec3",
+          "control_video": "16-48000-vary-stream1-control.mkv",
+          "roles": [
+            "Lc",
+            "Rc",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "16-48000-vary-stream2.ec3",
+          "control_video": "16-48000-vary-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr",
+            "Vhc"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "16-48000-vary-stream3.ec3",
+          "control_video": "16-48000-vary-stream3-control.mkv",
+          "roles": [
+            "Ts",
+            "Lw",
+            "Rw"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "16-48000-clip",
+      "file": "16-48000-clip.ec3",
+      "video": "16-48000-clip.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 16,
+      "wave_mask": null,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Lc",
+        "Rc",
+        "Ls",
+        "Rs",
+        "Ts",
+        "Vhl",
+        "Vhc",
+        "Vhr",
+        "Lw",
+        "Rw"
+      ],
+      "components": [
+        {
+          "raw": "16-48000-clip-stream0.ec3",
+          "control_video": "16-48000-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "16-48000-clip-stream1.ec3",
+          "control_video": "16-48000-clip-stream1-control.mkv",
+          "roles": [
+            "Lc",
+            "Rc",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-48000-clip-stream2.ec3",
+          "control_video": "16-48000-clip-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr",
+            "Vhc"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-48000-clip-stream3.ec3",
+          "control_video": "16-48000-clip-stream3-control.mkv",
+          "roles": [
+            "Ts",
+            "Lw",
+            "Rw"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "16-44100-unity",
+      "file": "16-44100-unity.ec3",
+      "video": "16-44100-unity.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 16,
+      "wave_mask": null,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Lc",
+        "Rc",
+        "Ls",
+        "Rs",
+        "Ts",
+        "Vhl",
+        "Vhc",
+        "Vhr",
+        "Lw",
+        "Rw"
+      ],
+      "components": [
+        {
+          "raw": "16-44100-unity-stream0.ec3",
+          "control_video": "16-44100-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "16-44100-unity-stream1.ec3",
+          "control_video": "16-44100-unity-stream1-control.mkv",
+          "roles": [
+            "Lc",
+            "Rc",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-44100-unity-stream2.ec3",
+          "control_video": "16-44100-unity-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr",
+            "Vhc"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-44100-unity-stream3.ec3",
+          "control_video": "16-44100-unity-stream3-control.mkv",
+          "roles": [
+            "Ts",
+            "Lw",
+            "Rw"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    },
+    {
+      "name": "16-44100-vary",
+      "file": "16-44100-vary.ec3",
+      "video": "16-44100-vary.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 16,
+      "wave_mask": null,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Lc",
+        "Rc",
+        "Ls",
+        "Rs",
+        "Ts",
+        "Vhl",
+        "Vhc",
+        "Vhr",
+        "Lw",
+        "Rw"
+      ],
+      "components": [
+        {
+          "raw": "16-44100-vary-stream0.ec3",
+          "control_video": "16-44100-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "16-44100-vary-stream1.ec3",
+          "control_video": "16-44100-vary-stream1-control.mkv",
+          "roles": [
+            "Lc",
+            "Rc",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "16-44100-vary-stream2.ec3",
+          "control_video": "16-44100-vary-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr",
+            "Vhc"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        },
+        {
+          "raw": "16-44100-vary-stream3.ec3",
+          "control_video": "16-44100-vary-stream3-control.mkv",
+          "roles": [
+            "Ts",
+            "Lw",
+            "Rw"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 0,
+              "length": 255
+            }
+          ]
+        }
+      ],
+      "gains": [
+        4,
+        4,
+        0.5
+      ],
+      "scale": 1,
+      "mode": "vary"
+    },
+    {
+      "name": "16-44100-clip",
+      "file": "16-44100-clip.ec3",
+      "video": "16-44100-clip.mkv",
+      "rate": 44100,
+      "blocks": 3,
+      "channels": 16,
+      "wave_mask": null,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Lc",
+        "Rc",
+        "Ls",
+        "Rs",
+        "Ts",
+        "Vhl",
+        "Vhc",
+        "Vhr",
+        "Lw",
+        "Rw"
+      ],
+      "components": [
+        {
+          "raw": "16-44100-clip-stream0.ec3",
+          "control_video": "16-44100-clip-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "16-44100-clip-stream1.ec3",
+          "control_video": "16-44100-clip-stream1-control.mkv",
+          "roles": [
+            "Lc",
+            "Rc",
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-44100-clip-stream2.ec3",
+          "control_video": "16-44100-clip-stream2-control.mkv",
+          "roles": [
+            "Vhl",
+            "Vhr",
+            "Vhc"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "16-44100-clip-stream3.ec3",
+          "control_video": "16-44100-clip-stream3-control.mkv",
+          "roles": [
+            "Ts",
+            "Lw",
+            "Rw"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        8,
+        8,
+        8
+      ],
+      "scale": 1024,
+      "mode": "clip"
+    },
+    {
+      "name": "7.1-replacement-gap",
+      "file": "7.1-replacement-gap.ec3",
+      "video": "7.1-replacement-gap.mkv",
+      "rate": 48000,
+      "blocks": 3,
+      "channels": 8,
+      "wave_mask": 1599,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "components": [
+        {
+          "raw": "7.1-replacement-gap-stream0.ec3",
+          "control_video": "7.1-replacement-gap-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ],
+          "active_frames": [
+            0,
+            1,
+            2
+          ],
+          "windows": [
+            {
+              "location": 1200,
+              "length": 63
+            },
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "raw": "7.1-replacement-gap-stream1.ec3",
+          "control_video": "7.1-replacement-gap-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ],
+          "active_frames": [
+            0,
+            1,
+            2
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        },
+        {
+          "raw": "7.1-replacement-gap-stream2.ec3",
+          "control_video": "7.1-replacement-gap-stream2-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1
+          ],
+          "active_frames": [
+            0,
+            2
+          ],
+          "windows": [
+            {
+              "location": 960,
+              "length": 127
+            },
+            null,
+            {
+              "location": 1600,
+              "length": 31
+            }
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1
+      ],
+      "scale": 1,
+      "mode": "unity"
+    }
+  ],
+  "expanded_transient_accepted": true
+}

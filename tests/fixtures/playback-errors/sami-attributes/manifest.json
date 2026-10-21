@@ -1,0 +1,116 @@
+{
+  "provenance": "Authored SAMI quoted attribute-like strings,whole-name boundaries and matching-quote class values versus plain-attribute controls. Explicit1..2s and3..4s caption clocks,UTF8text,and five raw2x2Y4Mframes. Untimed input is a correct-skip test,not caption acceptance. No external codec,network or private media.",
+  "cases": [
+    {
+      "name": "quoted-begin-single",
+      "file": "quoted-begin-single.smi",
+      "control": "quoted-begin-single-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "quoted-begin-double",
+      "file": "quoted-begin-double.smi",
+      "control": "quoted-begin-double-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "hyphenated-name",
+      "file": "hyphenated-name.smi",
+      "control": "hyphenated-name-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "underscored-name",
+      "file": "underscored-name.smi",
+      "control": "underscored-name-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "quoted-end",
+      "file": "quoted-end.smi",
+      "control": "quoted-end-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "quoted-class",
+      "file": "quoted-class.smi",
+      "control": "quoted-class-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "untimed-title-only",
+      "file": "untimed-title-only.smi",
+      "control": "untimed-title-only-control.smi",
+      "before_failure": true,
+      "kind": "skip-untimed"
+    },
+    {
+      "name": "opposite-quote-in-class",
+      "file": "opposite-quote-in-class.smi",
+      "control": "opposite-quote-in-class-control.smi",
+      "before_failure": true,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "real-before-title",
+      "file": "real-before-title.smi",
+      "control": "real-before-title-control.smi",
+      "before_failure": false,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "quoted-whitespace",
+      "file": "quoted-whitespace.smi",
+      "control": "quoted-whitespace-control.smi",
+      "before_failure": false,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "unrelated-title-words",
+      "file": "unrelated-title-words.smi",
+      "control": "unrelated-title-words-control.smi",
+      "before_failure": false,
+      "kind": "caption-acceptance"
+    },
+    {
+      "name": "longer-name-control",
+      "file": "longer-name-control.smi",
+      "control": "longer-name-control-control.smi",
+      "before_failure": false,
+      "kind": "caption-acceptance"
+    }
+  ],
+  "sha256": {
+    "quoted-begin-single.smi": "c2d37fb9caa788b9d6b25253143c943b010b180c25e98ebf7f92cd3e14e52edb",
+    "quoted-begin-single-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "quoted-begin-double.smi": "514314964293bb1f15ae886b4d5d001ccfc30ebc67dfe638a4db04803be72085",
+    "quoted-begin-double-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "hyphenated-name.smi": "df1909a265590f7bb396a6ed814389f83c54e1f362ec950d24414846ed3245c8",
+    "hyphenated-name-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "underscored-name.smi": "c2e15f4088210f05ec1a2664537ae97db9b2c72e0acdddb2ab32a3a061231ca6",
+    "underscored-name-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "quoted-end.smi": "e78e48486a4c646c22d421d9fc231f48345db410c0106d8a1241e6ac82a9a1ef",
+    "quoted-end-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "quoted-class.smi": "a31c09e0e2c33a67c53b7b565159a3b02f16bf2b1837d638d8a4204c8e85d0a9",
+    "quoted-class-control.smi": "4296bed6c5c29e3431460035b27a1d795a3f263d7ed5b2a41fa2455ac60e2244",
+    "untimed-title-only.smi": "05350e98ffc4ac0967b3a7a4a5e129d4fe43e9c53a45d01cd168a0683dc63fcd",
+    "untimed-title-only-control.smi": "af2ea0458dc6bedf247853c1bacc5f1f26a061ac45b4ca7115aaf572dd461a4b",
+    "opposite-quote-in-class.smi": "9bea48f0da5afdd899374c4fc9bd1938dfc0211e390d4ad5c92e7495c436dc7c",
+    "opposite-quote-in-class-control.smi": "723e66b88ccd339a5230e85a262af9c349729293b5d921ccfab4a3df2eea7bd9",
+    "real-before-title.smi": "26e167fb3934661cc02721086040ba82aaa4453767c4377c9dc6e0fbac809dfe",
+    "real-before-title-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "quoted-whitespace.smi": "8e453c56dc88137e5af096cd43717a6d8562e9eb29c5c0bbb8d04c0277d7b650",
+    "quoted-whitespace-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "unrelated-title-words.smi": "70e4e01183cfdd3a127e4fbf4a07244c0485d53979e941e914796dc072959b29",
+    "unrelated-title-words-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "longer-name-control.smi": "491575ef900fd7d1b1e6c0d2c24c9dee3ff5e50f3c975a5ad8492241272ca9c5",
+    "longer-name-control-control.smi": "70b3fdbe293127646042a42e6b6043b9b6c9f4fa91e262feec062c8530bf3f20",
+    "video.y4m": "52bfe693fdacc4fcc700f62c56c67e5eec80bf74e9dcd8d05563fe45e65793e3"
+  }
+}

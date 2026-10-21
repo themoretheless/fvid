@@ -1,0 +1,274 @@
+{
+  "cases": [
+    {
+      "name": "long-bsid11",
+      "file": "long-bsid11.ec3",
+      "video": "long-bsid11.mkv",
+      "control": "long-control.ec3",
+      "bsid": 11
+    },
+    {
+      "name": "long-bsid12",
+      "file": "long-bsid12.ec3",
+      "video": "long-bsid12.mkv",
+      "control": "long-control.ec3",
+      "bsid": 12
+    },
+    {
+      "name": "long-bsid13",
+      "file": "long-bsid13.ec3",
+      "video": "long-bsid13.mkv",
+      "control": "long-control.ec3",
+      "bsid": 13
+    },
+    {
+      "name": "long-bsid14",
+      "file": "long-bsid14.ec3",
+      "video": "long-bsid14.mkv",
+      "control": "long-control.ec3",
+      "bsid": 14
+    },
+    {
+      "name": "long-bsid15",
+      "file": "long-bsid15.ec3",
+      "video": "long-bsid15.mkv",
+      "control": "long-control.ec3",
+      "bsid": 15
+    },
+    {
+      "name": "long-bsid16",
+      "file": "long-bsid16.ec3",
+      "video": "long-bsid16.mkv",
+      "control": "long-control.ec3",
+      "bsid": 16
+    },
+    {
+      "name": "short-bsid11",
+      "file": "short-bsid11.ec3",
+      "video": "short-bsid11.mkv",
+      "control": "short-control.ec3",
+      "bsid": 11
+    },
+    {
+      "name": "short-bsid12",
+      "file": "short-bsid12.ec3",
+      "video": "short-bsid12.mkv",
+      "control": "short-control.ec3",
+      "bsid": 12
+    },
+    {
+      "name": "short-bsid13",
+      "file": "short-bsid13.ec3",
+      "video": "short-bsid13.mkv",
+      "control": "short-control.ec3",
+      "bsid": 13
+    },
+    {
+      "name": "short-bsid14",
+      "file": "short-bsid14.ec3",
+      "video": "short-bsid14.mkv",
+      "control": "short-control.ec3",
+      "bsid": 14
+    },
+    {
+      "name": "short-bsid15",
+      "file": "short-bsid15.ec3",
+      "video": "short-bsid15.mkv",
+      "control": "short-control.ec3",
+      "bsid": 15
+    },
+    {
+      "name": "short-bsid16",
+      "file": "short-bsid16.ec3",
+      "video": "short-bsid16.mkv",
+      "control": "short-control.ec3",
+      "bsid": 16
+    },
+    {
+      "name": "mixed-bsid11",
+      "file": "mixed-bsid11.ec3",
+      "video": "mixed-bsid11.mkv",
+      "control": "mixed-control.ec3",
+      "bsid": 11
+    },
+    {
+      "name": "mixed-bsid12",
+      "file": "mixed-bsid12.ec3",
+      "video": "mixed-bsid12.mkv",
+      "control": "mixed-control.ec3",
+      "bsid": 12
+    },
+    {
+      "name": "mixed-bsid13",
+      "file": "mixed-bsid13.ec3",
+      "video": "mixed-bsid13.mkv",
+      "control": "mixed-control.ec3",
+      "bsid": 13
+    },
+    {
+      "name": "mixed-bsid14",
+      "file": "mixed-bsid14.ec3",
+      "video": "mixed-bsid14.mkv",
+      "control": "mixed-control.ec3",
+      "bsid": 14
+    },
+    {
+      "name": "mixed-bsid15",
+      "file": "mixed-bsid15.ec3",
+      "video": "mixed-bsid15.mkv",
+      "control": "mixed-control.ec3",
+      "bsid": 15
+    },
+    {
+      "name": "mixed-bsid16",
+      "file": "mixed-bsid16.ec3",
+      "video": "mixed-bsid16.mkv",
+      "control": "mixed-control.ec3",
+      "bsid": 16
+    },
+    {
+      "name": "spx-bsid11",
+      "file": "spx-bsid11.ec3",
+      "video": "spx-bsid11.mkv",
+      "control": "spx-control.ec3",
+      "bsid": 11
+    },
+    {
+      "name": "spx-bsid12",
+      "file": "spx-bsid12.ec3",
+      "video": "spx-bsid12.mkv",
+      "control": "spx-control.ec3",
+      "bsid": 12
+    },
+    {
+      "name": "spx-bsid13",
+      "file": "spx-bsid13.ec3",
+      "video": "spx-bsid13.mkv",
+      "control": "spx-control.ec3",
+      "bsid": 13
+    },
+    {
+      "name": "spx-bsid14",
+      "file": "spx-bsid14.ec3",
+      "video": "spx-bsid14.mkv",
+      "control": "spx-control.ec3",
+      "bsid": 14
+    },
+    {
+      "name": "spx-bsid15",
+      "file": "spx-bsid15.ec3",
+      "video": "spx-bsid15.mkv",
+      "control": "spx-control.ec3",
+      "bsid": 15
+    },
+    {
+      "name": "spx-bsid16",
+      "file": "spx-bsid16.ec3",
+      "video": "spx-bsid16.mkv",
+      "control": "spx-control.ec3",
+      "bsid": 16
+    },
+    {
+      "name": "spx-atten-bsid11",
+      "file": "spx-atten-bsid11.ec3",
+      "video": "spx-atten-bsid11.mkv",
+      "control": "spx-atten-control.ec3",
+      "bsid": 11
+    },
+    {
+      "name": "spx-atten-bsid12",
+      "file": "spx-atten-bsid12.ec3",
+      "video": "spx-atten-bsid12.mkv",
+      "control": "spx-atten-control.ec3",
+      "bsid": 12
+    },
+    {
+      "name": "spx-atten-bsid13",
+      "file": "spx-atten-bsid13.ec3",
+      "video": "spx-atten-bsid13.mkv",
+      "control": "spx-atten-control.ec3",
+      "bsid": 13
+    },
+    {
+      "name": "spx-atten-bsid14",
+      "file": "spx-atten-bsid14.ec3",
+      "video": "spx-atten-bsid14.mkv",
+      "control": "spx-atten-control.ec3",
+      "bsid": 14
+    },
+    {
+      "name": "spx-atten-bsid15",
+      "file": "spx-atten-bsid15.ec3",
+      "video": "spx-atten-bsid15.mkv",
+      "control": "spx-atten-control.ec3",
+      "bsid": 15
+    },
+    {
+      "name": "spx-atten-bsid16",
+      "file": "spx-atten-bsid16.ec3",
+      "video": "spx-atten-bsid16.mkv",
+      "control": "spx-atten-control.ec3",
+      "bsid": 16
+    },
+    {
+      "name": "spx-atten-edge-bsid11",
+      "file": "spx-atten-edge-bsid11.ec3",
+      "video": "spx-atten-edge-bsid11.mkv",
+      "control": "spx-atten-edge-control.ec3",
+      "bsid": 11
+    },
+    {
+      "name": "spx-atten-edge-bsid12",
+      "file": "spx-atten-edge-bsid12.ec3",
+      "video": "spx-atten-edge-bsid12.mkv",
+      "control": "spx-atten-edge-control.ec3",
+      "bsid": 12
+    },
+    {
+      "name": "spx-atten-edge-bsid13",
+      "file": "spx-atten-edge-bsid13.ec3",
+      "video": "spx-atten-edge-bsid13.mkv",
+      "control": "spx-atten-edge-control.ec3",
+      "bsid": 13
+    },
+    {
+      "name": "spx-atten-edge-bsid14",
+      "file": "spx-atten-edge-bsid14.ec3",
+      "video": "spx-atten-edge-bsid14.mkv",
+      "control": "spx-atten-edge-control.ec3",
+      "bsid": 14
+    },
+    {
+      "name": "spx-atten-edge-bsid15",
+      "file": "spx-atten-edge-bsid15.ec3",
+      "video": "spx-atten-edge-bsid15.mkv",
+      "control": "spx-atten-edge-control.ec3",
+      "bsid": 15
+    },
+    {
+      "name": "spx-atten-edge-bsid16",
+      "file": "spx-atten-edge-bsid16.ec3",
+      "video": "spx-atten-edge-bsid16.mkv",
+      "control": "spx-atten-edge-control.ec3",
+      "bsid": 16
+    }
+  ],
+  "invalid": [
+    {
+      "file": "invalid-bsid9.ec3",
+      "bsid": 9
+    },
+    {
+      "file": "invalid-bsid10.ec3",
+      "bsid": 10
+    },
+    {
+      "file": "invalid-bsid17.ec3",
+      "bsid": 17
+    },
+    {
+      "file": "invalid-bsid31.ec3",
+      "bsid": 31
+    }
+  ]
+}

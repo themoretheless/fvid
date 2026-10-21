@@ -47,6 +47,15 @@
       "pts_ns": 0
     },
     {
+      "name": "same-sample-origin-48000",
+      "file": "same-sample-origin-48000.mkv",
+      "rate": 48000,
+      "delay_ns": 20834,
+      "origin_ns": 20833,
+      "skip": 0,
+      "pts_ns": 0
+    },
+    {
       "name": "negative-sample-grid",
       "file": "negative-sample-grid.mkv",
       "rate": 44100,
@@ -61,6 +70,15 @@
       "rate": 48000,
       "delay_ns": 0,
       "origin_ns": -20833,
+      "skip": 1,
+      "pts_ns": 0
+    },
+    {
+      "name": "negative-sample-grid-48000",
+      "file": "negative-sample-grid-48000.mkv",
+      "rate": 48000,
+      "delay_ns": 0,
+      "origin_ns": -20834,
       "skip": 1,
       "pts_ns": 0
     },
@@ -126,12 +144,18 @@
     "same-sample-origin.mkv": "58f02936ae47a4aff011447d7719f5aee927a10632bd19a4325069c0fd012b57",
     "same-sample-origin-source.f32le": "109ddbf4b3e970c4cacdbf9e26f8f0bc9bd0a586ec31d9b157325ccc88f2f675",
     "same-sample-origin-expected.f32le": "109ddbf4b3e970c4cacdbf9e26f8f0bc9bd0a586ec31d9b157325ccc88f2f675",
+    "same-sample-origin-48000.mkv": "09a273bc53afbf2341e0e4e92c3199c1cd99b0462aeff8326cd56004ed06dc9d",
+    "same-sample-origin-48000-source.f32le": "23bbe0d59e3102bb30a6da39dadc5701407a187eb9bf634e86920b2184f68178",
+    "same-sample-origin-48000-expected.f32le": "23bbe0d59e3102bb30a6da39dadc5701407a187eb9bf634e86920b2184f68178",
     "negative-sample-grid.mkv": "013c1e2561085d7263c669abaf79fdcf6b0cdbcae30074e89e18570ff421dcc1",
     "negative-sample-grid-source.f32le": "628f89935016be5349189f8b184cd61e785e784a6aa69e9082b9692067be13a2",
     "negative-sample-grid-expected.f32le": "944a39049aaca6ea2a9f544efbc21f20c886ce8f726d3b1422f6c8959c97fae4",
     "control-negative-grid.mkv": "f5b9732ad716d95fb735711ed1f3e52545b285f854b72b1d00e486479548b5dd",
     "control-negative-grid-source.f32le": "b5b2e068b96f2081e4dc7a58ec90dc6ba404b8c9408b3176f6d4bd3a68a8b9ee",
     "control-negative-grid-expected.f32le": "a3b64ef38beb7cd7e82876dda8e40debaeb547b320b273c985a53d3554d0b2f6",
+    "negative-sample-grid-48000.mkv": "633677909566e76ecc34a887d4415423c33f2d983d90d7721325d2b3ea3d7f0a",
+    "negative-sample-grid-48000-source.f32le": "b5b2e068b96f2081e4dc7a58ec90dc6ba404b8c9408b3176f6d4bd3a68a8b9ee",
+    "negative-sample-grid-48000-expected.f32le": "a3b64ef38beb7cd7e82876dda8e40debaeb547b320b273c985a53d3554d0b2f6",
     "strict-negative-fraction.mkv": "1c3adcf83f79f1f40e626c8ff9eefaf71b4764e1c2f2fe455062d984e298eebe",
     "strict-negative-fraction-source.f32le": "b5b2e068b96f2081e4dc7a58ec90dc6ba404b8c9408b3176f6d4bd3a68a8b9ee",
     "strict-negative-fraction-expected.f32le": "a3b64ef38beb7cd7e82876dda8e40debaeb547b320b273c985a53d3554d0b2f6",

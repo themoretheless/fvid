@@ -7,6 +7,8 @@ use super::{
     bits::BitReader,
 };
 use crate::{Result, invalid};
+#[path = "avc_444_cavlc_slice.rs"]
+pub(crate) mod colour444;
 pub enum InterMacroblock {
     Intra(Box<super::avc_macroblock::IntraMacroblock>),
     Skip {
@@ -21,6 +23,7 @@ pub enum InterMacroblock {
 }
 pub struct InterCavlcSlice<'a> {
     bits: BitReader<'a>,
+    residual: Option<super::avc_slice::PartitionCursor<'a>>,
     syntax: InterSyntax,
     counts: CoefficientField,
     intra: Option<super::avc_macroblock::IntraCavlcReader<'a>>,
@@ -68,6 +71,7 @@ impl<'a> InterCavlcSlice<'a> {
         bits.skip(offset)?;
         Ok(Self {
             bits,
+            residual: None,
             syntax,
             counts,
             intra: None,
@@ -161,6 +165,7 @@ impl<'a> InterCavlcSlice<'a> {
             syntax,
             remaining,
         )?;
+        reader.residual = header.partition_cursor(false)?;
         reader.field_picture = header.field_pic;
         if allow_fmo {
             let map = super::avc_slice_group_map::map_units(
@@ -265,6 +270,8 @@ impl<'a> InterCavlcSlice<'a> {
                     return Err(invalid("MBAFF inter slice ends with incomplete pair"));
                 }
                 self.bits.finish_rbsp()?;
+                if let Some(residual) = &mut self.residual { residual.finish()?; }
+                if let Some(intra) = &mut self.intra { intra.finish_partition()?; }
                 self.finished = true;
                 return Ok(None);
             }
@@ -400,13 +407,23 @@ impl<'a> InterCavlcSlice<'a> {
                 }
             }
             let modes = &self.pair_fields;
-            self.counts
-                .read_inter_mbaff(&mut self.bits, address, 0, &syntax, |p| {
-                    modes.get(p).copied().flatten()
-                })?
+            if let Some(residual) = &mut self.residual {
+                self.counts.read_inter_mbaff_partitioned(
+                    &mut self.bits, &mut residual.bits, address, 0, &syntax,
+                    |p| modes.get(p).copied().flatten(),
+                )?
+            } else {
+                self.counts.read_inter_mbaff(&mut self.bits, address, 0, &syntax,
+                    |p| modes.get(p).copied().flatten())?
+            }
         } else {
-            self.counts
-                .read_inter_field(&mut self.bits, address, 0, &self.syntax, self.field_picture)?
+            if let Some(residual) = &mut self.residual {
+                self.counts.read_inter_field_partitioned(
+                    &mut self.bits, &mut residual.bits, address, 0, &self.syntax, self.field_picture,
+                )?
+            } else {
+                self.counts.read_inter_field(&mut self.bits, address, 0, &self.syntax, self.field_picture)?
+            }
         };
         if let Some(intra) = &mut self.intra {
             if let Some(wide)=&coefficients.chroma422 {intra.record_inter_422(address,coefficients.luma_counts,wide.counts)?;}

@@ -60,27 +60,60 @@
       "sample_rate": 16000,
       "channels": 2,
       "pcm_frames": 3072
+    },
+    {
+      "name": "blksw",
+      "file": "blksw.ec3",
+      "reference": "blksw.f32le",
+      "blocks": 6,
+      "sample_rate": 48000,
+      "channels": 2,
+      "pcm_frames": 3072
+    },
+    {
+      "name": "spx-no-atten",
+      "file": "spx-no-atten.ec3",
+      "reference": "spx-no-atten.f32le",
+      "blocks": 6,
+      "sample_rate": 48000,
+      "channels": 2,
+      "pcm_frames": 3072
+    },
+    {
+      "name": "spx-atten",
+      "file": "spx-atten.ec3",
+      "reference": "spx-atten.f32le",
+      "blocks": 6,
+      "sample_rate": 48000,
+      "channels": 2,
+      "pcm_frames": 3072
     }
   ],
   "sha256": {
+    "blksw.ec3": "d3b5e8c0fd179e18f07b725ce95ad977287c0314a41711291721c8eee946d78a",
+    "blksw.f32le": "2b8fd8f4dc1d657a7f5d85274f017d0d6e2172095717e53d0f3267dd71d214b7",
     "blocks-1.ec3": "89538df36b6380d1531dcd44c9893a667897a0ac6a5de78883b00e21f4933d80",
     "blocks-1.f32le": "b81d422240150d84636656dc7f2ea7c943359f2ac8d41708c3a05392e7b52108",
     "blocks-2.ec3": "a5280fb6a2d381f02cb2f3fe3da3fd8302db3eb0a486eb093528faf013dd5d14",
     "blocks-2.f32le": "e45e0360437902ffac41a2797ff1d412d1bb62dd79c1cbbaeb902fa518924157",
-    "blocks-2.mkv": "cd0f3cc827a8ded34fad64e61de2ca7168bd1b47db0a43a8afec67408f506df3",
+    "blocks-2.mkv": "230d733d5142b891f9fea4aa26265ad3862643456225d847a191f477f637400d",
     "blocks-2.mp4": "a9f011d222db456a8356a50606213b6d913058a650142201def0e9b1dc18f2db",
     "blocks-3.ec3": "cf173044f3b025f5145bf436d5759ad04478308e01ed27cee73ca13b1d5275ac",
     "blocks-3.f32le": "4cc5d97b6f0cab563963e67fc6967d5eb4e08fb0b3990ed123b7a8b900e04270",
     "blocks-6.ec3": "516ebd7906ab19a881c2ccb2d6e076d92ab231665bfb5483695d57fbd8201be0",
     "blocks-6.f32le": "3ea5f7eea6a334bc5a4435df04ea5fa1ae110207966240e6e023b907d54981ae",
-    "mismatch-rate.mkv": "26056b1ab36c9e500174231831140f0e89d60498f983bae39afc6a68d86be96a",
+    "mismatch-rate.mkv": "9f725fde4ebfeaec17af34034f75cac484929464221e347c65b68c69a38881a2",
     "mismatch-rate.mp4": "fbd00febea83b00bdb578b1ce91047d8ed4da118db1250f3bb492f83b8d30538",
     "reduced-16000.ec3": "2bbb614024861cafb2732e954ce01a8f2439eb890d767c2e89b2124f7ec990e1",
     "reduced-22050.ec3": "8e653ae99efd0098cab1f7a6c1249ee12052dfce61e8d8ee51b634edc7e599f4",
     "reduced-24000.ec3": "a2e422df46f4a6ed0c1218f52eae87f86210af21ae41f633ab91ad1f34668c6f",
-    "stereo-48k.mkv": "455572658a7b7b9294e7014fb404abcd04b1ab42478b3a16d7160454e365511e",
+    "spx-atten.ec3": "6d25eb9906469d6131e3f0b2080d650b0d4c8e37738cf79289e063f864f795c5",
+    "spx-atten.f32le": "f5046565f2f32f6deaba91a5db712a5d829aeba3912d4c68e48a792fbca4f223",
+    "spx-no-atten.ec3": "aa381a0cb43d97379be900f8d28e5067b3c9d0c2ed7a308d80da2b3721a5519a",
+    "spx-no-atten.f32le": "1029c79e03e93d6c25a8abc53335127596eb9fa5f95a2b708e568654b369bc85",
+    "stereo-48k.mkv": "24b11c713cb31411a849810c0e53fd86be3e6fa7de476eec7ba52a8dff755915",
     "stereo-48k.mp4": "9cf20f3b661da55ddc403268969a9bef18e3211c52128780e0c9446d2e060b24",
-    "surround-51.mkv": "a8f5447c97159be1e74c30ca365cf98f89984385e3c67f506deba88ffb66477e",
+    "surround-51.mkv": "f0a3d96ee998f407ff8fc02012b61586c67b84baeb2b16ad91b729a370b16595",
     "surround-51.mp4": "9095a711715c5f381abb9cd5706885d7db7b3ccb65841bb65382036f9c29835a"
   }
 }

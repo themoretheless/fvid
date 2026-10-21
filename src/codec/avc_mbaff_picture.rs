@@ -286,6 +286,9 @@ fn decode_optional_slices_impl(
     filtered: bool,
     direct_by_slice: Option<&[Option<&super::avc_direct::MbaffDirectPrediction<'_>>]>,
 ) -> Result<(IntraPicture, super::avc_motion_field::MotionField)> {
+    if sps.chroma_format==3 && !sps.separate_colour_plane {
+        return super::avc_inter_picture::decode_full_resolution_mbaff_inter(headers,sps,pps,references,direct_by_slice,budget,filtered);
+    }
     use super::{
         avc_boundary::{BlockEdge, DecodedBlockEdges, MotionReference},
         avc_compensation::Reference420,
@@ -703,18 +706,34 @@ fn decode_optional_slices_impl(
             } else {
                 prediction
             };
-            reconstruct_inter_macroblock_ready(
-                &mut picture,
-                address,
-                field,
-                prediction,
-                if switching { None } else { coefficients.as_deref() },
-                eight,
-                qps,
-                sps.transform_bypass && qps[0] == 0,
-                &scaling,
-                &mut ready,
-            )?;
+            // Constrained intra cannot use samples reconstructed by inter MBs.
+            // Motion and entropy neighbours remain available in their own grids.
+            if pps.constrained_intra_pred {
+                reconstruct_inter_macroblock(
+                    &mut picture,
+                    address,
+                    field,
+                    prediction,
+                    if switching { None } else { coefficients.as_deref() },
+                    eight,
+                    qps,
+                    sps.transform_bypass && qps[0] == 0,
+                    &scaling,
+                )?;
+            } else {
+                reconstruct_inter_macroblock_ready(
+                    &mut picture,
+                    address,
+                    field,
+                    prediction,
+                    if switching { None } else { coefficients.as_deref() },
+                    eight,
+                    qps,
+                    sps.transform_bypass && qps[0] == 0,
+                    &scaling,
+                    &mut ready,
+                )?;
+            }
             seen += 1;
         }
         if !fmo && seen != end {
@@ -916,19 +935,24 @@ fn decode_intra_slices_impl(
     let count = pixels / 256;
     // Probe the cheaper PCM path only when its own scratch reservation fits.
     // Compressed blocks fall through to the generic rectangular prediction view.
+    // Full-resolution PCM with deblocking also needs component QPs/edge metadata.
     let pcm_working=super::avc_picture::decoded_storage(sps,w,h)?
         .checked_add(count.checked_mul(256).and_then(|n|n.checked_add(16384))
             .ok_or_else(||invalid("MBAFF PCM budget overflow"))?)
         .ok_or_else(||invalid("MBAFF PCM budget overflow"))?;
     if matches!(sps.chroma_format,0|2|3) && !sps.separate_colour_plane
         && matches!(pps.slice_groups,super::avc::SliceGroups::Single)
-        && headers.iter().all(|h|h.disable_deblocking_filter_idc==1 || (sps.chroma_format==3 && h.disable_deblocking_filter_idc<=2))
+        && headers.iter().all(|h|h.disable_deblocking_filter_idc==1)
         && (sps.chroma_format==3 || pcm_working<=budget) {
         match component_pcm::decode(headers,sps,pps,budget) {
             Ok(picture)=>return Ok(picture),
-            Err(crate::Error::Unsupported(_)) if sps.chroma_format!=3=>{},
+            Err(crate::Error::Unsupported(_))=>{},
             Err(error)=>return Err(error),
         }
+    }
+
+    if sps.chroma_format == 3 && !sps.separate_colour_plane {
+        return super::avc_picture::decode_full_resolution_intra_slices(headers,sps,pps,budget);
     }
 
     let storage = super::avc_picture::decoded_storage(sps,w,h)?

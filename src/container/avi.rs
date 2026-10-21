@@ -278,7 +278,16 @@ impl Avi {
         let mut hdrl = None;
         let mut movi = None;
         let mut index = None;
-        for chunk in Chunks::range(bytes, 12, bytes.len()) {
+        let size = u32_at(bytes, 4).ok_or_else(|| invalid("AVI RIFF header has no size"))?;
+        if size < 4 {
+            return Err(invalid("AVI RIFF chunk ends before its form type"));
+        }
+        // Child chunks belong to this RIFF form, not to the rest of the buffer.
+        // Keep the existing clamped profile for an interrupted outer chunk.
+        let end = usize::try_from(u64::from(size) + 8)
+            .unwrap_or(usize::MAX)
+            .min(bytes.len());
+        for chunk in Chunks::range(bytes, 12, end) {
             match chunk.id {
                 id if id == *b"LIST" => match id_at(bytes, chunk.start) {
                     Some(kind) if kind == *b"hdrl" && hdrl.is_none() => hdrl = Some(chunk),
@@ -301,6 +310,10 @@ impl Avi {
         let mut groups: Vec<(Option<Chunk>, Option<Chunk>)> = Vec::new();
         for chunk in Chunks::list(bytes, &hdrl) {
             if chunk.id == *b"avih" {
+                // The count must be in this chunk, not in bytes of the next one.
+                if chunk.end - chunk.start < MAIN_STREAMS + 4 {
+                    return Err(invalid("AVI main header ends before its stream count"));
+                }
                 promised =
                     u32_at(bytes, chunk.start + MAIN_STREAMS).and_then(|n| usize::try_from(n).ok());
                 continue;
@@ -467,6 +480,11 @@ fn records(
         let Some(number) = stream_of(&chunk.id, groups) else {
             continue;
         };
+        if chunk.truncated {
+            return Err(invalid(&format!(
+                "stream {number} audio record extends past its enclosing run"
+            )));
+        }
         if chunk.start >= chunk.end {
             return Err(invalid(&format!(
                 "stream {number} holds a record with no bytes in it"
@@ -517,6 +535,11 @@ fn check_index(
         by_number[stream.number] = Some(slot);
     }
     let base = movi.start;
+    // AVIOLDINDEX also permits offsets from the beginning of the file. Keep
+    // one origin for the whole checked index: accepting each entry against
+    // either origin independently would conceal a corrupted mixture.
+    let mut movi_relative = true;
+    let mut file_relative = true;
     let mut counted = vec![0usize; audio.len()];
     for entry in 0..(index.end - index.start) / INDEX_ENTRY {
         let at = index.start + entry * INDEX_ENTRY;
@@ -552,7 +575,9 @@ fn check_index(
         let where_it_says = base
             .checked_add(offset)
             .and_then(|at| at.checked_add(CHUNK_HEADER));
-        if where_it_says != Some(walked.start) {
+        movi_relative &= where_it_says == Some(walked.start);
+        file_relative &= offset.checked_add(CHUNK_HEADER) == Some(walked.start);
+        if !movi_relative && !file_relative {
             return Err(invalid(&format!(
                 "stream {} record {} sits at {} where the index points at {}",
                 number,
@@ -712,6 +737,8 @@ mod tests {
         out.extend_from_slice(&list(b"hdrl", &hdrl));
         out.extend_from_slice(&list(b"movi", &[movi]));
         out.extend_from_slice(&chunk(b"idx1", &index));
+        let size = u32::try_from(out.len() - 8).expect("test RIFF fits its size field");
+        out[4..8].copy_from_slice(&size.to_le_bytes());
         out
     }
 
@@ -886,6 +913,8 @@ mod tests {
         let mut extra = bytes.clone();
         extra.extend_from_slice(&entry);
         extra[head + 4..head + 8].copy_from_slice(&(declared + 16).to_le_bytes());
+        let size = u32::try_from(extra.len() - 8).expect("test RIFF fits its size field");
+        extra[4..8].copy_from_slice(&size.to_le_bytes());
         assert!(
             said(&extra, Limits::default()).contains("more records for stream 0"),
             "{}",
@@ -1135,40 +1164,32 @@ mod tests {
         );
     }
 
-    /// The walk's own bound, asked of a `movi` list directly: a file whose list length
-    /// lies is read as far as its bytes go, which is the only reading a stale writer
-    /// leaves available - and the state the file's own index is there to catch.
+    /// Known audio records must fit their parent before any prefix is published.
+    /// Complete records at the same boundary remain readable without a successor.
     #[test]
-    fn a_movi_list_shorter_than_it_claims_is_read_to_its_end() {
+    fn a_movi_boundary_cannot_publish_a_partial_audio_record() {
         let groups = [(strh(b"auds", 2_041, 48_000, 2), ima())];
         let bytes = file(&groups, &[(0, 1_024, *b"wb"), (0, 1_024, *b"wb")], false);
-        // The list's header begins eight bytes before the type word the walk starts its
-        // run past, so the length word is the four bytes between them.
         let at = where_is(&bytes, b"movi") - 8;
         let mut lying = bytes.clone();
-        // Cut the list short inside the first record: four bytes of type word, eight of
-        // the record's own header, and 1 016 of its bytes.
+        // End the list eight bytes before the first record's declared body ends.
         lying[at + 4..at + 8].copy_from_slice(&(4 + 8 + 1_016u32).to_le_bytes());
         let movi = chunk_at(&lying, at, lying.len()).expect("the list").0;
         assert_eq!((movi.start, movi.end), (at + 8, at + 8 + 1_028));
         let mut found = vec![Vec::new(); 1];
-        records(&lying, &movi, &Limits::default(), 1, &mut found).expect("the walk");
-        assert_eq!(
-            found[0].len(),
-            1,
-            "the walk stops with the run, not inside it"
-        );
-        assert_eq!(
-            found[0][0].len, 1_016,
-            "the record is cut where the list does"
-        );
-        // Which the parser refuses rather than shortening silently: the index still
-        // states the whole record, and the two are compared.
-        assert!(
-            said(&lying, Limits::default())
-                .contains("record 0 is 1016 bytes where the index says 1024"),
-            "{}",
-            said(&lying, Limits::default())
-        );
+        let error = records(&lying, &movi, &Limits::default(), 1, &mut found)
+            .expect_err("a partial known audio body must not be published");
+        assert!(error.to_string().contains("audio record extends past its enclosing run"));
+        assert!(found[0].is_empty());
+        // Admission no longer depends on an optional later index spotting truncation.
+        assert!(said(&lying, Limits::default())
+            .contains("audio record extends past its enclosing run"));
+
+        // A boundary after the complete first body publishes exactly that record.
+        lying[at + 4..at + 8].copy_from_slice(&(4 + 8 + 1_024u32).to_le_bytes());
+        let movi = chunk_at(&lying, at, lying.len()).expect("the complete run").0;
+        records(&lying, &movi, &Limits::default(), 1, &mut found).expect("whole record");
+        assert_eq!(found[0].len(), 1);
+        assert_eq!(found[0][0].len, 1_024);
     }
 }

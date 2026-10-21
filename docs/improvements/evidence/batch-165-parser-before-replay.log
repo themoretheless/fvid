@@ -1,0 +1,11 @@
+ima-short-0.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ima-short-2.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ima-short-4.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ima-short-308.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ima-outside-index.avi: outside index incorrectly participates in first RIFF validation: the index lists a record of stream 0 as audio, which its header does not
+ms-short-0.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ms-short-2.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ms-short-4.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ms-short-338.avi: falsely accepted mandatory AVI lists outside declared RIFF extent
+ms-outside-index.avi: outside index incorrectly participates in first RIFF validation: the index lists a record of stream 0 as audio, which its header does not
+Eight false admissions,two outside-index refusals,six existing controls. Parser-only proof from frozen actual source;native PCM/worker gates still required.

@@ -1,0 +1,21 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0178",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "f0c7eaa71bd6996c632e1603a3fb11ca4dd37da3a275c0865c16269129d56f86",
+  "before_snapshot": "evidence/batch-171-mp4-before.rs",
+  "problem": "Effective trex/tfhd sample-description0 is accepted and samples are decoded with the sole stsd description1 without resolving any supported mapping.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "Mirrored ISO/IEC14496-12:2015:8.7.4.3 uses one-based sample-entry indexing;8.8.3 trex establishes defaults;8.8.7 tfhd overrides them. Zero sample-group-description semantics are different. Future stsd-group mappings are outside current single-description support;refusal is Unsupported,not a universal assertion of malformedness.",
+  "fixtures": "tests/fixtures/playback-errors/mp4-fragment-description",
+  "scope": "Pure owned16x16 VP9:3 independent20ms keyframes,4 zero-description paths inherited/explicit/middle/late,4 fMP4 controls inherited1/explicit1/overridden-zero-default/empty-unused-zero-description,and independent regular MP4 control. Existing explicit2 refusal is retained. No private parameters,external codec or network.",
+  "requirements": [
+    "Before fixing confirm all4 unresolved-description programs index the exact3 packets and decode analytic128planes/RGB130,not an unrelated codec failure.",
+    "Resolve effective description through tfhd overriding trex;refuse zero only when an active track run publishes samples. Preserve overridden unused0 defaults and empty0 runs.",
+    "Retain complete clocks,packet bytes,sample/packet budgets,actual public video seek/rewind and repeated EOF. Ordinary tests must not generate fixtures."
+  ],
+  "harness_correction": "Initial native controls failed solely because the new test assumed seek_raw(at/beyondEOF) returnsNone. Existing documented clamped-to-stream video contract and implementation return the last frame. Archived initial log/tests. Corrected only that oracle:require full analytic final planes/RGB,exact interval40..60ms,currentPTS,and two subsequentEOF reads. Description refusal gates,image/clock/resource/interior/rewind assertions stay active. No production change or extraID for test correction.",
+  "implementation_plan": "Store private trex description;retain optional tfhd override;check the effective zero selection only for a nonempty active run,after row-shape validation and before sample publication. Leave unused defaults/empty runs and existing description2 refusal intact.",
+  "counting": "One effective fMP4 description-resolution integrity fix. No extra IDs for paths,metadata values,fixtures,controls,seek contract correction or future unmapped profiles.",
+  "validation": "batch-171-validation.json"
+}

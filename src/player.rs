@@ -4350,6 +4350,7 @@ fn sound_codec(tag: &str) -> String {
         "A_MPEG/L3" => "MP3",
         "A_MPEG/L2" => "MP2",
         "A_FLAC" => "FLAC",
+        "wavpack" | "A_WAVPACK4" => "WavPack",
         "A_ALAC" | "alac" => "ALAC",
         "A_AC3" | "ac-3" => "Dolby Digital",
         "A_EAC3" | "ec-3" => "Dolby Digital Plus",
@@ -4513,6 +4514,27 @@ fn au_audio_stream(path: &Path, nth: usize) -> Option<Box<dyn crate::audio::Audi
     .map(boxed_stream)
 }
 
+/// Native headers distinguish WavPack before readers that ingest whole files.
+/// A present correction companion is required to validate; errors never select
+/// an implicit lossy fallback. Selecting .wvc resolves its .wv main file.
+fn wavpack_audio_stream(path:&Path,nth:usize)->Option<Box<dyn crate::audio::AudioStream>> {
+    if nth!=0 {return None;}
+    let main=if path.extension().is_some_and(|e|e.eq_ignore_ascii_case("wvc")) {
+        [path.with_extension("wv"),path.with_extension("WV")].into_iter().find(|p|p.is_file())?
+    }else{path.to_path_buf()};
+    let file=crate::playback_spool::open_shared(&main).ok()?;
+    let mut stream=crate::playback_wavpack::WavpackAudioReader::open(BufReader::new(file),Default::default()).ok()?;
+    for extension in ["wvc","WVC"] {
+        let companion=main.with_extension(extension);
+        match std::fs::symlink_metadata(&companion) {
+            Ok(_)=>{let file=crate::playback_spool::open_shared(&companion).ok()?;stream=stream.attach_correction(BufReader::new(file)).ok()?;break;},
+            Err(e)if e.kind()==std::io::ErrorKind::NotFound=>{},
+            Err(_)=>return None,
+        }
+    }
+    Some(boxed_stream(stream))
+}
+
 /// A `.flac` file names itself with `fLaC` and states its geometry once,
 /// but its frames carry no length, so the walk that lists them proves
 /// each end by the checksum the frame holds.
@@ -4592,6 +4614,7 @@ fn boxed_stream<R: crate::audio::AudioStream + 'static>(
 /// A container that names itself with a magic goes first; the bare elementary
 /// streams open last, because their first bytes are free to look like anything.
 const AUDIO_READERS: &[AudioAttempt] = &[
+    AudioAttempt { explicit: wavpack_audio_stream, preferred: None },
     AudioAttempt { explicit: mp4_audio_stream, preferred: Some(preferred_mp4_audio_stream) },
     AudioAttempt { explicit: webm_audio_stream, preferred: Some(preferred_webm_audio_stream) },
     AudioAttempt { explicit: avi_audio_stream, preferred: None },
@@ -4659,12 +4682,24 @@ fn smooth_timeline_value(
     initial: f32,
     seconds: f32,
 ) -> f32 {
-    let dt = ctx.input(|input| input.stable_dt).clamp(0.0, 0.05);
+    let (now, first_dt) = ctx.input(|input| (input.time, input.predicted_dt));
     let value = ctx.data_mut(|data| {
-        let previous = data.get_temp::<f32>(id).unwrap_or(initial);
+        let (previous, last_time) = data
+            .get_temp::<(f32, f64)>(id)
+            .unwrap_or((initial, now - f64::from(first_dt)));
+        // Use elapsed time rather than predicted frame time: hover and drag
+        // transitions must run at the same speed on 60 Hz and 120 Hz displays.
+        let elapsed = (now - last_time).max(0.0) as f32;
+        // A paused player may not paint for seconds. That idle time predates
+        // the new pointer target and must not fast-forward its transition.
+        let dt = if elapsed > 0.100 {
+            first_dt.clamp(1.0 / 240.0, 1.0 / 30.0)
+        } else {
+            elapsed
+        };
         let next = previous + (target - previous) * (1.0 - (-dt / seconds).exp());
         let next = if (target - next).abs() < 0.0001 { target } else { next };
-        data.insert_temp(id, next);
+        data.insert_temp(id, (next, now));
         next
     });
     if value != target {
@@ -5471,6 +5506,37 @@ fn controls_pressed(ctx: &egui::Context) -> Vec<Control> {
     out
 }
 
+/// Draw the active cue over the video, preserving authored and wrapped rows.
+fn paint_subtitle_block(
+    painter: &egui::Painter,
+    line: String,
+    font: FontId,
+    frame: Rect,
+    margin: f32,
+    controls: Option<Rect>,
+) -> (Pos2, std::sync::Arc<egui::Galley>) {
+    let mut job = egui::text::LayoutJob::simple(line, font, Color32::WHITE, frame.width() * 0.86);
+    job.halign = egui::Align::Center;
+    let wrapped = painter.layout_job(job);
+    // Controls paint after captions; keep their backing clear of the glyphs.
+    let margin = controls.map_or(margin, |panel| {
+        margin.max(frame.bottom() - panel.top() + 12.0)
+    });
+    // Center-aligned galley coordinates already straddle x=0.
+    let at = Pos2::new(frame.center().x, frame.bottom() - margin - wrapped.size().y);
+    for offset in [
+        Vec2::new(-1.5, 0.0),
+        Vec2::new(1.5, 0.0),
+        Vec2::new(0.0, -1.5),
+        Vec2::new(0.0, 1.5),
+    ] {
+        // A fallback color cannot recolor the layout's explicit white glyphs.
+        painter.galley_with_override_text_color(at + offset, wrapped.clone(), Color32::BLACK);
+    }
+    painter.galley(at, wrapped.clone(), Color32::WHITE);
+    (at, wrapped)
+}
+
 /// Space belongs to playback, even when a chrome button retains keyboard focus.
 fn play_pause_pressed(ctx: &egui::Context) -> bool {
     ctx.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Space))
@@ -5793,6 +5859,15 @@ impl eframe::App for Player {
 
             let pad = 28.0_f32.min(frame.width() * 0.05);
 
+            let panel_bottom = frame.bottom() - 20.0;
+            let row_y = panel_bottom - 8.0 - BUTTON / 2.0;
+            let bar_y = row_y - BUTTON / 2.0 - if self.skin.diagram { 34.0 } else { 12.0 };
+            let clock_y = bar_y - 18.0;
+            let panel = Rect::from_min_max(
+                Pos2::new(frame.left() + pad, clock_y - 22.0),
+                Pos2::new(frame.right() - pad, panel_bottom),
+            );
+
             // Captions and key messages stay on screen while the panel hides, so
             // a key pressed during playback still answers without a mouse move.
             // Captions go first, so a key message can still be read over them.
@@ -5803,26 +5878,7 @@ impl eframe::App for Player {
                 .map(str::to_owned)
             {
                 let font = FontId::proportional(self.subtitle_font);
-                let wrapped = painter.layout(
-                    line.replace('\n', " "),
-                    font,
-                    Color32::WHITE,
-                    frame.width() * 0.86,
-                );
-                let at = Pos2::new(
-                    frame.center().x,
-                    frame.bottom() - self.subtitle_margin - wrapped.size().y,
-                );
-                // A hard outline keeps white text readable on a bright picture.
-                for offset in [
-                    Vec2::new(-1.5, 0.0),
-                    Vec2::new(1.5, 0.0),
-                    Vec2::new(0.0, -1.5),
-                    Vec2::new(0.0, 1.5),
-                ] {
-                    painter.galley(at + offset, wrapped.clone(), Color32::from_rgb(0, 0, 0));
-                }
-                painter.galley(at, wrapped, Color32::from_rgb(0xff, 0xff, 0xff));
+                paint_subtitle_block(&painter, line, font, frame, self.subtitle_margin, visible.then_some(panel));
             }
             // The key message sits in the corner opposite the title.
             if let Some((message, since)) = &self.osd
@@ -5879,11 +5935,12 @@ impl eframe::App for Player {
             // Keep the title block clear of the macOS traffic lights over the hidden title bar.
             let title_left = if fullscreen { pad } else { pad.max(96.0) };
             let top = Pos2::new(frame.left() + title_left, frame.top() + 24.0);
-            if let Some(playback) = self.playback.as_ref().filter(|p| p.preparing_seek()) {
+            let preparing_seek = self.playback.as_ref().is_some_and(|p| p.preparing_seek());
+            if let Some(playback) = self.playback.as_ref().filter(|_| preparing_seek) {
                 ctx.request_repaint_after(Duration::from_millis(100));
                 let progress: f32 = self.duration.map_or(0.0, |total|
                     playback.prepared_frame_ranges(total).iter().map(|[a,b]| b-a).sum());
-                painter.text(Pos2::new(top.x, top.y + 48.0),
+                painter.text(Pos2::new(top.x, top.y + 24.0),
                     Align2::LEFT_TOP, format!("Подготовка быстрой перемотки: {:.0}%", progress.clamp(0.0, 1.0) * 100.0),
                     FontId::proportional(12.0), skin_text);
             }
@@ -5900,13 +5957,17 @@ impl eframe::App for Player {
                     FontId::proportional(17.0),
                     skin_text,
                 );
-                painter.text(
-                    Pos2::new(top.x, top.y + 24.0),
-                    Align2::LEFT_TOP,
-                    self.subtitle(),
-                    FontId::proportional(13.0),
-                    MUTED,
-                );
+                // Use the top panel's metadata row for preparation progress.
+                // Restore the media details once preparation has finished.
+                if !preparing_seek {
+                    painter.text(
+                        Pos2::new(top.x, top.y + 24.0),
+                        Align2::LEFT_TOP,
+                        self.subtitle(),
+                        FontId::proportional(13.0),
+                        MUTED,
+                    );
+                }
             } else {
                 painter.text(
                     top,
@@ -5942,14 +6003,6 @@ impl eframe::App for Player {
             }
             // Bottom: one panel holding the clocks, the progress line under
             // them and the control row, on a backing the picture shows through.
-            let panel_bottom = frame.bottom() - 20.0;
-            let row_y = panel_bottom - 8.0 - BUTTON / 2.0;
-            let bar_y = row_y - BUTTON / 2.0 - if self.skin.diagram { 34.0 } else { 12.0 };
-            let clock_y = bar_y - 18.0;
-            let panel = Rect::from_min_max(
-                Pos2::new(frame.left() + pad, clock_y - 22.0),
-                Pos2::new(frame.right() - pad, panel_bottom),
-            );
             // The panel takes the pointer itself, so a click between its
             // buttons does not fall through to the picture and pause it.
             ui.interact(panel, ui.id().with("panel"), Sense::click());
@@ -6189,7 +6242,14 @@ impl eframe::App for Player {
                     .flatten()
             });
             if let (Some(hover), Some(total)) = (preview, total) {
-                let moment = total.mul_f32(hover);
+                // Move the timestamp and its label together during retargeting.
+                // The actual seek still uses the exact pointer coordinate.
+                let preview_position = smooth_timeline_position(
+                    &ctx,
+                    ui.id().with("timeline-preview-position"),
+                    hover,
+                );
+                let moment = total.mul_f32(preview_position);
                 let mut label = clock(moment);
                 if let Some((_, title)) = chapter_at(&self.chapters, moment)
                     && !title.is_empty()
@@ -6198,12 +6258,6 @@ impl eframe::App for Player {
                 }
                 let galley = painter.layout_no_wrap(label, FontId::monospace(13.0), skin_text);
                 let size = galley.size() + Vec2::new(16.0, 8.0);
-                // Keep the timestamp exact while the preview follows the pointer smoothly.
-                let preview_position = smooth_timeline_position(
-                    &ctx,
-                    ui.id().with("timeline-preview-position"),
-                    hover,
-                );
                 if !self.skin.diagram {
                     // Follow the same animated position as the timestamp.
                     // Pointer hit testing and the actual seek remain exact.
@@ -6439,9 +6493,10 @@ mod tests {
         let mut time = 0.0;
         let mut step = |target: f32| {
             time += 1.0 / 60.0;
-            let _ = ctx.run_ui(egui::RawInput { time: Some(time), ..Default::default() }, |ui| {
+            let mut output = ctx.run_ui(egui::RawInput { time: Some(time), ..Default::default() }, |ui| {
                 value = super::smooth_timeline_value(ui.ctx(), id, target, 0.0, 0.120);
             });
+            output.textures_delta.clear();
             value
         };
         let first = step(1.0);
@@ -6456,6 +6511,55 @@ mod tests {
     }
 
     #[test]
+    fn timeline_animation_starts_smoothly_after_idle() {
+        use eframe::egui;
+        let ctx = egui::Context::default();
+        let id = egui::Id::new("timeline-after-idle");
+        let mut previous = 0.0f32;
+        for (time, target) in [(0.0, 0.0), (10.0, 1.0), (20.0, 0.0)] {
+            let mut value = 0.0;
+            let mut output = ctx.run_ui(egui::RawInput {
+                time: Some(time), ..Default::default()
+            }, |ui| {
+                value = super::smooth_timeline_value(ui.ctx(), id, target, 0.0, 0.120);
+            });
+            output.textures_delta.clear();
+            if time > 0.0 {
+                assert!(value > previous.min(target) && value < previous.max(target));
+                assert!((value - previous).abs() < (target - previous).abs() * 0.3,
+                    "idle time must not advance a newly requested transition");
+            }
+            previous = value;
+        }
+    }
+
+    #[test]
+    fn timeline_animation_has_equal_speed_across_refresh_rates() {
+        use eframe::egui;
+        fn sample(hz: usize) -> f32 {
+            let ctx = egui::Context::default();
+            let id = egui::Id::new("timeline-refresh-rate");
+            let mut value = 0.0;
+            for frame in 0..=hz / 2 {
+                let mut output = ctx.run_ui(egui::RawInput {
+                    time: Some(frame as f64 / hz as f64),
+                    ..Default::default()
+                }, |ui| {
+                    value = super::smooth_timeline_value(
+                        ui.ctx(), id, if frame == 0 { 0.0 } else { 1.0 }, 0.0, 0.120,
+                    );
+                });
+                output.textures_delta.clear();
+            }
+            value
+        }
+        let slow = sample(30);
+        for hz in [60, 120, 144] {
+            assert!((slow - sample(hz)).abs() < 0.00001, "refresh rate {hz}");
+        }
+    }
+
+    #[test]
     fn timeline_animation_position_initializes_exactly_then_tracks_new_targets() {
         use eframe::egui;
         let ctx = egui::Context::default();
@@ -6463,9 +6567,10 @@ mod tests {
         let mut value = 0.0f32;
         for (frame, target) in [0.2f32, 0.8, 0.1].into_iter().enumerate() {
             let before = value;
-            let _ = ctx.run_ui(egui::RawInput {
+            let mut output = ctx.run_ui(egui::RawInput {
                 time: Some(frame as f64 / 60.0), ..Default::default()
             }, |ui| { value = super::smooth_timeline_position(ui.ctx(), id, target); });
+            output.textures_delta.clear();
             if frame == 0 { assert_eq!(value, target); }
             else { assert!(value > before.min(target) && value < before.max(target)); }
         }
@@ -7507,6 +7612,7 @@ mod tests {
             [
                 format!("Video: H.264 · 64×64 · 25 fps{decoder}"),
                 "Buffer …".to_owned(),
+                "Spool …".to_owned(),
                 "Sound: 1/3 · AAC · Первая · 1 ch 48000 Hz".to_owned(),
                 "Subtitles: 1/2 · Титры".to_owned(),
                 "File: 21 kB · 0:00 · 413 kb/s".to_owned(),
@@ -7542,6 +7648,7 @@ mod tests {
             [
                 "Video: VP9 · 16×16 · 4 fps",
                 "Buffer …",
+                "Spool …",
                 "File: 1.2 kB · 0:04 · 2 kb/s",
                 "Chapters: 3",
             ]
@@ -7749,10 +7856,11 @@ mod tests {
         player.play_index(0);
         assert!(player.error.is_none(), "{:?}", player.error);
         assert_eq!(player.video_codec, "");
-        let lines = player.info_lines();
+        let lines = panel_lines(&player.info_lines());
         assert_eq!(
             lines,
             [
+                "Spool …",
                 "Sound: 1/1 · FLAC · 2 ch 44100 Hz",
                 // The length comes from the item's own two seconds, which is the
                 // one statement the panel has before every block is indexed;
@@ -8061,6 +8169,183 @@ mod tests {
 
     fn seconds(millis: u64) -> Duration {
         Duration::from_millis(millis)
+    }
+
+    #[test]
+    fn native_sami_attribute_values_do_not_change_playing_caption_clocks() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/sami-attributes");
+        for (name, later) in [("quoted-begin-single", None), ("quoted-class", Some("Вторая"))] {
+            let mut player = Player {
+                // Y4M presents correctly but deliberately has no indexed seek.
+                // Reuse the authored VP9 companion for actual seek acceptance.
+                queue: vec![root.parent().unwrap().join("vp9-long-gop-seek.webm")],
+                subtitle_file: Some(root.join(format!("{name}.smi"))),
+                no_audio: true,
+                asynchronous_open: false,
+                ..Default::default()
+            };
+            player.play_index(0);
+            assert!(player.error.is_none(), "{name}: {:?}", player.error);
+            assert!(player.playback.is_some());
+            let ctx = eframe::egui::Context::default();
+            let until = Instant::now() + Duration::from_secs(10);
+            while player.presented.is_none() {
+                assert!(Instant::now() < until, "{name}: no native video frame");
+                let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                output.textures_delta.clear();
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            assert_eq!(player.subtitle_line(Duration::from_millis(500)), None, "{name}");
+            assert_eq!(player.subtitle_line(Duration::from_millis(1500)), Some("Строка α"));
+            assert_eq!(player.subtitle_line(Duration::from_millis(2500)), None);
+            for (target, expected) in [(1, Some("Строка α")), (3, later)] {
+                player.seek_time(Duration::from_secs(target));
+                let until = Instant::now() + Duration::from_secs(10);
+                while player.seek_preview || player.buffering {
+                    assert!(Instant::now() < until, "{name}: native seek did not finish");
+                    assert!(player.error.is_none(), "{name}: {:?}", player.error);
+                    let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                    output.textures_delta.clear();
+                    std::thread::sleep(Duration::from_millis(1));
+                }
+                assert_eq!(player.subtitle_line(Duration::from_secs(target)), expected, "{name}");
+            }
+            assert_eq!(player.subtitle_line(Duration::from_secs(5)), None);
+        }
+    }
+
+    #[test]
+    fn native_sami_sync_clocks_clear_and_seek_like_independent_subrip() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/sami-sync");
+        for name in ["language-gap", "invalid-clock"] {
+            let expected = subtitles::load(&root.join(format!("{name}.srt"))).unwrap();
+            let mut player = Player {
+                queue: vec![root.parent().unwrap().join("vp9-long-gop-seek.webm")],
+                subtitle_file: Some(root.join(format!("{name}.smi"))),
+                no_audio: true,
+                asynchronous_open: false,
+                ..Default::default()
+            };
+            player.play_index(0);
+            assert!(player.error.is_none(), "{name}: {:?}", player.error);
+            assert_eq!(player.cues, expected, "{name}");
+            let ctx = eframe::egui::Context::default();
+            let until = Instant::now() + Duration::from_secs(10);
+            while player.presented.is_none() {
+                assert!(Instant::now() < until, "{name}: no native frame");
+                let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                output.textures_delta.clear();
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            for millis in [500, 1500, 2500, 3500, 4500, 1500, 5000] {
+                let target = Duration::from_millis(millis);
+                player.seek_time(target);
+                let until = Instant::now() + Duration::from_secs(10);
+                while player.seek_preview || player.buffering {
+                    assert!(player.error.is_none(), "{name}: {:?}", player.error);
+                    assert!(Instant::now() < until, "{name}: seek {millis} stalled");
+                    let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                    output.textures_delta.clear();
+                    std::thread::sleep(Duration::from_millis(1));
+                }
+                assert_eq!(player.presented.as_ref().unwrap().generation,
+                    player.playback.as_ref().unwrap().generation());
+                let line = subtitles::active(&expected, target, Duration::ZERO)
+                    .map(|cue| cue.text.as_str());
+                assert_eq!(player.subtitle_line(target), line, "{name} at {millis}");
+            }
+        }
+    }
+
+    fn wait_for_native_caption_frame(player: &mut Player, ctx: &eframe::egui::Context) {
+        assert!(player.error.is_none(), "{:?}", player.error);
+        assert!(player.playback.is_some());
+        let until = Instant::now() + Duration::from_secs(10);
+        while player.presented.is_none() || player.seek_preview || player.buffering {
+            assert!(player.error.is_none(), "{:?}", player.error);
+            assert!(Instant::now() < until, "native caption frame did not arrive");
+            let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+            output.textures_delta.clear();
+            std::thread::sleep(Duration::from_millis(1));
+        }
+    }
+
+    #[test]
+    fn native_sami_break_case_preserves_caption_lines() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/sami-break-case");
+        let mut player = Player {
+            queue: vec![root.parent().unwrap().join("vp9-long-gop-seek.webm")],
+            subtitle_file: Some(root.join("upper.smi")),
+            no_audio: true,
+            asynchronous_open: false,
+            ..Default::default()
+        };
+        player.play_index(0);
+        let ctx = eframe::egui::Context::default();
+        wait_for_native_caption_frame(&mut player, &ctx);
+        assert_eq!(player.subtitle_line(Duration::from_millis(1500)), Some("Первая\nстрока"));
+        for (millis, line) in [(1500, Some("Первая\nстрока")), (2500, None), (500, None), (1500, Some("Первая\nстрока"))] {
+            player.seek_time(Duration::from_millis(millis));
+            wait_for_native_caption_frame(&mut player, &ctx);
+            assert_eq!(player.subtitle_line(Duration::from_millis(millis)), line);
+        }
+    }
+
+    #[test]
+    fn native_sami_extension_is_discovered_and_survives_seeking() {
+        let directory = scratch("fvid-native-sami-extension", &[]);
+        std::fs::write(directory.join("video.webm"),
+            include_bytes!("../tests/fixtures/playback-errors/vp9-long-gop-seek.webm")).unwrap();
+        std::fs::write(directory.join("video.sami"),
+            include_bytes!("../tests/fixtures/playback-errors/sami-sidecar-extension/lower/video.sami")).unwrap();
+        let mut player = Player {
+            queue: vec![directory.join("video.webm")],
+            no_audio: true,
+            asynchronous_open: false,
+            ..Default::default()
+        };
+        player.play_index(0);
+        let ctx = eframe::egui::Context::default();
+        wait_for_native_caption_frame(&mut player, &ctx);
+        assert_eq!(player.subtitle_name, "video.sami");
+        for (millis, line) in [(1500, Some("Строка α")), (2500, None), (500, None), (1500, Some("Строка α"))] {
+            player.seek_time(Duration::from_millis(millis));
+            wait_for_native_caption_frame(&mut player, &ctx);
+            assert_eq!(player.subtitle_line(Duration::from_millis(millis)), line);
+        }
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn native_sami_body_boundaries_preserve_caption_and_seek() {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/playback-errors/sami-body-boundaries");
+        for name in ["quoted-body-close", "title-raw-close"] {
+            let mut player = Player {
+                queue: vec![root.parent().unwrap().join("vp9-long-gop-seek.webm")],
+                subtitle_file: Some(root.join(format!("{name}.smi"))),
+                no_audio: true,
+                asynchronous_open: false,
+                ..Default::default()
+            };
+            player.play_index(0);
+            let ctx = eframe::egui::Context::default();
+            wait_for_native_caption_frame(&mut player, &ctx);
+            assert_eq!(player.subtitle_line(Duration::from_millis(1500)),
+                Some("Строка α"), "{name}");
+            for (millis, line) in [(500, None), (1500, Some("Строка α")), (2500, None), (1500, Some("Строка α"))] {
+                let target = Duration::from_millis(millis);
+                player.seek_time(target);
+                wait_for_native_caption_frame(&mut player, &ctx);
+                assert_eq!(player.presented.as_ref().unwrap().generation,
+                    player.playback.as_ref().unwrap().generation());
+                assert_eq!(player.subtitle_line(target), line, "{name} at {millis}");
+            }
+        }
     }
 
     #[test]
@@ -8500,8 +8785,13 @@ mod tests {
         assert_eq!(player.opened.as_ref(), Some(&first));
         assert!(player.playback.is_some());
         let next = player.next_file.take().unwrap();
-        let cached = next.source.recv_timeout(Duration::from_secs(5)).unwrap().unwrap();
-        assert!(matches!(&cached.0, crate::playback_spool::Source::Memory(_)));
+        let mut cached = next.source.recv_timeout(Duration::from_secs(5)).unwrap().unwrap();
+        // The cache may use RAM or a spool. Require the complete original bytes
+        // and reuse after unlinking the source, independently of storage policy.
+        let mut bytes = Vec::new();
+        std::io::Read::read_to_end(&mut cached.0, &mut bytes).unwrap();
+        assert_eq!(bytes, y4m(2));
+        std::io::Seek::seek(&mut cached.0, std::io::SeekFrom::Start(0)).unwrap();
         let (send, source) = std::sync::mpsc::channel();
         send.send(Ok(cached)).unwrap();
         player.next_file = Some(super::NextFile { path: second.clone(), source, cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)) });
@@ -10330,8 +10620,9 @@ mod tests {
             ),
             (48_000, 6)
         );
-        // Eight frames of 1536 samples at 48 kHz, which is what ffprobe reports.
-        assert_eq!(heard.duration, Some(Duration::from_micros(256_000)));
+        // Eight coded frames minus the decoder's 256-sample priming.
+        // The player reports audible time, not encoded-frame duration.
+        assert_eq!(heard.duration, Some(Duration::from_nanos((8*1536-256)*1_000_000_000/48000)));
         assert!(heard.seekable, "a walked stream has a seek table");
         drop(heard);
 
@@ -10370,7 +10661,7 @@ mod tests {
             ),
             (32_000, 1)
         );
-        assert_eq!(low.duration, Some(Duration::from_millis(288)));
+        assert_eq!(low.duration, Some(Duration::from_nanos((6*1536-256)*1_000_000_000/32000)));
         drop(low);
         std::fs::remove_dir_all(&directory).unwrap();
     }
@@ -12093,5 +12384,59 @@ mod timeline_release_duration_factory_regressions {
             let mut player=Player::default();assert!(player.open_item_audio(&root.join(file)),"{file}");
             assert_eq!(player.audio.as_ref().unwrap().duration(),Some(Duration::from_millis(millis)));
         }
+    }
+}
+
+#[cfg(test)]
+#[path = "player_subtitle_tests.rs"]
+mod subtitle_paint_tests;
+
+#[cfg(test)]
+mod native_wavpack_file_factory_regressions {
+    use super::*;
+    fn root() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/wavpack-files")
+    }
+    fn pcm(mut stream: Box<dyn crate::audio::AudioStream>) -> Vec<u8> {
+        assert_eq!(stream.codec(), "wavpack");
+        let mut decoder = stream.make_decoder().unwrap();
+        let mut out = Vec::new();
+        while let Some(packet) = stream.next_packet().unwrap() {
+            let decoded = decoder.decode_packet(&packet.data, packet.pts, packet.duration as u64).unwrap().unwrap();
+            if let Some(packet) = stream.present_decoded(decoded.packet, decoded.source_pts).unwrap() {
+                out.extend(packet.data);
+            }
+        }
+        stream.validate_eof().unwrap();
+        out
+    }
+    #[test]
+    fn automatic_native_file_dispatch_preserves_exact_pcm() {
+        for name in ["false-d8-t1-neg0-none", "correction-8-mono-snr-none-cross0-term1", "dsd-high-six-p3-noise", "float-hybrid-stereo-bitrate-delta-optimized-e127"] {
+            let path = root().join(format!("{name}.wv"));
+            let stream = AUDIO_READERS.iter().find_map(|attempt| attempt.open(&path, None)).expect(name);
+            assert_eq!(pcm(stream), std::fs::read(root().join(format!("{name}.f32le"))).unwrap(), "{name}");
+        }
+    }
+    #[test]
+    fn correction_selection_and_invalid_companion_are_strict() {
+        let name = "correction-8-mono-snr-none-cross0-term1";
+        let expected = std::fs::read(root().join(format!("{name}.f32le"))).unwrap();
+        assert_eq!(pcm(wavpack_audio_stream(&root().join(format!("{name}.wvc")), 0).unwrap()), expected);
+        assert!(wavpack_audio_stream(&root().join(format!("{name}.wv")), 1).is_none());
+        let temp = std::env::temp_dir().join(format!("fvid-native-wavpack-factory-{}", std::process::id()));
+        std::fs::create_dir_all(&temp).unwrap();
+        let result = std::panic::catch_unwind(|| {
+            let main = temp.join("owned.WV");
+            let correction = temp.join("owned.WVC");
+            std::fs::copy(root().join(format!("{name}.wv")), &main).unwrap();
+            std::fs::copy(root().join(format!("{name}.wvc")), &correction).unwrap();
+            assert_eq!(pcm(wavpack_audio_stream(&correction, 0).unwrap()), expected);
+            std::fs::write(&correction, b"invalid correction").unwrap();
+            assert!(wavpack_audio_stream(&main, 0).is_none());
+            assert!(AUDIO_READERS.iter().find_map(|attempt| attempt.open(&main, None)).is_none());
+        });
+        std::fs::remove_dir_all(&temp).unwrap();
+        result.unwrap();
     }
 }

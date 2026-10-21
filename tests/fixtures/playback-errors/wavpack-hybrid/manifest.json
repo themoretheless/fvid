@@ -1,0 +1,2447 @@
+{
+  "provenance": "Owned WavPack hybrid main streams: explicit quantizer intervals and scalar PCM.\nNo external codec, private input, generated fixture, process or network is used.\n",
+  "cases": [
+    {
+      "name": "8-mono-snr",
+      "file": "8-mono-snr.mkv",
+      "oracle": "8-mono-snr.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-snr-0.wv",
+          "packet": "8-mono-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-snr-1.wv",
+          "packet": "8-mono-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-snr-2.wv",
+          "packet": "8-mono-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-bitrate",
+      "file": "8-mono-bitrate.mkv",
+      "oracle": "8-mono-bitrate.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-bitrate-0.wv",
+          "packet": "8-mono-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-bitrate-1.wv",
+          "packet": "8-mono-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-bitrate-2.wv",
+          "packet": "8-mono-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-bitrate-delta",
+      "file": "8-mono-bitrate-delta.mkv",
+      "oracle": "8-mono-bitrate-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-bitrate-delta-0.wv",
+          "packet": "8-mono-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-bitrate-delta-1.wv",
+          "packet": "8-mono-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-bitrate-delta-2.wv",
+          "packet": "8-mono-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-balance",
+      "file": "8-mono-balance.mkv",
+      "oracle": "8-mono-balance.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-balance-0.wv",
+          "packet": "8-mono-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-balance-1.wv",
+          "packet": "8-mono-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-balance-2.wv",
+          "packet": "8-mono-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-balance-delta",
+      "file": "8-mono-balance-delta.mkv",
+      "oracle": "8-mono-balance-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-balance-delta-0.wv",
+          "packet": "8-mono-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-balance-delta-1.wv",
+          "packet": "8-mono-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-balance-delta-2.wv",
+          "packet": "8-mono-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-zero-limit",
+      "file": "8-mono-zero-limit.mkv",
+      "oracle": "8-mono-zero-limit.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-zero-limit-0.wv",
+          "packet": "8-mono-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-zero-limit-1.wv",
+          "packet": "8-mono-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-zero-limit-2.wv",
+          "packet": "8-mono-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-balance-high",
+      "file": "8-mono-balance-high.mkv",
+      "oracle": "8-mono-balance-high.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-balance-high-0.wv",
+          "packet": "8-mono-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-balance-high-1.wv",
+          "packet": "8-mono-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-balance-high-2.wv",
+          "packet": "8-mono-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-mono-balance-low",
+      "file": "8-mono-balance-low.mkv",
+      "oracle": "8-mono-balance-low.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "8-mono-balance-low-0.wv",
+          "packet": "8-mono-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-mono-balance-low-1.wv",
+          "packet": "8-mono-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-mono-balance-low-2.wv",
+          "packet": "8-mono-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-snr",
+      "file": "8-stereo-snr.mkv",
+      "oracle": "8-stereo-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-snr-0.wv",
+          "packet": "8-stereo-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-snr-1.wv",
+          "packet": "8-stereo-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-snr-2.wv",
+          "packet": "8-stereo-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-bitrate",
+      "file": "8-stereo-bitrate.mkv",
+      "oracle": "8-stereo-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-bitrate-0.wv",
+          "packet": "8-stereo-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-bitrate-1.wv",
+          "packet": "8-stereo-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-bitrate-2.wv",
+          "packet": "8-stereo-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-bitrate-delta",
+      "file": "8-stereo-bitrate-delta.mkv",
+      "oracle": "8-stereo-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-bitrate-delta-0.wv",
+          "packet": "8-stereo-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-bitrate-delta-1.wv",
+          "packet": "8-stereo-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-bitrate-delta-2.wv",
+          "packet": "8-stereo-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-balance",
+      "file": "8-stereo-balance.mkv",
+      "oracle": "8-stereo-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-balance-0.wv",
+          "packet": "8-stereo-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-balance-1.wv",
+          "packet": "8-stereo-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-balance-2.wv",
+          "packet": "8-stereo-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-balance-delta",
+      "file": "8-stereo-balance-delta.mkv",
+      "oracle": "8-stereo-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-balance-delta-0.wv",
+          "packet": "8-stereo-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-balance-delta-1.wv",
+          "packet": "8-stereo-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-balance-delta-2.wv",
+          "packet": "8-stereo-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-zero-limit",
+      "file": "8-stereo-zero-limit.mkv",
+      "oracle": "8-stereo-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-zero-limit-0.wv",
+          "packet": "8-stereo-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-zero-limit-1.wv",
+          "packet": "8-stereo-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-zero-limit-2.wv",
+          "packet": "8-stereo-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-balance-high",
+      "file": "8-stereo-balance-high.mkv",
+      "oracle": "8-stereo-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-balance-high-0.wv",
+          "packet": "8-stereo-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-balance-high-1.wv",
+          "packet": "8-stereo-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-balance-high-2.wv",
+          "packet": "8-stereo-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-stereo-balance-low",
+      "file": "8-stereo-balance-low.mkv",
+      "oracle": "8-stereo-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-stereo-balance-low-0.wv",
+          "packet": "8-stereo-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-stereo-balance-low-1.wv",
+          "packet": "8-stereo-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-stereo-balance-low-2.wv",
+          "packet": "8-stereo-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-snr",
+      "file": "8-false-snr.mkv",
+      "oracle": "8-false-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-snr-0.wv",
+          "packet": "8-false-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-snr-1.wv",
+          "packet": "8-false-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-snr-2.wv",
+          "packet": "8-false-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-bitrate",
+      "file": "8-false-bitrate.mkv",
+      "oracle": "8-false-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-bitrate-0.wv",
+          "packet": "8-false-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-bitrate-1.wv",
+          "packet": "8-false-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-bitrate-2.wv",
+          "packet": "8-false-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-bitrate-delta",
+      "file": "8-false-bitrate-delta.mkv",
+      "oracle": "8-false-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-bitrate-delta-0.wv",
+          "packet": "8-false-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-bitrate-delta-1.wv",
+          "packet": "8-false-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-bitrate-delta-2.wv",
+          "packet": "8-false-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-balance",
+      "file": "8-false-balance.mkv",
+      "oracle": "8-false-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-balance-0.wv",
+          "packet": "8-false-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-balance-1.wv",
+          "packet": "8-false-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-balance-2.wv",
+          "packet": "8-false-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-balance-delta",
+      "file": "8-false-balance-delta.mkv",
+      "oracle": "8-false-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-balance-delta-0.wv",
+          "packet": "8-false-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-balance-delta-1.wv",
+          "packet": "8-false-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-balance-delta-2.wv",
+          "packet": "8-false-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-zero-limit",
+      "file": "8-false-zero-limit.mkv",
+      "oracle": "8-false-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-zero-limit-0.wv",
+          "packet": "8-false-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-zero-limit-1.wv",
+          "packet": "8-false-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-zero-limit-2.wv",
+          "packet": "8-false-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-balance-high",
+      "file": "8-false-balance-high.mkv",
+      "oracle": "8-false-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-balance-high-0.wv",
+          "packet": "8-false-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-balance-high-1.wv",
+          "packet": "8-false-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-balance-high-2.wv",
+          "packet": "8-false-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "8-false-balance-low",
+      "file": "8-false-balance-low.mkv",
+      "oracle": "8-false-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "8-false-balance-low-0.wv",
+          "packet": "8-false-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "8-false-balance-low-1.wv",
+          "packet": "8-false-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "8-false-balance-low-2.wv",
+          "packet": "8-false-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-snr",
+      "file": "16-mono-snr.mkv",
+      "oracle": "16-mono-snr.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-snr-0.wv",
+          "packet": "16-mono-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-snr-1.wv",
+          "packet": "16-mono-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-snr-2.wv",
+          "packet": "16-mono-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-bitrate",
+      "file": "16-mono-bitrate.mkv",
+      "oracle": "16-mono-bitrate.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-bitrate-0.wv",
+          "packet": "16-mono-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-bitrate-1.wv",
+          "packet": "16-mono-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-bitrate-2.wv",
+          "packet": "16-mono-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-bitrate-delta",
+      "file": "16-mono-bitrate-delta.mkv",
+      "oracle": "16-mono-bitrate-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-bitrate-delta-0.wv",
+          "packet": "16-mono-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-bitrate-delta-1.wv",
+          "packet": "16-mono-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-bitrate-delta-2.wv",
+          "packet": "16-mono-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-balance",
+      "file": "16-mono-balance.mkv",
+      "oracle": "16-mono-balance.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-balance-0.wv",
+          "packet": "16-mono-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-balance-1.wv",
+          "packet": "16-mono-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-balance-2.wv",
+          "packet": "16-mono-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-balance-delta",
+      "file": "16-mono-balance-delta.mkv",
+      "oracle": "16-mono-balance-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-balance-delta-0.wv",
+          "packet": "16-mono-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-balance-delta-1.wv",
+          "packet": "16-mono-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-balance-delta-2.wv",
+          "packet": "16-mono-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-zero-limit",
+      "file": "16-mono-zero-limit.mkv",
+      "oracle": "16-mono-zero-limit.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-zero-limit-0.wv",
+          "packet": "16-mono-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-zero-limit-1.wv",
+          "packet": "16-mono-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-zero-limit-2.wv",
+          "packet": "16-mono-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-balance-high",
+      "file": "16-mono-balance-high.mkv",
+      "oracle": "16-mono-balance-high.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-balance-high-0.wv",
+          "packet": "16-mono-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-balance-high-1.wv",
+          "packet": "16-mono-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-balance-high-2.wv",
+          "packet": "16-mono-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-mono-balance-low",
+      "file": "16-mono-balance-low.mkv",
+      "oracle": "16-mono-balance-low.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "16-mono-balance-low-0.wv",
+          "packet": "16-mono-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-mono-balance-low-1.wv",
+          "packet": "16-mono-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-mono-balance-low-2.wv",
+          "packet": "16-mono-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-snr",
+      "file": "16-stereo-snr.mkv",
+      "oracle": "16-stereo-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-snr-0.wv",
+          "packet": "16-stereo-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-snr-1.wv",
+          "packet": "16-stereo-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-snr-2.wv",
+          "packet": "16-stereo-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-bitrate",
+      "file": "16-stereo-bitrate.mkv",
+      "oracle": "16-stereo-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-bitrate-0.wv",
+          "packet": "16-stereo-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-bitrate-1.wv",
+          "packet": "16-stereo-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-bitrate-2.wv",
+          "packet": "16-stereo-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-bitrate-delta",
+      "file": "16-stereo-bitrate-delta.mkv",
+      "oracle": "16-stereo-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-bitrate-delta-0.wv",
+          "packet": "16-stereo-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-bitrate-delta-1.wv",
+          "packet": "16-stereo-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-bitrate-delta-2.wv",
+          "packet": "16-stereo-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-balance",
+      "file": "16-stereo-balance.mkv",
+      "oracle": "16-stereo-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-balance-0.wv",
+          "packet": "16-stereo-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-balance-1.wv",
+          "packet": "16-stereo-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-balance-2.wv",
+          "packet": "16-stereo-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-balance-delta",
+      "file": "16-stereo-balance-delta.mkv",
+      "oracle": "16-stereo-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-balance-delta-0.wv",
+          "packet": "16-stereo-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-balance-delta-1.wv",
+          "packet": "16-stereo-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-balance-delta-2.wv",
+          "packet": "16-stereo-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-zero-limit",
+      "file": "16-stereo-zero-limit.mkv",
+      "oracle": "16-stereo-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-zero-limit-0.wv",
+          "packet": "16-stereo-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-zero-limit-1.wv",
+          "packet": "16-stereo-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-zero-limit-2.wv",
+          "packet": "16-stereo-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-balance-high",
+      "file": "16-stereo-balance-high.mkv",
+      "oracle": "16-stereo-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-balance-high-0.wv",
+          "packet": "16-stereo-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-balance-high-1.wv",
+          "packet": "16-stereo-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-balance-high-2.wv",
+          "packet": "16-stereo-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-stereo-balance-low",
+      "file": "16-stereo-balance-low.mkv",
+      "oracle": "16-stereo-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-stereo-balance-low-0.wv",
+          "packet": "16-stereo-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-stereo-balance-low-1.wv",
+          "packet": "16-stereo-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-stereo-balance-low-2.wv",
+          "packet": "16-stereo-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-snr",
+      "file": "16-false-snr.mkv",
+      "oracle": "16-false-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-snr-0.wv",
+          "packet": "16-false-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-snr-1.wv",
+          "packet": "16-false-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-snr-2.wv",
+          "packet": "16-false-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-bitrate",
+      "file": "16-false-bitrate.mkv",
+      "oracle": "16-false-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-bitrate-0.wv",
+          "packet": "16-false-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-bitrate-1.wv",
+          "packet": "16-false-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-bitrate-2.wv",
+          "packet": "16-false-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-bitrate-delta",
+      "file": "16-false-bitrate-delta.mkv",
+      "oracle": "16-false-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-bitrate-delta-0.wv",
+          "packet": "16-false-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-bitrate-delta-1.wv",
+          "packet": "16-false-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-bitrate-delta-2.wv",
+          "packet": "16-false-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-balance",
+      "file": "16-false-balance.mkv",
+      "oracle": "16-false-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-balance-0.wv",
+          "packet": "16-false-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-balance-1.wv",
+          "packet": "16-false-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-balance-2.wv",
+          "packet": "16-false-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-balance-delta",
+      "file": "16-false-balance-delta.mkv",
+      "oracle": "16-false-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-balance-delta-0.wv",
+          "packet": "16-false-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-balance-delta-1.wv",
+          "packet": "16-false-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-balance-delta-2.wv",
+          "packet": "16-false-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-zero-limit",
+      "file": "16-false-zero-limit.mkv",
+      "oracle": "16-false-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-zero-limit-0.wv",
+          "packet": "16-false-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-zero-limit-1.wv",
+          "packet": "16-false-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-zero-limit-2.wv",
+          "packet": "16-false-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-balance-high",
+      "file": "16-false-balance-high.mkv",
+      "oracle": "16-false-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-balance-high-0.wv",
+          "packet": "16-false-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-balance-high-1.wv",
+          "packet": "16-false-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-balance-high-2.wv",
+          "packet": "16-false-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "16-false-balance-low",
+      "file": "16-false-balance-low.mkv",
+      "oracle": "16-false-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "16-false-balance-low-0.wv",
+          "packet": "16-false-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "16-false-balance-low-1.wv",
+          "packet": "16-false-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "16-false-balance-low-2.wv",
+          "packet": "16-false-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-snr",
+      "file": "24-mono-snr.mkv",
+      "oracle": "24-mono-snr.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-snr-0.wv",
+          "packet": "24-mono-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-snr-1.wv",
+          "packet": "24-mono-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-snr-2.wv",
+          "packet": "24-mono-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-bitrate",
+      "file": "24-mono-bitrate.mkv",
+      "oracle": "24-mono-bitrate.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-bitrate-0.wv",
+          "packet": "24-mono-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-bitrate-1.wv",
+          "packet": "24-mono-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-bitrate-2.wv",
+          "packet": "24-mono-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-bitrate-delta",
+      "file": "24-mono-bitrate-delta.mkv",
+      "oracle": "24-mono-bitrate-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-bitrate-delta-0.wv",
+          "packet": "24-mono-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-bitrate-delta-1.wv",
+          "packet": "24-mono-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-bitrate-delta-2.wv",
+          "packet": "24-mono-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-balance",
+      "file": "24-mono-balance.mkv",
+      "oracle": "24-mono-balance.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-balance-0.wv",
+          "packet": "24-mono-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-balance-1.wv",
+          "packet": "24-mono-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-balance-2.wv",
+          "packet": "24-mono-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-balance-delta",
+      "file": "24-mono-balance-delta.mkv",
+      "oracle": "24-mono-balance-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-balance-delta-0.wv",
+          "packet": "24-mono-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-balance-delta-1.wv",
+          "packet": "24-mono-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-balance-delta-2.wv",
+          "packet": "24-mono-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-zero-limit",
+      "file": "24-mono-zero-limit.mkv",
+      "oracle": "24-mono-zero-limit.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-zero-limit-0.wv",
+          "packet": "24-mono-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-zero-limit-1.wv",
+          "packet": "24-mono-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-zero-limit-2.wv",
+          "packet": "24-mono-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-balance-high",
+      "file": "24-mono-balance-high.mkv",
+      "oracle": "24-mono-balance-high.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-balance-high-0.wv",
+          "packet": "24-mono-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-balance-high-1.wv",
+          "packet": "24-mono-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-balance-high-2.wv",
+          "packet": "24-mono-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-mono-balance-low",
+      "file": "24-mono-balance-low.mkv",
+      "oracle": "24-mono-balance-low.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "24-mono-balance-low-0.wv",
+          "packet": "24-mono-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-mono-balance-low-1.wv",
+          "packet": "24-mono-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-mono-balance-low-2.wv",
+          "packet": "24-mono-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-snr",
+      "file": "24-stereo-snr.mkv",
+      "oracle": "24-stereo-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-snr-0.wv",
+          "packet": "24-stereo-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-snr-1.wv",
+          "packet": "24-stereo-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-snr-2.wv",
+          "packet": "24-stereo-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-bitrate",
+      "file": "24-stereo-bitrate.mkv",
+      "oracle": "24-stereo-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-bitrate-0.wv",
+          "packet": "24-stereo-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-bitrate-1.wv",
+          "packet": "24-stereo-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-bitrate-2.wv",
+          "packet": "24-stereo-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-bitrate-delta",
+      "file": "24-stereo-bitrate-delta.mkv",
+      "oracle": "24-stereo-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-bitrate-delta-0.wv",
+          "packet": "24-stereo-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-bitrate-delta-1.wv",
+          "packet": "24-stereo-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-bitrate-delta-2.wv",
+          "packet": "24-stereo-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-balance",
+      "file": "24-stereo-balance.mkv",
+      "oracle": "24-stereo-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-balance-0.wv",
+          "packet": "24-stereo-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-balance-1.wv",
+          "packet": "24-stereo-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-balance-2.wv",
+          "packet": "24-stereo-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-balance-delta",
+      "file": "24-stereo-balance-delta.mkv",
+      "oracle": "24-stereo-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-balance-delta-0.wv",
+          "packet": "24-stereo-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-balance-delta-1.wv",
+          "packet": "24-stereo-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-balance-delta-2.wv",
+          "packet": "24-stereo-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-zero-limit",
+      "file": "24-stereo-zero-limit.mkv",
+      "oracle": "24-stereo-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-zero-limit-0.wv",
+          "packet": "24-stereo-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-zero-limit-1.wv",
+          "packet": "24-stereo-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-zero-limit-2.wv",
+          "packet": "24-stereo-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-balance-high",
+      "file": "24-stereo-balance-high.mkv",
+      "oracle": "24-stereo-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-balance-high-0.wv",
+          "packet": "24-stereo-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-balance-high-1.wv",
+          "packet": "24-stereo-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-balance-high-2.wv",
+          "packet": "24-stereo-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-stereo-balance-low",
+      "file": "24-stereo-balance-low.mkv",
+      "oracle": "24-stereo-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-stereo-balance-low-0.wv",
+          "packet": "24-stereo-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-stereo-balance-low-1.wv",
+          "packet": "24-stereo-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-stereo-balance-low-2.wv",
+          "packet": "24-stereo-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-snr",
+      "file": "24-false-snr.mkv",
+      "oracle": "24-false-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-snr-0.wv",
+          "packet": "24-false-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-snr-1.wv",
+          "packet": "24-false-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-snr-2.wv",
+          "packet": "24-false-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-bitrate",
+      "file": "24-false-bitrate.mkv",
+      "oracle": "24-false-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-bitrate-0.wv",
+          "packet": "24-false-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-bitrate-1.wv",
+          "packet": "24-false-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-bitrate-2.wv",
+          "packet": "24-false-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-bitrate-delta",
+      "file": "24-false-bitrate-delta.mkv",
+      "oracle": "24-false-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-bitrate-delta-0.wv",
+          "packet": "24-false-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-bitrate-delta-1.wv",
+          "packet": "24-false-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-bitrate-delta-2.wv",
+          "packet": "24-false-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-balance",
+      "file": "24-false-balance.mkv",
+      "oracle": "24-false-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-balance-0.wv",
+          "packet": "24-false-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-balance-1.wv",
+          "packet": "24-false-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-balance-2.wv",
+          "packet": "24-false-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-balance-delta",
+      "file": "24-false-balance-delta.mkv",
+      "oracle": "24-false-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-balance-delta-0.wv",
+          "packet": "24-false-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-balance-delta-1.wv",
+          "packet": "24-false-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-balance-delta-2.wv",
+          "packet": "24-false-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-zero-limit",
+      "file": "24-false-zero-limit.mkv",
+      "oracle": "24-false-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-zero-limit-0.wv",
+          "packet": "24-false-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-zero-limit-1.wv",
+          "packet": "24-false-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-zero-limit-2.wv",
+          "packet": "24-false-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-balance-high",
+      "file": "24-false-balance-high.mkv",
+      "oracle": "24-false-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-balance-high-0.wv",
+          "packet": "24-false-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-balance-high-1.wv",
+          "packet": "24-false-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-balance-high-2.wv",
+          "packet": "24-false-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "24-false-balance-low",
+      "file": "24-false-balance-low.mkv",
+      "oracle": "24-false-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "24-false-balance-low-0.wv",
+          "packet": "24-false-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "24-false-balance-low-1.wv",
+          "packet": "24-false-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "24-false-balance-low-2.wv",
+          "packet": "24-false-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-snr",
+      "file": "32-mono-snr.mkv",
+      "oracle": "32-mono-snr.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-snr-0.wv",
+          "packet": "32-mono-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-snr-1.wv",
+          "packet": "32-mono-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-snr-2.wv",
+          "packet": "32-mono-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-bitrate",
+      "file": "32-mono-bitrate.mkv",
+      "oracle": "32-mono-bitrate.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-bitrate-0.wv",
+          "packet": "32-mono-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-bitrate-1.wv",
+          "packet": "32-mono-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-bitrate-2.wv",
+          "packet": "32-mono-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-bitrate-delta",
+      "file": "32-mono-bitrate-delta.mkv",
+      "oracle": "32-mono-bitrate-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-bitrate-delta-0.wv",
+          "packet": "32-mono-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-bitrate-delta-1.wv",
+          "packet": "32-mono-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-bitrate-delta-2.wv",
+          "packet": "32-mono-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-balance",
+      "file": "32-mono-balance.mkv",
+      "oracle": "32-mono-balance.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-balance-0.wv",
+          "packet": "32-mono-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-balance-1.wv",
+          "packet": "32-mono-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-balance-2.wv",
+          "packet": "32-mono-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-balance-delta",
+      "file": "32-mono-balance-delta.mkv",
+      "oracle": "32-mono-balance-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-balance-delta-0.wv",
+          "packet": "32-mono-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-balance-delta-1.wv",
+          "packet": "32-mono-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-balance-delta-2.wv",
+          "packet": "32-mono-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-zero-limit",
+      "file": "32-mono-zero-limit.mkv",
+      "oracle": "32-mono-zero-limit.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-zero-limit-0.wv",
+          "packet": "32-mono-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-zero-limit-1.wv",
+          "packet": "32-mono-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-zero-limit-2.wv",
+          "packet": "32-mono-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-balance-high",
+      "file": "32-mono-balance-high.mkv",
+      "oracle": "32-mono-balance-high.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-balance-high-0.wv",
+          "packet": "32-mono-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-balance-high-1.wv",
+          "packet": "32-mono-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-balance-high-2.wv",
+          "packet": "32-mono-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-mono-balance-low",
+      "file": "32-mono-balance-low.mkv",
+      "oracle": "32-mono-balance-low.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "32-mono-balance-low-0.wv",
+          "packet": "32-mono-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-mono-balance-low-1.wv",
+          "packet": "32-mono-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-mono-balance-low-2.wv",
+          "packet": "32-mono-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-snr",
+      "file": "32-stereo-snr.mkv",
+      "oracle": "32-stereo-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-snr-0.wv",
+          "packet": "32-stereo-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-snr-1.wv",
+          "packet": "32-stereo-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-snr-2.wv",
+          "packet": "32-stereo-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-bitrate",
+      "file": "32-stereo-bitrate.mkv",
+      "oracle": "32-stereo-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-bitrate-0.wv",
+          "packet": "32-stereo-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-bitrate-1.wv",
+          "packet": "32-stereo-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-bitrate-2.wv",
+          "packet": "32-stereo-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-bitrate-delta",
+      "file": "32-stereo-bitrate-delta.mkv",
+      "oracle": "32-stereo-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-bitrate-delta-0.wv",
+          "packet": "32-stereo-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-bitrate-delta-1.wv",
+          "packet": "32-stereo-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-bitrate-delta-2.wv",
+          "packet": "32-stereo-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-balance",
+      "file": "32-stereo-balance.mkv",
+      "oracle": "32-stereo-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-balance-0.wv",
+          "packet": "32-stereo-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-balance-1.wv",
+          "packet": "32-stereo-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-balance-2.wv",
+          "packet": "32-stereo-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-balance-delta",
+      "file": "32-stereo-balance-delta.mkv",
+      "oracle": "32-stereo-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-balance-delta-0.wv",
+          "packet": "32-stereo-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-balance-delta-1.wv",
+          "packet": "32-stereo-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-balance-delta-2.wv",
+          "packet": "32-stereo-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-zero-limit",
+      "file": "32-stereo-zero-limit.mkv",
+      "oracle": "32-stereo-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-zero-limit-0.wv",
+          "packet": "32-stereo-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-zero-limit-1.wv",
+          "packet": "32-stereo-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-zero-limit-2.wv",
+          "packet": "32-stereo-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-balance-high",
+      "file": "32-stereo-balance-high.mkv",
+      "oracle": "32-stereo-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-balance-high-0.wv",
+          "packet": "32-stereo-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-balance-high-1.wv",
+          "packet": "32-stereo-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-balance-high-2.wv",
+          "packet": "32-stereo-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-stereo-balance-low",
+      "file": "32-stereo-balance-low.mkv",
+      "oracle": "32-stereo-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-stereo-balance-low-0.wv",
+          "packet": "32-stereo-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-stereo-balance-low-1.wv",
+          "packet": "32-stereo-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-stereo-balance-low-2.wv",
+          "packet": "32-stereo-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-snr",
+      "file": "32-false-snr.mkv",
+      "oracle": "32-false-snr.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-snr-0.wv",
+          "packet": "32-false-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-snr-1.wv",
+          "packet": "32-false-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-snr-2.wv",
+          "packet": "32-false-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-bitrate",
+      "file": "32-false-bitrate.mkv",
+      "oracle": "32-false-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-bitrate-0.wv",
+          "packet": "32-false-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-bitrate-1.wv",
+          "packet": "32-false-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-bitrate-2.wv",
+          "packet": "32-false-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-bitrate-delta",
+      "file": "32-false-bitrate-delta.mkv",
+      "oracle": "32-false-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-bitrate-delta-0.wv",
+          "packet": "32-false-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-bitrate-delta-1.wv",
+          "packet": "32-false-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-bitrate-delta-2.wv",
+          "packet": "32-false-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-balance",
+      "file": "32-false-balance.mkv",
+      "oracle": "32-false-balance.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-balance-0.wv",
+          "packet": "32-false-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-balance-1.wv",
+          "packet": "32-false-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-balance-2.wv",
+          "packet": "32-false-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-balance-delta",
+      "file": "32-false-balance-delta.mkv",
+      "oracle": "32-false-balance-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-balance-delta-0.wv",
+          "packet": "32-false-balance-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-balance-delta-1.wv",
+          "packet": "32-false-balance-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-balance-delta-2.wv",
+          "packet": "32-false-balance-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-zero-limit",
+      "file": "32-false-zero-limit.mkv",
+      "oracle": "32-false-zero-limit.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-zero-limit-0.wv",
+          "packet": "32-false-zero-limit-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-zero-limit-1.wv",
+          "packet": "32-false-zero-limit-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-zero-limit-2.wv",
+          "packet": "32-false-zero-limit-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-balance-high",
+      "file": "32-false-balance-high.mkv",
+      "oracle": "32-false-balance-high.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-balance-high-0.wv",
+          "packet": "32-false-balance-high-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-balance-high-1.wv",
+          "packet": "32-false-balance-high-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-balance-high-2.wv",
+          "packet": "32-false-balance-high-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "32-false-balance-low",
+      "file": "32-false-balance-low.mkv",
+      "oracle": "32-false-balance-low.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "32-false-balance-low-0.wv",
+          "packet": "32-false-balance-low-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "32-false-balance-low-1.wv",
+          "packet": "32-false-balance-low-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "32-false-balance-low-2.wv",
+          "packet": "32-false-balance-low-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "zero-run-mono-bitrate",
+      "file": "zero-run-mono-bitrate.mkv",
+      "oracle": "zero-run-mono-bitrate.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "zero-run-mono-bitrate-0.wv",
+          "packet": "zero-run-mono-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "zero-run-mono-bitrate-1.wv",
+          "packet": "zero-run-mono-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "zero-run-mono-bitrate-2.wv",
+          "packet": "zero-run-mono-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "zero-run-mono-bitrate-delta",
+      "file": "zero-run-mono-bitrate-delta.mkv",
+      "oracle": "zero-run-mono-bitrate-delta.f32le",
+      "channels": 1,
+      "frames": [
+        {
+          "file": "zero-run-mono-bitrate-delta-0.wv",
+          "packet": "zero-run-mono-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "zero-run-mono-bitrate-delta-1.wv",
+          "packet": "zero-run-mono-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "zero-run-mono-bitrate-delta-2.wv",
+          "packet": "zero-run-mono-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "zero-run-stereo-bitrate",
+      "file": "zero-run-stereo-bitrate.mkv",
+      "oracle": "zero-run-stereo-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "zero-run-stereo-bitrate-0.wv",
+          "packet": "zero-run-stereo-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "zero-run-stereo-bitrate-1.wv",
+          "packet": "zero-run-stereo-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "zero-run-stereo-bitrate-2.wv",
+          "packet": "zero-run-stereo-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "zero-run-stereo-bitrate-delta",
+      "file": "zero-run-stereo-bitrate-delta.mkv",
+      "oracle": "zero-run-stereo-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "zero-run-stereo-bitrate-delta-0.wv",
+          "packet": "zero-run-stereo-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "zero-run-stereo-bitrate-delta-1.wv",
+          "packet": "zero-run-stereo-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "zero-run-stereo-bitrate-delta-2.wv",
+          "packet": "zero-run-stereo-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "zero-run-false-bitrate",
+      "file": "zero-run-false-bitrate.mkv",
+      "oracle": "zero-run-false-bitrate.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "zero-run-false-bitrate-0.wv",
+          "packet": "zero-run-false-bitrate-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "zero-run-false-bitrate-1.wv",
+          "packet": "zero-run-false-bitrate-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "zero-run-false-bitrate-2.wv",
+          "packet": "zero-run-false-bitrate-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "zero-run-false-bitrate-delta",
+      "file": "zero-run-false-bitrate-delta.mkv",
+      "oracle": "zero-run-false-bitrate-delta.f32le",
+      "channels": 2,
+      "frames": [
+        {
+          "file": "zero-run-false-bitrate-delta-0.wv",
+          "packet": "zero-run-false-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "zero-run-false-bitrate-delta-1.wv",
+          "packet": "zero-run-false-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "zero-run-false-bitrate-delta-2.wv",
+          "packet": "zero-run-false-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "multichannel-snr",
+      "file": "multichannel-snr.mkv",
+      "oracle": "multichannel-snr.f32le",
+      "channels": 6,
+      "frames": [
+        {
+          "file": "multichannel-snr-0.wv",
+          "packet": "multichannel-snr-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "multichannel-snr-1.wv",
+          "packet": "multichannel-snr-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "multichannel-snr-2.wv",
+          "packet": "multichannel-snr-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "multichannel-bitrate-delta",
+      "file": "multichannel-bitrate-delta.mkv",
+      "oracle": "multichannel-bitrate-delta.f32le",
+      "channels": 6,
+      "frames": [
+        {
+          "file": "multichannel-bitrate-delta-0.wv",
+          "packet": "multichannel-bitrate-delta-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "multichannel-bitrate-delta-1.wv",
+          "packet": "multichannel-bitrate-delta-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "multichannel-bitrate-delta-2.wv",
+          "packet": "multichannel-bitrate-delta-2.packet",
+          "pts": 320
+        }
+      ]
+    },
+    {
+      "name": "multichannel-balance",
+      "file": "multichannel-balance.mkv",
+      "oracle": "multichannel-balance.f32le",
+      "channels": 6,
+      "frames": [
+        {
+          "file": "multichannel-balance-0.wv",
+          "packet": "multichannel-balance-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "multichannel-balance-1.wv",
+          "packet": "multichannel-balance-1.packet",
+          "pts": 160
+        },
+        {
+          "file": "multichannel-balance-2.wv",
+          "packet": "multichannel-balance-2.packet",
+          "pts": 320
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "profile-short.wv",
+      "movie": "profile-short.mkv",
+      "message": "profile is the wrong length"
+    },
+    {
+      "file": "profile-missing.wv",
+      "movie": "profile-missing.mkv",
+      "message": "profile is the wrong length"
+    },
+    {
+      "file": "entropy-short.wv",
+      "movie": "entropy-short.mkv",
+      "message": "ends inside"
+    },
+    {
+      "file": "profile-exponent.wv",
+      "movie": "profile-exponent.mkv",
+      "message": "exponent exceeds"
+    },
+    {
+      "file": "correction.wv",
+      "movie": "correction.mkv",
+      "message": "ends inside"
+    }
+  ]
+}

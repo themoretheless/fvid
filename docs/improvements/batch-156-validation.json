@@ -1,0 +1,56 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0164"
+  ],
+  "checked_at": "2026-10-21T01:26:45.750341+00:00",
+  "before": [
+    "evidence/batch-156-before.log",
+    "evidence/batch-156-acceptance-before.log",
+    "evidence/batch-156-container-before.rs",
+    "evidence/batch-156-parser-before-replayed.log"
+  ],
+  "primary_reference": "batch-156-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-156-after.log",
+      "passed": 13,
+      "new_pcm_combinations": 32,
+      "new_worker_target_variants": 16
+    },
+    {
+      "log": "evidence/batch-156-player-media-final.log",
+      "passed": 5,
+      "scope": "Final feature-gated test source with player."
+    },
+    {
+      "log": "evidence/batch-156-core-media-after.log",
+      "passed": 3,
+      "scope": "Same parser/refusal/resource regressions without default features or player."
+    },
+    {
+      "log": "evidence/batch-156-units-after.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-156-core-after.log",
+      "passed": 18
+    },
+    {
+      "log": "evidence/batch-156-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-156-player-build.log",
+      "exit": 0
+    }
+  ],
+  "qualification": [
+    "Six authored XM1.04 zero-sample headers of29,64 or240 bytes were rejected by the unconditional241-byte guard. Full241/243-byte cases and eight independent full-header controls already parse;four malformed controls already refuse.",
+    "Forced before intended metadata/PCM and worker gates decode the valid authored companion then fail during XM source admission at the same241-byte requirement. The worker does not start before this refusal;no separate pre-fix seek failure is claimed.",
+    "Short zero-sample headers now skip their declared padding and expose metadata identical to full empty headers. First,middle,last and entirely empty layouts pass32 exact PCM combinations and16 actual-worker target variants. Corrupt/truncated/huge and nonempty-short headers refuse;file,instrument,sample and frame caps are preserved.",
+    "13 focused/related integrations,35 player XM units,18 core parser units,the final5 player tests and3 core feature tests pass. Repeated configurations and fixture variants add no IDs.",
+    "Existing full headers retain their behavior. Header-size0 legacy quirks,other untested XM combinations,full FT2 synthesis,performance and physical audio listening are not claimed."
+  ],
+  "counting": "One zero-sample instrument-header admission defect. Eight valid layouts,four malformed cases,core/player configurations and all tests add zero extra IDs."
+}

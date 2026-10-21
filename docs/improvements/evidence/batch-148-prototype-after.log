@@ -1,0 +1,9 @@
+clear: 1 independently timed caption(s) matched
+replace: 2 independently timed caption(s) matched
+quoted: 1 independently timed caption(s) matched
+
+thread 'main' (2122684) panicked at /private/tmp/fvid-sami-sync-prototype.rs:959:3:
+assertion `left == right` failed: lines
+  left: [Cue { start: 1s, end: 2s, text: "Перваястрока" }]
+ right: [Cue { start: 1s, end: 2s, text: "Первая\nстрока" }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

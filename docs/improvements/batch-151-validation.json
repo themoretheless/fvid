@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0159"
+  ],
+  "checked_at": "2026-10-20T23:58:10.914632+00:00",
+  "before": [
+    "evidence/batch-151-before.log",
+    "evidence/batch-151-acceptance-before.log",
+    "evidence/batch-151-native-before.log",
+    "evidence/batch-151-matrix-before.log",
+    "evidence/batch-151-pre-sync-reproduction.log",
+    "evidence/batch-151-subtitles-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-151-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-151-standalone-units-after.log",
+      "passed": 19
+    },
+    {
+      "log": "evidence/batch-151-standalone-after.log",
+      "passed_cases": 6
+    },
+    {
+      "log": "evidence/batch-151-after.log",
+      "passed": 20
+    },
+    {
+      "log": "evidence/batch-151-units-after.log",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-151-malformed-audit.log",
+      "probes": 12822,
+      "scope": "Bounded no-panic audit on twelve valid seeds;not arbitrary input correctness or total-resource proof."
+    },
+    {
+      "log": "evidence/batch-151-player-build.log",
+      "passed": 0
+    },
+    {
+      "artifact": "evidence/batch-151-ui-proof.json",
+      "scope": "Physical window caption survival,playing frame progression and caption clear;separate renderer layout defect remains."
+    }
+  ],
+  "qualification": [
+    "Four authored quoted/comment/raw-header cases lost valid1..2s captions;two healthy controls already worked. All four reproduce on the pre-Sync parser snapshot,so they are pre-existing. Forced media acceptance decoded raw video before failing at missing captions versus independent SRT.",
+    "Native before: authored VP9 presented successfully,then the quoted-body fixture failed specifically at absent caption. Hardware initialization refused and software fallback was exercised.",
+    "The new body-boundary pass consumes whole quoted tags and comments,and skips Title/Style/Script raw content before finding actual body tags. Exact tag names prevent false prefix delimiters. No private media or copied codec parameters are used.",
+    "Native after gates cover quoted values and Title headers with forward/backward seek and fresh-generation frame checks. The focused native/media gates passed. Full HTML/SAMI conformance,physical font rendering,total memory bounds and performance gains are not claimed.",
+    "All20 focused tests,33 related units,19 standalone legacy units,six direct controls,fixture reproduction,12822 bounded no-panic probes and player build pass. Actual window review showed authored caption words despite body-like header/attribute text and eventual cue clear. The composite UI sample exposed a separate pre-existing renderer hard-break/placement/outline issue;no correct multiline glyph layout is claimed here."
+  ],
+  "counting": "One body-boundary discovery defect. Four failing contexts,two healthy controls,raw video and native seek variants add zero extra IDs."
+}

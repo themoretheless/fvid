@@ -1,0 +1,56 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0161"
+  ],
+  "checked_at": "2026-10-21T00:37:52.091723+00:00",
+  "before": [
+    "evidence/batch-152-before-all-cases.log",
+    "evidence/batch-152-acceptance-before-verified.log",
+    "evidence/batch-152-xm-decoder-before.rs"
+  ],
+  "primary_reference": "evidence/batch-152-reference.json",
+  "checks": [
+    {
+      "log": "evidence/batch-152-after.log",
+      "passed": 3,
+      "pcm_combinations": 56,
+      "worker_seek_and_eof_targets": 28
+    },
+    {
+      "log": "evidence/batch-152-units-after.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-152-related-after.log",
+      "passed_before_obsolete_control": 18,
+      "obsolete_control_failure": 1,
+      "qualification": "Six related targets pass;the old lifetime control assumed irrecoverable no-envelope release and required an oracle migration."
+    },
+    {
+      "log": "evidence/batch-152-related-corrected.log",
+      "passed": 3,
+      "scope": "Migrated lifetime phase/seek/EOF test and previously unexecuted volume-panning target."
+    },
+    {
+      "log": "evidence/batch-152-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-152-lifetime-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-152-player-build.log",
+      "exit": 0
+    }
+  ],
+  "qualification": [
+    "Nine authored failing scores and five healthy controls isolate channel-volume and retained sample phase. No-envelope release cuts volume0;explicit volume/default commands restore the active phase;note-only triggers retain zero volume.",
+    "All56 exact after PCM comparisons,28 actual-worker target variants,35 module units and21 related integration tests pass. The authored companion decodes and reaches EOF. This does not claim full FT2 mixing,envelope/fadeout support,or physical audio listening.",
+    "Unsupported envelope release retains its old behavior;sample owner selection and natural sample end remain intact.",
+    "The prior volume-lifetime released-control expected permanent silence after explicit volume restore. Its actual score and assertions are preserved;only the independent control changes to C00 then volume64 and expected audibility totrue. The historical generator,manifest,reference and failed log are retained. No extra ID for this necessary oracle migration.",
+    "Initial worker-baseline duration mismatch was corrected before the verified PCM-failure log;that initial log is diagnostic only."
+  ],
+  "counting": "One no-envelope release volume/phase-state defect. Fourteen score variants,fixtures,oracle migration and test variants add zero extra IDs."
+}

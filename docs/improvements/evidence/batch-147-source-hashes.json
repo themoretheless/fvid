@@ -1,0 +1,6 @@
+{
+  "src/subtitles.rs": "fc3b1cfe4a41f2c4c5a73439683e8f1c4ea0c3dda97f86e0d70ecba86e2c4d0b",
+  "tests/sami_attribute_values.rs": "6f55c8685a26a884b469fe58cad66a2e3ba7e49600a6ce659ce92954f1f2ccde",
+  "scripts/generate_sami_attribute_regressions.py": "9be7eba9a4d170d23d89af60e640c72e653d25e2e3cd2d5d84a38012daa58abd",
+  "tests/fixtures/playback-errors/sami-attributes/manifest.json": "65b3bc5f15a98a94c1b6bcfcdfd928f8b8858d3b58a9bbaf14f56654007c2db6"
+}

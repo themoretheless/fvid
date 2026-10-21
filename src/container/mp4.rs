@@ -1546,6 +1546,7 @@ struct Fragment {
 #[derive(Clone, Copy, Debug)]
 struct TrackExtends {
     track: u32,
+    description: u32,
     duration: u32,
     size: u32,
     /// `None` when the box states no flags at all, which leaves a sample's own
@@ -1571,12 +1572,14 @@ fn fragment_defaults(moov: &[Atom<'_>]) -> Result<Vec<TrackExtends>> {
     let mut out = Vec::new();
     for trex in children.iter().filter(|a| &a.kind == b"trex") {
         version(trex.data, 0)?;
-        if u32be(trex.data, 8)? > 1 {
+        let description = u32be(trex.data, 8)?;
+        if description > 1 {
             return Err(invalid("MP4 fragment sample description index"));
         }
         let flags = u32be(trex.data, 20)?;
         out.push(TrackExtends {
             track: u32be(trex.data, 4)?,
+            description,
             duration: u32be(trex.data, 12)?,
             size: u32be(trex.data, 16)?,
             flags: (flags != 0).then_some(flags),
@@ -1628,10 +1631,13 @@ fn index_fragments(
                 stated_base = Some(u64be(header, at)?);
                 at += 8;
             }
+            let mut description = None;
             if flags & 0x00_0002 != 0 {
-                if u32be(header, at)? > 1 {
+                let value = u32be(header, at)?;
+                if value > 1 {
                     return Err(invalid("MP4 fragment sample description index"));
                 }
+                description = Some(value);
                 at += 4;
             }
             let mut duration = 0;
@@ -1664,6 +1670,9 @@ fn index_fragments(
                 continue;
             };
             let extends = defaults.iter().find(|entry| entry.track == id);
+            let description = description
+                .or_else(|| extends.map(|entry| entry.description))
+                .unwrap_or(1);
             let duration = if duration == 0 {
                 extends.map_or(0, |entry| entry.duration)
             } else {
@@ -1738,6 +1747,11 @@ fn index_fragments(
                     != Some(bytes.len())
                 {
                     return Err(invalid("MP4 track-run size does not match its rows"));
+                }
+                // Only a populated run selects a description. A tfhd override
+                // may replace an unused zero trex default;empty runs use none.
+                if count != 0 && description == 0 {
+                    return Err(unsupported("MP4 fragment sample description zero is not supported"));
                 }
                 for index in 0..count {
                     if *limit == 0 {

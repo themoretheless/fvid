@@ -1,0 +1,964 @@
+{
+  "cases": [
+    {
+      "name": "a0-e8-t0-m0-d0",
+      "file": "a0-e8-t0-m0-d0.ec3",
+      "video": "a0-e8-t0-m0-d0.mkv",
+      "mp4": "a0-e8-t0-m0-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 0,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m0-d1",
+      "file": "a0-e8-t0-m0-d1.ec3",
+      "video": "a0-e8-t0-m0-d1.mkv",
+      "mp4": "a0-e8-t0-m0-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 0,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m1-d0",
+      "file": "a0-e8-t0-m1-d0.ec3",
+      "video": "a0-e8-t0-m1-d0.mkv",
+      "mp4": "a0-e8-t0-m1-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 1,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m1-d1",
+      "file": "a0-e8-t0-m1-d1.ec3",
+      "video": "a0-e8-t0-m1-d1.mkv",
+      "mp4": "a0-e8-t0-m1-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 1,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m2-d0",
+      "file": "a0-e8-t0-m2-d0.ec3",
+      "video": "a0-e8-t0-m2-d0.mkv",
+      "mp4": "a0-e8-t0-m2-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 2,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m2-d1",
+      "file": "a0-e8-t0-m2-d1.ec3",
+      "video": "a0-e8-t0-m2-d1.mkv",
+      "mp4": "a0-e8-t0-m2-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 2,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m3-d0",
+      "file": "a0-e8-t0-m3-d0.ec3",
+      "video": "a0-e8-t0-m3-d0.mkv",
+      "mp4": "a0-e8-t0-m3-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 3,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m3-d1",
+      "file": "a0-e8-t0-m3-d1.ec3",
+      "video": "a0-e8-t0-m3-d1.mkv",
+      "mp4": "a0-e8-t0-m3-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 3,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m4-d0",
+      "file": "a0-e8-t0-m4-d0.ec3",
+      "video": "a0-e8-t0-m4-d0.mkv",
+      "mp4": "a0-e8-t0-m4-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 4,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m4-d1",
+      "file": "a0-e8-t0-m4-d1.ec3",
+      "video": "a0-e8-t0-m4-d1.mkv",
+      "mp4": "a0-e8-t0-m4-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 4,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m5-d0",
+      "file": "a0-e8-t0-m5-d0.ec3",
+      "video": "a0-e8-t0-m5-d0.mkv",
+      "mp4": "a0-e8-t0-m5-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 5,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m5-d1",
+      "file": "a0-e8-t0-m5-d1.ec3",
+      "video": "a0-e8-t0-m5-d1.mkv",
+      "mp4": "a0-e8-t0-m5-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 5,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m6-d0",
+      "file": "a0-e8-t0-m6-d0.ec3",
+      "video": "a0-e8-t0-m6-d0.mkv",
+      "mp4": "a0-e8-t0-m6-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 6,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m6-d1",
+      "file": "a0-e8-t0-m6-d1.ec3",
+      "video": "a0-e8-t0-m6-d1.mkv",
+      "mp4": "a0-e8-t0-m6-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 6,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t0-m7-d0",
+      "file": "a0-e8-t0-m7-d0.ec3",
+      "video": "a0-e8-t0-m7-d0.mkv",
+      "mp4": "a0-e8-t0-m7-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 7,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t0-m7-d1",
+      "file": "a0-e8-t0-m7-d1.ec3",
+      "video": "a0-e8-t0-m7-d1.mkv",
+      "mp4": "a0-e8-t0-m7-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 7,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m0-d0",
+      "file": "a0-e8-t2-m0-d0.ec3",
+      "video": "a0-e8-t2-m0-d0.mkv",
+      "mp4": "a0-e8-t2-m0-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 0,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m0-d1",
+      "file": "a0-e8-t2-m0-d1.ec3",
+      "video": "a0-e8-t2-m0-d1.mkv",
+      "mp4": "a0-e8-t2-m0-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 0,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m1-d0",
+      "file": "a0-e8-t2-m1-d0.ec3",
+      "video": "a0-e8-t2-m1-d0.mkv",
+      "mp4": "a0-e8-t2-m1-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 1,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m1-d1",
+      "file": "a0-e8-t2-m1-d1.ec3",
+      "video": "a0-e8-t2-m1-d1.mkv",
+      "mp4": "a0-e8-t2-m1-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 1,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m2-d0",
+      "file": "a0-e8-t2-m2-d0.ec3",
+      "video": "a0-e8-t2-m2-d0.mkv",
+      "mp4": "a0-e8-t2-m2-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 2,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m2-d1",
+      "file": "a0-e8-t2-m2-d1.ec3",
+      "video": "a0-e8-t2-m2-d1.mkv",
+      "mp4": "a0-e8-t2-m2-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 2,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m3-d0",
+      "file": "a0-e8-t2-m3-d0.ec3",
+      "video": "a0-e8-t2-m3-d0.mkv",
+      "mp4": "a0-e8-t2-m3-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 3,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m3-d1",
+      "file": "a0-e8-t2-m3-d1.ec3",
+      "video": "a0-e8-t2-m3-d1.mkv",
+      "mp4": "a0-e8-t2-m3-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 3,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m4-d0",
+      "file": "a0-e8-t2-m4-d0.ec3",
+      "video": "a0-e8-t2-m4-d0.mkv",
+      "mp4": "a0-e8-t2-m4-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 4,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m4-d1",
+      "file": "a0-e8-t2-m4-d1.ec3",
+      "video": "a0-e8-t2-m4-d1.mkv",
+      "mp4": "a0-e8-t2-m4-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 4,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m5-d0",
+      "file": "a0-e8-t2-m5-d0.ec3",
+      "video": "a0-e8-t2-m5-d0.mkv",
+      "mp4": "a0-e8-t2-m5-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 5,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m5-d1",
+      "file": "a0-e8-t2-m5-d1.ec3",
+      "video": "a0-e8-t2-m5-d1.mkv",
+      "mp4": "a0-e8-t2-m5-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 5,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m6-d0",
+      "file": "a0-e8-t2-m6-d0.ec3",
+      "video": "a0-e8-t2-m6-d0.mkv",
+      "mp4": "a0-e8-t2-m6-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 6,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m6-d1",
+      "file": "a0-e8-t2-m6-d1.ec3",
+      "video": "a0-e8-t2-m6-d1.mkv",
+      "mp4": "a0-e8-t2-m6-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 6,
+      "enabled": true
+    },
+    {
+      "name": "a0-e8-t2-m7-d0",
+      "file": "a0-e8-t2-m7-d0.ec3",
+      "video": "a0-e8-t2-m7-d0.mkv",
+      "mp4": "a0-e8-t2-m7-d0.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 7,
+      "enabled": false
+    },
+    {
+      "name": "a0-e8-t2-m7-d1",
+      "file": "a0-e8-t2-m7-d1.ec3",
+      "video": "a0-e8-t2-m7-d1.mkv",
+      "mp4": "a0-e8-t2-m7-d1.mp4",
+      "allocated": false,
+      "exponent": 8,
+      "mask": 7,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m0-d0",
+      "file": "a0-e12-t0-m0-d0.ec3",
+      "video": "a0-e12-t0-m0-d0.mkv",
+      "mp4": "a0-e12-t0-m0-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 0,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m0-d1",
+      "file": "a0-e12-t0-m0-d1.ec3",
+      "video": "a0-e12-t0-m0-d1.mkv",
+      "mp4": "a0-e12-t0-m0-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 0,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m1-d0",
+      "file": "a0-e12-t0-m1-d0.ec3",
+      "video": "a0-e12-t0-m1-d0.mkv",
+      "mp4": "a0-e12-t0-m1-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 1,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m1-d1",
+      "file": "a0-e12-t0-m1-d1.ec3",
+      "video": "a0-e12-t0-m1-d1.mkv",
+      "mp4": "a0-e12-t0-m1-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 1,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m2-d0",
+      "file": "a0-e12-t0-m2-d0.ec3",
+      "video": "a0-e12-t0-m2-d0.mkv",
+      "mp4": "a0-e12-t0-m2-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 2,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m2-d1",
+      "file": "a0-e12-t0-m2-d1.ec3",
+      "video": "a0-e12-t0-m2-d1.mkv",
+      "mp4": "a0-e12-t0-m2-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 2,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m3-d0",
+      "file": "a0-e12-t0-m3-d0.ec3",
+      "video": "a0-e12-t0-m3-d0.mkv",
+      "mp4": "a0-e12-t0-m3-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 3,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m3-d1",
+      "file": "a0-e12-t0-m3-d1.ec3",
+      "video": "a0-e12-t0-m3-d1.mkv",
+      "mp4": "a0-e12-t0-m3-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 3,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m4-d0",
+      "file": "a0-e12-t0-m4-d0.ec3",
+      "video": "a0-e12-t0-m4-d0.mkv",
+      "mp4": "a0-e12-t0-m4-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 4,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m4-d1",
+      "file": "a0-e12-t0-m4-d1.ec3",
+      "video": "a0-e12-t0-m4-d1.mkv",
+      "mp4": "a0-e12-t0-m4-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 4,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m5-d0",
+      "file": "a0-e12-t0-m5-d0.ec3",
+      "video": "a0-e12-t0-m5-d0.mkv",
+      "mp4": "a0-e12-t0-m5-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 5,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m5-d1",
+      "file": "a0-e12-t0-m5-d1.ec3",
+      "video": "a0-e12-t0-m5-d1.mkv",
+      "mp4": "a0-e12-t0-m5-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 5,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m6-d0",
+      "file": "a0-e12-t0-m6-d0.ec3",
+      "video": "a0-e12-t0-m6-d0.mkv",
+      "mp4": "a0-e12-t0-m6-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 6,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m6-d1",
+      "file": "a0-e12-t0-m6-d1.ec3",
+      "video": "a0-e12-t0-m6-d1.mkv",
+      "mp4": "a0-e12-t0-m6-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 6,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t0-m7-d0",
+      "file": "a0-e12-t0-m7-d0.ec3",
+      "video": "a0-e12-t0-m7-d0.mkv",
+      "mp4": "a0-e12-t0-m7-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 7,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t0-m7-d1",
+      "file": "a0-e12-t0-m7-d1.ec3",
+      "video": "a0-e12-t0-m7-d1.mkv",
+      "mp4": "a0-e12-t0-m7-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 7,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m0-d0",
+      "file": "a0-e12-t2-m0-d0.ec3",
+      "video": "a0-e12-t2-m0-d0.mkv",
+      "mp4": "a0-e12-t2-m0-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 0,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m0-d1",
+      "file": "a0-e12-t2-m0-d1.ec3",
+      "video": "a0-e12-t2-m0-d1.mkv",
+      "mp4": "a0-e12-t2-m0-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 0,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m1-d0",
+      "file": "a0-e12-t2-m1-d0.ec3",
+      "video": "a0-e12-t2-m1-d0.mkv",
+      "mp4": "a0-e12-t2-m1-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 1,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m1-d1",
+      "file": "a0-e12-t2-m1-d1.ec3",
+      "video": "a0-e12-t2-m1-d1.mkv",
+      "mp4": "a0-e12-t2-m1-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 1,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m2-d0",
+      "file": "a0-e12-t2-m2-d0.ec3",
+      "video": "a0-e12-t2-m2-d0.mkv",
+      "mp4": "a0-e12-t2-m2-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 2,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m2-d1",
+      "file": "a0-e12-t2-m2-d1.ec3",
+      "video": "a0-e12-t2-m2-d1.mkv",
+      "mp4": "a0-e12-t2-m2-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 2,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m3-d0",
+      "file": "a0-e12-t2-m3-d0.ec3",
+      "video": "a0-e12-t2-m3-d0.mkv",
+      "mp4": "a0-e12-t2-m3-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 3,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m3-d1",
+      "file": "a0-e12-t2-m3-d1.ec3",
+      "video": "a0-e12-t2-m3-d1.mkv",
+      "mp4": "a0-e12-t2-m3-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 3,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m4-d0",
+      "file": "a0-e12-t2-m4-d0.ec3",
+      "video": "a0-e12-t2-m4-d0.mkv",
+      "mp4": "a0-e12-t2-m4-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 4,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m4-d1",
+      "file": "a0-e12-t2-m4-d1.ec3",
+      "video": "a0-e12-t2-m4-d1.mkv",
+      "mp4": "a0-e12-t2-m4-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 4,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m5-d0",
+      "file": "a0-e12-t2-m5-d0.ec3",
+      "video": "a0-e12-t2-m5-d0.mkv",
+      "mp4": "a0-e12-t2-m5-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 5,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m5-d1",
+      "file": "a0-e12-t2-m5-d1.ec3",
+      "video": "a0-e12-t2-m5-d1.mkv",
+      "mp4": "a0-e12-t2-m5-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 5,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m6-d0",
+      "file": "a0-e12-t2-m6-d0.ec3",
+      "video": "a0-e12-t2-m6-d0.mkv",
+      "mp4": "a0-e12-t2-m6-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 6,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m6-d1",
+      "file": "a0-e12-t2-m6-d1.ec3",
+      "video": "a0-e12-t2-m6-d1.mkv",
+      "mp4": "a0-e12-t2-m6-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 6,
+      "enabled": true
+    },
+    {
+      "name": "a0-e12-t2-m7-d0",
+      "file": "a0-e12-t2-m7-d0.ec3",
+      "video": "a0-e12-t2-m7-d0.mkv",
+      "mp4": "a0-e12-t2-m7-d0.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 7,
+      "enabled": false
+    },
+    {
+      "name": "a0-e12-t2-m7-d1",
+      "file": "a0-e12-t2-m7-d1.ec3",
+      "video": "a0-e12-t2-m7-d1.mkv",
+      "mp4": "a0-e12-t2-m7-d1.mp4",
+      "allocated": false,
+      "exponent": 12,
+      "mask": 7,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m0-d0",
+      "file": "a1-e10-t0-m0-d0.ec3",
+      "video": "a1-e10-t0-m0-d0.mkv",
+      "mp4": "a1-e10-t0-m0-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 0,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m0-d1",
+      "file": "a1-e10-t0-m0-d1.ec3",
+      "video": "a1-e10-t0-m0-d1.mkv",
+      "mp4": "a1-e10-t0-m0-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 0,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m1-d0",
+      "file": "a1-e10-t0-m1-d0.ec3",
+      "video": "a1-e10-t0-m1-d0.mkv",
+      "mp4": "a1-e10-t0-m1-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 1,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m1-d1",
+      "file": "a1-e10-t0-m1-d1.ec3",
+      "video": "a1-e10-t0-m1-d1.mkv",
+      "mp4": "a1-e10-t0-m1-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 1,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m2-d0",
+      "file": "a1-e10-t0-m2-d0.ec3",
+      "video": "a1-e10-t0-m2-d0.mkv",
+      "mp4": "a1-e10-t0-m2-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 2,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m2-d1",
+      "file": "a1-e10-t0-m2-d1.ec3",
+      "video": "a1-e10-t0-m2-d1.mkv",
+      "mp4": "a1-e10-t0-m2-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 2,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m3-d0",
+      "file": "a1-e10-t0-m3-d0.ec3",
+      "video": "a1-e10-t0-m3-d0.mkv",
+      "mp4": "a1-e10-t0-m3-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 3,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m3-d1",
+      "file": "a1-e10-t0-m3-d1.ec3",
+      "video": "a1-e10-t0-m3-d1.mkv",
+      "mp4": "a1-e10-t0-m3-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 3,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m4-d0",
+      "file": "a1-e10-t0-m4-d0.ec3",
+      "video": "a1-e10-t0-m4-d0.mkv",
+      "mp4": "a1-e10-t0-m4-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 4,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m4-d1",
+      "file": "a1-e10-t0-m4-d1.ec3",
+      "video": "a1-e10-t0-m4-d1.mkv",
+      "mp4": "a1-e10-t0-m4-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 4,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m5-d0",
+      "file": "a1-e10-t0-m5-d0.ec3",
+      "video": "a1-e10-t0-m5-d0.mkv",
+      "mp4": "a1-e10-t0-m5-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 5,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m5-d1",
+      "file": "a1-e10-t0-m5-d1.ec3",
+      "video": "a1-e10-t0-m5-d1.mkv",
+      "mp4": "a1-e10-t0-m5-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 5,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m6-d0",
+      "file": "a1-e10-t0-m6-d0.ec3",
+      "video": "a1-e10-t0-m6-d0.mkv",
+      "mp4": "a1-e10-t0-m6-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 6,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m6-d1",
+      "file": "a1-e10-t0-m6-d1.ec3",
+      "video": "a1-e10-t0-m6-d1.mkv",
+      "mp4": "a1-e10-t0-m6-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 6,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t0-m7-d0",
+      "file": "a1-e10-t0-m7-d0.ec3",
+      "video": "a1-e10-t0-m7-d0.mkv",
+      "mp4": "a1-e10-t0-m7-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 7,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t0-m7-d1",
+      "file": "a1-e10-t0-m7-d1.ec3",
+      "video": "a1-e10-t0-m7-d1.mkv",
+      "mp4": "a1-e10-t0-m7-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 7,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m0-d0",
+      "file": "a1-e10-t2-m0-d0.ec3",
+      "video": "a1-e10-t2-m0-d0.mkv",
+      "mp4": "a1-e10-t2-m0-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 0,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m0-d1",
+      "file": "a1-e10-t2-m0-d1.ec3",
+      "video": "a1-e10-t2-m0-d1.mkv",
+      "mp4": "a1-e10-t2-m0-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 0,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m1-d0",
+      "file": "a1-e10-t2-m1-d0.ec3",
+      "video": "a1-e10-t2-m1-d0.mkv",
+      "mp4": "a1-e10-t2-m1-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 1,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m1-d1",
+      "file": "a1-e10-t2-m1-d1.ec3",
+      "video": "a1-e10-t2-m1-d1.mkv",
+      "mp4": "a1-e10-t2-m1-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 1,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m2-d0",
+      "file": "a1-e10-t2-m2-d0.ec3",
+      "video": "a1-e10-t2-m2-d0.mkv",
+      "mp4": "a1-e10-t2-m2-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 2,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m2-d1",
+      "file": "a1-e10-t2-m2-d1.ec3",
+      "video": "a1-e10-t2-m2-d1.mkv",
+      "mp4": "a1-e10-t2-m2-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 2,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m3-d0",
+      "file": "a1-e10-t2-m3-d0.ec3",
+      "video": "a1-e10-t2-m3-d0.mkv",
+      "mp4": "a1-e10-t2-m3-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 3,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m3-d1",
+      "file": "a1-e10-t2-m3-d1.ec3",
+      "video": "a1-e10-t2-m3-d1.mkv",
+      "mp4": "a1-e10-t2-m3-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 3,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m4-d0",
+      "file": "a1-e10-t2-m4-d0.ec3",
+      "video": "a1-e10-t2-m4-d0.mkv",
+      "mp4": "a1-e10-t2-m4-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 4,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m4-d1",
+      "file": "a1-e10-t2-m4-d1.ec3",
+      "video": "a1-e10-t2-m4-d1.mkv",
+      "mp4": "a1-e10-t2-m4-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 4,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m5-d0",
+      "file": "a1-e10-t2-m5-d0.ec3",
+      "video": "a1-e10-t2-m5-d0.mkv",
+      "mp4": "a1-e10-t2-m5-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 5,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m5-d1",
+      "file": "a1-e10-t2-m5-d1.ec3",
+      "video": "a1-e10-t2-m5-d1.mkv",
+      "mp4": "a1-e10-t2-m5-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 5,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m6-d0",
+      "file": "a1-e10-t2-m6-d0.ec3",
+      "video": "a1-e10-t2-m6-d0.mkv",
+      "mp4": "a1-e10-t2-m6-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 6,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m6-d1",
+      "file": "a1-e10-t2-m6-d1.ec3",
+      "video": "a1-e10-t2-m6-d1.mkv",
+      "mp4": "a1-e10-t2-m6-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 6,
+      "enabled": true
+    },
+    {
+      "name": "a1-e10-t2-m7-d0",
+      "file": "a1-e10-t2-m7-d0.ec3",
+      "video": "a1-e10-t2-m7-d0.mkv",
+      "mp4": "a1-e10-t2-m7-d0.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 7,
+      "enabled": false
+    },
+    {
+      "name": "a1-e10-t2-m7-d1",
+      "file": "a1-e10-t2-m7-d1.ec3",
+      "video": "a1-e10-t2-m7-d1.mkv",
+      "mp4": "a1-e10-t2-m7-d1.mp4",
+      "allocated": true,
+      "exponent": 10,
+      "mask": 7,
+      "enabled": true
+    }
+  ]
+}

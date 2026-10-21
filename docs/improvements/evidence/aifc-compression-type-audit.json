@@ -1,0 +1,9 @@
+{
+  "status": "audit-only-unaccepted",
+  "source": "src/playback/audio/aiff.rs",
+  "finding": "parse_comm explicitly treats AIFC COMM18..21 bytes as plain NONE PCM whenever the compressionType is missing or incomplete. This can silently select wrong endian/codec instead of refusing an unidentifiable program. No fix or accepted ID yet.",
+  "primary_reference": "https://dev.os9.ca/techpubs/mac/Sound/Sound-61.html",
+  "reference_provenance": "Mirror of Apple Inside Macintosh:Sound,Sound Manager,Common Chunk. AIFF-C explicitly extends mandatory18-byte geometry with4-byte compressionType;NONE identifies uncompressed sound. No compressionName/FVER strictness change is proposed.",
+  "next_gate": "After previous batch validation,author AIFF and complete AIFC NONE/sowt controls plus same sound data with COMM truncated to18/19/20/21 bytes. Confirm successful wrong native PCM admission before fix;then precise Invalid missing-compression-type refusal. Keep complete22-byte type compatibility,even if name omitted,and use synthetic video companion.",
+  "oracle_design": "Use asymmetric authored integer16/24/32 mono/stereo values and little-endian payloads. Complete sowt controls match literal gold;incomplete18..21-byte COMM old fallback selects NONE big-endian. Store independently computed big-endian reinterpretation as an explicit wrong-output control,and require it differs from intended gold. FVER,chunk lengths,padding,declared frames and SSND offsets remain valid. Keep22-byte complete type without compressionName as compatibility control."
+}

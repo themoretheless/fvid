@@ -41,7 +41,7 @@ fn signed_block_padding_spans_fixed_xiph_and_ebml_laces_without_refusing_valid_a
 }
 
 #[test]
-fn owned_pcm_export_keeps_one_leading_padding_origin_across_laced_frames() {
+fn owned_pcm_export_preserves_zero_origin_and_audible_laced_samples() {
     let base=Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/matroska-lace-padding");
     let manifest:serde_json::Value=serde_json::from_slice(&std::fs::read(base.join("manifest.json")).unwrap()).unwrap();
     let mut wrong=Vec::new();
@@ -57,11 +57,16 @@ fn owned_pcm_export_keeps_one_leading_padding_origin_across_laced_frames() {
             };
             if expected.is_empty(){assert!(result.err().unwrap().to_string().contains("contains no samples"));continue;}
             result.unwrap();
-            let wanted=if precise {expected.chunks_exact(4).flat_map(|b|f64::from(f32::from_le_bytes(b.try_into().unwrap())).to_le_bytes()).collect::<Vec<_>>()}else{expected.clone()};
+            // Packet oracles concatenate audible windows. Whole-container PCM
+            // export retains their timestamps, including the initial gap even
+            // when block-level head padding consumes complete lace packets.
+            let mut timeline=vec![0;case["first"].as_u64().unwrap() as usize*4];
+            timeline.extend_from_slice(&expected);
+            let wanted=if precise {timeline.chunks_exact(4).flat_map(|b|f64::from(f32::from_le_bytes(b.try_into().unwrap())).to_le_bytes()).collect::<Vec<_>>()}else{timeline};
             if output!=wanted {wrong.push(format!("{name},f64={precise}: {} instead of{} bytes",output.len(),wanted.len()));}
         }
     }
-    assert!(wrong.is_empty(),"laced leading padding was reinserted as output silence: {wrong:?}");
+    assert!(wrong.is_empty(),"laced container timeline or audible samples differ: {wrong:?}");
 }
 
 #[test]

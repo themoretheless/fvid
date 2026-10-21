@@ -9,17 +9,12 @@
 //!
 //! The two headers of one stream state the same facts in different words, so a
 //! stream is only readable once the coding says which word means what. For the two
-//! Microsoft-spelled ADPCM codings the pair is settled by the block. `dwScale` over
-//! `dwRate` is how long one record plays, and a record of these codings is one
-//! block, so the pair is the block's sample count over the sample rate the `strf`
-//! record states beside it - stated in reduced terms, which is why the two are
-//! compared as a product and not as two numbers: a 48 kHz Microsoft mono stream
-//! whose block holds 2 036 samples writes 509 over 12 000. And `dwLength` counts
-//! *records*, measured on files this build's reference muxer writes, where a
-//! five-record stream states a length of five. The same muxer counts *samples* for
-//! an uncompressed stream of the same shape, so the counting is a property of the
-//! coding, and this reader limits itself to the codings whose counting it has
-//! measured rather than inferring one from the other.
+//! Microsoft-spelled ADPCM codings the unit is one fixed-size block. `dwScale`
+//! over `dwRate` is that block's sample count over the sample rate in `strf`.
+//! A chunk may group several blocks; the reader exposes each as an independent
+//! decoder packet, and `dwLength` is checked against the total block count.
+//! Chunk indexing remains the container's job. The logical block view preserves
+//! packet clocks and block-rounded seek regardless of how chunks group samples.
 //!
 //! The block's sample count is not read from the setup record either: it is
 //! computed from the block's byte length, the channel count and the coding, by the
@@ -28,7 +23,7 @@
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::adpcm_decoder::block_frames;
-use crate::container::avi::{Audio, Avi, Limits};
+use crate::container::avi::{Audio, Avi, Limits, Record};
 use crate::{Error, Result, invalid, unsupported};
 use std::io::Read;
 use std::time::Duration;
@@ -40,30 +35,26 @@ use std::time::Duration;
 const ADPCM_MS: u16 = 0x0002;
 const ADPCM_IMA_WAV: u16 = 0x0011;
 
-/// Wave format numbers of codings this build decodes out of another container:
-/// uncompressed integers and floats and the two G.711 tables, all of which the Wave
-/// reader hands to an arm that already exists. A stream of one of these is missing
-/// this reader's record framing rather than a decoder, and says so.
-const FRAMED_ELSEWHERE: [u16; 2] = [0x0001, 0x0003];
+/// Bound linear PCM packets independently of the source chunk size.
+const PCM_PACKET_FRAMES: usize = 2_048;
 
-/// The dispatch name of a coding this reader frames, or `None` for one it leaves to
-/// another file's reader.
-fn coding(tag: u16) -> Option<&'static str> {
-    match tag {
-        6=>Some("pcm_alaw"),7=>Some("pcm_mulaw"),
-        ADPCM_MS => Some("adpcm_ms"),
-        ADPCM_IMA_WAV => Some("adpcm_ima_wav"),
+/// Native decoder for one supported Wave format and sample width.
+fn coding(tag: u16, bits: u16) -> Option<&'static str> {
+    match (tag, bits) {
+        (0x0001, 8 | 16 | 24 | 32) => Some("A_PCM/INT/LIT"),
+        (0x0003, 32 | 64) => Some("A_PCM/FLOAT/IEEE"),
+        (6, _) => Some("pcm_alaw"),
+        (7, _) => Some("pcm_mulaw"),
+        (ADPCM_MS, _) => Some("adpcm_ms"),
+        (ADPCM_IMA_WAV, _) => Some("adpcm_ima_wav"),
         _ => None,
     }
 }
 
-/// What a stream this reader leaves alone states about itself, in the half of the
-/// pipeline that is missing: a coding with an arm and no framing here is a reader's
-/// gap, and one with no arm at all is a decoder's.
-fn refused(tag: u16) -> Error {
-    if FRAMED_ELSEWHERE.contains(&tag) {
-        return invalid(&format!(
-            "AVI audio coded as Wave format {tag:#06x} is a coding this reader frames no records for"
+fn refused(tag: u16, bits: u16) -> Error {
+    if matches!(tag, 0x0001 | 0x0003) {
+        return unsupported(&format!(
+            "AVI PCM Wave format {tag:#06x} at {bits} bits is unsupported"
         ));
     }
     unsupported(&format!(
@@ -80,16 +71,21 @@ struct Program {
     channels: u16,
     bits: u16,
     /// Samples one block holds, as the coding's arithmetic and the header's own
-    /// timing agree on. Every record of the run is one block, so this is also how
-    /// far the timeline advances per packet.
+    /// timing agree on. ADPCM packets each carry one independently coded block.
     frames: u64,
     /// The whole `strf` body: the `WAVEFORMATEX` a decoder reads its block length
     /// and, for Microsoft's coding, its prediction tables out of.
     setup: Vec<u8>,
     /// This stream's place in the container's own list, whose records it reads.
     stream: usize,
-    /// How many records the run holds, which is what the header's `dwLength` states.
+    /// Indexed ADPCM blocks or PCM/G.711 records. PCM records may span windows.
     records: usize,
+    /// Encoded bytes per frame for PCM/G.711 record spans;unused for ADPCM.
+    input_frame_bytes: usize,
+    /// PCM spans are streamed in bounded windows;G.711 keeps its record grain.
+    packet_frames: Option<usize>,
+    // Only grouped ADPCM chunks need a separate logical-block view.
+    block_records: Option<Vec<Record>>,
     samples: Option<Vec<(u64,u64)>>,
 }
 
@@ -125,14 +121,14 @@ impl AviAudioReader {
         let avi = Avi::parse(&bytes, &limits)?;
         let mut programs = Vec::new();
         for (index, stream) in avi.audio().iter().enumerate() {
-            let Some(codec) = coding(stream.format.tag) else {
+            let Some(codec) = coding(stream.format.tag, stream.format.bits) else {
                 continue;
             };
-            programs.push(laid_out(codec, index, stream)?);
+            programs.push(laid_out(codec, index, stream, &limits)?);
         }
         if programs.is_empty() {
             return Err(match avi.audio().first() {
-                Some(stream) => refused(stream.format.tag),
+                Some(stream) => refused(stream.format.tag, stream.format.bits),
                 None => invalid("AVI has no audio stream"),
             });
         }
@@ -156,19 +152,26 @@ impl AviAudioReader {
         &self.programs[self.chosen]
     }
 
-    /// Bytes of one of the chosen stream's records: exactly one block, by the check
-    /// that laid the stream out.
+    /// One indexed ADPCM block or PCM/G.711 record;PCM is windowed afterwards.
     fn record(&self, at: usize) -> Option<&[u8]> {
-        let stream = self.programs[self.chosen].stream;
-        self.avi.audio()[stream].record(&self.file, at)
+        let program = self.program();
+        if let Some(records) = &program.block_records {
+            let record = records.get(at)?;
+            self.file.get(record.start..record.start.checked_add(record.len)?)
+        } else {
+            self.avi.audio()[program.stream].record(&self.file, at)
+        }
     }
 }
 
 /// Lay a stream out as a decoder's timeline, or say where its two headers and its
 /// records fail to agree. Every check here compares one claim of the file with
 /// another; none of them fills in a number the file left out.
-fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program> {
+fn laid_out(codec: &'static str, index: usize, stream: &Audio, limits: &Limits) -> Result<Program> {
     if matches!(codec,"pcm_alaw"|"pcm_mulaw") {return laid_out_g711(codec,index,stream);}
+    if matches!(stream.format.tag, 0x0001 | 0x0003) {
+        return laid_out_pcm(codec, index, stream);
+    }
     let format = stream.format;
     let block_bytes = u64::from(format.block_align);
     let rate = u64::from(format.sample_rate);
@@ -189,23 +192,34 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program
             stream.number
         )));
     }
-    // For these codings one record is one block, and the header's `dwLength` counts
-    // the records - the counting this build's reference muxer writes them with.
-    if usize::try_from(stream.declared) != Ok(stream.records.len()) {
-        return Err(invalid(&format!(
-            "AVI audio stream {} states {} records and the run holds {}",
-            stream.number,
-            stream.declared,
-            stream.records.len()
-        )));
-    }
+    // A fixed-size AVI sample is one ADPCM block. Several samples may share
+    // a physical chunk, so dwLength counts blocks rather than chunk headers.
+    let block_size = usize::from(format.block_align);
+    let mut count = 0usize;
+    let mut grouped = false;
     for (at, record) in stream.records.iter().enumerate() {
-        if usize::try_from(block_bytes) != Ok(record.len) {
+        if record.len == 0 || record.len % block_size != 0 {
             return Err(invalid(&format!(
-                "AVI audio stream {} record {at} holds {} bytes where its coding's block is {block_bytes}",
+                "AVI audio stream {} record {at} holds {} bytes and does not contain whole ADPCM blocks of {block_bytes} bytes",
                 stream.number, record.len
             )));
         }
+        let blocks = record.len / block_size;
+        grouped |= blocks > 1;
+        count = count.checked_add(blocks)
+            .ok_or_else(|| invalid("AVI ADPCM block count overflow"))?;
+        if count > limits.records {
+            return Err(invalid(&format!(
+                "AVI audio stream {} expands to more than {} ADPCM blocks",
+                stream.number, limits.records
+            )));
+        }
+    }
+    if usize::try_from(stream.declared) != Ok(count) {
+        return Err(invalid(&format!(
+            "AVI audio stream {} states {} ADPCM blocks and the run holds {count}",
+            stream.number, stream.declared
+        )));
     }
     // The pair in the stream header is one block's duration, and the block's sample
     // count over the sample rate is the same duration, so the two products are one
@@ -213,7 +227,7 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program
     // products match.
     if u64::from(stream.scale) * rate != u64::from(stream.rate) * frames {
         return Err(invalid(&format!(
-            "AVI audio stream {} plays a record for {} over {} where its block of {frames} samples at {rate} Hz plays {frames} over {rate}",
+            "AVI audio stream {} plays a block for {} over {} where its block of {frames} samples at {rate} Hz plays {frames} over {rate}",
             stream.number, stream.scale, stream.rate
         )));
     }
@@ -233,6 +247,23 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program
             stream.number
         )));
     }
+    let block_records = if grouped {
+        let mut records = Vec::new();
+        records.try_reserve_exact(count)
+            .map_err(|_| invalid("AVI ADPCM block index allocation failed"))?;
+        for record in &stream.records {
+            for offset in (0..record.len).step_by(block_size) {
+                records.push(Record {
+                    start: record.start.checked_add(offset)
+                        .ok_or_else(|| invalid("AVI ADPCM block offset overflow"))?,
+                    len: block_size,
+                });
+            }
+        }
+        Some(records)
+    } else {
+        None
+    };
     Ok(Program {
         codec,
         sample_rate: format.sample_rate,
@@ -241,8 +272,54 @@ fn laid_out(codec: &'static str, index: usize, stream: &Audio) -> Result<Program
         frames,
         setup: stream.setup.clone(),
         stream: index,
-        records: stream.records.len(),
+        records: count,
+        input_frame_bytes: 0,
+        packet_frames: None,
+        block_records,
         samples: None,
+    })
+}
+
+fn laid_out_pcm(codec: &'static str, index: usize, stream: &Audio) -> Result<Program> {
+    let f = stream.format;
+    let stride = u64::from(f.channels) * u64::from(f.bits / 8);
+    if stride == 0 || u64::from(f.block_align) != stride
+        || u64::from(f.bytes_per_second) != stride * u64::from(f.sample_rate)
+    {
+        return Err(invalid("inconsistent AVI PCM sample geometry"));
+    }
+    if stream.scale == 0
+        || u64::from(stream.scale) * u64::from(f.sample_rate) != u64::from(stream.rate)
+    {
+        return Err(invalid("AVI PCM clock disagrees with its sample rate"));
+    }
+    let stride = usize::from(f.block_align);
+    let mut samples = Vec::new();
+    samples.try_reserve_exact(stream.records.len())
+        .map_err(|_| invalid("AVI PCM sample index allocation failed"))?;
+    let start = u64::from(stream.start);
+    let mut cursor = start;
+    for record in &stream.records {
+        if record.len == 0 || record.len % stride != 0 {
+            return Err(invalid("AVI PCM record ends in an incomplete channel frame"));
+        }
+        let frames = u64::try_from(record.len / stride)
+            .map_err(|_| invalid("AVI PCM frame count overflow"))?;
+        samples.push((cursor, frames));
+        cursor = cursor.checked_add(frames)
+            .ok_or_else(|| invalid("AVI PCM clock overflow"))?;
+        if cursor > i64::MAX as u64 {
+            return Err(invalid("AVI PCM clock exceeds the packet time range"));
+        }
+    }
+    if samples.is_empty() || cursor - start != u64::from(stream.declared) {
+        return Err(invalid("AVI PCM declared frame count disagrees with records"));
+    }
+    Ok(Program {
+        codec, sample_rate: f.sample_rate, channels: f.channels, bits: f.bits,
+        frames: 1, setup: stream.setup.clone(), stream: index, records: samples.len(),
+        input_frame_bytes: stride, packet_frames: Some(PCM_PACKET_FRAMES),
+        block_records: None, samples: Some(samples),
     })
 }
 
@@ -257,7 +334,7 @@ fn laid_out_g711(codec: &'static str,index:usize,stream:&Audio)->Result<Program>
         cursor=cursor.checked_add(frames).ok_or_else(||invalid("AVI G.711 clock overflow"))?;
     }
     if samples.is_empty() || cursor-u64::from(stream.start)!=u64::from(stream.declared){return Err(invalid("AVI G.711 declared frame count disagrees with records"));}
-    Ok(Program{codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),samples:Some(samples)})
+    Ok(Program{codec,sample_rate:f.sample_rate,channels:f.channels,bits:8,frames:1,setup:stream.setup.clone(),stream:index,records:samples.len(),input_frame_bytes:usize::from(f.channels),packet_frames:None,block_records:None,samples:Some(samples)})
 }
 
 /// Packets are timestamped in samples of the stream's own rate, which is the unit
@@ -315,11 +392,31 @@ impl AudioStream for AviAudioReader {
             return Ok(None);
         }
         let at = self.packet;
-        if let Some(samples)=&program.samples {
-            let (start,frames)=samples[at];let skip=self.frame_skip;
-            let data=self.record(at).ok_or_else(||invalid("AVI G.711 record missing"))?[skip*usize::from(program.channels)..].to_vec();
-            self.packet+=1;self.frame_skip=0;
-            return Ok(Some(EncodedPacket{data,pts:(start+skip as u64)as i64,duration:frames as i64-skip as i64}));
+        if let Some(samples) = &program.samples {
+            let (start, frames) = samples[at];
+            let skip = self.frame_skip;
+            let frames = usize::try_from(frames)
+                .map_err(|_| invalid("AVI sample span exceeds addressable memory"))?;
+            let left = frames.checked_sub(skip)
+                .ok_or_else(|| invalid("AVI sample cursor exceeds its record"))?;
+            let take = left.min(program.packet_frames.unwrap_or(usize::MAX));
+            if take == 0 {
+                return Err(invalid("AVI sample cursor holds no frames"));
+            }
+            let stride = program.input_frame_bytes;
+            let data = self.record(at).ok_or_else(|| invalid("AVI sample record missing"))?
+                [skip * stride..(skip + take) * stride].to_vec();
+            if skip + take == frames {
+                self.packet += 1;
+                self.frame_skip = 0;
+            } else {
+                self.frame_skip = skip + take;
+            }
+            return Ok(Some(EncodedPacket {
+                data,
+                pts: (start + skip as u64) as i64,
+                duration: take as i64,
+            }));
         }
         let data = self
             .record(at)
@@ -567,27 +664,26 @@ mod tests {
 
     #[test]
     fn a_length_that_does_not_count_the_run_is_a_disagreement() {
-        // `dwLength` counts records for these codings, which is what the muxer's own
-        // files state; a length one past the run is the file doubting its own index.
+        // These reference files each put one block in a chunk. The declared
+        // block count must agree with the payload even when chunks group blocks.
         let mut bytes = IMA_STEREO.to_vec();
         poke(&mut bytes, b"strh", 32, 11);
         let (said, _) = said(&bytes, 0);
         assert_eq!(
             said.expect("a reason").as_str(),
-            "AVI audio stream 0 states 11 records and the run holds 10"
+            "AVI audio stream 0 states 11 ADPCM blocks and the run holds 10"
         );
     }
 
     #[test]
-    fn a_record_that_is_not_one_block_of_its_coding_is_refused() {
-        // Halving the stated block length leaves the records as they are, so the
-        // stream's own geometry no longer matches the bytes it holds.
+    fn a_record_that_contains_a_partial_block_is_refused() {
+        // A chunk may contain whole blocks, but not an incomplete final block.
         let mut bytes = IMA_MONO.to_vec();
-        poke16(&mut bytes, b"strf", 12, 512);
+        poke16(&mut bytes, b"strf", 12, 1016);
         let (said, _) = said(&bytes, 0);
         assert_eq!(
             said.expect("a reason").as_str(),
-            "AVI audio stream 0 record 0 holds 1024 bytes where its coding's block is 512"
+            "AVI audio stream 0 record 0 holds 1024 bytes and does not contain whole ADPCM blocks of 1016 bytes"
         );
     }
 
@@ -602,7 +698,7 @@ mod tests {
         let (said, _) = said(&bytes, 0);
         assert_eq!(
             said.expect("a reason").as_str(),
-            "AVI audio stream 0 plays a record for 2042 over 48000 where its block of 2041 samples at 48000 Hz plays 2041 over 48000"
+            "AVI audio stream 0 plays a block for 2042 over 48000 where its block of 2041 samples at 48000 Hz plays 2041 over 48000"
         );
         // The reduced spelling of the same duration is the one a real Microsoft
         // mono stream uses, and it reads.
@@ -648,16 +744,16 @@ mod tests {
     }
 
     #[test]
-    fn a_coding_with_an_arm_elsewhere_is_a_framing_gap_not_a_missing_decoder() {
-        // Uncompressed 16-bit integers: this build decodes them out of a Wave file,
-        // so the number says which half of the player is missing.
+    fn an_unsupported_pcm_width_is_named_without_claiming_no_decoder() {
+        // This ADPCM reference still states four bits per sample after changing
+        // its tag. That is not a supported linear PCM width.
         let mut bytes = IMA_MONO.to_vec();
         poke16(&mut bytes, b"strf", 0, 1);
         let (said, opened) = said(&bytes, 0);
         assert!(!opened);
         assert_eq!(
             said.expect("a reason").as_str(),
-            "AVI audio coded as Wave format 0x0001 is a coding this reader frames no records for"
+            "AVI PCM Wave format 0x0001 at 4 bits is unsupported"
         );
     }
 

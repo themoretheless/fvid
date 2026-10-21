@@ -109,13 +109,24 @@ pub fn hdr_from_obu(obu: &Obu<'_>) -> Option<HdrMetadata> {
     }
 }
 
+/// Apply a received block, retaining the distinction between absent CLL and
+/// explicitly received zero light levels. Returns whether a CLL was received.
+pub(crate) fn update_hdr(hdr: &mut HdrMetadata, obu: &Obu<'_>) -> bool {
+    let Some(metadata) = hdr_from_obu(obu) else { return false; };
+    if metadata_type(obu.payload).is_ok_and(|(kind, _)| kind == METADATA_HDR_CLL) {
+        hdr.light = metadata.light;
+        true
+    } else {
+        hdr.merge(metadata);
+        false
+    }
+}
+
 /// Static HDR metadata across every metadata OBU of one packet.
 pub fn hdr_from_packet(packet: &[u8]) -> Result<HdrMetadata> {
     let mut hdr = HdrMetadata::default();
     for obu in Obus::new(packet) {
-        if let Some(metadata) = hdr_from_obu(&obu?) {
-            hdr.merge(metadata);
-        }
+        update_hdr(&mut hdr, &obu?);
     }
     Ok(hdr)
 }
@@ -150,8 +161,8 @@ fn signal_from_obus(obus: Obus<'_>) -> (ColourDescription, HdrMetadata) {
                     .ok()
                     .map(|sequence| sequence.color.signal());
             }
-        } else if let Some(metadata) = hdr_from_obu(&obu) {
-            hdr.merge(metadata);
+        } else {
+            update_hdr(&mut hdr, &obu);
         }
     }
     (colour.unwrap_or_default(), hdr)

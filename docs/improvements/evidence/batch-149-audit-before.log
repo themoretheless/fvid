@@ -1,0 +1,4 @@
+upper: same clocks, actual text "Перваястрока", expected "Первая\nстрока"
+mixed: same clocks, actual text "Перваястрока", expected "Первая\nстрока"
+attributes: same clocks, actual text "Перваястрока", expected "Первая\nстрока"
+lower-control: same clocks, actual text "Первая\nстрока", expected "Первая\nстрока"

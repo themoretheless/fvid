@@ -1,0 +1,2437 @@
+{
+  "provenance": "Owned missing/truncated primary slice recovery, literal nonzero PCM planes.",
+  "cases": [
+    {
+      "name": "partition0-good0-II-missing-aso0",
+      "file": "partition0-good0-II-missing-aso0.mp4",
+      "oracle": "partition0-good0-II-missing-aso0.yuv",
+      "primary": "partition0-good0-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-II-missing-aso0-0.packet",
+          "control": "partition0-good0-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-missing-aso0-1.packet",
+          "control": "partition0-good0-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-missing-aso0-2.packet",
+          "control": "partition0-good0-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-missing-aso0-3.packet",
+          "control": "partition0-good0-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-II-missing-aso1",
+      "file": "partition0-good0-II-missing-aso1.mp4",
+      "oracle": "partition0-good0-II-missing-aso1.yuv",
+      "primary": "partition0-good0-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-II-missing-aso1-0.packet",
+          "control": "partition0-good0-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-missing-aso1-1.packet",
+          "control": "partition0-good0-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-missing-aso1-2.packet",
+          "control": "partition0-good0-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-missing-aso1-3.packet",
+          "control": "partition0-good0-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-II-truncated-aso0",
+      "file": "partition0-good0-II-truncated-aso0.mp4",
+      "oracle": "partition0-good0-II-truncated-aso0.yuv",
+      "primary": "partition0-good0-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-II-truncated-aso0-0.packet",
+          "control": "partition0-good0-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-truncated-aso0-1.packet",
+          "control": "partition0-good0-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-truncated-aso0-2.packet",
+          "control": "partition0-good0-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-truncated-aso0-3.packet",
+          "control": "partition0-good0-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-II-truncated-aso1",
+      "file": "partition0-good0-II-truncated-aso1.mp4",
+      "oracle": "partition0-good0-II-truncated-aso1.yuv",
+      "primary": "partition0-good0-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-II-truncated-aso1-0.packet",
+          "control": "partition0-good0-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-truncated-aso1-1.packet",
+          "control": "partition0-good0-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-truncated-aso1-2.packet",
+          "control": "partition0-good0-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-II-truncated-aso1-3.packet",
+          "control": "partition0-good0-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-IP-missing-aso0",
+      "file": "partition0-good0-IP-missing-aso0.mp4",
+      "oracle": "partition0-good0-IP-missing-aso0.yuv",
+      "primary": "partition0-good0-IP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-IP-missing-aso0-0.packet",
+          "control": "partition0-good0-IP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-missing-aso0-1.packet",
+          "control": "partition0-good0-IP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-missing-aso0-2.packet",
+          "control": "partition0-good0-IP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-missing-aso0-3.packet",
+          "control": "partition0-good0-IP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-IP-missing-aso1",
+      "file": "partition0-good0-IP-missing-aso1.mp4",
+      "oracle": "partition0-good0-IP-missing-aso1.yuv",
+      "primary": "partition0-good0-IP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-IP-missing-aso1-0.packet",
+          "control": "partition0-good0-IP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-missing-aso1-1.packet",
+          "control": "partition0-good0-IP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-missing-aso1-2.packet",
+          "control": "partition0-good0-IP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-missing-aso1-3.packet",
+          "control": "partition0-good0-IP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-IP-truncated-aso0",
+      "file": "partition0-good0-IP-truncated-aso0.mp4",
+      "oracle": "partition0-good0-IP-truncated-aso0.yuv",
+      "primary": "partition0-good0-IP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-IP-truncated-aso0-0.packet",
+          "control": "partition0-good0-IP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-truncated-aso0-1.packet",
+          "control": "partition0-good0-IP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-truncated-aso0-2.packet",
+          "control": "partition0-good0-IP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-truncated-aso0-3.packet",
+          "control": "partition0-good0-IP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-IP-truncated-aso1",
+      "file": "partition0-good0-IP-truncated-aso1.mp4",
+      "oracle": "partition0-good0-IP-truncated-aso1.yuv",
+      "primary": "partition0-good0-IP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-IP-truncated-aso1-0.packet",
+          "control": "partition0-good0-IP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-truncated-aso1-1.packet",
+          "control": "partition0-good0-IP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-truncated-aso1-2.packet",
+          "control": "partition0-good0-IP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-IP-truncated-aso1-3.packet",
+          "control": "partition0-good0-IP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PI-missing-aso0",
+      "file": "partition0-good0-PI-missing-aso0.mp4",
+      "oracle": "partition0-good0-PI-missing-aso0.yuv",
+      "primary": "partition0-good0-PI-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PI-missing-aso0-0.packet",
+          "control": "partition0-good0-PI-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-missing-aso0-1.packet",
+          "control": "partition0-good0-PI-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-missing-aso0-2.packet",
+          "control": "partition0-good0-PI-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-missing-aso0-3.packet",
+          "control": "partition0-good0-PI-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PI-missing-aso1",
+      "file": "partition0-good0-PI-missing-aso1.mp4",
+      "oracle": "partition0-good0-PI-missing-aso1.yuv",
+      "primary": "partition0-good0-PI-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PI-missing-aso1-0.packet",
+          "control": "partition0-good0-PI-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-missing-aso1-1.packet",
+          "control": "partition0-good0-PI-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-missing-aso1-2.packet",
+          "control": "partition0-good0-PI-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-missing-aso1-3.packet",
+          "control": "partition0-good0-PI-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PI-truncated-aso0",
+      "file": "partition0-good0-PI-truncated-aso0.mp4",
+      "oracle": "partition0-good0-PI-truncated-aso0.yuv",
+      "primary": "partition0-good0-PI-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PI-truncated-aso0-0.packet",
+          "control": "partition0-good0-PI-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-truncated-aso0-1.packet",
+          "control": "partition0-good0-PI-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-truncated-aso0-2.packet",
+          "control": "partition0-good0-PI-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-truncated-aso0-3.packet",
+          "control": "partition0-good0-PI-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PI-truncated-aso1",
+      "file": "partition0-good0-PI-truncated-aso1.mp4",
+      "oracle": "partition0-good0-PI-truncated-aso1.yuv",
+      "primary": "partition0-good0-PI-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PI-truncated-aso1-0.packet",
+          "control": "partition0-good0-PI-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-truncated-aso1-1.packet",
+          "control": "partition0-good0-PI-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-truncated-aso1-2.packet",
+          "control": "partition0-good0-PI-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PI-truncated-aso1-3.packet",
+          "control": "partition0-good0-PI-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PP-missing-aso0",
+      "file": "partition0-good0-PP-missing-aso0.mp4",
+      "oracle": "partition0-good0-PP-missing-aso0.yuv",
+      "primary": "partition0-good0-PP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PP-missing-aso0-0.packet",
+          "control": "partition0-good0-PP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-missing-aso0-1.packet",
+          "control": "partition0-good0-PP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-missing-aso0-2.packet",
+          "control": "partition0-good0-PP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-missing-aso0-3.packet",
+          "control": "partition0-good0-PP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PP-missing-aso1",
+      "file": "partition0-good0-PP-missing-aso1.mp4",
+      "oracle": "partition0-good0-PP-missing-aso1.yuv",
+      "primary": "partition0-good0-PP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PP-missing-aso1-0.packet",
+          "control": "partition0-good0-PP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-missing-aso1-1.packet",
+          "control": "partition0-good0-PP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-missing-aso1-2.packet",
+          "control": "partition0-good0-PP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-missing-aso1-3.packet",
+          "control": "partition0-good0-PP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PP-truncated-aso0",
+      "file": "partition0-good0-PP-truncated-aso0.mp4",
+      "oracle": "partition0-good0-PP-truncated-aso0.yuv",
+      "primary": "partition0-good0-PP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PP-truncated-aso0-0.packet",
+          "control": "partition0-good0-PP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-truncated-aso0-1.packet",
+          "control": "partition0-good0-PP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-truncated-aso0-2.packet",
+          "control": "partition0-good0-PP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-truncated-aso0-3.packet",
+          "control": "partition0-good0-PP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good0-PP-truncated-aso1",
+      "file": "partition0-good0-PP-truncated-aso1.mp4",
+      "oracle": "partition0-good0-PP-truncated-aso1.yuv",
+      "primary": "partition0-good0-PP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good0-PP-truncated-aso1-0.packet",
+          "control": "partition0-good0-PP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-truncated-aso1-1.packet",
+          "control": "partition0-good0-PP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-truncated-aso1-2.packet",
+          "control": "partition0-good0-PP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good0-PP-truncated-aso1-3.packet",
+          "control": "partition0-good0-PP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-II-missing-aso0",
+      "file": "partition0-good1-II-missing-aso0.mp4",
+      "oracle": "partition0-good1-II-missing-aso0.yuv",
+      "primary": "partition0-good1-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-II-missing-aso0-0.packet",
+          "control": "partition0-good1-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-missing-aso0-1.packet",
+          "control": "partition0-good1-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-missing-aso0-2.packet",
+          "control": "partition0-good1-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-missing-aso0-3.packet",
+          "control": "partition0-good1-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-II-missing-aso1",
+      "file": "partition0-good1-II-missing-aso1.mp4",
+      "oracle": "partition0-good1-II-missing-aso1.yuv",
+      "primary": "partition0-good1-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-II-missing-aso1-0.packet",
+          "control": "partition0-good1-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-missing-aso1-1.packet",
+          "control": "partition0-good1-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-missing-aso1-2.packet",
+          "control": "partition0-good1-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-missing-aso1-3.packet",
+          "control": "partition0-good1-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-II-truncated-aso0",
+      "file": "partition0-good1-II-truncated-aso0.mp4",
+      "oracle": "partition0-good1-II-truncated-aso0.yuv",
+      "primary": "partition0-good1-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-II-truncated-aso0-0.packet",
+          "control": "partition0-good1-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-truncated-aso0-1.packet",
+          "control": "partition0-good1-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-truncated-aso0-2.packet",
+          "control": "partition0-good1-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-truncated-aso0-3.packet",
+          "control": "partition0-good1-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-II-truncated-aso1",
+      "file": "partition0-good1-II-truncated-aso1.mp4",
+      "oracle": "partition0-good1-II-truncated-aso1.yuv",
+      "primary": "partition0-good1-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-II-truncated-aso1-0.packet",
+          "control": "partition0-good1-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-truncated-aso1-1.packet",
+          "control": "partition0-good1-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-truncated-aso1-2.packet",
+          "control": "partition0-good1-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-II-truncated-aso1-3.packet",
+          "control": "partition0-good1-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-IP-missing-aso0",
+      "file": "partition0-good1-IP-missing-aso0.mp4",
+      "oracle": "partition0-good1-IP-missing-aso0.yuv",
+      "primary": "partition0-good1-IP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-IP-missing-aso0-0.packet",
+          "control": "partition0-good1-IP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-missing-aso0-1.packet",
+          "control": "partition0-good1-IP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-missing-aso0-2.packet",
+          "control": "partition0-good1-IP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-missing-aso0-3.packet",
+          "control": "partition0-good1-IP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-IP-missing-aso1",
+      "file": "partition0-good1-IP-missing-aso1.mp4",
+      "oracle": "partition0-good1-IP-missing-aso1.yuv",
+      "primary": "partition0-good1-IP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-IP-missing-aso1-0.packet",
+          "control": "partition0-good1-IP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-missing-aso1-1.packet",
+          "control": "partition0-good1-IP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-missing-aso1-2.packet",
+          "control": "partition0-good1-IP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-missing-aso1-3.packet",
+          "control": "partition0-good1-IP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-IP-truncated-aso0",
+      "file": "partition0-good1-IP-truncated-aso0.mp4",
+      "oracle": "partition0-good1-IP-truncated-aso0.yuv",
+      "primary": "partition0-good1-IP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-IP-truncated-aso0-0.packet",
+          "control": "partition0-good1-IP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-truncated-aso0-1.packet",
+          "control": "partition0-good1-IP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-truncated-aso0-2.packet",
+          "control": "partition0-good1-IP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-truncated-aso0-3.packet",
+          "control": "partition0-good1-IP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-IP-truncated-aso1",
+      "file": "partition0-good1-IP-truncated-aso1.mp4",
+      "oracle": "partition0-good1-IP-truncated-aso1.yuv",
+      "primary": "partition0-good1-IP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-IP-truncated-aso1-0.packet",
+          "control": "partition0-good1-IP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-truncated-aso1-1.packet",
+          "control": "partition0-good1-IP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-truncated-aso1-2.packet",
+          "control": "partition0-good1-IP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-IP-truncated-aso1-3.packet",
+          "control": "partition0-good1-IP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PI-missing-aso0",
+      "file": "partition0-good1-PI-missing-aso0.mp4",
+      "oracle": "partition0-good1-PI-missing-aso0.yuv",
+      "primary": "partition0-good1-PI-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PI-missing-aso0-0.packet",
+          "control": "partition0-good1-PI-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-missing-aso0-1.packet",
+          "control": "partition0-good1-PI-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-missing-aso0-2.packet",
+          "control": "partition0-good1-PI-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-missing-aso0-3.packet",
+          "control": "partition0-good1-PI-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PI-missing-aso1",
+      "file": "partition0-good1-PI-missing-aso1.mp4",
+      "oracle": "partition0-good1-PI-missing-aso1.yuv",
+      "primary": "partition0-good1-PI-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PI-missing-aso1-0.packet",
+          "control": "partition0-good1-PI-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-missing-aso1-1.packet",
+          "control": "partition0-good1-PI-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-missing-aso1-2.packet",
+          "control": "partition0-good1-PI-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-missing-aso1-3.packet",
+          "control": "partition0-good1-PI-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PI-truncated-aso0",
+      "file": "partition0-good1-PI-truncated-aso0.mp4",
+      "oracle": "partition0-good1-PI-truncated-aso0.yuv",
+      "primary": "partition0-good1-PI-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PI-truncated-aso0-0.packet",
+          "control": "partition0-good1-PI-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-truncated-aso0-1.packet",
+          "control": "partition0-good1-PI-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-truncated-aso0-2.packet",
+          "control": "partition0-good1-PI-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-truncated-aso0-3.packet",
+          "control": "partition0-good1-PI-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PI-truncated-aso1",
+      "file": "partition0-good1-PI-truncated-aso1.mp4",
+      "oracle": "partition0-good1-PI-truncated-aso1.yuv",
+      "primary": "partition0-good1-PI-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PI-truncated-aso1-0.packet",
+          "control": "partition0-good1-PI-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-truncated-aso1-1.packet",
+          "control": "partition0-good1-PI-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-truncated-aso1-2.packet",
+          "control": "partition0-good1-PI-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PI-truncated-aso1-3.packet",
+          "control": "partition0-good1-PI-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PP-missing-aso0",
+      "file": "partition0-good1-PP-missing-aso0.mp4",
+      "oracle": "partition0-good1-PP-missing-aso0.yuv",
+      "primary": "partition0-good1-PP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PP-missing-aso0-0.packet",
+          "control": "partition0-good1-PP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-missing-aso0-1.packet",
+          "control": "partition0-good1-PP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-missing-aso0-2.packet",
+          "control": "partition0-good1-PP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-missing-aso0-3.packet",
+          "control": "partition0-good1-PP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PP-missing-aso1",
+      "file": "partition0-good1-PP-missing-aso1.mp4",
+      "oracle": "partition0-good1-PP-missing-aso1.yuv",
+      "primary": "partition0-good1-PP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PP-missing-aso1-0.packet",
+          "control": "partition0-good1-PP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-missing-aso1-1.packet",
+          "control": "partition0-good1-PP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-missing-aso1-2.packet",
+          "control": "partition0-good1-PP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-missing-aso1-3.packet",
+          "control": "partition0-good1-PP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PP-truncated-aso0",
+      "file": "partition0-good1-PP-truncated-aso0.mp4",
+      "oracle": "partition0-good1-PP-truncated-aso0.yuv",
+      "primary": "partition0-good1-PP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PP-truncated-aso0-0.packet",
+          "control": "partition0-good1-PP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-truncated-aso0-1.packet",
+          "control": "partition0-good1-PP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-truncated-aso0-2.packet",
+          "control": "partition0-good1-PP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-truncated-aso0-3.packet",
+          "control": "partition0-good1-PP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition0-good1-PP-truncated-aso1",
+      "file": "partition0-good1-PP-truncated-aso1.mp4",
+      "oracle": "partition0-good1-PP-truncated-aso1.yuv",
+      "primary": "partition0-good1-PP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition0-good1-PP-truncated-aso1-0.packet",
+          "control": "partition0-good1-PP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-truncated-aso1-1.packet",
+          "control": "partition0-good1-PP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-truncated-aso1-2.packet",
+          "control": "partition0-good1-PP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition0-good1-PP-truncated-aso1-3.packet",
+          "control": "partition0-good1-PP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-II-missing-aso0",
+      "file": "partition1-good0-II-missing-aso0.mp4",
+      "oracle": "partition1-good0-II-missing-aso0.yuv",
+      "primary": "partition1-good0-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-II-missing-aso0-0.packet",
+          "control": "partition1-good0-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-missing-aso0-1.packet",
+          "control": "partition1-good0-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-missing-aso0-2.packet",
+          "control": "partition1-good0-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-missing-aso0-3.packet",
+          "control": "partition1-good0-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-II-missing-aso1",
+      "file": "partition1-good0-II-missing-aso1.mp4",
+      "oracle": "partition1-good0-II-missing-aso1.yuv",
+      "primary": "partition1-good0-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-II-missing-aso1-0.packet",
+          "control": "partition1-good0-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-missing-aso1-1.packet",
+          "control": "partition1-good0-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-missing-aso1-2.packet",
+          "control": "partition1-good0-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-missing-aso1-3.packet",
+          "control": "partition1-good0-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-II-truncated-aso0",
+      "file": "partition1-good0-II-truncated-aso0.mp4",
+      "oracle": "partition1-good0-II-truncated-aso0.yuv",
+      "primary": "partition1-good0-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-II-truncated-aso0-0.packet",
+          "control": "partition1-good0-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-truncated-aso0-1.packet",
+          "control": "partition1-good0-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-truncated-aso0-2.packet",
+          "control": "partition1-good0-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-truncated-aso0-3.packet",
+          "control": "partition1-good0-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-II-truncated-aso1",
+      "file": "partition1-good0-II-truncated-aso1.mp4",
+      "oracle": "partition1-good0-II-truncated-aso1.yuv",
+      "primary": "partition1-good0-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-II-truncated-aso1-0.packet",
+          "control": "partition1-good0-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-truncated-aso1-1.packet",
+          "control": "partition1-good0-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-truncated-aso1-2.packet",
+          "control": "partition1-good0-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-II-truncated-aso1-3.packet",
+          "control": "partition1-good0-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-IP-missing-aso0",
+      "file": "partition1-good0-IP-missing-aso0.mp4",
+      "oracle": "partition1-good0-IP-missing-aso0.yuv",
+      "primary": "partition1-good0-IP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-IP-missing-aso0-0.packet",
+          "control": "partition1-good0-IP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-missing-aso0-1.packet",
+          "control": "partition1-good0-IP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-missing-aso0-2.packet",
+          "control": "partition1-good0-IP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-missing-aso0-3.packet",
+          "control": "partition1-good0-IP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-IP-missing-aso1",
+      "file": "partition1-good0-IP-missing-aso1.mp4",
+      "oracle": "partition1-good0-IP-missing-aso1.yuv",
+      "primary": "partition1-good0-IP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-IP-missing-aso1-0.packet",
+          "control": "partition1-good0-IP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-missing-aso1-1.packet",
+          "control": "partition1-good0-IP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-missing-aso1-2.packet",
+          "control": "partition1-good0-IP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-missing-aso1-3.packet",
+          "control": "partition1-good0-IP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-IP-truncated-aso0",
+      "file": "partition1-good0-IP-truncated-aso0.mp4",
+      "oracle": "partition1-good0-IP-truncated-aso0.yuv",
+      "primary": "partition1-good0-IP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-IP-truncated-aso0-0.packet",
+          "control": "partition1-good0-IP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-truncated-aso0-1.packet",
+          "control": "partition1-good0-IP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-truncated-aso0-2.packet",
+          "control": "partition1-good0-IP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-truncated-aso0-3.packet",
+          "control": "partition1-good0-IP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-IP-truncated-aso1",
+      "file": "partition1-good0-IP-truncated-aso1.mp4",
+      "oracle": "partition1-good0-IP-truncated-aso1.yuv",
+      "primary": "partition1-good0-IP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-IP-truncated-aso1-0.packet",
+          "control": "partition1-good0-IP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-truncated-aso1-1.packet",
+          "control": "partition1-good0-IP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-truncated-aso1-2.packet",
+          "control": "partition1-good0-IP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-IP-truncated-aso1-3.packet",
+          "control": "partition1-good0-IP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PI-missing-aso0",
+      "file": "partition1-good0-PI-missing-aso0.mp4",
+      "oracle": "partition1-good0-PI-missing-aso0.yuv",
+      "primary": "partition1-good0-PI-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PI-missing-aso0-0.packet",
+          "control": "partition1-good0-PI-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-missing-aso0-1.packet",
+          "control": "partition1-good0-PI-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-missing-aso0-2.packet",
+          "control": "partition1-good0-PI-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-missing-aso0-3.packet",
+          "control": "partition1-good0-PI-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PI-missing-aso1",
+      "file": "partition1-good0-PI-missing-aso1.mp4",
+      "oracle": "partition1-good0-PI-missing-aso1.yuv",
+      "primary": "partition1-good0-PI-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PI-missing-aso1-0.packet",
+          "control": "partition1-good0-PI-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-missing-aso1-1.packet",
+          "control": "partition1-good0-PI-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-missing-aso1-2.packet",
+          "control": "partition1-good0-PI-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-missing-aso1-3.packet",
+          "control": "partition1-good0-PI-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PI-truncated-aso0",
+      "file": "partition1-good0-PI-truncated-aso0.mp4",
+      "oracle": "partition1-good0-PI-truncated-aso0.yuv",
+      "primary": "partition1-good0-PI-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PI-truncated-aso0-0.packet",
+          "control": "partition1-good0-PI-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-truncated-aso0-1.packet",
+          "control": "partition1-good0-PI-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-truncated-aso0-2.packet",
+          "control": "partition1-good0-PI-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-truncated-aso0-3.packet",
+          "control": "partition1-good0-PI-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PI-truncated-aso1",
+      "file": "partition1-good0-PI-truncated-aso1.mp4",
+      "oracle": "partition1-good0-PI-truncated-aso1.yuv",
+      "primary": "partition1-good0-PI-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PI-truncated-aso1-0.packet",
+          "control": "partition1-good0-PI-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-truncated-aso1-1.packet",
+          "control": "partition1-good0-PI-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-truncated-aso1-2.packet",
+          "control": "partition1-good0-PI-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PI-truncated-aso1-3.packet",
+          "control": "partition1-good0-PI-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PP-missing-aso0",
+      "file": "partition1-good0-PP-missing-aso0.mp4",
+      "oracle": "partition1-good0-PP-missing-aso0.yuv",
+      "primary": "partition1-good0-PP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PP-missing-aso0-0.packet",
+          "control": "partition1-good0-PP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-missing-aso0-1.packet",
+          "control": "partition1-good0-PP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-missing-aso0-2.packet",
+          "control": "partition1-good0-PP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-missing-aso0-3.packet",
+          "control": "partition1-good0-PP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PP-missing-aso1",
+      "file": "partition1-good0-PP-missing-aso1.mp4",
+      "oracle": "partition1-good0-PP-missing-aso1.yuv",
+      "primary": "partition1-good0-PP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PP-missing-aso1-0.packet",
+          "control": "partition1-good0-PP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-missing-aso1-1.packet",
+          "control": "partition1-good0-PP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-missing-aso1-2.packet",
+          "control": "partition1-good0-PP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-missing-aso1-3.packet",
+          "control": "partition1-good0-PP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PP-truncated-aso0",
+      "file": "partition1-good0-PP-truncated-aso0.mp4",
+      "oracle": "partition1-good0-PP-truncated-aso0.yuv",
+      "primary": "partition1-good0-PP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PP-truncated-aso0-0.packet",
+          "control": "partition1-good0-PP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-truncated-aso0-1.packet",
+          "control": "partition1-good0-PP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-truncated-aso0-2.packet",
+          "control": "partition1-good0-PP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-truncated-aso0-3.packet",
+          "control": "partition1-good0-PP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good0-PP-truncated-aso1",
+      "file": "partition1-good0-PP-truncated-aso1.mp4",
+      "oracle": "partition1-good0-PP-truncated-aso1.yuv",
+      "primary": "partition1-good0-PP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good0-PP-truncated-aso1-0.packet",
+          "control": "partition1-good0-PP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-truncated-aso1-1.packet",
+          "control": "partition1-good0-PP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-truncated-aso1-2.packet",
+          "control": "partition1-good0-PP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good0-PP-truncated-aso1-3.packet",
+          "control": "partition1-good0-PP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-II-missing-aso0",
+      "file": "partition1-good1-II-missing-aso0.mp4",
+      "oracle": "partition1-good1-II-missing-aso0.yuv",
+      "primary": "partition1-good1-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-II-missing-aso0-0.packet",
+          "control": "partition1-good1-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-missing-aso0-1.packet",
+          "control": "partition1-good1-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-missing-aso0-2.packet",
+          "control": "partition1-good1-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-missing-aso0-3.packet",
+          "control": "partition1-good1-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-II-missing-aso1",
+      "file": "partition1-good1-II-missing-aso1.mp4",
+      "oracle": "partition1-good1-II-missing-aso1.yuv",
+      "primary": "partition1-good1-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-II-missing-aso1-0.packet",
+          "control": "partition1-good1-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-missing-aso1-1.packet",
+          "control": "partition1-good1-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-missing-aso1-2.packet",
+          "control": "partition1-good1-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-missing-aso1-3.packet",
+          "control": "partition1-good1-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-II-truncated-aso0",
+      "file": "partition1-good1-II-truncated-aso0.mp4",
+      "oracle": "partition1-good1-II-truncated-aso0.yuv",
+      "primary": "partition1-good1-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-II-truncated-aso0-0.packet",
+          "control": "partition1-good1-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-truncated-aso0-1.packet",
+          "control": "partition1-good1-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-truncated-aso0-2.packet",
+          "control": "partition1-good1-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-truncated-aso0-3.packet",
+          "control": "partition1-good1-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-II-truncated-aso1",
+      "file": "partition1-good1-II-truncated-aso1.mp4",
+      "oracle": "partition1-good1-II-truncated-aso1.yuv",
+      "primary": "partition1-good1-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-II-truncated-aso1-0.packet",
+          "control": "partition1-good1-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-truncated-aso1-1.packet",
+          "control": "partition1-good1-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-truncated-aso1-2.packet",
+          "control": "partition1-good1-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-II-truncated-aso1-3.packet",
+          "control": "partition1-good1-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-IP-missing-aso0",
+      "file": "partition1-good1-IP-missing-aso0.mp4",
+      "oracle": "partition1-good1-IP-missing-aso0.yuv",
+      "primary": "partition1-good1-IP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-IP-missing-aso0-0.packet",
+          "control": "partition1-good1-IP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-missing-aso0-1.packet",
+          "control": "partition1-good1-IP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-missing-aso0-2.packet",
+          "control": "partition1-good1-IP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-missing-aso0-3.packet",
+          "control": "partition1-good1-IP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-IP-missing-aso1",
+      "file": "partition1-good1-IP-missing-aso1.mp4",
+      "oracle": "partition1-good1-IP-missing-aso1.yuv",
+      "primary": "partition1-good1-IP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-IP-missing-aso1-0.packet",
+          "control": "partition1-good1-IP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-missing-aso1-1.packet",
+          "control": "partition1-good1-IP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-missing-aso1-2.packet",
+          "control": "partition1-good1-IP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-missing-aso1-3.packet",
+          "control": "partition1-good1-IP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-IP-truncated-aso0",
+      "file": "partition1-good1-IP-truncated-aso0.mp4",
+      "oracle": "partition1-good1-IP-truncated-aso0.yuv",
+      "primary": "partition1-good1-IP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-IP-truncated-aso0-0.packet",
+          "control": "partition1-good1-IP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-truncated-aso0-1.packet",
+          "control": "partition1-good1-IP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-truncated-aso0-2.packet",
+          "control": "partition1-good1-IP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-truncated-aso0-3.packet",
+          "control": "partition1-good1-IP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-IP-truncated-aso1",
+      "file": "partition1-good1-IP-truncated-aso1.mp4",
+      "oracle": "partition1-good1-IP-truncated-aso1.yuv",
+      "primary": "partition1-good1-IP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-IP-truncated-aso1-0.packet",
+          "control": "partition1-good1-IP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-truncated-aso1-1.packet",
+          "control": "partition1-good1-IP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-truncated-aso1-2.packet",
+          "control": "partition1-good1-IP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-IP-truncated-aso1-3.packet",
+          "control": "partition1-good1-IP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PI-missing-aso0",
+      "file": "partition1-good1-PI-missing-aso0.mp4",
+      "oracle": "partition1-good1-PI-missing-aso0.yuv",
+      "primary": "partition1-good1-PI-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PI-missing-aso0-0.packet",
+          "control": "partition1-good1-PI-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-missing-aso0-1.packet",
+          "control": "partition1-good1-PI-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-missing-aso0-2.packet",
+          "control": "partition1-good1-PI-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-missing-aso0-3.packet",
+          "control": "partition1-good1-PI-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PI-missing-aso1",
+      "file": "partition1-good1-PI-missing-aso1.mp4",
+      "oracle": "partition1-good1-PI-missing-aso1.yuv",
+      "primary": "partition1-good1-PI-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PI-missing-aso1-0.packet",
+          "control": "partition1-good1-PI-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-missing-aso1-1.packet",
+          "control": "partition1-good1-PI-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-missing-aso1-2.packet",
+          "control": "partition1-good1-PI-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-missing-aso1-3.packet",
+          "control": "partition1-good1-PI-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PI-truncated-aso0",
+      "file": "partition1-good1-PI-truncated-aso0.mp4",
+      "oracle": "partition1-good1-PI-truncated-aso0.yuv",
+      "primary": "partition1-good1-PI-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PI-truncated-aso0-0.packet",
+          "control": "partition1-good1-PI-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-truncated-aso0-1.packet",
+          "control": "partition1-good1-PI-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-truncated-aso0-2.packet",
+          "control": "partition1-good1-PI-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-truncated-aso0-3.packet",
+          "control": "partition1-good1-PI-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PI-truncated-aso1",
+      "file": "partition1-good1-PI-truncated-aso1.mp4",
+      "oracle": "partition1-good1-PI-truncated-aso1.yuv",
+      "primary": "partition1-good1-PI-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PI-truncated-aso1-0.packet",
+          "control": "partition1-good1-PI-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-truncated-aso1-1.packet",
+          "control": "partition1-good1-PI-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-truncated-aso1-2.packet",
+          "control": "partition1-good1-PI-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PI-truncated-aso1-3.packet",
+          "control": "partition1-good1-PI-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PP-missing-aso0",
+      "file": "partition1-good1-PP-missing-aso0.mp4",
+      "oracle": "partition1-good1-PP-missing-aso0.yuv",
+      "primary": "partition1-good1-PP-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PP-missing-aso0-0.packet",
+          "control": "partition1-good1-PP-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-missing-aso0-1.packet",
+          "control": "partition1-good1-PP-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-missing-aso0-2.packet",
+          "control": "partition1-good1-PP-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-missing-aso0-3.packet",
+          "control": "partition1-good1-PP-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PP-missing-aso1",
+      "file": "partition1-good1-PP-missing-aso1.mp4",
+      "oracle": "partition1-good1-PP-missing-aso1.yuv",
+      "primary": "partition1-good1-PP-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PP-missing-aso1-0.packet",
+          "control": "partition1-good1-PP-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-missing-aso1-1.packet",
+          "control": "partition1-good1-PP-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-missing-aso1-2.packet",
+          "control": "partition1-good1-PP-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-missing-aso1-3.packet",
+          "control": "partition1-good1-PP-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PP-truncated-aso0",
+      "file": "partition1-good1-PP-truncated-aso0.mp4",
+      "oracle": "partition1-good1-PP-truncated-aso0.yuv",
+      "primary": "partition1-good1-PP-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PP-truncated-aso0-0.packet",
+          "control": "partition1-good1-PP-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-truncated-aso0-1.packet",
+          "control": "partition1-good1-PP-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-truncated-aso0-2.packet",
+          "control": "partition1-good1-PP-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-truncated-aso0-3.packet",
+          "control": "partition1-good1-PP-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partition1-good1-PP-truncated-aso1",
+      "file": "partition1-good1-PP-truncated-aso1.mp4",
+      "oracle": "partition1-good1-PP-truncated-aso1.yuv",
+      "primary": "partition1-good1-PP-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "P",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "partition1-good1-PP-truncated-aso1-0.packet",
+          "control": "partition1-good1-PP-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-truncated-aso1-1.packet",
+          "control": "partition1-good1-PP-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-truncated-aso1-2.packet",
+          "control": "partition1-good1-PP-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "partition1-good1-PP-truncated-aso1-3.packet",
+          "control": "partition1-good1-PP-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good0-II-missing-aso0",
+      "file": "startup-partition0-good0-II-missing-aso0.mp4",
+      "oracle": "startup-partition0-good0-II-missing-aso0.yuv",
+      "primary": "startup-partition0-good0-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good0-II-missing-aso0-0.packet",
+          "control": "startup-partition0-good0-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-missing-aso0-1.packet",
+          "control": "startup-partition0-good0-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-missing-aso0-2.packet",
+          "control": "startup-partition0-good0-II-missing-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good0-II-missing-aso1",
+      "file": "startup-partition0-good0-II-missing-aso1.mp4",
+      "oracle": "startup-partition0-good0-II-missing-aso1.yuv",
+      "primary": "startup-partition0-good0-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good0-II-missing-aso1-0.packet",
+          "control": "startup-partition0-good0-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-missing-aso1-1.packet",
+          "control": "startup-partition0-good0-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-missing-aso1-2.packet",
+          "control": "startup-partition0-good0-II-missing-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good0-II-truncated-aso0",
+      "file": "startup-partition0-good0-II-truncated-aso0.mp4",
+      "oracle": "startup-partition0-good0-II-truncated-aso0.yuv",
+      "primary": "startup-partition0-good0-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good0-II-truncated-aso0-0.packet",
+          "control": "startup-partition0-good0-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-truncated-aso0-1.packet",
+          "control": "startup-partition0-good0-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-truncated-aso0-2.packet",
+          "control": "startup-partition0-good0-II-truncated-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good0-II-truncated-aso1",
+      "file": "startup-partition0-good0-II-truncated-aso1.mp4",
+      "oracle": "startup-partition0-good0-II-truncated-aso1.yuv",
+      "primary": "startup-partition0-good0-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good0-II-truncated-aso1-0.packet",
+          "control": "startup-partition0-good0-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-truncated-aso1-1.packet",
+          "control": "startup-partition0-good0-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good0-II-truncated-aso1-2.packet",
+          "control": "startup-partition0-good0-II-truncated-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good1-II-missing-aso0",
+      "file": "startup-partition0-good1-II-missing-aso0.mp4",
+      "oracle": "startup-partition0-good1-II-missing-aso0.yuv",
+      "primary": "startup-partition0-good1-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good1-II-missing-aso0-0.packet",
+          "control": "startup-partition0-good1-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-missing-aso0-1.packet",
+          "control": "startup-partition0-good1-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-missing-aso0-2.packet",
+          "control": "startup-partition0-good1-II-missing-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good1-II-missing-aso1",
+      "file": "startup-partition0-good1-II-missing-aso1.mp4",
+      "oracle": "startup-partition0-good1-II-missing-aso1.yuv",
+      "primary": "startup-partition0-good1-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good1-II-missing-aso1-0.packet",
+          "control": "startup-partition0-good1-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-missing-aso1-1.packet",
+          "control": "startup-partition0-good1-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-missing-aso1-2.packet",
+          "control": "startup-partition0-good1-II-missing-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good1-II-truncated-aso0",
+      "file": "startup-partition0-good1-II-truncated-aso0.mp4",
+      "oracle": "startup-partition0-good1-II-truncated-aso0.yuv",
+      "primary": "startup-partition0-good1-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good1-II-truncated-aso0-0.packet",
+          "control": "startup-partition0-good1-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-truncated-aso0-1.packet",
+          "control": "startup-partition0-good1-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-truncated-aso0-2.packet",
+          "control": "startup-partition0-good1-II-truncated-aso0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-partition0-good1-II-truncated-aso1",
+      "file": "startup-partition0-good1-II-truncated-aso1.mp4",
+      "oracle": "startup-partition0-good1-II-truncated-aso1.yuv",
+      "primary": "startup-partition0-good1-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-partition0-good1-II-truncated-aso1-0.packet",
+          "control": "startup-partition0-good1-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-truncated-aso1-1.packet",
+          "control": "startup-partition0-good1-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "startup-partition0-good1-II-truncated-aso1-2.packet",
+          "control": "startup-partition0-good1-II-truncated-aso1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good0-II-missing-aso0",
+      "file": "non-reference-partition0-good0-II-missing-aso0.mp4",
+      "oracle": "non-reference-partition0-good0-II-missing-aso0.yuv",
+      "primary": "non-reference-partition0-good0-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso0-0.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso0-1.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso0-2.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso0-3.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good0-II-missing-aso1",
+      "file": "non-reference-partition0-good0-II-missing-aso1.mp4",
+      "oracle": "non-reference-partition0-good0-II-missing-aso1.yuv",
+      "primary": "non-reference-partition0-good0-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso1-0.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso1-1.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso1-2.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-missing-aso1-3.packet",
+          "control": "non-reference-partition0-good0-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good0-II-truncated-aso0",
+      "file": "non-reference-partition0-good0-II-truncated-aso0.mp4",
+      "oracle": "non-reference-partition0-good0-II-truncated-aso0.yuv",
+      "primary": "non-reference-partition0-good0-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso0-0.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso0-1.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso0-2.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso0-3.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good0-II-truncated-aso1",
+      "file": "non-reference-partition0-good0-II-truncated-aso1.mp4",
+      "oracle": "non-reference-partition0-good0-II-truncated-aso1.yuv",
+      "primary": "non-reference-partition0-good0-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso1-0.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso1-1.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso1-2.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good0-II-truncated-aso1-3.packet",
+          "control": "non-reference-partition0-good0-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good1-II-missing-aso0",
+      "file": "non-reference-partition0-good1-II-missing-aso0.mp4",
+      "oracle": "non-reference-partition0-good1-II-missing-aso0.yuv",
+      "primary": "non-reference-partition0-good1-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso0-0.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso0-1.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso0-2.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso0-3.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good1-II-missing-aso1",
+      "file": "non-reference-partition0-good1-II-missing-aso1.mp4",
+      "oracle": "non-reference-partition0-good1-II-missing-aso1.yuv",
+      "primary": "non-reference-partition0-good1-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso1-0.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso1-1.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso1-2.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-missing-aso1-3.packet",
+          "control": "non-reference-partition0-good1-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good1-II-truncated-aso0",
+      "file": "non-reference-partition0-good1-II-truncated-aso0.mp4",
+      "oracle": "non-reference-partition0-good1-II-truncated-aso0.yuv",
+      "primary": "non-reference-partition0-good1-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso0-0.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso0-1.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso0-2.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso0-3.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition0-good1-II-truncated-aso1",
+      "file": "non-reference-partition0-good1-II-truncated-aso1.mp4",
+      "oracle": "non-reference-partition0-good1-II-truncated-aso1.yuv",
+      "primary": "non-reference-partition0-good1-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso1-0.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso1-1.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso1-2.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition0-good1-II-truncated-aso1-3.packet",
+          "control": "non-reference-partition0-good1-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good0-II-missing-aso0",
+      "file": "non-reference-partition1-good0-II-missing-aso0.mp4",
+      "oracle": "non-reference-partition1-good0-II-missing-aso0.yuv",
+      "primary": "non-reference-partition1-good0-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso0-0.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso0-1.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso0-2.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso0-3.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good0-II-missing-aso1",
+      "file": "non-reference-partition1-good0-II-missing-aso1.mp4",
+      "oracle": "non-reference-partition1-good0-II-missing-aso1.yuv",
+      "primary": "non-reference-partition1-good0-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso1-0.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso1-1.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso1-2.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-missing-aso1-3.packet",
+          "control": "non-reference-partition1-good0-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good0-II-truncated-aso0",
+      "file": "non-reference-partition1-good0-II-truncated-aso0.mp4",
+      "oracle": "non-reference-partition1-good0-II-truncated-aso0.yuv",
+      "primary": "non-reference-partition1-good0-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso0-0.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso0-1.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso0-2.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso0-3.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good0-II-truncated-aso1",
+      "file": "non-reference-partition1-good0-II-truncated-aso1.mp4",
+      "oracle": "non-reference-partition1-good0-II-truncated-aso1.yuv",
+      "primary": "non-reference-partition1-good0-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso1-0.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso1-1.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso1-2.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good0-II-truncated-aso1-3.packet",
+          "control": "non-reference-partition1-good0-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good1-II-missing-aso0",
+      "file": "non-reference-partition1-good1-II-missing-aso0.mp4",
+      "oracle": "non-reference-partition1-good1-II-missing-aso0.yuv",
+      "primary": "non-reference-partition1-good1-II-missing-aso0-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso0-0.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso0-1.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso0-2.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso0-3.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good1-II-missing-aso1",
+      "file": "non-reference-partition1-good1-II-missing-aso1.mp4",
+      "oracle": "non-reference-partition1-good1-II-missing-aso1.yuv",
+      "primary": "non-reference-partition1-good1-II-missing-aso1-primary.packet",
+      "damage": "missing",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso1-0.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso1-1.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso1-2.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-missing-aso1-3.packet",
+          "control": "non-reference-partition1-good1-II-missing-aso1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good1-II-truncated-aso0",
+      "file": "non-reference-partition1-good1-II-truncated-aso0.mp4",
+      "oracle": "non-reference-partition1-good1-II-truncated-aso0.yuv",
+      "primary": "non-reference-partition1-good1-II-truncated-aso0-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso0-0.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso0-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso0-1.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso0-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso0-2.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso0-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso0-3.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso0-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-partition1-good1-II-truncated-aso1",
+      "file": "non-reference-partition1-good1-II-truncated-aso1.mp4",
+      "oracle": "non-reference-partition1-good1-II-truncated-aso1.yuv",
+      "primary": "non-reference-partition1-good1-II-truncated-aso1-primary.packet",
+      "damage": "truncated",
+      "kind": "I",
+      "good_mb": 1,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso1-0.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso1-1.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso1-2.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-partition1-good1-II-truncated-aso1-3.packet",
+          "control": "non-reference-partition1-good1-II-truncated-aso1-3-control.packet"
+        }
+      ]
+    }
+  ]
+}

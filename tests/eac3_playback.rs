@@ -1,4 +1,7 @@
 #![cfg(feature = "player")]
+#[path = "support/audio_decode.rs"]
+mod decode_support;
+use decode_support::DecodeComplete;
 
 use fvid::audio::{AudioDecode, AudioStream};
 use fvid::codec::eac3_decoder::{Eac3Decoder, frame as eac3_frame};
@@ -35,7 +38,7 @@ fn make_audio_decoder_dispatches_eac3_tags_and_validates_frame_rate() {
         let mut decoder = make_audio_decoder(tag, &[], 48_000, 2, 0)
             .unwrap_or_else(|e| panic!("make_audio_decoder({tag}) failed: {e}"));
         let pkt = decoder
-            .decode_encoded(&bytes, 0, 0)
+            .decode_complete(&bytes, 0, 0)
             .expect("decodes 6-block E-AC-3")
             .expect("audio packet");
         let samples = f32_samples(&pkt.data);
@@ -47,7 +50,7 @@ fn make_audio_decoder_dispatches_eac3_tags_and_validates_frame_rate() {
     // Clean syncframe rate mismatch against configured decoder rate must be refused.
     let mut bad_rate = make_audio_decoder("A_EAC3", &[], 32_000, 2, 0).unwrap();
     let err = bad_rate
-        .decode_encoded(&bytes, 0, 0)
+        .decode_complete(&bytes, 0, 0)
         .err()
         .expect("48 kHz E-AC-3 frame on 32 kHz decoder must fail");
     assert!(
@@ -80,7 +83,7 @@ fn eac3_conversion_layer_1_2_3_and_6_block_syncframes_decode_matching_reference(
 
         // Verify full decode matches reference amplitude and length (after 256-sample encoder delay).
         let mut dec = Eac3Decoder::new(&[], 48_000, 2).unwrap();
-        let pkt = dec.decode_encoded(&raw, 0, 0).unwrap().unwrap();
+        let pkt = dec.decode_complete(&raw, 0, 0).unwrap().unwrap();
         let got = f32_samples(&pkt.data);
         let ref_trimmed = &ref_samples[256 * 2..];
         assert_eq!(got.len(), ref_trimmed.len(), "blocks-{blocks} sample count");
@@ -107,17 +110,13 @@ fn eac3_conversion_layer_1_2_3_and_6_block_syncframes_decode_matching_reference(
         let mut total_frames = 0usize;
         while let Some(enc) = reader.next_packet().unwrap() {
             assert_eq!(enc.duration, (blocks * 256) as i64);
-            let decoded = stream_dec
-                .decode_packet(&enc.data, enc.pts, enc.duration as u64)
-                .unwrap()
-                .unwrap();
-            if let Some(presented) = reader
-                .present_decoded(decoded.packet, decoded.source_pts)
-                .unwrap()
-            {
-                total_frames += presented.data.len() / 8;
+            if let Some(decoded) = stream_dec.decode_packet(&enc.data,enc.pts,enc.duration as u64).unwrap() {
+                if let Some(presented)=reader.present_decoded(decoded.packet,decoded.source_pts).unwrap() {
+                    total_frames+=presented.data.len()/8;
+                }
             }
         }
+        total_frames+=stream_dec.drain_presented(&mut reader).iter().map(|p|p.data.len()/8).sum::<usize>();
         assert_eq!(total_frames, expected_syncframes * blocks * 256 - 256);
     }
 }
@@ -136,7 +135,7 @@ fn eac3_reduced_sample_rates_24k_22k05_and_16k_decode_cleanly() {
         let mut dec = make_audio_decoder("A_EAC3", &[], rate, 2, 0)
             .unwrap_or_else(|e| panic!("make_audio_decoder at {rate} Hz failed: {e}"));
         let pkt = dec
-            .decode_encoded(&raw, 0, 0)
+            .decode_complete(&raw, 0, 0)
             .unwrap_or_else(|e| panic!("decode at {rate} Hz failed: {e}"))
             .unwrap();
         assert_eq!((pkt.timebase_num, pkt.timebase_den), (1, rate));
@@ -182,10 +181,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
         while let Some(step) = stream.next_step().unwrap() {
             match step {
                 fvid::audio::AudioStep::Encoded(p) => {
-                    let d = dec
-                        .decode_packet(&p.data, p.pts, p.duration as u64)
-                        .unwrap()
-                        .unwrap();
+                    let Some(d)=dec.decode_packet(&p.data,p.pts,p.duration as u64).unwrap() else {continue;};
                     if let Some(pres) = stream.present_decoded(d.packet, d.source_pts).unwrap() {
                         total_frames += pres.data.len() / 8;
                         all_samples.extend(f32_samples(&pres.data));
@@ -197,6 +193,10 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
                 }
                 fvid::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut dec).unwrap(),
             }
+        }
+        for p in dec.drain_presented(&mut *stream) {
+            total_frames+=p.data.len()/8;
+            all_samples.extend(f32_samples(&p.data));
         }
         assert!(total_frames >= 2816, "{file}: total_frames={total_frames}");
         let peaks = peak_channels(&all_samples, 2);
@@ -233,10 +233,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
         while let Some(step) = stream.next_step().unwrap() {
             match step {
                 fvid::audio::AudioStep::Encoded(p) => {
-                    let d = dec
-                        .decode_packet(&p.data, p.pts, p.duration as u64)
-                        .unwrap()
-                        .unwrap();
+                    let Some(d)=dec.decode_packet(&p.data,p.pts,p.duration as u64).unwrap() else {continue;};
                     if let Some(pres) = stream.present_decoded(d.packet, d.source_pts).unwrap() {
                         all_samples.extend(f32_samples(&pres.data));
                     }
@@ -247,6 +244,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
                 fvid::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut dec).unwrap(),
             }
         }
+        for p in dec.drain_presented(&mut *stream) {all_samples.extend(f32_samples(&p.data));}
         let peaks = peak_channels(&all_samples, 6);
         let expected = [0.3, 0.25, 0.2, 0.3, 0.15, 0.1];
         for (ch, (&got, &want)) in peaks.iter().zip(&expected).enumerate() {
@@ -282,10 +280,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
         while let Some(step) = stream.next_step().unwrap() {
             match step {
                 fvid::audio::AudioStep::Encoded(p) => {
-                    let d = dec
-                        .decode_packet(&p.data, p.pts, p.duration as u64)
-                        .unwrap()
-                        .unwrap();
+                    let Some(d)=dec.decode_packet(&p.data,p.pts,p.duration as u64).unwrap() else {continue;};
                     if let Some(pres) = stream.present_decoded(d.packet, d.source_pts).unwrap() {
                         total_frames += pres.data.len() / 4;
                     }
@@ -296,6 +291,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
                 fvid::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut dec).unwrap(),
             }
         }
+        total_frames+=dec.drain_presented(&mut *stream).iter().map(|p|p.data.len()/4).sum::<usize>();
         assert!(total_frames >= 1280, "{file}: total_frames={total_frames}");
     }
 
@@ -341,4 +337,90 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
             "{file}: {err}"
         );
     }
+}
+
+#[test]
+fn eac3_block_switching_and_spx_attenuation_decode_matching_reference() {
+    let dir = fixture_dir();
+
+    // 1. Block switching (`blkswe = 1` with per-block `blksw[ch]` flags)
+    let blksw_raw = std::fs::read(dir.join("blksw.ec3")).unwrap();
+    let blksw_ref = f32_samples(&std::fs::read(dir.join("blksw.f32le")).unwrap());
+    let hdr = eac3_frame(&blksw_raw).expect("blksw.ec3 header parses");
+    assert!(hdr.blocks_state.block_switching);
+    let mut dec = Eac3Decoder::new(&[], 48_000, 2).unwrap();
+    let pkt = dec.decode_complete(&blksw_raw, 0, 0).unwrap().unwrap();
+    let got = f32_samples(&pkt.data);
+    let ref_trimmed = &blksw_ref[256 * 2..];
+    assert_eq!(got.len(), ref_trimmed.len());
+    let max_err = got
+        .iter()
+        .zip(ref_trimmed)
+        .map(|(a, b)| (a - b).abs())
+        .fold(0.0f32, f32::max);
+    assert!(
+        max_err < 1e-5,
+        "blksw.ec3 sample mismatch against reference: max_err={max_err}"
+    );
+
+    // 2. Spectral Extension boundary attenuation (`spxattene = 1`) vs unattenuated control
+    let no_atten_raw = std::fs::read(dir.join("spx-no-atten.ec3")).unwrap();
+    let no_atten_ref = f32_samples(&std::fs::read(dir.join("spx-no-atten.f32le")).unwrap());
+    let atten_raw = std::fs::read(dir.join("spx-atten.ec3")).unwrap();
+    let atten_ref = f32_samples(&std::fs::read(dir.join("spx-atten.f32le")).unwrap());
+
+    let hdr_no = eac3_frame(&no_atten_raw).expect("spx-no-atten.ec3 header parses");
+    assert_eq!(hdr_no.spx_attenuation[..2], [None, None]);
+    let hdr_at = eac3_frame(&atten_raw).expect("spx-atten.ec3 header parses");
+    assert_eq!(hdr_at.spx_attenuation[..2], [Some(15), Some(31)]);
+
+    let mut dec_no = Eac3Decoder::new(&[], 48_000, 2).unwrap();
+    let got_no = f32_samples(
+        &dec_no
+            .decode_complete(&no_atten_raw, 0, 0)
+            .unwrap()
+            .unwrap()
+            .data,
+    );
+    let mut dec_at = Eac3Decoder::new(&[], 48_000, 2).unwrap();
+    let got_at = f32_samples(
+        &dec_at
+            .decode_complete(&atten_raw, 0, 0)
+            .unwrap()
+            .unwrap()
+            .data,
+    );
+
+    let ref_no_trimmed = &no_atten_ref[256 * 2..];
+    let ref_at_trimmed = &atten_ref[256 * 2..];
+    assert_eq!(got_no.len(), ref_no_trimmed.len());
+    assert_eq!(got_at.len(), ref_at_trimmed.len());
+
+    let max_err_no = got_no
+        .iter()
+        .zip(ref_no_trimmed)
+        .map(|(a, b)| (a - b).abs())
+        .fold(0.0f32, f32::max);
+    let max_err_at = got_at
+        .iter()
+        .zip(ref_at_trimmed)
+        .map(|(a, b)| (a - b).abs())
+        .fold(0.0f32, f32::max);
+    let atten_effect = got_no
+        .iter()
+        .zip(&got_at)
+        .map(|(a, b)| (a - b).abs())
+        .fold(0.0f32, f32::max);
+    assert!(
+        max_err_no < 1e-5,
+        "spx-no-atten.ec3 mismatch against reference: max_err={max_err_no}"
+    );
+    assert!(
+        max_err_at < 1e-5,
+        "spx-atten.ec3 mismatch against reference: max_err={max_err_at}"
+    );
+    assert!(
+        atten_effect > 0.015,
+        "spxattene should measurably attenuate SPX wrap boundaries: atten_effect={atten_effect}"
+    );
 }

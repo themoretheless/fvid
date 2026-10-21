@@ -1,0 +1,73 @@
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-opus)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.68s
+     Running unittests src/lib.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/fvid_opus-e006c02eb7ea0688)
+
+running 65 tests
+test ogg::crc::tests::empty_input_is_zero ... ok
+test ogg::crc::tests::update_zeros_matches_explicit_zero_bytes ... ok
+test ogg::header::tests::tags_reject_invalid_names ... ok
+test ogg::header::tests::head_accepts_unknown_minor_version ... ok
+test ogg::header::tests::head_rejects_malformed_input ... ok
+test ogg::header::tests::head_round_trips_family_0 ... ok
+test ogg::header::tests::tags_preserve_unknown_entries_verbatim ... ok
+test ogg::header::tests::head_rejects_more_coupled_than_streams ... ok
+test ogg::header::tests::tags_reject_oversized_lengths ... ok
+test ogg::header::tests::head_round_trips_family_1_surround ... ok
+test ogg::crc::tests::update_is_incremental ... ok
+test ogg::header::wave_speaker_semantics_tests::opus_surround_orders_declare_correct_wave_speakers_and_discrete_is_unassigned ... ok
+test ogg::header::tests::head_rejects_mapping_that_names_a_missing_stream ... ok
+test ogg::header::decoded_channel_limit_tests::identification_limits_decoded_channels_independently_of_output_count ... ok
+test ogg::header::tests::tags_round_trip ... ok
+test ogg::page::tests::exact_multiples_get_a_zero_terminator ... ok
+test ogg::page::tests::crc_rejects_a_flipped_payload_byte ... ok
+test ogg::page::tests::header_round_trips ... ok
+test ogg::page::tests::lacing_terminates_below_255 ... ok
+test ogg::page::tests::rejects_bad_capture_pattern_and_version ... ok
+test ogg::tests::a_comment_header_sharing_its_page_with_audio_is_refused ... ok
+test ogg::tests::distinct_headers_get_distinct_serials ... ok
+test ogg::tests::empty_stream_round_trips ... ok
+test ogg::tests::explicit_serial_is_honoured ... ok
+test ogg::tests::explicit_duration_cannot_exceed_coded_audio_or_precede_another_packet_after_trim ... ok
+test ogg::tests::header_pages_are_separate_and_flagged ... ok
+test ogg::tests::last_page_is_flagged_end_of_stream ... ok
+test ogg::tests::multistream_writer_rejects_disagreeing_elementary_durations_without_mutation ... ok
+test ogg::tests::granule_counts_decodable_samples_not_pre_skip_plus_them ... ok
+test ogg::tests::a_corrupt_page_is_an_error_not_silent_truncation ... ok
+test ogg::tests::rejects_a_stream_that_is_not_ogg ... ok
+test ogg::tests::rejects_ogg_that_is_not_opus ... ok
+test ogg::tests::packet_lengths_that_are_multiples_of_255_round_trip ... ok
+test ogg::tests::rewind_keeps_a_stream_that_ends_on_its_headers_ended ... ok
+test ogg::tests::resyncs_past_leading_garbage ... ok
+test ogg::tests::output_is_reproducible ... ok
+test ogg::tests::round_trips_a_simple_stream ... ok
+test ogg::tests::page_target_controls_page_count ... ok
+test ogg::tests::writer_rejects_impossible_packets ... ok
+test ogg::trim::tests::a_final_packet_can_be_trimmed_away_completely ... ok
+test ogg::trim::tests::a_granule_that_over_claims_does_not_extend_the_audio ... ok
+test ogg::trim::tests::a_lower_decode_rate_scales_both_ends ... ok
+test ogg::trim::tests::a_pre_skip_longer_than_one_packet_spans_packets ... ok
+test ogg::trim::tests::a_pre_skip_that_does_not_divide_the_rate_still_clamps_nowhere ... ok
+test ogg::trim::tests::a_rate_opus_cannot_decode_at_is_rejected ... ok
+test ogg::trim::tests::a_stream_shorter_than_its_own_pre_skip_yields_nothing ... ok
+test ogg::trim::tests::an_absent_granule_trims_nothing ... ok
+test ogg::trim::tests::an_exact_final_granule_trims_nothing ... ok
+test ogg::trim::tests::an_ordinary_page_granule_clamps_nothing ... ok
+test ogg::trim::tests::keep_range_indexes_values_not_frames ... ok
+test ogg::tests::granule_advances_across_multiple_pages ... ok
+test ogg::trim::tests::keep_range_locates_a_cut_that_a_length_cannot ... ok
+test ogg::trim::tests::pre_skip_is_taken_from_the_front_of_the_first_packet ... ok
+test ogg::trim::tests::stereo_counts_sample_frames_not_values ... ok
+test ogg::tests::truncated_stream_is_rejected ... ok
+test ogg::trim::tests::the_final_granule_trims_the_end ... ok
+test ogg::trim::tests::the_trim_is_taken_from_an_unflagged_final_page ... ok
+test ogg::tests::rewind_replays_a_stream_with_no_end_of_stream_page ... ok
+test ogg::crc::tests::table_matches_bitwise_oracle ... ok
+test ogg::tests::packets_spanning_pages_reassemble ... ok
+test ogg::tests::rewind_returns_to_the_first_audio_page_of_a_stream_inside_its_source ... ok
+test ogg::tests::read_packet_into_yields_what_read_packet_does ... ok
+test ogg::tests::a_failed_rewind_leaves_the_reader_where_it_was ... ok
+test ogg::tests::rewind_replays_the_stream_from_the_first_audio_packet ... ok
+test ogg::tests::a_packet_past_the_size_cap_is_refused ... ok
+
+test result: ok. 65 passed; 0 failed; 0 ignored; 0 measured; 95 filtered out; finished in 1.44s
+

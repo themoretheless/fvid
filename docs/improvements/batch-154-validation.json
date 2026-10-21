@@ -1,0 +1,40 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0162"
+  ],
+  "checked_at": "2026-10-21T00:50:09.382131+00:00",
+  "before": [
+    "evidence/batch-154-before.log",
+    "evidence/batch-154-acceptance-before.log",
+    "evidence/batch-154-decoder-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-154-after.log",
+      "passed": 9,
+      "new_pcm_combinations": 16,
+      "new_worker_targets": 8,
+      "related_scope": "Prior sample-offset controls,key-off volume state and held-volume lifetime."
+    },
+    {
+      "log": "evidence/batch-154-units-after.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-154-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-154-player-build.log",
+      "exit": 0
+    }
+  ],
+  "qualification": [
+    "Two looping scores emit stale-gain audio after an out-of-range9FF stop,C00 or volume-column0,and a note-only trigger. Independent controls omit only the zero-volume note;the entire post-window is literal zero,and earlier PCM prefixes match.",
+    "Natural sample end already clears gain. The unlooped and initially-zero controls remain silent before and after;this speculative natural-end branch adds no fix or accepted ID.",
+    "Forced before acceptance decodes the valid authored video then fails on PCM;actual worker fails generation0 packet3 with matching clocks and length. After gates compare16 exact PCM combinations and8 actual-worker seek/EOF targets.",
+    "The fix clears gain only when9xx starts beyond the sample end. Public interfaces,volume commands and existing sample phase logic are unchanged. No performance or physical audio listening claim."
+  ],
+  "counting": "One stopped-offset gain-state defect;four score cases,video,commands,rates,channels and worker variants add zero extra IDs."
+}

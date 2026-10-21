@@ -1,0 +1,2594 @@
+[
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-temporal-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-temporal-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-temporal-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-skip-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-skip-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-skip-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-spatial-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-spatial-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-spatial-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-bi-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-bi-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w0-bi-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-temporal-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-temporal-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-temporal-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-skip-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-skip-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-skip-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-spatial-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-spatial-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-spatial-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-bi-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-bi-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w1-bi-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-temporal-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-temporal-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-temporal-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-skip-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-skip-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-skip-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-spatial-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-spatial-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-spatial-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-bi-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-bi-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x8-y-4-w2-bi-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-temporal-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-temporal-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-temporal-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-skip-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-skip-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-skip-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-spatial-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-spatial-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-spatial-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-bi-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-bi-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w0-bi-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-temporal-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-temporal-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-temporal-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-skip-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-skip-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-skip-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-spatial-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-spatial-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-spatial-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-bi-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-bi-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w1-bi-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-temporal-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-temporal-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-temporal-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-skip-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-skip-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-skip-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-spatial-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-spatial-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-spatial-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-bi-i0",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-bi-i1",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y8-c8-x-7-y5-w2-bi-i2",
+    "yd": 8,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-temporal-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-temporal-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-temporal-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-skip-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-skip-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-skip-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-spatial-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-spatial-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-spatial-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-bi-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-bi-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w0-bi-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-temporal-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-temporal-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-temporal-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-skip-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-skip-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-skip-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-spatial-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-spatial-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-spatial-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-bi-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-bi-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w1-bi-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-temporal-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-temporal-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-temporal-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-skip-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-skip-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-skip-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-spatial-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-spatial-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-spatial-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-bi-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-bi-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x8-y-4-w2-bi-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-temporal-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-temporal-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-temporal-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-skip-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-skip-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-skip-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-spatial-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-spatial-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-spatial-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-bi-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-bi-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w0-bi-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-temporal-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-temporal-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-temporal-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-skip-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-skip-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-skip-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-spatial-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-spatial-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-spatial-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-bi-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-bi-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w1-bi-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-temporal-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-temporal-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-temporal-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-skip-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-skip-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-skip-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-spatial-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-spatial-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-spatial-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-bi-i0",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-bi-i1",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y10-c12-x-7-y5-w2-bi-i2",
+    "yd": 10,
+    "cd": 12,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-temporal-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-temporal-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-temporal-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-skip-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-skip-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-skip-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-spatial-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-spatial-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-spatial-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-bi-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-bi-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w0-bi-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-temporal-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-temporal-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-temporal-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-skip-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-skip-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-skip-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-spatial-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-spatial-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-spatial-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-bi-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-bi-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w1-bi-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-temporal-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-temporal-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-temporal-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-skip-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-skip-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-skip-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-spatial-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-spatial-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-spatial-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-bi-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-bi-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x8-y-4-w2-bi-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      8,
+      -4
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-temporal-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-temporal-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-temporal-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-skip-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-skip-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-skip-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-spatial-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-spatial-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-spatial-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-bi-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-bi-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w0-bi-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 0,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-temporal-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-temporal-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-temporal-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-skip-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-skip-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-skip-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-spatial-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-spatial-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-spatial-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-bi-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-bi-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w1-bi-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 1,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-temporal-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-temporal-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-temporal-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "temporal",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-skip-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-skip-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-skip-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "skip",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-spatial-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-spatial-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-spatial-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "spatial",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-bi-i0",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 0
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-bi-i1",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 1
+  },
+  {
+    "name": "cabac-b-y14-c8-x-7-y5-w2-bi-i2",
+    "yd": 14,
+    "cd": 8,
+    "mode": "bi",
+    "bipred": 2,
+    "vector": [
+      -7,
+      5
+    ],
+    "init_idc": 2
+  }
+]

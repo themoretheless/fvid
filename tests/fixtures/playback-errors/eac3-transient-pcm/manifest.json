@@ -1,0 +1,198 @@
+{
+  "cases": [
+    {
+      "file": "o0-p0-l0.f32le",
+      "origin": 0,
+      "transient": 3072,
+      "length": 0,
+      "start": 2560,
+      "end": 3072
+    },
+    {
+      "file": "o0-p0-l1.f32le",
+      "origin": 0,
+      "transient": 3072,
+      "length": 1,
+      "start": 2559,
+      "end": 3072
+    },
+    {
+      "file": "o0-p0-l128.f32le",
+      "origin": 0,
+      "transient": 3072,
+      "length": 128,
+      "start": 2432,
+      "end": 3072
+    },
+    {
+      "file": "o0-p0-l255.f32le",
+      "origin": 0,
+      "transient": 3072,
+      "length": 255,
+      "start": 2305,
+      "end": 3072
+    },
+    {
+      "file": "o0-p4-l0.f32le",
+      "origin": 0,
+      "transient": 3076,
+      "length": 0,
+      "start": 2560,
+      "end": 3076
+    },
+    {
+      "file": "o0-p4-l1.f32le",
+      "origin": 0,
+      "transient": 3076,
+      "length": 1,
+      "start": 2559,
+      "end": 3076
+    },
+    {
+      "file": "o0-p4-l128.f32le",
+      "origin": 0,
+      "transient": 3076,
+      "length": 128,
+      "start": 2432,
+      "end": 3076
+    },
+    {
+      "file": "o0-p4-l255.f32le",
+      "origin": 0,
+      "transient": 3076,
+      "length": 255,
+      "start": 2305,
+      "end": 3076
+    },
+    {
+      "file": "o0-p252-l0.f32le",
+      "origin": 0,
+      "transient": 3324,
+      "length": 0,
+      "start": 2560,
+      "end": 3324
+    },
+    {
+      "file": "o0-p252-l1.f32le",
+      "origin": 0,
+      "transient": 3324,
+      "length": 1,
+      "start": 2559,
+      "end": 3324
+    },
+    {
+      "file": "o0-p252-l128.f32le",
+      "origin": 0,
+      "transient": 3324,
+      "length": 128,
+      "start": 2432,
+      "end": 3324
+    },
+    {
+      "file": "o0-p252-l255.f32le",
+      "origin": 0,
+      "transient": 3324,
+      "length": 255,
+      "start": 2305,
+      "end": 3324
+    },
+    {
+      "file": "o-1536-p0-l0.f32le",
+      "origin": -1536,
+      "transient": 1536,
+      "length": 0,
+      "start": 2560,
+      "end": 3072
+    },
+    {
+      "file": "o-1536-p0-l1.f32le",
+      "origin": -1536,
+      "transient": 1536,
+      "length": 1,
+      "start": 2559,
+      "end": 3072
+    },
+    {
+      "file": "o-1536-p0-l128.f32le",
+      "origin": -1536,
+      "transient": 1536,
+      "length": 128,
+      "start": 2432,
+      "end": 3072
+    },
+    {
+      "file": "o-1536-p0-l255.f32le",
+      "origin": -1536,
+      "transient": 1536,
+      "length": 255,
+      "start": 2305,
+      "end": 3072
+    },
+    {
+      "file": "o-1536-p4-l0.f32le",
+      "origin": -1536,
+      "transient": 1540,
+      "length": 0,
+      "start": 2560,
+      "end": 3076
+    },
+    {
+      "file": "o-1536-p4-l1.f32le",
+      "origin": -1536,
+      "transient": 1540,
+      "length": 1,
+      "start": 2559,
+      "end": 3076
+    },
+    {
+      "file": "o-1536-p4-l128.f32le",
+      "origin": -1536,
+      "transient": 1540,
+      "length": 128,
+      "start": 2432,
+      "end": 3076
+    },
+    {
+      "file": "o-1536-p4-l255.f32le",
+      "origin": -1536,
+      "transient": 1540,
+      "length": 255,
+      "start": 2305,
+      "end": 3076
+    },
+    {
+      "file": "o-1536-p252-l0.f32le",
+      "origin": -1536,
+      "transient": 1788,
+      "length": 0,
+      "start": 2560,
+      "end": 3324
+    },
+    {
+      "file": "o-1536-p252-l1.f32le",
+      "origin": -1536,
+      "transient": 1788,
+      "length": 1,
+      "start": 2559,
+      "end": 3324
+    },
+    {
+      "file": "o-1536-p252-l128.f32le",
+      "origin": -1536,
+      "transient": 1788,
+      "length": 128,
+      "start": 2432,
+      "end": 3324
+    },
+    {
+      "file": "o-1536-p252-l255.f32le",
+      "origin": -1536,
+      "transient": 1788,
+      "length": 255,
+      "start": 2305,
+      "end": 3324
+    }
+  ],
+  "decoder_integration_accepted": false,
+  "absolute_tolerance": 1e-06
+}

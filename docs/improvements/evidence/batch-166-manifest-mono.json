@@ -1,0 +1,198 @@
+{
+  "provenance": "Authored fixed-size ADPCM samples:dwSampleSize and nBlockAlign are8,dwLength counts3 blocks. AVI chunks group2+1,1+2,3 samples,including nested rec and idx1 variants. Two ungrouped controls and four malformed refusals. Literal predictor PCM and owned VP9/Matroska companion;no private media,encoder or network. Not a performance benchmark.",
+  "cases": [
+    {
+      "file": "ima-two-one.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "raw_records": 2,
+      "control": "ima-single.avi",
+      "groups": [
+        2,
+        1
+      ],
+      "nested": false,
+      "indexed": false
+    },
+    {
+      "file": "ima-one-two.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "raw_records": 2,
+      "control": "ima-single.avi",
+      "groups": [
+        1,
+        2
+      ],
+      "nested": false,
+      "indexed": false
+    },
+    {
+      "file": "ima-three.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "raw_records": 1,
+      "control": "ima-single.avi",
+      "groups": [
+        3
+      ],
+      "nested": false,
+      "indexed": false
+    },
+    {
+      "file": "ima-nested.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "raw_records": 2,
+      "control": "ima-single.avi",
+      "groups": [
+        2,
+        1
+      ],
+      "nested": true,
+      "indexed": false
+    },
+    {
+      "file": "ima-indexed.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "raw_records": 2,
+      "control": "ima-single.avi",
+      "groups": [
+        2,
+        1
+      ],
+      "nested": false,
+      "indexed": true
+    },
+    {
+      "file": "ms-two-one.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "raw_records": 2,
+      "control": "ms-single.avi",
+      "groups": [
+        2,
+        1
+      ],
+      "nested": false,
+      "indexed": false
+    },
+    {
+      "file": "ms-one-two.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "raw_records": 2,
+      "control": "ms-single.avi",
+      "groups": [
+        1,
+        2
+      ],
+      "nested": false,
+      "indexed": false
+    },
+    {
+      "file": "ms-three.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "raw_records": 1,
+      "control": "ms-single.avi",
+      "groups": [
+        3
+      ],
+      "nested": false,
+      "indexed": false
+    },
+    {
+      "file": "ms-nested.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "raw_records": 2,
+      "control": "ms-single.avi",
+      "groups": [
+        2,
+        1
+      ],
+      "nested": true,
+      "indexed": false
+    },
+    {
+      "file": "ms-indexed.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "raw_records": 2,
+      "control": "ms-single.avi",
+      "groups": [
+        2,
+        1
+      ],
+      "nested": false,
+      "indexed": true
+    }
+  ],
+  "controls": [
+    {
+      "file": "ima-single.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "raw_records": 3
+    },
+    {
+      "file": "ms-single.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "raw_records": 3
+    }
+  ],
+  "malformed": [
+    {
+      "file": "ima-incomplete.avi",
+      "reason": "incomplete"
+    },
+    {
+      "file": "ima-wrong-count.avi",
+      "reason": "wrong-count"
+    },
+    {
+      "file": "ms-incomplete.avi",
+      "reason": "incomplete"
+    },
+    {
+      "file": "ms-wrong-count.avi",
+      "reason": "wrong-count"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "ima-single.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f",
+    "ima-two-one.avi": "a74c065423bb3c4457867590a307e585b7418dd8304b762ea5ebceb18ebf654e",
+    "ima-one-two.avi": "5e541046a5d5f16419dc0dc56db8e5017cfa70d45428ae8d7d32658b6f382052",
+    "ima-three.avi": "ca6267762651126ec2c0c60483ff5d51012ca95bf0d3b3f8068bdc307ce46f04",
+    "ima-nested.avi": "fa2abd8109a6aa82a758d7bb4cdfe934e7e8a9007e0f5cf904fac428b6dbd585",
+    "ima-indexed.avi": "962fd0cd859b6e2a5d159c9a7c01604d919093f265bfe47412c8ada836810ea6",
+    "ima-incomplete.avi": "e7e2f73f9e8f38e65f5d37fb02bd848997272fb6c2d79c4bd78dab365fe42e83",
+    "ima-wrong-count.avi": "afef46ca8b80fda972b499dc368a82bf8282756a05518ac4e896f09b233d353c",
+    "ms.f32le": "d35ee49b68fa2e1fb8d67b7a2c0cb26efac6d95eb83c897c5e2dcec7c147ae81",
+    "ms-single.avi": "c26a2b060e651708c7972ea814ceb95e2b67d0cf4d384aaf4770ba09f6c5a814",
+    "ms-two-one.avi": "d70c651fe0f9e7b682346a94f61a06eec4a1cf5135133ab58e55553b813a8175",
+    "ms-one-two.avi": "b2d03cea3cc61cd1d0f32435ed56e8ceff16c73976eed3638c4cec471c42ed2c",
+    "ms-three.avi": "004b2978b11701905787cb5a7757ac44a5e18b912b3ce7c5cd6371e2f70fda16",
+    "ms-nested.avi": "db0bc666b4b9b46b859dee53520a3b3d0adb581d7896533a045a8d07545da6ed",
+    "ms-indexed.avi": "23e4f5a4be1c2f042f15c25d48aae123b627402e9a6a7d0041f8b6aacb3e1de4",
+    "ms-incomplete.avi": "2504c87daacbe25f28a3dc253cbf0e5849f7ad02dc348e19c9efe6fb6bd37006",
+    "ms-wrong-count.avi": "3d10bbd5acdf4adc570ee64322c8bddd02d9fc1276fa8fbfa8e08313c08f4ad1"
+  }
+}

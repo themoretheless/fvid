@@ -1,0 +1,42 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0161"
+  ],
+  "issue": "No-envelope XM key-off must cut channel volume while retaining recoverable sample phase",
+  "regression": "tests/xm_key_off_volume_state.rs",
+  "fixtures": "tests/fixtures/playback-errors/xm-key-off-volume-state",
+  "before": [
+    "evidence/batch-152-before-all-cases.log",
+    "evidence/batch-152-before-verified.log",
+    "evidence/batch-152-acceptance-before-verified.log",
+    "evidence/batch-152-xm-decoder-before.rs"
+  ],
+  "reference": "evidence/batch-152-reference.json",
+  "scope": "Fourteen authored scores:nine PCM/activity failures and five healthy controls. Both default-rate stereo and post-row activity directions were verified. A natural-end control remains silent under volume restore. Fixtures have no volume envelope or fadeout; decoder guards assert those ignored counts are zero.",
+  "observed": [
+    "Note97/K00/delayed K03 followed by a note without instrument wrongly resume audio after release.",
+    "Explicit channel volume,instrument-default and fine-volume restores are wrongly blocked; same-row volume/default cases are included.",
+    "Primary FT2 keyOff sets realVol/outVol to zero when no volume envelope is enabled. With zero fadeout,volume commands can restore the active sample; no new note is required.",
+    "Current native held=false also stops the sample after its gain ramp reaches zero. Any fix must preserve phase,not merely make later commands audible."
+  ],
+  "qualification": [
+    "Forced intended media comparison decoded the authored companion and failed at the first PCM byte after the restore boundary. The actual worker fails at generation0 packet2 PCM with matching PTS/byte count. This does not independently prove a pre-fix seek failure.",
+    "The first worker attempt had an unrelated expected-duration error: XmAudioReader appends a120ms release tail. The fixture metadata was corrected from480/360ms to600/480ms. That initial log is retained and is not worker PCM proof.",
+    "At baseline there was no production change or accepted ID. Do not change the supported envelope/fadeout profile or claim full FT2 bit-exact mixing. Independent C00/split-row controls model channel-volume semantics in the existing renderer profile."
+  ],
+  "source_sha256": "a7f247ee884e661d256f809ff57b0ce4cd32488c500f2bc439f6ff4a35aa9e38",
+  "prototype": "evidence/batch-152-prototype-after.log",
+  "prototype_scope": "Standalone adapter compares the actual decoder and candidate helper at two rates and mono/stereo. All56 actual/reference PCM pairs match after the candidate;all56 reference streams remain byte-for-byte unchanged. This is supplementary and does not replace Cargo or actual worker acceptance.",
+  "implementation": "The actual active sample owner determines volume-envelope presence. No-envelope release sets channel volume0 while retaining phase; unsupported-envelope release keeps its former profile. Immediate note97/K00 and delayed Kxx use one helper. Existing selected/playing instrument ownership and natural sample end remain intact.",
+  "candidate_sha256": "0687c5179fef515894e086fe06eb77e307015efff6957adb8b3dd863e031da90",
+  "related_migration": {
+    "failed_log": "evidence/batch-152-related-after.log",
+    "old_generator": "evidence/batch-152-lifetime-generator-before.py",
+    "old_manifest": "evidence/batch-152-lifetime-manifest-before.json",
+    "old_reference": "evidence/batch-152-lifetime-released-control-before.xm",
+    "reason": "The pre-existing released-control incorrectly required a no-envelope note97 followed by explicit volume64 to remain silent. Primary FT2 keyOff semantics and the new independent controls require restoring the continuing sample phase. The same actual score,phase assertions,seek/EOF checks and natural-end silence control remain. Only its independent reference changes to C00 then volume64,and audible_after becomes true.",
+    "counts_as_new_improvement": false
+  },
+  "validation": "batch-152-validation.json"
+}

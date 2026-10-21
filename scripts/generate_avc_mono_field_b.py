@@ -27,7 +27,7 @@ def future_field(source,depth,bottom,index,cabac,chroma_planes=None,chroma_depth
     if cabac:b.bits.extend(c.finish())
     nal=b.nal(0x41,trailing=not cabac);return len(nal).to_bytes(4,'big')+nal
 
-def b_field(bottom,index,cabac,mode,weight,vectors=None,chroma=False):
+def b_field(bottom,index,cabac,mode,weight,vectors=None,chroma=False,full_resolution=False,init_idc=0):
     vectors=vectors or [[0,0],[0,0]]
     b=Writer();b.ue(0);b.ue(1);b.ue(0);b.u(2,4);b.u(1);b.u(int(bottom));b.u(2+index,4)
     b.u(int(mode not in ['temporal','skip']));b.u(0)
@@ -40,12 +40,12 @@ def b_field(bottom,index,cabac,mode,weight,vectors=None,chroma=False):
             if chroma:
                 b.u(1)
                 for cw,co in ([ (1,7),(-2,64) ] if l==0 else [ (3,-4),(1,-32) ]):b.se(cw);b.se(co)
-    if cabac:b.ue(0)
+    if cabac:b.ue(init_idc)
     b.se(0);b.ue(1)
     code={'l0':1,'l1':2,'bi':3,'spatial':0,'temporal':0,'skip':0}[mode]
     if cabac:
         while len(b.bits)%8:b.u(1)
-        c=CabacWriter(0,26)
+        c=CabacWriter(init_idc,26)
         for mb in range(2):
             c.decision(24+int(mb>0 and mode!='skip'),int(mode=='skip'))
             if mode!='skip':
@@ -53,7 +53,7 @@ def b_field(bottom,index,cabac,mode,weight,vectors=None,chroma=False):
                 for l in ([0,1] if code==3 else [code-1] if code in [1,2] else []):
                     for component in range(2):c.mvd(component,vectors[l][component] if mb==0 else 0,abs(vectors[l][component]) if mb else 0)
                 for ctx in ([73,74,75,76] if mb==0 else [74,74,76,76]):c.decision(ctx,0)
-                if chroma:c.decision(77,0)
+                if chroma and not full_resolution:c.decision(77,0)
             if mb==0:c.range-=2;c.renormalize()
         b.bits.extend(c.finish())
     elif mode=='skip':b.ue(2)

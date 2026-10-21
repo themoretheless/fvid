@@ -1,0 +1,176 @@
+{
+  "provenance": "Fourteen authored five-row XM scores. Invalid instrument components129/255 must not reset channel defaults,while valid notes/effects still execute. Independent controls remove only the invalid component;K00 cases use independent C00 cuts. Valid populated/empty-slot/default-level controls preserve intended restores. Existing owned signed16 waveform and authored VP9/PCM companion only;no private input,encoder or network.",
+  "cases": [
+    {
+      "name": "slot-129-note-mute",
+      "file": "slot-129-note-mute.xm",
+      "control": "slot-129-note-mute-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-unmute",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-129-selection-mute",
+      "file": "slot-129-selection-mute.xm",
+      "control": "slot-129-selection-mute-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-unmute",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-129-note-pan",
+      "file": "slot-129-note-pan.xm",
+      "control": "slot-129-note-pan-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-pan-reset",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-129-key-off",
+      "file": "slot-129-key-off.xm",
+      "control": "slot-129-key-off-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-unmute",
+      "post_row": 1,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-255-note-mute",
+      "file": "slot-255-note-mute.xm",
+      "control": "slot-255-note-mute-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-unmute",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-255-selection-mute",
+      "file": "slot-255-selection-mute.xm",
+      "control": "slot-255-selection-mute-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-unmute",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-255-note-pan",
+      "file": "slot-255-note-pan.xm",
+      "control": "slot-255-note-pan-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-pan-reset",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "slot-255-key-off",
+      "file": "slot-255-key-off.xm",
+      "control": "slot-255-key-off-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-unmute",
+      "post_row": 1,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "populated-note-defaults-control",
+      "file": "populated-note-defaults-control.xm",
+      "control": "populated-note-defaults-control-control.xm",
+      "before_failure": false,
+      "kind": "valid-default-restore",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 0
+    },
+    {
+      "name": "populated-selection-defaults-control",
+      "file": "populated-selection-defaults-control.xm",
+      "control": "populated-selection-defaults-control-control.xm",
+      "before_failure": false,
+      "kind": "valid-default-restore",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 0
+    },
+    {
+      "name": "valid-empty-slot-defaults-control",
+      "file": "valid-empty-slot-defaults-control.xm",
+      "control": "valid-empty-slot-defaults-control-control.xm",
+      "before_failure": false,
+      "kind": "valid-default-restore",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "valid-empty-slot-key-off-control",
+      "file": "valid-empty-slot-key-off-control.xm",
+      "control": "valid-empty-slot-key-off-control-control.xm",
+      "before_failure": false,
+      "kind": "valid-default-restore",
+      "post_row": 1,
+      "duration_ms": 720,
+      "expected_missing": 1
+    },
+    {
+      "name": "zero-instrument-control",
+      "file": "zero-instrument-control.xm",
+      "control": "zero-instrument-control-control.xm",
+      "before_failure": false,
+      "kind": "silent-control",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 0
+    },
+    {
+      "name": "default-level-invalid-control",
+      "file": "default-level-invalid-control.xm",
+      "control": "default-level-invalid-control-control.xm",
+      "before_failure": false,
+      "kind": "unchanged-default-level",
+      "post_row": 2,
+      "duration_ms": 720,
+      "expected_missing": 1
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "slot-129-note-mute.xm": "0bc64573c93ba54354089e191d835278508cd9f95e5d5db6a42aebefbb9f2ab2",
+    "slot-129-note-mute-control.xm": "d8c748329966bea155dff1d8ed81bf6ab7c79b1398aff2d5d050e5c638fdcb13",
+    "slot-129-selection-mute.xm": "f9c547a51b6cc86cce2510c04a36a44dbd3f7acc1f00c3aa09fad48b85dd5866",
+    "slot-129-selection-mute-control.xm": "06c70b45a0ebd4ac5038c727615860f11a26c652bdc92b0c3a162149b37ca428",
+    "slot-129-note-pan.xm": "26b7d7b2dede29fcf3ae64b1740b22a342d7f52aad1ff7dde3920fbfc1afdcfe",
+    "slot-129-note-pan-control.xm": "c3f063b0138af0793464bfc56cfdaa5a6d6fa12475550cd80c1b2df69cc252bb",
+    "slot-129-key-off.xm": "ac59243ce7f1cf7e0c446d0fcc3c61173f3254d4aa929aedc233fc1da760ad47",
+    "slot-129-key-off-control.xm": "06c70b45a0ebd4ac5038c727615860f11a26c652bdc92b0c3a162149b37ca428",
+    "slot-255-note-mute.xm": "d81fb865ec41ed6558459959e4e38b54d92ad8ff9aa6d0d3febe57351b76ee63",
+    "slot-255-note-mute-control.xm": "d8c748329966bea155dff1d8ed81bf6ab7c79b1398aff2d5d050e5c638fdcb13",
+    "slot-255-selection-mute.xm": "b5c67df9c71a6b90ff4e289161272f398d4160ec02985341aae88a0faf41f957",
+    "slot-255-selection-mute-control.xm": "06c70b45a0ebd4ac5038c727615860f11a26c652bdc92b0c3a162149b37ca428",
+    "slot-255-note-pan.xm": "f101f19f942e7c4368adaa898beed15637b5060a509dfb3535590ca4e939d44f",
+    "slot-255-note-pan-control.xm": "c3f063b0138af0793464bfc56cfdaa5a6d6fa12475550cd80c1b2df69cc252bb",
+    "slot-255-key-off.xm": "baf59f21bb789fe878195562c9072f30c32262164a4978e84931e6372de2e6dd",
+    "slot-255-key-off-control.xm": "06c70b45a0ebd4ac5038c727615860f11a26c652bdc92b0c3a162149b37ca428",
+    "populated-note-defaults-control.xm": "adf82f5989b6d73309ceaa77c653e1f7828a5a742c766d7abd70464173313524",
+    "populated-note-defaults-control-control.xm": "ea04fab7dd5596d6712e4d3bfcac32a6bed3b29d7c24cce916bb0bd46ecf32fa",
+    "populated-selection-defaults-control.xm": "3efbd3876322929710dd274e58a7541d15698f0ec5d346ba30da8fc532d146d9",
+    "populated-selection-defaults-control-control.xm": "19585463270346da17056c7e88ed44bafaa7baad5f4ee11d35fe9358761842d1",
+    "valid-empty-slot-defaults-control.xm": "7a9e15bd3b0b15c82780a5ada35e131b555d4fb7f366eecc5272eb3f702abb50",
+    "valid-empty-slot-defaults-control-control.xm": "fc4369b87c76f05536c25c012c92a033ffa019b1015c7cca2955db000b65201b",
+    "valid-empty-slot-key-off-control.xm": "6c6822726c7df556a61517dfffd6bfd7ae4fc2ab17ca4f14fe2844e727b3df05",
+    "valid-empty-slot-key-off-control-control.xm": "ac4ae71a9b2ccbd1fc2be2a74283c223f6435fbb6489e625bab091ed26f88768",
+    "zero-instrument-control.xm": "d8c748329966bea155dff1d8ed81bf6ab7c79b1398aff2d5d050e5c638fdcb13",
+    "zero-instrument-control-control.xm": "d8c748329966bea155dff1d8ed81bf6ab7c79b1398aff2d5d050e5c638fdcb13",
+    "default-level-invalid-control.xm": "04ccd4e8c2dd5c2ad1b5e194475ce2ae75c0bf90b03cb7966857f7936b40b02f",
+    "default-level-invalid-control-control.xm": "c8a208ccd680da6b86c0d00a5b6d627632c3e68d364139531e21a050ab89d03d"
+  }
+}

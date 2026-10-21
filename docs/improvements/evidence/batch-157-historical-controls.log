@@ -1,0 +1,15 @@
+slot-129-note-mute:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-129-selection-mute:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-129-note-pan:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-129-key-off:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-255-note-mute:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-255-selection-mute:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-255-note-pan:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+slot-255-key-off:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+populated-note-defaults-control:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+populated-selection-defaults-control:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+valid-empty-slot-defaults-control:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+valid-empty-slot-key-off-control:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+zero-instrument-control:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+default-level-invalid-control:historical/current classifications verified;four exact candidate pairs and four unchanged current controls
+20 historical pre-key-off-fix PCM failures,28 immediate-before failures,56 exact after pairs,56 current control streams unchanged. Six stereo mute/pan faults predate FVID0161;two K00 variants expand coverage and add no extra ID. Standalone adapter evidence;Cargo and actual worker gates remain separate.

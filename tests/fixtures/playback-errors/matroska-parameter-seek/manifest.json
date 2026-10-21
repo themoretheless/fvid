@@ -1,0 +1,1478 @@
+[
+  {
+    "file": "avc-y8-c8-sps-pps-inline.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-sps-pps-inline-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-sps-pps-prefix.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-sps-pps-prefix-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-pps-sps-inline.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-pps-sps-inline-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-pps-sps-prefix.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y8-c8-pps-sps-prefix-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y8-c8-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y8-c8-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-0.raw",
+        "depth": 8,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y8-c8-new-1.raw",
+        "depth": 8,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-sps-pps-inline.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-sps-pps-inline-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-sps-pps-prefix.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-sps-pps-prefix-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-pps-sps-inline.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-pps-sps-inline-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-pps-sps-prefix.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y10-c12-pps-sps-prefix-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y10-c12-old-0.raw",
+        "depth": 10,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y10-c12-old-1.raw",
+        "depth": 10,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-0.raw",
+        "depth": 12,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y10-c12-new-1.raw",
+        "depth": 12,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-sps-pps-inline.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-sps-pps-inline-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-sps-pps-prefix.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-sps-pps-prefix-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-pps-sps-inline.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-pps-sps-inline-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 80000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-pps-sps-prefix.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": false,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "avc-y14-c8-pps-sps-prefix-companion.mkv",
+    "codec": "avc",
+    "size": [
+      32,
+      16
+    ],
+    "companion": true,
+    "new_start": 2,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "avc-y14-c8-old-0.raw",
+        "depth": 14,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "avc-y14-c8-old-1.raw",
+        "depth": 14,
+        "start_ns": 40000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-0.raw",
+        "depth": 14,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "avc-y14-c8-new-1.raw",
+        "depth": 14,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-33-34-inline.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": false,
+    "new_start": 3,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-33-34-inline-companion.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": true,
+    "new_start": 3,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-33-34-prefix.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": false,
+    "new_start": 3,
+    "target_ns": 160000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 240000000,
+        "end_ns": 280000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-33-34-prefix-companion.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": true,
+    "new_start": 3,
+    "target_ns": 160000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 240000000,
+        "end_ns": 280000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-34-33-inline.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": false,
+    "new_start": 3,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-34-33-inline-companion.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": true,
+    "new_start": 3,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-34-33-prefix.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": false,
+    "new_start": 3,
+    "target_ns": 160000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 240000000,
+        "end_ns": 280000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-32-34-33-prefix-companion.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": true,
+    "new_start": 3,
+    "target_ns": 160000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 240000000,
+        "end_ns": 280000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-34-32-33-inline.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": false,
+    "new_start": 3,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-34-32-33-inline-companion.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": true,
+    "new_start": 3,
+    "target_ns": 120000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 120000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 120000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-34-32-33-prefix.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": false,
+    "new_start": 3,
+    "target_ns": 160000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 240000000,
+        "end_ns": 280000000
+      }
+    ]
+  },
+  {
+    "file": "hevc-34-32-33-prefix-companion.mkv",
+    "codec": "hevc",
+    "size": [
+      64,
+      64
+    ],
+    "companion": true,
+    "new_start": 3,
+    "target_ns": 160000000,
+    "frames": [
+      {
+        "oracle": "hevc-old-0.raw",
+        "depth": 8,
+        "start_ns": 0,
+        "end_ns": 40000000
+      },
+      {
+        "oracle": "hevc-old-1.raw",
+        "depth": 8,
+        "start_ns": 40000000,
+        "end_ns": 80000000
+      },
+      {
+        "oracle": "hevc-old-2.raw",
+        "depth": 8,
+        "start_ns": 80000000,
+        "end_ns": 160000000
+      },
+      {
+        "oracle": "hevc-new-0.raw",
+        "depth": 10,
+        "start_ns": 160000000,
+        "end_ns": 200000000
+      },
+      {
+        "oracle": "hevc-new-1.raw",
+        "depth": 10,
+        "start_ns": 200000000,
+        "end_ns": 240000000
+      },
+      {
+        "oracle": "hevc-new-2.raw",
+        "depth": 10,
+        "start_ns": 240000000,
+        "end_ns": 280000000
+      }
+    ]
+  }
+]

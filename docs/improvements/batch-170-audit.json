@@ -1,0 +1,19 @@
+{
+  "status": "accepted",
+  "related_id": "FVID-0086",
+  "additional_accepted_ids": [],
+  "problem": "AIFF/AIFC fixed-frame runs still truncate explicitly declared orphan bytes through packet alignment,unlike the already fixed WAV/AU paths. Rounded frames can equal COMM declaration,so EOF validation misses the discarded bytes.",
+  "source": "src/playback/audio/aiff.rs",
+  "source_sha256": "b0e2ceb956a50ace96a6db93971d6ac26035c8e2b25bcb456978500adf50888c",
+  "before_snapshot": "evidence/batch-170-aiff-before.rs",
+  "fixtures": "tests/fixtures/playback-errors/pcm-run-alignment",
+  "scope": "Extend existing owned generator with9 AIFF/AIFC layouts:integer16,24stereo,32,float32stereo,float64,int8stereo,G711stereo laws,valid odd mono8.12 orphan cases plus9 complete numeric controls;all existing WAV/AU media hashes and case definitions are preserved.",
+  "requirements": [
+    "Confirm actual native PCM and EOF succeed after discarding every one of12 explicitly declared orphan tails;all old WAV/AU refusals must remain precise.",
+    "Add fixed-frame modulo admission before packet rounding,restricting toPCM/G711;keep MACE interpretation and valid AIFF mono8 chunk padding.",
+    "Run extended regression,AIFF units,related PCM/G711/EOF/metadata regressions,fixture reproduction,minimal/player builds."
+  ],
+  "implementation_plan": "Same existing FVID0086 invariant applied at AIFF sample-run admission. Extend existing fixture generator and test source selector;do not replace prior WAV/AU test coverage.",
+  "counting": "0 additional IDs. This is a format-coverage follow-up for existing FVID-0086,not another independently counted alignment problem.",
+  "validation": "batch-170-validation.json"
+}

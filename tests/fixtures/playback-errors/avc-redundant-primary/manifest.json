@@ -1,0 +1,260 @@
+{
+  "provenance": "Owned Extended-profile SPS/PPS, PCM I primary and P-skip primary; distinct +1 PCM redundant representations. Scalar primary samples, no tools/network/private media.",
+  "cases": [
+    {
+      "name": "primary-split0-pps0-partial0-aso0",
+      "configuration": "primary-split0-pps0-partial0-aso0.avcc",
+      "file": "primary-split0-pps0-partial0-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split0-pps0-partial0-aso0-0.packet",
+          "primary": "primary-split0-pps0-partial0-aso0-0-primary.packet",
+          "slices": 1,
+          "redundants": 1
+        },
+        {
+          "packet": "primary-split0-pps0-partial0-aso0-1.packet",
+          "primary": "primary-split0-pps0-partial0-aso0-1-primary.packet",
+          "slices": 1,
+          "redundants": 1
+        }
+      ]
+    },
+    {
+      "name": "primary-split0-pps0-partial1-aso0",
+      "configuration": "primary-split0-pps0-partial1-aso0.avcc",
+      "file": "primary-split0-pps0-partial1-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split0-pps0-partial1-aso0-0.packet",
+          "primary": "primary-split0-pps0-partial1-aso0-0-primary.packet",
+          "slices": 1,
+          "redundants": 3
+        },
+        {
+          "packet": "primary-split0-pps0-partial1-aso0-1.packet",
+          "primary": "primary-split0-pps0-partial1-aso0-1-primary.packet",
+          "slices": 1,
+          "redundants": 3
+        }
+      ]
+    },
+    {
+      "name": "primary-split0-pps1-partial0-aso0",
+      "configuration": "primary-split0-pps1-partial0-aso0.avcc",
+      "file": "primary-split0-pps1-partial0-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split0-pps1-partial0-aso0-0.packet",
+          "primary": "primary-split0-pps1-partial0-aso0-0-primary.packet",
+          "slices": 1,
+          "redundants": 1
+        },
+        {
+          "packet": "primary-split0-pps1-partial0-aso0-1.packet",
+          "primary": "primary-split0-pps1-partial0-aso0-1-primary.packet",
+          "slices": 1,
+          "redundants": 1
+        }
+      ]
+    },
+    {
+      "name": "primary-split0-pps1-partial1-aso0",
+      "configuration": "primary-split0-pps1-partial1-aso0.avcc",
+      "file": "primary-split0-pps1-partial1-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split0-pps1-partial1-aso0-0.packet",
+          "primary": "primary-split0-pps1-partial1-aso0-0-primary.packet",
+          "slices": 1,
+          "redundants": 3
+        },
+        {
+          "packet": "primary-split0-pps1-partial1-aso0-1.packet",
+          "primary": "primary-split0-pps1-partial1-aso0-1-primary.packet",
+          "slices": 1,
+          "redundants": 3
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps0-partial0-aso0",
+      "configuration": "primary-split1-pps0-partial0-aso0.avcc",
+      "file": "primary-split1-pps0-partial0-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps0-partial0-aso0-0.packet",
+          "primary": "primary-split1-pps0-partial0-aso0-0-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        },
+        {
+          "packet": "primary-split1-pps0-partial0-aso0-1.packet",
+          "primary": "primary-split1-pps0-partial0-aso0-1-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps0-partial0-aso1",
+      "configuration": "primary-split1-pps0-partial0-aso1.avcc",
+      "file": "primary-split1-pps0-partial0-aso1.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps0-partial0-aso1-0.packet",
+          "primary": "primary-split1-pps0-partial0-aso1-0-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        },
+        {
+          "packet": "primary-split1-pps0-partial0-aso1-1.packet",
+          "primary": "primary-split1-pps0-partial0-aso1-1-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps0-partial1-aso0",
+      "configuration": "primary-split1-pps0-partial1-aso0.avcc",
+      "file": "primary-split1-pps0-partial1-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps0-partial1-aso0-0.packet",
+          "primary": "primary-split1-pps0-partial1-aso0-0-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        },
+        {
+          "packet": "primary-split1-pps0-partial1-aso0-1.packet",
+          "primary": "primary-split1-pps0-partial1-aso0-1-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps0-partial1-aso1",
+      "configuration": "primary-split1-pps0-partial1-aso1.avcc",
+      "file": "primary-split1-pps0-partial1-aso1.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps0-partial1-aso1-0.packet",
+          "primary": "primary-split1-pps0-partial1-aso1-0-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        },
+        {
+          "packet": "primary-split1-pps0-partial1-aso1-1.packet",
+          "primary": "primary-split1-pps0-partial1-aso1-1-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps1-partial0-aso0",
+      "configuration": "primary-split1-pps1-partial0-aso0.avcc",
+      "file": "primary-split1-pps1-partial0-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps1-partial0-aso0-0.packet",
+          "primary": "primary-split1-pps1-partial0-aso0-0-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        },
+        {
+          "packet": "primary-split1-pps1-partial0-aso0-1.packet",
+          "primary": "primary-split1-pps1-partial0-aso0-1-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps1-partial0-aso1",
+      "configuration": "primary-split1-pps1-partial0-aso1.avcc",
+      "file": "primary-split1-pps1-partial0-aso1.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps1-partial0-aso1-0.packet",
+          "primary": "primary-split1-pps1-partial0-aso1-0-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        },
+        {
+          "packet": "primary-split1-pps1-partial0-aso1-1.packet",
+          "primary": "primary-split1-pps1-partial0-aso1-1-primary.packet",
+          "slices": 2,
+          "redundants": 1
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps1-partial1-aso0",
+      "configuration": "primary-split1-pps1-partial1-aso0.avcc",
+      "file": "primary-split1-pps1-partial1-aso0.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps1-partial1-aso0-0.packet",
+          "primary": "primary-split1-pps1-partial1-aso0-0-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        },
+        {
+          "packet": "primary-split1-pps1-partial1-aso0-1.packet",
+          "primary": "primary-split1-pps1-partial1-aso0-1-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        }
+      ]
+    },
+    {
+      "name": "primary-split1-pps1-partial1-aso1",
+      "configuration": "primary-split1-pps1-partial1-aso1.avcc",
+      "file": "primary-split1-pps1-partial1-aso1.mp4",
+      "frames": [
+        {
+          "packet": "primary-split1-pps1-partial1-aso1-0.packet",
+          "primary": "primary-split1-pps1-partial1-aso1-0-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        },
+        {
+          "packet": "primary-split1-pps1-partial1-aso1-1.packet",
+          "primary": "primary-split1-pps1-partial1-aso1-1-primary.packet",
+          "slices": 2,
+          "redundants": 3
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "wrong-frame.packet",
+      "configuration": "invalid.avcc",
+      "message": "redundant slice picture identity"
+    },
+    {
+      "file": "wrong-reference-class.packet",
+      "configuration": "invalid.avcc",
+      "message": "redundant slice picture identity"
+    },
+    {
+      "file": "duplicate-primary.packet",
+      "configuration": "invalid.avcc",
+      "message": "overlap"
+    },
+    {
+      "file": "unknown-pps.packet",
+      "configuration": "unknown-pps.avcc",
+      "message": "unknown AVC PPS"
+    },
+    {
+      "file": "different-bottom.packet",
+      "configuration": "different-bottom.avcc",
+      "message": "redundant PPS POC"
+    }
+  ]
+}

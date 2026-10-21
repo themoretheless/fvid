@@ -1,0 +1,14 @@
+{
+  "provenance": "Authored SRT words,newlines and long wrapped text. Indexed video is the existing owned testsrc VP9 fixture,not private media. Regeneration copies that checked-in authored fixture;no encoder or network is needed. Native visual reproduction: fvid play video.webm --sub-file two-lines.srt --start-time 1.5 --start-paused --no-audio.",
+  "cases": [
+    "two-lines",
+    "wrapped",
+    "outline"
+  ],
+  "sha256": {
+    "two-lines.srt": "364746e63d040be239a8cce758a5efba75e729f4134e5b97892fd88a9009d474",
+    "wrapped.srt": "b190d31c326f42d60cb8a587f762f38f3ed6f6f26230cb4051a6dae2a5e28003",
+    "outline.srt": "4a0866f132fb47b58ee0155902a0fd733b254be45383e6617ce5a5ebdd92aac5",
+    "video.webm": "34aa7753d1f9e8c051776b5a698ad3a5e44f7b04c096620eda51f0de436542b4"
+  }
+}

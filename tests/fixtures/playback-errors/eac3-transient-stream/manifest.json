@@ -1,0 +1,137 @@
+{
+  "cases": [
+    {
+      "name": "regular",
+      "frames": [
+        1536,
+        1536,
+        1536,
+        1536
+      ],
+      "windows": [
+        {
+          "location": 2048,
+          "length": 64
+        },
+        {
+          "location": 0,
+          "length": 255
+        },
+        null,
+        {
+          "location": 512,
+          "length": 128
+        }
+      ],
+      "changes": true
+    },
+    {
+      "name": "short",
+      "frames": [
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256,
+        256
+      ],
+      "windows": [
+        {
+          "location": 2048,
+          "length": 48
+        },
+        null,
+        {
+          "location": 1024,
+          "length": 1
+        },
+        null,
+        null,
+        null,
+        null,
+        {
+          "location": 512,
+          "length": 128
+        },
+        null,
+        null,
+        null,
+        null
+      ],
+      "changes": true
+    },
+    {
+      "name": "eof-prefix",
+      "frames": [
+        768,
+        512,
+        256
+      ],
+      "windows": [
+        {
+          "location": 2048,
+          "length": 255
+        },
+        null,
+        null
+      ],
+      "changes": true
+    },
+    {
+      "name": "mixed",
+      "frames": [
+        256,
+        512,
+        768,
+        1536,
+        256,
+        768
+      ],
+      "windows": [
+        {
+          "location": 1024,
+          "length": 0
+        },
+        {
+          "location": 0,
+          "length": 255
+        },
+        {
+          "location": 512,
+          "length": 128
+        },
+        {
+          "location": 2048,
+          "length": 64
+        },
+        {
+          "location": 0,
+          "length": 255
+        },
+        null
+      ],
+      "changes": true
+    },
+    {
+      "name": "far-future",
+      "frames": [
+        256
+      ],
+      "windows": [
+        {
+          "location": 4092,
+          "length": 255
+        }
+      ],
+      "changes": false
+    }
+  ],
+  "decoder_integration_accepted": false,
+  "absolute_tolerance": 3e-06
+}
