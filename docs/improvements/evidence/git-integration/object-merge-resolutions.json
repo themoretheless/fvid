@@ -212666,5 +212666,22 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-hevc-colour-plane-draft-20261009",
+    "incoming": "012782f74b4cf829cb37819860f1e1ce2b0c8425",
+    "conflicts": {
+      "examples/hevc_colour_plane_fixture_meta.rs": {
+        "2": [
+          "100644",
+          "2896b15a5c71c7d5c2c38f6a6ea7c7844103ac77"
+        ],
+        "3": [
+          "100644",
+          "505a57858988887c18730c56cba5d78c0f5c6f31"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
