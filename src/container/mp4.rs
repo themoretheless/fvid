@@ -1705,6 +1705,11 @@ fn index_fragments(
                 if flags & !TRUN_SUPPORTED != 0 {
                     return Err(invalid("unsupported MP4 track-run flags"));
                 }
+                if flags & 0x00_0004 != 0 && flags & 0x00_0400 != 0 {
+                    return Err(invalid(
+                        "MP4 track-run states both first-sample flags and per-sample flags",
+                    ));
+                }
                 let count = u32be(bytes, 4)? as usize;
                 let mut at = 8usize;
                 // A run that says nothing about where it begins follows the last

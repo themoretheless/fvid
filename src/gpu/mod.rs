@@ -1,5 +1,5 @@
-//! Portable integer-texture processing on Metal, Vulkan, D3D12 and GL/GLES.
-//! No window, surface, float color conversion, compute shader, or unsafe code.
+//! Portable integer-texture and UMA compute processing on Metal, Vulkan, D3D12 and GL/GLES.
+//! No window, surface, float color conversion, or unsafe code in the root crate.
 use crate::backend::{Backend, DeviceInfo, unavailable};
 use crate::resident::TransferStats;
 use crate::{Error, Plan, Result};
@@ -112,10 +112,7 @@ impl Layout {
 pub(crate) struct GpuProcessor {
     device: wgpu::Device,
     queue: wgpu::Queue,
-    frames: Vec<wgpu::Texture>,
-    stages: Vec<Stage>,
-    upload: wgpu::Buffer,
-    readback: wgpu::Buffer,
+    execution: ExecutionMode,
     input_layout: Layout,
     output_layout: Layout,
     input_len: usize,
@@ -128,11 +125,36 @@ pub(crate) struct GpuProcessor {
     map_sender: mpsc::SyncSender<std::result::Result<(), wgpu::BufferAsyncError>>,
     map_receiver: mpsc::Receiver<std::result::Result<(), wgpu::BufferAsyncError>>,
 }
-struct Stage {
+
+enum ExecutionMode {
+    #[cfg(target_os = "macos")]
+    UmaCompute {
+        buffers: Vec<fvid_vt::UmaSharedBuffer>,
+        stages: Vec<ComputeStage>,
+        last_submission: Option<wgpu::SubmissionIndex>,
+    },
+    Render {
+        frames: Vec<wgpu::Texture>,
+        stages: Vec<RenderStage>,
+        upload: wgpu::Buffer,
+        readback: wgpu::Buffer,
+    },
+}
+
+#[cfg(target_os = "macos")]
+struct ComputeStage {
+    pipeline: wgpu::ComputePipeline,
+    bindings: wgpu::BindGroup,
+    groups_x: u32,
+    groups_y: u32,
+}
+
+struct RenderStage {
     pipeline: wgpu::RenderPipeline,
     bindings: wgpu::BindGroup,
     output_view: wgpu::TextureView,
 }
+
 impl GpuProcessor {
     pub fn new(plan: &Plan, backend: Backend, ordinal: usize, memory_limit: usize) -> Result<Self> {
         Self::new_chain(&[plan], backend, ordinal, memory_limit)
@@ -169,7 +191,8 @@ impl GpuProcessor {
             .into_iter()
             .nth(ordinal)
             .ok_or_else(|| unavailable(backend, &format!("hardware device {ordinal} not found")))?;
-        let name = adapter.get_info().name;
+        let info = adapter.get_info();
+        let name = info.name;
         let limits = adapter.limits();
         let format = wgpu::TextureFormat::Rgba8Uint;
         let allowed = adapter.get_texture_format_features(format).allowed_usages;
@@ -197,7 +220,7 @@ impl GpuProcessor {
         {
             return Err(gpu_error("staging buffer exceeds adapter max_buffer_size"));
         }
-        // All resident textures plus exactly one boundary upload/readback pair.
+        // All resident textures/buffers plus boundary budget.
         // Include caller boundary frame buffers to retain the CLI budget contract.
         let mut controlled_memory = plan
             .input_len
@@ -220,13 +243,23 @@ impl GpuProcessor {
                 "GPU frame/staging buffers need {controlled_memory} bytes, exceeding memory limit {memory_limit}"
             )));
         }
-        let required_limits =
-            wgpu::Limits::downlevel_webgl2_defaults().using_resolution(limits.clone());
+        #[cfg(target_os = "macos")]
+        let use_uma_compute = backend == Backend::Metal
+            && info.device_type == wgpu::DeviceType::IntegratedGpu
+            && limits.max_storage_buffers_per_shader_stage >= 2;
+        #[cfg(not(target_os = "macos"))]
+        let use_uma_compute = false;
+
+        let base_limits = if use_uma_compute {
+            wgpu::Limits::downlevel_defaults().using_resolution(limits.clone())
+        } else {
+            wgpu::Limits::downlevel_webgl2_defaults().using_resolution(limits.clone())
+        };
         let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
             label: Some("fvid GPU"),
             required_limits: wgpu::Limits {
                 max_buffer_size: limits.max_buffer_size,
-                ..required_limits
+                ..base_limits
             },
             memory_hints: wgpu::MemoryHints::MemoryUsage,
             ..Default::default()
@@ -248,6 +281,196 @@ impl GpuProcessor {
         let oom = device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
         let internal = device.push_error_scope(wgpu::ErrorFilter::Internal);
         let validation = device.push_error_scope(wgpu::ErrorFilter::Validation);
+
+        let execution = Self::build_execution(
+            &device,
+            plans,
+            shaders,
+            &layouts,
+            input_layout,
+            output_layout,
+            format,
+            usages,
+            use_uma_compute,
+        )?;
+
+        if let Some(error) = [
+            pollster::block_on(validation.pop()),
+            pollster::block_on(internal.pop()),
+            pollster::block_on(oom.pop()),
+        ]
+        .into_iter()
+        .flatten()
+        .next()
+        {
+            return Err(gpu_error(error));
+        }
+        if let Some(error) = asynchronous_error.lock().map_err(gpu_error)?.take() {
+            return Err(gpu_error(error));
+        }
+        let (map_sender, map_receiver) = mpsc::sync_channel(1);
+        Ok(Self {
+            map_sender,
+            map_receiver,
+            device,
+            queue,
+            execution,
+            input_layout,
+            output_layout,
+            input_len: plan.input_len,
+            output_len: last.output_len,
+            asynchronous_error,
+            name,
+            controlled_memory,
+            transfers: TransferStats::default(),
+            poisoned: false,
+        })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn build_execution(
+        device: &wgpu::Device,
+        plans: &[&Plan],
+        shaders: &[Option<&crate::resident::ByteShader>],
+        layouts: &[Layout],
+        input_layout: Layout,
+        output_layout: Layout,
+        format: wgpu::TextureFormat,
+        usages: wgpu::TextureUsages,
+        use_uma_compute: bool,
+    ) -> Result<ExecutionMode> {
+        #[cfg(target_os = "macos")]
+        if use_uma_compute {
+            let mut buffers = Vec::with_capacity(layouts.len());
+            for (index, layout) in layouts.iter().enumerate() {
+                let uma = fvid_vt::UmaSharedBuffer::new(
+                    device,
+                    layout.bytes,
+                    wgpu::BufferUsages::STORAGE,
+                    Some(if index == 0 {
+                        "UMA zero-copy input"
+                    } else {
+                        "UMA zero-copy stage output"
+                    }),
+                )
+                .map_err(gpu_error)?;
+                buffers.push(uma);
+            }
+            let bind_layout =
+                device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("fvid UMA compute bindings"),
+                    entries: &[
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 0,
+                            visibility: wgpu::ShaderStages::COMPUTE,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Storage { read_only: true },
+                                has_dynamic_offset: false,
+                                min_binding_size: wgpu::BufferSize::new(4),
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 1,
+                            visibility: wgpu::ShaderStages::COMPUTE,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Storage { read_only: false },
+                                has_dynamic_offset: false,
+                                min_binding_size: wgpu::BufferSize::new(4),
+                            },
+                            count: None,
+                        },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 2,
+                            visibility: wgpu::ShaderStages::COMPUTE,
+                            ty: wgpu::BindingType::Buffer {
+                                ty: wgpu::BufferBindingType::Uniform,
+                                has_dynamic_offset: false,
+                                min_binding_size: wgpu::BufferSize::new(128),
+                            },
+                            count: None,
+                        },
+                    ],
+                });
+            let pipeline_layout =
+                device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                    label: Some("fvid UMA compute pipeline"),
+                    bind_group_layouts: &[Some(&bind_layout)],
+                    immediate_size: 0,
+                });
+            let mut pipelines =
+                std::collections::HashMap::<&str, wgpu::ComputePipeline>::new();
+            let max_wg = device.limits().max_compute_workgroups_per_dimension.max(1);
+            let mut stages = Vec::with_capacity(plans.len());
+            for (index, plan) in plans.iter().enumerate() {
+                let mut params = plan.gpu_params()?;
+                params[28] = layouts[index].width;
+                params[29] = layouts[index + 1].width;
+                let bytes: Vec<u8> = params.into_iter().flat_map(u32::to_le_bytes).collect();
+                let uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("UMA compute stage plan"),
+                    contents: &bytes,
+                    usage: wgpu::BufferUsages::UNIFORM,
+                });
+                let bindings = device.create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("UMA compute stage bindings"),
+                    layout: &bind_layout,
+                    entries: &[
+                        wgpu::BindGroupEntry {
+                            binding: 0,
+                            resource: buffers[index].wgpu_buffer().as_entire_binding(),
+                        },
+                        wgpu::BindGroupEntry {
+                            binding: 1,
+                            resource: buffers[index + 1].wgpu_buffer().as_entire_binding(),
+                        },
+                        wgpu::BindGroupEntry {
+                            binding: 2,
+                            resource: uniform.as_entire_binding(),
+                        },
+                    ],
+                });
+                let source = shaders[index].map_or(include_str!("compute.wgsl"), |shader| {
+                    shader.compute_compiled_source()
+                });
+                let pipeline = pipelines
+                    .entry(source)
+                    .or_insert_with(|| {
+                        let shader =
+                            device.create_shader_module(wgpu::ShaderModuleDescriptor {
+                                label: Some("fvid UMA compute shader"),
+                                source: wgpu::ShaderSource::Wgsl(source.into()),
+                            });
+                        device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                            label: Some("fvid UMA compute crop/reflect"),
+                            layout: Some(&pipeline_layout),
+                            module: &shader,
+                            entry_point: Some("compute_main"),
+                            compilation_options: Default::default(),
+                            cache: None,
+                        })
+                    })
+                    .clone();
+                let words = u32::try_from(plan.output_len.div_ceil(4)).map_err(gpu_error)?;
+                let total_groups = words.div_ceil(64).max(1);
+                let groups_x = total_groups.min(max_wg);
+                let groups_y = total_groups.div_ceil(groups_x).max(1);
+                stages.push(ComputeStage {
+                    pipeline,
+                    bindings,
+                    groups_x,
+                    groups_y,
+                });
+            }
+            return Ok(ExecutionMode::UmaCompute {
+                buffers,
+                stages,
+                last_submission: None,
+            });
+        }
+        #[cfg(not(target_os = "macos"))]
+        let _ = use_uma_compute;
+
         let frames: Vec<_> = layouts
             .iter()
             .enumerate()
@@ -376,66 +599,31 @@ impl GpuProcessor {
                     })
                 })
                 .clone();
-            stages.push(Stage {
+            stages.push(RenderStage {
                 pipeline,
                 bindings,
                 output_view,
             });
         }
-        if let Some(error) = [
-            pollster::block_on(validation.pop()),
-            pollster::block_on(internal.pop()),
-            pollster::block_on(oom.pop()),
-        ]
-        .into_iter()
-        .flatten()
-        .next()
-        {
-            return Err(gpu_error(error));
-        }
-        if let Some(error) = asynchronous_error.lock().map_err(gpu_error)?.take() {
-            return Err(gpu_error(error));
-        }
-        let (map_sender, map_receiver) = mpsc::sync_channel(1);
-        Ok(Self {
-            map_sender,
-            map_receiver,
-            device,
-            queue,
+        Ok(ExecutionMode::Render {
             frames,
             stages,
             upload,
             readback,
-            input_layout,
-            output_layout,
-            input_len: plan.input_len,
-            output_len: last.output_len,
-            asynchronous_error,
-            name,
-            controlled_memory,
-            transfers: TransferStats::default(),
-            poisoned: false,
         })
     }
-    fn map(&self, buffer: &wgpu::Buffer, mode: wgpu::MapMode) -> Result<()> {
-        // Calls are sequential. A timeout poisons the pipeline, so a late
-        // callback can never be consumed by a later map operation.
-        let tx = self.map_sender.clone();
-        buffer.slice(..).map_async(mode, move |r| {
-            let _ = tx.send(r);
-        });
-        self.device
-            .poll(wgpu::PollType::Wait {
-                submission_index: None,
-                timeout: Some(Duration::from_secs(30)),
-            })
-            .map_err(gpu_error)?;
-        self.map_receiver
-            .recv_timeout(Duration::from_secs(30))
-            .map_err(gpu_error)?
-            .map_err(gpu_error)?;
-        self.check_error()
+
+    pub(crate) fn uses_uma_compute(&self) -> bool {
+        #[cfg(target_os = "macos")]
+        {
+            matches!(self.execution, ExecutionMode::UmaCompute { .. })
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            false
+        }
     }
+
     fn check_error(&self) -> Result<()> {
         if self.poisoned {
             return Err(gpu_error("GPU pipeline is poisoned; recreate it"));
@@ -465,31 +653,65 @@ impl GpuProcessor {
     }
     fn upload_inner(&mut self, input: &[u8]) -> Result<()> {
         self.check_error()?;
-        self.map(&self.upload, wgpu::MapMode::Write)?;
-        {
-            let mut mapped = self
-                .upload
-                .slice(..)
-                .get_mapped_range_mut()
-                .map_err(gpu_error)?;
-            mapped.slice(..input.len()).copy_from_slice(input);
-            mapped.slice(input.len()..).fill(0);
+        match &mut self.execution {
+            #[cfg(target_os = "macos")]
+            ExecutionMode::UmaCompute {
+                buffers,
+                last_submission,
+                ..
+            } => {
+                // If an earlier frame was dispatched and discarded without download,
+                // wait for its in-flight compute pass before mutating the shared UMA buffer.
+                if let Some(submission) = last_submission.take() {
+                    self.device
+                        .poll(wgpu::PollType::Wait {
+                            submission_index: Some(submission),
+                            timeout: Some(Duration::from_secs(30)),
+                        })
+                        .map_err(gpu_error)?;
+                }
+                buffers[0].write_slice(input).map_err(gpu_error)?;
+            }
+            ExecutionMode::Render { frames, upload, .. } => {
+                let tx = self.map_sender.clone();
+                upload.slice(..).map_async(wgpu::MapMode::Write, move |r| {
+                    let _ = tx.send(r);
+                });
+                self.device
+                    .poll(wgpu::PollType::Wait {
+                        submission_index: None,
+                        timeout: Some(Duration::from_secs(30)),
+                    })
+                    .map_err(gpu_error)?;
+                self.map_receiver
+                    .recv_timeout(Duration::from_secs(30))
+                    .map_err(gpu_error)?
+                    .map_err(gpu_error)?;
+                {
+                    let mut mapped = upload
+                        .slice(..)
+                        .get_mapped_range_mut()
+                        .map_err(gpu_error)?;
+                    mapped.slice(..input.len()).copy_from_slice(input);
+                    mapped.slice(input.len()..).fill(0);
+                }
+                upload.unmap();
+                let mut encoder =
+                    self.device
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("fvid frame"),
+                        });
+                encoder.copy_buffer_to_texture(
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: upload,
+                        layout: self.input_layout.copy_layout(),
+                    },
+                    frames[0].as_image_copy(),
+                    self.input_layout.extent(),
+                );
+                self.queue.submit([encoder.finish()]);
+            }
         }
-        self.upload.unmap();
-        let mut encoder = self
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("fvid frame"),
-            });
-        encoder.copy_buffer_to_texture(
-            wgpu::TexelCopyBufferInfo {
-                buffer: &self.upload,
-                layout: self.input_layout.copy_layout(),
-            },
-            self.frames[0].as_image_copy(),
-            self.input_layout.extent(),
-        );
-        self.queue.submit([encoder.finish()]);
         self.transfers.uploads += 1;
         self.transfers.upload_bytes += input.len() as u64;
         self.transfers.upload_staging_bytes += self.input_layout.bytes as u64;
@@ -502,29 +724,54 @@ impl GpuProcessor {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("resident filter chain; no host transfers"),
             });
-        for stage in &self.stages {
-            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("fvid transform"),
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &stage.output_view,
-                    depth_slice: None,
-                    resolve_target: None,
-                    ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
-                        store: wgpu::StoreOp::Store,
-                    },
-                })],
-                depth_stencil_attachment: None,
-                timestamp_writes: None,
-                occlusion_query_set: None,
-                multiview_mask: None,
-            });
-            pass.set_pipeline(&stage.pipeline);
-            pass.set_bind_group(0, &stage.bindings, &[]);
-            pass.draw(0..3, 0..1);
-        }
-        self.queue.submit([encoder.finish()]);
-        self.transfers.filter_passes += self.stages.len() as u64;
+        let pass_count = match &mut self.execution {
+            #[cfg(target_os = "macos")]
+            ExecutionMode::UmaCompute {
+                stages,
+                last_submission,
+                ..
+            } => {
+                for stage in stages.iter() {
+                    let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+                        label: Some("fvid UMA compute transform"),
+                        timestamp_writes: None,
+                    });
+                    pass.set_pipeline(&stage.pipeline);
+                    pass.set_bind_group(0, &stage.bindings, &[]);
+                    pass.dispatch_workgroups(stage.groups_x, stage.groups_y, 1);
+                }
+                let count = stages.len();
+                *last_submission = Some(self.queue.submit([encoder.finish()]));
+                count
+            }
+            ExecutionMode::Render { stages, .. } => {
+                for stage in stages.iter() {
+                    let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                        label: Some("fvid transform"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view: &stage.output_view,
+                            depth_slice: None,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                                store: wgpu::StoreOp::Store,
+                            },
+                        })],
+                        depth_stencil_attachment: None,
+                        timestamp_writes: None,
+                        occlusion_query_set: None,
+                        multiview_mask: None,
+                    });
+                    pass.set_pipeline(&stage.pipeline);
+                    pass.set_bind_group(0, &stage.bindings, &[]);
+                    pass.draw(0..3, 0..1);
+                }
+                let count = stages.len();
+                self.queue.submit([encoder.finish()]);
+                count
+            }
+        };
+        self.transfers.filter_passes += pass_count as u64;
         self.check_error()
     }
     pub(crate) fn download_frame(&mut self, output: &mut [u8]) -> Result<()> {
@@ -539,30 +786,67 @@ impl GpuProcessor {
     }
     fn download_inner(&mut self, output: &mut [u8]) -> Result<()> {
         self.check_error()?;
-        let mut encoder = self
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("explicit resident readback"),
-            });
-        encoder.copy_texture_to_buffer(
-            self.frames.last().expect("resident output").as_image_copy(),
-            wgpu::TexelCopyBufferInfo {
-                buffer: &self.readback,
-                layout: self.output_layout.copy_layout(),
-            },
-            self.output_layout.extent(),
-        );
-        self.queue.submit([encoder.finish()]);
-        self.map(&self.readback, wgpu::MapMode::Read)?;
-        {
-            let mapped = self
-                .readback
-                .slice(..)
-                .get_mapped_range()
-                .map_err(gpu_error)?;
-            output.copy_from_slice(&mapped[..output.len()]);
+        match &mut self.execution {
+            #[cfg(target_os = "macos")]
+            ExecutionMode::UmaCompute {
+                buffers,
+                last_submission,
+                ..
+            } => {
+                let submission = last_submission.take();
+                self.device
+                    .poll(wgpu::PollType::Wait {
+                        submission_index: submission,
+                        timeout: Some(Duration::from_secs(30)),
+                    })
+                    .map_err(gpu_error)?;
+                buffers
+                    .last()
+                    .expect("resident UMA output")
+                    .read_slice(output)
+                    .map_err(gpu_error)?;
+            }
+            ExecutionMode::Render {
+                frames, readback, ..
+            } => {
+                let mut encoder =
+                    self.device
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("explicit resident readback"),
+                        });
+                encoder.copy_texture_to_buffer(
+                    frames.last().expect("resident output").as_image_copy(),
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: readback,
+                        layout: self.output_layout.copy_layout(),
+                    },
+                    self.output_layout.extent(),
+                );
+                self.queue.submit([encoder.finish()]);
+                let tx = self.map_sender.clone();
+                readback.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+                    let _ = tx.send(r);
+                });
+                self.device
+                    .poll(wgpu::PollType::Wait {
+                        submission_index: None,
+                        timeout: Some(Duration::from_secs(30)),
+                    })
+                    .map_err(gpu_error)?;
+                self.map_receiver
+                    .recv_timeout(Duration::from_secs(30))
+                    .map_err(gpu_error)?
+                    .map_err(gpu_error)?;
+                {
+                    let mapped = readback
+                        .slice(..)
+                        .get_mapped_range()
+                        .map_err(gpu_error)?;
+                    output.copy_from_slice(&mapped[..output.len()]);
+                }
+                readback.unmap();
+            }
         }
-        self.readback.unmap();
         self.transfers.downloads += 1;
         self.transfers.download_bytes += output.len() as u64;
         self.transfers.download_staging_bytes += self.output_layout.bytes as u64;

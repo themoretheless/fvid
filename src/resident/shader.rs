@@ -9,6 +9,7 @@ use crate::{Error, Result};
 #[derive(Clone, Debug)]
 pub struct ByteShader {
     compiled: String,
+    compute_compiled: String,
 }
 impl ByteShader {
     /// Parse and validate before any GPU is initialized. Source is limited to 64 KiB.
@@ -36,10 +37,34 @@ impl ByteShader {
         if module.entry_points.len() != 2 || module.global_variables.len() != 2 {
             return Err(Error::Invalid("shader must only add functions and constants; extra entry points or globals are unsupported".into()));
         }
-        Ok(Self { compiled })
+        let compute_compiled = format!(
+            "{}\n{}\n{}",
+            include_str!("../gpu/compute.wgsl")
+                .replace("fn gather(output_index:", "fn raw_gather(output_index:"),
+            HELPERS,
+            source
+        );
+        let compute_module = naga::front::wgsl::parse_str(&compute_compiled)
+            .map_err(|error| Error::Invalid(error.emit_to_string(&compute_compiled)))?;
+        naga::valid::Validator::new(
+            naga::valid::ValidationFlags::all(),
+            naga::valid::Capabilities::empty(),
+        )
+        .validate(&compute_module)
+        .map_err(|error| Error::Invalid(error.emit_to_string(&compute_compiled)))?;
+        if compute_module.entry_points.len() != 1 || compute_module.global_variables.len() != 3 {
+            return Err(Error::Invalid("shader must only add functions and constants; extra entry points or globals are unsupported".into()));
+        }
+        Ok(Self {
+            compiled,
+            compute_compiled,
+        })
     }
     pub fn compiled_source(&self) -> &str {
         &self.compiled
+    }
+    pub fn compute_compiled_source(&self) -> &str {
+        &self.compute_compiled
     }
 }
 
