@@ -103,9 +103,8 @@ pub use error::{Error, Result};
 pub(crate) use error::{invalid, unsupported};
 mod view;
 pub use view::{FrameView, PlaneView, RowView};
-mod memory;
+pub mod memory; // Moved from internal to public API
 mod parallel;
-pub(crate) use memory::buffer;
 pub(crate) use parallel::span_workers;
 #[cfg(feature = "gpu")]
 mod gpu;
