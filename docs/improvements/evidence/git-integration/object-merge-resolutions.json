@@ -212118,5 +212118,134 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-codec-player-wip-20261006",
+    "incoming": "4990d64b2879693b7ad3a10a00e59772cfe15bcf",
+    "conflicts": {
+      "crates/fvid-media/src/owned_mp4_video_decode.rs": {
+        "1": [
+          "100644",
+          "88b5a386adb94041a2f35f203f027064220cb32b"
+        ],
+        "2": [
+          "100644",
+          "b471d8597905d0d71c0cb5b1171b7b2fa5f7ef4b"
+        ],
+        "3": [
+          "100644",
+          "6bcc7c04c11629879396be5583ce84f60ba0ed4e"
+        ]
+      },
+      "docs/CODEC_PROGRESS.md": {
+        "1": [
+          "100644",
+          "bb8966149070edde11722f7bd5159cf48fb27ef9"
+        ],
+        "2": [
+          "100644",
+          "e6ff2681631734639e1c0408e880e5fc7f146292"
+        ],
+        "3": [
+          "100644",
+          "b9a2ce635e989ebb7160b0db4225fff4a187af01"
+        ]
+      },
+      "scripts/generate_avc_field_b_longterm_samples.py": {
+        "1": [
+          "100644",
+          "16180a7b7fbe45585556348d46f49350dcd91b24"
+        ],
+        "2": [
+          "100644",
+          "d690c4d44ae6a6cc292ef3c7a9241c32568792d6"
+        ],
+        "3": [
+          "100644",
+          "64a93bd6b39aa90d9e390063efa9897f5ab6d9bd"
+        ]
+      },
+      "scripts/generate_avc_field_cabac_samples.py": {
+        "1": [
+          "100644",
+          "ad6c69ed43fc62adc0e0ddfd74b92a0aa629b47e"
+        ],
+        "2": [
+          "100644",
+          "acc68a43f74dc699d232b20f6cb109fdf6ecac0e"
+        ],
+        "3": [
+          "100644",
+          "fa1466f43c6235ea19bb90a94f4fd3e8a1aa7010"
+        ]
+      },
+      "scripts/generate_avc_field_gap_samples.py": {
+        "2": [
+          "100644",
+          "84625af0decc6ebda0494bc4ec8c08b96149d308"
+        ],
+        "3": [
+          "100644",
+          "e87e192ef87a559a914a9c2b54abf48a04fa69b2"
+        ]
+      },
+      "scripts/generate_avc_field_reference_samples.py": {
+        "1": [
+          "100644",
+          "2fa702d0f2f281c08511291a6c2d27bb7fb575d3"
+        ],
+        "2": [
+          "100644",
+          "7839142274eebbe3a8bbc8e5a6248110f988687a"
+        ],
+        "3": [
+          "100644",
+          "d2e49c413abcf39277b2afa7239894a31e09e8ff"
+        ]
+      },
+      "src/codec/avc_decoder.rs": {
+        "1": [
+          "100644",
+          "817bcb3954d0eb5347c9c1fe808cc316419eca49"
+        ],
+        "2": [
+          "100644",
+          "95bb141db12d52ad171e85e7d9f0f40a30884700"
+        ],
+        "3": [
+          "100644",
+          "fb8be1b40cbeb13ade1c31878b0ec2c976ff0d3a"
+        ]
+      },
+      "tests/avc_multislice.rs": {
+        "1": [
+          "100644",
+          "57d1316de4d703c717e6b93cd10e83db39141531"
+        ],
+        "2": [
+          "100644",
+          "6f46dffa11cfe8478b0be2277245078aee76e9b7"
+        ],
+        "3": [
+          "100644",
+          "736b64d560d9fcf12fcdf117c8ca792636474115"
+        ]
+      },
+      "tests/fixtures/playback-errors/README.md": {
+        "1": [
+          "100644",
+          "fb46727efb13799e83fd56e280fcc8d5cb7dee7c"
+        ],
+        "2": [
+          "100644",
+          "5d8a0c2afc6133d70d3ef22fb5d9b8b6a7e54929"
+        ],
+        "3": [
+          "100644",
+          "3b5fe0861f3bbecfa535390b5836717bc0c3f560"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
