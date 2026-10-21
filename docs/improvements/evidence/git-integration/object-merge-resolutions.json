@@ -2818,5 +2818,40 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-active-drafts-20261008-scaled",
+    "incoming": "e1cc39dd37e263e48c768f5b356d1a68b6993787",
+    "conflicts": {
+      "src/codec/hevc_transform.rs": {
+        "1": [
+          "100644",
+          "4146483f5fe416874abbf51633060d630bbb0670"
+        ],
+        "2": [
+          "100644",
+          "1b4da8b6a7fb42f2b2b391f24835a2e8a70f4e69"
+        ],
+        "3": [
+          "100644",
+          "6eb542b0585e176ee264ab370e5f0c9ef1728ec9"
+        ]
+      },
+      "src/player_gpu.rs": {
+        "1": [
+          "100644",
+          "20db2ae9d7f372e7293576a48ee474269519d451"
+        ],
+        "2": [
+          "100644",
+          "7e3e0415b1608995adb965d6822ca4fca8bfb672"
+        ],
+        "3": [
+          "100644",
+          "269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
