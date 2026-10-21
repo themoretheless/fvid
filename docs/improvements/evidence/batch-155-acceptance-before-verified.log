@@ -1,0 +1,20 @@
+
+running 2 tests
+
+thread 'missing_valid_slots_match_explicit_empty_instruments_and_report_once_per_cell' (3617670) panicked at tests/xm_empty_slot.rs:109:17:
+"slot-2-note" rate11025 channels1: missing slot replayed old sample
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test missing_valid_slots_match_explicit_empty_instruments_and_report_once_per_cell ... FAILED
+
+thread 'empty_slot_actual_worker_preserves_selection_recovery_seek_and_eof' (3617669) panicked at tests/support/audio_capture.rs:124:17:
+worker generation0 packet1: PCM differs (actual42336 expected42336 bytes)
+test empty_slot_actual_worker_preserves_selection_recovery_seek_and_eof ... FAILED
+
+failures:
+
+failures:
+    empty_slot_actual_worker_preserves_selection_recovery_seek_and_eof
+    missing_valid_slots_match_explicit_empty_instruments_and_report_once_per_cell
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.02s
+

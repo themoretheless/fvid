@@ -1,4 +1,4 @@
-//! Progressive non-4:2:0 CAVLC PCM reconstruction in native component geometry.
+//! Progressive PCM reconstruction in native component geometry, with 4:4:4 loop filtering.
 use super::{IntraPicture, decoded_storage};
 use super::super::{avc::{Pps, Sps, SliceGroups}, avc_slice::{SliceHeader,SliceType}, bits::BitReader};
 use crate::{Result,invalid,unsupported};
@@ -17,7 +17,12 @@ pub(super) fn decode(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,budget:usize)->Re
     if !(8..=14).contains(&sps.bit_depth_luma)||!(8..=14).contains(&sps.bit_depth_chroma) || w==0||h==0||w%16!=0||h%16!=0 {
         return Err(invalid("invalid AVC PCM component geometry or precision"));
     }
-    let needed=decoded_storage(sps,w,h)?;
+    let filter_pcm=sps.chroma_format==3 && headers.iter().any(|h|h.disable_deblocking_filter_idc!=1);
+    let filter_work=if filter_pcm {
+        (w/16).checked_mul(h/16).and_then(|n|n.checked_mul(std::mem::size_of::<super::super::avc_deblock::MacroblockEdges>()+13))
+            .ok_or_else(||invalid("AVC PCM filter storage overflow"))?
+    }else{0};
+    let needed=decoded_storage(sps,w,h)?.checked_add(filter_work).ok_or_else(||invalid("AVC PCM filter budget overflow"))?;
     if needed>budget {return Err(invalid("AVC PCM picture exceeds memory budget"));}
     let allocate=|count:usize|->Result<Vec<u16>> {
         let mut samples=Vec::new();samples.try_reserve_exact(count).map_err(|_|invalid("cannot allocate AVC PCM plane"))?;
@@ -27,7 +32,7 @@ pub(super) fn decode(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,budget:usize)->Re
     let mut picture=IntraPicture {coded_width:w,coded_height:h,crop:sps.crop.map(|v|v as usize),bit_depth:sps.bit_depth_luma,chroma_bit_depth:sps.bit_depth_chroma,
         y:allocate(count)?,cb:allocate(chroma)?,cr:allocate(chroma)?};
     let actual=picture.y.capacity().checked_add(picture.cb.capacity()).and_then(|v|v.checked_add(picture.cr.capacity())).and_then(|v|v.checked_mul(2));
-    if actual.is_none_or(|v|v>budget) {return Err(invalid("AVC PCM plane capacities exceed budget"));}
+    if actual.and_then(|n|n.checked_add(filter_work)).is_none_or(|v|v>budget) {return Err(invalid("AVC PCM plane capacities exceed budget"));}
     let mut ordered=headers.to_vec();ordered.sort_by_key(|h|h.first_mb);
     let mut seen=0;let mw=w/16;
     for &header in &ordered {
@@ -40,7 +45,8 @@ pub(super) fn decode(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,budget:usize)->Re
                 let left=seen%mw!=0 && seen>start;
                 let top=seen>=mw && seen-mw>=start;
                 if !reader.decision(3+usize::from(left)+usize::from(top))? || !reader.terminate()? {
-                    return Err(unsupported("AVC non-4:2:0 CABAC non-PCM macroblocks are not connected"));
+                    drop(picture);drop(reader);
+                    return super::intra444::decode(&ordered,sps,pps,budget);
                 }
                 let (y,[cb,cr])=reader.pcm_raw::<256>(sps.bit_depth_luma,sps.bit_depth_chroma,true)?;
                 let bx=seen%mw*16;let by=seen/mw*16;
@@ -66,7 +72,8 @@ pub(super) fn decode(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,budget:usize)->Re
                     drop(picture);
                     return super::decode_component_intra_slices(&ordered,sps,pps,budget);
                 }
-                return Err(unsupported("AVC non-4:2:0 CAVLC non-PCM macroblocks are not connected"));
+                drop(picture);
+                return super::intra444::decode(&ordered,sps,pps,budget);
             }
             while bits.position()%8!=0 {if bits.bit()? {return Err(invalid("nonzero AVC PCM alignment bit"));}}
             for (component,plane)in [&mut picture.y,&mut picture.cb,&mut picture.cr].into_iter().enumerate() {
@@ -81,5 +88,19 @@ pub(super) fn decode(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,budget:usize)->Re
         bits.finish_rbsp()?;
     }
     if seen!=count/256 {return Err(invalid("incomplete AVC PCM picture"));}
+    if filter_pcm {
+        // PCM macroblocks use QPY=0 for filtering, regardless of slice QP.
+        // Full-resolution chroma still derives its component QPC from that 0.
+        let mut qps=Vec::new();qps.try_reserve_exact(seen).map_err(|_|invalid("cannot allocate AVC PCM filter QPs"))?;qps.resize(seen,0i32);
+        let eight=crate::buffer(seen)?;
+        let depths=[sps.bit_depth_luma,sps.bit_depth_chroma,sps.bit_depth_chroma];
+        for (p,plane) in [&mut picture.y,&mut picture.cb,&mut picture.cr].into_iter().enumerate() {
+            let qp=if p==0 {0}else {
+                i32::from(super::chroma_qp(0,if p==1 {pps.chroma_qp_offset}else{pps.second_chroma_qp_offset},depths[p]))-6*(i32::from(depths[p])-8)
+            };
+            qps.fill(qp);
+            super::super::avc_deblock::intra_plane_owned(plane,w,h,&qps,depths[p],&ordered,false,&eight,None)?;
+        }
+    }
     Ok(picture)
 }

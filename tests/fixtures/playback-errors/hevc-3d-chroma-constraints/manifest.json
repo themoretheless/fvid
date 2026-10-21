@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "stem": "depth-chroma0",
+      "chroma": 0,
+      "valid": true
+    },
+    {
+      "stem": "depth-chroma1",
+      "chroma": 1,
+      "valid": false
+    },
+    {
+      "stem": "depth-chroma2",
+      "chroma": 2,
+      "valid": false
+    },
+    {
+      "stem": "depth-chroma3",
+      "chroma": 3,
+      "valid": false
+    }
+  ]
+}

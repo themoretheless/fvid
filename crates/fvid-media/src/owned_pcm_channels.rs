@@ -238,3 +238,19 @@ pub fn stereo_coefficients(channels: u16, mask: u32) -> Result<[[f64; 2]; 8], St
     }
     Ok(coefficients)
 }
+
+/// Device-only stereo folding for large codec layouts. The eight-channel PCM
+/// rematrix API retains its existing shape and admission rules.
+pub fn device_stereo_coefficients(channels:u16,mask:u32)->Result<Vec<[f64;2]>,String>{
+    if channels==0 || channels>4096 || mask&!0x3ffff!=0 || mask.count_ones()>u32::from(channels) {
+        return Err("unsupported device source speaker layout".into());
+    }
+    if channels<=8 {return Ok(stereo_coefficients(channels,mask)?[..usize::from(channels)].to_vec());}
+    let mut coefficients=Vec::new();
+    coefficients.try_reserve_exact(usize::from(channels)).map_err(|_|"device speaker allocation failed")?;
+    for i in 0..u32::from(channels){
+        coefficients.push(if mask==0 {[1./f64::from(channels);2]}
+            else {stereo_weight(mask_channel_at(u64::from(mask),i),false)});
+    }
+    Ok(coefficients)
+}

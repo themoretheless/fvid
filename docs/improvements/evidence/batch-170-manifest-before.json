@@ -1,0 +1,342 @@
+{
+  "provenance": "Authored20ms PCM/floats/G711 WAVE/AU with complete frame controls and explicitly declared orphan audio bytes. Existing window alignment silently removes those bytes before native decode. Odd mono8 RIFF word pad and AU annotation/footer are valid controls. Matching VP9/PCM video. No private media, encoder or network.",
+  "cases": [
+    {
+      "name": "wav-int16",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 1,
+      "file": "wav-int16.wav",
+      "expected": "wav-int16.f32le",
+      "bad": [
+        {
+          "file": "wav-int16-orphan-1.wav",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "wav-int24-stereo",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 2,
+      "file": "wav-int24-stereo.wav",
+      "expected": "wav-int24-stereo.f32le",
+      "bad": [
+        {
+          "file": "wav-int24-stereo-orphan-1.wav",
+          "tail": 1
+        },
+        {
+          "file": "wav-int24-stereo-orphan-5.wav",
+          "tail": 5
+        }
+      ]
+    },
+    {
+      "name": "wav-int32",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 1,
+      "file": "wav-int32.wav",
+      "expected": "wav-int32.f32le",
+      "bad": [
+        {
+          "file": "wav-int32-orphan-1.wav",
+          "tail": 1
+        },
+        {
+          "file": "wav-int32-orphan-3.wav",
+          "tail": 3
+        }
+      ]
+    },
+    {
+      "name": "wav-float32-stereo",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 2,
+      "file": "wav-float32-stereo.wav",
+      "expected": "wav-float32-stereo.f32le",
+      "bad": [
+        {
+          "file": "wav-float32-stereo-orphan-1.wav",
+          "tail": 1
+        },
+        {
+          "file": "wav-float32-stereo-orphan-7.wav",
+          "tail": 7
+        }
+      ]
+    },
+    {
+      "name": "wav-float64",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 1,
+      "file": "wav-float64.wav",
+      "expected": "wav-float64.f32le",
+      "bad": [
+        {
+          "file": "wav-float64-orphan-1.wav",
+          "tail": 1
+        },
+        {
+          "file": "wav-float64-orphan-7.wav",
+          "tail": 7
+        }
+      ]
+    },
+    {
+      "name": "wav-int8-stereo",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 2,
+      "file": "wav-int8-stereo.wav",
+      "expected": "wav-int8-stereo.f32le",
+      "bad": [
+        {
+          "file": "wav-int8-stereo-orphan-1.wav",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "wav-alaw-stereo",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 2,
+      "file": "wav-alaw-stereo.wav",
+      "expected": "wav-alaw-stereo.f32le",
+      "bad": [
+        {
+          "file": "wav-alaw-stereo-orphan-1.wav",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "wav-mulaw-stereo",
+      "kind": "wav",
+      "frames": 160,
+      "channels": 2,
+      "file": "wav-mulaw-stereo.wav",
+      "expected": "wav-mulaw-stereo.f32le",
+      "bad": [
+        {
+          "file": "wav-mulaw-stereo-orphan-1.wav",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "wav-odd-mono8",
+      "kind": "wav",
+      "frames": 161,
+      "channels": 1,
+      "file": "wav-odd-mono8.wav",
+      "expected": "wav-odd-mono8.f32le",
+      "bad": []
+    },
+    {
+      "name": "au-int16",
+      "kind": "au",
+      "frames": 160,
+      "channels": 1,
+      "file": "au-int16.au",
+      "expected": "au-int16.f32le",
+      "bad": [
+        {
+          "file": "au-int16-orphan-1.au",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "au-int24-stereo",
+      "kind": "au",
+      "frames": 160,
+      "channels": 2,
+      "file": "au-int24-stereo.au",
+      "expected": "au-int24-stereo.f32le",
+      "bad": [
+        {
+          "file": "au-int24-stereo-orphan-1.au",
+          "tail": 1
+        },
+        {
+          "file": "au-int24-stereo-orphan-5.au",
+          "tail": 5
+        }
+      ]
+    },
+    {
+      "name": "au-int32",
+      "kind": "au",
+      "frames": 160,
+      "channels": 1,
+      "file": "au-int32.au",
+      "expected": "au-int32.f32le",
+      "bad": [
+        {
+          "file": "au-int32-orphan-1.au",
+          "tail": 1
+        },
+        {
+          "file": "au-int32-orphan-3.au",
+          "tail": 3
+        }
+      ]
+    },
+    {
+      "name": "au-float32-stereo",
+      "kind": "au",
+      "frames": 160,
+      "channels": 2,
+      "file": "au-float32-stereo.au",
+      "expected": "au-float32-stereo.f32le",
+      "bad": [
+        {
+          "file": "au-float32-stereo-orphan-1.au",
+          "tail": 1
+        },
+        {
+          "file": "au-float32-stereo-orphan-7.au",
+          "tail": 7
+        }
+      ]
+    },
+    {
+      "name": "au-float64",
+      "kind": "au",
+      "frames": 160,
+      "channels": 1,
+      "file": "au-float64.au",
+      "expected": "au-float64.f32le",
+      "bad": [
+        {
+          "file": "au-float64-orphan-1.au",
+          "tail": 1
+        },
+        {
+          "file": "au-float64-orphan-7.au",
+          "tail": 7
+        }
+      ]
+    },
+    {
+      "name": "au-int8-stereo",
+      "kind": "au",
+      "frames": 160,
+      "channels": 2,
+      "file": "au-int8-stereo.au",
+      "expected": "au-int8-stereo.f32le",
+      "bad": [
+        {
+          "file": "au-int8-stereo-orphan-1.au",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "au-alaw-stereo",
+      "kind": "au",
+      "frames": 160,
+      "channels": 2,
+      "file": "au-alaw-stereo.au",
+      "expected": "au-alaw-stereo.f32le",
+      "bad": [
+        {
+          "file": "au-alaw-stereo-orphan-1.au",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "au-mulaw-stereo",
+      "kind": "au",
+      "frames": 160,
+      "channels": 2,
+      "file": "au-mulaw-stereo.au",
+      "expected": "au-mulaw-stereo.f32le",
+      "bad": [
+        {
+          "file": "au-mulaw-stereo-orphan-1.au",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "au-odd-mono8",
+      "kind": "au",
+      "frames": 161,
+      "channels": 1,
+      "file": "au-odd-mono8.au",
+      "expected": "au-odd-mono8.f32le",
+      "bad": []
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "wav-int16.wav": "e1da04013618993e28a8984936226dd12b826d9ba7a79394a299088f5730ef92",
+    "wav-int16.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "wav-int16-orphan-1.wav": "04711a98b35ce43d067cadf1a4195e12afd0824121bf42f3c1f131d00af63d61",
+    "wav-int24-stereo.wav": "d75e1993d3d494bd16afb4e6881c9107ff3c9e67d48b360b31e76f73031acaf8",
+    "wav-int24-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "wav-int24-stereo-orphan-1.wav": "b3c3f2bd67aa0b57fd8dff39d069de6714f24c9b1ada20012f211f5d9bdad738",
+    "wav-int24-stereo-orphan-5.wav": "76ab69adaa957afc19b3fd8d33839f286b18a32d2e7a2a7cf1675c0d6d1d443d",
+    "wav-int32.wav": "daa4035cb0ceb42a859b76c69a89145df75be23d296e6e693e63c78dfa360e63",
+    "wav-int32.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "wav-int32-orphan-1.wav": "20ebcee1e366d3287bd46f68c8a7d212896c98c3a069004652793f8a33f2dccc",
+    "wav-int32-orphan-3.wav": "256e9e26825c5d367911853cd5c57658e1af0383952250c8ebfc7ed34f060748",
+    "wav-float32-stereo.wav": "147d83bd77bdf578017c78fc958a5aec9a225c7d41d851790fc5bdf9f26ae2ae",
+    "wav-float32-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "wav-float32-stereo-orphan-1.wav": "3b42d6fc97f115f77d7e6f3a6be8b2cebe72ed3f0c98423bc81b5402fa1ea75c",
+    "wav-float32-stereo-orphan-7.wav": "3b8203393e13cb9d35b6c78697a4d4edda1cca977d032095486630b8b34c0677",
+    "wav-float64.wav": "bd50e403cfe6aba75c9359873f1213a24a2afac07a861b6b24b79870712a60c2",
+    "wav-float64.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "wav-float64-orphan-1.wav": "55e73aa820316f58914295f917c2b832a728f1eab60c7de0d130a44ad1b5a625",
+    "wav-float64-orphan-7.wav": "3bac1e9d9fbeb49188b88593b3d9030f27ca40fae1cbbe2b27ba7554ecbc6254",
+    "wav-int8-stereo.wav": "60b0aec8aec141a3c654f74382e1f3dcf28fae1bf0303687e96a32bc62d8b61c",
+    "wav-int8-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "wav-int8-stereo-orphan-1.wav": "6dc6e643706b7739d87f53ca600b59bdd6028eb17160b623cf83fa5302c55f35",
+    "wav-alaw-stereo.wav": "a809a1a58da471ce29e0f3c8350d39d3b564836504abaea13fc095feb15ae8ed",
+    "wav-alaw-stereo.f32le": "717e99cacb2a0d5086746c738f0e7638b4e050c06aa82364a56243c40de75945",
+    "wav-alaw-stereo-orphan-1.wav": "c41278b82cd7d0f99ff90c3d5199da88877b48741ce59750e24f5993473470f8",
+    "wav-mulaw-stereo.wav": "61b94662b6857e0389bf4bf90ba6a122f4095a7bb3f2e18c40d1ce92e25b77eb",
+    "wav-mulaw-stereo.f32le": "d4b20671fefe91b92589015347603c8bf894df3a3d6b179884160f4f8bd56fec",
+    "wav-mulaw-stereo-orphan-1.wav": "df49536440ab17714856f886259080c0beaad9c937f679e10683e735de7815f0",
+    "wav-odd-mono8.wav": "bc179105cade2e37a55daf5d7b1c8cb92fe33083bede106027c0666e4279233b",
+    "wav-odd-mono8.f32le": "f245ac783945a3e39580e6ff21922d54d61252e8d5ace64d2e428522245932d6",
+    "au-int16.au": "a30721123f4800400625073cdaedb1fc41110787d7e5efade2391b3459d82355",
+    "au-int16.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "au-int16-orphan-1.au": "1d2351f0c63907cb2cb948954c5c62d4390fc62e090e972135d080158aadf6be",
+    "au-int24-stereo.au": "8af6b78712a8a0cefcd74144e4bfbace0b5a4c2cc5e8c63344dd8acf4fad1cd3",
+    "au-int24-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "au-int24-stereo-orphan-1.au": "6777471e45a1908a42e8f992cd071972ed2fd3ecad9db194262eb26d5cd6dd2e",
+    "au-int24-stereo-orphan-5.au": "8f76d301dd493122a9098e94d43da11dd96fcfafd1628a991bc78d1e34645d67",
+    "au-int32.au": "11715cb6372557f0a24e36f1129fd317586ed04edbda9c202887f54398fc50bb",
+    "au-int32.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "au-int32-orphan-1.au": "356e0eeb42b32f437a28b95f1914545843af20a375a16b84bcabda1a41188bf4",
+    "au-int32-orphan-3.au": "9f0b4d6d2d393f61cd7ee8dce450cccb0ad39bab14805174de443724e4edfd23",
+    "au-float32-stereo.au": "446bb6e81f08a44826ef5bfeecca019df50c08a34eafc1ba6d27ba066af7dae7",
+    "au-float32-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "au-float32-stereo-orphan-1.au": "fece794b6bebc343bb731505fc2ee0a8994cc0ebae36237d4e853417d2a7017b",
+    "au-float32-stereo-orphan-7.au": "1cae4255d5743545a8915bdbe12472bc7f208d8908f8dddcc9c80e1ba3250698",
+    "au-float64.au": "7cc7930309604a10a3a04a67b936cdae0c6d0789bf168c8455ad205c2dc9a712",
+    "au-float64.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "au-float64-orphan-1.au": "927fb97112e03b0b09e3b80077ecd61291bc9dd2a57ef432003afce4bacdbf67",
+    "au-float64-orphan-7.au": "ad2ce13cfa21eee6418db5ddb5fd18994c21283c5cbb8376b963c41f8771c47d",
+    "au-int8-stereo.au": "6559b5986a8c220c4f83bb5161df7b5eb838648143b62f5e8c54778907ff58b6",
+    "au-int8-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "au-int8-stereo-orphan-1.au": "7e0030ef469559855b18a589ba122d1137b71e9020f6acb0cb3d9f7b5591301a",
+    "au-alaw-stereo.au": "9fa590d5e4eb68b9544d123e01871b8f3e3207f12a5fc8c4906a14901a3bb446",
+    "au-alaw-stereo.f32le": "717e99cacb2a0d5086746c738f0e7638b4e050c06aa82364a56243c40de75945",
+    "au-alaw-stereo-orphan-1.au": "f180657114f569d5a2c4be07b68cc2f9ef813040e9c63e94825c2976cfa7e2a3",
+    "au-mulaw-stereo.au": "7f208546db58b4d641f911f562ab0d6fbfa1c00b57ff57b49c37e90bf2a26aea",
+    "au-mulaw-stereo.f32le": "d4b20671fefe91b92589015347603c8bf894df3a3d6b179884160f4f8bd56fec",
+    "au-mulaw-stereo-orphan-1.au": "005536ea5cb09bb1e14e35807ca97ca242a6444dbdfd2b9ee999c1823d6bb67e",
+    "au-odd-mono8.au": "2ab5380ced46f38a738819831b682d2e4b51e6fc88c75f4121972f7753eac482",
+    "au-odd-mono8.f32le": "f245ac783945a3e39580e6ff21922d54d61252e8d5ace64d2e428522245932d6"
+  }
+}

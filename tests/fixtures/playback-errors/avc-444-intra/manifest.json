@@ -1,0 +1,665 @@
+{
+  "provenance": "Owned nonseparate 4:4:4 CAVLC intra samples; no external codec or private data.",
+  "cases": [
+    {
+      "name": "i4-y8-c8-crop0",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-y8-c8-crop0-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-y8-c8-crop1",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-y8-c8-crop1-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-dc-y8-c8-crop0",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-dc-y8-c8-crop0-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-dc-y8-c8-crop1",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-dc-y8-c8-crop1-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i8-y8-c8-crop0",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i8-y8-c8-crop0-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i8-y8-c8-crop1",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i8-y8-c8-crop1-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-zero-y8-c8-crop0",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-zero-y8-c8-crop0-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-zero-y8-c8-crop1",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-zero-y8-c8-crop1-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-dc-y8-c8-crop0",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-dc-y8-c8-crop0-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-dc-y8-c8-crop1",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-dc-y8-c8-crop1-joined",
+      "yd": 8,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-y10-c12-crop0",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-y10-c12-crop0-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-y10-c12-crop1",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-y10-c12-crop1-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-dc-y10-c12-crop0",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-dc-y10-c12-crop0-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-dc-y10-c12-crop1",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-dc-y10-c12-crop1-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i8-y10-c12-crop0",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i8-y10-c12-crop0-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i8-y10-c12-crop1",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i8-y10-c12-crop1-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-zero-y10-c12-crop0",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-zero-y10-c12-crop0-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-zero-y10-c12-crop1",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-zero-y10-c12-crop1-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-dc-y10-c12-crop0",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-dc-y10-c12-crop0-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-dc-y10-c12-crop1",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-dc-y10-c12-crop1-joined",
+      "yd": 10,
+      "cd": 12,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-y14-c8-crop0",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-y14-c8-crop0-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-y14-c8-crop1",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-y14-c8-crop1-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-dc-y14-c8-crop0",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-dc-y14-c8-crop0-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i4-dc-y14-c8-crop1",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i4-dc-y14-c8-crop1-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i8-y14-c8-crop0",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i8-y14-c8-crop0-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i8-y14-c8-crop1",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i8-y14-c8-crop1-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-zero-y14-c8-crop0",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-zero-y14-c8-crop0-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-zero-y14-c8-crop1",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-zero-y14-c8-crop1-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-dc-y14-c8-crop0",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-dc-y14-c8-crop0-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "i16-dc-y14-c8-crop1",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "i16-dc-y14-c8-crop1-joined",
+      "yd": 14,
+      "cd": 8,
+      "crop": [
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ]
+}

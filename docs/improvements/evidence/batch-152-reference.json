@@ -1,0 +1,23 @@
+{
+  "status": "baseline-confirmed",
+  "accepted_ids": [],
+  "source": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/master/src/ft2_replayer.c",
+  "sha256": "0a4b735e8c35ecaf11f00db236bab0dbb404fdc8beb463f5c17b8f3b60efb2da",
+  "retrieved_at": "2026-10-20T23:13:31.070527+00:00",
+  "inspected_functions": [
+    "keyOff",
+    "getNewNote",
+    "updateVolPanAutoVib",
+    "retrigNote",
+    "triggerInstrument"
+  ],
+  "findings": [
+    "Without a volume envelope,keyOff sets realVol and outVol to zero. With zero fadeout,subsequent channel-volume or instrument-default restores can resume the active sample.",
+    "A note without an instrument does not reset channel volume. It must retain the zero after release unless a volume/default restore explicitly changes it.",
+    "Retrigger research exposed this separate release-state question. No E9x implementation is proposed here."
+  ],
+  "fixture_scope": "Fourteen authored zero-envelope,zero-fadeout inputs versus independent volume-zero controls; nine failures,five healthy controls including natural sample end. No full FT2 bit-exact claim.",
+  "commit": "923829b28946d5504eea2168655c2ac3f7c67ace",
+  "pinned_source": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/923829b28946d5504eea2168655c2ac3f7c67ace/src/ft2_replayer.c",
+  "pinned_hash_verified": true
+}

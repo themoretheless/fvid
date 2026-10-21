@@ -1,6 +1,6 @@
 # Verified improvements
 
-Accepted: **153 / 1000 independent, useful changes**. Only entries marked `accepted` in
+Accepted: **178 / 1000 independent, useful changes**. Only entries marked `accepted` in
 [`registry.json`](registry.json) count. Fixture variants, test cases, documentation
 and baseline integration repairs do not inflate the count.
 
@@ -619,3 +619,181 @@ FVID-0152 places seek preparation below the upper file metadata. Actual native U
 ## Batch145 — XM active sample ownership
 
 FVID-0153 separates future instrument selection from the playing sample.36 exact PCM comparisons and18 actual worker targets pass;35 units,13 related integration targets and player build pass. Historical pan oracles now use static-pan note-on controls;all40 tested pan inputs remain unchanged. Unselected notes are silent and counted as missing samples. See[validation](batch-145-validation.json).
+
+## Batch146 — finite XM pattern loops
+
+FVID-0154 expands E6x with channel-local counters and bounded timeline admission.14 literal traces,56 exact PCM comparisons and28 actual worker targets pass;35 units,minimal configuration,related integrations and player build pass. Existing native global one-pass policy remains qualified separately from local finite repeats. See[validation](batch-146-validation.json).
+
+Batch147 — FVID-0155: SAMI attribute tokenization. Eight failing variants and four healthy controls now agree with independent captions;33 related units,native video/seek and player build pass. Untimed captions are a correct-skip case. Unsupported Y4M seek in the initial test was corrected by using the existing authored indexed VP9 clip; this adds no ID. See [validation](batch-147-validation.json).
+
+Batch148 — FVID-0156: canonical SAMI Sync clocks and selected-language clear events. Six independent SRT references,14 native Player seek targets,11 focused tests,33 related units,fixture reproduction and player build pass.7959 bounded malformed-text probes found no panics; they add no IDs and do not prove full HTML/SAMI conformance. See [validation](batch-148-validation.json).
+
+Batch149 — FVID-0157/0158: case-insensitive SAMI BR tags and .sami sidecar discovery. Each defect failed its specific native Player assertion after actual video presentation before the fix.17 focused tests,33 related units,eight new native seek targets,fixture reproduction and player build pass. Discovery audit150 is incorporated here and adds no extra ID. See [validation](batch-149-validation.json).
+
+Batch151 — FVID-0159: quoted/comment/raw-header text no longer terminates SAMI body discovery. Six independent controls,20 focused tests,33 related units,12822 bounded no-panic probes and player build pass. Physical video playback showed the caption and its later clear;the review exposed a separate renderer hard-break/placement defect for the next repair. See [validation](batch-151-validation.json).
+
+## Batch 153 — subtitle painting
+
+FVID-0160 preserves hard breaks,centers wrapped rows,renders a real black outline
+and keeps captions above visible controls. Five output/native regressions,34 related
+tests,offline fixture reproduction,player build and physical playback review pass.
+See `batch-153-validation.json` for scope and the separate Documents-path wait.
+
+## Batch 152 — no-envelope XM release state
+
+FVID-0161 makes note97/K00/delayed Kxx cut channel volume while preserving
+recoverable sample phase. Fourteen scores,56 exact PCM combinations,28 actual
+worker seek/EOF targets,35 units,21 related tests and player build pass. The old
+permanent-release lifetime oracle is migrated to independent C00/volume restore;
+its historical files and failed log remain in evidence. See `batch-152-validation.json`.
+
+## Batch 154 — stopped XM offset gain
+
+FVID-0162 clears gain when9xx starts beyond the sample end,preventing a later
+zero-volume note from emitting stale-gain audio. Four scores,16 exact PCM
+combinations,8 worker targets,9 focused/related tests,35 units,fixture checks
+and player build pass. See `batch-154-validation.json`.
+
+## Batch 155 — valid empty XM slots
+
+FVID-0163 selects valid unpopulated instrument slots instead of replaying the
+previous instrument. Instrument-only rows preserve the active sample until a
+note;valid instrument1 recovers. Ten scores,40 PCM combinations,20 worker
+target variants,15 integrations,35 units,fixture checks and player build pass.
+The old wrong-audio unit expectation and duplicate diagnostic are corrected.
+Short empty headers remain separate;see `batch-155-validation.json`.
+
+## Batch 156 — short empty XM instrument headers
+
+FVID-0164 reads29-byte sample-free headers and skips declared padding without
+reading the next instrument as metadata. Eight layouts,four malformed refusals,
+32 PCM combinations,16 worker targets,13 integrations,35 player units,18 core
+units,final player/core regressions and player build pass. Size0 quirks are not
+qualified. See `batch-156-validation.json`.
+
+## Batch 157 — invalid XM instrument defaults
+
+FVID-0165 preserves mute,pan and K00 when an invalid instrument component is
+ignored. Valid notes/effects and populated/valid-empty128 restores remain active.
+Fourteen scores,56 PCM pairs,28 worker targets,20 integrations,35 units,unchanged
+reference streams and player build pass. Historical proof prevents counting K00
+variants as a separate fix. See `batch-157-validation.json`.
+
+## Batch 158 — whole XM tick spans
+
+FVID-0166 converts a whole tick interval before microsecond rounding. Equal
+tempo/speed ratios retain row lengths,and Kxx/ECx no longer cut a sample early
+in the authored boundary cases. Ten scores,40 PCM pairs,16 fixed-window pairs,
+20 worker targets,20 integrations,35 player units,18 core units,2 core
+regressions and player build pass. See `batch-158-validation.json`.
+
+## Batch 159 — AVI index origins
+
+FVID-0167 accepts the documented file-origin idx1 convention while requiring
+a consistent origin across checked audio entries. Eight indexed cases,16 worker
+target variants,7 integrations,34 related units,2 core regressions and player
+build pass. Mixed origins and invalid addresses still refuse.
+See `batch-159-validation.json`.
+
+## Batch 160 — AVI main-header field boundaries
+
+FVID-0168 refuses an avih stream count borrowed from the next chunk. Six
+malformed inputs now refuse;four full/padded controls retain literal PCM and
+worker navigation.11 integrations,34 related units,4 core regressions and
+player build pass. See `batch-160-validation.json`.
+
+## Batch 161 — FLAC coded-clock consistency
+
+FVID-0169 refuses canonical but discontinuous frame/sample clocks and blocking
+strategy changes before building the bare-FLAC index. Eleven malformed scores
+refuse while four legal controls retain exact PCM and8 worker targets. Native,
+shared-media,core,libFLAC MD5 and player build gates pass. Three old mask0
+test oracles were aligned with unchanged committed routing behavior at zero
+new IDs;original failures and sources remain archived. See `batch-161-validation.json`.
+
+## Batch 162 — Ogg page sequence integrity
+
+FVID-0170 detects page-counter discontinuities in the canonical and standalone
+streaming readers,including correct counter restoration on rewind. Actual
+missing audio no longer reaches silent successful EOF in the strict file profile.
+32 integrations,19 root/7 media units,9 media integrations,2 core/2 streaming
+regressions,65 Opus/Ogg units and player build pass. Initial/wrapped counters
+and positive origins remain supported;discontinuous live captures need coherent
+reframing rather than silent gap acceptance. See `batch-162-validation.json`.
+
+## Batch 163 — Ogg packet continuation state
+
+FVID-0171 prevents incomplete packet tails from becoming audio and admits valid
+joined live prefixes by discarding only the unavailable fragment. Both readers
+preserve whole packets and granules;rewind restores streaming fragment state.
+38 integrations,19 root/7 media units,9 media integrations,5 core/5 streaming
+regressions,65 Opus/Ogg units,22 new worker targets and player build pass.
+See `batch-163-validation.json`.
+
+## Batch 164 — streaming Ogg logical identity
+
+FVID-0172 establishes serial ownership at the initial BOS and refuses another
+BOS inside the active stream before its bytes can use the original OpusHead.
+Both packet APIs,rewind,zero serials,continuation and counter profiles remain
+qualified;stop-at-first-EOS behavior is preserved.40 integrations,19 root/7 media
+units,9 media integrations,6 core/7 streaming regressions,65 Opus/Ogg units,4 new
+worker targets and player build pass. See `batch-164-validation.json`.
+
+## Batch 165 — AVI outer RIFF boundaries
+
+FVID-0173 keeps AVI child walking inside the declared RIFF form. Mandatory
+lists outside it refuse;an outside idx1 cannot change the completed first
+RIFF's validation. Existing overdeclared/sentinel clamping and whole-input
+budgets remain.17 integrations,34 related units,7 core checks,16 worker targets
+and player build pass. Old zero-size unit fixtures were repaired at zero
+additional IDs. See `batch-165-validation.json`.
+
+## Batch 166 — grouped AVI ADPCM samples
+
+FVID-0174 exposes grouped fixed-size ADPCM samples as independent block packets.
+Raw chunk indices remain intact;logical packet expansion is bounded before
+allocation.14 mono/stereo programs,4 plain controls,exact PCM and36 worker
+targets pass.7 focused/18 related integrations,34 units,8 core checks and player
+build pass. Existing block-rounded seek and G.711 behavior are preserved.
+See `batch-166-validation.json`.
+
+## Batch 167 — classic AVI linear PCM
+
+FVID-0175 frames unsigned8,signed16/24/32 and IEEE32/64 PCM with full encoded
+frame stride and bounded2048-frame packets.13 mono/stereo programs preserve
+literal PCM,exact clocks,seek,rewind and26 worker targets.7 focused/25 related
+integrations,34 units,9 core checks and player build pass. No performance or
+AVI-video GUI qualification is claimed. See `batch-167-validation.json`.
+
+## Batch 168 — AVI audio-record body extents
+
+FVID-0176 refuses known audio chunks whose declared body exceeds its enclosing
+run.16 formerly successful clipped PCM/ADPCM admissions now refuse precisely;
+12 healthy direct/nested/sentinel controls retain exact PCM and24 worker targets.
+4 focused/32 related integrations,34 units,11 core checks and player build pass.
+See `batch-168-validation.json`.
+
+## Batch 169 — mandatory AIFC codec identification
+
+FVID-0177 refuses incomplete AIFC compression types instead of guessing NONE
+and reinterpreting sowt bytes as big-endian PCM.16 wrong-output cases now refuse
+precisely;16 healthy AIFF/AIFC controls retain exact PCM and32 worker targets.
+5 focused/9 related integrations,14 AIFF units,1 core check and player build pass.
+Complete22-byte codec types retain compatibility. See `batch-169-validation.json`.
+
+## Batch 170 — AIFF fixed-frame alignment follow-up (0 IDs)
+
+Existing FVID-0086 now also covers AIFF/AIFC:12 native false-success orphan
+runs refuse before packet rounding.27 numeric controls,36 malformed cases,
+14 related integrations,14 AIFF units,1 core check and player build pass.
+All previous WAV/AU media hashes remain identical. Count stays177/1000.
+See `batch-170-validation.json`.
+
+## Batch 171 — effective fragmented MP4 sample descriptions
+
+FVID-0178 resolves tfhd overrides over trex defaults before publishing samples.
+Unsupported effective0 now refuses;overridden unused0 and empty0 runs stay valid.
+Analytic VP9 planes/RGB,clocks and40 public native seek targets pass.4 focused/
+54 related integrations,17 units,25 core checks and player build pass. The initial
+seek test oracle was corrected to the documented final-frame clamp with exact
+pixels/interval and repeatedEOF checks;it adds no ID. See `batch-171-validation.json`.

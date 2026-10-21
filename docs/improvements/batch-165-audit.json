@@ -1,0 +1,74 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0173",
+  "problem": "AVI parser checks RIFF/AVI signatures but ignores the outer declared size. Mandatory lists beyond the RIFF can be admitted;an idx1 outside the completed first RIFF can incorrectly affect its validation.",
+  "source": "src/container/avi.rs",
+  "source_sha256": "9404bedd65b1cd7600506d4304c9329ac7b255df80ae8f730bf7fbe36d7a4ec4",
+  "before_snapshot": "evidence/batch-165-avi-before.rs",
+  "reference": {
+    "url": "https://learn.microsoft.com/en-us/windows/win32/directshow/avi-riff-file-reference",
+    "finding": "The RIFF data size includes form type and its contained lists/chunks,excluding the eight-byte chunk header. AVI hdrl,movi and optional idx1 are children of that RIFF form. The cited page explicitly excludes OpenDML extensions."
+  },
+  "fixtures": "tests/fixtures/playback-errors/avi-riff-boundary",
+  "parser_before": {
+    "source": "evidence/batch-165-parser-before-replay.rs",
+    "log": "evidence/batch-165-parser-before-replay.log",
+    "observed": "Eight short-root files falsely admit2 streams and3 audio records. Two outside-index buffers refuse the complete first RIFF because external data contradicts video/audio identity. Six complete/overdeclared/sentinel controls pass. This is parser proof;Cargo/native gates still required."
+  },
+  "rejected_hypothesis": "Existing strh48-byte and strf16-byte minimum checks already contain all fields read by the container;no stream-header field-boundary improvement was invented or counted.",
+  "requirements": [
+    "Bound child walking to declared RIFF end capped by actual bytes;validate the form type fits inside its declaration.",
+    "Preserve existing clamped overdeclared/sentinel-root behavior;do not introduce a full-file truncation policy change.",
+    "Keep the full input resource budget,including bytes outside the first RIFF;do not qualify full OpenDML or globally valid trailing structures.",
+    "Separate correct refusal of mandatory lists outside RIFF from successful playback of a complete first RIFF unaffected by an outside index.",
+    "Confirm actual predictor PCM and worker behavior before/after;keep own AVI video and separately decoded Matroska companion. Offline pure generation only."
+  ],
+  "counting": "One outer RIFF boundary defect. No separate IDs for list/index directions,size variants,IMA/MS,profiles,fixtures or tests.",
+  "initial_probe_repair": "The first standalone probe expected an outside-index length mismatch. Its authored00wb points to stream0,which is video,so the earlier specific index/audio identity error is correct. Updated only the assertion;no media or production bytes changed. Initial probe source/stdout remain archived;this repair adds zero IDs.",
+  "candidate_preflight": {
+    "source": "evidence/batch-165-parser-candidate-check.rs",
+    "log": "evidence/batch-165-parser-candidate-check.log",
+    "result": "Eight specific root refusals,two complete-first-RIFF outside-index acceptances,six preserved controls. Production not yet changed;native baseline/acceptance still required."
+  },
+  "implementation_plan": "Validate declared RIFF size includes its four-byte form type. Bound the top-level chunk run by min(declared size+8,actual bytes),using a wide checked conversion so existing overdeclared/sentinel clamping remains portable. Keep full-buffer byte budget before this boundary.",
+  "confirmed_native_before": {
+    "normal": "evidence/batch-165-before.log:6 passed,4 ignored",
+    "forced": "evidence/batch-165-acceptance-before.log:4 intended acceptances fail at outside-list admission or external-index contradiction",
+    "scope": "Eight short-root inputs decode the exact independent IMA/MS predictor PCM;ima-short-4 also reaches the actual worker. Six complete/overdeclared/sentinel controls retain12 worker target variants. Outside-index source refusals are specific pre-existing external index/audio identity contradictions."
+  },
+  "candidate_sha256": {
+    "src/container/avi.rs": "2bfe1b83a5c42800751381fafd43edc5dc4e4ce1314dd53840c111f64d4c5180",
+    "tests/avi_riff_boundary.rs": "6dad4bd034e6d2c0f442ac96ccbd92ca8ddd44a56eb248d1d3bcb9259f424631"
+  },
+  "unit_fixture_maintenance": {
+    "failure": "evidence/batch-165-root-units-initial.log:20 passed,14 failed at the new proper RIFF boundary",
+    "source": "evidence/batch-165-avi-pre-fixture-repair.rs",
+    "frozen_before": "evidence/batch-165-frozen-units-before.log:17 actual frozen parser units pass with the former zero-size helper",
+    "finding": "The existing unit file() helper left RIFF size0 for every file. Fill its actual envelope size. Its extra-index mutation must also grow the envelope so the intended extra entry remains inside RIFF. Keep every original index/header/resource assertion. Production portion before cfg(test) is byte-identical to the candidate before this repair.",
+    "counting": "Test-fixture maintenance only;zero extra improvement IDs.",
+    "candidate_preflight": "evidence/batch-165-candidate-units-preflight.log:17 passed after repair,including original extra-index and all leaf refusal assertions"
+  },
+  "integration_after": {
+    "log": "evidence/batch-165-after.log",
+    "passed": 17,
+    "ignored": 0,
+    "worker_target_variants": 16,
+    "composed_source_note": "Integration Cargo compiled before the unit-helper-only repair. The production portion before cfg(test) is byte-identical;final unit/core/build gates run against the repaired composed source."
+  },
+  "completed_gates": {
+    "after": {
+      "log": "evidence/batch-165-after.log",
+      "passed": 17
+    },
+    "root-units": {
+      "log": "evidence/batch-165-root-units.log",
+      "passed": 34
+    },
+    "core": {
+      "log": "evidence/batch-165-core.log",
+      "passed": 7
+    }
+  },
+  "accepted_id": "FVID-0173",
+  "validation": "batch-165-validation.json"
+}

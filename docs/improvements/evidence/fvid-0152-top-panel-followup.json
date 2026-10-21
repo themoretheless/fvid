@@ -1,0 +1,25 @@
+{
+  "status": "visually-verified",
+  "counted_new_improvements": 0,
+  "existing_id": "FVID-0152",
+  "checked_at": "2026-10-21T02:29:34.922424+00:00",
+  "change": "Move preparation status into upper metadata row, top.y+24; hide metadata while preparation runs and restore it afterwards.",
+  "source_sha256": "fe2ee95dba84195d7afd875547f9cec83d39b27fef8776be3cea945b638c6aee",
+  "binary_sha256": "9812bd564f463b21ad6725006affa1a73c196ea826a47c3a50b6bee43922730c",
+  "build": {
+    "command": "CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target cargo build --locked --offline --features player --bin fvid",
+    "exit_code": 0,
+    "log": "/tmp/fvid-top-panel-build.log"
+  },
+  "native_ui": {
+    "observed": "Подготовка быстрой перемотки: 9%",
+    "position": "Upper left directly below video.webm, above video surface controls. No overlapping metadata.",
+    "input": "1000 stream-copy repetitions of authored tests/fixtures/playback-errors/vp9-long-gop-seek.webm; diagnostic /private/tmp/fvid-top-panel-ui/video.webm",
+    "capture": "cua topPanelCheck.getAXStateAndScreenshot in this conversation",
+    "state": "windowed, paused, real software VP9 preparation; controls visible"
+  },
+  "limitations": [
+    "Completion and fullscreen layout not captured.",
+    "No new media decoding correctness or performance claim."
+  ]
+}

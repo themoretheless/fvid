@@ -1,0 +1,118 @@
+{
+  "provenance": "Ten author-created five-row XM scores. Valid but unpopulated slots2/9/128 are compared with the same rows and explicitly empty instruments. Instrument-only selection preserves active sample until the next note;explicit instrument1 recovers. Slots129/255 are ignored-format controls. The existing owned signed16 ramp and authored VP9/PCM companion are reused;no copied private media,codec parameters,encoder or network.",
+  "cases": [
+    {
+      "name": "slot-2-note",
+      "file": "slot-2-note.xm",
+      "control": "slot-2-note-empty-control.xm",
+      "before_failure": true,
+      "post_row": 1,
+      "duration_ms": 720,
+      "kind": "missing-valid-slot"
+    },
+    {
+      "name": "slot-2-select-then-note",
+      "file": "slot-2-select-then-note.xm",
+      "control": "slot-2-select-then-note-empty-control.xm",
+      "before_failure": true,
+      "post_row": 2,
+      "duration_ms": 720,
+      "kind": "missing-valid-slot"
+    },
+    {
+      "name": "slot-9-note",
+      "file": "slot-9-note.xm",
+      "control": "slot-9-note-empty-control.xm",
+      "before_failure": true,
+      "post_row": 1,
+      "duration_ms": 720,
+      "kind": "missing-valid-slot"
+    },
+    {
+      "name": "slot-9-select-then-note",
+      "file": "slot-9-select-then-note.xm",
+      "control": "slot-9-select-then-note-empty-control.xm",
+      "before_failure": true,
+      "post_row": 2,
+      "duration_ms": 720,
+      "kind": "missing-valid-slot"
+    },
+    {
+      "name": "slot-128-note",
+      "file": "slot-128-note.xm",
+      "control": "slot-128-note-empty-control.xm",
+      "before_failure": true,
+      "post_row": 1,
+      "duration_ms": 720,
+      "kind": "missing-valid-slot"
+    },
+    {
+      "name": "slot-128-select-then-note",
+      "file": "slot-128-select-then-note.xm",
+      "control": "slot-128-select-then-note-empty-control.xm",
+      "before_failure": true,
+      "post_row": 2,
+      "duration_ms": 720,
+      "kind": "missing-valid-slot"
+    },
+    {
+      "name": "out-of-format-129-control",
+      "file": "out-of-format-129-control.xm",
+      "control": "out-of-format-129-control-empty-control.xm",
+      "before_failure": false,
+      "post_row": 1,
+      "duration_ms": 720,
+      "kind": "ignored-out-of-format-slot"
+    },
+    {
+      "name": "out-of-format-255-control",
+      "file": "out-of-format-255-control.xm",
+      "control": "out-of-format-255-control-empty-control.xm",
+      "before_failure": false,
+      "post_row": 1,
+      "duration_ms": 720,
+      "kind": "ignored-out-of-format-slot"
+    },
+    {
+      "name": "initial-empty-slot-control",
+      "file": "initial-empty-slot-control.xm",
+      "control": "initial-empty-slot-control-empty-control.xm",
+      "before_failure": false,
+      "post_row": 0,
+      "duration_ms": 720,
+      "kind": "initial-empty-slot"
+    },
+    {
+      "name": "populated-slot-control",
+      "file": "populated-slot-control.xm",
+      "control": "populated-slot-control-empty-control.xm",
+      "before_failure": false,
+      "post_row": 1,
+      "duration_ms": 720,
+      "kind": "populated-slot"
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "slot-2-note.xm": "16ff22f6ef1206fd52ac4943f32eb83235b3bffa1a290166552a0f3bbaf6660c",
+    "slot-2-note-empty-control.xm": "0f576fe13bd4aed30902e682086056fc993f08ea8e401f81947ed0dd29119672",
+    "slot-2-select-then-note.xm": "e40d762b026f2115a53c83566ff982653f0e6b1d8ced2ae8bd0bc008cfa0f6d2",
+    "slot-2-select-then-note-empty-control.xm": "f30c71b9724c04acc7f93b8d0fc197e69cfdf005200ba8156cb592dd47fd386b",
+    "slot-9-note.xm": "fa027cd2fc9416e0e4c177e8138694a8b0588b33c7509d85690538ff9a246881",
+    "slot-9-note-empty-control.xm": "ce135bc4e410e868eae6949b18222afdf06a6843c8a379a23ce6787c376df24c",
+    "slot-9-select-then-note.xm": "439dbea6b1524f463afffe2ca67735f004032441f0655f2907db841e5b698929",
+    "slot-9-select-then-note-empty-control.xm": "02d0c92f1df04d2a5a53333c74790269426a03ca098de872258b6381bb48fa54",
+    "slot-128-note.xm": "b6998a6d894fde1d5e2b4bbdb6a581822f8119add13482544b7290965b808f68",
+    "slot-128-note-empty-control.xm": "1e7adcfbc99e32455bf47bc855638920058665ef4d79ec09fe3f43ab443de2a3",
+    "slot-128-select-then-note.xm": "1df855fa198cf58ee42d1e3d45f9c9f0b62c503a44c39808aeba3c7b746eeacd",
+    "slot-128-select-then-note-empty-control.xm": "41dcdd2a08260a95d7f710dbdac58326eeaa3f8f95ab836c322345f73aa220f7",
+    "out-of-format-129-control.xm": "bbec8b7ff1d3194a43dc6b81cf0b18a7a0a4a053b91bb9d0beb8c2f5813f9541",
+    "out-of-format-129-control-empty-control.xm": "cabb675738f48343f446023da522da581e6f8d5ef4608a4db953a139957f2d35",
+    "out-of-format-255-control.xm": "2529cd3679dcaafc2bcb37245f4ea6d4d3c5a3798598a0f3965fa3a3dc990463",
+    "out-of-format-255-control-empty-control.xm": "cabb675738f48343f446023da522da581e6f8d5ef4608a4db953a139957f2d35",
+    "initial-empty-slot-control.xm": "2436b3798c7dce5765714fb3735c84cd1f8b0eb6fe4bda6d3935705e31a856b4",
+    "initial-empty-slot-control-empty-control.xm": "02b7b212081807a80229309dc4e5ffbbc2b20d8ac70cbe61165310ef3c5398bd",
+    "populated-slot-control.xm": "9f90b55932c9c71d3dd88514a4aae12196de377dd3f4d55ddcf07b286756569a",
+    "populated-slot-control-empty-control.xm": "33bf2a07804f20dec1a1429992f307c9d7416ee14d24e95f2f9e4a47084da03e"
+  }
+}

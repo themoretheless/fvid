@@ -226,102 +226,28 @@ def single_slice_mbaff_cabac_picture(yd, cd, topology, index):
 
 def unsupported_cases():
     records = []
-    # 1. Progressive CABAC 4:4:4 compressed I_16x16 macroblock
-    b = Writer()
-    b.ue(0)
-    b.ue(2)
-    b.ue(0)
-    b.u(0, 4)
-    b.ue(0)
-    b.u(0, 4)
-    b.u(0)
-    b.u(0)
-    b.se(0)
-    b.ue(1)
-    while len(b.bits) % 8:
-        b.u(1)
-    c = CabacWriter(-1, 26)
-    c.decision(3, 1)
-    c.range -= 2
-    c.renormalize()
-    for ctx, v in [(6, 0), (7, 0), (9, 1), (10, 0), (64, 0), (60, 0), (88, 0)]:
-        c.decision(ctx, v)
-    b.bits.extend(c.finish())
-    nal = b.nal(0x65, trailing=False)
-    packet = len(nal).to_bytes(4, 'big') + nal
-    config = (OUT / 'prog-pcm-f3-y8-c8-e1-a0-crop0.avcc').read_bytes()
-    name = 'compressed-prog-f3-y8-c8-e1'
-    for ext, data in [
-        ('avcc', config),
-        ('packet', packet),
-        ('mp4', mux(config, [(0, True, packet)], 32, 16, 25)),
-    ]:
-        (OUT / f'{name}.{ext}').write_bytes(data)
-    records.append(dict(
-        name=name,
-        kind='progressive',
-        cabac=True,
-        field=False,
-        expect='AVC non-4:2:0 CABAC non-PCM macroblocks are not connected',
-    ))
-    # 2. MBAFF CAVLC & CABAC 4:4:4 compressed first pair
+    # The old progressive refusal had only luma syntax and incomplete coverage.
+    # Replace it with a valid two-MB, three-component acceptance fixture.
+    from generate_avc_444_cabac_intra import make_case
+    config,packet,expected=make_case(8,8,'i16-zero',False,(0,0),1,crop=False)
+    name='compressed-prog-f3-y8-c8-e1'
+    for ext,data in [('avcc',config),('packet',packet),('mp4',mux(config,[(0,True,packet)],32,16,25)),('y16',struct.pack('<1536H',*expected))]:
+        (OUT/f'{name}.{ext}').write_bytes(data)
+    (OUT/'accepted.json').write_text(json.dumps([dict(name=name)],indent=2)+'\n')
+    # Historical MBAFF refusals had incomplete/non-444 residual syntax.
+    # Replace them with full valid shared syntax and independently owned goldens.
+    from generate_avc_444_mbaff_intra import picture
+    from generate_avc_444_fields import configuration as mbaff_config
     for cabac, field in itertools.product([False, True], [False, True]):
-        topology = 'field' if field else 'frame'
-        base = f'mbaff-pcm-f3-y8-c8-e{int(cabac)}-{topology}-a0-crop0'
-        name = f'compressed-{base}'
-        b = Writer()
-        b.ue(0)
-        b.ue(2)
-        b.ue(0)
-        b.u(0, 4)
-        b.u(0)
-        b.ue(0)
-        b.u(0, 4)
-        b.u(0)
-        b.u(0)
-        b.se(0)
-        b.ue(1)
-        if cabac:
-            while len(b.bits) % 8:
-                b.u(1)
-            c = CabacWriter(-1, 26)
-            c.decision(70, int(field))
-        for parity in range(2):
-            if not cabac:
-                if parity == 0:
-                    b.u(int(field))
-                b.ue(3)
-                b.ue(0)
-                b.se(0)
-                b.u(1)
-            else:
-                c.decision(3 + int(parity == 1 and not field), 1)
-                c.range -= 2
-                c.renormalize()
-                for ctx, v in [(6, 0), (7, 0), (9, 1), (10, 0), (64, 0), (60, 0)]:
-                    c.decision(ctx, v)
-                c.decision(86 if parity == 1 and not field else 88, 0)
-        if cabac:
-            b.bits.extend(c.finish())
-        nal = b.nal(0x65, trailing=not cabac)
-        original = (OUT / f'{base}-0.packet').read_bytes()
-        length = int.from_bytes(original[:4], 'big')
-        packet = len(nal).to_bytes(4, 'big') + nal + original[4 + length:]
-        config = (OUT / f'{base}.avcc').read_bytes()
-        for ext, data in [
-            ('avcc', config),
-            ('packet', packet),
-            ('mp4', mux(config, [(0, True, packet)], 32, 64, 25)),
-        ]:
-            (OUT / f'{name}.{ext}').write_bytes(data)
-        records.append(dict(
-            name=name,
-            kind='mbaff',
-            cabac=cabac,
-            field=field,
-            expect='PCM fast path encountered compressed MBAFF syntax',
-        ))
-    (OUT / 'unsupported.json').write_text(json.dumps(records, indent=2) + '\n')
+        topology='field' if field else 'frame'
+        name=f'compressed-mbaff-pcm-f3-y8-c8-e{int(cabac)}-{topology}-a0-crop0'
+        config=mbaff_config(8,8,cabac,[0,0],mbaff=True)
+        packet,expected=picture(8,cabac,topology,0)
+        for ext,data in [('avcc',config),('packet',packet),('mp4',mux(config,[(0,True,packet)],32,64,25)),('y16',struct.pack('<6144H',*expected))]:
+            (OUT/f'{name}.{ext}').write_bytes(data)
+        records.append(dict(name=name,kind='mbaff',cabac=cabac,field=field,crop=[1,1,2,2]))
+    (OUT/'accepted-mbaff.json').write_text(json.dumps(records,indent=2)+'\n')
+    (OUT/'unsupported.json').write_text('[]\n')
 
 
 def generate():

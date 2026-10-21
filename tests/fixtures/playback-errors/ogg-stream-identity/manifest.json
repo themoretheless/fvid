@@ -1,0 +1,59 @@
+{
+  "provenance": "Authored mono Opus headers and DTX packets. Each page has valid CRC and consecutive counters;no continuation flags. Missing/repeated BOS and foreign BOS cannot be hidden by prior sequence or continuation fixes. Owned VP9/PCM companion is separate from audio container reproduction. No private inputs,encoder or network.",
+  "cases": [
+    {
+      "file": "missing-bos-zero.ogg",
+      "header_serial": 0,
+      "before_final_serial": 0,
+      "frames": 1920
+    },
+    {
+      "file": "repeated-tags-bos.ogg",
+      "header_serial": 1180059936,
+      "before_final_serial": 1180059936,
+      "frames": 1920
+    },
+    {
+      "file": "foreign-tags-bos.ogg",
+      "header_serial": 1180059936,
+      "before_final_serial": 1180059937,
+      "frames": 1920
+    },
+    {
+      "file": "repeated-audio-bos.ogg",
+      "header_serial": 1180059936,
+      "before_final_serial": 1180059936,
+      "frames": 1920
+    },
+    {
+      "file": "foreign-audio-bos.ogg",
+      "header_serial": 1180059936,
+      "before_final_serial": 1180059937,
+      "frames": 1920
+    }
+  ],
+  "controls": [
+    {
+      "file": "normal.ogg",
+      "serial": 1180059936,
+      "frames": 1920
+    },
+    {
+      "file": "zero-serial.ogg",
+      "serial": 0,
+      "frames": 1920
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "mono.head": "e61b2e422c979808500317ae6237303b880e8e4e7d9f37f692cd899cfe01237f",
+    "20ms.packet": "e472bbfc3250acf87bfacdc4b112e39e9c7d863b6e8806baca718f57d17a5bb6",
+    "normal.ogg": "e7d076fab0cf47ba7c625db6880445b4e6a4ba6fe110015be8f75ea2df41b0d9",
+    "zero-serial.ogg": "d6b9cfc478e997e29348b457d114857393a8815cc3fd63eee82bbcf550a6672c",
+    "missing-bos-zero.ogg": "a68ba296b90851ab361800412ecdb1960b5e8e63cf162fb1ee4a5e2543b30cf3",
+    "repeated-tags-bos.ogg": "12591c43542c305691cc9a6e3b3a367f36182137f38807bbf49f4cd2fc2b5335",
+    "foreign-tags-bos.ogg": "076d1f3092a08b74c0ce851d1bde0b8e1eff2a3f3ec3577827c74cbe5fa991df",
+    "repeated-audio-bos.ogg": "f912158166220c1659e38e596838233069cbb4db8d10106fe6bce292c59eeae5",
+    "foreign-audio-bos.ogg": "4fb84c90271ddad3534990da2bf3b0d77d36080436aaf4a18e3d1024c84f1d41"
+  }
+}

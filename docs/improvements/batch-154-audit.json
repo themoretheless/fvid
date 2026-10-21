@@ -1,0 +1,28 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0162"
+  ],
+  "issue": "Out-of-range XM9xx may retain prior gain across a stopped voice and a subsequent zero-volume retrigger.",
+  "source": "src/codec/xm_decoder.rs",
+  "source_sha256": "0687c5179fef515894e086fe06eb77e307015efff6957adb8b3dd863e031da90",
+  "regression": "tests/xm_offset_silence.rs",
+  "fixtures": "tests/fixtures/playback-errors/xm-offset-silence",
+  "controls": [
+    "The independent control omits only the zero-volume new note. Its entire post-window must contain literal zero PCM.",
+    "Natural sample-end already resets level0;the unlooped control must remain silent.",
+    "An initially muted loop has no stale gain and must remain silent."
+  ],
+  "rejected_hypotheses": [
+    "Natural sample-end stale gain: current source and the saved batch152 baseline both explicitly clear voice.level when read_frame returnsNone. No new fix or accepted ID for this speculative branch."
+  ],
+  "counting": "No production change or accepted ID. Intended output and actual-worker acceptance remain ignored until baseline confirms the specific defect.",
+  "before": [
+    "evidence/batch-154-before.log",
+    "evidence/batch-154-acceptance-before.log"
+  ],
+  "observed": "Both looped C00/column-zero scores emit stale-gain PCM after360ms;the natural-end and initially-zero controls stay silent. Prefixes and independent literal-zero control tails match exactly. Forced acceptance and actual-worker checks fail at PCM after valid companion decoding.",
+  "candidate_sha256": "23974aff63dbee2f09884ca79c74f1b1922cc10443ef34ab5e95439213cdc7be",
+  "implementation": "Reset gain when9xx starts beyond the active sample end,matching existing natural-end cleanup. The voice remains stopped;next muted notes cannot ramp from stale gain. No phase,volume-command or supported envelope policy change.",
+  "validation": "batch-154-validation.json"
+}

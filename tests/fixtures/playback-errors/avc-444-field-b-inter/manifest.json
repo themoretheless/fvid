@@ -1,0 +1,11234 @@
+[
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r0-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e-1-r1-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r0-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e0-r1-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r0-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e1-r1-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r0-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w0-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w1-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-l0-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-l0-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-l1-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-l1-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-bi-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-bi-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-spatial-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-spatial-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-temporal-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-temporal-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-skip-x8-y-4",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y8-c8-e2-r1-w2-skip-x-7-y5",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r0-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e-1-r1-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r0-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e0-r1-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r0-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e1-r1-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r0-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w0-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w1-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-l0-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-l0-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-l1-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-l1-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-bi-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-bi-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-spatial-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-spatial-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-temporal-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-temporal-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-skip-x8-y-4",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y10-c12-e2-r1-w2-skip-x-7-y5",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r0-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e-1-r1-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r0-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e0-r1-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r0-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e1-r1-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r0-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": false,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w0-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 0,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w1-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 1,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-l0-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-l0-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l0",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-l1-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-l1-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "l1",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-bi-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-bi-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "bi",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-spatial-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-spatial-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "spatial",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-temporal-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-temporal-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "temporal",
+    "vector": [
+      -7,
+      5
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-skip-x8-y-4",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      8,
+      -4
+    ]
+  },
+  {
+    "name": "field-b-y14-c8-e2-r1-w2-skip-x-7-y5",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "reverse": true,
+    "weight": 2,
+    "mode": "skip",
+    "vector": [
+      -7,
+      5
+    ]
+  }
+]

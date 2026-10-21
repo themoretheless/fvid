@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {
+      "name": "stereo",
+      "layout": 2,
+      "lfe": false
+    },
+    {
+      "name": "dual",
+      "layout": 0,
+      "lfe": false
+    },
+    {
+      "name": "mono-lfe",
+      "layout": 1,
+      "lfe": true
+    }
+  ],
+  "native_adapter_accepted": true,
+  "base_player_integration_accepted": true,
+  "expanded_player_integration_accepted": false
+}

@@ -1,0 +1,9 @@
+{
+  "status": "audit-only-unaccepted",
+  "priority": "crash/correctness before the trun flag-exclusivity audit",
+  "source": "src/container/mp4.rs",
+  "finding": "A signed trun.data_offset uses -shift while shift is i32. i32MIN negation panics in checked/debug builds. Without overflow checks,the conversion fallback instead rejects a potentially valid2GiB negative displacement. No source edit or accepted ID yet.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC14496-12:2015,8.8.8 syntax:data_offset is signed32bits and relative to tfhd base. Entire signed range must be representable during offset resolution.",
+  "next_gate": "After prior validation,author small malformed MIN-offset video and legitimate positive/negative controls. Also author stored prefix/footer/virtual extent plan for a valid i32MIN displacement with mdat2GiB before moof;interpret checked-in segments with a bounded sparse Read+Seek adapter,without allocating or reading a2GiB buffer and without generating encoded media during tests. Baseline must identify exact negation panic;fix via unsigned_abs must both refuse small underflow and play legitimate virtual large file with exact pixels/clocks/seek/EOF and bounded actual reads."
+}

@@ -1,0 +1,136 @@
+{
+  "provenance": "Eight authored RIFF bounds place mandatory AVI lists outside the declared form. Two complete first-RIFF inputs append an outside idx1 that must not participate in its index validation. Six controls preserve complete and existing clamped overdeclared/sentinel profiles. Owned VP9/IMA-or-MS ADPCM AVI,independent predictor PCM,and separate owned Matroska video companion. No private media,encoder or network;not OpenDML or global validity qualification of trailing bytes.",
+  "cases": [
+    {
+      "file": "ima-short-0.avi",
+      "declared": 0,
+      "frames": 27,
+      "expected": "ima.f32le",
+      "control": "ima-complete.avi"
+    },
+    {
+      "file": "ima-short-2.avi",
+      "declared": 2,
+      "frames": 27,
+      "expected": "ima.f32le",
+      "control": "ima-complete.avi"
+    },
+    {
+      "file": "ima-short-4.avi",
+      "declared": 4,
+      "frames": 27,
+      "expected": "ima.f32le",
+      "control": "ima-complete.avi"
+    },
+    {
+      "file": "ima-short-308.avi",
+      "declared": 308,
+      "frames": 27,
+      "expected": "ima.f32le",
+      "control": "ima-complete.avi"
+    },
+    {
+      "file": "ms-short-0.avi",
+      "declared": 0,
+      "frames": 12,
+      "expected": "ms.f32le",
+      "control": "ms-complete.avi"
+    },
+    {
+      "file": "ms-short-2.avi",
+      "declared": 2,
+      "frames": 12,
+      "expected": "ms.f32le",
+      "control": "ms-complete.avi"
+    },
+    {
+      "file": "ms-short-4.avi",
+      "declared": 4,
+      "frames": 12,
+      "expected": "ms.f32le",
+      "control": "ms-complete.avi"
+    },
+    {
+      "file": "ms-short-338.avi",
+      "declared": 338,
+      "frames": 12,
+      "expected": "ms.f32le",
+      "control": "ms-complete.avi"
+    }
+  ],
+  "controls": [
+    {
+      "file": "ima-complete.avi",
+      "frames": 27,
+      "expected": "ima.f32le",
+      "profile": "complete"
+    },
+    {
+      "file": "ima-overdeclared.avi",
+      "frames": 27,
+      "expected": "ima.f32le",
+      "profile": "existing clamped truncated-root compatibility"
+    },
+    {
+      "file": "ima-sentinel.avi",
+      "frames": 27,
+      "expected": "ima.f32le",
+      "profile": "existing clamped truncated-root compatibility"
+    },
+    {
+      "file": "ms-complete.avi",
+      "frames": 12,
+      "expected": "ms.f32le",
+      "profile": "complete"
+    },
+    {
+      "file": "ms-overdeclared.avi",
+      "frames": 12,
+      "expected": "ms.f32le",
+      "profile": "existing clamped truncated-root compatibility"
+    },
+    {
+      "file": "ms-sentinel.avi",
+      "frames": 12,
+      "expected": "ms.f32le",
+      "profile": "existing clamped truncated-root compatibility"
+    }
+  ],
+  "outside": [
+    {
+      "file": "ima-outside-index.avi",
+      "frames": 27,
+      "expected": "ima.f32le",
+      "control": "ima-complete.avi",
+      "riff_end": 4526
+    },
+    {
+      "file": "ms-outside-index.avi",
+      "frames": 12,
+      "expected": "ms.f32le",
+      "control": "ms-complete.avi",
+      "riff_end": 4556
+    }
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "ima-short-0.avi": "af21cc441930bf37aeded672c23ef1063effe274fbca8a4a122a9eea3b24bf24",
+    "ima-short-2.avi": "714c3a0b983f2f664047633bd15ba84e9ef65094b9eadadb5b2c6ae70ac5604e",
+    "ima-short-4.avi": "f1aa4abefdf64eaebf6b0d918d1b4b47d43070d968b3b54584c8334b16b84938",
+    "ima-short-308.avi": "8369f9904988acca163fbacdbec98c0f009d36a9bed0623b01eea294d3190d1b",
+    "ima-complete.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f",
+    "ima-overdeclared.avi": "28baa7f5bda705052d69c2cea0a5bda38d5840540e6ca634f4677b743105f4c5",
+    "ima-sentinel.avi": "ce72674aa268786a06c0e1c7b41b0a498cfe5bca4a7682e79998715cbe6f2850",
+    "ima-outside-index.avi": "e8f4d95cc73c2f23d102f3715ee46f9ced313b86d215071d96e9f3f7e1a9a8f7",
+    "ms.f32le": "d35ee49b68fa2e1fb8d67b7a2c0cb26efac6d95eb83c897c5e2dcec7c147ae81",
+    "ms-short-0.avi": "79c019ab1897560fcd500820c431bd0739339b7ea3b3640f89c263d5d276baeb",
+    "ms-short-2.avi": "635b1e6a302278ad96d984314bf1ddba113d846d6b79ccead0e8afb6c1dec9de",
+    "ms-short-4.avi": "5e31606c3570761e521c36e38bb1c7445624b9b98f216aaa132b63fa3d957505",
+    "ms-short-338.avi": "f65db3d22777524d5f2af40f4856ffd9c3676fa0417be7575d310a1b8553f8e6",
+    "ms-complete.avi": "c26a2b060e651708c7972ea814ceb95e2b67d0cf4d384aaf4770ba09f6c5a814",
+    "ms-overdeclared.avi": "5503a3213ae62c754da45462d0c0ce8df62abbeda50205ae194b266133e53652",
+    "ms-sentinel.avi": "ad3458771062a97e7872749bdc407a7f7fc7a08392b620673ab955241fbee014",
+    "ms-outside-index.avi": "d80dbb49664be5cbbe3b78ea2ae9b7438ae6c359b7b5f5cdb84e5efff63d159a"
+  }
+}

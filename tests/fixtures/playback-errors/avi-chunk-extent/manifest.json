@@ -1,0 +1,302 @@
+{
+  "provenance": "16 independently authored final audio-chunk extent contradictions:IMA/MS/int16/IEEEfloat32,direct/nested rec,short overclaim/u32MAX.12 complete controls include existing outer RIFF sentinel profile. Existing coded audio and owned VP9 are synthesized by offline generators;manual literal float32 gold and separate VP9 Matroska companion. Only chunk size changes in faults;whole root/list extents and valid available audio stay intact. No private media,FFmpeg or network.",
+  "cases": [
+    {
+      "file": "ima-direct-long.avi",
+      "control": "ima-direct.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "record_offset": 4510,
+      "available": 8,
+      "claimed": 16,
+      "nested": false
+    },
+    {
+      "file": "ima-direct-max.avi",
+      "control": "ima-direct.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "record_offset": 4510,
+      "available": 8,
+      "claimed": 4294967295,
+      "nested": false
+    },
+    {
+      "file": "ima-nested-long.avi",
+      "control": "ima-nested.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "record_offset": 4522,
+      "available": 8,
+      "claimed": 16,
+      "nested": true
+    },
+    {
+      "file": "ima-nested-max.avi",
+      "control": "ima-nested.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "record_offset": 4522,
+      "available": 8,
+      "claimed": 4294967295,
+      "nested": true
+    },
+    {
+      "file": "ms-direct-long.avi",
+      "control": "ms-direct.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "record_offset": 4540,
+      "available": 8,
+      "claimed": 16,
+      "nested": false
+    },
+    {
+      "file": "ms-direct-max.avi",
+      "control": "ms-direct.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "record_offset": 4540,
+      "available": 8,
+      "claimed": 4294967295,
+      "nested": false
+    },
+    {
+      "file": "ms-nested-long.avi",
+      "control": "ms-nested.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "record_offset": 4552,
+      "available": 8,
+      "claimed": 16,
+      "nested": true
+    },
+    {
+      "file": "ms-nested-max.avi",
+      "control": "ms-nested.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "record_offset": 4552,
+      "available": 8,
+      "claimed": 4294967295,
+      "nested": true
+    },
+    {
+      "file": "int16-direct-long.avi",
+      "control": "int16-direct.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4500,
+      "available": 8,
+      "claimed": 16,
+      "nested": false
+    },
+    {
+      "file": "int16-direct-max.avi",
+      "control": "int16-direct.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4500,
+      "available": 8,
+      "claimed": 4294967295,
+      "nested": false
+    },
+    {
+      "file": "int16-nested-long.avi",
+      "control": "int16-nested.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4512,
+      "available": 8,
+      "claimed": 16,
+      "nested": true
+    },
+    {
+      "file": "int16-nested-max.avi",
+      "control": "int16-nested.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4512,
+      "available": 8,
+      "claimed": 4294967295,
+      "nested": true
+    },
+    {
+      "file": "float32-direct-long.avi",
+      "control": "float32-direct.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4532,
+      "available": 32,
+      "claimed": 40,
+      "nested": false
+    },
+    {
+      "file": "float32-direct-max.avi",
+      "control": "float32-direct.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4532,
+      "available": 32,
+      "claimed": 4294967295,
+      "nested": false
+    },
+    {
+      "file": "float32-nested-long.avi",
+      "control": "float32-nested.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4544,
+      "available": 32,
+      "claimed": 40,
+      "nested": true
+    },
+    {
+      "file": "float32-nested-max.avi",
+      "control": "float32-nested.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "record_offset": 4544,
+      "available": 32,
+      "claimed": 4294967295,
+      "nested": true
+    }
+  ],
+  "controls": [
+    {
+      "file": "ima-direct.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "nested": false
+    },
+    {
+      "file": "ima-direct-outer-sentinel.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "nested": false
+    },
+    {
+      "file": "ima-nested.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "seek": 9,
+      "nested": true
+    },
+    {
+      "file": "ms-direct.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "nested": false
+    },
+    {
+      "file": "ms-direct-outer-sentinel.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "nested": false
+    },
+    {
+      "file": "ms-nested.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "seek": 4,
+      "nested": true
+    },
+    {
+      "file": "int16-direct.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "nested": false
+    },
+    {
+      "file": "int16-direct-outer-sentinel.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "nested": false
+    },
+    {
+      "file": "int16-nested.avi",
+      "expected": "int16.f32le",
+      "frames": 9,
+      "seek": 2,
+      "nested": true
+    },
+    {
+      "file": "float32-direct.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "nested": false
+    },
+    {
+      "file": "float32-direct-outer-sentinel.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "nested": false
+    },
+    {
+      "file": "float32-nested.avi",
+      "expected": "float32.f32le",
+      "frames": 9,
+      "seek": 2,
+      "nested": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "ima-direct.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f",
+    "ima-direct-long.avi": "4e4a812626e252aec659ff234917c55182d05c77ff0a25fccf41cd0241870381",
+    "ima-direct-max.avi": "a0cc3c9dcb7fb6c968a8916eb038379e8e2cef4ccd62f64fe95361dd99cb3f3d",
+    "ima-direct-outer-sentinel.avi": "ce72674aa268786a06c0e1c7b41b0a498cfe5bca4a7682e79998715cbe6f2850",
+    "ima-nested.avi": "77b7ae39c1cc813b73787fa3fe013d0f30843e5defb8984cb2be1592f31350fc",
+    "ima-nested-long.avi": "ea4ac443feb5769edd3e12c2665351dbbe2a7f2a7d33355b42e1326bfded7b94",
+    "ima-nested-max.avi": "135522e59fcc55b404fc74b0b01bf245a7ed9dd658f99d5874d91844e67d25b4",
+    "ms.f32le": "d35ee49b68fa2e1fb8d67b7a2c0cb26efac6d95eb83c897c5e2dcec7c147ae81",
+    "ms-direct.avi": "c26a2b060e651708c7972ea814ceb95e2b67d0cf4d384aaf4770ba09f6c5a814",
+    "ms-direct-long.avi": "3d4427e7347f11395dcc8eaed9aa648dd8fa591c8afb5e805b5ea9896ff101f8",
+    "ms-direct-max.avi": "4fa50b249145f0a6ebbcea2f8022a438393d35bc7790e74b14c9ecfdd0c985f8",
+    "ms-direct-outer-sentinel.avi": "ad3458771062a97e7872749bdc407a7f7fc7a08392b620673ab955241fbee014",
+    "ms-nested.avi": "b5e44fd4732085b37bcef2a65e984b0e2b5e3a81610b9a56ce168f81a3b5dd09",
+    "ms-nested-long.avi": "1e2d8e7b3dc7a7cbe516d712dc30373dac237b63faf8343e2c542ba5dea90ad6",
+    "ms-nested-max.avi": "18b8434ae215c4154a12261a0350e049c4c76eb86d625ab43567857424e3f260",
+    "int16.f32le": "badc34f66ed5c5efa540fac946459173798bb2ba5f895c0ef5a0996d359779c3",
+    "int16-direct.avi": "89f178f26a41cf36e55bf7c48b7db41916be828cea2424a456d6bfe2575401f2",
+    "int16-direct-long.avi": "bbe38c2469ff2320cd200e1319280971aa02c4003290ebcec1486a3f83463246",
+    "int16-direct-max.avi": "1314ff0ef1767c5d6743b7e4b3bab8c5d0c561fac4a72455d48eed05107c7cfa",
+    "int16-direct-outer-sentinel.avi": "dfb75bf3dd7c1888845e1b06aa25820006ab051b3a2ffe7d0513c05915aa96e7",
+    "int16-nested.avi": "d73550353c527c40d6f2bc34477056623ffaf1250a4d8d162b04a3f6e2461c7b",
+    "int16-nested-long.avi": "fab466ba47f14d3db867c29f1db55a3b39ede4acd7ebce968e7ab909441dbfaa",
+    "int16-nested-max.avi": "2b19a0cbe6efee5854f78b53bda9d6c0ad771c85feb1e5cac356d3bd4cdfe355",
+    "float32.f32le": "852526a397764d2af08c041b2d5e08f5d81c1aef1169ae99032fc30e7448613b",
+    "float32-direct.avi": "e2e9635d498acda0bb803bdf6e49338bfa9f72a0653fd7cbdf4284788f49f36f",
+    "float32-direct-long.avi": "6a2eb0f21db622531fe74823089c37a349d65c3b9a9512206c8050cb03396b6d",
+    "float32-direct-max.avi": "50c3f397d025780525eef41434774ca0f46d2286ecaaad4082c00736efd2568d",
+    "float32-direct-outer-sentinel.avi": "7f4ff629295662d78e7ae9fed4139ef4d68a62788dad250feef7bfe2d98b64c0",
+    "float32-nested.avi": "faa55106bfb4fffd63a43bbd4a36fd516242cbf4358c0ce9f479f58f74bd24d7",
+    "float32-nested-long.avi": "ee9d61d65d81bb678999013e1828da962f07e2f0895fd91fef131149143f1241",
+    "float32-nested-max.avi": "05581f1fe6d7712bba5698ab34da591312436f250dd7ab861f68261175d03cb4"
+  }
+}

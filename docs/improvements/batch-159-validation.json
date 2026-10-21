@@ -1,0 +1,47 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0167"
+  ],
+  "checked_at": "2026-10-21T02:39:53.172807+00:00",
+  "sources": [
+    "src/container/avi.rs"
+  ],
+  "before": [
+    "evidence/batch-159-before.log",
+    "evidence/batch-159-acceptance-before.log",
+    "evidence/batch-159-container-before.rs",
+    "evidence/batch-159-tests-before.rs"
+  ],
+  "primary_reference": "batch-159-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-159-after.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-159-units-after.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-159-core-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-159-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-159-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "Four file-origin cases refused at the intended index offset check while relative and unindexed controls passed. Forced parser and source/worker acceptance both failed before the fix at parser admission;no pre-fix seek/decode defect is claimed.",
+    "Eight indexed AVI cases cover IMA/MS ADPCM,flat/nested rec lists and both documented origins. Independently walked offsets,exact literal predictor PCM and four unindexed controls agree.",
+    "A single origin is required across all checked audio entries. Four mixed/bad/huge index cases and all record-budget variants still refuse.",
+    "Eight PCM stream comparisons and16 actual-worker seek target variants pass,including play,rewind,midstream seek andEOF. Seven integration tests,17 AVI parser units,13 reader units,four additional navigation-filter matches,2 core regressions,fixture reproduction and player build pass.",
+    "The owned VP9 companion verifies video decoding independently. AVI picture playback,OpenDML indices and performance are not claimed."
+  ],
+  "counting": "One documented AVI idx1 origin compatibility defect. Two origins,codecs,nesting,malformed variants and configurations add no extra IDs."
+}

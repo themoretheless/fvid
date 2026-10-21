@@ -1,0 +1,347 @@
+{
+  "cases": [
+    {
+      "name": "down",
+      "file": "down.xm",
+      "control": "down-ticks.xm",
+      "volumes": [
+        64,
+        62,
+        60,
+        58
+      ]
+    },
+    {
+      "name": "up",
+      "file": "up.xm",
+      "control": "up-ticks.xm",
+      "volumes": [
+        16,
+        16,
+        16,
+        16,
+        16,
+        19,
+        22,
+        25
+      ]
+    },
+    {
+      "name": "high-nibble-wins",
+      "file": "high-nibble-wins.xm",
+      "control": "high-nibble-wins-ticks.xm",
+      "volumes": [
+        32,
+        32,
+        32,
+        32,
+        32,
+        34,
+        36,
+        38
+      ]
+    },
+    {
+      "name": "clamp-low",
+      "file": "clamp-low.xm",
+      "control": "clamp-low-ticks.xm",
+      "volumes": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "clamp-high",
+      "file": "clamp-high.xm",
+      "control": "clamp-high-ticks.xm",
+      "volumes": [
+        64,
+        64,
+        64,
+        64
+      ]
+    },
+    {
+      "name": "memory",
+      "file": "memory.xm",
+      "control": "memory-ticks.xm",
+      "volumes": [
+        64,
+        61,
+        58,
+        55,
+        55,
+        55,
+        55,
+        55,
+        55,
+        52,
+        49,
+        46
+      ]
+    },
+    {
+      "name": "empty-memory",
+      "file": "empty-memory.xm",
+      "control": "empty-memory-ticks.xm",
+      "volumes": [
+        64,
+        64,
+        64,
+        64
+      ]
+    },
+    {
+      "name": "rewind-clears-memory",
+      "file": "rewind-clears-memory.xm",
+      "control": "rewind-clears-memory-ticks.xm",
+      "volumes": [
+        64,
+        64,
+        64,
+        64,
+        64,
+        62,
+        60,
+        58
+      ]
+    },
+    {
+      "name": "zero-restores-phase",
+      "file": "zero-restores-phase.xm",
+      "control": "zero-restores-phase-ticks.xm",
+      "volumes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "set-does-not-clear-memory",
+      "file": "set-does-not-clear-memory.xm",
+      "control": "set-does-not-clear-memory-ticks.xm",
+      "volumes": [
+        64,
+        62,
+        60,
+        58,
+        32,
+        32,
+        32,
+        32,
+        32,
+        30,
+        28,
+        26
+      ]
+    },
+    {
+      "name": "A-does-not-store-H",
+      "file": "A-does-not-store-H.xm",
+      "control": "A-does-not-store-H-ticks.xm",
+      "volumes": [
+        64,
+        62,
+        60,
+        58,
+        58,
+        58,
+        58,
+        58,
+        58,
+        56,
+        54,
+        52
+      ]
+    },
+    {
+      "name": "speed-one-does-not-store",
+      "file": "speed-one-does-not-store.xm",
+      "control": "speed-one-does-not-store-ticks.xm",
+      "volumes": [
+        64,
+        60,
+        56,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        48,
+        44,
+        40
+      ]
+    },
+    {
+      "name": "silent-channel",
+      "file": "silent-channel.xm",
+      "control": "silent-channel-ticks.xm",
+      "volumes": [
+        [
+          64,
+          64
+        ],
+        [
+          61,
+          61
+        ],
+        [
+          58,
+          58
+        ],
+        [
+          55,
+          55
+        ]
+      ]
+    },
+    {
+      "name": "channel-order-up-down",
+      "file": "channel-order-up-down.xm",
+      "control": "channel-order-up-down-ticks.xm",
+      "volumes": [
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          62,
+          62
+        ],
+        [
+          62,
+          62
+        ],
+        [
+          62,
+          62
+        ]
+      ]
+    },
+    {
+      "name": "channel-order-down-up",
+      "file": "channel-order-down-up.xm",
+      "control": "channel-order-down-up-ticks.xm",
+      "volumes": [
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          63,
+          63
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ],
+        [
+          64,
+          64
+        ]
+      ]
+    },
+    {
+      "name": "channel-local-memory",
+      "file": "channel-local-memory.xm",
+      "control": "channel-local-memory-ticks.xm",
+      "volumes": [
+        [
+          64,
+          64
+        ],
+        [
+          59,
+          59
+        ],
+        [
+          54,
+          54
+        ],
+        [
+          49,
+          49
+        ],
+        [
+          49,
+          49
+        ],
+        [
+          47,
+          47
+        ],
+        [
+          45,
+          45
+        ],
+        [
+          43,
+          43
+        ],
+        [
+          43,
+          43
+        ],
+        [
+          40,
+          40
+        ],
+        [
+          37,
+          37
+        ],
+        [
+          34,
+          34
+        ]
+      ]
+    }
+  ],
+  "provenance": "Owned signed16loop and authored literal tick-volume controls. No codec tools, network or private media."
+}

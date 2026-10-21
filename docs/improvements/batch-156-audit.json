@@ -1,0 +1,29 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0164"
+  ],
+  "issue": "XM parser requires241 instrument-header bytes even when sample count0 uses only29 core bytes.",
+  "source": "src/container/xm.rs",
+  "regression": "tests/xm_empty_header.rs",
+  "fixtures": "tests/fixtures/playback-errors/xm-empty-header",
+  "before_initial": "evidence/batch-155-before.log",
+  "primary_reference": {
+    "url": "https://raw.githubusercontent.com/8bitbubsy/ft2-clone/923829b28946d5504eea2168655c2ac3f7c67ace/src/modloaders/ft2_load_xm.c",
+    "sha256": "047efa7aa689098a23df325ee2b2b5e85214a753fbf0851afce769222e745c50",
+    "scope": "loadInstrHeader zero-initializes metadata,reads declared shorter header,and allocates sample structures only for positive sample count."
+  },
+  "matrix": "Six authored short-header cases,two full-header controls,four malformed refusals. Positive gates cover metadata/PCM,actual worker seek/EOF and resource bounds.",
+  "qualification": "No container production change or accepted ID. Existing refusal baseline must be replaced only after positive acceptance gates pass.",
+  "before": [
+    "evidence/batch-156-parser-before.log",
+    "evidence/batch-156-before.log",
+    "evidence/batch-156-acceptance-before.log",
+    "evidence/batch-156-container-before.rs"
+  ],
+  "before_scope": "The normal Cargo baseline passes two refusal/control tests and ignores three intended acceptances. Forced metadata/PCM and worker acceptance decode the authored video then fail during XM source admission at the241-byte requirement. The worker does not start before this parse failure;no independent pre-fix seek failure is claimed.",
+  "implementation": "Validate29-byte core and declared file span first. Short headers require sample count0;skip declared padding and supply neutral metadata equivalent to full empty headers. Nonzero samples still require extended fields;full-header behavior and resource accounting remain intact.",
+  "candidate_sha256": "d154c68b845015d51ba87298c5a2b18a0c22c68087a768f7259a522945091b7d",
+  "validation": "batch-156-validation.json",
+  "test_sha256": "3c333a97d37a8902d3ee4903004611542ec0f5a6629e021363171d72b4643e62"
+}

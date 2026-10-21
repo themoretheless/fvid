@@ -1,0 +1,173 @@
+{
+  "cases": [
+    {
+      "file": "7.1-m0-None-unity.mp4",
+      "source": "7.1-m0-None-unity.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-None-vary.mp4",
+      "source": "7.1-m0-None-vary.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-None-boost.mp4",
+      "source": "7.1-m0-None-boost.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-mixed-unity.mp4",
+      "source": "7.1-m0-mixed-unity.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-mixed-vary.mp4",
+      "source": "7.1-m0-mixed-vary.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-mixed-boost.mp4",
+      "source": "7.1-m0-mixed-boost.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-replace-m0-None-unity.mp4",
+      "source": "7.1-replace-m0-None-unity.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-replace-m0-None-vary.mp4",
+      "source": "7.1-replace-m0-None-vary.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-replace-m0-None-boost.mp4",
+      "source": "7.1-replace-m0-None-boost.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-replace-m0-mixed-unity.mp4",
+      "source": "7.1-replace-m0-mixed-unity.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-replace-m0-mixed-vary.mp4",
+      "source": "7.1-replace-m0-mixed-vary.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-replace-m0-mixed-boost.mp4",
+      "source": "7.1-replace-m0-mixed-boost.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "10-m0-None-unity.mp4",
+      "source": "10-m0-None-unity.ec3",
+      "channels": 10,
+      "mask": 22079,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "10-m0-None-vary.mp4",
+      "source": "10-m0-None-vary.ec3",
+      "channels": 10,
+      "mask": 22079,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "10-m0-None-boost.mp4",
+      "source": "10-m0-None-boost.ec3",
+      "channels": 10,
+      "mask": 22079,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "10-m0-mixed-unity.mp4",
+      "source": "10-m0-mixed-unity.ec3",
+      "channels": 10,
+      "mask": 22079,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "10-m0-mixed-vary.mp4",
+      "source": "10-m0-mixed-vary.ec3",
+      "channels": 10,
+      "mask": 22079,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "10-m0-mixed-boost.mp4",
+      "source": "10-m0-mixed-boost.ec3",
+      "channels": 10,
+      "mask": 22079,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-None-clip.mp4",
+      "source": "7.1-m0-None-clip.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-None-neutral.mp4",
+      "source": "7.1-m0-None-neutral.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 48000
+    },
+    {
+      "file": "7.1-m0-None-neutral-rate44100.mp4",
+      "source": "7.1-m0-None-neutral-rate44100.ec3",
+      "channels": 8,
+      "mask": 1599,
+      "samples": 4608,
+      "rate": 44100
+    }
+  ],
+  "two_track": "two-expanded-audio-tracks.mp4"
+}

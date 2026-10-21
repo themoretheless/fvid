@@ -1,0 +1,20 @@
+
+running 1 test
+"note-off-note-only": PCM differs=true,first differing frame=Some(10584),post-row audible actual=true,control=false
+"k00-note-only": PCM differs=true,first differing frame=Some(10584),post-row audible actual=true,control=false
+"note-off-volume-only": PCM differs=true,first differing frame=Some(10584),post-row audible actual=false,control=true
+"k00-volume-only": PCM differs=true,first differing frame=Some(10584),post-row audible actual=false,control=true
+"note-off-instrument-only": PCM differs=true,first differing frame=Some(10584),post-row audible actual=false,control=true
+"note-off-fine-volume": PCM differs=true,first differing frame=Some(10584),post-row audible actual=false,control=true
+"explicit-instrument-control": PCM differs=false,first differing frame=None,post-row audible actual=true,control=true
+"no-restore-control": PCM differs=false,first differing frame=None,post-row audible actual=false,control=false
+"explicit-volume-note-control": PCM differs=false,first differing frame=None,post-row audible actual=true,control=true
+"global-volume-control": PCM differs=false,first differing frame=None,post-row audible actual=false,control=false
+"k03-note-only": PCM differs=true,first differing frame=Some(5292),post-row audible actual=true,control=false
+"note-off-same-row-volume": PCM differs=true,first differing frame=Some(5324),post-row audible actual=false,control=true
+"k00-same-row-instrument": PCM differs=true,first differing frame=Some(5292),post-row audible actual=false,control=true
+"natural-end-control": PCM differs=false,first differing frame=None,post-row audible actual=false,control=false
+test no_envelope_key_off_currently_keeps_wrong_volume_or_blocks_explicit_restore ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.15s
+

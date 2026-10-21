@@ -1,0 +1,372 @@
+{
+  "cases": [
+    {
+      "name": "P-left",
+      "file": "P-left.xm",
+      "control": "P-left-ticks.xm",
+      "pans": [
+        128,
+        124,
+        120,
+        116
+      ]
+    },
+    {
+      "name": "P-right",
+      "file": "P-right.xm",
+      "control": "P-right-ticks.xm",
+      "pans": [
+        128,
+        131,
+        134,
+        137
+      ]
+    },
+    {
+      "name": "P-high-nibble-wins",
+      "file": "P-high-nibble-wins.xm",
+      "control": "P-high-nibble-wins-ticks.xm",
+      "pans": [
+        128,
+        130,
+        132,
+        134
+      ]
+    },
+    {
+      "name": "P-clamp-left",
+      "file": "P-clamp-left.xm",
+      "control": "P-clamp-left-ticks.xm",
+      "pans": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "P-clamp-right",
+      "file": "P-clamp-right.xm",
+      "control": "P-clamp-right-ticks.xm",
+      "pans": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        255,
+        255,
+        255
+      ]
+    },
+    {
+      "name": "P-memory",
+      "file": "P-memory.xm",
+      "control": "P-memory-ticks.xm",
+      "pans": [
+        128,
+        125,
+        122,
+        119,
+        119,
+        119,
+        119,
+        119,
+        119,
+        116,
+        113,
+        110
+      ]
+    },
+    {
+      "name": "P-empty-memory",
+      "file": "P-empty-memory.xm",
+      "control": "P-empty-memory-ticks.xm",
+      "pans": [
+        128,
+        128,
+        128,
+        128
+      ]
+    },
+    {
+      "name": "set-retains-memory",
+      "file": "set-retains-memory.xm",
+      "control": "set-retains-memory-ticks.xm",
+      "pans": [
+        128,
+        125,
+        122,
+        119,
+        32,
+        32,
+        32,
+        32,
+        32,
+        29,
+        26,
+        23
+      ]
+    },
+    {
+      "name": "P-speed-one-no-store",
+      "file": "P-speed-one-no-store.xm",
+      "control": "P-speed-one-no-store-ticks.xm",
+      "pans": [
+        128,
+        124,
+        120,
+        116,
+        116,
+        116,
+        116,
+        116,
+        116,
+        116,
+        116,
+        112,
+        108,
+        104
+      ]
+    },
+    {
+      "name": "P-retrigger-memory",
+      "file": "P-retrigger-memory.xm",
+      "control": "P-retrigger-memory-ticks.xm",
+      "pans": [
+        128,
+        124,
+        120,
+        116,
+        128,
+        124,
+        120,
+        116
+      ]
+    },
+    {
+      "name": "P-rewind-empty",
+      "file": "P-rewind-empty.xm",
+      "control": "P-rewind-empty-ticks.xm",
+      "pans": [
+        128,
+        128,
+        128,
+        128,
+        128,
+        125,
+        122,
+        119
+      ]
+    },
+    {
+      "name": "P-silent-memory",
+      "file": "P-silent-memory.xm",
+      "control": "P-silent-memory-ticks.xm",
+      "pans": [
+        0,
+        0,
+        0,
+        0,
+        128,
+        125,
+        122,
+        119
+      ]
+    },
+    {
+      "name": "P-two-channels",
+      "file": "P-two-channels.xm",
+      "control": "P-two-channels-ticks.xm",
+      "pans": [
+        [
+          128,
+          128
+        ],
+        [
+          126,
+          125
+        ],
+        [
+          124,
+          122
+        ],
+        [
+          122,
+          119
+        ],
+        [
+          122,
+          119
+        ],
+        [
+          120,
+          116
+        ],
+        [
+          118,
+          113
+        ],
+        [
+          116,
+          110
+        ]
+      ]
+    },
+    {
+      "name": "P-direction-memory",
+      "file": "P-direction-memory.xm",
+      "control": "P-direction-memory-ticks.xm",
+      "pans": [
+        128,
+        126,
+        124,
+        122,
+        122,
+        125,
+        128,
+        131,
+        131,
+        134,
+        137,
+        140
+      ]
+    },
+    {
+      "name": "column-left",
+      "file": "column-left.xm",
+      "control": "column-left-ticks.xm",
+      "pans": [
+        128,
+        124,
+        120,
+        116
+      ]
+    },
+    {
+      "name": "column-right",
+      "file": "column-right.xm",
+      "control": "column-right-ticks.xm",
+      "pans": [
+        128,
+        131,
+        134,
+        137
+      ]
+    },
+    {
+      "name": "D0-FT2-quirk",
+      "file": "D0-FT2-quirk.xm",
+      "control": "D0-FT2-quirk-ticks.xm",
+      "pans": [
+        128,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "E0-no-change",
+      "file": "E0-no-change.xm",
+      "control": "E0-no-change-ticks.xm",
+      "pans": [
+        128,
+        128,
+        128,
+        128
+      ]
+    },
+    {
+      "name": "column-no-P-memory",
+      "file": "column-no-P-memory.xm",
+      "control": "column-no-P-memory-ticks.xm",
+      "pans": [
+        128,
+        125,
+        122,
+        119,
+        119,
+        115,
+        111,
+        107,
+        107,
+        104,
+        101,
+        98
+      ]
+    },
+    {
+      "name": "column-before-P-right",
+      "file": "column-before-P-right.xm",
+      "control": "column-before-P-right-ticks.xm",
+      "pans": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "column-before-P-left",
+      "file": "column-before-P-left.xm",
+      "control": "column-before-P-left-ticks.xm",
+      "pans": [
+        250,
+        250,
+        250,
+        250,
+        250,
+        254,
+        254,
+        254
+      ]
+    },
+    {
+      "name": "Cx-tick-zero",
+      "file": "Cx-tick-zero.xm",
+      "control": "Cx-tick-zero-ticks.xm",
+      "pans": [
+        48,
+        44,
+        40,
+        36
+      ]
+    },
+    {
+      "name": "column-speed-one",
+      "file": "column-speed-one.xm",
+      "control": "column-speed-one-ticks.xm",
+      "pans": [
+        128
+      ]
+    },
+    {
+      "name": "A-no-P-memory",
+      "file": "A-no-P-memory.xm",
+      "control": "A-no-P-memory-ticks.xm",
+      "pans": [
+        128,
+        126,
+        124,
+        122,
+        122,
+        122,
+        122,
+        122,
+        122,
+        120,
+        118,
+        116
+      ]
+    }
+  ],
+  "provenance": "Owned signed16loop and literal independent 8xx pan ticks, including FT2 D0 quirk. No tools/network/private media."
+}

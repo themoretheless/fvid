@@ -1347,11 +1347,16 @@ mod eof_drain_regressions {
         assert_eq!(expected.len(),32768);
         assert_eq!(shared.ring.lock().unwrap().position_frames(),24000);
         let deadline = Instant::now() + Duration::from_millis(100);
-        while shared.ring.lock().unwrap().write_pos < 65552 && Instant::now() < deadline {
+        while shared.ring.lock().unwrap().write_pos < 65536 && Instant::now() < deadline {
             std::thread::sleep(Duration::from_millis(1));
         }
-        assert_eq!(shared.ring.lock().unwrap().write_pos,65552,
+        let ring=shared.ring.lock().unwrap();
+        // Contiguous native sample clocks do not insert the old 16-sample
+        // timestamp-rounding silence between the first two PCM packets.
+        assert_eq!(ring.write_pos,65536,
             "decoder failed to refill after accelerated device consumed its200ms source lead");
+        assert_eq!(&ring.buffer[32768..65536],expected.as_slice(),
+            "refill must contain the exact next packet, without inserted silence");
     }
     fn fixture() -> (Vec<u8>, Vec<f32>) {
         let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -2238,7 +2243,17 @@ mod explicit_flac_speaker_route_regressions {
             let peak = golden.iter().copied().map(f32::abs).fold(0., f32::max);
             let mut expected = Vec::new();
             for frame in golden.chunks_exact(channels) {
-                let mut stereo = [0f32; 2];
+                // A zero mask names no roles. Preserve the committed audible
+                // fallback independently of the production routing function.
+                let mut stereo = if mask == 0 {
+                    match channels {
+                        1 => [frame[0]; 2],
+                        2 => [frame[0], frame[1]],
+                        _ => [frame.iter().sum::<f32>() / channels as f32; 2],
+                    }
+                } else {
+                    [0f32; 2]
+                };
                 let mut bits = mask;
                 for &sample in frame {
                     if bits == 0 {

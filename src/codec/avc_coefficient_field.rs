@@ -196,6 +196,30 @@ impl CoefficientField {
         syntax: &InterSyntax,
         field: bool,
     ) -> Result<(InterHeader, InterCoefficients)> {
+        self.read_inter_field_streams(bits, None, address, slice, syntax, field)
+    }
+    /// Read category-2 syntax from partition A and category-4 residuals from C.
+    /// Both cursors and neighbour storage commit together, after full validation.
+    pub fn read_inter_field_partitioned(
+        &mut self,
+        control: &mut BitReader<'_>,
+        residual: &mut BitReader<'_>,
+        address: usize,
+        slice: u32,
+        syntax: &InterSyntax,
+        field: bool,
+    ) -> Result<(InterHeader, InterCoefficients)> {
+        self.read_inter_field_streams(control, Some(residual), address, slice, syntax, field)
+    }
+    fn read_inter_field_streams(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        residual: Option<&mut BitReader<'_>>,
+        address: usize,
+        slice: u32,
+        syntax: &InterSyntax,
+        field: bool,
+    ) -> Result<(InterHeader, InterCoefficients)> {
         if syntax.chroma_array_type > 2 {
             return Err(invalid("inter coefficient field requires 4:2:0"));
         }
@@ -205,15 +229,32 @@ impl CoefficientField {
         }
         let mut input = bits.clone();
         let header = super::avc_inter::read_inter_header_field(&mut input, syntax, field)?;
-        let coefficients = if syntax.chroma_array_type==2 {
-            super::avc_inter_coefficients::read_inter_coefficients_422_field(&mut input,header.residual.pattern,header.residual.transform8,neighbours,self.neighbours_422(address,slice)?,field)?
-        }else{super::avc_inter_coefficients::read_inter_coefficients_field(
-            &mut input,
-            header.residual.pattern,
-            header.residual.transform8,
-            neighbours,
-            field,
-        )?};
+        let mut residual_input = residual.as_deref().cloned();
+        let read_coefficients = |coefficients_input: &mut BitReader<'_>| {
+            if syntax.chroma_array_type == 2 {
+                super::avc_inter_coefficients::read_inter_coefficients_422_field(
+                    coefficients_input,
+                    header.residual.pattern,
+                    header.residual.transform8,
+                    neighbours,
+                    self.neighbours_422(address, slice)?,
+                    field,
+                )
+            } else {
+                super::avc_inter_coefficients::read_inter_coefficients_field(
+                    coefficients_input,
+                    header.residual.pattern,
+                    header.residual.transform8,
+                    neighbours,
+                    field,
+                )
+            }
+        };
+        let coefficients = if let Some(residual_input) = residual_input.as_mut() {
+            read_coefficients(residual_input)?
+        } else {
+            read_coefficients(&mut input)?
+        };
         if let Some(wide)=&coefficients.chroma422 {self.store_422(address,slice,coefficients.luma_counts,wide.counts)?;}
         else{self.store(
             address,
@@ -222,6 +263,9 @@ impl CoefficientField {
             coefficients.chroma_counts,
         )?;}
         *bits = input;
+        if let (Some(destination), Some(source)) = (residual, residual_input) {
+            *destination = source;
+        }
         Ok((header, coefficients))
     }
     /// The caller consumes mb_field_decoding_flag and supplies expanded active
@@ -229,6 +273,29 @@ impl CoefficientField {
     pub fn read_inter_mbaff(
         &mut self,
         bits: &mut BitReader<'_>,
+        address: usize,
+        slice: u32,
+        syntax: &InterSyntax,
+        pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<(InterHeader, InterCoefficients)> {
+        self.read_inter_mbaff_streams(bits, None, address, slice, syntax, pair_field)
+    }
+    /// Partition A/C equivalent with the caller's physical MBAFF neighbours.
+    pub fn read_inter_mbaff_partitioned(
+        &mut self,
+        control: &mut BitReader<'_>,
+        residual: &mut BitReader<'_>,
+        address: usize,
+        slice: u32,
+        syntax: &InterSyntax,
+        pair_field: impl FnMut(usize) -> Option<bool>,
+    ) -> Result<(InterHeader, InterCoefficients)> {
+        self.read_inter_mbaff_streams(control, Some(residual), address, slice, syntax, pair_field)
+    }
+    fn read_inter_mbaff_streams(
+        &mut self,
+        bits: &mut BitReader<'_>,
+        residual: Option<&mut BitReader<'_>>,
         address: usize,
         slice: u32,
         syntax: &InterSyntax,
@@ -245,17 +312,32 @@ impl CoefficientField {
         }
         let mut input = bits.clone();
         let header = super::avc_inter::read_inter_header_field(&mut input, syntax, field)?;
-        let coefficients = if syntax.chroma_array_type==2 {
-            super::avc_inter_coefficients::read_inter_coefficients_422_field(
-                &mut input,header.residual.pattern,header.residual.transform8,neighbours,
-                self.neighbours_422_mbaff(address,slice,&mut pair_field)?,field)?
-        } else {super::avc_inter_coefficients::read_inter_coefficients_field(
-            &mut input,
-            header.residual.pattern,
-            header.residual.transform8,
-            neighbours,
-            field,
-        )?};
+        let mut residual_input = residual.as_deref().cloned();
+        let mut read_coefficients = |coefficients_input: &mut BitReader<'_>| {
+            if syntax.chroma_array_type == 2 {
+                super::avc_inter_coefficients::read_inter_coefficients_422_field(
+                    coefficients_input,
+                    header.residual.pattern,
+                    header.residual.transform8,
+                    neighbours,
+                    self.neighbours_422_mbaff(address, slice, &mut pair_field)?,
+                    field,
+                )
+            } else {
+                super::avc_inter_coefficients::read_inter_coefficients_field(
+                    coefficients_input,
+                    header.residual.pattern,
+                    header.residual.transform8,
+                    neighbours,
+                    field,
+                )
+            }
+        };
+        let coefficients = if let Some(residual_input) = residual_input.as_mut() {
+            read_coefficients(residual_input)?
+        } else {
+            read_coefficients(&mut input)?
+        };
         if let Some(wide)=&coefficients.chroma422 {self.store_422(address,slice,coefficients.luma_counts,wide.counts)?;}
         else{self.store(
             address,
@@ -264,6 +346,9 @@ impl CoefficientField {
             coefficients.chroma_counts,
         )?;}
         *bits = input;
+        if let (Some(destination), Some(source)) = (residual, residual_input) {
+            *destination = source;
+        }
         Ok((header, coefficients))
     }
 }
@@ -271,6 +356,87 @@ impl CoefficientField {
 mod tests {
     use super::super::avc_slice::SliceType;
     use super::*;
+    #[test]
+    fn partitioned_inter_commits_two_cursors_and_nonzero_context_together() {
+        let syntax = InterSyntax {
+            slice: SliceType::P, active_references: [1, 0], previous_qp: 26,
+            bit_depth: 8, chroma_array_type: 1, transform8_enabled: false,
+            direct8_inference: true,
+        };
+        for field_picture in [false, true] {
+            let mut counts = CoefficientField::new(2, 1, 8192).unwrap();
+            // A: mb_type=0, MVD=(0,0), CBP code=2 => pattern 1, delta=0.
+            // C: one positive coefficient at scan position 1; three zero blocks.
+            let mut control = BitReader::new(&[0xee]);
+            let mut truncated = BitReader::new(&[0x4f]);
+            assert!(counts.read_inter_field_partitioned(
+                &mut control, &mut truncated, 0, 7, &syntax, field_picture,
+            ).is_err());
+            assert_eq!((control.position(), truncated.position()), (0, 0));
+            assert!(counts.cells.iter().all(Option::is_none));
+            let mut residual = BitReader::new(&[0x4f, 0x80]);
+            let (header, coefficients) = counts.read_inter_field_partitioned(
+                &mut control, &mut residual, 0, 7, &syntax, field_picture,
+            ).unwrap();
+            assert_eq!((control.position(), residual.position()), (7, 9));
+            assert_eq!(header.residual.pattern, 1);
+            assert_eq!(coefficients.luma4[0][if field_picture {4} else {1}], 1);
+            assert_eq!(counts.cells[0].unwrap().luma[0], 1);
+            assert_eq!(coefficients.luma_counts.iter().map(|&n| usize::from(n)).sum::<usize>(), 1);
+            // Independent combined-stream control: seven A bits + nine C bits.
+            let mut combined = BitReader::new(&[0xee, 0x9f]);
+            let (_, expected) = CoefficientField::new(2, 1, 8192).unwrap()
+                .read_inter_field(&mut combined, 0, 7, &syntax, field_picture).unwrap();
+            assert_eq!(combined.position(), 16);
+            assert_eq!(coefficients.luma4, expected.luma4);
+            assert_eq!(coefficients.luma_counts, expected.luma_counts);
+            let before = (control.position(), residual.position());
+            assert!(counts.read_inter_field_partitioned(
+                &mut control, &mut residual, 0, 7, &syntax, field_picture,
+            ).is_err());
+            assert_eq!((control.position(), residual.position()), before);
+        }
+        // CBP=0 has no category-4 syntax: partition C can be absent/empty.
+        let mut control = BitReader::new(&[0xf0]);
+        let mut empty = BitReader::new(&[]);
+        let (_, coefficients) = CoefficientField::new(1, 1, 8192).unwrap()
+            .read_inter_field_partitioned(&mut control, &mut empty, 0, 0, &syntax, false).unwrap();
+        assert_eq!((control.position(), empty.position()), (4, 0));
+        assert_eq!(coefficients.luma_counts, [0; 16]);
+    }
+
+    #[test]
+    fn partitioned_mbaff_inter_preserves_frame_field_scan_and_atomicity() {
+        let syntax = InterSyntax {
+            slice: SliceType::P, active_references: [1, 0], previous_qp: 26,
+            bit_depth: 8, chroma_array_type: 1, transform8_enabled: false,
+            direct8_inference: true,
+        };
+        for field in [false, true] {
+            let mut counts = CoefficientField::new(1, 2, 8192).unwrap();
+            let mut control = BitReader::new(&[0xee]);
+            let mut truncated = BitReader::new(&[0x4f]);
+            assert!(counts.read_inter_mbaff_partitioned(
+                &mut control, &mut truncated, 0, 7, &syntax, |_| Some(field),
+            ).is_err());
+            assert_eq!((control.position(), truncated.position()), (0, 0));
+            assert!(counts.cells.iter().all(Option::is_none));
+            let mut residual = BitReader::new(&[0x4f, 0x80]);
+            let (_, coefficients) = counts.read_inter_mbaff_partitioned(
+                &mut control, &mut residual, 0, 7, &syntax, |_| Some(field),
+            ).unwrap();
+            assert_eq!((control.position(), residual.position()), (7, 9));
+            assert_eq!(coefficients.luma4[0][if field {4} else {1}], 1);
+            let mut combined = BitReader::new(&[0xee, 0x9f]);
+            let (_, expected) = CoefficientField::new(1, 2, 8192).unwrap()
+                .read_inter_mbaff(&mut combined, 0, 7, &syntax, |_| Some(field)).unwrap();
+            assert_eq!(combined.position(), 16);
+            assert_eq!(coefficients.luma4, expected.luma4);
+            assert_eq!(coefficients.luma_counts, expected.luma_counts);
+            assert_eq!(counts.cells[0].unwrap().luma[0], 1);
+        }
+    }
+
     #[test]
     fn rectangular_mbaff_counts_select_physical_frame_and_field_owners() {
         for current_field in [false,true] {for foreign_top in [false,true] {

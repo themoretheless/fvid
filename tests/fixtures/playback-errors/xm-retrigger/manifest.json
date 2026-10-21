@@ -1,0 +1,333 @@
+{
+  "cases": [
+    {
+      "name": "every-tick",
+      "file": "every-tick.xm",
+      "control": "every-tick-ticks.xm",
+      "notes": [
+        49,
+        49,
+        49,
+        49
+      ]
+    },
+    {
+      "name": "interval-two",
+      "file": "interval-two.xm",
+      "control": "interval-two-ticks.xm",
+      "notes": [
+        49,
+        0,
+        49,
+        0
+      ]
+    },
+    {
+      "name": "interval-three",
+      "file": "interval-three.xm",
+      "control": "interval-three-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        49
+      ]
+    },
+    {
+      "name": "interval-beyond-row",
+      "file": "interval-beyond-row.xm",
+      "control": "interval-beyond-row-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "row-zero-is-not-repeat",
+      "file": "row-zero-is-not-repeat.xm",
+      "control": "row-zero-is-not-repeat-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        0,
+        49,
+        0
+      ]
+    },
+    {
+      "name": "zero-restarts-on-row",
+      "file": "zero-restarts-on-row.xm",
+      "control": "zero-restarts-on-row-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        49,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "zero-has-no-interval-memory",
+      "file": "zero-has-no-interval-memory.xm",
+      "control": "zero-has-no-interval-memory-ticks.xm",
+      "notes": [
+        49,
+        0,
+        49,
+        0,
+        49,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "zero-explicit-new-note",
+      "file": "zero-explicit-new-note.xm",
+      "control": "zero-explicit-new-note-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        50,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "zero-empty",
+      "file": "zero-empty.xm",
+      "control": "zero-empty-ticks.xm",
+      "notes": [
+        0,
+        0,
+        0,
+        0,
+        49,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "nonzero-empty",
+      "file": "nonzero-empty.xm",
+      "control": "nonzero-empty-ticks.xm",
+      "notes": [
+        0,
+        0,
+        0,
+        0,
+        49,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "speed-one",
+      "file": "speed-one.xm",
+      "control": "speed-one-ticks.xm",
+      "notes": [
+        49,
+        0
+      ]
+    },
+    {
+      "name": "volume-retained",
+      "file": "volume-retained.xm",
+      "control": "volume-retained-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        49,
+        49,
+        49
+      ]
+    },
+    {
+      "name": "pan-retained",
+      "file": "pan-retained.xm",
+      "control": "pan-retained-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        0,
+        49,
+        0
+      ]
+    },
+    {
+      "name": "offset-not-reused",
+      "file": "offset-not-reused.xm",
+      "control": "offset-not-reused-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        49,
+        49,
+        49
+      ]
+    },
+    {
+      "name": "unlooped-revival",
+      "file": "unlooped-revival.xm",
+      "control": "unlooped-revival-ticks.xm",
+      "notes": [
+        49,
+        49,
+        49,
+        49
+      ]
+    },
+    {
+      "name": "ping-pong-direction",
+      "file": "ping-pong-direction.xm",
+      "control": "ping-pong-direction-ticks.xm",
+      "notes": [
+        49,
+        0,
+        49,
+        0,
+        0,
+        0,
+        49,
+        0
+      ]
+    },
+    {
+      "name": "two-channels",
+      "file": "two-channels.xm",
+      "control": "two-channels-ticks.xm",
+      "notes": [
+        [
+          49,
+          50
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          49,
+          0
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          49,
+          0
+        ],
+        [
+          0,
+          50
+        ]
+      ]
+    },
+    {
+      "name": "zero-key-off",
+      "file": "zero-key-off.xm",
+      "control": "zero-key-off-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        97,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "instrument-only-repeat",
+      "file": "instrument-only-repeat.xm",
+      "control": "instrument-only-repeat-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        0,
+        49,
+        0
+      ]
+    },
+    {
+      "name": "new-pitch-repeat",
+      "file": "new-pitch-repeat.xm",
+      "control": "new-pitch-repeat-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        53,
+        53,
+        53,
+        53
+      ]
+    },
+    {
+      "name": "selected-instrument-repeat",
+      "file": "selected-instrument-repeat.xm",
+      "control": "selected-instrument-repeat-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        0,
+        0,
+        49,
+        0
+      ]
+    },
+    {
+      "name": "selected-instrument-zero",
+      "file": "selected-instrument-zero.xm",
+      "control": "selected-instrument-zero-ticks.xm",
+      "notes": [
+        49,
+        0,
+        0,
+        0,
+        49,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "provenance": "Owned signed16loop/unlooped/ping-pong sample and literal tick-note restart controls. No codec tools/network/private media."
+}

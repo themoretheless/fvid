@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'player::tests::native_sami_attribute_values_do_not_change_playing_caption_clocks' (2168642) panicked at src/player.rs:8095:21:
+quoted-begin-single: native seek did not finish
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test player::tests::native_sami_attribute_values_do_not_change_playing_caption_clocks ... FAILED
+
+failures:
+
+failures:
+    player::tests::native_sami_attribute_values_do_not_change_playing_caption_clocks
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1019 filtered out; finished in 10.22s
+

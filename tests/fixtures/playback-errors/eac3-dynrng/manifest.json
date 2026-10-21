@@ -1,0 +1,1796 @@
+{
+  "cases": [
+    {
+      "name": "code-000",
+      "file": "code-000.ec3",
+      "video": "code-000.mkv",
+      "code": 0,
+      "gain": 1.0
+    },
+    {
+      "name": "code-001",
+      "file": "code-001.ec3",
+      "video": "code-001.mkv",
+      "code": 1,
+      "gain": 1.03125
+    },
+    {
+      "name": "code-002",
+      "file": "code-002.ec3",
+      "video": "code-002.mkv",
+      "code": 2,
+      "gain": 1.0625
+    },
+    {
+      "name": "code-003",
+      "file": "code-003.ec3",
+      "video": "code-003.mkv",
+      "code": 3,
+      "gain": 1.09375
+    },
+    {
+      "name": "code-004",
+      "file": "code-004.ec3",
+      "video": "code-004.mkv",
+      "code": 4,
+      "gain": 1.125
+    },
+    {
+      "name": "code-005",
+      "file": "code-005.ec3",
+      "video": "code-005.mkv",
+      "code": 5,
+      "gain": 1.15625
+    },
+    {
+      "name": "code-006",
+      "file": "code-006.ec3",
+      "video": "code-006.mkv",
+      "code": 6,
+      "gain": 1.1875
+    },
+    {
+      "name": "code-007",
+      "file": "code-007.ec3",
+      "video": "code-007.mkv",
+      "code": 7,
+      "gain": 1.21875
+    },
+    {
+      "name": "code-008",
+      "file": "code-008.ec3",
+      "video": "code-008.mkv",
+      "code": 8,
+      "gain": 1.25
+    },
+    {
+      "name": "code-009",
+      "file": "code-009.ec3",
+      "video": "code-009.mkv",
+      "code": 9,
+      "gain": 1.28125
+    },
+    {
+      "name": "code-010",
+      "file": "code-010.ec3",
+      "video": "code-010.mkv",
+      "code": 10,
+      "gain": 1.3125
+    },
+    {
+      "name": "code-011",
+      "file": "code-011.ec3",
+      "video": "code-011.mkv",
+      "code": 11,
+      "gain": 1.34375
+    },
+    {
+      "name": "code-012",
+      "file": "code-012.ec3",
+      "video": "code-012.mkv",
+      "code": 12,
+      "gain": 1.375
+    },
+    {
+      "name": "code-013",
+      "file": "code-013.ec3",
+      "video": "code-013.mkv",
+      "code": 13,
+      "gain": 1.40625
+    },
+    {
+      "name": "code-014",
+      "file": "code-014.ec3",
+      "video": "code-014.mkv",
+      "code": 14,
+      "gain": 1.4375
+    },
+    {
+      "name": "code-015",
+      "file": "code-015.ec3",
+      "video": "code-015.mkv",
+      "code": 15,
+      "gain": 1.46875
+    },
+    {
+      "name": "code-016",
+      "file": "code-016.ec3",
+      "video": "code-016.mkv",
+      "code": 16,
+      "gain": 1.5
+    },
+    {
+      "name": "code-017",
+      "file": "code-017.ec3",
+      "video": "code-017.mkv",
+      "code": 17,
+      "gain": 1.53125
+    },
+    {
+      "name": "code-018",
+      "file": "code-018.ec3",
+      "video": "code-018.mkv",
+      "code": 18,
+      "gain": 1.5625
+    },
+    {
+      "name": "code-019",
+      "file": "code-019.ec3",
+      "video": "code-019.mkv",
+      "code": 19,
+      "gain": 1.59375
+    },
+    {
+      "name": "code-020",
+      "file": "code-020.ec3",
+      "video": "code-020.mkv",
+      "code": 20,
+      "gain": 1.625
+    },
+    {
+      "name": "code-021",
+      "file": "code-021.ec3",
+      "video": "code-021.mkv",
+      "code": 21,
+      "gain": 1.65625
+    },
+    {
+      "name": "code-022",
+      "file": "code-022.ec3",
+      "video": "code-022.mkv",
+      "code": 22,
+      "gain": 1.6875
+    },
+    {
+      "name": "code-023",
+      "file": "code-023.ec3",
+      "video": "code-023.mkv",
+      "code": 23,
+      "gain": 1.71875
+    },
+    {
+      "name": "code-024",
+      "file": "code-024.ec3",
+      "video": "code-024.mkv",
+      "code": 24,
+      "gain": 1.75
+    },
+    {
+      "name": "code-025",
+      "file": "code-025.ec3",
+      "video": "code-025.mkv",
+      "code": 25,
+      "gain": 1.78125
+    },
+    {
+      "name": "code-026",
+      "file": "code-026.ec3",
+      "video": "code-026.mkv",
+      "code": 26,
+      "gain": 1.8125
+    },
+    {
+      "name": "code-027",
+      "file": "code-027.ec3",
+      "video": "code-027.mkv",
+      "code": 27,
+      "gain": 1.84375
+    },
+    {
+      "name": "code-028",
+      "file": "code-028.ec3",
+      "video": "code-028.mkv",
+      "code": 28,
+      "gain": 1.875
+    },
+    {
+      "name": "code-029",
+      "file": "code-029.ec3",
+      "video": "code-029.mkv",
+      "code": 29,
+      "gain": 1.90625
+    },
+    {
+      "name": "code-030",
+      "file": "code-030.ec3",
+      "video": "code-030.mkv",
+      "code": 30,
+      "gain": 1.9375
+    },
+    {
+      "name": "code-031",
+      "file": "code-031.ec3",
+      "video": "code-031.mkv",
+      "code": 31,
+      "gain": 1.96875
+    },
+    {
+      "name": "code-032",
+      "file": "code-032.ec3",
+      "video": "code-032.mkv",
+      "code": 32,
+      "gain": 2.0
+    },
+    {
+      "name": "code-033",
+      "file": "code-033.ec3",
+      "video": "code-033.mkv",
+      "code": 33,
+      "gain": 2.0625
+    },
+    {
+      "name": "code-034",
+      "file": "code-034.ec3",
+      "video": "code-034.mkv",
+      "code": 34,
+      "gain": 2.125
+    },
+    {
+      "name": "code-035",
+      "file": "code-035.ec3",
+      "video": "code-035.mkv",
+      "code": 35,
+      "gain": 2.1875
+    },
+    {
+      "name": "code-036",
+      "file": "code-036.ec3",
+      "video": "code-036.mkv",
+      "code": 36,
+      "gain": 2.25
+    },
+    {
+      "name": "code-037",
+      "file": "code-037.ec3",
+      "video": "code-037.mkv",
+      "code": 37,
+      "gain": 2.3125
+    },
+    {
+      "name": "code-038",
+      "file": "code-038.ec3",
+      "video": "code-038.mkv",
+      "code": 38,
+      "gain": 2.375
+    },
+    {
+      "name": "code-039",
+      "file": "code-039.ec3",
+      "video": "code-039.mkv",
+      "code": 39,
+      "gain": 2.4375
+    },
+    {
+      "name": "code-040",
+      "file": "code-040.ec3",
+      "video": "code-040.mkv",
+      "code": 40,
+      "gain": 2.5
+    },
+    {
+      "name": "code-041",
+      "file": "code-041.ec3",
+      "video": "code-041.mkv",
+      "code": 41,
+      "gain": 2.5625
+    },
+    {
+      "name": "code-042",
+      "file": "code-042.ec3",
+      "video": "code-042.mkv",
+      "code": 42,
+      "gain": 2.625
+    },
+    {
+      "name": "code-043",
+      "file": "code-043.ec3",
+      "video": "code-043.mkv",
+      "code": 43,
+      "gain": 2.6875
+    },
+    {
+      "name": "code-044",
+      "file": "code-044.ec3",
+      "video": "code-044.mkv",
+      "code": 44,
+      "gain": 2.75
+    },
+    {
+      "name": "code-045",
+      "file": "code-045.ec3",
+      "video": "code-045.mkv",
+      "code": 45,
+      "gain": 2.8125
+    },
+    {
+      "name": "code-046",
+      "file": "code-046.ec3",
+      "video": "code-046.mkv",
+      "code": 46,
+      "gain": 2.875
+    },
+    {
+      "name": "code-047",
+      "file": "code-047.ec3",
+      "video": "code-047.mkv",
+      "code": 47,
+      "gain": 2.9375
+    },
+    {
+      "name": "code-048",
+      "file": "code-048.ec3",
+      "video": "code-048.mkv",
+      "code": 48,
+      "gain": 3.0
+    },
+    {
+      "name": "code-049",
+      "file": "code-049.ec3",
+      "video": "code-049.mkv",
+      "code": 49,
+      "gain": 3.0625
+    },
+    {
+      "name": "code-050",
+      "file": "code-050.ec3",
+      "video": "code-050.mkv",
+      "code": 50,
+      "gain": 3.125
+    },
+    {
+      "name": "code-051",
+      "file": "code-051.ec3",
+      "video": "code-051.mkv",
+      "code": 51,
+      "gain": 3.1875
+    },
+    {
+      "name": "code-052",
+      "file": "code-052.ec3",
+      "video": "code-052.mkv",
+      "code": 52,
+      "gain": 3.25
+    },
+    {
+      "name": "code-053",
+      "file": "code-053.ec3",
+      "video": "code-053.mkv",
+      "code": 53,
+      "gain": 3.3125
+    },
+    {
+      "name": "code-054",
+      "file": "code-054.ec3",
+      "video": "code-054.mkv",
+      "code": 54,
+      "gain": 3.375
+    },
+    {
+      "name": "code-055",
+      "file": "code-055.ec3",
+      "video": "code-055.mkv",
+      "code": 55,
+      "gain": 3.4375
+    },
+    {
+      "name": "code-056",
+      "file": "code-056.ec3",
+      "video": "code-056.mkv",
+      "code": 56,
+      "gain": 3.5
+    },
+    {
+      "name": "code-057",
+      "file": "code-057.ec3",
+      "video": "code-057.mkv",
+      "code": 57,
+      "gain": 3.5625
+    },
+    {
+      "name": "code-058",
+      "file": "code-058.ec3",
+      "video": "code-058.mkv",
+      "code": 58,
+      "gain": 3.625
+    },
+    {
+      "name": "code-059",
+      "file": "code-059.ec3",
+      "video": "code-059.mkv",
+      "code": 59,
+      "gain": 3.6875
+    },
+    {
+      "name": "code-060",
+      "file": "code-060.ec3",
+      "video": "code-060.mkv",
+      "code": 60,
+      "gain": 3.75
+    },
+    {
+      "name": "code-061",
+      "file": "code-061.ec3",
+      "video": "code-061.mkv",
+      "code": 61,
+      "gain": 3.8125
+    },
+    {
+      "name": "code-062",
+      "file": "code-062.ec3",
+      "video": "code-062.mkv",
+      "code": 62,
+      "gain": 3.875
+    },
+    {
+      "name": "code-063",
+      "file": "code-063.ec3",
+      "video": "code-063.mkv",
+      "code": 63,
+      "gain": 3.9375
+    },
+    {
+      "name": "code-064",
+      "file": "code-064.ec3",
+      "video": "code-064.mkv",
+      "code": 64,
+      "gain": 4.0
+    },
+    {
+      "name": "code-065",
+      "file": "code-065.ec3",
+      "video": "code-065.mkv",
+      "code": 65,
+      "gain": 4.125
+    },
+    {
+      "name": "code-066",
+      "file": "code-066.ec3",
+      "video": "code-066.mkv",
+      "code": 66,
+      "gain": 4.25
+    },
+    {
+      "name": "code-067",
+      "file": "code-067.ec3",
+      "video": "code-067.mkv",
+      "code": 67,
+      "gain": 4.375
+    },
+    {
+      "name": "code-068",
+      "file": "code-068.ec3",
+      "video": "code-068.mkv",
+      "code": 68,
+      "gain": 4.5
+    },
+    {
+      "name": "code-069",
+      "file": "code-069.ec3",
+      "video": "code-069.mkv",
+      "code": 69,
+      "gain": 4.625
+    },
+    {
+      "name": "code-070",
+      "file": "code-070.ec3",
+      "video": "code-070.mkv",
+      "code": 70,
+      "gain": 4.75
+    },
+    {
+      "name": "code-071",
+      "file": "code-071.ec3",
+      "video": "code-071.mkv",
+      "code": 71,
+      "gain": 4.875
+    },
+    {
+      "name": "code-072",
+      "file": "code-072.ec3",
+      "video": "code-072.mkv",
+      "code": 72,
+      "gain": 5.0
+    },
+    {
+      "name": "code-073",
+      "file": "code-073.ec3",
+      "video": "code-073.mkv",
+      "code": 73,
+      "gain": 5.125
+    },
+    {
+      "name": "code-074",
+      "file": "code-074.ec3",
+      "video": "code-074.mkv",
+      "code": 74,
+      "gain": 5.25
+    },
+    {
+      "name": "code-075",
+      "file": "code-075.ec3",
+      "video": "code-075.mkv",
+      "code": 75,
+      "gain": 5.375
+    },
+    {
+      "name": "code-076",
+      "file": "code-076.ec3",
+      "video": "code-076.mkv",
+      "code": 76,
+      "gain": 5.5
+    },
+    {
+      "name": "code-077",
+      "file": "code-077.ec3",
+      "video": "code-077.mkv",
+      "code": 77,
+      "gain": 5.625
+    },
+    {
+      "name": "code-078",
+      "file": "code-078.ec3",
+      "video": "code-078.mkv",
+      "code": 78,
+      "gain": 5.75
+    },
+    {
+      "name": "code-079",
+      "file": "code-079.ec3",
+      "video": "code-079.mkv",
+      "code": 79,
+      "gain": 5.875
+    },
+    {
+      "name": "code-080",
+      "file": "code-080.ec3",
+      "video": "code-080.mkv",
+      "code": 80,
+      "gain": 6.0
+    },
+    {
+      "name": "code-081",
+      "file": "code-081.ec3",
+      "video": "code-081.mkv",
+      "code": 81,
+      "gain": 6.125
+    },
+    {
+      "name": "code-082",
+      "file": "code-082.ec3",
+      "video": "code-082.mkv",
+      "code": 82,
+      "gain": 6.25
+    },
+    {
+      "name": "code-083",
+      "file": "code-083.ec3",
+      "video": "code-083.mkv",
+      "code": 83,
+      "gain": 6.375
+    },
+    {
+      "name": "code-084",
+      "file": "code-084.ec3",
+      "video": "code-084.mkv",
+      "code": 84,
+      "gain": 6.5
+    },
+    {
+      "name": "code-085",
+      "file": "code-085.ec3",
+      "video": "code-085.mkv",
+      "code": 85,
+      "gain": 6.625
+    },
+    {
+      "name": "code-086",
+      "file": "code-086.ec3",
+      "video": "code-086.mkv",
+      "code": 86,
+      "gain": 6.75
+    },
+    {
+      "name": "code-087",
+      "file": "code-087.ec3",
+      "video": "code-087.mkv",
+      "code": 87,
+      "gain": 6.875
+    },
+    {
+      "name": "code-088",
+      "file": "code-088.ec3",
+      "video": "code-088.mkv",
+      "code": 88,
+      "gain": 7.0
+    },
+    {
+      "name": "code-089",
+      "file": "code-089.ec3",
+      "video": "code-089.mkv",
+      "code": 89,
+      "gain": 7.125
+    },
+    {
+      "name": "code-090",
+      "file": "code-090.ec3",
+      "video": "code-090.mkv",
+      "code": 90,
+      "gain": 7.25
+    },
+    {
+      "name": "code-091",
+      "file": "code-091.ec3",
+      "video": "code-091.mkv",
+      "code": 91,
+      "gain": 7.375
+    },
+    {
+      "name": "code-092",
+      "file": "code-092.ec3",
+      "video": "code-092.mkv",
+      "code": 92,
+      "gain": 7.5
+    },
+    {
+      "name": "code-093",
+      "file": "code-093.ec3",
+      "video": "code-093.mkv",
+      "code": 93,
+      "gain": 7.625
+    },
+    {
+      "name": "code-094",
+      "file": "code-094.ec3",
+      "video": "code-094.mkv",
+      "code": 94,
+      "gain": 7.75
+    },
+    {
+      "name": "code-095",
+      "file": "code-095.ec3",
+      "video": "code-095.mkv",
+      "code": 95,
+      "gain": 7.875
+    },
+    {
+      "name": "code-096",
+      "file": "code-096.ec3",
+      "video": "code-096.mkv",
+      "code": 96,
+      "gain": 8.0
+    },
+    {
+      "name": "code-097",
+      "file": "code-097.ec3",
+      "video": "code-097.mkv",
+      "code": 97,
+      "gain": 8.25
+    },
+    {
+      "name": "code-098",
+      "file": "code-098.ec3",
+      "video": "code-098.mkv",
+      "code": 98,
+      "gain": 8.5
+    },
+    {
+      "name": "code-099",
+      "file": "code-099.ec3",
+      "video": "code-099.mkv",
+      "code": 99,
+      "gain": 8.75
+    },
+    {
+      "name": "code-100",
+      "file": "code-100.ec3",
+      "video": "code-100.mkv",
+      "code": 100,
+      "gain": 9.0
+    },
+    {
+      "name": "code-101",
+      "file": "code-101.ec3",
+      "video": "code-101.mkv",
+      "code": 101,
+      "gain": 9.25
+    },
+    {
+      "name": "code-102",
+      "file": "code-102.ec3",
+      "video": "code-102.mkv",
+      "code": 102,
+      "gain": 9.5
+    },
+    {
+      "name": "code-103",
+      "file": "code-103.ec3",
+      "video": "code-103.mkv",
+      "code": 103,
+      "gain": 9.75
+    },
+    {
+      "name": "code-104",
+      "file": "code-104.ec3",
+      "video": "code-104.mkv",
+      "code": 104,
+      "gain": 10.0
+    },
+    {
+      "name": "code-105",
+      "file": "code-105.ec3",
+      "video": "code-105.mkv",
+      "code": 105,
+      "gain": 10.25
+    },
+    {
+      "name": "code-106",
+      "file": "code-106.ec3",
+      "video": "code-106.mkv",
+      "code": 106,
+      "gain": 10.5
+    },
+    {
+      "name": "code-107",
+      "file": "code-107.ec3",
+      "video": "code-107.mkv",
+      "code": 107,
+      "gain": 10.75
+    },
+    {
+      "name": "code-108",
+      "file": "code-108.ec3",
+      "video": "code-108.mkv",
+      "code": 108,
+      "gain": 11.0
+    },
+    {
+      "name": "code-109",
+      "file": "code-109.ec3",
+      "video": "code-109.mkv",
+      "code": 109,
+      "gain": 11.25
+    },
+    {
+      "name": "code-110",
+      "file": "code-110.ec3",
+      "video": "code-110.mkv",
+      "code": 110,
+      "gain": 11.5
+    },
+    {
+      "name": "code-111",
+      "file": "code-111.ec3",
+      "video": "code-111.mkv",
+      "code": 111,
+      "gain": 11.75
+    },
+    {
+      "name": "code-112",
+      "file": "code-112.ec3",
+      "video": "code-112.mkv",
+      "code": 112,
+      "gain": 12.0
+    },
+    {
+      "name": "code-113",
+      "file": "code-113.ec3",
+      "video": "code-113.mkv",
+      "code": 113,
+      "gain": 12.25
+    },
+    {
+      "name": "code-114",
+      "file": "code-114.ec3",
+      "video": "code-114.mkv",
+      "code": 114,
+      "gain": 12.5
+    },
+    {
+      "name": "code-115",
+      "file": "code-115.ec3",
+      "video": "code-115.mkv",
+      "code": 115,
+      "gain": 12.75
+    },
+    {
+      "name": "code-116",
+      "file": "code-116.ec3",
+      "video": "code-116.mkv",
+      "code": 116,
+      "gain": 13.0
+    },
+    {
+      "name": "code-117",
+      "file": "code-117.ec3",
+      "video": "code-117.mkv",
+      "code": 117,
+      "gain": 13.25
+    },
+    {
+      "name": "code-118",
+      "file": "code-118.ec3",
+      "video": "code-118.mkv",
+      "code": 118,
+      "gain": 13.5
+    },
+    {
+      "name": "code-119",
+      "file": "code-119.ec3",
+      "video": "code-119.mkv",
+      "code": 119,
+      "gain": 13.75
+    },
+    {
+      "name": "code-120",
+      "file": "code-120.ec3",
+      "video": "code-120.mkv",
+      "code": 120,
+      "gain": 14.0
+    },
+    {
+      "name": "code-121",
+      "file": "code-121.ec3",
+      "video": "code-121.mkv",
+      "code": 121,
+      "gain": 14.25
+    },
+    {
+      "name": "code-122",
+      "file": "code-122.ec3",
+      "video": "code-122.mkv",
+      "code": 122,
+      "gain": 14.5
+    },
+    {
+      "name": "code-123",
+      "file": "code-123.ec3",
+      "video": "code-123.mkv",
+      "code": 123,
+      "gain": 14.75
+    },
+    {
+      "name": "code-124",
+      "file": "code-124.ec3",
+      "video": "code-124.mkv",
+      "code": 124,
+      "gain": 15.0
+    },
+    {
+      "name": "code-125",
+      "file": "code-125.ec3",
+      "video": "code-125.mkv",
+      "code": 125,
+      "gain": 15.25
+    },
+    {
+      "name": "code-126",
+      "file": "code-126.ec3",
+      "video": "code-126.mkv",
+      "code": 126,
+      "gain": 15.5
+    },
+    {
+      "name": "code-127",
+      "file": "code-127.ec3",
+      "video": "code-127.mkv",
+      "code": 127,
+      "gain": 15.75
+    },
+    {
+      "name": "code-128",
+      "file": "code-128.ec3",
+      "video": "code-128.mkv",
+      "code": 128,
+      "gain": 0.0625
+    },
+    {
+      "name": "code-129",
+      "file": "code-129.ec3",
+      "video": "code-129.mkv",
+      "code": 129,
+      "gain": 0.064453125
+    },
+    {
+      "name": "code-130",
+      "file": "code-130.ec3",
+      "video": "code-130.mkv",
+      "code": 130,
+      "gain": 0.06640625
+    },
+    {
+      "name": "code-131",
+      "file": "code-131.ec3",
+      "video": "code-131.mkv",
+      "code": 131,
+      "gain": 0.068359375
+    },
+    {
+      "name": "code-132",
+      "file": "code-132.ec3",
+      "video": "code-132.mkv",
+      "code": 132,
+      "gain": 0.0703125
+    },
+    {
+      "name": "code-133",
+      "file": "code-133.ec3",
+      "video": "code-133.mkv",
+      "code": 133,
+      "gain": 0.072265625
+    },
+    {
+      "name": "code-134",
+      "file": "code-134.ec3",
+      "video": "code-134.mkv",
+      "code": 134,
+      "gain": 0.07421875
+    },
+    {
+      "name": "code-135",
+      "file": "code-135.ec3",
+      "video": "code-135.mkv",
+      "code": 135,
+      "gain": 0.076171875
+    },
+    {
+      "name": "code-136",
+      "file": "code-136.ec3",
+      "video": "code-136.mkv",
+      "code": 136,
+      "gain": 0.078125
+    },
+    {
+      "name": "code-137",
+      "file": "code-137.ec3",
+      "video": "code-137.mkv",
+      "code": 137,
+      "gain": 0.080078125
+    },
+    {
+      "name": "code-138",
+      "file": "code-138.ec3",
+      "video": "code-138.mkv",
+      "code": 138,
+      "gain": 0.08203125
+    },
+    {
+      "name": "code-139",
+      "file": "code-139.ec3",
+      "video": "code-139.mkv",
+      "code": 139,
+      "gain": 0.083984375
+    },
+    {
+      "name": "code-140",
+      "file": "code-140.ec3",
+      "video": "code-140.mkv",
+      "code": 140,
+      "gain": 0.0859375
+    },
+    {
+      "name": "code-141",
+      "file": "code-141.ec3",
+      "video": "code-141.mkv",
+      "code": 141,
+      "gain": 0.087890625
+    },
+    {
+      "name": "code-142",
+      "file": "code-142.ec3",
+      "video": "code-142.mkv",
+      "code": 142,
+      "gain": 0.08984375
+    },
+    {
+      "name": "code-143",
+      "file": "code-143.ec3",
+      "video": "code-143.mkv",
+      "code": 143,
+      "gain": 0.091796875
+    },
+    {
+      "name": "code-144",
+      "file": "code-144.ec3",
+      "video": "code-144.mkv",
+      "code": 144,
+      "gain": 0.09375
+    },
+    {
+      "name": "code-145",
+      "file": "code-145.ec3",
+      "video": "code-145.mkv",
+      "code": 145,
+      "gain": 0.095703125
+    },
+    {
+      "name": "code-146",
+      "file": "code-146.ec3",
+      "video": "code-146.mkv",
+      "code": 146,
+      "gain": 0.09765625
+    },
+    {
+      "name": "code-147",
+      "file": "code-147.ec3",
+      "video": "code-147.mkv",
+      "code": 147,
+      "gain": 0.099609375
+    },
+    {
+      "name": "code-148",
+      "file": "code-148.ec3",
+      "video": "code-148.mkv",
+      "code": 148,
+      "gain": 0.1015625
+    },
+    {
+      "name": "code-149",
+      "file": "code-149.ec3",
+      "video": "code-149.mkv",
+      "code": 149,
+      "gain": 0.103515625
+    },
+    {
+      "name": "code-150",
+      "file": "code-150.ec3",
+      "video": "code-150.mkv",
+      "code": 150,
+      "gain": 0.10546875
+    },
+    {
+      "name": "code-151",
+      "file": "code-151.ec3",
+      "video": "code-151.mkv",
+      "code": 151,
+      "gain": 0.107421875
+    },
+    {
+      "name": "code-152",
+      "file": "code-152.ec3",
+      "video": "code-152.mkv",
+      "code": 152,
+      "gain": 0.109375
+    },
+    {
+      "name": "code-153",
+      "file": "code-153.ec3",
+      "video": "code-153.mkv",
+      "code": 153,
+      "gain": 0.111328125
+    },
+    {
+      "name": "code-154",
+      "file": "code-154.ec3",
+      "video": "code-154.mkv",
+      "code": 154,
+      "gain": 0.11328125
+    },
+    {
+      "name": "code-155",
+      "file": "code-155.ec3",
+      "video": "code-155.mkv",
+      "code": 155,
+      "gain": 0.115234375
+    },
+    {
+      "name": "code-156",
+      "file": "code-156.ec3",
+      "video": "code-156.mkv",
+      "code": 156,
+      "gain": 0.1171875
+    },
+    {
+      "name": "code-157",
+      "file": "code-157.ec3",
+      "video": "code-157.mkv",
+      "code": 157,
+      "gain": 0.119140625
+    },
+    {
+      "name": "code-158",
+      "file": "code-158.ec3",
+      "video": "code-158.mkv",
+      "code": 158,
+      "gain": 0.12109375
+    },
+    {
+      "name": "code-159",
+      "file": "code-159.ec3",
+      "video": "code-159.mkv",
+      "code": 159,
+      "gain": 0.123046875
+    },
+    {
+      "name": "code-160",
+      "file": "code-160.ec3",
+      "video": "code-160.mkv",
+      "code": 160,
+      "gain": 0.125
+    },
+    {
+      "name": "code-161",
+      "file": "code-161.ec3",
+      "video": "code-161.mkv",
+      "code": 161,
+      "gain": 0.12890625
+    },
+    {
+      "name": "code-162",
+      "file": "code-162.ec3",
+      "video": "code-162.mkv",
+      "code": 162,
+      "gain": 0.1328125
+    },
+    {
+      "name": "code-163",
+      "file": "code-163.ec3",
+      "video": "code-163.mkv",
+      "code": 163,
+      "gain": 0.13671875
+    },
+    {
+      "name": "code-164",
+      "file": "code-164.ec3",
+      "video": "code-164.mkv",
+      "code": 164,
+      "gain": 0.140625
+    },
+    {
+      "name": "code-165",
+      "file": "code-165.ec3",
+      "video": "code-165.mkv",
+      "code": 165,
+      "gain": 0.14453125
+    },
+    {
+      "name": "code-166",
+      "file": "code-166.ec3",
+      "video": "code-166.mkv",
+      "code": 166,
+      "gain": 0.1484375
+    },
+    {
+      "name": "code-167",
+      "file": "code-167.ec3",
+      "video": "code-167.mkv",
+      "code": 167,
+      "gain": 0.15234375
+    },
+    {
+      "name": "code-168",
+      "file": "code-168.ec3",
+      "video": "code-168.mkv",
+      "code": 168,
+      "gain": 0.15625
+    },
+    {
+      "name": "code-169",
+      "file": "code-169.ec3",
+      "video": "code-169.mkv",
+      "code": 169,
+      "gain": 0.16015625
+    },
+    {
+      "name": "code-170",
+      "file": "code-170.ec3",
+      "video": "code-170.mkv",
+      "code": 170,
+      "gain": 0.1640625
+    },
+    {
+      "name": "code-171",
+      "file": "code-171.ec3",
+      "video": "code-171.mkv",
+      "code": 171,
+      "gain": 0.16796875
+    },
+    {
+      "name": "code-172",
+      "file": "code-172.ec3",
+      "video": "code-172.mkv",
+      "code": 172,
+      "gain": 0.171875
+    },
+    {
+      "name": "code-173",
+      "file": "code-173.ec3",
+      "video": "code-173.mkv",
+      "code": 173,
+      "gain": 0.17578125
+    },
+    {
+      "name": "code-174",
+      "file": "code-174.ec3",
+      "video": "code-174.mkv",
+      "code": 174,
+      "gain": 0.1796875
+    },
+    {
+      "name": "code-175",
+      "file": "code-175.ec3",
+      "video": "code-175.mkv",
+      "code": 175,
+      "gain": 0.18359375
+    },
+    {
+      "name": "code-176",
+      "file": "code-176.ec3",
+      "video": "code-176.mkv",
+      "code": 176,
+      "gain": 0.1875
+    },
+    {
+      "name": "code-177",
+      "file": "code-177.ec3",
+      "video": "code-177.mkv",
+      "code": 177,
+      "gain": 0.19140625
+    },
+    {
+      "name": "code-178",
+      "file": "code-178.ec3",
+      "video": "code-178.mkv",
+      "code": 178,
+      "gain": 0.1953125
+    },
+    {
+      "name": "code-179",
+      "file": "code-179.ec3",
+      "video": "code-179.mkv",
+      "code": 179,
+      "gain": 0.19921875
+    },
+    {
+      "name": "code-180",
+      "file": "code-180.ec3",
+      "video": "code-180.mkv",
+      "code": 180,
+      "gain": 0.203125
+    },
+    {
+      "name": "code-181",
+      "file": "code-181.ec3",
+      "video": "code-181.mkv",
+      "code": 181,
+      "gain": 0.20703125
+    },
+    {
+      "name": "code-182",
+      "file": "code-182.ec3",
+      "video": "code-182.mkv",
+      "code": 182,
+      "gain": 0.2109375
+    },
+    {
+      "name": "code-183",
+      "file": "code-183.ec3",
+      "video": "code-183.mkv",
+      "code": 183,
+      "gain": 0.21484375
+    },
+    {
+      "name": "code-184",
+      "file": "code-184.ec3",
+      "video": "code-184.mkv",
+      "code": 184,
+      "gain": 0.21875
+    },
+    {
+      "name": "code-185",
+      "file": "code-185.ec3",
+      "video": "code-185.mkv",
+      "code": 185,
+      "gain": 0.22265625
+    },
+    {
+      "name": "code-186",
+      "file": "code-186.ec3",
+      "video": "code-186.mkv",
+      "code": 186,
+      "gain": 0.2265625
+    },
+    {
+      "name": "code-187",
+      "file": "code-187.ec3",
+      "video": "code-187.mkv",
+      "code": 187,
+      "gain": 0.23046875
+    },
+    {
+      "name": "code-188",
+      "file": "code-188.ec3",
+      "video": "code-188.mkv",
+      "code": 188,
+      "gain": 0.234375
+    },
+    {
+      "name": "code-189",
+      "file": "code-189.ec3",
+      "video": "code-189.mkv",
+      "code": 189,
+      "gain": 0.23828125
+    },
+    {
+      "name": "code-190",
+      "file": "code-190.ec3",
+      "video": "code-190.mkv",
+      "code": 190,
+      "gain": 0.2421875
+    },
+    {
+      "name": "code-191",
+      "file": "code-191.ec3",
+      "video": "code-191.mkv",
+      "code": 191,
+      "gain": 0.24609375
+    },
+    {
+      "name": "code-192",
+      "file": "code-192.ec3",
+      "video": "code-192.mkv",
+      "code": 192,
+      "gain": 0.25
+    },
+    {
+      "name": "code-193",
+      "file": "code-193.ec3",
+      "video": "code-193.mkv",
+      "code": 193,
+      "gain": 0.2578125
+    },
+    {
+      "name": "code-194",
+      "file": "code-194.ec3",
+      "video": "code-194.mkv",
+      "code": 194,
+      "gain": 0.265625
+    },
+    {
+      "name": "code-195",
+      "file": "code-195.ec3",
+      "video": "code-195.mkv",
+      "code": 195,
+      "gain": 0.2734375
+    },
+    {
+      "name": "code-196",
+      "file": "code-196.ec3",
+      "video": "code-196.mkv",
+      "code": 196,
+      "gain": 0.28125
+    },
+    {
+      "name": "code-197",
+      "file": "code-197.ec3",
+      "video": "code-197.mkv",
+      "code": 197,
+      "gain": 0.2890625
+    },
+    {
+      "name": "code-198",
+      "file": "code-198.ec3",
+      "video": "code-198.mkv",
+      "code": 198,
+      "gain": 0.296875
+    },
+    {
+      "name": "code-199",
+      "file": "code-199.ec3",
+      "video": "code-199.mkv",
+      "code": 199,
+      "gain": 0.3046875
+    },
+    {
+      "name": "code-200",
+      "file": "code-200.ec3",
+      "video": "code-200.mkv",
+      "code": 200,
+      "gain": 0.3125
+    },
+    {
+      "name": "code-201",
+      "file": "code-201.ec3",
+      "video": "code-201.mkv",
+      "code": 201,
+      "gain": 0.3203125
+    },
+    {
+      "name": "code-202",
+      "file": "code-202.ec3",
+      "video": "code-202.mkv",
+      "code": 202,
+      "gain": 0.328125
+    },
+    {
+      "name": "code-203",
+      "file": "code-203.ec3",
+      "video": "code-203.mkv",
+      "code": 203,
+      "gain": 0.3359375
+    },
+    {
+      "name": "code-204",
+      "file": "code-204.ec3",
+      "video": "code-204.mkv",
+      "code": 204,
+      "gain": 0.34375
+    },
+    {
+      "name": "code-205",
+      "file": "code-205.ec3",
+      "video": "code-205.mkv",
+      "code": 205,
+      "gain": 0.3515625
+    },
+    {
+      "name": "code-206",
+      "file": "code-206.ec3",
+      "video": "code-206.mkv",
+      "code": 206,
+      "gain": 0.359375
+    },
+    {
+      "name": "code-207",
+      "file": "code-207.ec3",
+      "video": "code-207.mkv",
+      "code": 207,
+      "gain": 0.3671875
+    },
+    {
+      "name": "code-208",
+      "file": "code-208.ec3",
+      "video": "code-208.mkv",
+      "code": 208,
+      "gain": 0.375
+    },
+    {
+      "name": "code-209",
+      "file": "code-209.ec3",
+      "video": "code-209.mkv",
+      "code": 209,
+      "gain": 0.3828125
+    },
+    {
+      "name": "code-210",
+      "file": "code-210.ec3",
+      "video": "code-210.mkv",
+      "code": 210,
+      "gain": 0.390625
+    },
+    {
+      "name": "code-211",
+      "file": "code-211.ec3",
+      "video": "code-211.mkv",
+      "code": 211,
+      "gain": 0.3984375
+    },
+    {
+      "name": "code-212",
+      "file": "code-212.ec3",
+      "video": "code-212.mkv",
+      "code": 212,
+      "gain": 0.40625
+    },
+    {
+      "name": "code-213",
+      "file": "code-213.ec3",
+      "video": "code-213.mkv",
+      "code": 213,
+      "gain": 0.4140625
+    },
+    {
+      "name": "code-214",
+      "file": "code-214.ec3",
+      "video": "code-214.mkv",
+      "code": 214,
+      "gain": 0.421875
+    },
+    {
+      "name": "code-215",
+      "file": "code-215.ec3",
+      "video": "code-215.mkv",
+      "code": 215,
+      "gain": 0.4296875
+    },
+    {
+      "name": "code-216",
+      "file": "code-216.ec3",
+      "video": "code-216.mkv",
+      "code": 216,
+      "gain": 0.4375
+    },
+    {
+      "name": "code-217",
+      "file": "code-217.ec3",
+      "video": "code-217.mkv",
+      "code": 217,
+      "gain": 0.4453125
+    },
+    {
+      "name": "code-218",
+      "file": "code-218.ec3",
+      "video": "code-218.mkv",
+      "code": 218,
+      "gain": 0.453125
+    },
+    {
+      "name": "code-219",
+      "file": "code-219.ec3",
+      "video": "code-219.mkv",
+      "code": 219,
+      "gain": 0.4609375
+    },
+    {
+      "name": "code-220",
+      "file": "code-220.ec3",
+      "video": "code-220.mkv",
+      "code": 220,
+      "gain": 0.46875
+    },
+    {
+      "name": "code-221",
+      "file": "code-221.ec3",
+      "video": "code-221.mkv",
+      "code": 221,
+      "gain": 0.4765625
+    },
+    {
+      "name": "code-222",
+      "file": "code-222.ec3",
+      "video": "code-222.mkv",
+      "code": 222,
+      "gain": 0.484375
+    },
+    {
+      "name": "code-223",
+      "file": "code-223.ec3",
+      "video": "code-223.mkv",
+      "code": 223,
+      "gain": 0.4921875
+    },
+    {
+      "name": "code-224",
+      "file": "code-224.ec3",
+      "video": "code-224.mkv",
+      "code": 224,
+      "gain": 0.5
+    },
+    {
+      "name": "code-225",
+      "file": "code-225.ec3",
+      "video": "code-225.mkv",
+      "code": 225,
+      "gain": 0.515625
+    },
+    {
+      "name": "code-226",
+      "file": "code-226.ec3",
+      "video": "code-226.mkv",
+      "code": 226,
+      "gain": 0.53125
+    },
+    {
+      "name": "code-227",
+      "file": "code-227.ec3",
+      "video": "code-227.mkv",
+      "code": 227,
+      "gain": 0.546875
+    },
+    {
+      "name": "code-228",
+      "file": "code-228.ec3",
+      "video": "code-228.mkv",
+      "code": 228,
+      "gain": 0.5625
+    },
+    {
+      "name": "code-229",
+      "file": "code-229.ec3",
+      "video": "code-229.mkv",
+      "code": 229,
+      "gain": 0.578125
+    },
+    {
+      "name": "code-230",
+      "file": "code-230.ec3",
+      "video": "code-230.mkv",
+      "code": 230,
+      "gain": 0.59375
+    },
+    {
+      "name": "code-231",
+      "file": "code-231.ec3",
+      "video": "code-231.mkv",
+      "code": 231,
+      "gain": 0.609375
+    },
+    {
+      "name": "code-232",
+      "file": "code-232.ec3",
+      "video": "code-232.mkv",
+      "code": 232,
+      "gain": 0.625
+    },
+    {
+      "name": "code-233",
+      "file": "code-233.ec3",
+      "video": "code-233.mkv",
+      "code": 233,
+      "gain": 0.640625
+    },
+    {
+      "name": "code-234",
+      "file": "code-234.ec3",
+      "video": "code-234.mkv",
+      "code": 234,
+      "gain": 0.65625
+    },
+    {
+      "name": "code-235",
+      "file": "code-235.ec3",
+      "video": "code-235.mkv",
+      "code": 235,
+      "gain": 0.671875
+    },
+    {
+      "name": "code-236",
+      "file": "code-236.ec3",
+      "video": "code-236.mkv",
+      "code": 236,
+      "gain": 0.6875
+    },
+    {
+      "name": "code-237",
+      "file": "code-237.ec3",
+      "video": "code-237.mkv",
+      "code": 237,
+      "gain": 0.703125
+    },
+    {
+      "name": "code-238",
+      "file": "code-238.ec3",
+      "video": "code-238.mkv",
+      "code": 238,
+      "gain": 0.71875
+    },
+    {
+      "name": "code-239",
+      "file": "code-239.ec3",
+      "video": "code-239.mkv",
+      "code": 239,
+      "gain": 0.734375
+    },
+    {
+      "name": "code-240",
+      "file": "code-240.ec3",
+      "video": "code-240.mkv",
+      "code": 240,
+      "gain": 0.75
+    },
+    {
+      "name": "code-241",
+      "file": "code-241.ec3",
+      "video": "code-241.mkv",
+      "code": 241,
+      "gain": 0.765625
+    },
+    {
+      "name": "code-242",
+      "file": "code-242.ec3",
+      "video": "code-242.mkv",
+      "code": 242,
+      "gain": 0.78125
+    },
+    {
+      "name": "code-243",
+      "file": "code-243.ec3",
+      "video": "code-243.mkv",
+      "code": 243,
+      "gain": 0.796875
+    },
+    {
+      "name": "code-244",
+      "file": "code-244.ec3",
+      "video": "code-244.mkv",
+      "code": 244,
+      "gain": 0.8125
+    },
+    {
+      "name": "code-245",
+      "file": "code-245.ec3",
+      "video": "code-245.mkv",
+      "code": 245,
+      "gain": 0.828125
+    },
+    {
+      "name": "code-246",
+      "file": "code-246.ec3",
+      "video": "code-246.mkv",
+      "code": 246,
+      "gain": 0.84375
+    },
+    {
+      "name": "code-247",
+      "file": "code-247.ec3",
+      "video": "code-247.mkv",
+      "code": 247,
+      "gain": 0.859375
+    },
+    {
+      "name": "code-248",
+      "file": "code-248.ec3",
+      "video": "code-248.mkv",
+      "code": 248,
+      "gain": 0.875
+    },
+    {
+      "name": "code-249",
+      "file": "code-249.ec3",
+      "video": "code-249.mkv",
+      "code": 249,
+      "gain": 0.890625
+    },
+    {
+      "name": "code-250",
+      "file": "code-250.ec3",
+      "video": "code-250.mkv",
+      "code": 250,
+      "gain": 0.90625
+    },
+    {
+      "name": "code-251",
+      "file": "code-251.ec3",
+      "video": "code-251.mkv",
+      "code": 251,
+      "gain": 0.921875
+    },
+    {
+      "name": "code-252",
+      "file": "code-252.ec3",
+      "video": "code-252.mkv",
+      "code": 252,
+      "gain": 0.9375
+    },
+    {
+      "name": "code-253",
+      "file": "code-253.ec3",
+      "video": "code-253.mkv",
+      "code": 253,
+      "gain": 0.953125
+    },
+    {
+      "name": "code-254",
+      "file": "code-254.ec3",
+      "video": "code-254.mkv",
+      "code": 254,
+      "gain": 0.96875
+    },
+    {
+      "name": "code-255",
+      "file": "code-255.ec3",
+      "video": "code-255.mkv",
+      "code": 255,
+      "gain": 0.984375
+    }
+  ]
+}

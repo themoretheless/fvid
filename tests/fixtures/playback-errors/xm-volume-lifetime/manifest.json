@@ -1,5 +1,5 @@
 {
-  "provenance": "Four authored XM signed16ramp samples with supported volume-column mute/unmute. Late/initial mute require continuous sample phase after volume restores. Explicit keyoff andunlooped natural-end controls must stay silent. Native smoothing first64frames are excluded from independent steady-phase oracle. Short authored VP9/PCM companion. No encoder/network/private media.",
+  "provenance": "Four authored XM signed16ramp samples with supported volume-column mute/unmute. Late/initial mute require continuous sample phase after volume restores. No-envelope keyoff followed by explicit volume restore must resume the continuing phase,against independent C00/volume-column restore;unlooped natural-end control stays silent. Native smoothing first64frames are excluded from independent steady-phase oracle. Short authored VP9/PCM companion. No encoder/network/private media.",
   "cases": [
     {
       "name": "late-mute",
@@ -23,7 +23,7 @@
       "control": "released-control-continuous.xm",
       "mute": 1,
       "resume": 2,
-      "audible_after": false
+      "audible_after": true
     },
     {
       "name": "unlooped-end-control",
@@ -41,7 +41,7 @@
     "initial-mute.xm": "acbb6b0220a2a9a6ef2c83db7ec8c1578a30bdffbacc970e412a3157e2552b89",
     "initial-mute-continuous.xm": "8ca4c77b95333a51a8d7f7f110dd3b51ee90d4a01bfe8a3e1307036946e0ab6e",
     "released-control.xm": "b8457ccb0cc0268781c825cc541614ce14829f67bea11c264bed86529a4fd762",
-    "released-control-continuous.xm": "98e928c152b762fba74cef375e797869f8636a4670a86f047e6776551b4a1096",
+    "released-control-continuous.xm": "8f9f6842f88b9061a9c28f71ce99090d9bdcf137428121e67b07d82a80faa74f",
     "unlooped-end-control.xm": "1ad45b494f6a05821c773fc306f2970a2fe2a414cb52156ec10fd13f5ce7c638",
     "unlooped-end-control-continuous.xm": "0ef5bf162da2f0579fdf3b01274c3e0660722da345d9966a8e00a77e20c9abcd"
   }

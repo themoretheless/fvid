@@ -1,0 +1,68 @@
+[
+  {
+    "name": "32-33-34-inline",
+    "order": [
+      32,
+      33,
+      34
+    ],
+    "separate": false,
+    "old_frames": 3,
+    "new_frames": 3
+  },
+  {
+    "name": "32-33-34-prefix",
+    "order": [
+      32,
+      33,
+      34
+    ],
+    "separate": true,
+    "old_frames": 3,
+    "new_frames": 3
+  },
+  {
+    "name": "32-34-33-inline",
+    "order": [
+      32,
+      34,
+      33
+    ],
+    "separate": false,
+    "old_frames": 3,
+    "new_frames": 3
+  },
+  {
+    "name": "32-34-33-prefix",
+    "order": [
+      32,
+      34,
+      33
+    ],
+    "separate": true,
+    "old_frames": 3,
+    "new_frames": 3
+  },
+  {
+    "name": "34-32-33-inline",
+    "order": [
+      34,
+      32,
+      33
+    ],
+    "separate": false,
+    "old_frames": 3,
+    "new_frames": 3
+  },
+  {
+    "name": "34-32-33-prefix",
+    "order": [
+      34,
+      32,
+      33
+    ],
+    "separate": true,
+    "old_frames": 3,
+    "new_frames": 3
+  }
+]

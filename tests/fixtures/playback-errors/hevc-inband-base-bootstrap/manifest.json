@@ -1,0 +1,440 @@
+[
+  {
+    "name": "hevc-pcm-reference-rext8-empty-inline",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "empty-inline",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-empty-prefix",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "empty-prefix",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-empty-split",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "empty-split",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-vps-recorded",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "vps-recorded",
+    "configuration_types": [
+      32
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-sps-recorded",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "sps-recorded",
+    "configuration_types": [
+      33
+    ],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-sps-pps-recorded",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "sps-pps-recorded",
+    "configuration_types": [
+      33,
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-pps-recorded",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "pps-recorded",
+    "configuration_types": [
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-reference-rext8-empty-reverse",
+    "seed": "hevc-pcm-reference-rext8",
+    "layout": "empty-reverse",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-empty-inline",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "empty-inline",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-empty-prefix",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "empty-prefix",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-empty-split",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "empty-split",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-vps-recorded",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "vps-recorded",
+    "configuration_types": [
+      32
+    ],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-sps-recorded",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "sps-recorded",
+    "configuration_types": [
+      33
+    ],
+    "frames": 1,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-sps-pps-recorded",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "sps-pps-recorded",
+    "configuration_types": [
+      33,
+      34
+    ],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-pps-recorded",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "pps-recorded",
+    "configuration_types": [
+      34
+    ],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-pcm-dependent-rext8-empty-reverse",
+    "seed": "hevc-pcm-dependent-rext8",
+    "layout": "empty-reverse",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-empty-inline",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "empty-inline",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-empty-prefix",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "empty-prefix",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-empty-split",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "empty-split",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-vps-recorded",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "vps-recorded",
+    "configuration_types": [
+      32
+    ],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-sps-recorded",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "sps-recorded",
+    "configuration_types": [
+      33
+    ],
+    "frames": 1,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-sps-pps-recorded",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "sps-pps-recorded",
+    "configuration_types": [
+      33,
+      34
+    ],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-pps-recorded",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "pps-recorded",
+    "configuration_types": [
+      34
+    ],
+    "frames": 1,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-separate-colour-planes-distinct-synthetic-empty-reverse",
+    "seed": "hevc-separate-colour-planes-distinct-synthetic",
+    "layout": "empty-reverse",
+    "configuration_types": [],
+    "frames": 1,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-empty-inline",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "empty-inline",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-empty-prefix",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "empty-prefix",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-empty-split",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "empty-split",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-vps-recorded",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "vps-recorded",
+    "configuration_types": [
+      32
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-sps-recorded",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "sps-recorded",
+    "configuration_types": [
+      33
+    ],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-sps-pps-recorded",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "sps-pps-recorded",
+    "configuration_types": [
+      33,
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-pps-recorded",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "pps-recorded",
+    "configuration_types": [
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y12-c10-wpp-empty-reverse",
+    "seed": "hevc-mixed-depth-y12-c10-wpp",
+    "layout": "empty-reverse",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-empty-inline",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "empty-inline",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-empty-prefix",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "empty-prefix",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-empty-split",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "empty-split",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-vps-recorded",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "vps-recorded",
+    "configuration_types": [
+      32
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-sps-recorded",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "sps-recorded",
+    "configuration_types": [
+      33
+    ],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-sps-pps-recorded",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "sps-pps-recorded",
+    "configuration_types": [
+      33,
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-pps-recorded",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "pps-recorded",
+    "configuration_types": [
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-mixed-depth-y10-c8-mixed-tiles-empty-reverse",
+    "seed": "hevc-mixed-depth-y10-c8-mixed-tiles",
+    "layout": "empty-reverse",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-empty-inline",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "empty-inline",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-empty-prefix",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "empty-prefix",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-empty-split",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "empty-split",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-vps-recorded",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "vps-recorded",
+    "configuration_types": [
+      32
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-sps-recorded",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "sps-recorded",
+    "configuration_types": [
+      33
+    ],
+    "frames": 3,
+    "first_sample": 1
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-sps-pps-recorded",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "sps-pps-recorded",
+    "configuration_types": [
+      33,
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-pps-recorded",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "pps-recorded",
+    "configuration_types": [
+      34
+    ],
+    "frames": 3,
+    "first_sample": 0
+  },
+  {
+    "name": "hevc-scc-act-slice-y10-c10-empty-reverse",
+    "seed": "hevc-scc-act-slice-y10-c10",
+    "layout": "empty-reverse",
+    "configuration_types": [],
+    "frames": 3,
+    "first_sample": 3
+  }
+]

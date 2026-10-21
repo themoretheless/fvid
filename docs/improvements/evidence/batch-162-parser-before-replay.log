@@ -1,0 +1,5 @@
+lost-first-audio: CRC-valid contradictory page sequence falsely accepted,4 packets
+gap: CRC-valid contradictory page sequence falsely accepted,5 packets
+duplicate: CRC-valid contradictory page sequence falsely accepted,5 packets
+backward: CRC-valid contradictory page sequence falsely accepted,5 packets
+Four false admissions,six preserved controls using frozen actual Ogg parser. Error type adapter only;no decoder/worker acceptance claim.

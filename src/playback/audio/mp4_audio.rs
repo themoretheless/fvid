@@ -25,6 +25,9 @@ pub struct Mp4AudioReader<R> {
     demuxer: Mp4Reader<R>,
     track_index: usize,
     in_band_ps: bool,
+    dolby_mask: Option<u32>,
+    dolby_channels: Option<u16>,
+    dolby_track_channels: Vec<Option<u16>>,
     sample_index: usize,
     presentation_floor: i64,
     packet: Vec<u8>,
@@ -151,6 +154,24 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
             .collect()
     }
 
+    /// Probe Dolby packet geometry before exposing track descriptions. A sample
+    /// entry can carry a placeholder channel count instead of decoded roles.
+    fn dolby_geometry(demuxer: &mut Mp4Reader<R>, index: usize) -> Result<Option<(u16,u32)>> {
+        let track=&demuxer.tracks()[index];
+        let kind=track.codec;
+        if track.samples.is_empty() || !matches!(&kind,b"ac-3"|b"ec-3") {return Ok(None);}
+        let mut payload=Vec::new();demuxer.read_packet(index,0,&mut payload)?;
+        if kind==*b"ac-3" && let Some(frame)=crate::codec::ac3_decoder::checked_syncframe(&payload) {
+            return Ok(Some((frame.channels,crate::codec::ac3_decoder::speaker_mask(&payload,frame.channels)?)));
+        }
+        if kind==*b"ec-3" && let Some(frame)=crate::codec::eac3_decoder::checked_frame(&payload) {
+            let layout=crate::codec::eac3_decoder::presentation::raw_programme(&payload)?;
+            let native_channels=layout.as_ref().map_or(frame.channels,|(_,layout)|layout.0.len() as u16);
+            return Ok(Some((native_channels,crate::codec::eac3_decoder::speaker_mask(&payload,native_channels)?)));
+        }
+        Ok(None)
+    }
+
     /// Open a specific audio track by index.
     pub fn from_demuxer(mut demuxer: Mp4Reader<R>, index: usize) -> Result<Self> {
         let track = demuxer
@@ -186,7 +207,23 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
                 if probe.ps_detected() { in_band_ps = true; break; }
             }
         }
+        let geometry=Self::dolby_geometry(&mut demuxer,index)?;
+        let dolby_channels=geometry.map(|(channels,_)|channels);
+        let dolby_mask=geometry.map(|(_,mask)|mask);
+        let mut dolby_track_channels=vec![None;demuxer.tracks().len()];
+        dolby_track_channels[index]=dolby_channels;
+        for other in Self::supported(&demuxer).into_iter().filter(|other|*other!=index) {
+            // An unreadable/unmapped unselected track must not prevent opening
+            // the selected valid track. Its original metadata remains visible.
+            dolby_track_channels[other]=Self::dolby_geometry(&mut demuxer,other).ok().flatten().map(|(channels,_)|channels);
+        }
+        // A failed optional probe may have left an underlying reader between
+        // packets. Always re-seek the selected first packet on real playback.
+        demuxer.invalidate_position();
         Ok(Self {
+            dolby_mask,
+            dolby_channels,
+            dolby_track_channels,
             in_band_ps,
             timeline,
             edit_cursor:std::cell::Cell::new(0),
@@ -255,6 +292,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn speaker_mask(&self)->Result<Option<u32>> {
+        if matches!(&self.track().codec,b"ac-3"|b"ec-3") {return Ok(self.dolby_mask);}
         if self.track().codec==*b"alac" {crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.track().configuration,self.track().sample_rate,self.track().channels).map(Some)}else{Ok(None)}
     }
 
@@ -297,7 +335,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn channels(&self) -> u16 {
-        if self.in_band_ps { 2 } else { self.track().channels }
+        if self.in_band_ps { 2 } else { self.dolby_channels.unwrap_or(self.track().channels) }
     }
 
     fn bits_per_sample(&self) -> u16 {
@@ -444,7 +482,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
                 let track = &self.demuxer.tracks()[index];
                 crate::audio::AudioTrack {
                     sample_rate: track.sample_rate,
-                    channels: track.channels,
+                    channels: if index==self.track_index {self.channels()}else{self.dolby_track_channels[index].unwrap_or(track.channels)},
                     name: track.name.clone(),
                     language: track.language.clone(),
                 }
@@ -503,7 +541,8 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         let track = self.track();
         let shift = if track.codec == *b"mp4a" && track.edits.len() == 1 && track.edits[0].media_time >= 0 { track.edits[0].media_time } else { 0 };
-        let preroll = track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0));
+        let preroll = matches!(&track.codec, b"ac-3" | b"ec-3")
+            || (track.codec == *b"mp4a" && (track.edits.is_empty() || (track.edits.len() == 1 && track.edits[0].media_time >= 0)));
         let source_end=if track.duration>0 {track.duration as u128}else{
             track.samples.get(track.samples.len().saturating_sub(1)).map_or(0,|sample|sample.pts.max(0)as u128+u128::from(sample.duration))
         };

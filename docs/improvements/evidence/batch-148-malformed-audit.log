@@ -1,0 +1,1 @@
+7959 authored UTF8 truncation/deletion/markup insertion probes completed without panic. This is a robustness audit,not caption-correctness or total-resource proof.

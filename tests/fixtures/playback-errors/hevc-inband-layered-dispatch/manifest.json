@@ -1,0 +1,202 @@
+[
+  {
+    "name": "pcm-independent-base-inline",
+    "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "base-inline"
+  },
+  {
+    "name": "pcm-independent-base-prefix",
+    "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "base-prefix"
+  },
+  {
+    "name": "pcm-independent-empty-inline",
+    "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "empty-inline"
+  },
+  {
+    "name": "pcm-independent-empty-prefix",
+    "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "empty-prefix"
+  },
+  {
+    "name": "pcm-independent-multiple-vps",
+    "source": "hevc-layered-reconstruct-pcm-independent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "multiple-vps"
+  },
+  {
+    "name": "pcm-dependent-base-inline",
+    "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "base-inline"
+  },
+  {
+    "name": "pcm-dependent-base-prefix",
+    "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "base-prefix"
+  },
+  {
+    "name": "pcm-dependent-empty-inline",
+    "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "empty-inline"
+  },
+  {
+    "name": "pcm-dependent-empty-prefix",
+    "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "empty-prefix"
+  },
+  {
+    "name": "pcm-dependent-multiple-vps",
+    "source": "hevc-layered-reconstruct-pcm-dependent.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "multiple-vps"
+  },
+  {
+    "name": "multislice-dependent-base-inline",
+    "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+    "oracle": "hevc-pcm-dependent-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "base-inline"
+  },
+  {
+    "name": "multislice-dependent-base-prefix",
+    "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+    "oracle": "hevc-pcm-dependent-rext8.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "base-prefix"
+  },
+  {
+    "name": "multislice-dependent-empty-inline",
+    "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+    "oracle": "hevc-pcm-dependent-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "empty-inline"
+  },
+  {
+    "name": "multislice-dependent-empty-prefix",
+    "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+    "oracle": "hevc-pcm-dependent-rext8.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "empty-prefix"
+  },
+  {
+    "name": "multislice-dependent-multiple-vps",
+    "source": "hevc-layered-reconstruct-multislice-dependent.mp4",
+    "oracle": "hevc-pcm-dependent-rext8.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "multiple-vps"
+  },
+  {
+    "name": "colour-planes-independent-base-inline",
+    "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+    "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "base-inline"
+  },
+  {
+    "name": "colour-planes-independent-base-prefix",
+    "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+    "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "base-prefix"
+  },
+  {
+    "name": "colour-planes-independent-empty-inline",
+    "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+    "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "empty-inline"
+  },
+  {
+    "name": "colour-planes-independent-empty-prefix",
+    "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+    "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+    "frames": 1,
+    "first_sample": 1,
+    "variant": "empty-prefix"
+  },
+  {
+    "name": "colour-planes-independent-multiple-vps",
+    "source": "hevc-layered-reconstruct-colour-planes-independent.mp4",
+    "oracle": "hevc-separate-colour-planes-distinct-synthetic.yuv",
+    "frames": 1,
+    "first_sample": 0,
+    "variant": "multiple-vps"
+  },
+  {
+    "name": "inter-prediction-base-inline",
+    "source": "hevc-layered-reconstruct-inter-prediction.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 2,
+    "first_sample": 0,
+    "variant": "base-inline"
+  },
+  {
+    "name": "inter-prediction-base-prefix",
+    "source": "hevc-layered-reconstruct-inter-prediction.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 2,
+    "first_sample": 1,
+    "variant": "base-prefix"
+  },
+  {
+    "name": "inter-prediction-empty-inline",
+    "source": "hevc-layered-reconstruct-inter-prediction.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 2,
+    "first_sample": 0,
+    "variant": "empty-inline"
+  },
+  {
+    "name": "inter-prediction-empty-prefix",
+    "source": "hevc-layered-reconstruct-inter-prediction.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 2,
+    "first_sample": 1,
+    "variant": "empty-prefix"
+  },
+  {
+    "name": "inter-prediction-multiple-vps",
+    "source": "hevc-layered-reconstruct-inter-prediction.mp4",
+    "oracle": "hevc-pcm-reference-rext8.yuv",
+    "frames": 2,
+    "first_sample": 0,
+    "variant": "multiple-vps"
+  }
+]

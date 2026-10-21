@@ -1,0 +1,5 @@
+{
+  "source": "https://learn.microsoft.com/en-us/previous-versions/windows/desktop/dnacc/understanding-sami-1.0",
+  "inspection": "Microsoft SAMI 1.0 synchronization uses Sync Start timestamps in milliseconds. Blank nonbreaking-space captions clear the previous caption.",
+  "scope": "Canonical timing capability candidate; no production fix or accepted ID yet. Independently authored paired SRT oracles avoid copying published samples or private media."
+}

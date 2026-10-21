@@ -1,20 +1,16 @@
 //! Bounded float32 speaker routing for a known front-left/front-right sink.
 pub struct StereoRouter {
     channels: u16,
-    coefficients: [[f32; 2]; 64],
+    coefficients: Vec<[f32; 2]>,
     source_mask: Option<u32>,
 }
 impl StereoRouter {
     pub fn new(channels: u16, mask: u32) -> Result<Self, String> {
-        let weights = crate::owned_pcm_channels::stereo_coefficients(channels, mask)?;
-        let mut coefficients = [[0.; 2]; 64];
-        for (to, from) in coefficients
-            .iter_mut()
-            .zip(weights.iter())
-            .take(usize::from(channels))
-        {
-            *to = from.map(|v| v as f32);
-        }
+        let weights = crate::owned_pcm_channels::device_stereo_coefficients(channels, mask)?;
+        let coefficients = weights
+            .into_iter()
+            .map(|row| row.map(|v| v as f32))
+            .collect();
         let mut router = Self {
             channels,
             coefficients,
@@ -24,10 +20,10 @@ impl StereoRouter {
         Ok(router)
     }
     /// Explicit emitted-PCM order, including codec positions not representable
-    /// by a WAVE mask. AAC PCE admits at most 64 source channels.
+    /// by a WAVE mask. AAC PCE admits 64; WavPack can carry 4096.
     pub fn from_coefficients(weights: &[[f32; 2]]) -> Result<Self, String> {
         if weights.is_empty()
-            || weights.len() > 64
+            || weights.len() > 4096
             || !weights
                 .iter()
                 .flatten()
@@ -35,8 +31,11 @@ impl StereoRouter {
         {
             return Err("invalid stereo routing coefficients".into());
         }
-        let mut coefficients = [[0.; 2]; 64];
-        coefficients[..weights.len()].copy_from_slice(weights);
+        let mut coefficients = Vec::new();
+        coefficients
+            .try_reserve_exact(weights.len())
+            .map_err(|_| "speaker coefficient allocation failed")?;
+        coefficients.extend_from_slice(weights);
         Ok(Self {
             channels: weights.len() as u16,
             coefficients,
@@ -103,21 +102,25 @@ mod tests {
         );
         assert_eq!(
             StereoRouter::new(2, 0).unwrap().route(&input, 8).unwrap(),
-            [0., 0.]
+            [1., 2.]
         );
     }
     #[test]
     fn routing_admission_and_malformed_pcm_fail_before_output() {
         let router = StereoRouter::new(1, 4).unwrap();
-        assert!(router
-            .route(&1f32.to_le_bytes(), 7)
-            .unwrap_err()
-            .contains("output limit"));
+        assert!(
+            router
+                .route(&1f32.to_le_bytes(), 7)
+                .unwrap_err()
+                .contains("output limit")
+        );
         assert!(router.route(&[0; 3], 8).unwrap_err().contains("partial"));
-        assert!(router
-            .route(&f32::NAN.to_le_bytes(), 8)
-            .unwrap_err()
-            .contains("non-finite"));
+        assert!(
+            router
+                .route(&f32::NAN.to_le_bytes(), 8)
+                .unwrap_err()
+                .contains("non-finite")
+        );
         assert!(StereoRouter::new(1, 3).is_err());
         assert!(StereoRouter::new(0, 0).is_err());
     }
@@ -135,7 +138,7 @@ mod explicit_position_capacity {
         assert_eq!(router.input_channels(), 64);
         let data: Vec<_> = (1..=64).flat_map(|v| (v as f32).to_le_bytes()).collect();
         assert_eq!(router.route(&data, 8).unwrap(), [1024., 1056.]);
-        assert!(StereoRouter::from_coefficients(&[[1., 1.]; 65]).is_err());
+        assert!(StereoRouter::from_coefficients(&[[1., 1.]; 4097]).is_err());
         assert!(StereoRouter::from_coefficients(&[[f32::INFINITY, 0.]]).is_err());
     }
 }

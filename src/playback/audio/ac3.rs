@@ -16,9 +16,10 @@
 //! which is what makes the timestamps a plain running count.
 //!
 //! The decoder is the work of [`crate::codec::ac3_decoder`], written from the
-//! public ATSC A/52:2012 text; this file only lists frames. Nothing here reads
-//! E-AC-3, whose syncframe starts with a different syncword and whose
-//! [`crate::codec::ac3_decoder::syncframe`] probe refuses it by name.
+//! public ATSC A/52:2012 text; this file lists AC-3 and E-AC-3 frames through
+//! their respective probes. They share the syncword but have different headers.
+//! For multiplexed E-AC-3, only independent substream 0 contributes packets and
+//! sample time; dependent streams and other programmes are skipped by envelope.
 
 use crate::audio::{AudioStream, AudioTrack, EncodedPacket};
 use crate::codec::ac3_decoder::syncframe;
@@ -57,6 +58,7 @@ const SAMPLES_PER_FRAME: u32 = 1536;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct SyncHeader {
+    speaker_mask: u32,
     codec: &'static str,
     sample_rate: u32,
     channels: u16,
@@ -67,6 +69,7 @@ struct SyncHeader {
 fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {
     if let Some(at) = syncframe(bytes) {
         return Some(SyncHeader {
+            speaker_mask: crate::codec::ac3_decoder::speaker_mask(bytes,at.channels).ok()?,
             codec: TAG,
             sample_rate: at.sample_rate,
             channels: at.channels,
@@ -76,6 +79,7 @@ fn probe_syncframe(bytes: &[u8]) -> Option<SyncHeader> {
     }
     if let Some(at) = crate::codec::eac3_decoder::frame(bytes) {
         return Some(SyncHeader {
+            speaker_mask: crate::codec::eac3_decoder::speaker_mask(bytes,at.channels).ok()?,
             codec: EAC3_TAG,
             sample_rate: at.sample_rate,
             channels: at.channels,
@@ -103,6 +107,7 @@ pub struct Frame {
 /// A `.ac3` or `.ec3` file: the geometry its first frame states and the frames that play.
 #[derive(Clone, Debug)]
 pub struct Ac3 {
+    speaker_mask: u32,
     pub codec: &'static str,
     pub sample_rate: u32,
     pub channels: u16,
@@ -114,7 +119,10 @@ pub struct Ac3 {
 impl Ac3 {
     /// Read a whole file: the run of frames, from wherever the first syncframe
     /// starts to wherever the last one ends.
-    pub fn parse(bytes: &[u8], limits: &Limits) -> Result<Self> {
+    pub fn parse(bytes:&[u8],limits:&Limits)->Result<Self>{Self::parse_mode(bytes,limits,true)}
+    /// Compatibility output decodes only independent programme 0, up to 5.1.
+    pub fn parse_compatible(bytes:&[u8],limits:&Limits)->Result<Self>{Self::parse_mode(bytes,limits,false)}
+    fn parse_mode(bytes: &[u8], limits: &Limits, expanded:bool) -> Result<Self> {
         if bytes.len() > limits.file_bytes {
             return Err(invalid(&format!(
                 "file is over the {} byte limit",
@@ -135,7 +143,22 @@ impl Ac3 {
         }
         let first_start = pos;
         let mut truncated_final_frame = false;
-        while let Some(at) = probe_syncframe(bytes.get(pos..).unwrap_or_default()) {
+        let mut truncated_skipped_tail = false;
+        loop {
+            let remaining=bytes.get(pos..).unwrap_or_default();
+            if found.first().is_some_and(|first|first.codec==EAC3_TAG) {
+                match crate::codec::eac3_decoder::skipped_substream_bytes(remaining) {
+                    Ok(Some(size))=>{pos+=size;continue;},
+                    Err(crate::Error::Invalid(_))=>{
+                        truncated_final_frame=true;
+                        truncated_skipped_tail=true;
+                        break;
+                    },
+                    Err(reason)=>return Err(reason),
+                    Ok(None)=>{},
+                }
+            }
+            let Some(at)=probe_syncframe(remaining) else {break;};
             if let Some(first) = found.first()
                 && at.codec != first.codec
             {
@@ -162,13 +185,24 @@ impl Ac3 {
         // A run that stops well short of the end of the file was never the file: a
         // stream of frames fills it, and anything else is another container whose
         // bytes this reader happened to make a syncframe out of.
-        if (pos - first_start) * 10 < (bytes.len() - first_start) * 9 {
+        // A recognized but incomplete unselected tail is still reported at EOF.
+        // Its bytes must not make the complete primary frames look like a false
+        // syncword match in some unrelated container.
+        if !truncated_skipped_tail && (pos - first_start) * 10 < (bytes.len() - first_start) * 9 {
             return Err(invalid(&format!(
                 "the frames run to byte {pos} of a file {} bytes long",
                 bytes.len()
             )));
         }
         let first = found[0];
+        let native=if expanded && first.codec==EAC3_TAG {
+            crate::codec::eac3_decoder::presentation::raw_programme(&bytes[first_start..])?
+                .map(|(_,layout)|layout).filter(|layout|layout.0.len()>6)
+        }else{None};
+        let output_channels=native.as_ref().map_or(first.channels,|layout|layout.0.len() as u16);
+        let output_mask=if let Some(layout)=&native {
+            layout.wave_mask().ok_or_else(||crate::unsupported("E-AC-3 speaker locations need an extended speaker mask"))?
+        }else{first.speaker_mask};
         let mut frames = Vec::with_capacity(found.len());
         let mut pts = 0u64;
         for (at, start) in found.iter().zip(&starts) {
@@ -182,20 +216,30 @@ impl Ac3 {
                     first.channels
                 )));
             }
+            let size=if let Some(expected)=&native {
+                let programme=crate::codec::eac3_decoder::presentation::raw_programme(&bytes[*start..]);
+                match programme {
+                    Ok(Some((size,layout))) if &layout==expected=>size,
+                    Err(_) if truncated_final_frame && Some(start)==starts.last()=>break,
+                    Err(error)=>return Err(error),
+                    _=>return Err(invalid("E-AC-3 elementary presentation changes or loses extension channels")),
+                }
+            }else{at.frame_bytes};
             frames.push(Frame {
                 start: *start,
-                size: at.frame_bytes,
+                size,
                 pts,
                 rate: at.sample_rate,
-                channels: at.channels,
+                channels: output_channels,
                 samples: at.samples,
             });
             pts += u64::from(at.samples);
         }
         Ok(Self {
+            speaker_mask: output_mask,
             codec: first.codec,
             sample_rate: first.sample_rate,
-            channels: first.channels,
+            channels: output_channels,
             frames,
             data: bytes.to_vec(),
             truncated_final_frame,
@@ -234,12 +278,14 @@ pub struct Ac3AudioReader {
 impl Ac3AudioReader {
     /// Read a whole file. The frames lie at lengths only their own headers state,
     /// so all of them are walked before the first one plays.
-    pub fn open<R: Read>(mut reader: R, limits: Limits) -> Result<Self> {
+    pub fn open<R:Read>(reader:R,limits:Limits)->Result<Self>{Self::open_mode(reader,limits,true)}
+    pub fn open_compatible<R:Read>(reader:R,limits:Limits)->Result<Self>{Self::open_mode(reader,limits,false)}
+    fn open_mode<R: Read>(mut reader: R, limits: Limits, expanded:bool) -> Result<Self> {
         let mut bytes = Vec::new();
         let cap = u64::try_from(limits.file_bytes).unwrap_or(u64::MAX);
         reader.by_ref().take(cap.saturating_add(1)).read_to_end(&mut bytes)?;
         Ok(Self {
-            ac3: Ac3::parse(&bytes, &limits)?,
+            ac3: Ac3::parse_mode(&bytes, &limits, expanded)?,
             packet: 0,
             presentation_trim: Cell::new(0),
             presentation_floor: None,
@@ -257,6 +303,8 @@ impl Ac3AudioReader {
 }
 
 impl AudioStream for Ac3AudioReader {
+    fn speaker_mask(&self) -> Result<Option<u32>> {Ok(Some(self.ac3.speaker_mask))}
+
     fn codec(&self) -> &str {
         self.ac3.codec
     }

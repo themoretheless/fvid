@@ -47,6 +47,17 @@ pub struct VideoFrame {
     pub duration: MediaTime,
     pub sample_index: usize,
 }
+struct QueuedFrame {
+    frame: VideoFrame,
+    hdr: HdrMetadata,
+}
+impl QueuedFrame {
+    fn storage(&self) -> Result<usize> {
+        frame_storage(&self.frame)?.checked_add(
+            std::mem::size_of::<Self>() - std::mem::size_of::<VideoFrame>(),
+        ).ok_or_else(|| invalid("MP4 queued metadata storage overflow"))
+    }
+}
 
 /// Indexed MP4/MOV source for the currently supported AVC I/P/B tools,
 /// progressive or fragmented (moof/traf/trun). Demux metadata/packet limits are separate.
@@ -90,7 +101,7 @@ struct SingleLayerMp4VideoReader<R> {
     track_index: usize,
     sample_index: usize,
     pending_avc_field_sample: Option<usize>,
-    hevc_parameter_preroll: Option<usize>,
+    parameter_preroll: Option<usize>,
     packet: Vec<u8>,
     /// What an AV1 track states about its own pictures in bytes this reader can
     /// see the moment the file is open: the signal of its sequence header and
@@ -102,7 +113,8 @@ struct SingleLayerMp4VideoReader<R> {
     open_signal: Option<(ColourDescription, HdrMetadata)>,
     failed: bool,
     future_pts: Vec<i64>,
-    pending: Vec<VideoFrame>,
+    pending: Vec<QueuedFrame>,
+    presented_hdr: Option<HdrMetadata>,
     decoded_planar: Option<Arc<crate::playback_native::PackedPlanar>>,
     pending_bytes: usize,
     queue_budget: usize,
@@ -160,10 +172,11 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         future_pts.reverse();
         let work_budget = decoder_budget - decoder_budget / 2;
         let decoder = match &track.codec {
-            b"hvc1" | b"hev1" => Decoder::Hevc(Box::new(HevcDecoder::from_configuration(
-                &track.configuration,
-                work_budget,
-            )?)),
+            b"hvc1" | b"hev1" => Decoder::Hevc(Box::new(if track.codec == *b"hev1" {
+                HevcDecoder::from_inband_configuration(&track.configuration, work_budget)?
+            } else {
+                HevcDecoder::from_configuration(&track.configuration, work_budget)?
+            })),
             b"avc1" | b"avc3" => Decoder::Avc(Box::new(AvcDecoder::new(
                 &track.configuration,
                 work_budget,
@@ -178,7 +191,8 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             _ => unreachable!(),
         };
         #[cfg(all(target_os = "macos", feature = "videotoolbox"))]
-        let hardware = if !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some() {
+        let hardware = if !allow_hardware || std::env::var_os("FVID_SOFTWARE_DECODE").is_some()
+            || matches!(&decoder, Decoder::Hevc(d) if d.try_parameters().is_none()) {
             None
         } else {
             open_hardware(
@@ -200,12 +214,13 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             track_index: index,
             sample_index: 0,
             pending_avc_field_sample: None,
-            hevc_parameter_preroll: None,
+            parameter_preroll: None,
             packet: Vec::new(),
             open_signal: None,
             failed: false,
             future_pts,
             pending: Vec::new(),
+            presented_hdr: None,
             decoded_planar: None,
             pending_bytes: 0,
             queue_budget,
@@ -262,7 +277,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         }
         match &self.decoder {
             Decoder::Hevc(d) => {
-                crate::playback_native::AvcColour::from_hevc_vui(d.parameters().0.vui.as_ref())
+                crate::playback_native::AvcColour::from_hevc_vui(d.try_parameters().and_then(|(s,_)| s.vui.as_ref()))
             }
             Decoder::Avc(_) => crate::playback_native::AvcColour::from_vui(self.avc_vui()),
             Decoder::Vp9(_) | Decoder::Av1(_) => Ok(crate::playback_native::AvcColour::default()),
@@ -283,10 +298,8 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     pub fn bitstream_colour(&self) -> ColourDescription {
         match &self.decoder {
             Decoder::Hevc(d) => d
-                .parameters()
-                .0
-                .vui
-                .as_ref()
+                .try_parameters()
+                .and_then(|(s,_)| s.vui.as_ref())
                 .and_then(|vui| vui.signal.as_ref())
                 .map(|signal| {
                     let [primaries, transfer, matrix] = signal.colour.unwrap_or([0; 3]);
@@ -333,14 +346,18 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
     /// before a picture is decoded. That is what a caller grading the first
     /// picture needs; a stream that first states its light deeper in still
     /// states it there, once that packet has been decoded.
+    /// After presentation begins, this describes the last returned frame, even
+    /// when decoding has already looked ahead into a new HDR sequence. Before
+    /// the first frame (and after reset), it describes available decoder metadata.
     pub fn bitstream_hdr(&self) -> HdrMetadata {
+        self.presented_hdr.unwrap_or_else(|| self.decoder_hdr())
+    }
+    fn decoder_hdr(&self) -> HdrMetadata {
         match &self.decoder {
             Decoder::Hevc(d) => d.hdr(),
             Decoder::Av1(d) => {
                 let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
-                let mut hdr = d.hdr();
-                hdr.merge(seed);
-                hdr
+                d.hdr_with_fallback(seed)
             }
             Decoder::Avc(_) | Decoder::Vp9(_) => HdrMetadata::default(),
         }
@@ -453,7 +470,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 };
                 let p = &frame.picture;
                 let colour = crate::playback_native::AvcColour::from_hevc_vui(
-                    d.parameters().0.vui.as_ref(),
+                    d.try_parameters().and_then(|(s,_)| s.vui.as_ref()),
                 )?;
                 let explicit_geometry =
                     d.parameters().0.chroma_format != 1 || p.depth[0] != p.depth[1];
@@ -681,9 +698,10 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         self.failed = false;
         self.packet.clear();
         self.pending.clear();
+        self.presented_hdr = None;
         self.pending_bytes = 0;
         self.pending_avc_field_sample = None;
-        self.hevc_parameter_preroll = None;
+        self.parameter_preroll = None;
     }
     /// Restart decoding at the sync sample with the greatest presentation time
     /// at or before `pts` (the first sample when none qualifies), dropping all
@@ -702,8 +720,10 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .map_or(0, |(i, _)| i);
         self.rewind();
         self.sample_index = index;
-        if index > 0 && matches!(&self.decoder, Decoder::Hevc(_)) && !self.hardware_accelerated() {
-            self.hevc_parameter_preroll = Some(index);
+        if index > 0 && !self.hardware_accelerated()
+            && (matches!(&self.decoder, Decoder::Hevc(_))
+                || matches!(&self.decoder, Decoder::Avc(_)) && &self.track().codec == b"avc3") {
+            self.parameter_preroll = Some(index);
         }
         self.track().samples.get(index).map_or(0, |s| s.pts)
     }
@@ -716,14 +736,16 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
         result
     }
     fn read_frame_inner(&mut self) -> Result<Option<VideoFrame>> {
-        if let Some(end) = self.hevc_parameter_preroll.take() {
+        if let Some(end) = self.parameter_preroll.take() {
             // A sync sample resets pictures, not the in-band parameter history.
             // Recover only parameter state; no preceding pictures are decoded or
             // retained, and packet/decoder budgets still apply.
             for index in 0..end {
                 self.demuxer.read_packet(self.track_index, index, &mut self.packet)?;
-                if let Decoder::Hevc(decoder) = &mut self.decoder {
-                    decoder.prime_parameters(&self.packet)?;
+                match &mut self.decoder {
+                    Decoder::Hevc(decoder) => decoder.prime_parameters(&self.packet)?,
+                    Decoder::Avc(decoder) => decoder.prime_parameters(&self.packet)?,
+                    _ => {}
                 }
             }
         }
@@ -732,7 +754,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 .pending
                 .iter()
                 .enumerate()
-                .min_by_key(|(_, frame)| (frame.presentation_time.ticks, frame.sample_index))
+                .min_by_key(|(_, frame)| (frame.frame.presentation_time.ticks, frame.frame.sample_index))
             {
                 let future = self.future_pts.get(self.sample_index).copied();
                 // A future sample can be decode-only (for example a RASL
@@ -742,19 +764,20 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 let following = self
                     .pending
                     .iter()
-                    .filter(|f| f.presentation_time.ticks > frame.presentation_time.ticks)
-                    .map(|f| f.presentation_time.ticks)
+                    .filter(|f| f.frame.presentation_time.ticks > frame.frame.presentation_time.ticks)
+                    .map(|f| f.frame.presentation_time.ticks)
                     .min();
                 if future.is_none_or(|pts| following.is_some_and(|next| next < pts)) {
                     let mut frame = self.pending.swap_remove(index);
-                    self.pending_bytes -= frame_storage(&frame)?;
-                    let next = self.pending.iter().map(|f| f.presentation_time.ticks).min();
-                    frame.duration.ticks = presentation_duration(
-                        frame.presentation_time.ticks,
+                    self.pending_bytes -= frame.storage()?;
+                    let next = self.pending.iter().map(|f| f.frame.presentation_time.ticks).min();
+                    frame.frame.duration.ticks = presentation_duration(
+                        frame.frame.presentation_time.ticks,
                         next,
-                        frame.duration.ticks,
+                        frame.frame.duration.ticks,
                     )?;
-                    return Ok(Some(frame));
+                    self.presented_hdr = Some(frame.hdr);
+                    return Ok(Some(frame.frame));
                 }
             }
             let index = self.sample_index;
@@ -813,19 +836,20 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
                 while let Some(duplicate) = self
                     .pending
                     .iter()
-                    .position(|old| old.presentation_time.ticks == frame.presentation_time.ticks)
+                    .position(|old| old.frame.presentation_time.ticks == frame.presentation_time.ticks)
                 {
                     let old = self.pending.swap_remove(duplicate);
-                    self.pending_bytes -= frame_storage(&old)?;
+                    self.pending_bytes -= old.storage()?;
                     // If this group is at EOF there is no following PTS to
                     // establish its endpoint. Retain its nominal total span.
                     frame.duration.ticks = frame
                         .duration
                         .ticks
-                        .checked_add(old.duration.ticks)
+                        .checked_add(old.frame.duration.ticks)
                         .ok_or_else(|| invalid("duplicate-PTS duration overflow"))?;
                 }
-                let bytes = frame_storage(&frame)?;
+                let frame = QueuedFrame { frame, hdr: self.decoder_hdr() };
+                let bytes = frame.storage()?;
                 let total = self
                     .pending_bytes
                     .checked_add(bytes)

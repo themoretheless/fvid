@@ -1,0 +1,6482 @@
+[
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-frame-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-field-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-columns-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e-1-checker-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-frame-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-field-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-columns-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e0-checker-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-frame-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-field-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-columns-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e1-checker-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-frame-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-field-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-columns-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-bi-derived-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-bi-derived-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-bi-derived-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-temporal-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-temporal-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-temporal-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-temporal-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-temporal-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-temporal-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-spatial-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-spatial-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-spatial-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-spatial-skip-plain",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-spatial-skip-explicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y8-c8-e2-checker-spatial-skip-implicit",
+    "yd": 8,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-frame-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-field-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-columns-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e-1-checker-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-frame-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-field-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-columns-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e0-checker-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-frame-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-field-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-columns-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e1-checker-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-frame-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-field-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-columns-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-bi-derived-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-bi-derived-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-bi-derived-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-temporal-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-temporal-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-temporal-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-temporal-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-temporal-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-temporal-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-spatial-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-spatial-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-spatial-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-spatial-skip-plain",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-spatial-skip-explicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y10-c12-e2-checker-spatial-skip-implicit",
+    "yd": 10,
+    "cd": 12,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-frame-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-field-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-columns-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e-1-checker-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": -1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-frame-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-field-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-columns-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e0-checker-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 0,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-frame-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-field-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-columns-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e1-checker-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 1,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-frame-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "frame",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-field-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "field",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-columns-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "columns",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-bi-derived-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-bi-derived-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-bi-derived-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "bi-derived",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-temporal-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-temporal-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-temporal-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-temporal-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-temporal-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-temporal-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "temporal-skip",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-spatial-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-spatial-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-spatial-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial",
+    "weight": "implicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-spatial-skip-plain",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "plain"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-spatial-skip-explicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "explicit"
+  },
+  {
+    "name": "mbaff-b-y14-c8-e2-checker-spatial-skip-implicit",
+    "yd": 14,
+    "cd": 8,
+    "entropy": 2,
+    "topology": "checker",
+    "mode": "spatial-skip",
+    "weight": "implicit"
+  }
+]

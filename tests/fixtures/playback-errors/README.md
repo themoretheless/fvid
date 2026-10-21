@@ -3876,7 +3876,7 @@ media.
 
 `avc-444-pcm` contains 132 owned High 4:4:4 Predictive (`profile_idc = 244`,
 `chroma_format_idc = 3`, `separate_colour_plane_flag = 0`) two-frame movies and
-5 compressed-syntax refusal fixtures:
+4 compressed-syntax refusal fixtures and one progressive compressed acceptance:
 
 - 12 progressive CABAC (`frame_mbs_only_flag = 1`, `entropy_coding_mode_flag = 1`)
   movies across `(8,8)`, `(10,12)` and `(14,8)` luma/chroma depths, single-slice
@@ -3890,9 +3890,10 @@ media.
   `mb_type` neighbour context selection across mixed frame/field pairs. Before
   the fix, these fell through to compressed MBAFF reconstruction and failed with
   `AVC scaling reconstruction requires 4:2:0` or `MBAFF reconstruction exceeds memory budget`.
-- 5 explicit refusal fixtures (`unsupported.json`) verifying that compressed
-  non-separated 4:4:4 progressive CABAC and MBAFF CAVLC/CABAC macroblocks still
-  return `Error::Unsupported`.
+- 4 explicit refusal fixtures (`unsupported.json`) verifying that compressed
+  non-separated 4:4:4 MBAFF CAVLC/CABAC macroblocks still return
+  `Error::Unsupported`. `accepted.json` replaces the historical incomplete
+  progressive CABAC refusal with a valid complete three-component example.
 
 Generate separately with `python3 scripts/generate_avc_444_pcm.py`.
 `tests/avc_444_pcm.rs` verifies native per-component Y/Cb/Cr sample planes,
@@ -4011,3 +4012,483 @@ Generate separately with `python3 scripts/generate_avc_separate_mbaff_8x8_debloc
 playback (`subsampling = Some([1, 1])` cropped planes and rewind) offline
 without FFmpeg, network or private media.
 
+
+## Nonseparate H.264 4:4:4 compressed CAVLC intra
+
+`avc-444-intra` contains 60 owned level 4.1 progressive examples with shared
+macroblock modes and independent Y/Cb/Cr residual contexts. See its README for
+exact acceptance coverage. Progressive CABAC is qualified below; compressed
+inter/MBAFF coverage remains separate; intra fields are qualified below.
+Generate separately with `scripts/generate_avc_444_intra.py`; ordinary offline
+tests use `tests/avc_444_intra.rs` and need no FFmpeg or network.
+
+## Nonseparate H.264 4:4:4 loop filtering
+
+`avc-444-deblock` adds 324 compressed CAVLC intra filtering cases, and
+`avc-444-pcm-deblock` adds 54 progressive CAVLC/CABAC PCM filtering cases.
+`avc-444-mixed-deblock` adds 27 shared-slice PCM/I16 context and filtering cases.
+All three use independent owned scalar oracles, full-plane and software MP4
+acceptance checks, with fixture authoring separate from offline test execution.
+See their READMEs for witnesses and the remaining compressed inter/MBAFF gaps; intra fields are qualified below.
+
+SAMI attribute boundaries: `sami-attributes/` contains twelve authored pairs and a five-frame raw Y4M companion. `tests/sami_attribute_values.rs` checks whole attribute names, matching quotes, independent caption clocks and correct omission of untimed text; the native player regression also presents video and seeks. Generate separately with `scripts/generate_sami_attribute_regressions.py`.
+
+## Nonseparate H.264 4:4:4 CABAC intra
+
+`avc-444-cabac-intra` adds 486 owned compressed-intra cases with explicit
+full-resolution residual contexts and 8x8 coded-block flags.
+`avc-444-cabac-mixed` adds 27 shared-slice PCM/arithmetic-restart cases.
+`avc-444-cabac-transform-switch` adds 162 mixed 4x4/8x8 neighbour-context cases.
+The old progressive refusal in `avc-444-pcm` is now full-component acceptance;
+the four historical MBAFF refusals now have complete shared-component acceptance
+fixtures. See `avc-444-mbaff-intra` and the case READMEs for exact coverage,
+table provenance and remaining inter gaps.
+
+SAMI Sync clocks: `sami-sync/` pairs six authored paragraph sequences with independent SRT clocks and a five-frame Y4M companion. It covers replacement,clear events,quoted clocks,multiline captions,language gaps and an overflowing clock. Generate separately with `scripts/generate_sami_sync_regressions.py`; `tests/sami_sync.rs` checks the intended capability. Native Player validation uses the existing authored indexed VP9 clip for actual forward/backward seek.
+
+SAMI break case: `sami-break-case/` isolates uppercase/mixed-case break tags with explicit supported paragraph clocks. `tests/sami_break_case.rs` checks successful multiline captions against independent SRT after the case fix. Generate with `scripts/generate_sami_break_regressions.py`.
+
+SAMI sidecar extension: `sami-sidecar-extension/` isolates automatic discovery from explicit parsing. Lowercase,uppercase and language-suffixed `.sami` names have authored raw video companions; `.smi` is a healthy control and an unrelated filename must remain excluded. `tests/sami_sidecar_extension.rs` checks explicit loading and successful discovery after the extension fix. Generate with `scripts/generate_sami_sidecar_regressions.py`.
+
+## Nonseparate H.264 4:4:4 intra fields and PAFF frames
+
+`avc-444-fields` adds 540 paired-field scan/precision/filter/parity cases.
+`avc-444-fields-mixed` adds 108 shared-slice PCM/I16 field pairs, and
+`avc-444-paff-frames` adds 54 complete frames under field-capable SPS geometry.
+All use owned samples, independent scalar oracles and native/software MP4
+acceptance without external decoders or network. See their READMEs for exact
+coverage. `avc-444-mbaff-intra` adds 360 compressed/PCM MBAFF intra videos
+with I16/I4/I8 residuals and full-resolution component deblocking. Field inter has dedicated matrices below; nonseparate MBAFF inter qualification remains open.
+
+SAMI body boundaries: `sami-body-boundaries/` contains four failing quoted/comment/raw-header cases and two healthy controls,with independent SRT and raw Y4M. `tests/sami_body_boundaries.rs` retains the reproduction and ignored intended acceptance pending the body-boundary fix. Generate separately with `scripts/generate_sami_body_regressions.py`.
+
+## Nonseparate H.264 4:4:4 progressive CAVLC inter
+
+`avc-444-inter` adds 90 P motion/weight/residual/mixed-intra videos.
+`avc-444-b-inter` adds 72 B/direct and weighted biprediction/reordering videos.
+`avc-444-inter-deblock` adds 54 full-resolution component-strength/QP videos.
+All require exact native and software MP4 pixels, timestamps, reset and rewind,
+without FFmpeg. CABAC has its own matrices below; field/PAFF inter has dedicated matrices below; MBAFF inter remains unqualified.
+See each matrix README for the precise accepted combinations.
+
+## Nonseparate H.264 4:4:4 progressive CABAC inter
+
+`avc-444-cabac-inter` adds 324 P residual/motion/weight/skip/intra videos.
+`avc-444-cabac-b-inter` adds 216 B/direct and weighted-reordering videos.
+`avc-444-cabac-inter-deblock` adds 162 component CBF/QP/filter videos.
+Every matrix covers cabac_init_idc 0/1/2, actual native/software MP4 pixels,
+clocks, reset and rewind without FFmpeg. Explicit 8x8 CBFs see current-block
+classification before residual decoding; skip clears full-resolution Cb/Cr
+coefficient history. These are progressive matrices, not full H.264 completion.
+
+## Nonseparate H.264 4:4:4 field/PAFF inter
+
+`avc-444-field-inter` adds 768 P field parity/weight/AC-scan cases.
+`avc-444-field-b-inter` adds 864 B field motion/direct/weight/reordering cases.
+`avc-444-field-inter-deblock` adds 432 component CBF/QP/filter cases.
+`avc-444-paff-inter` adds 192 actual frame pictures under field-capable SPS.
+CAVLC and all CABAC init sets are included, with native/software MP4 pixels,
+clocks, field state, reset and rewind. The prior progressive-only inter
+restriction is replaced by actual frame/field syntax admission. Adaptive-frame
+MBAFF inter and combinations not represented by these matrices remain open.
+
+## Subtitle painting regression inputs
+
+`subtitle-painting` contains authored two-line, wrapped and outlined SubRip cues
+(1–9 seconds), plus a copy of the existing owned indexed VP9 color-bar video.
+Generate explicitly with `scripts/generate_subtitle_paint_regressions.py`;
+ordinary painter and native seek tests use only checked-in files. The painter
+regressions inspect actual laid-out rows and tessellated glyph colors.
+Acceptance also requires viewing the running native window.
+
+## XM no-envelope key-off volume state
+
+`xm-key-off-volume-state` pairs fourteen authored scores with independent C00 or
+split-row volume-zero controls. Note97/K00/delayed Kxx must cut channel volume
+without losing the active sample phase: explicit volume/default commands can
+restore it,while note-only triggers keep the cut volume. The authored VP9/PCM
+companion and all score bytes are checked in; ordinary tests need no generator,
+encoder or network. Unsupported envelopes/fadeout are outside this profile.
+The older `xm-volume-lifetime/released-control` reference now uses independent
+C00 then volume64;the actual score and phase/worker checks are preserved.
+
+## XM stopped-offset gain
+
+`xm-offset-silence` contains four authored scores with out-of-range9FF followed
+by a muted note-only retrigger. Two looping cases previously emitted a transient;
+natural-end and initially-zero controls already stayed silent. Independent
+controls omit only the muted note and require literal-zero PCM after360ms.
+The checked-in owned VP9/PCM companion,16 PCM combinations and worker seek/EOF
+targets run offline;generation is explicit and separate.
+
+## XM valid empty instrument slots
+
+`xm-empty-slot` compares absent valid slots2/9/128 with explicitly empty
+instruments,including instrument-only selection and later recovery. Out-of-format
+129/255 inputs at the default level,populated slots and initial empty selection
+are controls. Ten scores,40 PCM combinations and actual-worker checks use only
+checked-in authored media. The initial29-byte controls exposed a separate parser
+refusal;verified selection controls use full243-byte headers.
+
+## XM short empty instrument headers
+
+`xm-empty-header` contains eight authored layouts with short or full empty
+instruments,plus four malformed controls. First,middle,last and entirely empty
+positions compare against full243-byte metadata and PCM.32 PCM combinations,
+worker seek/EOF and parser/refusal/resource regressions run offline;the pure
+parser checks also run without player/default features. Generation remains
+explicit and uses only the existing owned waveform and VP9/PCM companion.
+
+## XM invalid instrument defaults
+
+`xm-invalid-defaults` contains fourteen authored scores. Invalid129/255 instrument
+components must preserve channel defaults while valid notes/effects still run.
+Independent normalized controls isolate mute,pan and K00;valid populated/empty128
+components retain legitimate restores.56 PCM combinations and actual-worker
+seek/EOF checks run offline on the owned waveform and VP9/PCM companion.
+
+## XM whole tick spans
+
+`xm-tick-span` contains ten authored equal-row tempo/speed scores. Controls at
+BPM100/125 have exact tick periods;K03/EC3 at150BPM and K02/EC2 at100BPM
+both target50ms. Native duration/PCM,core seek boundaries and actual-worker
+checks use the full sources. An explicitly fixed100ms decoder window isolates
+the subrow deadline. Tail length follows the final row. All generation is
+separate and uses the existing owned waveform and VP9/PCM companion only.
+
+## AVI index offset origins
+
+`avi-index-origin` contains eight authored VP9/ADPCM AVI files: IMA/MS audio,
+flat or nested `rec ` lists,and `idx1` offsets from `movi` or the file start.
+Four unindexed controls share the same payloads;literal predictor PCM checks
+native audio. Mixed origins,wrong offsets/lengths and oversized addresses must
+refuse. The identical owned VP9 picture is decoded in a Matroska companion;
+AVI picture playback is outside this regression. Generation is pure Python
+and separate from ordinary offline Cargo tests.
+
+## AVI main-header field boundaries
+
+`avi-main-header-bounds` contains six malformed AVI headers whose missing
+`dwStreams` can be borrowed from a following `JUNK` chunk. The intended behavior
+is parser/source refusal. Four complete56/64-byte headers provide independent
+PCM and worker navigation controls. The same authored VP9 frame has a Matroska
+companion;no AVI picture playback claim is made. Generation is pure Python;
+ordinary tests use checked-in bytes without FFmpeg or network access.
+
+## FLAC coded clock continuity
+
+`flac-number-timeline` contains eleven CRC-valid streams with contradictory
+frame/sample numbers or changing blocking strategies. Intended whole-file
+behavior is refusal;independent native decoding of each authored subframe still
+matches literal PCM. Four legal controls retain worker play/rewind/seek/EOF,
+variable block sizes,short final blocks and multi-byte coded numbers. An owned
+VP9/PCM video companion is checked separately. Pure Python generation is explicit;
+ordinary tests use checked-in bytes without FFmpeg or network access.
+
+## Ogg page sequence integrity
+
+`ogg-page-sequence` uses CRC-valid authored Opus pages to isolate sequence
+loss,gaps,repeats and backward counters. One removed page hides20ms as a
+positive granule origin. Controls keep normal/positive-origin programs,
+chaining,per-serial interleaving and initial/wrapped counter compatibility.
+Native PCM is compared with independent raw-packet decoding;DTX is finite
+near-silence and is not assumed to be bitwise zero. Tests cover both the
+canonical media reader and standalone streaming Opus reader,including rewind.
+
+Counter discontinuities are an explicit refusal in the strict file profile.
+Pasted-header live captures with gaps require coherent reframing/resequencing;
+this regression does not claim PLC or reconstruction of missing audio.
+
+## Ogg packet continuation boundaries
+
+`ogg-continuation-boundary` contains authored missing-flag cases and valid joined
+live prefixes. Packet-shaped bytes inside Opus padding must not become new audio.
+Whole40ms packets are split at legal255-byte segment boundaries;joined captures
+retain only a whole-page suffix and preserve granules with coherent counters.
+Controls include nil termination,multiple pages,complete EOS-less prefixes and
+empty-page compatibility. Nonzero padding is valid decoder-acceptance coverage
+under RFC6716;it is not claimed as conforming encoder output. Native PCM uses
+independent raw-packet controls and worker mid-packet/EOF seeks. Libopus packet
+checks are explicit reference evidence and are not ordinary test dependencies.
+
+## Ogg logical-stream identity
+
+`ogg-stream-identity` isolates missing/repeated BOS and a foreign BOS relabeling
+an existing streaming reader without replacing its OpusHead. All pages have
+valid CRCs,consecutive counters and complete packets. The standalone single-stream
+reader must refuse these boundaries before publishing audio or mutating identity;
+this does not add streaming multiplexing. Zero and nonzero serial controls keep
+native PCM and worker navigation. An owned VP9/PCM companion is decoded separately.
+Generation is explicit and offline;ordinary tests consume the checked-in bytes.
+
+The standalone reader requires a first BOS and rejects another BOS encountered
+before that stream's EOS. Inputs previously admitted through missing/repeated BOS
+now return an explicit framing error. Its public signatures stay compatible;
+callers need correctly framed headers and a separate decoding context for another
+logical stream. Existing stop-at-first-EOS behavior and rewind remain unchanged.
+
+## AVI outer RIFF boundaries
+
+`avi-riff-boundary` isolates a top-level AVI walk that ignored RIFF's size.
+Eight short-root inputs must refuse mandatory lists outside their declared form.
+Two complete first-RIFF inputs must ignore an idx1 outside that form instead of
+validating it as their own index. Six controls retain complete and existing
+clamped overdeclared/sentinel-root behavior. These are owned VP9/ADPCM AVI with
+literal predictor PCM and a separately decoded Matroska companion. This does not
+qualify full OpenDML or declare arbitrary trailing structures globally valid.
+Generation is explicit,pure and offline;ordinary tests consume saved samples.
+
+- `avc-data-partitions/`: owned Extended-profile A/B/C video acceptance with
+  scalar PCM/intra/inter pixel oracles, combined-stream controls, ASO association,
+  MP4 seek/rewind and separate malformed/missing partition regressions. Generate
+  separately using `scripts/generate_avc_data_partitions.py`; no FFmpeg/network.
+
+- `avc-data-partitions-b/`: owned two-reference Extended-profile partitioned B
+  pictures with L0/L1/Bi, spatial/temporal direct, skip/coded and PCM/intra mixes,
+  ASO, scalar pixels, combined controls, decode/presentation reordering and MP4
+  PTS/seek/rewind checks. Generate separately with
+  `scripts/generate_avc_partitioned_b.py`; ordinary tests need no FFmpeg/network.
+
+- `avc-data-partitions-switching/`: owned partitioned primary/secondary SP and SI
+  switching/ordinary controls at QSY0/26/51, signed luma/chroma residuals, PCM,
+  ASO and independent matrix pixel/MP4 timing/seek/rewind acceptance. Generate
+  separately with `scripts/generate_avc_partitioned_switching.py`; no FFmpeg or
+  network is required for generation or ordinary tests.
+
+- `avc-data-partitions-fmo/`: owned FMO maps0–6 with partition A/B/C, ASO and
+  interleaved partitions, multiple slices per group, signed group-specific
+  residuals, PCM/skip, scalar pixels and MP4 timing/seek/rewind acceptance.
+  Generate separately with `scripts/generate_avc_partitioned_fmo.py`;
+  generation and ordinary tests need no FFmpeg or network.
+
+- `avc-data-partitions-interlaced/`: owned PAFF field and MBAFF A/B/C acceptance,
+  layout/reference transitions, parity-distinct scalar pixels, I/PCM and P
+  residuals, ASO/FMO, direct PCM API and MP4 clocks/seek/rewind. Separate missing/
+  surplus B/C failures have short MP4 reproducers. Generate separately using
+  `scripts/generate_avc_partitioned_interlaced.py`; no FFmpeg/network is needed.
+
+- `avc-data-partitions-interlaced-switching/`: owned PAFF SP/SI and MBAFF SP
+  partitioned switching, signed luma/chroma, skip, field order, ASO and matrix
+  pixel/clock/seek/rewind acceptance. Generate separately with
+  `scripts/generate_avc_partitioned_interlaced_switching.py`.
+- `avc-data-partitions-interlaced-b/`: owned two-reference PAFF/MBAFF B A/B/C,
+  direct/skip/PCM, decode/presentation reordering and successor-reference checks.
+  Generate separately with `scripts/generate_avc_partitioned_interlaced_b.py`.
+  Both generators and ordinary tests work without FFmpeg or network.
+
+- `avc-data-partitions-mbaff-si/`: owned MBAFF SI/ordinary/PCM A/B with mixed
+  layouts, constrained neighbours, signed luma/chroma, split/ASO, manual A traces,
+  independent availability/matrix pixels and MP4 timing/seek/rewind acceptance.
+  Generate separately with `scripts/generate_avc_partitioned_mbaff_si.py`;
+  generation and ordinary tests work without FFmpeg or network.
+
+- `avc-redundant-recovery/`: owned missing-primary recovery using the lowest
+  complete redundant representation or disjoint slices across ranks; 84
+  ordinary/A-B-C, split/ASO, PPS, startup
+  and reference-lifetime cases. Scalar/control pixels, exact MP4 clocks,
+  reset/rewind/seek and explicit partial-area refusal tests. Generate separately
+  with `scripts/generate_avc_redundant_recovery.py`, without FFmpeg or network.
+
+- `avc-primary-recovery/`: 88 owned missing/truncated primary-slice recovery
+  videos with intact-region preservation, disjoint I/P replacements, ASO,
+  ordinary/A-B-C, IDR startup and non-reference lifetime. Independent entropy
+  failure checks, scalar/control pixels and MP4 clock/rewind/seek acceptance.
+  Generate separately with `scripts/generate_avc_primary_recovery.py`;
+  no FFmpeg or network is needed.
+
+- `wavpack-false-stereo/`: 99 owned VP9/WavPack videos qualifying mono-coded
+  stereo, 8/16/24/32-bit integer reconstruction, WVX CRC/padding, Matroska compact
+  packet mapping, rewind, exact seek and audio worker PCM. Six short malformed
+  videos preserve CRC/padding/length refusal checks. Generate separately with
+  `scripts/generate_wavpack_false_stereo.py`, without external codecs or network.
+
+- `wavpack-float/`: 180 owned IEEE-754 WavPack/VP9 videos plus four optimized
+  INT32 witnesses. Bit-exact mantissa/exponent/sign restoration, signed zeros,
+  subnormals, Inf/NaN payloads, old/new WVX, CRC, Matroska and audio-worker seek.
+  Ten malformed short videos preserve precise refusal checks. Generate separately
+  with `scripts/generate_wavpack_float.py`; no external codec or network required.
+
+- `wavpack-multichannel/`: 115 owned 60 ms VP9/WavPack acceptance videos,
+  3–4096 channels, complete multi-block assembly, legacy/new speaker metadata,
+  integer/float PCM, 40-bit counters, compact Matroska, reset/seek, worker capture
+  and stereo routing. Malformed components and mapping witnesses check exact
+  refusal and atomic layout/PCM publication. Generate separately with
+  `scripts/generate_wavpack_multichannel.py`, without external codecs or network.
+
+- `wavpack-custom-rate/`: 30 owned mono/stereo/six-channel VP9/WavPack videos
+  covering three-/four-byte custom rates and reserved-bit semantics, exact PCM,
+  timebases, reset/rewind and reader presentation; five specific malformed-rate
+  videos. Generate separately with `scripts/generate_wavpack_custom_rate.py`,
+  without external codecs or network.
+
+- `wavpack-hybrid/`: 105 owned 60 ms VP9/WavPack main-stream videos covering
+  error-budget quantization, bitrate/deltas/balance, zero-error codes, integer
+  fixup/clipping, zero runs, multichannel assembly, seek and worker capture.
+  Five specific malformed/unsupported witnesses. Generate separately with
+  `scripts/generate_wavpack_hybrid.py`; ordinary tests need no external codec.
+  An optional independent reference harness lives under `benches/`.
+
+## Grouped AVI ADPCM samples
+
+`avi-adpcm-grouped` authors14 mono/stereo IMA/MS cases with several fixed-size
+samples in a chunk,including nested records and idx1. Sample size and block
+alignment are8 or16 bytes;dwLength counts three blocks. Four single-block
+controls retain independent literal predictor PCM,including opposite-channel
+stereo. Malformed partial blocks and wrong declared counts remain explicit
+refusals. Logical packet expansion respects the reader's record budget.
+
+Each output packet carries one independent block and its sample clock. Seek
+keeps the existing block-rounded landing contract,including requests inside a
+block;the tests separately cover rewind and EOF. Owned AVI video and a separate
+Matroska companion contain the same authored VP9 control. Generation is explicit
+and offline;ordinary tests use saved bytes without FFmpeg or network access.
+
+- `wavpack-correction/`: 306 owned VP9/WavPack hybrid/correction pairs with
+  lossy and lossless scalar oracles, all integer widths, shaping, predictor
+  histories, CROSS_DECORR, multichannel, standard Matroska BlockAdditional,
+  exact seek and worker capture. Includes malformed/atomicity controls and an
+  explicit laced-correction refusal. Generate separately with
+  `scripts/generate_wavpack_correction.py`; no external codec or network required.
+
+- `wavpack-dsd/`: 256 owned VP9/WavPack videos covering raw/fast/high DSD,
+  probability table forms, mono/stereo/false stereo/six channels, exact native
+  bytes and scalar PCM, small-block FIR startup, replay-based exact seek and
+  audio-worker windows. Fourteen malformed witnesses preserve specific errors;
+  failed final components cannot advance filter/layout state. Generate separately
+  with `scripts/generate_wavpack_dsd.py`; ordinary tests need no external codec.
+
+- `wavpack-float-hybrid/`: 216 paired/main-only hybrid float videos covering
+  WVX forms, exponent/shift/overshoot behavior, exact IEEE words, Matroska, seek
+  and finite PCM worker windows. Includes WVX bound/CRC controls and legal
+  Xiph/fixed/EBML main-stream lacing with a foreign additional ID. Generate
+  separately with `scripts/generate_wavpack_float_hybrid.py`, without external codecs.
+
+- `wavpack-files/`: 1,317 native `.wv` cases with optional `.wvc` companions,
+  scalar PCM oracles and associated synthetic codec-control videos. Covers
+  incremental opening/indexing, correction pairing, sample-clock seek/rewind,
+  unknown totals, tags, malformed files and audio-worker playback. Generate
+  separately with `scripts/generate_wavpack_files.py`; no external codec or
+  network is used. See its README for the native/control-video distinction.
+
+- `eac3-bsid/`: 36 owned 96 ms VP9/E-AC-3 videos and elementary controls
+  covering backward-compatible BSID 11..16 across long/short/mixed transform
+  windows and spectral extension. Exact version-16 PCM equivalence, rewind and
+  reserved/future-ID rejection are tested offline in `tests/eac3_bsid.rs`.
+  Generate separately with `scripts/generate_eac3_bsid.py`; no FFmpeg is used.
+
+- `eac3-converted/`: 66 owned short VP9/E-AC-3 type-2 videos with matching
+  independent-stream controls, covering 1/2/3/6 blocks, compatible IDs, transform
+  windows, mixing metadata and first/continuation forms. `tests/eac3_converted.rs`
+  checks exact PCM, duration, rewind and malformed original-frame-size rejection.
+  Generate separately with `scripts/generate_eac3_converted.py`; no FFmpeg is used.
+
+- `eac3-aht/`: eight owned scalar-AHT cases with independent controls and short
+  VP9/Matroska videos (six active transforms, two all-plane declines). Exact PCM,
+  plane flag parsing, duration and rewind are tested offline. Separate codec units
+  cover normative VQ words and GAQ reconstruction; their full playback matrix is
+  still open. Generate with `scripts/generate_eac3_aht.py`, without FFmpeg.
+
+- `eac3-aht-ac/`: 36 owned nonzero AHT AC basis/mixture videos and conventional
+  controls. Checks temporal reconstruction, raw/Matroska PCM, duration, rewind,
+  and audio-worker seek. Exact representable spectra require byte equality;
+  remaining controls use an analytic quantization-error bound. Generate separately
+  with `scripts/generate_eac3_aht_ac.py`, without external codecs or network.
+
+- `eac3-aht-quantizers/`: 400 owned VQ/GAQ AHT video/native cases and analytic
+  conventional controls. Covers hebap 1..19, four GAQ modes and all 956 normative
+  VQ indices; includes saturation and matched headroom inputs. Checks PCM,
+  raw/Matroska duration, rewind and audio-worker partial seek. Generate separately
+  with `scripts/generate_eac3_aht_quantizers.py`; no external codec/network.
+  See its README for explicit reference-policy and VQ4 discrepancies.
+
+- `eac3-aht-lfe/`: 48 owned stereo+LFE cases and conventional controls in
+  raw, VP9/Matroska and VP9/MP4 forms. Checks nonzero LFE PCM, FL/FR/LFE
+  assignment through the audio backend, stereo routing, rewind and partial seek.
+  Generate separately with `scripts/generate_eac3_aht_lfe.py`, without FFmpeg
+  or network. See its README for numeric bounds and qualification limits.
+
+- `eac3-aht-coupling/`: 192 owned coupled stereo cases in raw and short
+  VP9/Matroska form. Conventional controls resend equivalent coordinates while
+  test streams reuse them. Checks ordinary/scalar-AHT coupling, phase retention,
+  PCM, duration, rewind and partial seek. Generate separately with
+  `scripts/generate_eac3_aht_coupling.py`; no external codec or network.
+
+- `eac3-enhanced-coupling/`: 432 owned enhanced-coupling stereo cases and
+  uncoupled scalar controls, elementary and short VP9/Matroska versions. Covers
+  all amplitude codes, low six-bin bands, merged higher bands and scalar/AHT
+  playback, rewind and partial seek. Generate separately with
+  `scripts/generate_eac3_enhanced_coupling.py`. See its README for qualification
+  limits and the explicitly non-green optional reference-control comparison.
+
+- `eac3-coupling-updates/`: 448 owned cases for amplitude updates, participant
+  changes, geometry changes and ordinary/enhanced tool transitions across
+  layouts 2..7, native/converted streams and LFE. Uncoupled controls check actual
+  PCM; raw/Matroska, duration, masks, rewind and partial seek are checked offline.
+  Generate separately with `scripts/generate_eac3_coupling_updates.py`.
+
+- `eac3-aht-updates/`: 356 owned AHT/coupling-update combinations across
+  layouts 2..7 and LFE. Eligible planes use six-block AHT; uncoupled scalar
+  controls use equivalent three-block frames. Checks PCM, plane flags,
+  raw/Matroska clocks, masks, rewind and partial seek. Generate separately with
+  `scripts/generate_eac3_aht_updates.py`; ordinary tests need no external codec.
+
+- `eac3-spx-noise/`: 15 owned noisy/signal-only SPX cases with three attenuation
+  variants. Reproduces the separate SPX random-generator reset defect and checks
+  raw/Matroska rewind, normal frame continuity and audio-worker partial seek.
+  Generate separately with `scripts/generate_eac3_spx_noise.py`, without FFmpeg
+  or network.
+
+- `eac3-zero-bit/`: 112 zero-bit dither cases and 16 coded-signal controls,
+  conventional/AHT and native/converted. Checks per-block/channel silence with
+  overlap, re-enabling, scaling, stereo independence, raw/Matroska rewind and
+  worker seek. Generate separately with `scripts/generate_eac3_zero_bit.py`.
+  See its README for the explicitly failing optional FFmpeg silence audit.
+
+- `eac3-aht-mixed-zero/`: 272 owned delta-allocation cases with zero/VQ/GAQ
+  mixtures, four gain modes and native/converted streams. Checks actual decoded
+  allocation arrays, nonzero PCM against scalar controls, raw/Matroska clocks,
+  rewind and partial seek. Generate separately with
+  `scripts/generate_eac3_aht_mixed_zero.py`, without external codecs/network.
+
+- `eac3-coupling-zero/`: 448 owned ordinary-coupling zero-bit cases,
+  all AHT masks, native/converted, phase flags and per-channel/block dither.
+  Checks coupled spectra, silence, independence, exponent scaling, rewind
+  and worker partial seek; regenerate with `scripts/generate_eac3_coupling_zero.py`.
+
+- `eac3-enhanced-noise/`: 224 owned enhanced-coupling dither cases with
+  conventional/AHT, all 32 amplitude codes and unity-amplitude companions.
+  Checks coupled spectra, silence, scaling, stereo independence, raw/Matroska
+  rewind and worker seek; regenerate with `scripts/generate_eac3_enhanced_noise.py`.
+
+- `eac3-lfe-zero/`: 96 owned conventional/AHT stereo+LFE cases with zero
+  allocation and coded controls, raw/Matroska/MP4 readers, rewind and worker
+  seek. Regenerate with `scripts/generate_eac3_lfe_zero.py`; see its README
+  for the separate, explicitly failing FFmpeg LFE-silence comparison.
+
+- `eac3-substreams/`: 88 owned multiplexed base-programme cases with
+  extra independent/dependent frames, exact PCM/PTS, sample counts, rewind,
+  worker seek and malformed length guards. Regenerate separately with
+  `scripts/generate_eac3_substreams.py`. Extension-channel reconstruction remains open.
+
+- `eac3-dependent/`: 496 owned low-level dependent-channel cases spanning all
+  acmod/LFE layouts, coded PCM order, AHT masks and all channel-map locations,
+  plus malformed-map raw/video guards. Generate with
+  `scripts/generate_eac3_dependent.py`. Fixed-layout assembly is qualified separately by `eac3-presentation/`.
+
+- `eac3-dynrng/`: all 256 normal DRC codes with signed-exponent and block-reuse
+  PCM acceptance, raw and synthetic video; regenerate with
+  `scripts/generate_eac3_dynrng.py` without external codecs.
+- `eac3-presentation/`: 27 owned fixed-layout 7.1/10/16-channel assembly cases,
+  replacement, common normal DRC, final clipping, separate-syncframe Matroska,
+  rational clock and worker seeks. Generate with
+  `scripts/generate_eac3_presentation.py`. Extended device mapping and full
+  codec/profile coverage remain open.
+
+- `eac3-transient-native/`: owned sounding stereo, dual-mono and mono+LFE
+  transient streams, matched metadata-free controls, neutral VP9 Matroska videos
+  and deliberately damaged-CRC streams. Generate separately with
+  `scripts/generate_eac3_transient_native.py` (no external codecs/network).
+  Decoder-unit tests check native reconstruction equivalence, active/inactive
+  planes, per-block transient windows and gains, correction through the aligned
+  adapter, reset and whole-frame CRC concealment. These are native reconstruction
+  and adapter tests; delayed player packet/seek acceptance remains pending.

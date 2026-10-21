@@ -1,35 +1,53 @@
 {
-  "provenance": "240ms authored440Hz mono tone with authored16-square VP9 neutral video. No private input. Generation uses FFmpeg; tests load saved bytes only.",
+  "provenance": "Owned neutral VP9 and Matroska construction from separately frozen original synthetic nonzero audio packets. All six audio payloads/configuration/timing are preserved. No encoder, FFmpeg, network or generated output is read. Reference encoding refresh is a separate explicit benchmark, not ordinary fixture generation.",
   "cases": [
     {
       "file": "flac.mkv",
-      "encoder": "flac",
-      "sha256": "6caa7ec16acdc6f50eb3dce623ac9667c0349eb64154109721c8a003d362bfcc"
+      "codec": "A_FLAC",
+      "reference_encoder": "flac",
+      "reference_payload_sha256": "fcaa51d8eb285663fb474c8b7ca0c9194a872462943e834a78ebaca6229084ee",
+      "reference_movie_sha256": "6caa7ec16acdc6f50eb3dce623ac9667c0349eb64154109721c8a003d362bfcc",
+      "sha256": "5fe70b3a062d0c5e9a57a61f281cd44ca2e300f6951bca779743cf2011e036cd"
     },
     {
       "file": "alac.mkv",
-      "encoder": "alac",
-      "sha256": "2fae9dca675199eed1b49c3b30b2f464b0bec1048f9c7ee924db029be6480ea0"
+      "codec": "A_ALAC",
+      "reference_encoder": "alac",
+      "reference_payload_sha256": "94ba70013008577a9388e32a1f40d120c7d1b9b2fc14e1848e8ff71683794099",
+      "reference_movie_sha256": "2fae9dca675199eed1b49c3b30b2f464b0bec1048f9c7ee924db029be6480ea0",
+      "sha256": "df439af8e61d4a8792a162476cd96e6678c6bfba1fda2735ffb90f9550f17d6d"
     },
     {
       "file": "mp3.mkv",
-      "encoder": "libmp3lame",
-      "sha256": "c478ffd795ee5fdf1c76d3d16645c1e62a2e048ccff2d99c6a44512b053b56b2"
+      "codec": "A_MPEG/L3",
+      "reference_encoder": "libmp3lame",
+      "reference_payload_sha256": "49d24978e12506fce81b6ba9c7561fefc324ed98e0368a150bb6e0be1e0d40fa",
+      "reference_movie_sha256": "c478ffd795ee5fdf1c76d3d16645c1e62a2e048ccff2d99c6a44512b053b56b2",
+      "sha256": "d578f8a8134a4d0045447adb85e37da91eaef1354fdbf7b9d27273e7db60ba2e"
     },
     {
       "file": "mp2.mkv",
-      "encoder": "mp2",
-      "sha256": "d3ba45d24362bddea48d5725a12b274f1900420dd38ffcc32e1568e7ee5e9e24"
+      "codec": "A_MPEG/L2",
+      "reference_encoder": "mp2",
+      "reference_payload_sha256": "a33105c37ca48129c57871c09d6caea1c49232b5eb843d71406992703f6bef83",
+      "reference_movie_sha256": "d3ba45d24362bddea48d5725a12b274f1900420dd38ffcc32e1568e7ee5e9e24",
+      "sha256": "1b7b68350472ad66baa7eda05f024eebb2dc35cc9529174943764cb4d061e949"
     },
     {
       "file": "vorbis.mkv",
-      "encoder": "vorbis",
-      "sha256": "0d351273a159e944f6e42bf22ea292bddfd57c82d403118e60b7c8288bf32dc4"
+      "codec": "A_VORBIS",
+      "reference_encoder": "vorbis",
+      "reference_payload_sha256": "999fa94dda26c095ad20d2f001c38d5ef5e802843dc49ff73098c61e16ad779a",
+      "reference_movie_sha256": "0d351273a159e944f6e42bf22ea292bddfd57c82d403118e60b7c8288bf32dc4",
+      "sha256": "d0a53965b2500c3b6a8a73d4dd0a364fb8661eeb5c131254185271d31a338b11"
     },
     {
       "file": "ac3.mkv",
-      "encoder": "ac3",
-      "sha256": "4337f7088d37caf8eba4b93d3dc39a128273b7cbfd25a752102ca0a32a769a99"
+      "codec": "A_AC3",
+      "reference_encoder": "ac3",
+      "reference_payload_sha256": "1776c0c5bb1b8ec63ee226fddcef291217f9acb570c6de8611f6f309f0aef2a0",
+      "reference_movie_sha256": "4337f7088d37caf8eba4b93d3dc39a128273b7cbfd25a752102ca0a32a769a99",
+      "sha256": "49ba85c87627f28d35ca8b3a5e6c2d7aabaffe365756333e0d703560ba03659a"
     }
   ]
 }

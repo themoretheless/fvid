@@ -1,0 +1,162 @@
+{
+  "provenance": "Authored no-envelope XM release/restore rows versus independent C00 or split-row volume-zero controls. Signed16 looping wave and authored VP9/PCM companion inherited from the owned key-off generator. No private media,network,encoder or copied codec parameters. Controls test channel-volume state,not full FT2 bit-exact synthesis.",
+  "cases": [
+    {
+      "name": "note-off-note-only",
+      "file": "note-off-note-only.xm",
+      "control": "note-off-note-only-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-note-resume",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "k00-note-only",
+      "file": "k00-note-only.xm",
+      "control": "k00-note-only-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-note-resume",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "note-off-volume-only",
+      "file": "note-off-volume-only.xm",
+      "control": "note-off-volume-only-control.xm",
+      "before_failure": true,
+      "kind": "blocked-volume-restore",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "k00-volume-only",
+      "file": "k00-volume-only.xm",
+      "control": "k00-volume-only-control.xm",
+      "before_failure": true,
+      "kind": "blocked-volume-restore",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "note-off-instrument-only",
+      "file": "note-off-instrument-only.xm",
+      "control": "note-off-instrument-only-control.xm",
+      "before_failure": true,
+      "kind": "blocked-volume-restore",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "note-off-fine-volume",
+      "file": "note-off-fine-volume.xm",
+      "control": "note-off-fine-volume-control.xm",
+      "before_failure": true,
+      "kind": "blocked-volume-restore",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "explicit-instrument-control",
+      "file": "explicit-instrument-control.xm",
+      "control": "explicit-instrument-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy-control",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "no-restore-control",
+      "file": "no-restore-control.xm",
+      "control": "no-restore-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy-control",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "explicit-volume-note-control",
+      "file": "explicit-volume-note-control.xm",
+      "control": "explicit-volume-note-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy-control",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "global-volume-control",
+      "file": "global-volume-control.xm",
+      "control": "global-volume-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy-control",
+      "duration_ms": 600,
+      "post_row": 2
+    },
+    {
+      "name": "k03-note-only",
+      "file": "k03-note-only.xm",
+      "control": "k03-note-only-control.xm",
+      "before_failure": true,
+      "kind": "unexpected-note-resume",
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "note-off-same-row-volume",
+      "file": "note-off-same-row-volume.xm",
+      "control": "note-off-same-row-volume-control.xm",
+      "before_failure": true,
+      "kind": "blocked-volume-restore",
+      "duration_ms": 600,
+      "post_row": 1
+    },
+    {
+      "name": "k00-same-row-instrument",
+      "file": "k00-same-row-instrument.xm",
+      "control": "k00-same-row-instrument-control.xm",
+      "before_failure": true,
+      "kind": "blocked-volume-restore",
+      "duration_ms": 600,
+      "post_row": 1
+    },
+    {
+      "name": "natural-end-control",
+      "file": "natural-end-control.xm",
+      "control": "natural-end-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy-control",
+      "duration_ms": 600,
+      "post_row": 2
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "note-off-note-only.xm": "dc7aedaffe06f87e75f4f6e4fe45f03f218e121c997193f91a4a6f51762d674d",
+    "note-off-note-only-control.xm": "925cfea6776c6e18a4b42d3c6c495673b1d33516f3a991d4ac8454c397d438b8",
+    "k00-note-only.xm": "cc878f6d63fb390adc54920660e3c283fb1a99954ef52d1f2e398ee9c8afffb5",
+    "k00-note-only-control.xm": "925cfea6776c6e18a4b42d3c6c495673b1d33516f3a991d4ac8454c397d438b8",
+    "note-off-volume-only.xm": "69571eb5b979893a036ae08a3250f0032423eea1a600adc1a800bfc943b55baf",
+    "note-off-volume-only-control.xm": "98a80bb7f2fc6414dc08342033e36863897431dea034b5f4c7b070fc25f260dc",
+    "k00-volume-only.xm": "6105c980ae428d33e1d29649ec8b4281ad0d02626cfd8e8650e6f492023e828a",
+    "k00-volume-only-control.xm": "98a80bb7f2fc6414dc08342033e36863897431dea034b5f4c7b070fc25f260dc",
+    "note-off-instrument-only.xm": "181abb42277e0f0bb1f75776475c1761e0a42ebeed62c3e1656b2c8ac072c48f",
+    "note-off-instrument-only-control.xm": "a4818eea11f0dee3aefcf0d54c3701f72fe6416c7f0015cbb285219d054523ae",
+    "note-off-fine-volume.xm": "a27a2bcf0bf3e19cfc56e5b4e1b4c478190213af88adb465485a25a5a5152238",
+    "note-off-fine-volume-control.xm": "354ffd2949531319e8ba119e6d0a8badb472f3a96d66e27ae8d65bd6f8198a27",
+    "explicit-instrument-control.xm": "f91c6becb72e9d777b60ab82a9038393b4599607c0e151ac1c75228d786d5e00",
+    "explicit-instrument-control-control.xm": "a75de90e88dd096353085eaf926b26b2dfb6927cd5eb26093fcadf30fde86582",
+    "no-restore-control.xm": "a304a9976655ad9e2faf3e63ac327c8ffe4e65dc805680688d369a8bc0fbd3a5",
+    "no-restore-control-control.xm": "cf3352489f4c6fa20596522c28d72afa0a80e7fa24abf7e79216574980f2ee02",
+    "explicit-volume-note-control.xm": "e61b08bbe8fa5127da4b155404defd315770dbd152d882d27ba2e4d41c969718",
+    "explicit-volume-note-control-control.xm": "c520d15abf52717f71a74802da38780c01b813279629fd4bf8878bed08319d2e",
+    "global-volume-control.xm": "d7089a754cc75e7f283e38aa70b744da1f154d22ca69ba8f89a474f2022592b9",
+    "global-volume-control-control.xm": "45e5172d31c882b09351d7f97bfdb4db026f33374615b139619e5c9073faa4c5",
+    "k03-note-only.xm": "66dd859a8cada17b62676263a1c085d54840da000f0c3a7b657c3ca0bbe684ce",
+    "k03-note-only-control.xm": "c52a9e4b63c9781e2271f7d75886b8402953e874ea5b24a77fcbe140de0d0551",
+    "note-off-same-row-volume.xm": "3015caad4d8b55b93e03b4210921b3841e59263bf89008c4f58cb6ae2a416ec6",
+    "note-off-same-row-volume-control.xm": "7656701fc225224a9cefd67185d8186162be5fd00b924bf63ec73974f386c6f4",
+    "k00-same-row-instrument.xm": "e9b011cd42153e16ff8bbe624c55855273c42a9a2dc17712dae97c03e02245b2",
+    "k00-same-row-instrument-control.xm": "7bbcf7a8a5f1a283b7e8d5289ead8dfd9be1783109bf83263038e840f0bca0c1",
+    "natural-end-control.xm": "8d188e664d14ce24c28f22bbc87e573f9145e2a3ad764a49919e05a0ceec9ed7",
+    "natural-end-control-control.xm": "401bd26106587ed3248d94bb538573c5b658df4b8571289a3f572a4c64eec36b"
+  }
+}

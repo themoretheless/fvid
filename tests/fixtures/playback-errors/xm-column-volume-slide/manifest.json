@@ -1,0 +1,235 @@
+{
+  "cases": [
+    {
+      "name": "column-down",
+      "file": "column-down.xm",
+      "control": "column-down-ticks.xm",
+      "volumes": [
+        64,
+        60,
+        56,
+        52
+      ]
+    },
+    {
+      "name": "column-up",
+      "file": "column-up.xm",
+      "control": "column-up-ticks.xm",
+      "volumes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        8,
+        12
+      ]
+    },
+    {
+      "name": "zero-does-not-recall",
+      "file": "zero-does-not-recall.xm",
+      "control": "zero-does-not-recall-ticks.xm",
+      "volumes": [
+        64,
+        60,
+        56,
+        52,
+        52,
+        52,
+        52,
+        52
+      ]
+    },
+    {
+      "name": "clamp-low",
+      "file": "clamp-low.xm",
+      "control": "clamp-low-ticks.xm",
+      "volumes": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "clamp-high",
+      "file": "clamp-high.xm",
+      "control": "clamp-high-ticks.xm",
+      "volumes": [
+        64,
+        64,
+        64,
+        64
+      ]
+    },
+    {
+      "name": "fine-down-tick-zero",
+      "file": "fine-down-tick-zero.xm",
+      "control": "fine-down-tick-zero-ticks.xm",
+      "volumes": [
+        61,
+        61,
+        61,
+        61
+      ]
+    },
+    {
+      "name": "fine-up-tick-zero",
+      "file": "fine-up-tick-zero.xm",
+      "control": "fine-up-tick-zero-ticks.xm",
+      "volumes": [
+        32,
+        32,
+        32,
+        32,
+        35,
+        35,
+        35,
+        35
+      ]
+    },
+    {
+      "name": "column-before-A-up",
+      "file": "column-before-A-up.xm",
+      "control": "column-before-A-up-ticks.xm",
+      "volumes": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "column-before-A-down",
+      "file": "column-before-A-down.xm",
+      "control": "column-before-A-down-ticks.xm",
+      "volumes": [
+        60,
+        60,
+        60,
+        60,
+        60,
+        63,
+        63,
+        63
+      ]
+    },
+    {
+      "name": "Cxx-then-column",
+      "file": "Cxx-then-column.xm",
+      "control": "Cxx-then-column-ticks.xm",
+      "volumes": [
+        32,
+        28,
+        24,
+        20
+      ]
+    },
+    {
+      "name": "column-before-cut",
+      "file": "column-before-cut.xm",
+      "control": "column-before-cut-ticks.xm",
+      "volumes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        4
+      ]
+    },
+    {
+      "name": "column-before-key-off",
+      "file": "column-before-key-off.xm",
+      "control": "column-before-key-off-ticks.xm",
+      "volumes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        4
+      ]
+    },
+    {
+      "name": "column-does-not-write-A-memory",
+      "file": "column-does-not-write-A-memory.xm",
+      "control": "column-does-not-write-A-memory-ticks.xm",
+      "volumes": [
+        32,
+        29,
+        26,
+        23,
+        23,
+        19,
+        15,
+        11,
+        11,
+        8,
+        5,
+        2
+      ]
+    },
+    {
+      "name": "speed-one",
+      "file": "speed-one.xm",
+      "control": "speed-one-ticks.xm",
+      "volumes": [
+        64
+      ]
+    },
+    {
+      "name": "two-channels",
+      "file": "two-channels.xm",
+      "control": "two-channels-ticks.xm",
+      "volumes": [
+        [
+          64,
+          16
+        ],
+        [
+          64,
+          16
+        ],
+        [
+          64,
+          16
+        ],
+        [
+          64,
+          16
+        ],
+        [
+          64,
+          16
+        ],
+        [
+          60,
+          19
+        ],
+        [
+          56,
+          22
+        ],
+        [
+          52,
+          25
+        ]
+      ]
+    }
+  ],
+  "provenance": "Owned signed16loop and authored literal tick-volume controls. No codec tools, network or private media."
+}

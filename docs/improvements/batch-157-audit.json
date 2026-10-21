@@ -1,0 +1,25 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0165"
+  ],
+  "issue": "Ignored out-of-format XM instrument components129/255 may reset channel volume/panning and cancel no-envelope key-off.",
+  "source": "src/codec/xm_decoder.rs",
+  "regression": "tests/xm_invalid_defaults.rs",
+  "fixtures": "tests/fixtures/playback-errors/xm-invalid-defaults",
+  "source_sha256": "17706b64bf31e2b30af0e3b9a0a213bfbdb794d5fc79a1e666798a5f71225bd6",
+  "primary_reference": "evidence/batch-152-reference.json",
+  "primary_scope": "Pinned getNewNote normalizes instrument IDs aboveMAX_INST128 to local inst0,and calls resetVolumes only for nonzero accepted inst. The current decoder ignores selection but later tests raw cell.instrument!=0 before restoring defaults.",
+  "matrix": "Fourteen scores:eight suspected stereo failures and six healthy controls. Independent controls remove only the invalid instrument component,or use C00 for key-off. Populated/valid-empty128 controls must still restore defaults;normal notes/effects and diagnostics remain active.",
+  "qualification": "No production change or accepted ID yet. Present default-level129/255 tests from batch155 do not cover muted/shifted-pan state or K00.",
+  "before": [
+    "evidence/batch-157-before.log",
+    "evidence/batch-157-acceptance-before.log"
+  ],
+  "observed": "Eight stereo failures,six healthy controls. Prefix PCM and diagnostics match expectations. Forced PCM fails on invalid129 mute at11025Hz mono;actual worker fails generation0 packet2 with matching clocks/length after valid companion decode.",
+  "candidate_sha256": "dad4c0a36c95a0f4d96eb229ffe8e8813b8d6e9729cb143706bd2b38e002114f",
+  "implementation": "One accepted-instrument classification controls both selection and default restoration. Invalid components retain their diagnostics and valid notes/effects execute;valid populated or empty128 components retain their legitimate restores.",
+  "historical_control_audit": "evidence/batch-157-historical-controls.log",
+  "historical_scope": "An adapter using frozen actual decoder/container snapshots reproduces six stereo C00/pan faults on the pre-FVID0161 decoder (20 failing rate/channel combinations). Immediate-before has28 failing combinations,including K00 variants;the candidate passes56 exact pairs and all56 current control streams remain unchanged. This supplemental proof does not replace Cargo/worker gates and adds no IDs.",
+  "validation": "batch-157-validation.json"
+}

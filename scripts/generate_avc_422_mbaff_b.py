@@ -9,7 +9,7 @@ from generate_avc_mbaff_direct_samples import CabacWriter
 from generate_avc_field_b_cabac_mixed_samples import mb_type
 from avc_fixture_weights import table as weight_table
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/avc-422-mbaff-b'
-def packet(cabac,topology,aso,mode,pair_vectors=None,poc=2,weights=None,bottom_delta=None,colour_plane=None,monochrome=False):
+def packet(cabac,topology,aso,mode,pair_vectors=None,poc=2,weights=None,bottom_delta=None,colour_plane=None,monochrome=False,full_resolution=False,init=0):
     if monochrome:assert weights is None
     nals=[];direct=not mode.startswith('bi-') and mode not in ['l0','l1'];skip=mode.endswith('-skip');motion=(8,4) if mode=='bi-motion' else (0,0);opposite=mode=='bi-motion'
     code=0 if direct else 1 if mode=='l0' else 2 if mode=='l1' else 3
@@ -22,11 +22,11 @@ def packet(cabac,topology,aso,mode,pair_vectors=None,poc=2,weights=None,bottom_d
         if bottom_delta is not None:b.se(bottom_delta)
         b.u(int(not mode.startswith('temporal')));b.u(0);b.u(0);b.u(0)
         if weights is not None:weight_table(b,weights)
-        if cabac:b.ue(0)
+        if cabac:b.ue(init)
         b.se(0);b.ue(1)
         if cabac:
             while len(b.bits)%8:b.u(1)
-            c=CabacWriter(0,26)
+            c=CabacWriter(init,26)
         for parity in range(2):
             bottom=parity==1 and not field;skipped=skip and parity==1
             if not cabac:
@@ -53,7 +53,7 @@ def packet(cabac,topology,aso,mode,pair_vectors=None,poc=2,weights=None,bottom_d
                     for list_index in active:
                         for axis,v in enumerate(vectors[list_index]):c.mvd(axis,0 if bottom else v,abs(v) if bottom else 0)
                 for ctx in ([75,76,75,76] if bottom else [73,74,75,76]):c.decision(ctx,0)
-                if not monochrome:c.decision(77,0)
+                if not monochrome and not full_resolution:c.decision(77,0)
         if cabac:b.bits.extend(c.finish())
         nal=b.nal(0x01,trailing=not cabac);nals.append(nal)
     if aso:nals.reverse()

@@ -1,0 +1,20 @@
+{
+  "status": "investigating",
+  "candidate": "FVID-0179",
+  "source": "src/container/mp4.rs",
+  "source_sha256": "aa8e4936e837e38646647b79d0404332536393b57c65e4db4b63b35e8f6ce08f",
+  "before_snapshot": "evidence/batch-172-mp4-before.rs",
+  "problem": "Negating signed32bit trun.data_offset inside i32 cannot represent i32MIN. Debug/checked builds panic;unchecked builds wrap and falsely reject even a legitimate MIN displacement.",
+  "primary_reference": "https://b.goeswhere.com/ISO_IEC_14496-12_2015a.pdf",
+  "reference_provenance": "ISO/IEC14496-12:2015,8.8.8:data_offset is signed32bit relative to tfhd base. Use the complete representable range before checked absolute-address resolution.",
+  "fixtures": "tests/fixtures/playback-errors/mp4-signed-offset",
+  "scope": "Pure owned3-frame16x16 VP9. Positive and ordinary negative controls;short MIN and adjacent-underflow refusals. Stored prefix/footer plans specify valid negative2147483648/2147483647 displacement across a free box. Virtual Read+Seek interprets stored segments and implicit zero padding;ordinary tests do not generate media or allocate/write gigabytes.",
+  "requirements": [
+    "Before fixing identify the exact i32 negation overflow panic on malformed small and legal virtual MIN inputs. Adjacent negative boundary must already parse and play correctly.",
+    "Convert the unsigned magnitude through unsigned_abs,then preserve checked base subtraction. Corrupt small MIN must return exact Invalid before-base error without unwind;legal virtual MIN must index exact packets and actually decode analytic VP9 planes/RGB.",
+    "Preserve all3 PTS/duration intervals,public clamped seek,rewind,natural/repeated EOF,sample/packet budgets,metadata andactual read bounds. Stored input<=32KiB;index/read3 packets<64KiB;full native playback/navigation<128KiB actual reads,per-read<=64KiB.",
+    "Run related MP4 integrations,units,minimal configuration,fixture reproduction and player build. No performance or GUI claims."
+  ],
+  "implementation_plan": "Replace the single negation/conversion operand by u64::from(shift.unsigned_abs()). Preserve signed offset interpretation,checked base subtraction and all other fragment/descriptor logic.",
+  "counting": "One signed trun offset magnitude overflow fix,including legal negative-MIN acceptance and corrupt underflow refusal. No additional IDs for virtual adapters,adjacent values,fixtures or tests."
+}

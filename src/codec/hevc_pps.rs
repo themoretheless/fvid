@@ -137,15 +137,18 @@ pub struct Pps {
     pub act_qp_offsets: [i8; 3],
 }
 impl Pps {
-    pub(crate) fn referenced_sps_id(nal: &[u8], budget: usize) -> Result<u8> {
+    pub(crate) fn identifiers(nal: &[u8], budget: usize) -> Result<(u8, u8)> {
         let rbsp = NalRbsp::parse(nal, budget)?;
         rbsp.header.require_base_layer()?;
         if rbsp.header.unit_type != 34 {
             return Err(invalid("expected HEVC PPS NAL"));
         }
         let b = &mut BitReader::new(&rbsp.bytes);
-        ue(b, 63)?;
-        Ok(ue(b, 15)? as u8)
+        let id = ue(b, 63)? as u8;
+        Ok((id, ue(b, 15)? as u8))
+    }
+    pub(crate) fn referenced_sps_id(nal: &[u8], budget: usize) -> Result<u8> {
+        Self::identifiers(nal, budget).map(|ids| ids.1)
     }
     pub fn parse(nal: &[u8], sps: &Sps, budget: usize) -> Result<Self> {
         Ok(Self::parse_internal(nal, sps, budget, None)?.pps)

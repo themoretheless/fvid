@@ -48,7 +48,7 @@ def direct(values):
     if refs==[None,None]:return [(0,(0,0)),(0,(0,0))]
     return [False if ref is None else (ref,predict(values[i],ref)) for i,ref in enumerate(refs)]
 
-def state(topology,mode,negative):
+def state(topology,mode,negative,direct_by_address=None):
     _,_,partition=parts(mode);cells_out={};deltas={}
     for pair,field in enumerate(MODES[topology]):
         cells={}
@@ -62,7 +62,7 @@ def state(topology,mode,negative):
             frozen=[neighbours(0,0,16,i) for i in range(2)]
             for index,(x,y,w,h,group,pred) in enumerate(partition):
                 values=[False,False]
-                if pred=='direct':values=direct(frozen)
+                if pred=='direct':values=direct(frozen)if direct_by_address is None else direct_by_address[address]
                 else:
                     for list_index in range(2):
                         if not uses(pred,list_index):continue
@@ -76,19 +76,29 @@ def state(topology,mode,negative):
     assert len(cells_out)==128
     return cells_out,deltas
 
-def coded_packet(cabac,topology,mode,negative,aso,weights=None,poc=2,bottom_delta=None):
-    code,subcodes,partition=parts(mode);_,deltas=state(topology,mode,negative);nals=[]
+def coded_packet(cabac,topology,mode,negative,aso,weights=None,poc=2,bottom_delta=None,full_resolution=False,init=0,spatial=True,residual=None,filter_mode=1,keep_reference=False,eight=False):
+    assert residual is None or full_resolution
+    code,subcodes,partition=parts(mode)
+    allow8=subcodes is None or all(c<=3 for c in subcodes)
+    assert not eight or allow8
+    if residual is not None:
+        from avc_cabac_444_writer import Cabac444Writer
+        from generate_avc_444_mbaff_inter import single
+        from generate_avc_444_deblock import coefficient
+    _,deltas=state(topology,mode,negative);nals=[]
     for pair,field in enumerate(MODES[topology]):
         b=Writer();b.ue(pair);b.ue(1);b.ue(0);b.u(2,4);b.u(0);b.u(poc,4)
         if bottom_delta is not None:b.se(bottom_delta)
-        b.u(1);b.u(0);b.u(0);b.u(0)
+        b.u(int(spatial));b.u(0);b.u(0);b.u(0)
         if weights is not None:weight_table(b,weights)
-        if cabac:b.ue(0)
-        b.se(0);b.ue(1)
+        if keep_reference:b.u(0)
+        if cabac:b.ue(init)
+        b.se(0);b.ue(filter_mode)
+        if filter_mode!=1:b.se(0);b.se(0)
         if cabac:
             while len(b.bits)%8:b.u(1)
-            c=CabacWriter(0,26)
-        refs=[{},{}];mags=[{},{}]
+            c=(Cabac444Writer if residual is not None else CabacWriter)(init,26)
+        refs=[{},{}];mags=[{},{}];cbfs=[{}, {}, {}]
         for parity in range(2):
             address=pair*2+parity;ox=pair%2*16;oy=pair//2*32+(parity if field else parity*16);step=2 if field else 1;bottom=parity==1 and not field
             if not cabac:
@@ -135,12 +145,36 @@ def coded_packet(cabac,topology,mode,negative,aso,weights=None,poc=2,bottom_delt
                         for axis,v in enumerate(delta):c.mvd(axis,v,a[axis]+top[axis])
                     for row in range(y,y+h):
                         for col in range(x,x+w):mags[list_index][(ox+col,oy+row*step)]=tuple(abs(v) for v in delta)
-            if not cabac:b.ue(0)
+            if not cabac:
+                b.ue(9 if residual is not None else 0)
+                if residual is not None:
+                    if allow8:b.u(int(eight))
+                    b.se(0)
             else:
-                for ctx in ([75,76,75,76] if bottom else [73,74,75,76]):c.decision(ctx,0)
-                c.decision(77,0)
+                for ctx in ([73]*4 if residual is not None else[75,76,75,76]if bottom else[73,74,75,76]):c.decision(ctx,int(residual is not None))
+                if not full_resolution:c.decision(77,0)
+                if residual is not None:
+                    if allow8:c.decision(399+int(bottom and eight),int(eight))
+                    c.decision(60,0)
+            if residual is not None:
+                for p in range(3):
+                    for block in range(4 if eight else 16):
+                        if eight:x,y=block%2*8,block//2*8;side=8
+                        else:x,y=((block&1)+((block>>2)&1)*2)*4,(((block>>1)&1)+(block>>3)*2)*4;side=4
+                        xx,yy=ox+x,oy+y*step;active=residual(p,address,block,eight);sign=-1 if(p+pair+parity+block)%2 else 1
+                        if cabac:
+                            inc=int(cbfs[p].get((xx-1,yy),False))+2*int(cbfs[p].get((xx,yy-step),False))
+                            single(c,p,eight,field,inc,sign,zero=not active)
+                        elif eight:
+                            for sub in range(4):
+                                if active and sub==3:coefficient(b,4*sign,0)
+                                else:b.u(1)
+                        elif active:coefficient(b,sign,1)
+                        else:b.u(1)
+                        for row in range(side):
+                            for col in range(side):cbfs[p][(xx+col,yy+row*step)]=active
         if cabac:b.bits.extend(c.finish())
-        nals.append(b.nal(0x01,trailing=not cabac))
+        nals.append(b.nal(0x41 if keep_reference else 0x01,trailing=not cabac))
     if aso:nals.reverse()
     return b''.join(len(n).to_bytes(4,'big')+n for n in nals)
 

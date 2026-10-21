@@ -254,7 +254,7 @@ fn sequence_failure_is_terminal_and_matroska_concat_discards_partial_output() {
 }
 
 #[test]
-fn codec_delay_and_signed_padding_preserve_audible_aac_samples() {
+fn codec_delay_and_signed_padding_preserve_container_clock_and_audible_aac_samples() {
     use matroska_write::{Encoding, PacketWriter, TrackOptions, TrackSpec};
     let data = std::fs::read(fixture("aac-mono-44k.aac")).unwrap();
     let source = adts::Aac::parse(&data, &Default::default()).unwrap();
@@ -264,7 +264,7 @@ fn codec_delay_and_signed_padding_preserve_audible_aac_samples() {
     };
     let mut original = Vec::new();
     fvid::native_media::decode_aac_pcm(&data, &mut original, &Default::default()).unwrap();
-    for (delay, head, tail) in [(128, 0, 256), (0, 128, 256)] {
+    for (delay, head, tail) in [(128, 0, 256), (0, 128, 256), (64, 128, 256)] {
         let mut output = std::io::Cursor::new(Vec::new());
         let mut writer = PacketWriter::new_with_options(
             &mut output,
@@ -318,13 +318,19 @@ fn codec_delay_and_signed_padding_preserve_audible_aac_samples() {
             Some(ns(source.packets() as u64 * 1024) - ns(delay) - ns(tail))
         );
         let mut decoded = Vec::new();
-        fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut decoded, None)
+        let stats = fvid::native_media::decode_matroska_aac_pcm_interval(output.get_ref(), &mut decoded, None)
             .unwrap();
         let stride = usize::from(source.channels) * 4;
-        assert_eq!(
-            decoded,
-            original[(delay.max(head) as usize * stride)..original.len() - tail as usize * stride]
-        );
+        // This API addresses the container clock from zero, not concatenated
+        // audible windows. Head padding removes samples without shifting later
+        // timestamps; any portion after CodecDelay therefore remains silence.
+        let mut expected = vec![0; head.saturating_sub(delay) as usize * stride];
+        expected.extend_from_slice(&original[(delay.max(head) as usize * stride)..original.len() - tail as usize * stride]);
+        assert_eq!(stats.sample_frames as usize, original.len() / stride - delay as usize - tail as usize);
+        assert_eq!(decoded.len(), expected.len(), "delay={delay}, head={head}");
+        for (frame, (actual, wanted)) in decoded.chunks_exact(stride).zip(expected.chunks_exact(stride)).enumerate() {
+            assert_eq!(actual, wanted, "PCM frame {frame}, delay={delay}, head={head}");
+        }
     }
 }
 

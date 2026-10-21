@@ -1,0 +1,8 @@
+quoted_attribute=[Cue { start: 0ns, end: 2s, text: "Caption" }]
+plain_control=[Cue { start: 1s, end: 2s, text: "Caption" }]
+
+thread 'main' (1732709) panicked at /private/tmp/fvid-sami-attribute-audit.rs:7:2:
+assertion `left == right` failed: attribute-looking text inside title must not set Begin
+  left: [Cue { start: 0ns, end: 2s, text: "Caption" }]
+ right: [Cue { start: 1s, end: 2s, text: "Caption" }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

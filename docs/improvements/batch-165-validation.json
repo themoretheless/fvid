@@ -1,0 +1,54 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0173"
+  ],
+  "checked_at": "2026-10-21T10:55:58.243257+00:00",
+  "sources": [
+    "src/container/avi.rs"
+  ],
+  "regressions": [
+    "tests/avi_riff_boundary.rs"
+  ],
+  "before": [
+    "evidence/batch-165-avi-before.rs",
+    "evidence/batch-165-tests-before.rs",
+    "evidence/batch-165-before.log",
+    "evidence/batch-165-acceptance-before.log",
+    "evidence/batch-165-parser-before-replay.rs",
+    "evidence/batch-165-parser-before-replay.log"
+  ],
+  "primary_reference": "batch-165-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-165-after.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-165-root-units.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-165-core.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-165-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-165-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "qualification": [
+    "Eight authored AVI wrappers with0/2/4-byte or header-only RIFF declarations admit mandatory lists outside the form and decode exact IMA/MS predictor PCM. An empty4-byte-root case also reaches the actual worker. Two complete first-RIFF buffers incorrectly refuse because an outside idx1 claims a video stream is audio. Baseline6 passed/4 ignored;all4 forced acceptances fail at the specific boundary/index admission.",
+    "Validate that the RIFF declaration includes its form type,then walk only to min(declared+8,actual bytes). Wide conversion preserves clamping on overdeclared/sentinel roots. The full input byte budget is still enforced before selecting the first RIFF;outside-index acceptance checks exact and one-byte-too-small budgets.",
+    "Six complete/overdeclared/sentinel controls and two complete-first-RIFF outside-index cases retain independent literal predictor PCM and16 worker target variants for navigation,rewind and EOF. Eight outside-list cases refuse before audio source admission. Owned AVI includes VP9;the separate Matroska companion is decoded as an independent video control.",
+    "Scope is the legacy first-RIFF reader. This does not add full OpenDML,certify global validity of arbitrary trailing structures,or change the existing clamped overdeclared-root profile. Public signatures and decoder arithmetic are unchanged.",
+    "The first related unit run failed14 tests because its old helper wrote RIFF size0 in every synthetic file.17 frozen pre-fix parser units pass with that helper,confirming the old admission. Test-only maintenance now writes the actual root size and grows it when adding an intentional extra index entry. Every original refusal/resource assertion remains. The production prefix is byte-identical across this maintenance;it adds zero IDs.",
+    "17 integrations,34 related root units,7 core regressions,fixture reproduction and player build pass.17 candidate parser units also pass as supplemental preflight. No physical-device,GUI,performance or full-codec qualification is claimed.",
+    "The first parser adapter expected the outside idx1 length mismatch,but its00wb names a video stream,so an earlier explicit index/audio identity contradiction is the correct baseline. Only that assertion was repaired;authored media bytes were unchanged. This maintenance adds no IDs."
+  ],
+  "counting": "One AVI outer-RIFF boundary defect,covering both outside-list false admission and outside-index interference. No separate IDs for IMA/MS,size/profile variants,test repairs or fixtures."
+}

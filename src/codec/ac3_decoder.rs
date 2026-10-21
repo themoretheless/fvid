@@ -327,11 +327,10 @@ const DITHER_SEED: u32 = 0x9E37_79B9;
 /// signed power of two and the bottom five refine it, with the all-zeros code
 /// standing for unity.
 pub(crate) fn dynrng_gain(code: i32) -> f32 {
-    if code == 0 {
-        return 1.0;
-    }
-    let exponent = (code >> 5) - if code & 0x20 == 0 { 8 } else { 0 };
-    2f32.powi(exponent + 1) * (32 + (code & 0x1f)) as f32 / 64.0
+    // Table 6.29: the upper three bits form a signed integer. The lower
+    // five bits refine a normalized mantissa; 0x00 consequently means unity.
+    let exponent=(code>>5)-if code & 0x80!=0 {8}else{0};
+    2f32.powi(exponent)*(32+(code & 0x1f)) as f32/32.0
 }
 
 /// A coded mantissa of a symmetric quantizer as a fraction: the levels are spread
@@ -611,6 +610,35 @@ pub fn syncframe(bytes: &[u8]) -> Option<Syncframe> {
         channels: header.native_channels() as u16,
         frame_bytes: header.frame_bytes,
     })
+}
+
+/// Header geometry suitable for automatic container setup. Unlike `syncframe`,
+/// this requires the complete declared frame and the decoder's full-frame CRC
+/// check. A damaged header must not override trustworthy container geometry.
+/// This does not change the decoder's existing silence-concealment policy.
+pub fn checked_syncframe(bytes: &[u8]) -> Option<Syncframe> {
+    let header=syncframe(bytes)?;
+    let frame=bytes.get(..header.frame_bytes)?;
+    frame_crc_valid(frame).then_some(header)
+}
+
+/// WAVE speaker mask in the native PCM order used by Folding. Channel count
+/// alone cannot distinguish stereo+LFE from three front channels.
+pub(crate) fn decoded_speaker_mask(layout: usize, lfe: bool, declared: u16) -> Result<u32> {
+    let widths = [2u16,1,2,3,3,4,4,5];
+    let masks = [0x3u32,0x4,0x3,0x7,0x103,0x107,0x603,0x607];
+    let width = *widths.get(layout).ok_or_else(|| invalid("invalid Dolby channel mode"))? + u16::from(lfe);
+    if declared == width {return Ok(masks[layout] | if lfe {8}else{0});}
+    match declared {
+        1 => Ok(4),
+        2 => Ok(3),
+        _ => Err(invalid("Dolby decoded channel count has no native layout or downmix")),
+    }
+}
+/// Speaker assignment for the PCM emitted at the requested channel count.
+pub fn speaker_mask(data: &[u8], channels: u16) -> Result<u32> {
+    let h = Header::read(&mut Bits::new(data)).ok_or_else(|| invalid("invalid AC-3 speaker header"))?;
+    decoded_speaker_mask(h.acmod,h.lfeon,channels)
 }
 
 /// The bit allocation parameters a block states, held between blocks because a
@@ -1101,9 +1129,9 @@ impl Strategy {
             for bnd in 0..self.bnd {
                 band_phs[bnd] = bits.flag();
             }
-        } else {
-            self.phsflginu = false;
         }
+        // Without new coordinates the phase flags are reused too. The
+        // coupling strategy owns phsflginu; a quiet cplcoe must not clear it.
         for ch in 0..header.nfchans {
             if !self.incpl[ch] || !coordinates[ch] {
                 continue;
@@ -1334,19 +1362,13 @@ impl Tables {
         }
         for k in 0..FFT {
             // The positive sign is the inverse kernel Section 7.9.4.1 step 3 sums
-            // with; the normalization it omits is `ifft_scale`'s.
+            // with (unnormalized).
             let angle = core::f32::consts::TAU * k as f32 / FFT as f32;
             tables.twc[k] = angle.cos();
             tables.tws[k] = angle.sin();
         }
         tables
     }
-}
-
-/// The factor a complex inverse transform of this length carries and the standard's
-/// pseudocode leaves out.
-const fn ifft_scale(n: usize) -> f32 {
-    1.0 / (n as f32)
 }
 
 /// How a frame's planes reach the track's declared channels: a weight per plane for
@@ -1360,6 +1382,34 @@ pub(crate) struct Folding {
 }
 
 impl Folding {
+    /// Preserve output geometry when an invalid frame contributes silence.
+    pub(crate) fn silence(width:usize)->Self {
+        Self {width,weight:[[0.0;PLANES];SLOTS]}
+    }
+    /// Finalize already reconstructed/corrected native PCM with the original
+    /// block's gain and mixing matrix. No inverse transform is repeated here.
+    pub(crate) fn write_pcm(&self,pcm:&[[f32;SAMPLES];PLANES],gains:&[f32;PLANES],out:&mut Vec<f32>,clip:bool) {
+        for n in 0..SAMPLES {
+            for output in 0..self.width {
+                let mut value = 0.0f32;
+                for plane in 0..PLANES {
+                    let weight = self.weight[output][plane];
+                    if weight != 0.0 {
+                        value += weight * gains[plane] * pcm[plane][n];
+                    }
+                }
+                out.push(if clip {value.clamp(-1.0,1.0)}else{value});
+            }
+        }
+    }
+    /// Preserve coded plane order for an E-AC-3 dependent stream. Its custom
+    /// channel map, rather than acmod speaker positions, owns the output order.
+    pub(crate) fn coded(header: Header) -> Self {
+        let mut result=Self {width:header.native_channels(),weight:[[0.0;PLANES];SLOTS]};
+        for ch in 0..header.nfchans {result.weight[ch][ch]=1.0;}
+        if header.lfeon {result.weight[header.nfchans][LFE]=1.0;}
+        result
+    }
     /// The folding for a frame, or `None` when the declared channel count matches
     /// neither the frame's own layout nor a downmix the standard defines. The
     /// downmix coefficients come from Section 7.8.2; the optional pre-scaling that
@@ -1694,11 +1744,10 @@ impl Ac3Decoder {
 /// coupling and rematrixing restoration, the inverse transform and the folding of
 /// planes into channels.
 ///
-/// Annex E (E-AC-3) decodes audio exactly this way and changes only the side
-/// information above it - where the exponent strategies come from, which frame
-/// supplies them, and how the offsets are laid out - so its reader drives this core
-/// rather than repeating it. Section 3.3 of the annex names the parameters it
-/// modifies and leaves the rest of the core's behaviour to Section 7.
+/// Conventional Annex E planes share this core. Adaptive hybrid transform planes
+/// share its exponent/masking calculation but select high-efficiency allocation,
+/// reconstruct their six-block spectrum separately, then reuse the same inverse
+/// MDCT, overlap, rematrixing and output folding.
 pub(crate) struct Core {
     pub(crate) strategy: Strategy,
     /// Transform coefficients per plane: the only thing that crosses a block's
@@ -1742,6 +1791,9 @@ impl Core {
     /// Bit allocation for every plane the frame carries, in the standard's own order:
     /// each full-bandwidth channel, the coupling plane, then the LFE.
     pub(crate) fn allocate_all(&mut self, header: Header) {
+        self.allocate_all_aht(header, [false; PLANES]);
+    }
+    pub(crate) fn allocate_all_aht(&mut self, header: Header, aht: [bool; PLANES]) {
         if self.all_snr_offsets_zero(header) {
             for plane in 0..PLANES {
                 self.strategy.bap[plane] = [0; BINS];
@@ -1749,13 +1801,13 @@ impl Core {
             return;
         }
         for plane in 0..header.nfchans {
-            self.bit_allocation(plane, header.rate);
+            self.bit_allocation(plane, header.rate, aht[plane]);
         }
         if self.strategy.cplinu {
-            self.bit_allocation(CPL, header.rate);
+            self.bit_allocation(CPL, header.rate, aht[CPL]);
         }
         if header.lfeon {
-            self.bit_allocation(LFE, header.rate);
+            self.bit_allocation(LFE, header.rate, aht[LFE]);
         }
     }
 
@@ -1781,7 +1833,7 @@ impl Core {
     /// The seven steps of Section 7.2.2, run over one plane's exponent set. Every
     /// step is integer arithmetic on a 14-bit accumulator because the result has to
     /// match what the encoder assumed when it packed the mantissas.
-    fn bit_allocation(&mut self, plane: usize, fscod: usize) {
+    fn bit_allocation(&mut self, plane: usize, fscod: usize, aht: bool) {
         let start = self.strategy.start[plane];
         let end = self.strategy.end[plane];
         if end <= start {
@@ -1914,7 +1966,7 @@ impl Core {
             level = (level & 0x1fe0) + floor;
             while bin < lastbin {
                 let address = ((psd[bin] - level) >> 5).clamp(0, 63) as usize;
-                self.strategy.bap[plane][bin] = BAPTAB[address];
+                self.strategy.bap[plane][bin] = if aht {super::eac3_decoder::aht::HEBAP[address]}else{BAPTAB[address]};
                 bin += 1;
             }
             band += 1;
@@ -1930,6 +1982,10 @@ impl Core {
     /// next channel's, which is where Table 5.3 puts it; the grouped quantizers share
     /// half-filled groups across those runs, so the group state is reset here rather
     /// than per plane.
+    pub(crate) fn begin_mantissas(&mut self) {
+        self.coef = [[0.0; BINS]; PLANES];
+        self.scratch.groups = [Group::default(); 3];
+    }
     pub(crate) fn mantissas(&mut self, header: Header, bits: &mut Bits<'_>) {
         for plane in 0..PLANES {
             self.coef[plane] = [0.0; BINS];
@@ -1954,7 +2010,7 @@ impl Core {
     /// applies dither after the individual channels are extracted from the coupling
     /// channel, so an unallocated coupling bin is restored in `decouple` instead. That
     /// ordering is also what keeps the noise in the two channels uncorrelated.
-    fn plane_mantissas(&mut self, bits: &mut Bits<'_>, plane: usize) {
+    pub(crate) fn plane_mantissas(&mut self, bits: &mut Bits<'_>, plane: usize) {
         let start = self.strategy.start[plane];
         let end = self.strategy.end[plane];
         if std::env::var("EAC3_TRACE").is_ok() {
@@ -1992,6 +2048,7 @@ impl Core {
     /// random: consecutive draws are uncorrelated with the coded mantissas they sit
     /// between, and every call advances the decoder's own state, so a run of zero-bit
     /// bins hands out a run of different values rather than one fixed offset.
+    pub(crate) fn aht_noise(&mut self) -> f32 { self.dice() * (0.5 / DITHER_SCALE) }
     fn dice(&mut self) -> f32 {
         self.dither_state = self
             .dither_state
@@ -2083,6 +2140,17 @@ impl Core {
         }
     }
 
+    /// A coupled bin before its channel coordinate is applied. Zero-allocation
+    /// bins use the channel's dither choice, for ordinary and enhanced coupling.
+    pub(crate) fn coupled_mantissa(&mut self, channel: usize, bin: usize) -> f32 {
+        if self.strategy.bap[CPL][bin] != 0 {
+            self.coef[CPL][bin]
+        } else if self.strategy.dither[channel] {
+            let exponent=self.strategy.exp[CPL][bin].clamp(0,24) as usize;
+            self.dice()*POW2[exponent]
+        } else {0.0}
+    }
+
     /// Undo the sums and differences the 2/0 mode coded in place of left and right.
     pub(crate) fn rematrix_restore(&mut self, header: Header) {
         if header.acmod != 2 {
@@ -2109,34 +2177,36 @@ impl Core {
     /// Inverse transform every plane of the block, overlap it with the last one, and
     /// fold the result into the frame's interleaved samples.
     pub(crate) fn spectrum_to_sound(&mut self, header: Header, folding: &Folding, out: &mut Vec<f32>) {
+        self.spectrum_to_sound_mode(header,folding,out,true);
+    }
+    pub(crate) fn spectrum_to_sound_unclipped(&mut self,header:Header,folding:&Folding,out:&mut Vec<f32>) {
+        self.spectrum_to_sound_mode(header,folding,out,false);
+    }
+    fn spectrum_to_sound_mode(&mut self,header:Header,folding:&Folding,out:&mut Vec<f32>,clip:bool) {
+        let gains=self.output_gains(header);
+        let pcm=self.inverse_planes(header);
+        folding.write_pcm(pcm,&gains,out,clip);
+    }
+
+    /// Native PCM before programme gain, channel folding and clipping. Only
+    /// signalled planes are current; delayed reconstruction must snapshot them.
+    pub(crate) fn inverse_planes(&mut self,header:Header)->&mut [[f32;SAMPLES];PLANES] {
         for ch in 0..header.nfchans {
-            let short = self.strategy.blksw[ch];
-            self.transform(ch, short);
+            self.transform(ch,self.strategy.blksw[ch]);
         }
-        if header.lfeon {
-            self.transform(LFE, false);
-        }
-        // The dynamic range gain is per program, so a 1+1 frame puts its second
-        // program's gain on its second channel.
-        let gains = if header.acmod == 0 {
+        if header.lfeon {self.transform(LFE,false);}
+        &mut self.scratch.pcm
+    }
+
+    /// Capture with a delayed PCM block; later frames may change the strategy.
+    pub(crate) fn output_gains(&self,header:Header)->[f32;PLANES] {
+        if header.acmod == 0 {
             let [first, second] = self.strategy.gain;
             let mut plane = [first; PLANES];
             plane[1] = second;
             plane
         } else {
             [self.strategy.gain[0]; PLANES]
-        };
-        for n in 0..SAMPLES {
-            for output in 0..folding.width {
-                let mut value = 0.0f32;
-                for plane in 0..PLANES {
-                    let weight = folding.weight[output][plane];
-                    if weight != 0.0 {
-                        value += weight * gains[plane] * self.scratch.pcm[plane][n];
-                    }
-                }
-                out.push(value.clamp(-1.0, 1.0));
-            }
         }
     }
 
@@ -2246,11 +2316,12 @@ impl Core {
             im[k] = forward * cos2[k] + back * sin2[k];
         }
         ifft(&mut re, &mut im, &self.tables.twc, &self.tables.tws);
-        let scale = ifft_scale(QUARTER);
         let mut yr = [0.0f32; QUARTER];
         let mut yi = [0.0f32; QUARTER];
         for n in 0..QUARTER {
-            let (zr, zi) = (re[n] * scale, im[n] * scale);
+            // As in `transform_long`, Section 7.9.4.2 step 3 sums the 64-point
+            // complex transform unnormalized.
+            let (zr, zi) = (re[n], im[n]);
             yr[n] = zr * cos2[n] - zi * sin2[n];
             yi[n] = zi * cos2[n] + zr * sin2[n];
         }
@@ -2713,5 +2784,66 @@ mod tests {
                 .expect("and holds audio again"),
         );
         assert_eq!(first, second, "a seek leaves no state behind");
+    }
+}
+
+#[cfg(test)]
+mod speaker_assignment_regressions {
+    use super::*;
+    #[test]
+    fn every_native_dolby_layout_and_downmix_retains_speaker_identity() {
+        for (layout,channels,mask) in [(0,2,3),(1,1,4),(2,2,3),(3,3,7),(4,3,0x103),(5,4,0x107),(6,4,0x603),(7,5,0x607)] {
+            for lfe in [false,true] {
+                let width=channels+u16::from(lfe);
+                assert_eq!(decoded_speaker_mask(layout,lfe,width).unwrap(),mask|if lfe {8}else{0});
+                if width!=1 {assert_eq!(decoded_speaker_mask(layout,lfe,1).unwrap(),4);}
+                if width!=2 {assert_eq!(decoded_speaker_mask(layout,lfe,2).unwrap(),3);}
+            }
+        }
+        assert_eq!(decoded_speaker_mask(1,true,2).unwrap(),0x0c,"centre/LFE is not stereo");
+        assert!(decoded_speaker_mask(8,false,2).is_err());
+        assert!(decoded_speaker_mask(2,true,4).is_err());
+    }
+    #[test]
+    fn existing_ac3_headers_publish_native_and_requested_stereo_masks() {
+        let stereo=include_bytes!("../../tests/fixtures/audio/ac3-stereo.ac3");
+        let surround=include_bytes!("../../tests/fixtures/audio/ac3-51.ac3");
+        assert_eq!(speaker_mask(stereo,2).unwrap(),3);
+        assert_eq!(speaker_mask(surround,6).unwrap(),0x60f);
+        assert_eq!(speaker_mask(surround,2).unwrap(),3);
+        assert!(speaker_mask(&[0x0b,0x77],2).is_err());
+    }
+}
+
+#[cfg(test)]
+mod pre_fold_pcm_regressions {
+    use super::*;
+    #[test]
+    fn corrected_native_planes_are_mixed_before_final_clamp() {
+        let header=Header::annex_e(0,1024,7,true,0.5,0.25);
+        let mixing=Folding::new(header,2).unwrap();
+        let mut pcm=[[0.0;SAMPLES];PLANES];
+        for (plane,value)in [(0,0.1),(1,0.2),(2,0.3),(3,0.4),(4,0.5),(LFE,100.0)]{pcm[plane].fill(value);}
+        let gains=[2.0;PLANES];let mut original=Vec::new();
+        mixing.write_pcm(&pcm,&gains,&mut original,false);
+        assert!((original[0]-0.6).abs()<1e-6);
+        assert!((original[1]-1.05).abs()<1e-6,"LFE must not leak into stereo");
+        // The correction changes the centre plane before either downmix or clip.
+        pcm[1][0]=0.8;pcm[0][1]=-2.0;
+        let mut unclipped=Vec::new();mixing.write_pcm(&pcm,&gains,&mut unclipped,false);
+        assert!((unclipped[0]-1.2).abs()<1e-6);assert!((unclipped[1]-1.65).abs()<1e-6);
+        assert!((unclipped[2]+3.6).abs()<1e-6);
+        let mut clipped=Vec::new();mixing.write_pcm(&pcm,&gains,&mut clipped,true);
+        assert_eq!(&clipped[..4],&[1.0,1.0,-1.0,1.0]);
+    }
+    #[test]
+    fn delayed_dual_programme_pcm_uses_captured_gains() {
+        let header=Header::annex_e(0,1024,0,false,0.5,0.25);
+        let mut core=Core::new();core.strategy.gain=[2.0,3.0];
+        let gains=core.output_gains(header);let mixing=Folding::coded(header);
+        core.strategy.gain=[0.25,0.125];
+        let mut pcm=[[0.0;SAMPLES];PLANES];pcm[0].fill(0.25);pcm[1].fill(0.125);
+        let mut out=Vec::new();mixing.write_pcm(&pcm,&gains,&mut out,false);
+        assert!(out.chunks_exact(2).all(|pair|pair==[0.5,0.375]));
     }
 }

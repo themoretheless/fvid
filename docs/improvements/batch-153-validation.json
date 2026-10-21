@@ -1,0 +1,42 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0160"
+  ],
+  "checked_at": "2026-10-21T00:30:19.159347+00:00",
+  "before": [
+    "evidence/batch-153-before-verified.log",
+    "evidence/batch-153-player-before.rs",
+    "evidence/batch-151-ui-proof.json"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-153-after.log",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-153-related.log",
+      "passed": 34,
+      "ignored": 1,
+      "ignored_reason": "existing physical Metal/VideoToolbox mux requirement"
+    },
+    {
+      "log": "evidence/batch-153-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-153-player-build.log",
+      "exit": 0
+    },
+    {
+      "artifact": "evidence/batch-153-ui-proof.json",
+      "scope": "Physical paused and advancing video,two centered outlined lines,visible and hidden controls,clear at EOF."
+    }
+  ],
+  "qualification": [
+    "Corrected baseline fails all five intended assertions. Earlier wrong Cargo target and texture-delta harness failures are retained as diagnostic evidence only.",
+    "One caption-paint correctness repair. Synthetic words,wrap widths,outline colors,control margin and seek variants do not add IDs.",
+    "Actual UI success uses an independent same-binary launch on copied authored inputs in /private/tmp. Documents-path launch remained before file data;its cause is unproven and no security preference was changed.",
+    "Default window review plus automated widths320/640/1280. Fullscreen,arbitrarily tall captions and performance gains are not claimed."
+  ]
+}

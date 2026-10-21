@@ -1,0 +1,48 @@
+{
+  "provenance": "Four authored XM signed16ramp samples with supported volume-column mute/unmute. Late/initial mute require continuous sample phase after volume restores. Explicit keyoff andunlooped natural-end controls must stay silent. Native smoothing first64frames are excluded from independent steady-phase oracle. Short authored VP9/PCM companion. No encoder/network/private media.",
+  "cases": [
+    {
+      "name": "late-mute",
+      "file": "late-mute.xm",
+      "control": "late-mute-continuous.xm",
+      "mute": 1,
+      "resume": 2,
+      "audible_after": true
+    },
+    {
+      "name": "initial-mute",
+      "file": "initial-mute.xm",
+      "control": "initial-mute-continuous.xm",
+      "mute": 0,
+      "resume": 1,
+      "audible_after": true
+    },
+    {
+      "name": "released-control",
+      "file": "released-control.xm",
+      "control": "released-control-continuous.xm",
+      "mute": 1,
+      "resume": 2,
+      "audible_after": false
+    },
+    {
+      "name": "unlooped-end-control",
+      "file": "unlooped-end-control.xm",
+      "control": "unlooped-end-control-continuous.xm",
+      "mute": 0,
+      "resume": 1,
+      "audible_after": false
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "late-mute.xm": "6a9d8458891ec3992fba7b8ccd7129f6a67993eaf9ad9f7a7c05f3dfb2d4b1ae",
+    "late-mute-continuous.xm": "08fd84e4bfbe1509b6740eb5d4ddf2818afd4ed8d81562c83c7ef00801c5d558",
+    "initial-mute.xm": "acbb6b0220a2a9a6ef2c83db7ec8c1578a30bdffbacc970e412a3157e2552b89",
+    "initial-mute-continuous.xm": "8ca4c77b95333a51a8d7f7f110dd3b51ee90d4a01bfe8a3e1307036946e0ab6e",
+    "released-control.xm": "b8457ccb0cc0268781c825cc541614ce14829f67bea11c264bed86529a4fd762",
+    "released-control-continuous.xm": "98e928c152b762fba74cef375e797869f8636a4670a86f047e6776551b4a1096",
+    "unlooped-end-control.xm": "1ad45b494f6a05821c773fc306f2970a2fe2a414cb52156ec10fd13f5ce7c638",
+    "unlooped-end-control-continuous.xm": "0ef5bf162da2f0579fdf3b01274c3e0660722da345d9966a8e00a77e20c9abcd"
+  }
+}

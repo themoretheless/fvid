@@ -1,5 +1,5 @@
 {
-  "provenance": "Authored20ms PCM/floats/G711 WAVE/AU with complete frame controls and explicitly declared orphan audio bytes. Existing window alignment silently removes those bytes before native decode. Odd mono8 RIFF word pad and AU annotation/footer are valid controls. Matching VP9/PCM video. No private media, encoder or network.",
+  "provenance": "Authored20ms PCM/floats/G711 WAVE/AU/AIFF/AIFC with complete frame controls and explicitly declared orphan audio bytes. Existing window alignment silently removes those bytes before native decode. Odd mono8 RIFF/AIFF word pad and AU annotation/footer are valid controls. Matching VP9/PCM video. No private media, encoder or network.",
   "cases": [
     {
       "name": "wav-int16",
@@ -274,6 +274,143 @@
       "file": "au-odd-mono8.au",
       "expected": "au-odd-mono8.f32le",
       "bad": []
+    },
+    {
+      "name": "aiff-int16",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 1,
+      "file": "aiff-int16.aiff",
+      "expected": "aiff-int16.f32le",
+      "bad": [
+        {
+          "file": "aiff-int16-orphan-1.aiff",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "aiff-int24-stereo",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 2,
+      "file": "aiff-int24-stereo.aiff",
+      "expected": "aiff-int24-stereo.f32le",
+      "bad": [
+        {
+          "file": "aiff-int24-stereo-orphan-1.aiff",
+          "tail": 1
+        },
+        {
+          "file": "aiff-int24-stereo-orphan-5.aiff",
+          "tail": 5
+        }
+      ]
+    },
+    {
+      "name": "aiff-int32",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 1,
+      "file": "aiff-int32.aiff",
+      "expected": "aiff-int32.f32le",
+      "bad": [
+        {
+          "file": "aiff-int32-orphan-1.aiff",
+          "tail": 1
+        },
+        {
+          "file": "aiff-int32-orphan-3.aiff",
+          "tail": 3
+        }
+      ]
+    },
+    {
+      "name": "aiff-float32-stereo",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 2,
+      "file": "aiff-float32-stereo.aiff",
+      "expected": "aiff-float32-stereo.f32le",
+      "bad": [
+        {
+          "file": "aiff-float32-stereo-orphan-1.aiff",
+          "tail": 1
+        },
+        {
+          "file": "aiff-float32-stereo-orphan-7.aiff",
+          "tail": 7
+        }
+      ]
+    },
+    {
+      "name": "aiff-float64",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 1,
+      "file": "aiff-float64.aiff",
+      "expected": "aiff-float64.f32le",
+      "bad": [
+        {
+          "file": "aiff-float64-orphan-1.aiff",
+          "tail": 1
+        },
+        {
+          "file": "aiff-float64-orphan-7.aiff",
+          "tail": 7
+        }
+      ]
+    },
+    {
+      "name": "aiff-int8-stereo",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 2,
+      "file": "aiff-int8-stereo.aiff",
+      "expected": "aiff-int8-stereo.f32le",
+      "bad": [
+        {
+          "file": "aiff-int8-stereo-orphan-1.aiff",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "aiff-alaw-stereo",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 2,
+      "file": "aiff-alaw-stereo.aiff",
+      "expected": "aiff-alaw-stereo.f32le",
+      "bad": [
+        {
+          "file": "aiff-alaw-stereo-orphan-1.aiff",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "aiff-mulaw-stereo",
+      "kind": "aiff",
+      "frames": 160,
+      "channels": 2,
+      "file": "aiff-mulaw-stereo.aiff",
+      "expected": "aiff-mulaw-stereo.f32le",
+      "bad": [
+        {
+          "file": "aiff-mulaw-stereo-orphan-1.aiff",
+          "tail": 1
+        }
+      ]
+    },
+    {
+      "name": "aiff-odd-mono8",
+      "kind": "aiff",
+      "frames": 161,
+      "channels": 1,
+      "file": "aiff-odd-mono8.aiff",
+      "expected": "aiff-odd-mono8.f32le",
+      "bad": []
     }
   ],
   "sha256": {
@@ -337,6 +474,36 @@
     "au-mulaw-stereo.f32le": "d4b20671fefe91b92589015347603c8bf894df3a3d6b179884160f4f8bd56fec",
     "au-mulaw-stereo-orphan-1.au": "005536ea5cb09bb1e14e35807ca97ca242a6444dbdfd2b9ee999c1823d6bb67e",
     "au-odd-mono8.au": "2ab5380ced46f38a738819831b682d2e4b51e6fc88c75f4121972f7753eac482",
-    "au-odd-mono8.f32le": "f245ac783945a3e39580e6ff21922d54d61252e8d5ace64d2e428522245932d6"
+    "au-odd-mono8.f32le": "f245ac783945a3e39580e6ff21922d54d61252e8d5ace64d2e428522245932d6",
+    "aiff-int16.aiff": "a4b94873ed1633b566c249cfa71bff9cfb087c61ea297ebc3b3ce9f0af87f37b",
+    "aiff-int16.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "aiff-int16-orphan-1.aiff": "6cd48021e566fcce79f3ac7b8c92dafc480b6e04baeea0b99bcb031fd467c817",
+    "aiff-int24-stereo.aiff": "c6f24ae762bd1b32ce9a8141a0d41724f6c044f88ad7b8d0ae1eede3ad3e33a3",
+    "aiff-int24-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "aiff-int24-stereo-orphan-1.aiff": "082853dd594f5236b2f5231a37b0509ed6ac2b05ff0a9f6b953c619e9e57a160",
+    "aiff-int24-stereo-orphan-5.aiff": "4714ec627eca8e155e5626fb5dae891f6309a6c92311c29f4fcbe365c3636004",
+    "aiff-int32.aiff": "331f594c4cf480828468c1655c05dfbb181a77d57314fba076fe1c4944d0d90b",
+    "aiff-int32.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "aiff-int32-orphan-1.aiff": "fd3439a1f9cd00dbb091034ba500a70f5a45cd90bc1635e3e7b3eaaab7d1b515",
+    "aiff-int32-orphan-3.aiff": "1903c87e80b6532b064bf24cf2427f2efb75ec89478b64e60103de21aebb4743",
+    "aiff-float32-stereo.aiff": "29f4278f8ffa85d24e30c55b18b64bf76dd6a37708c00a7b4305b651902a48dc",
+    "aiff-float32-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "aiff-float32-stereo-orphan-1.aiff": "3e54fa1a5cdb8aedb269d320b56d3b81081b5211c4a46b8d5a8ca4fb2ee577ec",
+    "aiff-float32-stereo-orphan-7.aiff": "020b94ffba647e29bfd9c1a1433813fb1a8feda3252397d50a0803f343d5dee8",
+    "aiff-float64.aiff": "99d21239c92886dec8a2a3482bf5fb157c792dd4f8b95508a66f703dbad17b29",
+    "aiff-float64.f32le": "85de2166620c7f75f5c98670bf300193abd102f717133036117a044fcacd87f2",
+    "aiff-float64-orphan-1.aiff": "79851c12edf8ba0d738ec68879e905d2ebe8ac424b01a921214857c033119117",
+    "aiff-float64-orphan-7.aiff": "69c7c2db3c0449ecd00b6ae155831220a94a70f4b3371b7bc554e34148fc7fd5",
+    "aiff-int8-stereo.aiff": "bb95d3e856b65758f8945b19f2ff367e3ab9ea82b8a01c5c5595d3c8ac672812",
+    "aiff-int8-stereo.f32le": "63cbf11e5ab20744c306b47599f0105c9a2e870255a267f8859723746b161198",
+    "aiff-int8-stereo-orphan-1.aiff": "aaf856dadaa077a36a1eb30fdf5456267a2548d5c7948604dd5662d879b9b44f",
+    "aiff-alaw-stereo.aiff": "a603ee9363548d53a8a697d066270cfeb2cdfe446b702883a126040a00e8bbd3",
+    "aiff-alaw-stereo.f32le": "717e99cacb2a0d5086746c738f0e7638b4e050c06aa82364a56243c40de75945",
+    "aiff-alaw-stereo-orphan-1.aiff": "09f523eb8719fd374bd1c6c6aee86fb8d0976722e323a2b0dabb4ce492b46f90",
+    "aiff-mulaw-stereo.aiff": "8c7ed4ab6e00f98a960f731d8a2da9f3f3c08c53d7ac1b4224070ea95ac7cbb4",
+    "aiff-mulaw-stereo.f32le": "d4b20671fefe91b92589015347603c8bf894df3a3d6b179884160f4f8bd56fec",
+    "aiff-mulaw-stereo-orphan-1.aiff": "6e1e4164fef4044f2383768d7693e29d76c9bfd2b32c1fe4c3357737777e0758",
+    "aiff-odd-mono8.aiff": "8acb9f5e341c103d0b800cadf9a8f6f049d631ebdcc8b9d39b0798b9b4df3ee0",
+    "aiff-odd-mono8.f32le": "f245ac783945a3e39580e6ff21922d54d61252e8d5ace64d2e428522245932d6"
   }
 }

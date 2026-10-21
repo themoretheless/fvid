@@ -1,0 +1,6735 @@
+{
+  "provenance": "Owned DSD raw/static/adaptive range streams and literal interleaved byte oracles.\nScalar 56-tap PCM controls retain filter history across the three short frames.\nNo external codec, process, network, private input or generated fixture is read.\n",
+  "samples": 128,
+  "cases": [
+    {
+      "name": "raw-mono-p0-silence",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p0-silence.mkv",
+      "oracle": "raw-mono-p0-silence.dsd",
+      "pcm": "raw-mono-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p0-silence-0.wv",
+          "packet": "raw-mono-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p0-silence-1.wv",
+          "packet": "raw-mono-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p0-silence-2.wv",
+          "packet": "raw-mono-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p0-square",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p0-square.mkv",
+      "oracle": "raw-mono-p0-square.dsd",
+      "pcm": "raw-mono-p0-square.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p0-square-0.wv",
+          "packet": "raw-mono-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p0-square-1.wv",
+          "packet": "raw-mono-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p0-square-2.wv",
+          "packet": "raw-mono-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p0-ramp",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p0-ramp.mkv",
+      "oracle": "raw-mono-p0-ramp.dsd",
+      "pcm": "raw-mono-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p0-ramp-0.wv",
+          "packet": "raw-mono-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p0-ramp-1.wv",
+          "packet": "raw-mono-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p0-ramp-2.wv",
+          "packet": "raw-mono-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p0-noise",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p0-noise.mkv",
+      "oracle": "raw-mono-p0-noise.dsd",
+      "pcm": "raw-mono-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p0-noise-0.wv",
+          "packet": "raw-mono-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p0-noise-1.wv",
+          "packet": "raw-mono-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p0-noise-2.wv",
+          "packet": "raw-mono-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p3-silence",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p3-silence.mkv",
+      "oracle": "raw-mono-p3-silence.dsd",
+      "pcm": "raw-mono-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p3-silence-0.wv",
+          "packet": "raw-mono-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p3-silence-1.wv",
+          "packet": "raw-mono-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p3-silence-2.wv",
+          "packet": "raw-mono-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p3-square",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p3-square.mkv",
+      "oracle": "raw-mono-p3-square.dsd",
+      "pcm": "raw-mono-p3-square.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p3-square-0.wv",
+          "packet": "raw-mono-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p3-square-1.wv",
+          "packet": "raw-mono-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p3-square-2.wv",
+          "packet": "raw-mono-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p3-ramp",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p3-ramp.mkv",
+      "oracle": "raw-mono-p3-ramp.dsd",
+      "pcm": "raw-mono-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p3-ramp-0.wv",
+          "packet": "raw-mono-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p3-ramp-1.wv",
+          "packet": "raw-mono-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p3-ramp-2.wv",
+          "packet": "raw-mono-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p3-noise.mkv",
+      "oracle": "raw-mono-p3-noise.dsd",
+      "pcm": "raw-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p3-noise-0.wv",
+          "packet": "raw-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p3-noise-1.wv",
+          "packet": "raw-mono-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p3-noise-2.wv",
+          "packet": "raw-mono-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p4-silence",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p4-silence.mkv",
+      "oracle": "raw-mono-p4-silence.dsd",
+      "pcm": "raw-mono-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p4-silence-0.wv",
+          "packet": "raw-mono-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p4-silence-1.wv",
+          "packet": "raw-mono-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p4-silence-2.wv",
+          "packet": "raw-mono-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p4-square",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p4-square.mkv",
+      "oracle": "raw-mono-p4-square.dsd",
+      "pcm": "raw-mono-p4-square.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p4-square-0.wv",
+          "packet": "raw-mono-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p4-square-1.wv",
+          "packet": "raw-mono-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p4-square-2.wv",
+          "packet": "raw-mono-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p4-ramp",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p4-ramp.mkv",
+      "oracle": "raw-mono-p4-ramp.dsd",
+      "pcm": "raw-mono-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p4-ramp-0.wv",
+          "packet": "raw-mono-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p4-ramp-1.wv",
+          "packet": "raw-mono-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p4-ramp-2.wv",
+          "packet": "raw-mono-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-mono-p4-noise",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "raw-mono-p4-noise.mkv",
+      "oracle": "raw-mono-p4-noise.dsd",
+      "pcm": "raw-mono-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-mono-p4-noise-0.wv",
+          "packet": "raw-mono-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-mono-p4-noise-1.wv",
+          "packet": "raw-mono-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-mono-p4-noise-2.wv",
+          "packet": "raw-mono-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p0-silence.mkv",
+      "oracle": "raw-stereo-p0-silence.dsd",
+      "pcm": "raw-stereo-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p0-silence-0.wv",
+          "packet": "raw-stereo-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p0-silence-1.wv",
+          "packet": "raw-stereo-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p0-silence-2.wv",
+          "packet": "raw-stereo-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p0-square.mkv",
+      "oracle": "raw-stereo-p0-square.dsd",
+      "pcm": "raw-stereo-p0-square.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p0-square-0.wv",
+          "packet": "raw-stereo-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p0-square-1.wv",
+          "packet": "raw-stereo-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p0-square-2.wv",
+          "packet": "raw-stereo-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p0-ramp.mkv",
+      "oracle": "raw-stereo-p0-ramp.dsd",
+      "pcm": "raw-stereo-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p0-ramp-0.wv",
+          "packet": "raw-stereo-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p0-ramp-1.wv",
+          "packet": "raw-stereo-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p0-ramp-2.wv",
+          "packet": "raw-stereo-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p0-noise.mkv",
+      "oracle": "raw-stereo-p0-noise.dsd",
+      "pcm": "raw-stereo-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p0-noise-0.wv",
+          "packet": "raw-stereo-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p0-noise-1.wv",
+          "packet": "raw-stereo-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p0-noise-2.wv",
+          "packet": "raw-stereo-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p3-silence.mkv",
+      "oracle": "raw-stereo-p3-silence.dsd",
+      "pcm": "raw-stereo-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p3-silence-0.wv",
+          "packet": "raw-stereo-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p3-silence-1.wv",
+          "packet": "raw-stereo-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p3-silence-2.wv",
+          "packet": "raw-stereo-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p3-square.mkv",
+      "oracle": "raw-stereo-p3-square.dsd",
+      "pcm": "raw-stereo-p3-square.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p3-square-0.wv",
+          "packet": "raw-stereo-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p3-square-1.wv",
+          "packet": "raw-stereo-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p3-square-2.wv",
+          "packet": "raw-stereo-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p3-ramp.mkv",
+      "oracle": "raw-stereo-p3-ramp.dsd",
+      "pcm": "raw-stereo-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p3-ramp-0.wv",
+          "packet": "raw-stereo-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p3-ramp-1.wv",
+          "packet": "raw-stereo-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p3-ramp-2.wv",
+          "packet": "raw-stereo-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p3-noise.mkv",
+      "oracle": "raw-stereo-p3-noise.dsd",
+      "pcm": "raw-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p3-noise-0.wv",
+          "packet": "raw-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p3-noise-1.wv",
+          "packet": "raw-stereo-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p3-noise-2.wv",
+          "packet": "raw-stereo-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p4-silence.mkv",
+      "oracle": "raw-stereo-p4-silence.dsd",
+      "pcm": "raw-stereo-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p4-silence-0.wv",
+          "packet": "raw-stereo-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p4-silence-1.wv",
+          "packet": "raw-stereo-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p4-silence-2.wv",
+          "packet": "raw-stereo-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p4-square.mkv",
+      "oracle": "raw-stereo-p4-square.dsd",
+      "pcm": "raw-stereo-p4-square.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p4-square-0.wv",
+          "packet": "raw-stereo-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p4-square-1.wv",
+          "packet": "raw-stereo-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p4-square-2.wv",
+          "packet": "raw-stereo-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p4-ramp.mkv",
+      "oracle": "raw-stereo-p4-ramp.dsd",
+      "pcm": "raw-stereo-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p4-ramp-0.wv",
+          "packet": "raw-stereo-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p4-ramp-1.wv",
+          "packet": "raw-stereo-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p4-ramp-2.wv",
+          "packet": "raw-stereo-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-stereo-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-stereo-p4-noise.mkv",
+      "oracle": "raw-stereo-p4-noise.dsd",
+      "pcm": "raw-stereo-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-stereo-p4-noise-0.wv",
+          "packet": "raw-stereo-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-stereo-p4-noise-1.wv",
+          "packet": "raw-stereo-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-stereo-p4-noise-2.wv",
+          "packet": "raw-stereo-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p0-silence.mkv",
+      "oracle": "raw-false-p0-silence.dsd",
+      "pcm": "raw-false-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p0-silence-0.wv",
+          "packet": "raw-false-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p0-silence-1.wv",
+          "packet": "raw-false-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p0-silence-2.wv",
+          "packet": "raw-false-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p0-square.mkv",
+      "oracle": "raw-false-p0-square.dsd",
+      "pcm": "raw-false-p0-square.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p0-square-0.wv",
+          "packet": "raw-false-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p0-square-1.wv",
+          "packet": "raw-false-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p0-square-2.wv",
+          "packet": "raw-false-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p0-ramp.mkv",
+      "oracle": "raw-false-p0-ramp.dsd",
+      "pcm": "raw-false-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p0-ramp-0.wv",
+          "packet": "raw-false-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p0-ramp-1.wv",
+          "packet": "raw-false-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p0-ramp-2.wv",
+          "packet": "raw-false-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p0-noise.mkv",
+      "oracle": "raw-false-p0-noise.dsd",
+      "pcm": "raw-false-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p0-noise-0.wv",
+          "packet": "raw-false-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p0-noise-1.wv",
+          "packet": "raw-false-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p0-noise-2.wv",
+          "packet": "raw-false-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p3-silence.mkv",
+      "oracle": "raw-false-p3-silence.dsd",
+      "pcm": "raw-false-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p3-silence-0.wv",
+          "packet": "raw-false-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p3-silence-1.wv",
+          "packet": "raw-false-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p3-silence-2.wv",
+          "packet": "raw-false-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p3-square.mkv",
+      "oracle": "raw-false-p3-square.dsd",
+      "pcm": "raw-false-p3-square.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p3-square-0.wv",
+          "packet": "raw-false-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p3-square-1.wv",
+          "packet": "raw-false-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p3-square-2.wv",
+          "packet": "raw-false-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p3-ramp.mkv",
+      "oracle": "raw-false-p3-ramp.dsd",
+      "pcm": "raw-false-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p3-ramp-0.wv",
+          "packet": "raw-false-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p3-ramp-1.wv",
+          "packet": "raw-false-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p3-ramp-2.wv",
+          "packet": "raw-false-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p3-noise.mkv",
+      "oracle": "raw-false-p3-noise.dsd",
+      "pcm": "raw-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p3-noise-0.wv",
+          "packet": "raw-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p3-noise-1.wv",
+          "packet": "raw-false-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p3-noise-2.wv",
+          "packet": "raw-false-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p4-silence.mkv",
+      "oracle": "raw-false-p4-silence.dsd",
+      "pcm": "raw-false-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p4-silence-0.wv",
+          "packet": "raw-false-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p4-silence-1.wv",
+          "packet": "raw-false-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p4-silence-2.wv",
+          "packet": "raw-false-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p4-square.mkv",
+      "oracle": "raw-false-p4-square.dsd",
+      "pcm": "raw-false-p4-square.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p4-square-0.wv",
+          "packet": "raw-false-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p4-square-1.wv",
+          "packet": "raw-false-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p4-square-2.wv",
+          "packet": "raw-false-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p4-ramp.mkv",
+      "oracle": "raw-false-p4-ramp.dsd",
+      "pcm": "raw-false-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p4-ramp-0.wv",
+          "packet": "raw-false-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p4-ramp-1.wv",
+          "packet": "raw-false-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p4-ramp-2.wv",
+          "packet": "raw-false-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-false-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "raw-false-p4-noise.mkv",
+      "oracle": "raw-false-p4-noise.dsd",
+      "pcm": "raw-false-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-false-p4-noise-0.wv",
+          "packet": "raw-false-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-false-p4-noise-1.wv",
+          "packet": "raw-false-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-false-p4-noise-2.wv",
+          "packet": "raw-false-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p0-silence",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p0-silence.mkv",
+      "oracle": "raw-six-p0-silence.dsd",
+      "pcm": "raw-six-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p0-silence-0.wv",
+          "packet": "raw-six-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p0-silence-1.wv",
+          "packet": "raw-six-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p0-silence-2.wv",
+          "packet": "raw-six-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p0-square",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p0-square.mkv",
+      "oracle": "raw-six-p0-square.dsd",
+      "pcm": "raw-six-p0-square.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p0-square-0.wv",
+          "packet": "raw-six-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p0-square-1.wv",
+          "packet": "raw-six-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p0-square-2.wv",
+          "packet": "raw-six-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p0-ramp",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p0-ramp.mkv",
+      "oracle": "raw-six-p0-ramp.dsd",
+      "pcm": "raw-six-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p0-ramp-0.wv",
+          "packet": "raw-six-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p0-ramp-1.wv",
+          "packet": "raw-six-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p0-ramp-2.wv",
+          "packet": "raw-six-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p0-noise",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p0-noise.mkv",
+      "oracle": "raw-six-p0-noise.dsd",
+      "pcm": "raw-six-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p0-noise-0.wv",
+          "packet": "raw-six-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p0-noise-1.wv",
+          "packet": "raw-six-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p0-noise-2.wv",
+          "packet": "raw-six-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p3-silence",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p3-silence.mkv",
+      "oracle": "raw-six-p3-silence.dsd",
+      "pcm": "raw-six-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p3-silence-0.wv",
+          "packet": "raw-six-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p3-silence-1.wv",
+          "packet": "raw-six-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p3-silence-2.wv",
+          "packet": "raw-six-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p3-square",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p3-square.mkv",
+      "oracle": "raw-six-p3-square.dsd",
+      "pcm": "raw-six-p3-square.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p3-square-0.wv",
+          "packet": "raw-six-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p3-square-1.wv",
+          "packet": "raw-six-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p3-square-2.wv",
+          "packet": "raw-six-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p3-ramp",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p3-ramp.mkv",
+      "oracle": "raw-six-p3-ramp.dsd",
+      "pcm": "raw-six-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p3-ramp-0.wv",
+          "packet": "raw-six-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p3-ramp-1.wv",
+          "packet": "raw-six-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p3-ramp-2.wv",
+          "packet": "raw-six-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p3-noise.mkv",
+      "oracle": "raw-six-p3-noise.dsd",
+      "pcm": "raw-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p3-noise-0.wv",
+          "packet": "raw-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p3-noise-1.wv",
+          "packet": "raw-six-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p3-noise-2.wv",
+          "packet": "raw-six-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p4-silence",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p4-silence.mkv",
+      "oracle": "raw-six-p4-silence.dsd",
+      "pcm": "raw-six-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p4-silence-0.wv",
+          "packet": "raw-six-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p4-silence-1.wv",
+          "packet": "raw-six-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p4-silence-2.wv",
+          "packet": "raw-six-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p4-square",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p4-square.mkv",
+      "oracle": "raw-six-p4-square.dsd",
+      "pcm": "raw-six-p4-square.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p4-square-0.wv",
+          "packet": "raw-six-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p4-square-1.wv",
+          "packet": "raw-six-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p4-square-2.wv",
+          "packet": "raw-six-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p4-ramp",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p4-ramp.mkv",
+      "oracle": "raw-six-p4-ramp.dsd",
+      "pcm": "raw-six-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p4-ramp-0.wv",
+          "packet": "raw-six-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p4-ramp-1.wv",
+          "packet": "raw-six-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p4-ramp-2.wv",
+          "packet": "raw-six-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "raw-six-p4-noise",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "raw-six-p4-noise.mkv",
+      "oracle": "raw-six-p4-noise.dsd",
+      "pcm": "raw-six-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "raw-six-p4-noise-0.wv",
+          "packet": "raw-six-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "raw-six-p4-noise-1.wv",
+          "packet": "raw-six-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "raw-six-p4-noise-2.wv",
+          "packet": "raw-six-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p0-silence",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p0-silence.mkv",
+      "oracle": "fast-mono-p0-silence.dsd",
+      "pcm": "fast-mono-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p0-silence-0.wv",
+          "packet": "fast-mono-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p0-silence-1.wv",
+          "packet": "fast-mono-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p0-silence-2.wv",
+          "packet": "fast-mono-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p0-square",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p0-square.mkv",
+      "oracle": "fast-mono-p0-square.dsd",
+      "pcm": "fast-mono-p0-square.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p0-square-0.wv",
+          "packet": "fast-mono-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p0-square-1.wv",
+          "packet": "fast-mono-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p0-square-2.wv",
+          "packet": "fast-mono-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p0-ramp",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p0-ramp.mkv",
+      "oracle": "fast-mono-p0-ramp.dsd",
+      "pcm": "fast-mono-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p0-ramp-0.wv",
+          "packet": "fast-mono-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p0-ramp-1.wv",
+          "packet": "fast-mono-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p0-ramp-2.wv",
+          "packet": "fast-mono-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p0-noise",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p0-noise.mkv",
+      "oracle": "fast-mono-p0-noise.dsd",
+      "pcm": "fast-mono-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p0-noise-0.wv",
+          "packet": "fast-mono-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p0-noise-1.wv",
+          "packet": "fast-mono-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p0-noise-2.wv",
+          "packet": "fast-mono-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p3-silence",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p3-silence.mkv",
+      "oracle": "fast-mono-p3-silence.dsd",
+      "pcm": "fast-mono-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p3-silence-0.wv",
+          "packet": "fast-mono-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p3-silence-1.wv",
+          "packet": "fast-mono-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p3-silence-2.wv",
+          "packet": "fast-mono-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p3-square",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p3-square.mkv",
+      "oracle": "fast-mono-p3-square.dsd",
+      "pcm": "fast-mono-p3-square.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p3-square-0.wv",
+          "packet": "fast-mono-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p3-square-1.wv",
+          "packet": "fast-mono-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p3-square-2.wv",
+          "packet": "fast-mono-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p3-ramp",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p3-ramp.mkv",
+      "oracle": "fast-mono-p3-ramp.dsd",
+      "pcm": "fast-mono-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p3-ramp-0.wv",
+          "packet": "fast-mono-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p3-ramp-1.wv",
+          "packet": "fast-mono-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p3-ramp-2.wv",
+          "packet": "fast-mono-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p3-noise.mkv",
+      "oracle": "fast-mono-p3-noise.dsd",
+      "pcm": "fast-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p3-noise-0.wv",
+          "packet": "fast-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p3-noise-1.wv",
+          "packet": "fast-mono-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p3-noise-2.wv",
+          "packet": "fast-mono-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p4-silence",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p4-silence.mkv",
+      "oracle": "fast-mono-p4-silence.dsd",
+      "pcm": "fast-mono-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p4-silence-0.wv",
+          "packet": "fast-mono-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p4-silence-1.wv",
+          "packet": "fast-mono-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p4-silence-2.wv",
+          "packet": "fast-mono-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p4-square",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p4-square.mkv",
+      "oracle": "fast-mono-p4-square.dsd",
+      "pcm": "fast-mono-p4-square.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p4-square-0.wv",
+          "packet": "fast-mono-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p4-square-1.wv",
+          "packet": "fast-mono-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p4-square-2.wv",
+          "packet": "fast-mono-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p4-ramp",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p4-ramp.mkv",
+      "oracle": "fast-mono-p4-ramp.dsd",
+      "pcm": "fast-mono-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p4-ramp-0.wv",
+          "packet": "fast-mono-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p4-ramp-1.wv",
+          "packet": "fast-mono-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p4-ramp-2.wv",
+          "packet": "fast-mono-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-mono-p4-noise",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "fast-mono-p4-noise.mkv",
+      "oracle": "fast-mono-p4-noise.dsd",
+      "pcm": "fast-mono-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-mono-p4-noise-0.wv",
+          "packet": "fast-mono-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-mono-p4-noise-1.wv",
+          "packet": "fast-mono-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-mono-p4-noise-2.wv",
+          "packet": "fast-mono-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p0-silence.mkv",
+      "oracle": "fast-stereo-p0-silence.dsd",
+      "pcm": "fast-stereo-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p0-silence-0.wv",
+          "packet": "fast-stereo-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p0-silence-1.wv",
+          "packet": "fast-stereo-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p0-silence-2.wv",
+          "packet": "fast-stereo-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p0-square.mkv",
+      "oracle": "fast-stereo-p0-square.dsd",
+      "pcm": "fast-stereo-p0-square.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p0-square-0.wv",
+          "packet": "fast-stereo-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p0-square-1.wv",
+          "packet": "fast-stereo-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p0-square-2.wv",
+          "packet": "fast-stereo-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p0-ramp.mkv",
+      "oracle": "fast-stereo-p0-ramp.dsd",
+      "pcm": "fast-stereo-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p0-ramp-0.wv",
+          "packet": "fast-stereo-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p0-ramp-1.wv",
+          "packet": "fast-stereo-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p0-ramp-2.wv",
+          "packet": "fast-stereo-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p0-noise.mkv",
+      "oracle": "fast-stereo-p0-noise.dsd",
+      "pcm": "fast-stereo-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p0-noise-0.wv",
+          "packet": "fast-stereo-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p0-noise-1.wv",
+          "packet": "fast-stereo-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p0-noise-2.wv",
+          "packet": "fast-stereo-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p3-silence.mkv",
+      "oracle": "fast-stereo-p3-silence.dsd",
+      "pcm": "fast-stereo-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p3-silence-0.wv",
+          "packet": "fast-stereo-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p3-silence-1.wv",
+          "packet": "fast-stereo-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p3-silence-2.wv",
+          "packet": "fast-stereo-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p3-square.mkv",
+      "oracle": "fast-stereo-p3-square.dsd",
+      "pcm": "fast-stereo-p3-square.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p3-square-0.wv",
+          "packet": "fast-stereo-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p3-square-1.wv",
+          "packet": "fast-stereo-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p3-square-2.wv",
+          "packet": "fast-stereo-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p3-ramp.mkv",
+      "oracle": "fast-stereo-p3-ramp.dsd",
+      "pcm": "fast-stereo-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p3-ramp-0.wv",
+          "packet": "fast-stereo-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p3-ramp-1.wv",
+          "packet": "fast-stereo-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p3-ramp-2.wv",
+          "packet": "fast-stereo-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p3-noise.mkv",
+      "oracle": "fast-stereo-p3-noise.dsd",
+      "pcm": "fast-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p3-noise-0.wv",
+          "packet": "fast-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p3-noise-1.wv",
+          "packet": "fast-stereo-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p3-noise-2.wv",
+          "packet": "fast-stereo-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p4-silence.mkv",
+      "oracle": "fast-stereo-p4-silence.dsd",
+      "pcm": "fast-stereo-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p4-silence-0.wv",
+          "packet": "fast-stereo-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p4-silence-1.wv",
+          "packet": "fast-stereo-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p4-silence-2.wv",
+          "packet": "fast-stereo-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p4-square.mkv",
+      "oracle": "fast-stereo-p4-square.dsd",
+      "pcm": "fast-stereo-p4-square.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p4-square-0.wv",
+          "packet": "fast-stereo-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p4-square-1.wv",
+          "packet": "fast-stereo-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p4-square-2.wv",
+          "packet": "fast-stereo-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p4-ramp.mkv",
+      "oracle": "fast-stereo-p4-ramp.dsd",
+      "pcm": "fast-stereo-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p4-ramp-0.wv",
+          "packet": "fast-stereo-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p4-ramp-1.wv",
+          "packet": "fast-stereo-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p4-ramp-2.wv",
+          "packet": "fast-stereo-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-stereo-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-stereo-p4-noise.mkv",
+      "oracle": "fast-stereo-p4-noise.dsd",
+      "pcm": "fast-stereo-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-stereo-p4-noise-0.wv",
+          "packet": "fast-stereo-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-stereo-p4-noise-1.wv",
+          "packet": "fast-stereo-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-stereo-p4-noise-2.wv",
+          "packet": "fast-stereo-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p0-silence.mkv",
+      "oracle": "fast-false-p0-silence.dsd",
+      "pcm": "fast-false-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p0-silence-0.wv",
+          "packet": "fast-false-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p0-silence-1.wv",
+          "packet": "fast-false-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p0-silence-2.wv",
+          "packet": "fast-false-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p0-square.mkv",
+      "oracle": "fast-false-p0-square.dsd",
+      "pcm": "fast-false-p0-square.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p0-square-0.wv",
+          "packet": "fast-false-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p0-square-1.wv",
+          "packet": "fast-false-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p0-square-2.wv",
+          "packet": "fast-false-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p0-ramp.mkv",
+      "oracle": "fast-false-p0-ramp.dsd",
+      "pcm": "fast-false-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p0-ramp-0.wv",
+          "packet": "fast-false-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p0-ramp-1.wv",
+          "packet": "fast-false-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p0-ramp-2.wv",
+          "packet": "fast-false-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p0-noise.mkv",
+      "oracle": "fast-false-p0-noise.dsd",
+      "pcm": "fast-false-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p0-noise-0.wv",
+          "packet": "fast-false-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p0-noise-1.wv",
+          "packet": "fast-false-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p0-noise-2.wv",
+          "packet": "fast-false-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p3-silence.mkv",
+      "oracle": "fast-false-p3-silence.dsd",
+      "pcm": "fast-false-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p3-silence-0.wv",
+          "packet": "fast-false-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p3-silence-1.wv",
+          "packet": "fast-false-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p3-silence-2.wv",
+          "packet": "fast-false-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p3-square.mkv",
+      "oracle": "fast-false-p3-square.dsd",
+      "pcm": "fast-false-p3-square.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p3-square-0.wv",
+          "packet": "fast-false-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p3-square-1.wv",
+          "packet": "fast-false-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p3-square-2.wv",
+          "packet": "fast-false-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p3-ramp.mkv",
+      "oracle": "fast-false-p3-ramp.dsd",
+      "pcm": "fast-false-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p3-ramp-0.wv",
+          "packet": "fast-false-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p3-ramp-1.wv",
+          "packet": "fast-false-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p3-ramp-2.wv",
+          "packet": "fast-false-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p3-noise.mkv",
+      "oracle": "fast-false-p3-noise.dsd",
+      "pcm": "fast-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p3-noise-0.wv",
+          "packet": "fast-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p3-noise-1.wv",
+          "packet": "fast-false-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p3-noise-2.wv",
+          "packet": "fast-false-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p4-silence.mkv",
+      "oracle": "fast-false-p4-silence.dsd",
+      "pcm": "fast-false-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p4-silence-0.wv",
+          "packet": "fast-false-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p4-silence-1.wv",
+          "packet": "fast-false-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p4-silence-2.wv",
+          "packet": "fast-false-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p4-square.mkv",
+      "oracle": "fast-false-p4-square.dsd",
+      "pcm": "fast-false-p4-square.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p4-square-0.wv",
+          "packet": "fast-false-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p4-square-1.wv",
+          "packet": "fast-false-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p4-square-2.wv",
+          "packet": "fast-false-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p4-ramp.mkv",
+      "oracle": "fast-false-p4-ramp.dsd",
+      "pcm": "fast-false-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p4-ramp-0.wv",
+          "packet": "fast-false-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p4-ramp-1.wv",
+          "packet": "fast-false-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p4-ramp-2.wv",
+          "packet": "fast-false-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-false-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "fast-false-p4-noise.mkv",
+      "oracle": "fast-false-p4-noise.dsd",
+      "pcm": "fast-false-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-false-p4-noise-0.wv",
+          "packet": "fast-false-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-false-p4-noise-1.wv",
+          "packet": "fast-false-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-false-p4-noise-2.wv",
+          "packet": "fast-false-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p0-silence",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p0-silence.mkv",
+      "oracle": "fast-six-p0-silence.dsd",
+      "pcm": "fast-six-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p0-silence-0.wv",
+          "packet": "fast-six-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p0-silence-1.wv",
+          "packet": "fast-six-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p0-silence-2.wv",
+          "packet": "fast-six-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p0-square",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p0-square.mkv",
+      "oracle": "fast-six-p0-square.dsd",
+      "pcm": "fast-six-p0-square.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p0-square-0.wv",
+          "packet": "fast-six-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p0-square-1.wv",
+          "packet": "fast-six-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p0-square-2.wv",
+          "packet": "fast-six-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p0-ramp",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p0-ramp.mkv",
+      "oracle": "fast-six-p0-ramp.dsd",
+      "pcm": "fast-six-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p0-ramp-0.wv",
+          "packet": "fast-six-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p0-ramp-1.wv",
+          "packet": "fast-six-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p0-ramp-2.wv",
+          "packet": "fast-six-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p0-noise",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p0-noise.mkv",
+      "oracle": "fast-six-p0-noise.dsd",
+      "pcm": "fast-six-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p0-noise-0.wv",
+          "packet": "fast-six-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p0-noise-1.wv",
+          "packet": "fast-six-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p0-noise-2.wv",
+          "packet": "fast-six-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p3-silence",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p3-silence.mkv",
+      "oracle": "fast-six-p3-silence.dsd",
+      "pcm": "fast-six-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p3-silence-0.wv",
+          "packet": "fast-six-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p3-silence-1.wv",
+          "packet": "fast-six-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p3-silence-2.wv",
+          "packet": "fast-six-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p3-square",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p3-square.mkv",
+      "oracle": "fast-six-p3-square.dsd",
+      "pcm": "fast-six-p3-square.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p3-square-0.wv",
+          "packet": "fast-six-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p3-square-1.wv",
+          "packet": "fast-six-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p3-square-2.wv",
+          "packet": "fast-six-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p3-ramp",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p3-ramp.mkv",
+      "oracle": "fast-six-p3-ramp.dsd",
+      "pcm": "fast-six-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p3-ramp-0.wv",
+          "packet": "fast-six-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p3-ramp-1.wv",
+          "packet": "fast-six-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p3-ramp-2.wv",
+          "packet": "fast-six-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p3-noise.mkv",
+      "oracle": "fast-six-p3-noise.dsd",
+      "pcm": "fast-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p3-noise-0.wv",
+          "packet": "fast-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p3-noise-1.wv",
+          "packet": "fast-six-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p3-noise-2.wv",
+          "packet": "fast-six-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p4-silence",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p4-silence.mkv",
+      "oracle": "fast-six-p4-silence.dsd",
+      "pcm": "fast-six-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p4-silence-0.wv",
+          "packet": "fast-six-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p4-silence-1.wv",
+          "packet": "fast-six-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p4-silence-2.wv",
+          "packet": "fast-six-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p4-square",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p4-square.mkv",
+      "oracle": "fast-six-p4-square.dsd",
+      "pcm": "fast-six-p4-square.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p4-square-0.wv",
+          "packet": "fast-six-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p4-square-1.wv",
+          "packet": "fast-six-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p4-square-2.wv",
+          "packet": "fast-six-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p4-ramp",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p4-ramp.mkv",
+      "oracle": "fast-six-p4-ramp.dsd",
+      "pcm": "fast-six-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p4-ramp-0.wv",
+          "packet": "fast-six-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p4-ramp-1.wv",
+          "packet": "fast-six-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p4-ramp-2.wv",
+          "packet": "fast-six-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "fast-six-p4-noise",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "fast-six-p4-noise.mkv",
+      "oracle": "fast-six-p4-noise.dsd",
+      "pcm": "fast-six-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "fast-six-p4-noise-0.wv",
+          "packet": "fast-six-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "fast-six-p4-noise-1.wv",
+          "packet": "fast-six-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "fast-six-p4-noise-2.wv",
+          "packet": "fast-six-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p0-silence",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p0-silence.mkv",
+      "oracle": "rle-mono-p0-silence.dsd",
+      "pcm": "rle-mono-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p0-silence-0.wv",
+          "packet": "rle-mono-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p0-silence-1.wv",
+          "packet": "rle-mono-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p0-silence-2.wv",
+          "packet": "rle-mono-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p0-square",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p0-square.mkv",
+      "oracle": "rle-mono-p0-square.dsd",
+      "pcm": "rle-mono-p0-square.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p0-square-0.wv",
+          "packet": "rle-mono-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p0-square-1.wv",
+          "packet": "rle-mono-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p0-square-2.wv",
+          "packet": "rle-mono-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p0-ramp",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p0-ramp.mkv",
+      "oracle": "rle-mono-p0-ramp.dsd",
+      "pcm": "rle-mono-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p0-ramp-0.wv",
+          "packet": "rle-mono-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p0-ramp-1.wv",
+          "packet": "rle-mono-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p0-ramp-2.wv",
+          "packet": "rle-mono-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p0-noise",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p0-noise.mkv",
+      "oracle": "rle-mono-p0-noise.dsd",
+      "pcm": "rle-mono-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p0-noise-0.wv",
+          "packet": "rle-mono-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p0-noise-1.wv",
+          "packet": "rle-mono-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p0-noise-2.wv",
+          "packet": "rle-mono-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p3-silence",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p3-silence.mkv",
+      "oracle": "rle-mono-p3-silence.dsd",
+      "pcm": "rle-mono-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p3-silence-0.wv",
+          "packet": "rle-mono-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p3-silence-1.wv",
+          "packet": "rle-mono-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p3-silence-2.wv",
+          "packet": "rle-mono-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p3-square",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p3-square.mkv",
+      "oracle": "rle-mono-p3-square.dsd",
+      "pcm": "rle-mono-p3-square.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p3-square-0.wv",
+          "packet": "rle-mono-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p3-square-1.wv",
+          "packet": "rle-mono-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p3-square-2.wv",
+          "packet": "rle-mono-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p3-ramp",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p3-ramp.mkv",
+      "oracle": "rle-mono-p3-ramp.dsd",
+      "pcm": "rle-mono-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p3-ramp-0.wv",
+          "packet": "rle-mono-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p3-ramp-1.wv",
+          "packet": "rle-mono-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p3-ramp-2.wv",
+          "packet": "rle-mono-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p3-noise.mkv",
+      "oracle": "rle-mono-p3-noise.dsd",
+      "pcm": "rle-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p3-noise-0.wv",
+          "packet": "rle-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p3-noise-1.wv",
+          "packet": "rle-mono-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p3-noise-2.wv",
+          "packet": "rle-mono-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p4-silence",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p4-silence.mkv",
+      "oracle": "rle-mono-p4-silence.dsd",
+      "pcm": "rle-mono-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p4-silence-0.wv",
+          "packet": "rle-mono-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p4-silence-1.wv",
+          "packet": "rle-mono-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p4-silence-2.wv",
+          "packet": "rle-mono-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p4-square",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p4-square.mkv",
+      "oracle": "rle-mono-p4-square.dsd",
+      "pcm": "rle-mono-p4-square.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p4-square-0.wv",
+          "packet": "rle-mono-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p4-square-1.wv",
+          "packet": "rle-mono-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p4-square-2.wv",
+          "packet": "rle-mono-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p4-ramp",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p4-ramp.mkv",
+      "oracle": "rle-mono-p4-ramp.dsd",
+      "pcm": "rle-mono-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p4-ramp-0.wv",
+          "packet": "rle-mono-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p4-ramp-1.wv",
+          "packet": "rle-mono-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p4-ramp-2.wv",
+          "packet": "rle-mono-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-mono-p4-noise",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "rle-mono-p4-noise.mkv",
+      "oracle": "rle-mono-p4-noise.dsd",
+      "pcm": "rle-mono-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-mono-p4-noise-0.wv",
+          "packet": "rle-mono-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-mono-p4-noise-1.wv",
+          "packet": "rle-mono-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-mono-p4-noise-2.wv",
+          "packet": "rle-mono-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p0-silence.mkv",
+      "oracle": "rle-stereo-p0-silence.dsd",
+      "pcm": "rle-stereo-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p0-silence-0.wv",
+          "packet": "rle-stereo-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p0-silence-1.wv",
+          "packet": "rle-stereo-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p0-silence-2.wv",
+          "packet": "rle-stereo-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p0-square.mkv",
+      "oracle": "rle-stereo-p0-square.dsd",
+      "pcm": "rle-stereo-p0-square.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p0-square-0.wv",
+          "packet": "rle-stereo-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p0-square-1.wv",
+          "packet": "rle-stereo-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p0-square-2.wv",
+          "packet": "rle-stereo-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p0-ramp.mkv",
+      "oracle": "rle-stereo-p0-ramp.dsd",
+      "pcm": "rle-stereo-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p0-ramp-0.wv",
+          "packet": "rle-stereo-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p0-ramp-1.wv",
+          "packet": "rle-stereo-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p0-ramp-2.wv",
+          "packet": "rle-stereo-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p0-noise.mkv",
+      "oracle": "rle-stereo-p0-noise.dsd",
+      "pcm": "rle-stereo-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p0-noise-0.wv",
+          "packet": "rle-stereo-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p0-noise-1.wv",
+          "packet": "rle-stereo-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p0-noise-2.wv",
+          "packet": "rle-stereo-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p3-silence.mkv",
+      "oracle": "rle-stereo-p3-silence.dsd",
+      "pcm": "rle-stereo-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p3-silence-0.wv",
+          "packet": "rle-stereo-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p3-silence-1.wv",
+          "packet": "rle-stereo-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p3-silence-2.wv",
+          "packet": "rle-stereo-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p3-square.mkv",
+      "oracle": "rle-stereo-p3-square.dsd",
+      "pcm": "rle-stereo-p3-square.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p3-square-0.wv",
+          "packet": "rle-stereo-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p3-square-1.wv",
+          "packet": "rle-stereo-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p3-square-2.wv",
+          "packet": "rle-stereo-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p3-ramp.mkv",
+      "oracle": "rle-stereo-p3-ramp.dsd",
+      "pcm": "rle-stereo-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p3-ramp-0.wv",
+          "packet": "rle-stereo-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p3-ramp-1.wv",
+          "packet": "rle-stereo-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p3-ramp-2.wv",
+          "packet": "rle-stereo-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p3-noise.mkv",
+      "oracle": "rle-stereo-p3-noise.dsd",
+      "pcm": "rle-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p3-noise-0.wv",
+          "packet": "rle-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p3-noise-1.wv",
+          "packet": "rle-stereo-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p3-noise-2.wv",
+          "packet": "rle-stereo-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p4-silence.mkv",
+      "oracle": "rle-stereo-p4-silence.dsd",
+      "pcm": "rle-stereo-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p4-silence-0.wv",
+          "packet": "rle-stereo-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p4-silence-1.wv",
+          "packet": "rle-stereo-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p4-silence-2.wv",
+          "packet": "rle-stereo-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p4-square.mkv",
+      "oracle": "rle-stereo-p4-square.dsd",
+      "pcm": "rle-stereo-p4-square.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p4-square-0.wv",
+          "packet": "rle-stereo-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p4-square-1.wv",
+          "packet": "rle-stereo-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p4-square-2.wv",
+          "packet": "rle-stereo-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p4-ramp.mkv",
+      "oracle": "rle-stereo-p4-ramp.dsd",
+      "pcm": "rle-stereo-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p4-ramp-0.wv",
+          "packet": "rle-stereo-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p4-ramp-1.wv",
+          "packet": "rle-stereo-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p4-ramp-2.wv",
+          "packet": "rle-stereo-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-stereo-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-stereo-p4-noise.mkv",
+      "oracle": "rle-stereo-p4-noise.dsd",
+      "pcm": "rle-stereo-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-stereo-p4-noise-0.wv",
+          "packet": "rle-stereo-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-stereo-p4-noise-1.wv",
+          "packet": "rle-stereo-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-stereo-p4-noise-2.wv",
+          "packet": "rle-stereo-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p0-silence.mkv",
+      "oracle": "rle-false-p0-silence.dsd",
+      "pcm": "rle-false-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p0-silence-0.wv",
+          "packet": "rle-false-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p0-silence-1.wv",
+          "packet": "rle-false-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p0-silence-2.wv",
+          "packet": "rle-false-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p0-square.mkv",
+      "oracle": "rle-false-p0-square.dsd",
+      "pcm": "rle-false-p0-square.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p0-square-0.wv",
+          "packet": "rle-false-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p0-square-1.wv",
+          "packet": "rle-false-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p0-square-2.wv",
+          "packet": "rle-false-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p0-ramp.mkv",
+      "oracle": "rle-false-p0-ramp.dsd",
+      "pcm": "rle-false-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p0-ramp-0.wv",
+          "packet": "rle-false-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p0-ramp-1.wv",
+          "packet": "rle-false-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p0-ramp-2.wv",
+          "packet": "rle-false-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p0-noise.mkv",
+      "oracle": "rle-false-p0-noise.dsd",
+      "pcm": "rle-false-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p0-noise-0.wv",
+          "packet": "rle-false-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p0-noise-1.wv",
+          "packet": "rle-false-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p0-noise-2.wv",
+          "packet": "rle-false-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p3-silence.mkv",
+      "oracle": "rle-false-p3-silence.dsd",
+      "pcm": "rle-false-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p3-silence-0.wv",
+          "packet": "rle-false-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p3-silence-1.wv",
+          "packet": "rle-false-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p3-silence-2.wv",
+          "packet": "rle-false-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p3-square.mkv",
+      "oracle": "rle-false-p3-square.dsd",
+      "pcm": "rle-false-p3-square.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p3-square-0.wv",
+          "packet": "rle-false-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p3-square-1.wv",
+          "packet": "rle-false-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p3-square-2.wv",
+          "packet": "rle-false-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p3-ramp.mkv",
+      "oracle": "rle-false-p3-ramp.dsd",
+      "pcm": "rle-false-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p3-ramp-0.wv",
+          "packet": "rle-false-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p3-ramp-1.wv",
+          "packet": "rle-false-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p3-ramp-2.wv",
+          "packet": "rle-false-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p3-noise.mkv",
+      "oracle": "rle-false-p3-noise.dsd",
+      "pcm": "rle-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p3-noise-0.wv",
+          "packet": "rle-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p3-noise-1.wv",
+          "packet": "rle-false-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p3-noise-2.wv",
+          "packet": "rle-false-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p4-silence.mkv",
+      "oracle": "rle-false-p4-silence.dsd",
+      "pcm": "rle-false-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p4-silence-0.wv",
+          "packet": "rle-false-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p4-silence-1.wv",
+          "packet": "rle-false-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p4-silence-2.wv",
+          "packet": "rle-false-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p4-square.mkv",
+      "oracle": "rle-false-p4-square.dsd",
+      "pcm": "rle-false-p4-square.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p4-square-0.wv",
+          "packet": "rle-false-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p4-square-1.wv",
+          "packet": "rle-false-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p4-square-2.wv",
+          "packet": "rle-false-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p4-ramp.mkv",
+      "oracle": "rle-false-p4-ramp.dsd",
+      "pcm": "rle-false-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p4-ramp-0.wv",
+          "packet": "rle-false-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p4-ramp-1.wv",
+          "packet": "rle-false-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p4-ramp-2.wv",
+          "packet": "rle-false-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-false-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "rle-false-p4-noise.mkv",
+      "oracle": "rle-false-p4-noise.dsd",
+      "pcm": "rle-false-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-false-p4-noise-0.wv",
+          "packet": "rle-false-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-false-p4-noise-1.wv",
+          "packet": "rle-false-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-false-p4-noise-2.wv",
+          "packet": "rle-false-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p0-silence",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p0-silence.mkv",
+      "oracle": "rle-six-p0-silence.dsd",
+      "pcm": "rle-six-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p0-silence-0.wv",
+          "packet": "rle-six-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p0-silence-1.wv",
+          "packet": "rle-six-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p0-silence-2.wv",
+          "packet": "rle-six-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p0-square",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p0-square.mkv",
+      "oracle": "rle-six-p0-square.dsd",
+      "pcm": "rle-six-p0-square.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p0-square-0.wv",
+          "packet": "rle-six-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p0-square-1.wv",
+          "packet": "rle-six-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p0-square-2.wv",
+          "packet": "rle-six-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p0-ramp",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p0-ramp.mkv",
+      "oracle": "rle-six-p0-ramp.dsd",
+      "pcm": "rle-six-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p0-ramp-0.wv",
+          "packet": "rle-six-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p0-ramp-1.wv",
+          "packet": "rle-six-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p0-ramp-2.wv",
+          "packet": "rle-six-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p0-noise",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p0-noise.mkv",
+      "oracle": "rle-six-p0-noise.dsd",
+      "pcm": "rle-six-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p0-noise-0.wv",
+          "packet": "rle-six-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p0-noise-1.wv",
+          "packet": "rle-six-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p0-noise-2.wv",
+          "packet": "rle-six-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p3-silence",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p3-silence.mkv",
+      "oracle": "rle-six-p3-silence.dsd",
+      "pcm": "rle-six-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p3-silence-0.wv",
+          "packet": "rle-six-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p3-silence-1.wv",
+          "packet": "rle-six-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p3-silence-2.wv",
+          "packet": "rle-six-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p3-square",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p3-square.mkv",
+      "oracle": "rle-six-p3-square.dsd",
+      "pcm": "rle-six-p3-square.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p3-square-0.wv",
+          "packet": "rle-six-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p3-square-1.wv",
+          "packet": "rle-six-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p3-square-2.wv",
+          "packet": "rle-six-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p3-ramp",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p3-ramp.mkv",
+      "oracle": "rle-six-p3-ramp.dsd",
+      "pcm": "rle-six-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p3-ramp-0.wv",
+          "packet": "rle-six-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p3-ramp-1.wv",
+          "packet": "rle-six-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p3-ramp-2.wv",
+          "packet": "rle-six-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p3-noise.mkv",
+      "oracle": "rle-six-p3-noise.dsd",
+      "pcm": "rle-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p3-noise-0.wv",
+          "packet": "rle-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p3-noise-1.wv",
+          "packet": "rle-six-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p3-noise-2.wv",
+          "packet": "rle-six-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p4-silence",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p4-silence.mkv",
+      "oracle": "rle-six-p4-silence.dsd",
+      "pcm": "rle-six-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p4-silence-0.wv",
+          "packet": "rle-six-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p4-silence-1.wv",
+          "packet": "rle-six-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p4-silence-2.wv",
+          "packet": "rle-six-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p4-square",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p4-square.mkv",
+      "oracle": "rle-six-p4-square.dsd",
+      "pcm": "rle-six-p4-square.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p4-square-0.wv",
+          "packet": "rle-six-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p4-square-1.wv",
+          "packet": "rle-six-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p4-square-2.wv",
+          "packet": "rle-six-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p4-ramp",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p4-ramp.mkv",
+      "oracle": "rle-six-p4-ramp.dsd",
+      "pcm": "rle-six-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p4-ramp-0.wv",
+          "packet": "rle-six-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p4-ramp-1.wv",
+          "packet": "rle-six-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p4-ramp-2.wv",
+          "packet": "rle-six-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "rle-six-p4-noise",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "rle-six-p4-noise.mkv",
+      "oracle": "rle-six-p4-noise.dsd",
+      "pcm": "rle-six-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "rle-six-p4-noise-0.wv",
+          "packet": "rle-six-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "rle-six-p4-noise-1.wv",
+          "packet": "rle-six-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "rle-six-p4-noise-2.wv",
+          "packet": "rle-six-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p0-silence",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p0-silence.mkv",
+      "oracle": "high-mono-p0-silence.dsd",
+      "pcm": "high-mono-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p0-silence-0.wv",
+          "packet": "high-mono-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p0-silence-1.wv",
+          "packet": "high-mono-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p0-silence-2.wv",
+          "packet": "high-mono-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p0-square",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p0-square.mkv",
+      "oracle": "high-mono-p0-square.dsd",
+      "pcm": "high-mono-p0-square.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p0-square-0.wv",
+          "packet": "high-mono-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p0-square-1.wv",
+          "packet": "high-mono-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p0-square-2.wv",
+          "packet": "high-mono-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p0-ramp",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p0-ramp.mkv",
+      "oracle": "high-mono-p0-ramp.dsd",
+      "pcm": "high-mono-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p0-ramp-0.wv",
+          "packet": "high-mono-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p0-ramp-1.wv",
+          "packet": "high-mono-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p0-ramp-2.wv",
+          "packet": "high-mono-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p0-noise",
+      "rate": 44100,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p0-noise.mkv",
+      "oracle": "high-mono-p0-noise.dsd",
+      "pcm": "high-mono-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p0-noise-0.wv",
+          "packet": "high-mono-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p0-noise-1.wv",
+          "packet": "high-mono-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p0-noise-2.wv",
+          "packet": "high-mono-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p3-silence",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p3-silence.mkv",
+      "oracle": "high-mono-p3-silence.dsd",
+      "pcm": "high-mono-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p3-silence-0.wv",
+          "packet": "high-mono-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p3-silence-1.wv",
+          "packet": "high-mono-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p3-silence-2.wv",
+          "packet": "high-mono-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p3-square",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p3-square.mkv",
+      "oracle": "high-mono-p3-square.dsd",
+      "pcm": "high-mono-p3-square.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p3-square-0.wv",
+          "packet": "high-mono-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p3-square-1.wv",
+          "packet": "high-mono-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p3-square-2.wv",
+          "packet": "high-mono-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p3-ramp",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p3-ramp.mkv",
+      "oracle": "high-mono-p3-ramp.dsd",
+      "pcm": "high-mono-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p3-ramp-0.wv",
+          "packet": "high-mono-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p3-ramp-1.wv",
+          "packet": "high-mono-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p3-ramp-2.wv",
+          "packet": "high-mono-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p3-noise.mkv",
+      "oracle": "high-mono-p3-noise.dsd",
+      "pcm": "high-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p3-noise-0.wv",
+          "packet": "high-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p3-noise-1.wv",
+          "packet": "high-mono-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p3-noise-2.wv",
+          "packet": "high-mono-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p4-silence",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p4-silence.mkv",
+      "oracle": "high-mono-p4-silence.dsd",
+      "pcm": "high-mono-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p4-silence-0.wv",
+          "packet": "high-mono-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p4-silence-1.wv",
+          "packet": "high-mono-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p4-silence-2.wv",
+          "packet": "high-mono-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p4-square",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p4-square.mkv",
+      "oracle": "high-mono-p4-square.dsd",
+      "pcm": "high-mono-p4-square.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p4-square-0.wv",
+          "packet": "high-mono-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p4-square-1.wv",
+          "packet": "high-mono-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p4-square-2.wv",
+          "packet": "high-mono-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p4-ramp",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p4-ramp.mkv",
+      "oracle": "high-mono-p4-ramp.dsd",
+      "pcm": "high-mono-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p4-ramp-0.wv",
+          "packet": "high-mono-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p4-ramp-1.wv",
+          "packet": "high-mono-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p4-ramp-2.wv",
+          "packet": "high-mono-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-mono-p4-noise",
+      "rate": 705600,
+      "channels": 1,
+      "samples": 128,
+      "file": "high-mono-p4-noise.mkv",
+      "oracle": "high-mono-p4-noise.dsd",
+      "pcm": "high-mono-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "high-mono-p4-noise-0.wv",
+          "packet": "high-mono-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-mono-p4-noise-1.wv",
+          "packet": "high-mono-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-mono-p4-noise-2.wv",
+          "packet": "high-mono-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p0-silence.mkv",
+      "oracle": "high-stereo-p0-silence.dsd",
+      "pcm": "high-stereo-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p0-silence-0.wv",
+          "packet": "high-stereo-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p0-silence-1.wv",
+          "packet": "high-stereo-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p0-silence-2.wv",
+          "packet": "high-stereo-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p0-square.mkv",
+      "oracle": "high-stereo-p0-square.dsd",
+      "pcm": "high-stereo-p0-square.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p0-square-0.wv",
+          "packet": "high-stereo-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p0-square-1.wv",
+          "packet": "high-stereo-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p0-square-2.wv",
+          "packet": "high-stereo-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p0-ramp.mkv",
+      "oracle": "high-stereo-p0-ramp.dsd",
+      "pcm": "high-stereo-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p0-ramp-0.wv",
+          "packet": "high-stereo-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p0-ramp-1.wv",
+          "packet": "high-stereo-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p0-ramp-2.wv",
+          "packet": "high-stereo-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p0-noise.mkv",
+      "oracle": "high-stereo-p0-noise.dsd",
+      "pcm": "high-stereo-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p0-noise-0.wv",
+          "packet": "high-stereo-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p0-noise-1.wv",
+          "packet": "high-stereo-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p0-noise-2.wv",
+          "packet": "high-stereo-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p3-silence.mkv",
+      "oracle": "high-stereo-p3-silence.dsd",
+      "pcm": "high-stereo-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p3-silence-0.wv",
+          "packet": "high-stereo-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p3-silence-1.wv",
+          "packet": "high-stereo-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p3-silence-2.wv",
+          "packet": "high-stereo-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p3-square.mkv",
+      "oracle": "high-stereo-p3-square.dsd",
+      "pcm": "high-stereo-p3-square.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p3-square-0.wv",
+          "packet": "high-stereo-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p3-square-1.wv",
+          "packet": "high-stereo-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p3-square-2.wv",
+          "packet": "high-stereo-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p3-ramp.mkv",
+      "oracle": "high-stereo-p3-ramp.dsd",
+      "pcm": "high-stereo-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p3-ramp-0.wv",
+          "packet": "high-stereo-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p3-ramp-1.wv",
+          "packet": "high-stereo-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p3-ramp-2.wv",
+          "packet": "high-stereo-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p3-noise.mkv",
+      "oracle": "high-stereo-p3-noise.dsd",
+      "pcm": "high-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p3-noise-0.wv",
+          "packet": "high-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p3-noise-1.wv",
+          "packet": "high-stereo-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p3-noise-2.wv",
+          "packet": "high-stereo-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p4-silence.mkv",
+      "oracle": "high-stereo-p4-silence.dsd",
+      "pcm": "high-stereo-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p4-silence-0.wv",
+          "packet": "high-stereo-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p4-silence-1.wv",
+          "packet": "high-stereo-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p4-silence-2.wv",
+          "packet": "high-stereo-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p4-square.mkv",
+      "oracle": "high-stereo-p4-square.dsd",
+      "pcm": "high-stereo-p4-square.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p4-square-0.wv",
+          "packet": "high-stereo-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p4-square-1.wv",
+          "packet": "high-stereo-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p4-square-2.wv",
+          "packet": "high-stereo-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p4-ramp.mkv",
+      "oracle": "high-stereo-p4-ramp.dsd",
+      "pcm": "high-stereo-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p4-ramp-0.wv",
+          "packet": "high-stereo-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p4-ramp-1.wv",
+          "packet": "high-stereo-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p4-ramp-2.wv",
+          "packet": "high-stereo-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-stereo-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-stereo-p4-noise.mkv",
+      "oracle": "high-stereo-p4-noise.dsd",
+      "pcm": "high-stereo-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "high-stereo-p4-noise-0.wv",
+          "packet": "high-stereo-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-stereo-p4-noise-1.wv",
+          "packet": "high-stereo-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-stereo-p4-noise-2.wv",
+          "packet": "high-stereo-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p0-silence",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p0-silence.mkv",
+      "oracle": "high-false-p0-silence.dsd",
+      "pcm": "high-false-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "high-false-p0-silence-0.wv",
+          "packet": "high-false-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p0-silence-1.wv",
+          "packet": "high-false-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p0-silence-2.wv",
+          "packet": "high-false-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p0-square",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p0-square.mkv",
+      "oracle": "high-false-p0-square.dsd",
+      "pcm": "high-false-p0-square.f32le",
+      "frames": [
+        {
+          "file": "high-false-p0-square-0.wv",
+          "packet": "high-false-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p0-square-1.wv",
+          "packet": "high-false-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p0-square-2.wv",
+          "packet": "high-false-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p0-ramp",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p0-ramp.mkv",
+      "oracle": "high-false-p0-ramp.dsd",
+      "pcm": "high-false-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-false-p0-ramp-0.wv",
+          "packet": "high-false-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p0-ramp-1.wv",
+          "packet": "high-false-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p0-ramp-2.wv",
+          "packet": "high-false-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p0-noise",
+      "rate": 44100,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p0-noise.mkv",
+      "oracle": "high-false-p0-noise.dsd",
+      "pcm": "high-false-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "high-false-p0-noise-0.wv",
+          "packet": "high-false-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p0-noise-1.wv",
+          "packet": "high-false-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p0-noise-2.wv",
+          "packet": "high-false-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p3-silence",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p3-silence.mkv",
+      "oracle": "high-false-p3-silence.dsd",
+      "pcm": "high-false-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "high-false-p3-silence-0.wv",
+          "packet": "high-false-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p3-silence-1.wv",
+          "packet": "high-false-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p3-silence-2.wv",
+          "packet": "high-false-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p3-square",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p3-square.mkv",
+      "oracle": "high-false-p3-square.dsd",
+      "pcm": "high-false-p3-square.f32le",
+      "frames": [
+        {
+          "file": "high-false-p3-square-0.wv",
+          "packet": "high-false-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p3-square-1.wv",
+          "packet": "high-false-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p3-square-2.wv",
+          "packet": "high-false-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p3-ramp",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p3-ramp.mkv",
+      "oracle": "high-false-p3-ramp.dsd",
+      "pcm": "high-false-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-false-p3-ramp-0.wv",
+          "packet": "high-false-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p3-ramp-1.wv",
+          "packet": "high-false-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p3-ramp-2.wv",
+          "packet": "high-false-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p3-noise.mkv",
+      "oracle": "high-false-p3-noise.dsd",
+      "pcm": "high-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "high-false-p3-noise-0.wv",
+          "packet": "high-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p3-noise-1.wv",
+          "packet": "high-false-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p3-noise-2.wv",
+          "packet": "high-false-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p4-silence",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p4-silence.mkv",
+      "oracle": "high-false-p4-silence.dsd",
+      "pcm": "high-false-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "high-false-p4-silence-0.wv",
+          "packet": "high-false-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p4-silence-1.wv",
+          "packet": "high-false-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p4-silence-2.wv",
+          "packet": "high-false-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p4-square",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p4-square.mkv",
+      "oracle": "high-false-p4-square.dsd",
+      "pcm": "high-false-p4-square.f32le",
+      "frames": [
+        {
+          "file": "high-false-p4-square-0.wv",
+          "packet": "high-false-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p4-square-1.wv",
+          "packet": "high-false-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p4-square-2.wv",
+          "packet": "high-false-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p4-ramp",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p4-ramp.mkv",
+      "oracle": "high-false-p4-ramp.dsd",
+      "pcm": "high-false-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-false-p4-ramp-0.wv",
+          "packet": "high-false-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p4-ramp-1.wv",
+          "packet": "high-false-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p4-ramp-2.wv",
+          "packet": "high-false-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-false-p4-noise",
+      "rate": 705600,
+      "channels": 2,
+      "samples": 128,
+      "file": "high-false-p4-noise.mkv",
+      "oracle": "high-false-p4-noise.dsd",
+      "pcm": "high-false-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "high-false-p4-noise-0.wv",
+          "packet": "high-false-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-false-p4-noise-1.wv",
+          "packet": "high-false-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-false-p4-noise-2.wv",
+          "packet": "high-false-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p0-silence",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p0-silence.mkv",
+      "oracle": "high-six-p0-silence.dsd",
+      "pcm": "high-six-p0-silence.f32le",
+      "frames": [
+        {
+          "file": "high-six-p0-silence-0.wv",
+          "packet": "high-six-p0-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p0-silence-1.wv",
+          "packet": "high-six-p0-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p0-silence-2.wv",
+          "packet": "high-six-p0-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p0-square",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p0-square.mkv",
+      "oracle": "high-six-p0-square.dsd",
+      "pcm": "high-six-p0-square.f32le",
+      "frames": [
+        {
+          "file": "high-six-p0-square-0.wv",
+          "packet": "high-six-p0-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p0-square-1.wv",
+          "packet": "high-six-p0-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p0-square-2.wv",
+          "packet": "high-six-p0-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p0-ramp",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p0-ramp.mkv",
+      "oracle": "high-six-p0-ramp.dsd",
+      "pcm": "high-six-p0-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-six-p0-ramp-0.wv",
+          "packet": "high-six-p0-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p0-ramp-1.wv",
+          "packet": "high-six-p0-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p0-ramp-2.wv",
+          "packet": "high-six-p0-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p0-noise",
+      "rate": 44100,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p0-noise.mkv",
+      "oracle": "high-six-p0-noise.dsd",
+      "pcm": "high-six-p0-noise.f32le",
+      "frames": [
+        {
+          "file": "high-six-p0-noise-0.wv",
+          "packet": "high-six-p0-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p0-noise-1.wv",
+          "packet": "high-six-p0-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p0-noise-2.wv",
+          "packet": "high-six-p0-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p3-silence",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p3-silence.mkv",
+      "oracle": "high-six-p3-silence.dsd",
+      "pcm": "high-six-p3-silence.f32le",
+      "frames": [
+        {
+          "file": "high-six-p3-silence-0.wv",
+          "packet": "high-six-p3-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p3-silence-1.wv",
+          "packet": "high-six-p3-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p3-silence-2.wv",
+          "packet": "high-six-p3-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p3-square",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p3-square.mkv",
+      "oracle": "high-six-p3-square.dsd",
+      "pcm": "high-six-p3-square.f32le",
+      "frames": [
+        {
+          "file": "high-six-p3-square-0.wv",
+          "packet": "high-six-p3-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p3-square-1.wv",
+          "packet": "high-six-p3-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p3-square-2.wv",
+          "packet": "high-six-p3-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p3-ramp",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p3-ramp.mkv",
+      "oracle": "high-six-p3-ramp.dsd",
+      "pcm": "high-six-p3-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-six-p3-ramp-0.wv",
+          "packet": "high-six-p3-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p3-ramp-1.wv",
+          "packet": "high-six-p3-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p3-ramp-2.wv",
+          "packet": "high-six-p3-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p3-noise.mkv",
+      "oracle": "high-six-p3-noise.dsd",
+      "pcm": "high-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "high-six-p3-noise-0.wv",
+          "packet": "high-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p3-noise-1.wv",
+          "packet": "high-six-p3-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p3-noise-2.wv",
+          "packet": "high-six-p3-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p4-silence",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p4-silence.mkv",
+      "oracle": "high-six-p4-silence.dsd",
+      "pcm": "high-six-p4-silence.f32le",
+      "frames": [
+        {
+          "file": "high-six-p4-silence-0.wv",
+          "packet": "high-six-p4-silence-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p4-silence-1.wv",
+          "packet": "high-six-p4-silence-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p4-silence-2.wv",
+          "packet": "high-six-p4-silence-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p4-square",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p4-square.mkv",
+      "oracle": "high-six-p4-square.dsd",
+      "pcm": "high-six-p4-square.f32le",
+      "frames": [
+        {
+          "file": "high-six-p4-square-0.wv",
+          "packet": "high-six-p4-square-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p4-square-1.wv",
+          "packet": "high-six-p4-square-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p4-square-2.wv",
+          "packet": "high-six-p4-square-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p4-ramp",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p4-ramp.mkv",
+      "oracle": "high-six-p4-ramp.dsd",
+      "pcm": "high-six-p4-ramp.f32le",
+      "frames": [
+        {
+          "file": "high-six-p4-ramp-0.wv",
+          "packet": "high-six-p4-ramp-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p4-ramp-1.wv",
+          "packet": "high-six-p4-ramp-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p4-ramp-2.wv",
+          "packet": "high-six-p4-ramp-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "high-six-p4-noise",
+      "rate": 705600,
+      "channels": 6,
+      "samples": 128,
+      "file": "high-six-p4-noise.mkv",
+      "oracle": "high-six-p4-noise.dsd",
+      "pcm": "high-six-p4-noise.f32le",
+      "frames": [
+        {
+          "file": "high-six-p4-noise-0.wv",
+          "packet": "high-six-p4-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "high-six-p4-noise-1.wv",
+          "packet": "high-six-p4-noise-1.packet",
+          "pts": 128
+        },
+        {
+          "file": "high-six-p4-noise-2.wv",
+          "packet": "high-six-p4-noise-2.packet",
+          "pts": 256
+        }
+      ]
+    },
+    {
+      "name": "short1-raw-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 1,
+      "file": "short1-raw-mono-p3-noise.mkv",
+      "oracle": "short1-raw-mono-p3-noise.dsd",
+      "pcm": "short1-raw-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-raw-mono-p3-noise-0.wv",
+          "packet": "short1-raw-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-raw-mono-p3-noise-1.wv",
+          "packet": "short1-raw-mono-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-raw-mono-p3-noise-2.wv",
+          "packet": "short1-raw-mono-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-raw-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-raw-stereo-p3-noise.mkv",
+      "oracle": "short1-raw-stereo-p3-noise.dsd",
+      "pcm": "short1-raw-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-raw-stereo-p3-noise-0.wv",
+          "packet": "short1-raw-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-raw-stereo-p3-noise-1.wv",
+          "packet": "short1-raw-stereo-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-raw-stereo-p3-noise-2.wv",
+          "packet": "short1-raw-stereo-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-raw-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-raw-false-p3-noise.mkv",
+      "oracle": "short1-raw-false-p3-noise.dsd",
+      "pcm": "short1-raw-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-raw-false-p3-noise-0.wv",
+          "packet": "short1-raw-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-raw-false-p3-noise-1.wv",
+          "packet": "short1-raw-false-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-raw-false-p3-noise-2.wv",
+          "packet": "short1-raw-false-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-raw-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 1,
+      "file": "short1-raw-six-p3-noise.mkv",
+      "oracle": "short1-raw-six-p3-noise.dsd",
+      "pcm": "short1-raw-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-raw-six-p3-noise-0.wv",
+          "packet": "short1-raw-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-raw-six-p3-noise-1.wv",
+          "packet": "short1-raw-six-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-raw-six-p3-noise-2.wv",
+          "packet": "short1-raw-six-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-fast-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 1,
+      "file": "short1-fast-mono-p3-noise.mkv",
+      "oracle": "short1-fast-mono-p3-noise.dsd",
+      "pcm": "short1-fast-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-fast-mono-p3-noise-0.wv",
+          "packet": "short1-fast-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-fast-mono-p3-noise-1.wv",
+          "packet": "short1-fast-mono-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-fast-mono-p3-noise-2.wv",
+          "packet": "short1-fast-mono-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-fast-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-fast-stereo-p3-noise.mkv",
+      "oracle": "short1-fast-stereo-p3-noise.dsd",
+      "pcm": "short1-fast-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-fast-stereo-p3-noise-0.wv",
+          "packet": "short1-fast-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-fast-stereo-p3-noise-1.wv",
+          "packet": "short1-fast-stereo-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-fast-stereo-p3-noise-2.wv",
+          "packet": "short1-fast-stereo-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-fast-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-fast-false-p3-noise.mkv",
+      "oracle": "short1-fast-false-p3-noise.dsd",
+      "pcm": "short1-fast-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-fast-false-p3-noise-0.wv",
+          "packet": "short1-fast-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-fast-false-p3-noise-1.wv",
+          "packet": "short1-fast-false-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-fast-false-p3-noise-2.wv",
+          "packet": "short1-fast-false-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-fast-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 1,
+      "file": "short1-fast-six-p3-noise.mkv",
+      "oracle": "short1-fast-six-p3-noise.dsd",
+      "pcm": "short1-fast-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-fast-six-p3-noise-0.wv",
+          "packet": "short1-fast-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-fast-six-p3-noise-1.wv",
+          "packet": "short1-fast-six-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-fast-six-p3-noise-2.wv",
+          "packet": "short1-fast-six-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-rle-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 1,
+      "file": "short1-rle-mono-p3-noise.mkv",
+      "oracle": "short1-rle-mono-p3-noise.dsd",
+      "pcm": "short1-rle-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-rle-mono-p3-noise-0.wv",
+          "packet": "short1-rle-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-rle-mono-p3-noise-1.wv",
+          "packet": "short1-rle-mono-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-rle-mono-p3-noise-2.wv",
+          "packet": "short1-rle-mono-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-rle-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-rle-stereo-p3-noise.mkv",
+      "oracle": "short1-rle-stereo-p3-noise.dsd",
+      "pcm": "short1-rle-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-rle-stereo-p3-noise-0.wv",
+          "packet": "short1-rle-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-rle-stereo-p3-noise-1.wv",
+          "packet": "short1-rle-stereo-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-rle-stereo-p3-noise-2.wv",
+          "packet": "short1-rle-stereo-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-rle-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-rle-false-p3-noise.mkv",
+      "oracle": "short1-rle-false-p3-noise.dsd",
+      "pcm": "short1-rle-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-rle-false-p3-noise-0.wv",
+          "packet": "short1-rle-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-rle-false-p3-noise-1.wv",
+          "packet": "short1-rle-false-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-rle-false-p3-noise-2.wv",
+          "packet": "short1-rle-false-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-rle-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 1,
+      "file": "short1-rle-six-p3-noise.mkv",
+      "oracle": "short1-rle-six-p3-noise.dsd",
+      "pcm": "short1-rle-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-rle-six-p3-noise-0.wv",
+          "packet": "short1-rle-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-rle-six-p3-noise-1.wv",
+          "packet": "short1-rle-six-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-rle-six-p3-noise-2.wv",
+          "packet": "short1-rle-six-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-high-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 1,
+      "file": "short1-high-mono-p3-noise.mkv",
+      "oracle": "short1-high-mono-p3-noise.dsd",
+      "pcm": "short1-high-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-high-mono-p3-noise-0.wv",
+          "packet": "short1-high-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-high-mono-p3-noise-1.wv",
+          "packet": "short1-high-mono-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-high-mono-p3-noise-2.wv",
+          "packet": "short1-high-mono-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-high-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-high-stereo-p3-noise.mkv",
+      "oracle": "short1-high-stereo-p3-noise.dsd",
+      "pcm": "short1-high-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-high-stereo-p3-noise-0.wv",
+          "packet": "short1-high-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-high-stereo-p3-noise-1.wv",
+          "packet": "short1-high-stereo-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-high-stereo-p3-noise-2.wv",
+          "packet": "short1-high-stereo-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-high-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 1,
+      "file": "short1-high-false-p3-noise.mkv",
+      "oracle": "short1-high-false-p3-noise.dsd",
+      "pcm": "short1-high-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-high-false-p3-noise-0.wv",
+          "packet": "short1-high-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-high-false-p3-noise-1.wv",
+          "packet": "short1-high-false-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-high-false-p3-noise-2.wv",
+          "packet": "short1-high-false-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short1-high-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 1,
+      "file": "short1-high-six-p3-noise.mkv",
+      "oracle": "short1-high-six-p3-noise.dsd",
+      "pcm": "short1-high-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short1-high-six-p3-noise-0.wv",
+          "packet": "short1-high-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short1-high-six-p3-noise-1.wv",
+          "packet": "short1-high-six-p3-noise-1.packet",
+          "pts": 1
+        },
+        {
+          "file": "short1-high-six-p3-noise-2.wv",
+          "packet": "short1-high-six-p3-noise-2.packet",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "name": "short7-raw-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 7,
+      "file": "short7-raw-mono-p3-noise.mkv",
+      "oracle": "short7-raw-mono-p3-noise.dsd",
+      "pcm": "short7-raw-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-raw-mono-p3-noise-0.wv",
+          "packet": "short7-raw-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-raw-mono-p3-noise-1.wv",
+          "packet": "short7-raw-mono-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-raw-mono-p3-noise-2.wv",
+          "packet": "short7-raw-mono-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-raw-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-raw-stereo-p3-noise.mkv",
+      "oracle": "short7-raw-stereo-p3-noise.dsd",
+      "pcm": "short7-raw-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-raw-stereo-p3-noise-0.wv",
+          "packet": "short7-raw-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-raw-stereo-p3-noise-1.wv",
+          "packet": "short7-raw-stereo-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-raw-stereo-p3-noise-2.wv",
+          "packet": "short7-raw-stereo-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-raw-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-raw-false-p3-noise.mkv",
+      "oracle": "short7-raw-false-p3-noise.dsd",
+      "pcm": "short7-raw-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-raw-false-p3-noise-0.wv",
+          "packet": "short7-raw-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-raw-false-p3-noise-1.wv",
+          "packet": "short7-raw-false-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-raw-false-p3-noise-2.wv",
+          "packet": "short7-raw-false-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-raw-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 7,
+      "file": "short7-raw-six-p3-noise.mkv",
+      "oracle": "short7-raw-six-p3-noise.dsd",
+      "pcm": "short7-raw-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-raw-six-p3-noise-0.wv",
+          "packet": "short7-raw-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-raw-six-p3-noise-1.wv",
+          "packet": "short7-raw-six-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-raw-six-p3-noise-2.wv",
+          "packet": "short7-raw-six-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-fast-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 7,
+      "file": "short7-fast-mono-p3-noise.mkv",
+      "oracle": "short7-fast-mono-p3-noise.dsd",
+      "pcm": "short7-fast-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-fast-mono-p3-noise-0.wv",
+          "packet": "short7-fast-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-fast-mono-p3-noise-1.wv",
+          "packet": "short7-fast-mono-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-fast-mono-p3-noise-2.wv",
+          "packet": "short7-fast-mono-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-fast-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-fast-stereo-p3-noise.mkv",
+      "oracle": "short7-fast-stereo-p3-noise.dsd",
+      "pcm": "short7-fast-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-fast-stereo-p3-noise-0.wv",
+          "packet": "short7-fast-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-fast-stereo-p3-noise-1.wv",
+          "packet": "short7-fast-stereo-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-fast-stereo-p3-noise-2.wv",
+          "packet": "short7-fast-stereo-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-fast-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-fast-false-p3-noise.mkv",
+      "oracle": "short7-fast-false-p3-noise.dsd",
+      "pcm": "short7-fast-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-fast-false-p3-noise-0.wv",
+          "packet": "short7-fast-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-fast-false-p3-noise-1.wv",
+          "packet": "short7-fast-false-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-fast-false-p3-noise-2.wv",
+          "packet": "short7-fast-false-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-fast-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 7,
+      "file": "short7-fast-six-p3-noise.mkv",
+      "oracle": "short7-fast-six-p3-noise.dsd",
+      "pcm": "short7-fast-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-fast-six-p3-noise-0.wv",
+          "packet": "short7-fast-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-fast-six-p3-noise-1.wv",
+          "packet": "short7-fast-six-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-fast-six-p3-noise-2.wv",
+          "packet": "short7-fast-six-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-rle-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 7,
+      "file": "short7-rle-mono-p3-noise.mkv",
+      "oracle": "short7-rle-mono-p3-noise.dsd",
+      "pcm": "short7-rle-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-rle-mono-p3-noise-0.wv",
+          "packet": "short7-rle-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-rle-mono-p3-noise-1.wv",
+          "packet": "short7-rle-mono-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-rle-mono-p3-noise-2.wv",
+          "packet": "short7-rle-mono-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-rle-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-rle-stereo-p3-noise.mkv",
+      "oracle": "short7-rle-stereo-p3-noise.dsd",
+      "pcm": "short7-rle-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-rle-stereo-p3-noise-0.wv",
+          "packet": "short7-rle-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-rle-stereo-p3-noise-1.wv",
+          "packet": "short7-rle-stereo-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-rle-stereo-p3-noise-2.wv",
+          "packet": "short7-rle-stereo-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-rle-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-rle-false-p3-noise.mkv",
+      "oracle": "short7-rle-false-p3-noise.dsd",
+      "pcm": "short7-rle-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-rle-false-p3-noise-0.wv",
+          "packet": "short7-rle-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-rle-false-p3-noise-1.wv",
+          "packet": "short7-rle-false-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-rle-false-p3-noise-2.wv",
+          "packet": "short7-rle-false-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-rle-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 7,
+      "file": "short7-rle-six-p3-noise.mkv",
+      "oracle": "short7-rle-six-p3-noise.dsd",
+      "pcm": "short7-rle-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-rle-six-p3-noise-0.wv",
+          "packet": "short7-rle-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-rle-six-p3-noise-1.wv",
+          "packet": "short7-rle-six-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-rle-six-p3-noise-2.wv",
+          "packet": "short7-rle-six-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-high-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 7,
+      "file": "short7-high-mono-p3-noise.mkv",
+      "oracle": "short7-high-mono-p3-noise.dsd",
+      "pcm": "short7-high-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-high-mono-p3-noise-0.wv",
+          "packet": "short7-high-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-high-mono-p3-noise-1.wv",
+          "packet": "short7-high-mono-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-high-mono-p3-noise-2.wv",
+          "packet": "short7-high-mono-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-high-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-high-stereo-p3-noise.mkv",
+      "oracle": "short7-high-stereo-p3-noise.dsd",
+      "pcm": "short7-high-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-high-stereo-p3-noise-0.wv",
+          "packet": "short7-high-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-high-stereo-p3-noise-1.wv",
+          "packet": "short7-high-stereo-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-high-stereo-p3-noise-2.wv",
+          "packet": "short7-high-stereo-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-high-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 7,
+      "file": "short7-high-false-p3-noise.mkv",
+      "oracle": "short7-high-false-p3-noise.dsd",
+      "pcm": "short7-high-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-high-false-p3-noise-0.wv",
+          "packet": "short7-high-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-high-false-p3-noise-1.wv",
+          "packet": "short7-high-false-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-high-false-p3-noise-2.wv",
+          "packet": "short7-high-false-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short7-high-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 7,
+      "file": "short7-high-six-p3-noise.mkv",
+      "oracle": "short7-high-six-p3-noise.dsd",
+      "pcm": "short7-high-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short7-high-six-p3-noise-0.wv",
+          "packet": "short7-high-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short7-high-six-p3-noise-1.wv",
+          "packet": "short7-high-six-p3-noise-1.packet",
+          "pts": 7
+        },
+        {
+          "file": "short7-high-six-p3-noise-2.wv",
+          "packet": "short7-high-six-p3-noise-2.packet",
+          "pts": 14
+        }
+      ]
+    },
+    {
+      "name": "short15-raw-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 15,
+      "file": "short15-raw-mono-p3-noise.mkv",
+      "oracle": "short15-raw-mono-p3-noise.dsd",
+      "pcm": "short15-raw-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-raw-mono-p3-noise-0.wv",
+          "packet": "short15-raw-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-raw-mono-p3-noise-1.wv",
+          "packet": "short15-raw-mono-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-raw-mono-p3-noise-2.wv",
+          "packet": "short15-raw-mono-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-raw-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-raw-stereo-p3-noise.mkv",
+      "oracle": "short15-raw-stereo-p3-noise.dsd",
+      "pcm": "short15-raw-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-raw-stereo-p3-noise-0.wv",
+          "packet": "short15-raw-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-raw-stereo-p3-noise-1.wv",
+          "packet": "short15-raw-stereo-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-raw-stereo-p3-noise-2.wv",
+          "packet": "short15-raw-stereo-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-raw-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-raw-false-p3-noise.mkv",
+      "oracle": "short15-raw-false-p3-noise.dsd",
+      "pcm": "short15-raw-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-raw-false-p3-noise-0.wv",
+          "packet": "short15-raw-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-raw-false-p3-noise-1.wv",
+          "packet": "short15-raw-false-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-raw-false-p3-noise-2.wv",
+          "packet": "short15-raw-false-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-raw-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 15,
+      "file": "short15-raw-six-p3-noise.mkv",
+      "oracle": "short15-raw-six-p3-noise.dsd",
+      "pcm": "short15-raw-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-raw-six-p3-noise-0.wv",
+          "packet": "short15-raw-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-raw-six-p3-noise-1.wv",
+          "packet": "short15-raw-six-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-raw-six-p3-noise-2.wv",
+          "packet": "short15-raw-six-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-fast-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 15,
+      "file": "short15-fast-mono-p3-noise.mkv",
+      "oracle": "short15-fast-mono-p3-noise.dsd",
+      "pcm": "short15-fast-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-fast-mono-p3-noise-0.wv",
+          "packet": "short15-fast-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-fast-mono-p3-noise-1.wv",
+          "packet": "short15-fast-mono-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-fast-mono-p3-noise-2.wv",
+          "packet": "short15-fast-mono-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-fast-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-fast-stereo-p3-noise.mkv",
+      "oracle": "short15-fast-stereo-p3-noise.dsd",
+      "pcm": "short15-fast-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-fast-stereo-p3-noise-0.wv",
+          "packet": "short15-fast-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-fast-stereo-p3-noise-1.wv",
+          "packet": "short15-fast-stereo-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-fast-stereo-p3-noise-2.wv",
+          "packet": "short15-fast-stereo-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-fast-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-fast-false-p3-noise.mkv",
+      "oracle": "short15-fast-false-p3-noise.dsd",
+      "pcm": "short15-fast-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-fast-false-p3-noise-0.wv",
+          "packet": "short15-fast-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-fast-false-p3-noise-1.wv",
+          "packet": "short15-fast-false-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-fast-false-p3-noise-2.wv",
+          "packet": "short15-fast-false-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-fast-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 15,
+      "file": "short15-fast-six-p3-noise.mkv",
+      "oracle": "short15-fast-six-p3-noise.dsd",
+      "pcm": "short15-fast-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-fast-six-p3-noise-0.wv",
+          "packet": "short15-fast-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-fast-six-p3-noise-1.wv",
+          "packet": "short15-fast-six-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-fast-six-p3-noise-2.wv",
+          "packet": "short15-fast-six-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-rle-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 15,
+      "file": "short15-rle-mono-p3-noise.mkv",
+      "oracle": "short15-rle-mono-p3-noise.dsd",
+      "pcm": "short15-rle-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-rle-mono-p3-noise-0.wv",
+          "packet": "short15-rle-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-rle-mono-p3-noise-1.wv",
+          "packet": "short15-rle-mono-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-rle-mono-p3-noise-2.wv",
+          "packet": "short15-rle-mono-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-rle-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-rle-stereo-p3-noise.mkv",
+      "oracle": "short15-rle-stereo-p3-noise.dsd",
+      "pcm": "short15-rle-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-rle-stereo-p3-noise-0.wv",
+          "packet": "short15-rle-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-rle-stereo-p3-noise-1.wv",
+          "packet": "short15-rle-stereo-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-rle-stereo-p3-noise-2.wv",
+          "packet": "short15-rle-stereo-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-rle-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-rle-false-p3-noise.mkv",
+      "oracle": "short15-rle-false-p3-noise.dsd",
+      "pcm": "short15-rle-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-rle-false-p3-noise-0.wv",
+          "packet": "short15-rle-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-rle-false-p3-noise-1.wv",
+          "packet": "short15-rle-false-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-rle-false-p3-noise-2.wv",
+          "packet": "short15-rle-false-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-rle-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 15,
+      "file": "short15-rle-six-p3-noise.mkv",
+      "oracle": "short15-rle-six-p3-noise.dsd",
+      "pcm": "short15-rle-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-rle-six-p3-noise-0.wv",
+          "packet": "short15-rle-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-rle-six-p3-noise-1.wv",
+          "packet": "short15-rle-six-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-rle-six-p3-noise-2.wv",
+          "packet": "short15-rle-six-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-high-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 15,
+      "file": "short15-high-mono-p3-noise.mkv",
+      "oracle": "short15-high-mono-p3-noise.dsd",
+      "pcm": "short15-high-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-high-mono-p3-noise-0.wv",
+          "packet": "short15-high-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-high-mono-p3-noise-1.wv",
+          "packet": "short15-high-mono-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-high-mono-p3-noise-2.wv",
+          "packet": "short15-high-mono-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-high-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-high-stereo-p3-noise.mkv",
+      "oracle": "short15-high-stereo-p3-noise.dsd",
+      "pcm": "short15-high-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-high-stereo-p3-noise-0.wv",
+          "packet": "short15-high-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-high-stereo-p3-noise-1.wv",
+          "packet": "short15-high-stereo-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-high-stereo-p3-noise-2.wv",
+          "packet": "short15-high-stereo-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-high-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 15,
+      "file": "short15-high-false-p3-noise.mkv",
+      "oracle": "short15-high-false-p3-noise.dsd",
+      "pcm": "short15-high-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-high-false-p3-noise-0.wv",
+          "packet": "short15-high-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-high-false-p3-noise-1.wv",
+          "packet": "short15-high-false-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-high-false-p3-noise-2.wv",
+          "packet": "short15-high-false-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short15-high-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 15,
+      "file": "short15-high-six-p3-noise.mkv",
+      "oracle": "short15-high-six-p3-noise.dsd",
+      "pcm": "short15-high-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short15-high-six-p3-noise-0.wv",
+          "packet": "short15-high-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short15-high-six-p3-noise-1.wv",
+          "packet": "short15-high-six-p3-noise-1.packet",
+          "pts": 15
+        },
+        {
+          "file": "short15-high-six-p3-noise-2.wv",
+          "packet": "short15-high-six-p3-noise-2.packet",
+          "pts": 30
+        }
+      ]
+    },
+    {
+      "name": "short16-raw-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 16,
+      "file": "short16-raw-mono-p3-noise.mkv",
+      "oracle": "short16-raw-mono-p3-noise.dsd",
+      "pcm": "short16-raw-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-raw-mono-p3-noise-0.wv",
+          "packet": "short16-raw-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-raw-mono-p3-noise-1.wv",
+          "packet": "short16-raw-mono-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-raw-mono-p3-noise-2.wv",
+          "packet": "short16-raw-mono-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-raw-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-raw-stereo-p3-noise.mkv",
+      "oracle": "short16-raw-stereo-p3-noise.dsd",
+      "pcm": "short16-raw-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-raw-stereo-p3-noise-0.wv",
+          "packet": "short16-raw-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-raw-stereo-p3-noise-1.wv",
+          "packet": "short16-raw-stereo-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-raw-stereo-p3-noise-2.wv",
+          "packet": "short16-raw-stereo-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-raw-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-raw-false-p3-noise.mkv",
+      "oracle": "short16-raw-false-p3-noise.dsd",
+      "pcm": "short16-raw-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-raw-false-p3-noise-0.wv",
+          "packet": "short16-raw-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-raw-false-p3-noise-1.wv",
+          "packet": "short16-raw-false-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-raw-false-p3-noise-2.wv",
+          "packet": "short16-raw-false-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-raw-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 16,
+      "file": "short16-raw-six-p3-noise.mkv",
+      "oracle": "short16-raw-six-p3-noise.dsd",
+      "pcm": "short16-raw-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-raw-six-p3-noise-0.wv",
+          "packet": "short16-raw-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-raw-six-p3-noise-1.wv",
+          "packet": "short16-raw-six-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-raw-six-p3-noise-2.wv",
+          "packet": "short16-raw-six-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-fast-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 16,
+      "file": "short16-fast-mono-p3-noise.mkv",
+      "oracle": "short16-fast-mono-p3-noise.dsd",
+      "pcm": "short16-fast-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-fast-mono-p3-noise-0.wv",
+          "packet": "short16-fast-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-fast-mono-p3-noise-1.wv",
+          "packet": "short16-fast-mono-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-fast-mono-p3-noise-2.wv",
+          "packet": "short16-fast-mono-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-fast-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-fast-stereo-p3-noise.mkv",
+      "oracle": "short16-fast-stereo-p3-noise.dsd",
+      "pcm": "short16-fast-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-fast-stereo-p3-noise-0.wv",
+          "packet": "short16-fast-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-fast-stereo-p3-noise-1.wv",
+          "packet": "short16-fast-stereo-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-fast-stereo-p3-noise-2.wv",
+          "packet": "short16-fast-stereo-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-fast-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-fast-false-p3-noise.mkv",
+      "oracle": "short16-fast-false-p3-noise.dsd",
+      "pcm": "short16-fast-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-fast-false-p3-noise-0.wv",
+          "packet": "short16-fast-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-fast-false-p3-noise-1.wv",
+          "packet": "short16-fast-false-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-fast-false-p3-noise-2.wv",
+          "packet": "short16-fast-false-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-fast-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 16,
+      "file": "short16-fast-six-p3-noise.mkv",
+      "oracle": "short16-fast-six-p3-noise.dsd",
+      "pcm": "short16-fast-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-fast-six-p3-noise-0.wv",
+          "packet": "short16-fast-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-fast-six-p3-noise-1.wv",
+          "packet": "short16-fast-six-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-fast-six-p3-noise-2.wv",
+          "packet": "short16-fast-six-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-rle-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 16,
+      "file": "short16-rle-mono-p3-noise.mkv",
+      "oracle": "short16-rle-mono-p3-noise.dsd",
+      "pcm": "short16-rle-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-rle-mono-p3-noise-0.wv",
+          "packet": "short16-rle-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-rle-mono-p3-noise-1.wv",
+          "packet": "short16-rle-mono-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-rle-mono-p3-noise-2.wv",
+          "packet": "short16-rle-mono-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-rle-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-rle-stereo-p3-noise.mkv",
+      "oracle": "short16-rle-stereo-p3-noise.dsd",
+      "pcm": "short16-rle-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-rle-stereo-p3-noise-0.wv",
+          "packet": "short16-rle-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-rle-stereo-p3-noise-1.wv",
+          "packet": "short16-rle-stereo-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-rle-stereo-p3-noise-2.wv",
+          "packet": "short16-rle-stereo-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-rle-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-rle-false-p3-noise.mkv",
+      "oracle": "short16-rle-false-p3-noise.dsd",
+      "pcm": "short16-rle-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-rle-false-p3-noise-0.wv",
+          "packet": "short16-rle-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-rle-false-p3-noise-1.wv",
+          "packet": "short16-rle-false-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-rle-false-p3-noise-2.wv",
+          "packet": "short16-rle-false-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-rle-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 16,
+      "file": "short16-rle-six-p3-noise.mkv",
+      "oracle": "short16-rle-six-p3-noise.dsd",
+      "pcm": "short16-rle-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-rle-six-p3-noise-0.wv",
+          "packet": "short16-rle-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-rle-six-p3-noise-1.wv",
+          "packet": "short16-rle-six-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-rle-six-p3-noise-2.wv",
+          "packet": "short16-rle-six-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-high-mono-p3-noise",
+      "rate": 352800,
+      "channels": 1,
+      "samples": 16,
+      "file": "short16-high-mono-p3-noise.mkv",
+      "oracle": "short16-high-mono-p3-noise.dsd",
+      "pcm": "short16-high-mono-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-high-mono-p3-noise-0.wv",
+          "packet": "short16-high-mono-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-high-mono-p3-noise-1.wv",
+          "packet": "short16-high-mono-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-high-mono-p3-noise-2.wv",
+          "packet": "short16-high-mono-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-high-stereo-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-high-stereo-p3-noise.mkv",
+      "oracle": "short16-high-stereo-p3-noise.dsd",
+      "pcm": "short16-high-stereo-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-high-stereo-p3-noise-0.wv",
+          "packet": "short16-high-stereo-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-high-stereo-p3-noise-1.wv",
+          "packet": "short16-high-stereo-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-high-stereo-p3-noise-2.wv",
+          "packet": "short16-high-stereo-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-high-false-p3-noise",
+      "rate": 352800,
+      "channels": 2,
+      "samples": 16,
+      "file": "short16-high-false-p3-noise.mkv",
+      "oracle": "short16-high-false-p3-noise.dsd",
+      "pcm": "short16-high-false-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-high-false-p3-noise-0.wv",
+          "packet": "short16-high-false-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-high-false-p3-noise-1.wv",
+          "packet": "short16-high-false-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-high-false-p3-noise-2.wv",
+          "packet": "short16-high-false-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    },
+    {
+      "name": "short16-high-six-p3-noise",
+      "rate": 352800,
+      "channels": 6,
+      "samples": 16,
+      "file": "short16-high-six-p3-noise.mkv",
+      "oracle": "short16-high-six-p3-noise.dsd",
+      "pcm": "short16-high-six-p3-noise.f32le",
+      "frames": [
+        {
+          "file": "short16-high-six-p3-noise-0.wv",
+          "packet": "short16-high-six-p3-noise-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "short16-high-six-p3-noise-1.wv",
+          "packet": "short16-high-six-p3-noise-1.packet",
+          "pts": 16
+        },
+        {
+          "file": "short16-high-six-p3-noise-2.wv",
+          "packet": "short16-high-six-p3-noise-2.packet",
+          "pts": 32
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "metadata-short.wv",
+      "movie": "metadata-short.mkv",
+      "message": "metadata is too short"
+    },
+    {
+      "file": "pcm-flags.wv",
+      "movie": "pcm-flags.mkv",
+      "message": "incompatible PCM coding flags"
+    },
+    {
+      "file": "missing-flag.wv",
+      "movie": "missing-flag.mkv",
+      "message": "DSD metadata without DSD coding"
+    },
+    {
+      "file": "probability-bound.wv",
+      "movie": "probability-bound.mkv",
+      "message": "probability storage exceeds"
+    },
+    {
+      "file": "mode.wv",
+      "movie": "mode.mkv",
+      "message": "coding mode is invalid"
+    },
+    {
+      "file": "multiplier.wv",
+      "movie": "multiplier.mkv",
+      "message": "multiplier exceeds"
+    },
+    {
+      "file": "rate-overflow.wv",
+      "movie": "rate-overflow.mkv",
+      "message": "sample rate overflows"
+    },
+    {
+      "file": "raw-short.wv",
+      "movie": "raw-short.mkv",
+      "message": "raw DSD sample count mismatch"
+    },
+    {
+      "file": "high-rate.wv",
+      "movie": "high-rate.mkv",
+      "message": "adaptation rate is invalid"
+    },
+    {
+      "file": "high-short.wv",
+      "movie": "high-short.mkv",
+      "message": "stream is truncated"
+    },
+    {
+      "file": "fast-history.wv",
+      "movie": "fast-history.mkv",
+      "message": "history exceeds"
+    },
+    {
+      "file": "fast-empty.wv",
+      "movie": "fast-empty.mkv",
+      "message": "empty probability context"
+    },
+    {
+      "file": "rle-short.wv",
+      "movie": "rle-short.mkv",
+      "message": "probability table is incomplete"
+    },
+    {
+      "file": "crc.wv",
+      "movie": "crc.mkv",
+      "message": "DSD checksum"
+    }
+  ],
+  "atomic_case": "high-six-p3-noise"
+}

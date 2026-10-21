@@ -1,0 +1,9 @@
+{
+  "provenance": "Authored caption text and raw Y4M companion. Explicit paragraph clocks isolate break case handling from unsupported canonical Sync timing. No private media or codec parameters.",
+  "cases": [
+    "upper",
+    "mixed",
+    "attributes",
+    "lower-control"
+  ]
+}

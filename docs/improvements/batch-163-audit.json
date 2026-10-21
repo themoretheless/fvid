@@ -1,0 +1,106 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0171",
+  "problem": "Ogg assembly ignores a fresh-page flag while a known packet is unfinished,and treats an initial continued fragment with unavailable prefix as a full codec packet. Packet-looking bytes in legal decoder padding expose wrong10/30/40ms clocks.",
+  "references": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc7845.html#section-3",
+      "finding": "Joined live streams can begin audio with a continued fragment. A fragment without its preceding pieces must not be decoded. Fresh flags while previous packet continues also prohibit decoding that packet."
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc6716.html#section-3.2.5",
+      "finding": "Decoders must accept arbitrary padding bytes,though conforming encoders emit zero padding. Decoder-acceptance test padding can therefore contain packet-shaped bytes."
+    }
+  ],
+  "before_snapshots": [
+    "evidence/batch-163-ogg-before.rs",
+    "evidence/batch-163-opus-reader-before.rs"
+  ],
+  "sources_sha256": {
+    "crates/fvid-media/src/owned_ogg.rs": "0e3db4fa6a86e2a6c53adf85d89309b2bfb0ae5935c8941cc08821bac795c933",
+    "crates/fvid-opus/src/ogg/reader.rs": "67aed7c69bd04c6255bc7dda4ac317f36f072e8c2bfa99925fd38c6b5ac9cef7"
+  },
+  "fixtures": "tests/fixtures/playback-errors/ogg-continuation-boundary",
+  "independent_packet_controls": "evidence/batch-163-libopus-packet-controls.json",
+  "requirements": [
+    "All pages have valid CRCs and consecutive counters,so FVID0170 counter rejection cannot substitute for this fix.",
+    "Validate missing flags specifically;distinguish an existing codec refusal on zero-byte false packets from successful playback acceptance.",
+    "Discard joined fragments until a genuine packet begins. Do not blanket-refuse initial continuation,which is a defined RFC7845 live-join case.",
+    "Eight complete/prefix controls retain exact codec bytes and native PCM/worker seek/EOF,including nil termination and empty-page compatibility.",
+    "The standalone reader already refuses malformed flags and currently refuses joined prefixes as unsupported. Preserve refusals and enable its joined-prefix acceptance with the implementation,including rewind.",
+    "All fixture generation remains pure/offline and explicit;ordinary tests do not depend on libopus,FFmpeg or network."
+  ],
+  "counting": "Plan one continuation-aware packet-state improvement,not separate IDs per flag direction,partial-page layout,reader or sample clock.",
+  "supplementary_before": {
+    "source": "evidence/batch-163-parser-before-replay.rs",
+    "log": "evidence/batch-163-parser-before-replay.log",
+    "result": "The sequence-aware actual frozen parser publishes the exact wrong fragment bytes in all six malformed/joined cases while eight complete controls remain intact. This is parser proof;native clocks/worker and standalone acceptance gates remain required."
+  },
+  "implementation_plan": [
+    "Represent a known packet prefix separately from a continuation whose prefix is unavailable. Publish only complete known packets.",
+    "A fresh nonempty page while a known packet is unfinished must refuse specifically;do not decode packet-shaped bytes from that tail.",
+    "A valid joined initial continuation is not a blanket error:discard all of its segments until its terminating lace,then retain whole packets and original granules. Nil termination and multi-page fragments matter.",
+    "Keep generic empty-page compatibility without inventing packet boundaries from an empty segment table. The specialized streaming reader currently explicitly refuses empty segment tables;do not silently present that as playback acceptance.",
+    "The standalone reader needs an explicit headers/first-audio/discarding/regular phase. Rewind must restore first-audio fragment handling as well as FVID0170 counter checkpoint. Preserve malformed-flag refusal and packet-buffer bounds.",
+    "Native healthy/joined playback must match independent raw-packet PCM and actual mid-packet/EOF worker traces. The before30/40ms joined and10ms malformed clock hypotheses still require Cargo/runtime proof.",
+    "One cohesive continuation-state improvement,not separate IDs per state,reader,profile or fixture."
+  ],
+  "initial_harness_repair": {
+    "log": "evidence/batch-163-initial-before.log",
+    "source": "evidence/batch-163-tests-initial.rs",
+    "problem": "Raw-packet reference supplied sample ticks to generic Opus decoder,whose direct packet clock is nanoseconds. At the second packet it asserted1.92us versus40ms. Native source presentation separately maps its sample ticks correctly.",
+    "fix": "Convert only independent decoder reference PTS/duration arguments to nanoseconds. No production code or authored media bytes changed. Initial harness failure is not an improvement ID or the intended Ogg failure."
+  },
+  "candidate_preflight": {
+    "core": "evidence/batch-163-parser-candidate-check.log",
+    "streaming": "evidence/batch-163-opus-candidate-preflight.log",
+    "scope": "Frozen candidate source only: eight core controls,three joined drops,three malformed refusals,four counter refusals;three standalone integration tests including repeated rewind. Not yet acceptance or final Cargo/runtime proof.",
+    "harness_notes": [
+      "Direct rustc probe initially lacked CARGO_PKG_VERSION; archived compiler error,then supplied the actual crate version.",
+      "Initial private enum placement intercepted the public reader doc comment; moved enum before reader documentation. No production behavior change or accepted ID for these compile repairs."
+    ]
+  },
+  "confirmed_before": {
+    "normal": "evidence/batch-163-before.log",
+    "normal_result": "4 passed,4 ignored",
+    "forced": "evidence/batch-163-acceptance-before.log",
+    "forced_result": "4 intended acceptances failed at exact continuation admission/packet counts",
+    "native": "Missing-final-prefix reaches10ms,missing-middle60ms,joined-tail30ms,joined-two-pages40ms. Two zero-terminator false packets are existing codec refusals rather than playback.",
+    "standalone": "Existing malformed-flag refusals pass. Valid joined-fragment acceptance fails with the old explicit continuation refusal."
+  },
+  "candidate_sha256": {
+    "crates/fvid-media/src/owned_ogg.rs": "93c8cb470526887d9ace0a1f0687438bcd3287b7ad402d548f57bc61e2f99165",
+    "crates/fvid-opus/src/ogg/reader.rs": "4f8658840bc56adea4fc21f1714e4f4e9bbe8a1d07e20da199e31430b232307e",
+    "tests/ogg_continuation_boundary.rs": "f70417fe82242712a5b3db1bd6969209debc9386a1dbfd58cd55ea597c3726b7",
+    "crates/fvid-opus/tests/ogg_continuation_boundary.rs": "53c2b4a2afc8cc910a4fdec855902d1d9436039f58f16e760da20d4581076097"
+  },
+  "implementation": [
+    "Canonical pending state distinguishes available prefix from missing prefix;missing fragments never count against published packets and discard through terminating lace. Empty pages preserve pending state. Fresh nonempty pages cannot bypass a known unfinished packet.",
+    "Streaming reader distinguishes header,first-audio,discarding and regular phases. Discard-only pages advance page counters and retain only page-local payload,then whole packet publication resumes. Rewind restores first-audio phase alongside the sequence checkpoint.",
+    "No public interface,codec synthesis,buffer limit or claimed performance change."
+  ],
+  "completed_gates": {
+    "after": {
+      "passed": 38,
+      "ignored": 0,
+      "log": "evidence/batch-163-after.log"
+    },
+    "root-units": {
+      "passed": 19,
+      "ignored": 0,
+      "log": "evidence/batch-163-root-units.log"
+    },
+    "opus-after": {
+      "passed": 5,
+      "ignored": 0,
+      "log": "evidence/batch-163-opus-after.log"
+    },
+    "opus-units": {
+      "passed": 65,
+      "ignored": 0,
+      "log": "evidence/batch-163-opus-units.log"
+    }
+  },
+  "accepted_id": "FVID-0171",
+  "validation": "batch-163-validation.json"
+}

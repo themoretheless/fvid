@@ -493,7 +493,7 @@ fn se(b: &mut BitReader<'_>, min: i32, max: i32, field: &str) -> Result<i32> {
     Ok(n)
 }
 impl Pps {
-    pub fn parse(nal: &[u8], sps: &Sps) -> Result<Self> {
+    fn rbsp(nal: &[u8]) -> Result<Vec<u8>> {
         if nal
             .first()
             .is_none_or(|h| h & 0x80 != 0 || h & 31 != 8 || h & 0x60 == 0)
@@ -503,7 +503,16 @@ impl Pps {
         if nal.len() > 65535 {
             return Err(invalid("AVC PPS exceeds size limit"));
         }
-        let rbsp = unescape_rbsp(&nal[1..])?;
+        unescape_rbsp(&nal[1..])
+    }
+    /// IDs can be received before the replacement SPS needed for full syntax.
+    pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+        let rbsp = Self::rbsp(nal)?;
+        let mut b = BitReader::new(&rbsp);
+        Ok((ue(&mut b, 255, "PPS id")?, ue(&mut b, 31, "PPS SPS id")?))
+    }
+    pub fn parse(nal: &[u8], sps: &Sps) -> Result<Self> {
+        let rbsp = Self::rbsp(nal)?;
         let mut b = BitReader::new(&rbsp);
         let id = ue(&mut b, 255, "PPS id")?;
         let sps_id = ue(&mut b, 31, "PPS SPS id")?;

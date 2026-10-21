@@ -1,46 +1,21 @@
-//! WavPack's own lossless coding: a block of residuals, read out of an entropy stream
-//! that spends its shortest words on the most common sizes, run back through the
-//! adaptive decorrelation passes the block names.
+//! Owned WavPack lossless/hybrid main-stream reconstruction and sample-frame assembly.
 //!
-//! A block is self-contained. It states its own sample count and carries the terms, the
-//! weights and the past samples its passes start from, so a seek lands on a block that
-//! decodes the same however it was reached and nothing carries between blocks. What a
-//! block does not carry is the shape of the whole stream: its header counts the samples
-//! of the file rather than of the block, and in a multichannel file one block holds only
-//! some of the channels of the moment it covers. This decoder takes a whole block of a
-//! one- or two-channel stream, which is what a container hands over.
-//!
-//! The header is read little-endian from the block's `wvpk` tag. The metadata items that
-//! follow are typed by the low six bits of their id byte, of which the top one says a
-//! decoder need not understand the item, so an item this module has no case for is walked
-//! over on its own length rather than guessed at; an item whose body would run past the
-//! block stops the walk. The arithmetic is fixed width throughout: residuals and samples
-//! are 32-bit, a weight is Q10 with a range the stream states in one signed byte, the
-//! magnitudes come out of a 256-entry exp2 table, and bits come out of a byte from the
-//! bottom up. The block closes with a running checksum of the samples themselves, and
-//! that checksum is recomputed here, which is what lets a damaged block be refused whole
-//! instead of played as noise.
-//!
-//! So a block is refused - and the audio path shows it as a counted rejected packet
-//! rather than as silence - when it is hybrid, floating-point, DSD or dual-mono; when it
-//! states that it holds only part of what it covers; when its version is outside the 4.x
-//! coding transcribed here; when it does not state its own length, or states one that
-//! runs past the packet or under its own header; when it lacks the terms, weights,
-//! samples, entropy or bitstream item; when it names a reserved decorrelation term or
-//! more weights than it has passes or leaves the samples item with bytes nobody read;
-//! when its residuals or its extra bits run past the end of their stream; when its
-//! checksum does not match; when a sample is larger than the magnitude the header
-//! declares; and when a 32-bit block's extra bits are not spent to their last byte.
+//! Each component block owns its entropy, predictor history and sample CRC.
+//! Integer fixup or bit-exact IEEE reconstruction completes before false-stereo
+//! expansion. A packet contains all mono/stereo components for one sample window;
+//! the assembler validates boundaries, time/format and declared speaker layout
+//! before interleaving. A failed later component publishes neither PCM nor layout.
+//! Raw packets keep their complete headers; Matroska packets restore the shared
+//! version and per-component compact headers. Hybrid main streams reconstruct
+//! their quantized PCM; paired correction streams reconstruct lossless PCM.
+//! Raw/static/adaptive DSD bytes feed a persistent, transactional PCM decimator.
 
 use crate::audio::{AudioDecode, AudioPacket};
 use crate::{Result, invalid};
 
 /// Bytes between a block's `wvpk` tag and its first metadata item.
 pub(crate) const HEADER_BYTES: usize = 32;
-/// Offsets of the header's fields, counted from the tag. The two bytes at 10 and 11 are
-/// the track and index numbers by which a multichannel stream says which channels a block
-/// holds; a block that is the whole of a moment leaves both zero, and nothing here reads
-/// them.
+/// Header offsets. Bytes 10 and 11 extend the block/sample counters to 40 bits.
 const CK_SIZE: usize = 4;
 const VERSION: usize = 8;
 const TOTAL_SAMPLES: usize = 12;
@@ -49,17 +24,14 @@ const BLOCK_SAMPLES: usize = 20;
 const FLAGS: usize = 24;
 const CRC: usize = 28;
 
-/// The versions whose header, item layout and flags are transcribed here. Every file this
-/// build has measured - the ten fixtures under `tests/fixtures/wavpack` and the samples
-/// the coverage gate runs - was written by the 4.70 encoder and states 0x410, which is
-/// where the 4.x layout settled; a 5.x block states 0x500 and carries items this module
-/// could only refuse on their own flags.
+/// Shared WavPack 4/5 stream-version interval (software version 5 still uses 0x410).
 const MIN_VERSION: u16 = 0x402;
-const MAX_VERSION: u16 = 0x418;
+const MAX_VERSION: u16 = 0x410;
+const MAX_CHANNELS: u16 = 4096;
 
 /// Samples a block may hold. The reference decoder stops at this number, and nothing
 /// measured here comes near it: the largest block in these fixtures holds 2400 samples.
-const MAX_BLOCK_SAMPLES: u32 = 150_000;
+pub(crate) const MAX_BLOCK_SAMPLES: u32 = 150_000;
 
 /// Decorrelation passes a block may name, and the longest tap a positive term reaches -
 /// which is also how many past samples a pass holds.
@@ -67,8 +39,8 @@ const MAX_PASSES: usize = 16;
 const MAX_TERM: i32 = 8;
 
 /// The header's flag bits. Cross-decorrelation is the one bit that says something and is
-/// left alone: measured over every lossless fixture here, a block decodes the same with
-/// or without it, because the bit only changes which weights the hybrid path updates.
+/// left alone for lossless/main streams; correction reconstruction uses the bit
+/// to select the predictor history used by corrected stereo samples.
 const BYTES_FIELD: u32 = 0x3;
 const MONO: u32 = 1 << 2;
 const HYBRID: u32 = 1 << 3;
@@ -177,20 +149,28 @@ pub(crate) struct Block<'a> {
     /// Bytes from this block's tag to the next block's, so a caller can walk a stream.
     pub length: usize,
     /// Where the block sits in the file, in samples.
-    pub block_index: u32,
+    pub block_index: u64,
     pub block_samples: u32,
     /// Samples the whole stream runs to, which is what a duration is measured against.
-    pub total_samples: u32,
+    pub total_samples: Option<u64>,
     pub channels: u16,
     pub bits_per_sample: u16,
     pub sample_rate: u32,
     flags: u32,
+    version: u16,
+    channel_info: Option<frame::ChannelInfo>,
     crc: u32,
     terms: &'a [u8],
     weights: &'a [u8],
     decorr_samples: &'a [u8],
     entropy: &'a [u8],
+    hybrid_profile: &'a [u8],
+    shaping: &'a [u8],
+    dsd: &'a [u8],
+    correction_bits: Vec<&'a [u8]>,
     int32_info: &'a [u8],
+    float_info: &'a [u8],
+    extra_new: bool,
     extra_bits: Vec<&'a [u8]>,
     bits: Vec<&'a [u8]>,
 }
@@ -199,7 +179,11 @@ impl<'a> Block<'a> {
     /// Read the block that starts at `at` within `data`, refusing anything a decoder
     /// could only guess at.
     pub(crate) fn parse(data: &'a [u8], at: usize) -> Result<Self> {
-        if at + HEADER_BYTES > data.len() || data[at..at + 4] != *b"wvpk" {
+        if at
+            .checked_add(HEADER_BYTES)
+            .is_none_or(|end| end > data.len())
+            || data[at..at + 4] != *b"wvpk"
+        {
             return Err(invalid("WavPack block tag or header missing"));
         }
         let header = &data[at..];
@@ -211,8 +195,11 @@ impl<'a> Block<'a> {
             .checked_add(usize::try_from(ck_size).expect("below the maximum"))
             .filter(|length| *length >= HEADER_BYTES)
             .ok_or_else(|| invalid("WavPack block is shorter than its header"))?;
+        let end = at
+            .checked_add(length)
+            .ok_or_else(|| invalid("WavPack block runs past the packet"))?;
         let bytes = data
-            .get(at..at + length)
+            .get(at..end)
             .ok_or_else(|| invalid("WavPack block runs past the packet"))?;
         let version =
             u16::from_le_bytes(bytes[VERSION..VERSION + 2].try_into().expect("two bytes"));
@@ -224,38 +211,58 @@ impl<'a> Block<'a> {
             return Err(invalid("WavPack block states an unusable sample count"));
         }
         let flags = le32(bytes, FLAGS);
-        if flags & (HYBRID | HYBRID_BITRATE | SHAPING) != 0 {
+        if flags & HYBRID == 0 && flags & (HYBRID_BITRATE | SHAPING | (1 << 10)) != 0 {
+            return Err(invalid("WavPack hybrid controls without hybrid coding"));
+        }
+        if flags & FLOAT != 0 && (flags & INT32_DATA != 0 || flags & BYTES_FIELD != 3) {
             return Err(invalid(
-                "WavPack hybrid block: lossy coding is not supported",
+                "WavPack float block requires 32-bit storage without INT32 coding",
             ));
         }
-        if flags & FLOAT != 0 {
-            return Err(invalid("WavPack floating-point block is not supported"));
+        if flags & DSD_DATA != 0
+            && flags
+                & (HYBRID
+                    | FLOAT
+                    | INT32_DATA
+                    | JOINT_STEREO
+                    | SHAPING
+                    | BYTES_FIELD
+                    | (31 << SHIFT_FIELD))
+                != 0
+        {
+            return Err(invalid(
+                "WavPack DSD block has incompatible PCM coding flags",
+            ));
         }
-        if flags & DSD_DATA != 0 {
-            return Err(invalid("WavPack DSD block is not supported"));
-        }
-        if flags & FALSE_STEREO != 0 {
-            return Err(invalid("WavPack dual-mono block is not supported"));
-        }
-        if flags & (INITIAL_BLOCK | FINAL_BLOCK) != (INITIAL_BLOCK | FINAL_BLOCK) {
-            return Err(invalid("WavPack block holds only part of what it covers"));
+        if flags & (MONO | FALSE_STEREO) == (MONO | FALSE_STEREO) {
+            return Err(invalid("WavPack block signals both mono and false stereo"));
         }
         let mut block = Self {
             length,
-            block_index: le32(bytes, BLOCK_INDEX),
+            block_index: u64::from(le32(bytes, BLOCK_INDEX)) | (u64::from(bytes[10]) << 32),
             block_samples,
-            total_samples: le32(bytes, TOTAL_SAMPLES),
+            total_samples: (le32(bytes, TOTAL_SAMPLES) != u32::MAX).then(|| {
+                u64::from(le32(bytes, TOTAL_SAMPLES)) + (u64::from(bytes[11]) << 32)
+                    - u64::from(bytes[11])
+            }),
             channels: if flags & MONO != 0 { 1 } else { 2 },
             bits_per_sample: u16::from((flags & BYTES_FIELD) as u8 + 1) * 8,
             sample_rate: 0,
             flags,
+            version,
+            channel_info: None,
             crc: le32(bytes, CRC),
             terms: &[],
             weights: &[],
             decorr_samples: &[],
             entropy: &[],
+            hybrid_profile: &[],
+            shaping: &[],
+            dsd: &[],
+            correction_bits: Vec::new(),
             int32_info: &[],
+            float_info: &[],
+            extra_new: false,
             extra_bits: Vec::new(),
             bits: Vec::new(),
         };
@@ -299,32 +306,84 @@ impl<'a> Block<'a> {
                 ID_BITS => block.bits.push(body),
                 // The reference's word buffer is 64 KiB, so a long block's residuals do
                 // come in several items, which the decoder reads as one run.
-                ID_EXTRA_BITS => block.extra_bits.push(body),
+                ID_EXTRA_BITS | 0x2c => {
+                    let new = id & ID_MASK == 0x2c;
+                    if !block.extra_bits.is_empty() && block.extra_new != new {
+                        return Err(invalid("WavPack mixed extended bitstream formats"));
+                    }
+                    block.extra_new = new;
+                    block.extra_bits.push(body);
+                }
                 ID_SAMPLE_RATE => {
-                    if body.len() != 3 {
+                    if body.len() != 3 && body.len() != 4 {
                         return Err(invalid("WavPack custom sample rate is the wrong length"));
                     }
-                    custom_rate = Some(le24(body));
+                    // The extended form carries 31 bits; bit 31 is reserved.
+                    let rate =
+                        le24(body) | (body.get(3).map_or(0, |&byte| u32::from(byte & 0x7f)) << 24);
+                    if rate == 0 {
+                        return Err(invalid("WavPack custom sample rate is zero"));
+                    }
+                    custom_rate = Some(rate);
                 }
-                ID_HYBRID_PROFILE => return Err(invalid("WavPack hybrid profile item")),
-                ID_SHAPING_WEIGHTS => return Err(invalid("WavPack noise shaping item")),
-                ID_FLOAT_INFO => return Err(invalid("WavPack floating-point item")),
-                ID_CORRECTION => return Err(invalid("WavPack correction stream item")),
-                ID_CHANNEL_INFO => return Err(invalid("WavPack multichannel layout item")),
-                ID_DSD_BITS => return Err(invalid("WavPack DSD bitstream item")),
+                ID_HYBRID_PROFILE => block.hybrid_profile = body,
+                ID_SHAPING_WEIGHTS => {
+                    if flags & HYBRID == 0 {
+                        return Err(invalid("WavPack shaping metadata without hybrid coding"));
+                    }
+                    block.shaping = body;
+                }
+                ID_FLOAT_INFO => block.float_info = body,
+                ID_CORRECTION => {
+                    if flags & HYBRID == 0 {
+                        return Err(invalid("WavPack correction without hybrid coding"));
+                    }
+                    block.correction_bits.push(body);
+                }
+                ID_CHANNEL_INFO => {
+                    let info = frame::ChannelInfo::read(body)?;
+                    if block.channel_info.is_some_and(|old| old != info) {
+                        return Err(invalid("conflicting WavPack channel information"));
+                    }
+                    block.channel_info = Some(info);
+                }
+                ID_DSD_BITS => {
+                    if body.len() < 2 {
+                        return Err(invalid("WavPack DSD metadata is too short"));
+                    }
+                    if flags & DSD_DATA == 0 {
+                        return Err(invalid("WavPack DSD metadata without DSD coding"));
+                    }
+                    if !block.dsd.is_empty() {
+                        return Err(invalid("duplicate WavPack DSD metadata"));
+                    }
+                    block.dsd = body;
+                }
                 // Anything else - the encoder's own version note, a container's padding,
                 // a trailer, an MD5 - is skipped on the length just read.
                 _ => {}
             }
             at += item_header + body.len() + usize::from(id & IDF_ODD != 0);
         }
-        if block.terms.is_empty()
-            || block.weights.is_empty()
-            || block.decorr_samples.is_empty()
-            || block.entropy.is_empty()
-            || block.bits.is_empty()
-        {
-            return Err(invalid("WavPack block lacks the items its samples need"));
+        if flags & DSD_DATA != 0 {
+            if block.dsd.len() < 2 {
+                return Err(invalid("WavPack DSD metadata is too short"));
+            }
+        } else {
+            if block.terms.is_empty()
+                || block.weights.is_empty()
+                || block.decorr_samples.is_empty()
+                || block.entropy.is_empty()
+                || block.bits.is_empty()
+            {
+                return Err(invalid("WavPack block lacks the items its samples need"));
+            }
+            if flags & FLOAT != 0 && block.float_info.len() != 4 {
+                return Err(invalid("WavPack float information must contain four bytes"));
+            }
+            if flags & FLOAT == 0 && !block.float_info.is_empty() {
+                return Err(invalid("WavPack float metadata without float coding"));
+            }
         }
         let index = ((flags >> RATE_FIELD) & 0xf) as usize;
         block.sample_rate = if index < RATES.len() {
@@ -332,29 +391,65 @@ impl<'a> Block<'a> {
         } else {
             custom_rate.ok_or_else(|| invalid("WavPack custom sample rate is not stated"))?
         };
+        if flags & DSD_DATA != 0 {
+            block.sample_rate = dsd::rate(block.dsd, block.sample_rate)?;
+        }
         Ok(block)
     }
 
-    /// The block's samples, interleaved by channel and widened to the full word its depth
-    /// states, which is the form the decoder scales down.
-    pub(crate) fn samples(&self) -> Result<Vec<i32>> {
-        let mut buffer = self.residuals()?;
-        for mut pass in self.passes()? {
-            if self.channels == 1 {
-                mono_pass(&mut pass, &mut buffer);
-            } else {
-                stereo_pass(&mut pass, &mut buffer);
-            }
+    /// Entropy/decorrelation channel count differs from output in false stereo.
+    fn coded_channels(&self) -> u16 {
+        if self.flags & (MONO | FALSE_STEREO) != 0 {
+            1
+        } else {
+            2
         }
-        if self.flags & JOINT_STEREO != 0 {
-            // The block stored the mid and the difference; the ear wants both channels.
-            for pair in buffer.chunks_exact_mut(2) {
-                pair[1] = pair[1].wrapping_sub(pair[0] >> 1);
-                pair[0] = pair[0].wrapping_add(pair[1]);
+    }
+
+    /// Interleaved output after fixup and stereo expansion; float blocks return
+    /// IEEE-754 words unchanged, while integer blocks return scaled integers.
+    pub(crate) fn samples(&self) -> Result<Vec<i32>> {
+        if self.flags & DSD_DATA != 0 {
+            return dsd::decode(self);
+        }
+        let (mut buffer, offsets) = self.residuals()?;
+        if !self.correction_bits.is_empty() {
+            buffer = correction::reconstruct(self, &buffer, &offsets)?;
+        } else {
+            for mut pass in self.passes()? {
+                if self.coded_channels() == 1 {
+                    mono_pass(&mut pass, &mut buffer);
+                } else {
+                    stereo_pass(&mut pass, &mut buffer);
+                }
+            }
+            if self.coded_channels() == 2 && self.flags & JOINT_STEREO != 0 {
+                // The block stored the mid and the difference; the ear wants both channels.
+                for pair in buffer.chunks_exact_mut(2) {
+                    pair[1] = pair[1].wrapping_sub(pair[0] >> 1);
+                    pair[0] = pair[0].wrapping_add(pair[1]);
+                }
             }
         }
         self.check(&buffer)?;
-        self.widen(&buffer)
+        let samples = if self.flags & FLOAT != 0 {
+            self.float_values(&buffer)?
+        } else {
+            self.widen(&buffer)?
+        };
+        if self.flags & FALSE_STEREO == 0 {
+            return Ok(samples);
+        }
+        // Entropy, decorrelation, both CRCs and INT32 fixup belong to the
+        // single coded channel. Duplicate only the completed PCM samples.
+        let mut stereo = Vec::new();
+        stereo
+            .try_reserve_exact(samples.len() * 2)
+            .map_err(|_| invalid("cannot allocate WavPack false-stereo output"))?;
+        for sample in samples {
+            stereo.extend_from_slice(&[sample, sample]);
+        }
+        Ok(stereo)
     }
 
     /// The passes the block names, with the weights and the past samples it starts them
@@ -374,7 +469,7 @@ impl<'a> Block<'a> {
                 || term < -3
                 || (term > MAX_TERM && term < 17)
                 || term > 18
-                || (self.channels == 1 && term < 0)
+                || (self.coded_channels() == 1 && term < 0)
             {
                 return Err(invalid("WavPack block names a reserved decorrelation term"));
             }
@@ -389,7 +484,7 @@ impl<'a> Block<'a> {
         }
         passes.reverse();
 
-        let stereo = self.channels == 2;
+        let stereo = self.coded_channels() == 2;
         let stride = usize::from(stereo) + 1;
         if self.weights.len() / stride > passes.len() {
             return Err(invalid(
@@ -450,11 +545,22 @@ impl<'a> Block<'a> {
     }
 
     /// The residuals, one per sample slot, read out of the block's entropy stream.
-    fn residuals(&self) -> Result<Vec<i32>> {
-        let count = self.block_samples as usize * usize::from(self.channels);
+    fn residuals(&self) -> Result<(Vec<i32>, Vec<i32>)> {
+        let count = self.block_samples as usize * usize::from(self.coded_channels());
         let mut stream = Stream::new(&self.bits);
+        let mut correction =
+            (!self.correction_bits.is_empty()).then(|| Stream::new(&self.correction_bits));
+        let mut offsets = Vec::new();
+        if correction.is_some() {
+            offsets
+                .try_reserve_exact(count)
+                .map_err(|_| invalid("cannot allocate WavPack correction offsets"))?;
+        }
         let [mut med0, mut med1] = self.medians()?;
-        let stereo = self.channels == 2;
+        let stereo = self.coded_channels() == 2;
+        let mut hybrid = (self.flags & HYBRID != 0)
+            .then(|| hybrid::Hybrid::new(self))
+            .transpose()?;
         let mut holding_zero = false;
         let mut holding_one = false;
         let mut zeros_run = 0i32;
@@ -472,6 +578,12 @@ impl<'a> Block<'a> {
                 if zeros_run != 0 {
                     zeros_run -= 1;
                     if zeros_run != 0 {
+                        if let Some(h) = &mut hybrid {
+                            h.zero(current_med_idx);
+                        }
+                        if correction.is_some() {
+                            offsets.push(0);
+                        }
                         buffer.push(0);
                         continue;
                     }
@@ -480,41 +592,42 @@ impl<'a> Block<'a> {
                     if zeros_run != 0 {
                         med0 = [0; 3];
                         med1 = [0; 3];
+                        if let Some(h) = &mut hybrid {
+                            h.zero(current_med_idx);
+                        }
+                        if correction.is_some() {
+                            offsets.push(0);
+                        }
                         buffer.push(0);
                         continue;
                     }
                 }
             }
 
-            if holding_zero {
+            let ones = if holding_zero {
                 holding_zero = false;
-                let current_med = match current_med_idx {
-                    0 => &mut med0,
-                    _ => &mut med1,
-                };
-                let value = read_code(&mut stream, band(current_med, 0) - 1)?;
-                dec_med(current_med, 0);
-                let sign_bit = stream.get_bit()? != 0;
-                let sample = if sign_bit { !value } else { value };
-                buffer.push(sample);
-                continue;
-            }
-
-            let mut ones = 0i32;
-            while ones < LIMIT_ONES + 1 && stream.get_bit()? != 0 {
-                ones += 1;
-            }
-            if ones >= LIMIT_ONES {
-                if ones == LIMIT_ONES + 1 {
-                    return Err(invalid("WavPack block ends inside a residual"));
+                0
+            } else {
+                let mut ones = 0i32;
+                while ones < LIMIT_ONES + 1 && stream.get_bit()? != 0 {
+                    ones += 1;
                 }
-                ones = LIMIT_ONES + read_run(&mut stream)?;
+                if ones >= LIMIT_ONES {
+                    if ones == LIMIT_ONES + 1 {
+                        return Err(invalid("WavPack block ends inside a residual"));
+                    }
+                    ones = LIMIT_ONES + read_run(&mut stream)?;
+                }
+                let low = i32::from(holding_one);
+                holding_one = ones & 1 != 0;
+                holding_zero = ones & 1 == 0;
+                (ones >> 1) + low
+            };
+            if current_med_idx == 0
+                && let Some(h) = &mut hybrid
+            {
+                h.update()?;
             }
-
-            let low = i32::from(holding_one);
-            holding_one = ones & 1 != 0;
-            holding_zero = ones & 1 == 0;
-            let ones = (ones >> 1) + low;
 
             let current_med = match current_med_idx {
                 0 => &mut med0,
@@ -549,17 +662,37 @@ impl<'a> Block<'a> {
                 (base, width)
             };
 
-            let value = low + read_code(&mut stream, width)?;
-            let sign_bit = stream.get_bit()? != 0;
-            let sample = if sign_bit { !value } else { value };
+            let sample = if let Some(h) = &mut hybrid {
+                let (value, offset) = h.value(
+                    &mut stream,
+                    correction.as_mut(),
+                    current_med_idx,
+                    low,
+                    width,
+                )?;
+                if correction.is_some() {
+                    offsets.push(offset);
+                }
+                value
+            } else {
+                let value = low + read_code(&mut stream, width)?;
+                if stream.get_bit()? != 0 {
+                    !value
+                } else {
+                    value
+                }
+            };
             buffer.push(sample);
         }
-        Ok(buffer)
+        if let Some(stream) = correction {
+            stream.finish_word_padding()?;
+        }
+        Ok((buffer, offsets))
     }
     /// The three bands each channel starts its entropy decode at, in the fixed point the
     /// stream states them.
     fn medians(&self) -> Result<[[i32; 3]; 2]> {
-        let stereo = self.channels == 2;
+        let stereo = self.coded_channels() == 2;
         if self.entropy.len() != usize::from(stereo) * 6 + 6 {
             return Err(invalid("WavPack entropy variables are the wrong length"));
         }
@@ -587,6 +720,11 @@ impl<'a> Block<'a> {
             return Err(invalid("WavPack block checksum does not match its samples"));
         }
         let limit = (1i64 << ((self.flags >> MAG_FIELD) & 0x1f)) + 2;
+        let limit = if self.flags & HYBRID != 0 && self.correction_bits.is_empty() {
+            limit * 3 + 128
+        } else {
+            limit
+        };
         if let Some(&sample) = buffer
             .iter()
             .find(|&&sample| i64::from(sample).abs() > limit)
@@ -603,12 +741,8 @@ impl<'a> Block<'a> {
     /// simply left out.
     fn widen(&self, buffer: &[i32]) -> Result<Vec<i32>> {
         let stored = usize::from(self.bits_per_sample / 8);
-        let shift = ((self.flags >> SHIFT_FIELD) & 0x1f) as usize;
-        let post_shift =
-            usize::try_from(if stored <= 2 { 2 } else { 4 }).unwrap() * 8 - stored * 8 + shift;
-        if post_shift > 31 {
-            return Err(invalid("WavPack block shifts its samples out of a word"));
-        }
+        let mut shift = ((self.flags >> SHIFT_FIELD) & 0x1f) as usize;
+        let hybrid = self.flags & HYBRID != 0 && self.correction_bits.is_empty();
         let mut sent = 0u32;
         let (mut run, mut and, mut or) = (0u32, 0u32, 0u32);
         let mut parts: Vec<&[u8]> = Vec::new();
@@ -653,39 +787,233 @@ impl<'a> Block<'a> {
                 parts.push(&head[4..]);
                 parts.extend(self.extra_bits[1..].iter().copied());
             } else if sent != 0 {
-                return Err(invalid("WavPack block sends bits it has no stream for"));
+                if !hybrid {
+                    return Err(invalid("WavPack block sends bits it has no stream for"));
+                }
+                // The main lossy stream may omit the correction/extra low bits.
+                shift += sent as usize + run as usize;
+                sent = 0;
+                run = 0;
+            } else if hybrid && stored == 4 {
+                while run != 0 && shift < 8 {
+                    run -= 1;
+                    shift += 1;
+                }
             }
         }
+        if hybrid {
+            shift &= 31;
+        }
+        let post_shift = (if stored <= 2 { 2 } else { 4 }) * 8 - stored * 8 + shift;
+        if post_shift > 31 {
+            return Err(invalid("WavPack block shifts its samples out of a word"));
+        }
         let mut stream = expected.map(|_| Stream::new(&parts));
+        let maximum_width = if self.extra_new {
+            stream
+                .as_mut()
+                .ok_or_else(|| invalid("missing optimized WavPack integer stream"))?
+                .get_bits(5)? as u32
+        } else {
+            0
+        };
         let mut out = Vec::with_capacity(buffer.len());
         let mut crc = 0xffff_ffffu32;
         for &sample in buffer {
             let mut value = sample as u32;
             if sent != 0 {
+                let precision = 32
+                    - (if sample < 0 {
+                        !(sample as u32)
+                    } else {
+                        sample as u32
+                    })
+                    .leading_zeros();
+                let read = if maximum_width != 0 {
+                    sent.saturating_sub((precision + sent).saturating_sub(maximum_width))
+                } else {
+                    sent
+                };
                 let bits = stream
                     .as_mut()
                     .ok_or_else(|| invalid("WavPack block sends bits it has no stream for"))?
-                    .get_bits(sent)?;
-                value = value.wrapping_shl(sent) | bits as u32;
-                crc = crc
-                    .wrapping_mul(9)
-                    .wrapping_add((value & 0xffff) * 3 + (value >> 16));
+                    .get_bits(read)?;
+                value = (value.wrapping_shl(read) | bits as u32).wrapping_shl(sent - read);
             }
             if run != 0 {
                 let bit = (value & and) | or;
                 value = value.wrapping_add(bit).wrapping_shl(run).wrapping_sub(bit);
             }
+            if stream.is_some() {
+                crc = crc
+                    .wrapping_mul(9)
+                    .wrapping_add((value & 0xffff) * 3 + (value >> 16));
+            }
+            if hybrid {
+                let precision = stored * 8;
+                let minimum = (-(1i64 << (precision - 1)) >> shift) as i32;
+                let maximum = (((1i64 << (precision - 1)) - 1) >> shift) as i32;
+                value = (value as i32).clamp(minimum, maximum) as u32;
+            }
             out.push(value.wrapping_shl(post_shift as u32) as i32);
         }
         if let (Some(stream), Some(expected)) = (stream, expected) {
-            if !stream.exhausted() {
-                return Err(invalid("WavPack block leaves its extra bits unread"));
-            }
+            stream.finish_word_padding()?;
             if crc != expected {
                 return Err(invalid("WavPack extra bits do not match their checksum"));
             }
         }
         Ok(out)
+    }
+
+    /// Main-stream float reconstruction has no mantissa correction bits. Lossy
+    /// quantization can exceed the lossless sentinel, so normalize its exponent
+    /// rather than applying the strict WVX mantissa bound.
+    fn float_without_extra(&self, buffer: &[i32]) -> Result<Vec<i32>> {
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(buffer.len())
+            .map_err(|_| invalid("cannot allocate WavPack float output"))?;
+        let shift = u32::from(self.float_info[1] & 31);
+        for &sample in buffer {
+            let shifted = sample.wrapping_shl(shift);
+            let sign = u32::from(shifted < 0);
+            let mut magnitude = shifted.unsigned_abs();
+            let mut exponent = u32::from(self.float_info[2]);
+            if sample == 0 {
+                exponent = 0;
+            } else if magnitude >= 0x1000000 {
+                while magnitude & 0x0f000000 != 0 {
+                    magnitude >>= 1;
+                    exponent += 1;
+                }
+            } else if exponent != 0 {
+                let mut count = 0u32;
+                while magnitude & 0x800000 == 0 {
+                    exponent -= 1;
+                    if exponent == 0 {
+                        break;
+                    }
+                    magnitude = magnitude.wrapping_shl(1);
+                    count += 1;
+                }
+                let count = count & 31;
+                if count != 0 && self.float_info[0] & 1 != 0 {
+                    magnitude |= (1u32 << count) - 1;
+                }
+            }
+            output.push(((sign << 31) | ((exponent & 255) << 23) | (magnitude & 0x7fffff)) as i32);
+        }
+        Ok(output)
+    }
+
+    fn float_values(&self, buffer: &[i32]) -> Result<Vec<i32>> {
+        let flags = self.float_info[0];
+        let shift = self.float_info[1] & 31;
+        let maximum = u32::from(self.float_info[2]);
+        // float_norm_exp is an optional output-normalization hint. The lossless
+        // API preserves original IEEE bits, including -0 and NaN payloads.
+        let mut parts = Vec::new();
+        let expected = if let Some(first) = self.extra_bits.first() {
+            if first.len() <= 4 || first.len() % 2 != 0 {
+                return Err(invalid("invalid WavPack float extended stream"));
+            }
+            parts.push(&first[4..]);
+            parts.extend(self.extra_bits[1..].iter().copied());
+            Some(le32(first, 0))
+        } else {
+            None
+        };
+        if expected.is_none() {
+            return self.float_without_extra(buffer);
+        }
+        let mut bits = expected.map(|_| Stream::new(&parts));
+        let (min_zeros, max_ones) = if self.extra_new {
+            let bits = bits
+                .as_mut()
+                .ok_or_else(|| invalid("missing WavPack optimized float stream"))?;
+            (bits.get_bits(5)? as u32, bits.get_bits(5)? as u32)
+        } else {
+            (0, 0)
+        };
+        let mut crc = 0xffff_ffffu32;
+        let mut output = Vec::new();
+        output
+            .try_reserve_exact(buffer.len())
+            .map_err(|_| invalid("cannot allocate WavPack float output"))?;
+        for &sample in buffer {
+            let mut exponent = maximum;
+            let mut sign = u32::from(sample < 0);
+            let magnitude = u64::from(sample.unsigned_abs()) << shift;
+            if magnitude > 0x1000000 {
+                return Err(invalid("WavPack float core exceeds mantissa range"));
+            }
+            let mut magnitude = magnitude as u32;
+            if let Some(bits) = bits.as_mut() {
+                if sample == 0 {
+                    exponent = 0;
+                    if flags & 8 != 0 {
+                        if bits.get_bit()? != 0 {
+                            magnitude = bits.get_bits(23)? as u32;
+                            if maximum >= 25 {
+                                exponent = bits.get_bits(8)? as u32;
+                            }
+                            sign = bits.get_bit()? as u32;
+                        } else if flags & 16 != 0 {
+                            sign = bits.get_bit()? as u32;
+                        }
+                    }
+                } else if magnitude == 0x1000000 {
+                    magnitude = if bits.get_bit()? != 0 {
+                        bits.get_bits(23)? as u32
+                    } else {
+                        0
+                    };
+                    exponent = 255;
+                } else {
+                    let mut shifted = 0u32;
+                    while exponent != 0 && magnitude & 0x800000 == 0 {
+                        exponent -= 1;
+                        if exponent == 0 {
+                            break;
+                        }
+                        magnitude <<= 1;
+                        shifted += 1;
+                    }
+                    if shifted != 0 {
+                        let mask = (1u32 << shifted) - 1;
+                        if flags & 1 != 0 || flags & 2 != 0 && bits.get_bit()? != 0 {
+                            magnitude |= mask;
+                        } else if flags & 4 != 0 {
+                            let mut zeros = if max_ones != 0 {
+                                shifted.saturating_sub(max_ones)
+                            } else {
+                                0
+                            };
+                            zeros = zeros.max(min_zeros.min(shifted));
+                            let count = shifted - zeros;
+                            if count != 0 {
+                                magnitude |= ((bits.get_bits(count)? as u32) << zeros) & mask;
+                            }
+                        }
+                    }
+                }
+            }
+            let mantissa = magnitude & 0x7fffff;
+            exponent &= 255;
+            let word = (sign << 31) | (exponent << 23) | mantissa;
+            crc = crc
+                .wrapping_mul(27)
+                .wrapping_add(mantissa * 9 + exponent * 3 + sign);
+            output.push(word as i32);
+        }
+        if let (Some(bits), Some(expected)) = (bits, expected) {
+            bits.finish_word_padding()?;
+            if crc != expected {
+                return Err(invalid("WavPack float CRC does not match IEEE samples"));
+            }
+        }
+        Ok(output)
     }
 
     /// The block's own geometry and the samples it holds: what a container that already
@@ -936,7 +1264,7 @@ fn stereo_pass(pass: &mut Pass, buffer: &mut [i32]) {
                 let right = rb.wrapping_add(apply_weight(wb, left));
                 wb = update_weight_clip(wb, delta, left, rb);
                 pair[1] = right;
-                b[0] = right;
+                a[0] = right;
             }
         }
         -2 => {
@@ -949,7 +1277,7 @@ fn stereo_pass(pass: &mut Pass, buffer: &mut [i32]) {
                 let left = ra.wrapping_add(apply_weight(wa, right));
                 wa = update_weight_clip(wa, delta, right, ra);
                 pair[0] = left;
-                a[0] = left;
+                b[0] = left;
             }
         }
         _ => {
@@ -960,8 +1288,10 @@ fn stereo_pass(pass: &mut Pass, buffer: &mut [i32]) {
                 let rb = pair[1];
                 let lb = rb.wrapping_add(apply_weight(wb, b[0]));
                 wb = update_weight_clip(wb, delta, b[0], rb);
-                pair[0] = lb;
-                pair[1] = la;
+                pair[0] = la;
+                pair[1] = lb;
+                a[0] = lb;
+                b[0] = la;
             }
         }
     }
@@ -1024,64 +1354,248 @@ impl<'a> Stream<'a> {
         Ok(value)
     }
 
-    /// Whether every byte of the stream has been read to its last bit.
-    fn exhausted(&self) -> bool {
-        self.part >= self.parts.len()
+    /// Bitstreams are closed with one bits to a 16-bit word boundary.
+    fn finish_word_padding(mut self) -> Result<()> {
+        let remaining = self
+            .parts
+            .iter()
+            .skip(self.part)
+            .map(|p| p.len() * 8)
+            .sum::<usize>()
+            .saturating_sub(self.index * 8 + self.bit as usize);
+        if remaining > 15 {
+            return Err(invalid("WavPack block leaves its extra bits unread"));
+        }
+        for _ in 0..remaining {
+            if self.get_bit()? != 1 {
+                return Err(invalid("WavPack extra-bit padding is not all ones"));
+            }
+        }
+        Ok(())
     }
 }
 
-/// WavPack's lossless decoder: one block per packet, and nothing kept between them.
+#[path = "wavpack_frame.rs"]
+mod frame;
+
+/// One complete lossless sample frame per packet; blocks own their predictor state.
 pub struct WavpackDecoder {
     channels: u16,
+    matroska: Option<(u16, u32)>,
+    configured_mask: Option<u32>,
+    known_mask: Option<u32>,
+    dsd_filter: Option<dsd::Filter>,
 }
 
 impl WavpackDecoder {
     /// The channel count the container states, which every block of the stream has to
     /// agree with.
     pub fn new(channels: u16) -> Result<Self> {
-        if !(1..=2).contains(&channels) {
-            return Err(invalid("WavPack stream has more than two channels"));
+        if !(1..=MAX_CHANNELS).contains(&channels) {
+            return Err(invalid("WavPack channel count outside format range"));
         }
-        Ok(Self { channels })
+        Ok(Self {
+            channels,
+            matroska: None,
+            configured_mask: None,
+            known_mask: None,
+            dsd_filter: None,
+        })
+    }
+    /// Matroska stores the version in CodecPrivate and a 12-byte block header.
+    pub fn for_matroska(private: &[u8], sample_rate: u32, channels: u16) -> Result<Self> {
+        if private.len() != 2 {
+            return Err(invalid("Matroska WavPack requires a two-byte version"));
+        }
+        let version = u16::from_le_bytes(private.try_into().unwrap());
+        if !(MIN_VERSION..=MAX_VERSION).contains(&version) || sample_rate == 0 {
+            return Err(invalid("invalid Matroska WavPack version or sample rate"));
+        }
+        let mut decoder = Self::new(channels)?;
+        decoder.matroska = Some((version, sample_rate));
+        Ok(decoder)
+    }
+    /// Bind the container's immutable declared speaker layout across resets.
+    pub fn with_speaker_mask(mut self, mask: Option<u32>) -> Result<Self> {
+        if mask.is_some_and(|m| m.count_ones() > u32::from(self.channels)) {
+            return Err(invalid("WavPack speaker mask exceeds channel count"));
+        }
+        self.configured_mask = mask;
+        self.known_mask = mask;
+        Ok(self)
+    }
+
+    /// Inspect the first coded frame's declared standard speaker positions.
+    /// No PCM is synthesized, and all component headers/layout are validated.
+    pub fn matroska_speaker_mask(
+        private: &[u8],
+        data: &[u8],
+        rate: u32,
+        channels: u16,
+    ) -> Result<Option<u32>> {
+        let decoder = Self::for_matroska(private, rate, channels)?;
+        let raw = frame::restore_matroska(data, decoder.matroska.unwrap().0, channels)?;
+        let parsed = frame::Frame::parse(&raw, channels)?;
+        if parsed.blocks[0].sample_rate != rate {
+            return Err(invalid("WavPack block sample rate disagrees with Matroska"));
+        }
+        Ok(parsed.mask)
+    }
+}
+
+impl WavpackDecoder {
+    /// Reconstruct a hybrid frame using its corresponding full-header correction frame.
+    pub fn decode_with_correction(
+        &mut self,
+        main: &[u8],
+        extra: &[u8],
+        pts: u64,
+    ) -> Result<Option<AudioPacket>> {
+        let joined = if let Some((version, _)) = self.matroska {
+            correction::matroska(main, extra, version, self.channels)?
+        } else {
+            correction::join(main, extra, self.channels)?
+        };
+        self.decode_encoded(&joined, pts, 0)
+    }
+    /// Adapt standard Matroska BlockAdditional correction metadata for the decoder.
+    pub fn matroska_with_correction(
+        private: &[u8],
+        rate: u32,
+        channels: u16,
+        main: &[u8],
+        extra: &[u8],
+    ) -> Result<Vec<u8>> {
+        let d = Self::for_matroska(private, rate, channels)?;
+        correction::matroska(main, extra, d.matroska.unwrap().0, channels)
+    }
+}
+
+impl WavpackDecoder {
+    /// Recover canonical MSB-first DSD bytes without PCM filtering.
+    /// The returned rate counts byte frames, eight DSD bits per channel/frame.
+    pub fn decode_dsd(&self, data: &[u8]) -> Result<(Vec<u8>, u32)> {
+        let rebuilt = self
+            .matroska
+            .map(|(version, _)| frame::restore_matroska(data, version, self.channels))
+            .transpose()?;
+        let frame = frame::Frame::parse(rebuilt.as_deref().unwrap_or(data), self.channels)?;
+        let rate = frame.blocks[0].sample_rate;
+        if self.matroska.is_some_and(|(_, expected)| expected != rate) {
+            return Err(invalid("WavPack DSD rate disagrees with Matroska"));
+        }
+        Ok((dsd::bytes(&frame, self.channels)?, rate))
+    }
+    pub fn matroska_is_dsd(private: &[u8], data: &[u8], rate: u32, channels: u16) -> Result<bool> {
+        let d = Self::for_matroska(private, rate, channels)?;
+        let raw = frame::restore_matroska(data, d.matroska.unwrap().0, channels)?;
+        let frame = frame::Frame::parse(&raw, channels)?;
+        Ok(frame.blocks[0].flags & DSD_DATA != 0)
     }
 }
 
 impl AudioDecode for WavpackDecoder {
-    /// Decode the block the packet holds. Blocks are self-contained, so a packet always
-    /// stands on its own.
+    /// Decode every component before publishing a complete interleaved frame.
     fn decode_encoded(
         &mut self,
         data: &[u8],
         pts: u64,
         _duration: u64,
     ) -> Result<Option<AudioPacket>> {
-        let block = Block::parse(data, 0)?;
-        if block.channels != self.channels {
-            return Err(invalid(
-                "WavPack block's channels disagree with the container",
-            ));
+        let rebuilt = self
+            .matroska
+            .map(|(version, _)| frame::restore_matroska(data, version, self.channels))
+            .transpose()?;
+        let source = rebuilt.as_deref().unwrap_or(data);
+        let assembled = frame::Frame::parse(source, self.channels)?;
+        if self
+            .known_mask
+            .zip(assembled.mask)
+            .is_some_and(|(a, b)| a != b)
+        {
+            return Err(invalid("WavPack speaker layout changed inside stream"));
         }
-        // Blocks of up to 16 bits come out of `widen` in a 16-bit range, wider ones in a
-        // 32-bit range.
-        let scale = if block.bits_per_sample <= 16 {
-            SHORT_SCALE
-        } else {
-            FULL_SCALE
-        };
-        let mut out = Vec::with_capacity(data.len() * 2);
-        for sample in block.samples()? {
-            out.extend_from_slice(&((sample as f32) * scale).to_le_bytes());
+        let first = &assembled.blocks[0];
+        let rate = first.sample_rate;
+        if self.matroska.is_some_and(|(_, expected)| expected != rate) {
+            return Err(invalid("WavPack block sample rate disagrees with Matroska"));
+        }
+        if first.flags & DSD_DATA != 0 {
+            let bytes = dsd::bytes(&assembled, self.channels)?;
+            let mut filter = match &self.dsd_filter {
+                Some(filter) => filter.duplicate()?,
+                None => dsd::Filter::new(self.channels)?,
+            };
+            let pcm = filter.convert(&bytes)?;
+            let mut data = Vec::new();
+            data.try_reserve_exact(
+                pcm.len()
+                    .checked_mul(4)
+                    .ok_or_else(|| invalid("DSD PCM length overflow"))?,
+            )
+            .map_err(|_| invalid("cannot allocate DSD PCM packet"))?;
+            for value in pcm {
+                data.extend_from_slice(&value.to_le_bytes());
+            }
+            self.dsd_filter = Some(filter);
+            if self.known_mask.is_none() {
+                self.known_mask = assembled.mask;
+            }
+            return Ok(Some(AudioPacket {
+                data,
+                pts,
+                timebase_num: 1,
+                timebase_den: rate,
+            }));
+        }
+        let count = (first.block_samples as usize)
+            .checked_mul(usize::from(self.channels))
+            .and_then(|n| n.checked_mul(4))
+            .ok_or_else(|| invalid("WavPack output size overflow"))?;
+        let mut out = Vec::new();
+        out.try_reserve_exact(count)
+            .map_err(|_| invalid("cannot allocate WavPack multichannel output"))?;
+        out.resize(count, 0);
+        let mut offset = 0;
+        for block in &assembled.blocks {
+            let samples = block.samples()?;
+            let scale = if block.bits_per_sample <= 16 {
+                SHORT_SCALE
+            } else {
+                FULL_SCALE
+            };
+            for (row, values) in samples
+                .chunks_exact(usize::from(block.channels))
+                .enumerate()
+            {
+                for (channel, &sample) in values.iter().enumerate() {
+                    let at = (row * usize::from(self.channels) + offset + channel) * 4;
+                    let bytes = if block.flags & FLOAT != 0 {
+                        sample.to_le_bytes()
+                    } else {
+                        ((sample as f32) * scale).to_le_bytes()
+                    };
+                    out[at..at + 4].copy_from_slice(&bytes);
+                }
+            }
+            offset += usize::from(block.channels);
+        }
+        if self.known_mask.is_none() {
+            self.known_mask = assembled.mask;
         }
         Ok(Some(AudioPacket {
             data: out,
             pts,
             timebase_num: 1,
-            timebase_den: block.sample_rate,
+            timebase_den: rate,
         }))
     }
 
-    /// Blocks are self-contained, so there is no state a seek has to undo.
-    fn reset(&mut self) {}
+    /// Predictor blocks are independent; DSD PCM conversion also resets its FIR history.
+    fn reset(&mut self) {
+        self.known_mask = self.configured_mask;
+        self.dsd_filter = None;
+    }
 }
 
 #[cfg(test)]
@@ -1134,5 +1648,54 @@ mod tests {
         for (index, (&got, &want)) in decoded.iter().zip(&reference).enumerate() {
             assert_eq!(got, f32::from(want) / 32768.0, "sample {index}");
         }
+    }
+}
+
+#[path = "wavpack_hybrid.rs"]
+mod hybrid;
+
+#[path = "wavpack_correction.rs"]
+mod correction;
+
+#[path = "wavpack_dsd.rs"]
+mod dsd;
+
+/// Coded geometry of one complete native sample frame, without synthesizing PCM.
+#[derive(Clone, Copy, Debug)]
+pub struct FrameInfo {
+    pub channels: u16,
+    pub sample_rate: u32,
+    pub bits_per_sample: u16,
+    pub samples: u32,
+    pub block_index: u64,
+    pub total_samples: Option<u64>,
+    pub speaker_mask: Option<u32>,
+    pub dsd: bool,
+    pub float: bool,
+}
+impl WavpackDecoder {
+    pub fn inspect_frame(data: &[u8], channels: u16) -> Result<FrameInfo> {
+        Self::new(channels)?;
+        let f = frame::Frame::parse(data, channels)?;
+        let b = &f.blocks[0];
+        Ok(FrameInfo {
+            channels,
+            sample_rate: b.sample_rate,
+            bits_per_sample: if b.flags & DSD_DATA != 0 {
+                1
+            } else {
+                b.bits_per_sample
+            },
+            samples: b.block_samples,
+            block_index: b.block_index,
+            total_samples: b.total_samples,
+            speaker_mask: f.mask,
+            dsd: b.flags & DSD_DATA != 0,
+            float: b.flags & FLOAT != 0,
+        })
+    }
+    /// Adapt paired native components for the ordinary packet decoder.
+    pub fn native_with_correction(main: &[u8], extra: &[u8], channels: u16) -> Result<Vec<u8>> {
+        correction::join(main, extra, channels)
     }
 }

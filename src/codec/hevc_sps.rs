@@ -342,6 +342,12 @@ impl Sps {
                 e.graph.depth_layer_ids()?.any(|id|id == c.layer_id)
             } else {false}
         } else {false};
+        // I.11.1.1: a 3D Main depth layer is monochrome. This is a
+        // profile violation, not an unimplemented chroma prediction tool.
+        let effective_profile = if dependent { inherited_profile.as_ref().unwrap() } else { &profile };
+        if depth_layer && effective_profile.profile.is_some_and(|p|p.compatible_with(8)) && chroma_format != 0 {
+            return Err(invalid("HEVC 3D Main depth layer must be monochrome"));
+        }
         let mut scc_extension = false;
         let mut future_extension = false;
         let mut palette = None;

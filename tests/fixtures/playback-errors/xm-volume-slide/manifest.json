@@ -1,0 +1,169 @@
+{
+  "cases": [
+    {
+      "name": "down",
+      "file": "down.xm",
+      "control": "down-ticks.xm",
+      "volumes": [
+        64,
+        60,
+        56,
+        52,
+        52,
+        52,
+        52,
+        52
+      ]
+    },
+    {
+      "name": "up",
+      "file": "up.xm",
+      "control": "up-ticks.xm",
+      "volumes": [
+        16,
+        19,
+        22,
+        25
+      ]
+    },
+    {
+      "name": "both-nibbles-up-wins",
+      "file": "both-nibbles-up-wins.xm",
+      "control": "both-nibbles-up-wins-ticks.xm",
+      "volumes": [
+        32,
+        34,
+        36,
+        38
+      ]
+    },
+    {
+      "name": "clamp-high",
+      "file": "clamp-high.xm",
+      "control": "clamp-high-ticks.xm",
+      "volumes": [
+        60,
+        64,
+        64,
+        64
+      ]
+    },
+    {
+      "name": "clamp-low",
+      "file": "clamp-low.xm",
+      "control": "clamp-low-ticks.xm",
+      "volumes": [
+        3,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "memory",
+      "file": "memory.xm",
+      "control": "memory-ticks.xm",
+      "volumes": [
+        32,
+        29,
+        26,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        20,
+        17,
+        14
+      ]
+    },
+    {
+      "name": "empty-memory",
+      "file": "empty-memory.xm",
+      "control": "empty-memory-ticks.xm",
+      "volumes": [
+        32,
+        32,
+        32,
+        32
+      ]
+    },
+    {
+      "name": "memory-note-trigger",
+      "file": "memory-note-trigger.xm",
+      "control": "memory-note-trigger-ticks.xm",
+      "volumes": [
+        32,
+        29,
+        26,
+        23,
+        32,
+        29,
+        26,
+        23
+      ]
+    },
+    {
+      "name": "speed-one-does-not-store",
+      "file": "speed-one-does-not-store.xm",
+      "control": "speed-one-does-not-store-ticks.xm",
+      "volumes": [
+        32,
+        28,
+        24,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        16,
+        12,
+        8
+      ]
+    },
+    {
+      "name": "channel-local-memory",
+      "file": "channel-local-memory.xm",
+      "control": "channel-local-memory-ticks.xm",
+      "volumes": [
+        [
+          32,
+          16
+        ],
+        [
+          28,
+          13
+        ],
+        [
+          24,
+          10
+        ],
+        [
+          20,
+          7
+        ],
+        [
+          20,
+          7
+        ],
+        [
+          16,
+          4
+        ],
+        [
+          12,
+          1
+        ],
+        [
+          8,
+          0
+        ]
+      ]
+    }
+  ],
+  "provenance": "Owned signed16loop and authored literal tick-volume controls. No codec tools, network or private media."
+}

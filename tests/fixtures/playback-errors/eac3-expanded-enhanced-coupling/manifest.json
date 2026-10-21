@@ -1,0 +1,3124 @@
+{
+  "cases": [
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity",
+      "file": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary",
+      "file": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g0-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity",
+      "file": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary",
+      "file": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s0-g1-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity",
+      "file": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary",
+      "file": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g0-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity",
+      "file": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary",
+      "file": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.288818359375e-05,
+      "name": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b0-s31-g1-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity",
+      "file": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary",
+      "file": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g0-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity",
+      "file": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary",
+      "file": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s0-g1-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity",
+      "file": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary",
+      "file": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g0-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity",
+      "file": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary",
+      "file": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 5.7220458984375e-06,
+      "name": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.1444091796875e-05,
+      "name": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b4-s31-g1-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity",
+      "file": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary",
+      "file": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g0-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity",
+      "file": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary",
+      "file": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s0-g1-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity",
+      "file": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary",
+      "file": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g0-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity",
+      "file": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-3-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary",
+      "file": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-3-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 1.430511474609375e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity",
+      "file": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-unity-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "scale": 1
+    },
+    {
+      "rate": 48000,
+      "bound": 2.86102294921875e-06,
+      "name": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary",
+      "file": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary.ec3",
+      "video": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary.mkv",
+      "channels": 8,
+      "blocks": 6,
+      "speakers": [
+        "L",
+        "R",
+        "C",
+        "LFE",
+        "Lrs",
+        "Rrs",
+        "Ls",
+        "Rs"
+      ],
+      "wave_mask": 1599,
+      "components": [
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary-stream0.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary-stream0-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary-stream0-control.mkv",
+          "roles": [
+            "L",
+            "C",
+            "R",
+            "Ls",
+            "Rs",
+            "LFE"
+          ],
+          "coded_to_native": [
+            0,
+            2,
+            1,
+            4,
+            5,
+            3
+          ]
+        },
+        {
+          "raw": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary-stream1.ec3",
+          "control": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary-stream1-control.ec3",
+          "control_video": "7.1-aht-ecpl-b8-s31-g1-m4-mixed-vary-stream1-control.mkv",
+          "roles": [
+            "Lrs",
+            "Rrs"
+          ],
+          "coded_to_native": [
+            0,
+            1
+          ]
+        }
+      ],
+      "gains": [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        2.0,
+        2.0
+      ],
+      "scale": 1
+    }
+  ]
+}

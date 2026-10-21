@@ -1,0 +1,11 @@
+{
+  "provenance": "Authored quoted values,HTML comments and Title/Style raw header text; explicit legacy paragraph clocks isolate body boundary discovery from canonical Sync timing. Independent SRT and five raw Y4M frames. No external tools or private media.",
+  "cases": [
+    "quoted-body-close",
+    "comment-body-close",
+    "title-control",
+    "comment-control",
+    "title-raw-close",
+    "style-raw-close"
+  ]
+}

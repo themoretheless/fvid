@@ -11,6 +11,8 @@ use crate::{Result, invalid};
 use std::io::Write;
 #[path = "avc_pcm_picture.rs"]
 mod pcm_formats;
+#[path = "avc_444_intra_picture.rs"]
+mod intra444;
 #[path = "avc_separate_pcm_picture.rs"]
 mod separate_pcm;
 #[path="avc_chroma422_picture.rs"]
@@ -147,6 +149,10 @@ pub fn decode_intra_slices(
     if sps.mb_adaptive_frame_field && !header.field_pic {
         return super::avc_mbaff_picture::decode_intra_slices(headers, sps, pps, memory_limit);
     }
+    if sps.chroma_format==3 && header.field_pic {
+        let mut ordered=headers.to_vec();ordered.sort_by_key(|h|h.first_mb);
+        return decode_full_resolution_intra_slices(&ordered,sps,pps,memory_limit);
+    }
     if sps.chroma_format!=1 || sps.separate_colour_plane {
         return pcm_formats::decode(headers,sps,pps,memory_limit);
     }
@@ -154,6 +160,10 @@ pub fn decode_intra_slices(
         return Err(invalid("intra picture must begin at zero"));
     }
     decode_component_intra_slices(headers,sps,pps,memory_limit)
+}
+
+pub(super) fn decode_full_resolution_intra_slices(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,budget:usize)->Result<IntraPicture> {
+    intra444::decode(headers,sps,pps,budget)
 }
 
 pub(super) fn decode_component_intra_slices(headers:&[&SliceHeader],sps:&Sps,pps:&Pps,memory_limit:usize)->Result<IntraPicture> {

@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0177"
+  ],
+  "checked_at": "2026-10-21T12:19:35.290169+00:00",
+  "sources": [
+    "src/playback/audio/aiff.rs"
+  ],
+  "regressions": [
+    "tests/aifc_compression_type.rs"
+  ],
+  "before": [
+    "evidence/batch-169-aiff-before.rs",
+    "evidence/batch-169-tests-before.rs",
+    "evidence/batch-169-before.log",
+    "evidence/batch-169-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-169-after.log",
+      "passed": 5
+    },
+    {
+      "log": "evidence/batch-169-related-after.log",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-169-aiff-units.log",
+      "passed": 14
+    },
+    {
+      "log": "evidence/batch-169-core.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-169-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-169-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/aiff.rs": "b0e2ceb956a50ace96a6db93971d6ac26035c8e2b25bcb456978500adf50888c",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/aifc_compression_type.rs": "bc7d7ad9562f046cc1074a8ab7065cbcaf3640fc975b3037d7059c538ea740ca"
+  },
+  "qualification": [
+    "16 authored incomplete AIFC COMM18/19/20/21-byte compression IDs admit as NONE big-endian PCM. Asymmetric integer16mono/stereo,24mono,32stereo native output matches independently computed wrong-endian oracle and differs from intended sowt literal PCM. All reach successful wrong PCM EOF. Baseline4pass/2ignored;both forced parser/source refusal gates fail specifically at false NONE admission.",
+    "AIFC now requires the complete4-byte compressionType in COMM. Plain AIFF continues to imply NONE;complete22-byte types with no compressionName remain a compatibility control. No compressionName/FVER strictness,codec arithmetic,packetization or public API change.",
+    "Five focused regressions assert precise Invalid missing-type refusals,complete available SSND geometry and unchanged sound bytes,16 valid plain AIFF/AIFC NONE/sowt/minimal22-byte controls with exact PCM,PTS,duration,negative/interior/EOF/MAX seeks and real rewind.32 actual worker interior/EOF target variants pass;file/data/channel budgets remain exact.",
+    "Nine related integrations cover AIFC float widths/endian/seek,PCM exact seek and EOF,G.711,block-coded seek,duplicate metadata,known truncated payload EOF and full-input limits.14 existing AIFF units,1 minimal-configuration fixture geometry check,fixture reproduction and player build pass. No prior test expectation was skipped or relaxed.",
+    "Apple Inside Macintosh:Sound Common Chunk,mirrored at https://dev.os9.ca/techpubs/mac/Sound/Sound-61.html,defines the explicit AIFC codec ID independently of AIFF geometry. Incomplete IDs are refused;the intended malformed program is not claimed as successfully decoded.",
+    "Synthetic PCM/FVER/COMM/SSND and separate owned VP9 companion are generated offline explicitly;ordinary tests use stored bytes without FFmpeg/network. Native worker acceptance is not physical-device or GUI qualification. No performance claim."
+  ],
+  "counting": "One mandatory AIFC codec-identification integrity fix. No extra IDs for widths,channels,partial type lengths,oracles,controls or test strengthening."
+}

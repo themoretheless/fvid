@@ -1,0 +1,8 @@
+{
+  "provenance": "Existing repository-authored synthetic 5.1 tone, first three valid 48k AC3 frames, owned neutral VP9 video and MP4/dac3 metadata. No private media, process or network.",
+  "source_sha256": "b34092707204538e63e9894b4a01ae674dfc4dc26b465407572b5940a22df73b",
+  "frames": 3,
+  "samples": 4608,
+  "rate": 48000,
+  "channels": 6
+}

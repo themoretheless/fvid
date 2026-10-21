@@ -1,0 +1,50 @@
+[
+  {
+    "name": "compressed-mbaff-pcm-f3-y8-c8-e0-frame-a0-crop0",
+    "kind": "mbaff",
+    "cabac": false,
+    "field": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "compressed-mbaff-pcm-f3-y8-c8-e0-field-a0-crop0",
+    "kind": "mbaff",
+    "cabac": false,
+    "field": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "compressed-mbaff-pcm-f3-y8-c8-e1-frame-a0-crop0",
+    "kind": "mbaff",
+    "cabac": true,
+    "field": false,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  },
+  {
+    "name": "compressed-mbaff-pcm-f3-y8-c8-e1-field-a0-crop0",
+    "kind": "mbaff",
+    "cabac": true,
+    "field": true,
+    "crop": [
+      1,
+      1,
+      2,
+      2
+    ]
+  }
+]

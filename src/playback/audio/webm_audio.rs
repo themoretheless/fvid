@@ -14,7 +14,7 @@ const TIMESCALE_NS: u32 = 1_000_000_000;
 /// `A_PCM/*` IDs are uncompressed audio, whose width the track states in
 /// `BitDepth`. `A_AAC` is spelled `mp4a` by the decoder dispatch, whichever
 /// container named it, and needs its setup block rebuilt (see `aac_setup`).
-const CODECS: [&str; 13] = [
+const CODECS: [&str; 14] = [
     "A_OPUS",
     "A_VORBIS",
     "A_MPEG/L3",
@@ -22,6 +22,7 @@ const CODECS: [&str; 13] = [
     "A_MPEG/L1",
     "A_FLAC",
     "A_ALAC",
+    "A_WAVPACK4",
     "A_AC3",
     "A_EAC3",
     "A_AAC",
@@ -46,7 +47,7 @@ fn setup_data(track: &Track) -> Result<Vec<u8>> {
         }
         "A_VORBIS" => vorbis_setup_headers(&track.codec_private),
         "A_FLAC" => Ok(flac_stream_info(&track.codec_private)),
-        "A_ALAC" => Ok(track.codec_private.clone()),
+        "A_ALAC" | "A_WAVPACK4" => Ok(track.codec_private.clone()),
         "A_AAC" => aac_setup(&track.codec_private),
         _ => Ok(Vec::new()),
     }
@@ -312,21 +313,34 @@ impl MpegClock {
             + i128::from(self.samples)*1_000_000_000/i128::from(rate);
         Ok((pts,i64::try_from(end-i128::from(pts)).map_err(|_|invalid("MP3 duration overflow"))?))
     }
-    fn exact_skip(&self,floor:i64,rate:u32,frames:usize,delay_ns:u64)->Option<usize> {
+    fn exact_origin(&self,rate:u32,delay_ns:u64)->Option<i128> {
         if rate==0{return None;}
         let rate=i128::from(rate);let unit=1_000_000_000i128;
-        let delay=((u128::from(delay_ns)*rate as u128+500_000_000)/1_000_000_000)as i128;
-        let origin=(i128::from(self.origin?)+i128::from(delay_ns))*rate-delay*unit;
+        let literal=i128::from(self.origin?)+i128::from(delay_ns);
+        let projected=literal*rate;
+        let nearest=(projected+unit/2).div_euclid(unit);
+        let sample=nearest*unit;
+        let lower=sample.div_euclid(rate);
+        let upper=lower+i128::from(sample.rem_euclid(rate)!=0);
+        // Only the two integer-ns representations of this exact sample point
+        // qualify. Do not widen this to a container tick or round a seek floor.
+        let origin=if literal==lower || literal==upper {sample}else{projected};
+        let delay=(i128::from(delay_ns)*rate+unit/2).div_euclid(unit);
+        Some(origin-delay*unit)
+    }
+    fn exact_skip(&self,floor:i64,rate:u32,frames:usize,delay_ns:u64)->Option<usize> {
+        if rate==0{return None;}
+        let origin=self.exact_origin(rate,delay_ns)?;
+        let rate=i128::from(rate);let unit=1_000_000_000i128;
         let requested=i128::from(floor)*rate-origin;
         let target=requested.div_euclid(unit)+i128::from(requested.rem_euclid(unit)!=0);
         Some((target-i128::from(self.packet_start)).clamp(0,frames as i128)as usize)
     }
     fn exact_point(&self,first:usize,rate:u32,delay_ns:u64)->Option<u64> {
         if rate==0{return None;}
+        let origin=self.exact_origin(rate,delay_ns)?;
         let rate=i128::from(rate);let unit=1_000_000_000i128;
-        let delay=((u128::from(delay_ns)*rate as u128+500_000_000)/1_000_000_000)as i128;
-        let origin=(i128::from(self.origin?)+i128::from(delay_ns))*rate;
-        u64::try_from((origin+(i128::from(self.packet_start)+first as i128-delay)*unit).div_euclid(rate)).ok()
+        u64::try_from((origin+(i128::from(self.packet_start)+first as i128)*unit).div_euclid(rate)).ok()
     }
     /// Restore whole-sample CodecDelay from either adjacent integer ns before
     /// projecting PCM. Separately rounded packet/trim durations can drift by 1 ns.
@@ -357,12 +371,19 @@ pub struct WebmAudioReader<R> {
     presentation_floor: Option<i64>,
     mpeg_clock: MpegClock,
     ac3_clock: MpegClock,
+    // Decode-order metadata outlives lookahead reads. Duplicate PTS remain
+    // distinct entries; delayed E-AC-3 must not use the most recent clock.
+    eac3_windows: std::cell::RefCell<std::collections::VecDeque<(i64,MpegClock,i64)>>,
     pcm_clock: MpegClock,
     flac_clock: MpegClock,
     alac_clock:std::cell::RefCell<MpegClock>,
     alac_end_ns:std::cell::Cell<Option<u64>>,
     alac_outputs:std::cell::Cell<usize>,
     alac_duration_complete:std::cell::Cell<bool>,
+    wavpack_mask: Option<u32>,
+    dolby_mask: Option<u32>,
+    dolby_channels: Option<u16>,
+    wavpack_dsd: bool,
     flac_end_ns: Option<u64>,
     flac_duration_complete: bool,
     pcm_seek_error: Option<String>,
@@ -395,6 +416,21 @@ pub struct WebmAudioReader<R> {
 }
 
 impl<R: Read + Seek> WebmAudioReader<R> {
+    fn eac3_speaker_mask(&mut self,first:&[u8])->Result<Option<u32>> {
+        let channels=self.track().channels as u16;
+        if channels<=6 {return Ok(Some(crate::codec::eac3_decoder::speaker_mask(first,channels)?));}
+        let mut data=first.to_vec();
+        for count in 0..9 {
+            if let Some(layout)=crate::codec::eac3_decoder::presentation::try_packet_speakers(&data,channels)? {
+                return layout.wave_mask().map(Some).ok_or_else(||unsupported("E-AC-3 speaker locations need an extended speaker mask"));
+            }
+            if count==8 {break;}
+            let next=self.read_packet()?.ok_or_else(||invalid("incomplete E-AC-3 dependent presentation"))?;
+            data.extend(next.data);
+        }
+        Err(invalid("E-AC-3 presentation exceeds eight dependent substreams"))
+    }
+
     /// Prefer default usable audio; explicit lists retain container order.
     pub fn open(reader: R, limits: Limits) -> Result<Self> {
         let demuxer = WebmReader::open(reader, limits)?;
@@ -575,12 +611,17 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             presentation_floor: None,
             mpeg_clock: MpegClock::default(),
             ac3_clock: MpegClock::default(),
+            eac3_windows:Default::default(),
             pcm_clock: MpegClock::default(),
             flac_clock: MpegClock::default(),
             alac_clock:std::cell::RefCell::new(MpegClock::default()),
             alac_end_ns:std::cell::Cell::new(None),
             alac_outputs:std::cell::Cell::new(0),
             alac_duration_complete:std::cell::Cell::new(false),
+            wavpack_mask: None,
+            dolby_mask: None,
+            dolby_channels: None,
+            wavpack_dsd: false,
             flac_end_ns: None,
             flac_duration_complete: false,
             pcm_seek_error: None,
@@ -606,6 +647,30 @@ impl<R: Read + Seek> WebmAudioReader<R> {
             vorbis,
             vorbis_end_ns: None,
         };
+        if matches!(source.codec_tag.as_str(),"A_AC3"|"A_EAC3") {
+            if let Some(packet)=source.read_packet()? {
+                // An unreadable first header retains the decoder's existing late
+                // refusal/concealment behavior; never invent a mask from width.
+                source.dolby_mask = if source.codec_tag=="A_AC3" {
+                    if let Some(frame)=crate::codec::ac3_decoder::checked_syncframe(&packet.data) {
+                        source.dolby_channels=Some(frame.channels);
+                        Some(crate::codec::ac3_decoder::speaker_mask(&packet.data,frame.channels)?)
+                    }else{None}
+                }else if crate::codec::eac3_decoder::checked_frame(&packet.data).is_some() {
+                    source.eac3_speaker_mask(&packet.data)?
+                }else{None};
+            }
+            source.rewind();
+        }
+        if source.codec_tag=="A_WAVPACK4" {
+            if let Some(packet)=source.read_packet()? {
+                source.wavpack_dsd=crate::codec::wavpack_decoder::WavpackDecoder::matroska_is_dsd(
+                    &source.extra_data,&packet.data,source.track().sample_rate as u32,source.track().channels as u16)?;
+                source.wavpack_mask=crate::codec::wavpack_decoder::WavpackDecoder::matroska_speaker_mask(
+                    &source.extra_data,&packet.data,source.track().sample_rate as u32,source.track().channels as u16)?;
+            }
+            source.rewind();
+        }
         if source.codec_tag=="A_FLAC" {
             // Index actual coded sample counts once. No PCM reconstruction or
             // duplicate packet index is needed; rewind preserves the endpoint.
@@ -704,7 +769,11 @@ impl<R: Read + Seek> WebmAudioReader<R> {
                 continue;
             }
 
-            let data = self.demuxer.read_packet(idx)?;
+            let mut data = self.demuxer.read_packet(idx)?;
+            if self.codec_tag=="A_WAVPACK4" && let Some(extra)=self.demuxer.read_block_additional(idx,1)? {
+                data=crate::codec::wavpack_decoder::WavpackDecoder::matroska_with_correction(
+                    &self.extra_data,self.track().sample_rate as u32,self.track().channels as u16,&data,&extra)?;
+            }
             self.discard_padding_ns = self.demuxer.packets[idx].discard_padding_ns;
             let pts_ns = if self.codec_tag == "A_OPUS" {
                 let delay_ns = if self.track().codec_delay_ns != 0 {
@@ -797,14 +866,17 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         }
     }
     fn pcm_duration(&self)->Option<std::time::Duration> {
-        let(stride,rate)=self.pcm_geometry().ok()?;let mut clock=MpegClock::default();let mut end=0;let mut seen=false;
+        let(stride,rate)=self.pcm_geometry().ok()?;let mut clock=MpegClock::default();let mut end=0;let mut seen_packet=false;
         for index in 0..self.demuxer.packets.len() {
             if self.demuxer.packets[index].track!=self.track_number{continue;}
             let frames=self.pcm_packet_frames(index,stride).ok()?;self.stamp_pcm(&mut clock,index,frames,rate).ok()?;
             let(first,last)=self.pcm_bounds(index,frames,&clock,rate,0).ok()?;
-            if first<last {end=end.max(clock.exact_point(last,rate,self.index_delay_ns())?);seen=true;}
+            // A fully indexed, valid track whose windows all trim away has a
+            // known zero endpoint, distinct from an absent/invalid packet clock.
+            seen_packet=true;
+            if first<last {end=end.max(clock.exact_point(last,rate,self.index_delay_ns())?);}
         }
-        seen.then(||std::time::Duration::from_nanos(end))
+        seen_packet.then(||std::time::Duration::from_nanos(end))
     }
 
     /// Restart from the first packet.
@@ -813,6 +885,7 @@ impl<R: Read + Seek> WebmAudioReader<R> {
         self.presentation_floor = None;
         self.mpeg_clock = MpegClock::default();
         self.ac3_clock = MpegClock::default();
+        self.eac3_windows.get_mut().clear();
         self.pcm_clock = MpegClock::default();
         self.flac_clock = MpegClock::default();
         *self.alac_clock.get_mut()=MpegClock::default();
@@ -1379,6 +1452,10 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
+        if self.codec_tag=="A_WAVPACK4" {
+            return Ok(Box::new(crate::codec::wavpack_decoder::WavpackDecoder::for_matroska(
+                self.extra_data(),self.sample_rate(),self.channels())?.with_speaker_mask(self.wavpack_mask)?));
+        }
         if self.codec_tag == "A_AC3" {
             return Ok(Box::new(crate::codec::ac3_decoder::Ac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?));
         }
@@ -1445,6 +1522,8 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn speaker_mask(&self)->Result<Option<u32>>{
+        if matches!(self.codec_tag.as_str(),"A_AC3"|"A_EAC3") {return Ok(self.dolby_mask);}
+        if self.codec_tag=="A_WAVPACK4" {return Ok(self.wavpack_mask);}
         if self.codec_tag=="A_ALAC" {return crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.extra_data,self.sample_rate(),self.channels()).map(Some);}
         if self.codec_tag!="A_FLAC" {return Ok(None);}
         let track=self.demuxer.tracks.iter().find(|t|t.number==self.track_number).ok_or_else(||invalid("selected FLAC track is absent"))?;
@@ -1471,7 +1550,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         if self.in_band_ps {
             2
         } else {
-            self.track().channels as u16
+            self.dolby_channels.unwrap_or(self.track().channels as u16)
         }
     }
 
@@ -1623,7 +1702,7 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
                     } else {
                         track.sample_rate as u32
                     },
-                    channels: track.channels as u16,
+                    channels: if number==self.track_number {self.channels()}else{track.channels as u16},
                     name: track.name.clone(),
                     language: track.language.clone(),
                 }
@@ -1722,11 +1801,18 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
         } else if self.codec_tag == "A_EAC3" {
             let mut offset=0usize;let mut frames=0usize;
             while offset<p.data.len() {
+                if let Some(size)=crate::codec::eac3_decoder::skipped_substream_bytes(&p.data[offset..])? {
+                    offset+=size;
+                    continue;
+                }
                 let header=crate::codec::eac3_decoder::frame(&p.data[offset..]).ok_or_else(||invalid("E-AC-3 packet holds no syncframe"))?;
                 frames=frames.checked_add(header.blocks * 256).ok_or_else(||invalid("E-AC-3 packet sample count overflow"))?;
                 offset=offset.checked_add(header.frame_bytes).ok_or_else(||invalid("E-AC-3 frame size overflow"))?;
             }
-            let (pts,duration)=self.ac3_clock.stamp(p.pts_ns,frames,self.sample_rate(),self.demuxer.timestamp_scale_ns())?;
+            let (pts,duration)=if frames==0 {(p.pts_ns,0)}else{self.ac3_clock.stamp(p.pts_ns,frames,self.sample_rate(),self.demuxer.timestamp_scale_ns())?};
+            if frames!=0 {
+                self.eac3_windows.get_mut().push_back((pts,self.ac3_clock.clone(),self.discard_padding_ns));
+            }
             p.pts_ns=pts;duration
         } else if self.codec_tag == "A_OPUS" {
             let duration =
@@ -1753,6 +1839,13 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
+        if self.codec_tag=="A_WAVPACK4" {
+            if self.wavpack_dsd {self.rewind();self.presentation_floor=Some(pts.max(0));return pts.max(0);}
+            // Every WavPack block carries its predictor/entropy state. Seek
+            // directly, retaining a presentation floor for a partial block.
+            self.presentation_floor=Some(pts.max(0));
+            return WebmAudioReader::seek(self,pts.max(0));
+        }
         if self.codec_tag=="A_ALAC" {
             self.rewind();let target=pts.max(0);self.presentation_floor=Some(target);
             if let Err(error)=self.seek_alac(target){self.pcm_seek_error=Some(error.to_string());}
@@ -1864,40 +1957,58 @@ impl<R: Read + Seek + Send> AudioStream for WebmAudioReader<R> {
                 return Err(invalid("invalid Matroska PCM geometry"));
             }
             let frames = packet.data.len() / stride;
-            let padding = discard_padding_samples(self.discard_padding_ns, rate);
-            if padding > frames as u128 || discard_padding_exceeds_packet(self.discard_padding_ns, rate, frames) {
+            let context=if self.codec_tag=="A_EAC3" {
+                let mut windows=self.eac3_windows.borrow_mut();
+                if windows.front().is_some_and(|w|w.0!=source_pts) {
+                    return Err(invalid("E-AC-3 output source metadata identity mismatch"));
+                }
+                windows.pop_front()
+            }else{None};
+            let dolby_clock=context.as_ref().map_or(&self.ac3_clock,|w|&w.1);
+            let padding_ns=context.as_ref().map_or(self.discard_padding_ns,|w|w.2);
+            let padding = discard_padding_samples(padding_ns, rate);
+            if padding > frames as u128 || discard_padding_exceeds_packet(padding_ns, rate, frames) {
                 return Err(invalid("Matroska discard padding exceeds decoded packet"));
             }
             let padding = padding as usize;
             let source_pts=if self.codec_tag=="A_ALAC" {self.stamp_alac_geometry(source_pts,frames)?}else{source_pts};
+            // Public presentation calls can provide a standalone decoded PCM
+            // packet before any indexed packet has initialized its clock.
+            // Keep those signed timestamp/geometry checks, while indexed
+            // playback continues to use its accumulated exact sample history.
+            let direct_pcm_clock=MpegClock {origin:Some(source_pts),..Default::default()};
+            let pcm_clock=if self.pcm_clock.origin.is_some(){&self.pcm_clock}else{&direct_pcm_clock};
             // Audio decoders preserve the supplied integer timestamp, but
             // label it with their sample clocks. Matroska timestamps are ns.
             // Trim negative presentation samples before changing that clock.
             let skip = if self.codec_tag.starts_with("A_PCM/") {
-                self.pcm_clock.exact_skip(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns())
+                pcm_clock.exact_skip(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns())
                     .ok_or_else(||invalid("invalid PCM sample clock"))?
             } else if self.codec_tag=="A_ALAC" {
                 self.alac_clock.borrow().exact_skip(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns()).ok_or_else(||invalid("invalid ALAC sample clock"))?
             } else if self.codec_tag=="A_FLAC" {
                 self.flac_clock.exact_skip(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns()).ok_or_else(||invalid("invalid FLAC sample clock"))?
             } else if matches!(self.codec_tag.as_str(), "A_AC3" | "A_EAC3") {
-                self.ac3_clock.skip_delayed(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns())
+                dolby_clock.skip_delayed(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns())
             } else if matches!(self.codec_tag.as_str(), "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3") {
                 self.mpeg_clock.skip_delayed(self.presentation_floor.unwrap_or(0).max(0),rate,frames,self.index_delay_ns())
+            } else if self.codec_tag=="A_WAVPACK4" {
+                (((i128::from(self.presentation_floor.unwrap_or(0).max(0))-i128::from(source_pts))
+                    .max(0) as u128)*u128::from(rate)).div_ceil(1_000_000_000).min(frames as u128) as usize
             } else { zero_origin_preroll_samples(source_pts, rate, frames) };
-            let first = skip.max(if self.discard_padding_ns < 0 { padding } else { 0 });
-            let last = frames - if self.discard_padding_ns > 0 { padding } else { 0 };
-            if matches!(self.codec_tag.as_str(), "A_AC3" | "A_EAC3") && self.ac3_clock.skip_delayed(0,rate,frames,self.index_delay_ns())<last {
-                let end=self.ac3_clock.presented(last,rate,self.index_delay_ns()).ok_or_else(||invalid("negative AC-3 presentation end"))?;
+            let first = skip.max(if padding_ns < 0 { padding } else { 0 });
+            let last = frames - if padding_ns > 0 { padding } else { 0 };
+            if matches!(self.codec_tag.as_str(), "A_AC3" | "A_EAC3") && dolby_clock.skip_delayed(0,rate,frames,self.index_delay_ns())<last {
+                let end=dolby_clock.presented(last,rate,self.index_delay_ns()).ok_or_else(||invalid("negative AC-3 presentation end"))?;
                 self.ac3_end_ns.set(Some(self.ac3_end_ns.get().unwrap_or(0).max(end)));
             }
             if first >= last { return Ok(None); }
             if first != 0 { packet.data.copy_within(first * stride..last * stride, 0); }
             packet.data.truncate((last - first) * stride);
-            packet.pts = if self.codec_tag.starts_with("A_PCM/"){self.pcm_clock.exact_point(first,rate,self.index_delay_ns())}
+            packet.pts = if self.codec_tag.starts_with("A_PCM/"){pcm_clock.exact_point(first,rate,self.index_delay_ns())}
                 else if self.codec_tag=="A_ALAC" {self.alac_clock.borrow().exact_point(first,rate,self.index_delay_ns())}
                 else if self.codec_tag=="A_FLAC" {self.flac_clock.exact_point(first,rate,self.index_delay_ns())}
-                else if matches!(self.codec_tag.as_str(), "A_AC3" | "A_EAC3") {self.ac3_clock.presented(first,rate,self.index_delay_ns())}
+                else if matches!(self.codec_tag.as_str(), "A_AC3" | "A_EAC3") {dolby_clock.presented(first,rate,self.index_delay_ns())}
                 else if matches!(self.codec_tag.as_str(), "A_MPEG/L1" | "A_MPEG/L2" | "A_MPEG/L3") {self.mpeg_clock.presented(first,rate,self.index_delay_ns())}
                 else {presentation_after_preroll(source_pts, first, rate)}
                 .ok_or_else(|| invalid("negative PCM presentation time"))?;

@@ -1,0 +1,23 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0175",
+  "problem": "Classic AVI integer/IEEE PCM is explicitly refused despite existing native PCM decoders and consistent source framing.",
+  "source": "src/playback/audio/avi_audio.rs",
+  "source_sha256": "d1c0c2e0673a07d750830921a1e6dff0d5fbacbfb5e7d26230ad672596ac7b28",
+  "before_snapshot": "evidence/batch-167-reader-before.rs",
+  "fixtures": "tests/fixtures/playback-errors/avi-pcm",
+  "scope": "13 classic PCM programs:unsigned8,signed16/24/32,IEEEfloat32/64 mono/stereo plus8193-frame single-chunk window case. Independent WAV wrappers and literal dyadic float32 controls;6 malformed/unsupported cases. No WAVEFORMATEXTENSIBLE or universal layout qualification.",
+  "reference": "Native wav.rs format/codec mapping and pcm_decoder.rs ownership are current-source controls. AVISTREAMHEADER sample-size/rate/count rules remain documented at https://learn.microsoft.com/en-us/previous-versions/ms779638(v=vs.85).",
+  "requirements": [
+    "Before fixing,verify native WAV control PCM and specific AVI missing-framing refusals. Container geometry and original coded bytes must already be valid.",
+    "Map classic tags1/3 to existing native decoder IDs and keep bit-width/channel/frame geometry consistent with block align and byte rate. Check clock,declared sample count and complete interleaved frames.",
+    "PCM seeks must advance by the full encoded interleaved frame width,not G.711's one-byte-per-channel stride. Preserve independent ADPCM and G.711 paths.",
+    "Stream a large PCM chunk in at most2048-frame windows to bound per-packet copy and decoder output. Keep metadata indexed only by bounded raw records;do not allocate a descriptor per PCM frame/window.",
+    "Verify exact PCM,packet clocks,interior/boundary/negative/MAX seeks,real rewind,actual worker navigation,EOF and full-buffer/record limits. Tests stay offline and do not generate fixtures."
+  ],
+  "implementation_plan": "Add private encoded-frame stride and optional PCM window size. Reuse sample-span clock traversal while keeping grouped ADPCM block views and G.711 record grain unchanged. Validate and index raw PCM records,then slice bounded packets at read time. No new public signatures,codec arithmetic or performance claim.",
+  "test_strengthening": "The post-fix reader helper no longer performs a second seek,which could mask the state left by the actual negative/beyond-end seek or rewind being tested. WAV callers explicitly seek;AVI state probes and rewind are consumed directly. This is test quality only,not an additional ID.",
+  "unit_migration": "The former known-decoder/framing-gap unit mutates an ADPCM file tag toPCM but leaves bit depth4. Retain its refusal as unsupported PCM width4;do not skip it or classify it as valid16-bit PCM.",
+  "counting": "One classic AVI linear PCM framing capability,including integer/float widths,packetization,accurate byte-stride seek and resource checks. No separate IDs for format/channel variants,fixtures or test maintenance.",
+  "validation": "batch-167-validation.json"
+}

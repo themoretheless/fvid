@@ -1,0 +1,77 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0169"
+  ],
+  "checked_at": "2026-10-21T03:10:28.450036+00:00",
+  "sources": [
+    "crates/fvid-media/src/owned_flac.rs"
+  ],
+  "before": [
+    "evidence/batch-161-before.log",
+    "evidence/batch-161-acceptance-before.log",
+    "evidence/batch-161-flac-before.rs",
+    "evidence/batch-161-tests-before.rs"
+  ],
+  "primary_reference": "batch-161-audit.json",
+  "checks": [
+    {
+      "log": "evidence/batch-161-after.log",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-161-root-units-corrected.log",
+      "passed": 26
+    },
+    {
+      "log": "evidence/batch-161-media-units-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-161-router-oracle-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-161-media-after.log",
+      "passed": 10
+    },
+    {
+      "log": "evidence/batch-161-core-after.log",
+      "passed": 2
+    },
+    {
+      "log": "evidence/batch-161-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-161-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-161-libflac-controls.log",
+      "passed": 4,
+      "kind": "explicit-reference-controls"
+    }
+  ],
+  "qualification": [
+    "Eleven complete CRC-valid FLAC streams use canonical coded numbers but contradict preceding frame/sample counts or switch blocking strategy. Before the fix,indexing silently replaces them with PTS0/64/128 and the files reach exact PCM. Forced parser/source refusal tests fail at admission,not at unrelated CRC or subframe decode.",
+    "Retain coded number/strategy in private header fields and check whole-stream relationships before indexing. Canonical-number encoding,single-frame codec decode,Frame layout and public clock units are unchanged. This is independent of FVID0137 coded-number byte-length correction.",
+    "All eleven whole-stream contradictions now refuse. Independent native decoding of every subframe still matches literal PCM. Four legal controls keep actual-worker playback/rewind/midstream/EOF across8 target variants;short final blocks,variable block sizes,multibyte numbers and exact/tight resource limits pass.",
+    "Four complete legal controls also pass libFLAC1.5.0 test mode,including PCM MD5. This explicit reference check is separate from ordinary offline tests and fixture generation.",
+    "Ten root integrations,26 root unit tests,4 shared media units,10 shared media integrations,2 core regressions,fixture reproduction and player build pass. One existing physical-output smoke is ignored;physical audio listening is not claimed.",
+    "An initial broad unit run exposed a stale CPAL mask0 oracle. Exact same failure was reproduced with frozen pre-fix FLAC. Two related old test oracles also expected zero despite committed unchanged routing policy preserving unknown-channel audibility. Only test expectations were aligned;production routing and integer media assets are unchanged. The failed logs and original test sources remain archived. These baseline repairs add zero IDs.",
+    "Intended behavior for malformed coded clocks is refusal,not discontinuity recovery or invented PCM. Legal controls establish playback acceptance. Owned VP9/PCM companion is decoded separately;no new video-format or performance claim."
+  ],
+  "test_oracle_maintenance": [
+    "src/audio/cpal_backend.rs:cfg(test) explicit FLAC routing oracle",
+    "crates/fvid-media/tests/flac_layout.rs:mask0 reference",
+    "crates/fvid-media/src/owned_stereo_router.rs:cfg(test) directout expectation"
+  ],
+  "baseline_failures": [
+    "evidence/batch-161-root-units-after.log",
+    "evidence/batch-161-cpal-baseline-replay.log",
+    "evidence/batch-161-layout-oracle-before.log",
+    "evidence/batch-161-router-oracle-before.log"
+  ],
+  "counting": "One whole-stream FLAC coded-clock consistency defect. Eleven cases,strategy/number variants,feature configurations,reference tools and three old-oracle repairs add no extra IDs."
+}

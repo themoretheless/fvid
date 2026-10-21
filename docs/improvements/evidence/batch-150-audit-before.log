@@ -1,0 +1,4 @@
+lower: explicit caption loaded; discovered=[]
+upper: explicit caption loaded; discovered=[]
+loose: explicit caption loaded; discovered=[]
+smi-control: explicit caption loaded; discovered=["tests/fixtures/playback-errors/sami-sidecar-extension/smi-control/video.smi"]

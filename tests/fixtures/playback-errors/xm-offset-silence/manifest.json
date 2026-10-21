@@ -1,0 +1,48 @@
+{
+  "provenance": "Author-created five-row XM scores. The existing owned signed16 waveform and authored VP9/PCM companion are reused. 9FF stops beyond the 64-frame sample; subsequent C00 or volume-column zero must keep a note-only retrigger silent. Independent controls omit only that zero-volume note. Natural sample-end and initially-zero gain are healthy controls. No private input,FFmpeg or network.",
+  "cases": [
+    {
+      "name": "effect-zero",
+      "file": "effect-zero.xm",
+      "control": "effect-zero-control.xm",
+      "before_failure": true,
+      "post_row": 3,
+      "duration_ms": 720
+    },
+    {
+      "name": "column-zero",
+      "file": "column-zero.xm",
+      "control": "column-zero-control.xm",
+      "before_failure": true,
+      "post_row": 3,
+      "duration_ms": 720
+    },
+    {
+      "name": "natural-end-control",
+      "file": "natural-end-control.xm",
+      "control": "natural-end-control-control.xm",
+      "before_failure": false,
+      "post_row": 3,
+      "duration_ms": 720
+    },
+    {
+      "name": "no-gain-control",
+      "file": "no-gain-control.xm",
+      "control": "no-gain-control-control.xm",
+      "before_failure": false,
+      "post_row": 3,
+      "duration_ms": 720
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "effect-zero.xm": "88d8ad6041d4dd188aefa4e9cdeeda731570119109eabd2e30cf380dd655479f",
+    "effect-zero-control.xm": "2fd24c7cc37950e6313cf51e53efa600a3998ec24d76840c93dd371bd365611d",
+    "column-zero.xm": "079e67e5566f56134f5ba342d7d35c5671a902c4844fb1680e4bd89861913c70",
+    "column-zero-control.xm": "9e1ce722b8f91b82b5d5e2cd3379c9aaebb604c9b7008296b1ac1c47694a3026",
+    "natural-end-control.xm": "0682b0f8da24eb5c86ea62de838a1bda655a2e598b0e32f07802a26b2cdbc867",
+    "natural-end-control-control.xm": "b1d2240f42c9c37d7fcc485feaf8951e3e0095a7ba9e674282772b2a72a9e19d",
+    "no-gain-control.xm": "9efe80ebe3722e9087b7123bb778145935b505b0b548d3a2049dbbc9d744bcf8",
+    "no-gain-control-control.xm": "d60a30ea42a12dff856c405167ea6a4fef2fc2fd1e665c3c72802555eb3b8603"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "aa8e4936e837e38646647b79d0404332536393b57c65e4db4b63b35e8f6ce08f",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_fragment_description.rs": "e11b49fceb90e8b88b73b0115f181e301b7b34e17874cff46dbe4846840108d6",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_fragment_description_regressions.py": "1324dc76376728b1bdecc9ba5c53998306613e2bd55a0093fd6454cf61af2153",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-fragment-description/manifest.json": "05bac897ff579ea9091883badcdece882f5c94748577d530996ad45926605642"
+  },
+  "checks": [
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "mp4",
+        "--test",
+        "mp4_seek_io_regressions",
+        "--test",
+        "mp4_enabled_tracks",
+        "--test",
+        "hls_parser_regressions",
+        "--test",
+        "vp9_chroma",
+        "--test",
+        "mp4_audio_clocks",
+        "--test",
+        "mp4_pcm_choice"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-171-related-after.log"
+    },
+    {
+      "name": "mp4-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--lib",
+        "container::mp4::tests"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-171-mp4-units.log"
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "mp4_fragment_description",
+        "--test",
+        "mp4",
+        "--test",
+        "mp4_seek_io_regressions"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-171-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-171-player-build.log"
+    }
+  ]
+}

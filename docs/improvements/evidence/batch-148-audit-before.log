@@ -1,0 +1,5 @@
+[]
+
+thread 'main' (2102346) panicked at /private/tmp/fvid-sami-canonical-audit.rs:941:156:
+canonical Sync Start captions missing
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

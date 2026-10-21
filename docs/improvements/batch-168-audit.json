@@ -1,0 +1,21 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0176",
+  "problem": "Known AVI audio chunks are clipped to their parent run even when ckSize promises unavailable data. A whole-block/frame prefix can then pass coding-specific counts and reach successful native EOF.",
+  "source": "src/container/avi.rs",
+  "source_sha256": "2bfe1b83a5c42800751381fafd43edc5dc4e4ce1314dd53840c111f64d4c5180",
+  "before_snapshot": "evidence/batch-168-avi-before.rs",
+  "reference": "https://learn.microsoft.com/en-us/windows/win32/directshow/avi-riff-file-reference",
+  "reference_finding": "ckSize is the size of valid chunk data,excluding header and padding. The known audio record must contain its full declared body inside its enclosing run.",
+  "fixtures": "tests/fixtures/playback-errors/avi-chunk-extent",
+  "scope": "16 contradictions across IMA/MS/int16/IEEE32,direct/nested rec,and short/u32MAX overclaims.12 complete controls include4 outerRIFF sentinels. Faults change only final audio chunk size;all available payloads remain complete original coded records.",
+  "requirements": [
+    "Confirm parser clips unavailable bytes and old native reader decodes exact literal PCM to successful EOF,not an unrelated codec error.",
+    "Refuse known audio body truncation before Record admission. Preserve deliberate outer RIFF clamping,unknown chunks,raw valid records,index and stream limits.",
+    "Verify exact targeted Invalid refusal for all faults,healthy literal PCM,24 worker interior/EOF variants,rewind,related AVI/G.711 units/integrations,minimal configuration and player build."
+  ],
+  "implementation_plan": "Use the existing private Chunk.truncated marker at the known audio-record publication point,after stream identification and before empty/limit checks. No global strict RIFF profile or public API change.",
+  "counting": "One known AVI audio-chunk extent integrity fix. No extra IDs for encodings,nesting,overclaim widths,fixtures or test maintenance.",
+  "unit_migration": "Initial broad units33 pass/1 fail:old a_movi_list_shorter_than_it_claims test explicitly required publishing1016 bytes from a1024-byte record,then relied on idx1 to reject. Frozen actual before17 container units pass. Updated this same unit to require early exact refusal,empty output,and positive complete1024-byte boundary traversal. No production bytes changed by unit migration;no skipped assertions or extra ID. Initial log/snapshot preserved.",
+  "validation": "batch-168-validation.json"
+}

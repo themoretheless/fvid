@@ -1,0 +1,36 @@
+{
+  "status": "body-caption-visible-renderer-layout-defect-found",
+  "app": "/private/tmp/FVid-Caption-Verification-159.app",
+  "media": "/private/tmp/fvid-caption-ui-159/video.webm",
+  "subtitle": "/private/tmp/fvid-caption-ui-159/video.sami",
+  "provenance": "Authored combined visual integration sample;not the independent before/after proof for individual defects. Existing authored VP9 clip plus entirely authored SAMI. No private media.",
+  "binary_sha256": "d354fb7f1fa364fe471a9001dd8f95a28c0ce26d3c2f9acc43cab6db46328edf",
+  "source_sha256": "aaad7da96db648683b9e79789b9a7a9c19e72fbe506e7572cdd247efeba17227",
+  "subtitle_sha256": "7e4cff5df6ce638b993f16e4998d1dbc49ffea71a257b57389935ffd4fa6e806",
+  "arguments": [
+    "play",
+    "/private/tmp/fvid-caption-ui-159/video.webm",
+    "--no-audio",
+    "--start-time",
+    "1.5",
+    "--start-paused"
+  ],
+  "expected": "At1.5s the paused decoded video should show two lines: Первая α / строка. The cue clears at9s; automatic .sami selection,canonical Sync,quoted attributes,body header tokens and uppercase BR are combined.",
+  "initial_launch_attempt": {
+    "outcome": "No running process or window;Cua launch timed out.",
+    "cause": "Diagnostic launcher omitted the required play subcommand. Not a media failure or accepted improvement."
+  },
+  "checked_at": "2026-10-20T23:58:10.913555+00:00",
+  "observations": [
+    "Cua window FVid showed the authored96x64 color bars at encoded00:00:01.500 with the authored Cyrillic/Greek caption words. No explicit sub-file was passed;video.sami was discovered automatically.",
+    "Space started real playback;the displayed encoded counter advanced to00:00:02.133 and the caption stayed visible.",
+    "At encoded00:00:10.16/end,the caption was absent as required by the9s blank Sync event.",
+    "The expected hard break was flattened into a space and the block began at the horizontal center instead of being centered. Source painter uses line.replace(newline,space) and LEFT-aligned layout. This pre-existing renderer defect is not claimed fixed by the body-boundary change."
+  ],
+  "cua_calls": [
+    "captionVerification159.getAXStateAndScreenshot()",
+    "captionVerification159.pressKey(space);getAXStateAndScreenshot()",
+    "captionVerification159.getAXStateAndScreenshot() atEOF"
+  ],
+  "qualification": "Physical window verifies body-caption survival,automatic .sami selection,Unicode words and eventual clear. It does not prove correct multiline/centered/outlined glyph layout;that distinct renderer repair is next. Diagnostic launcher initially omitted play;the corrected launch is the only positive UI proof."
+}

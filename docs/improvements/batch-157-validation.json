@@ -1,0 +1,46 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0165"
+  ],
+  "checked_at": "2026-10-21T01:50:35.268696+00:00",
+  "before": [
+    "evidence/batch-157-before.log",
+    "evidence/batch-157-acceptance-before.log",
+    "evidence/batch-157-decoder-before.rs"
+  ],
+  "primary_reference": "evidence/batch-152-reference.json",
+  "checks": [
+    {
+      "log": "evidence/batch-157-after.log",
+      "passed": 20,
+      "new_pcm_combinations": 56,
+      "new_worker_target_variants": 28
+    },
+    {
+      "log": "evidence/batch-157-units-after.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-157-historical-controls.log",
+      "scope": "Frozen actual source adapter:20 failing historical rate/channel pairs,28 immediate-before failures,56 exact after pairs and56 unchanged current controls. Six stereo mute/pan faults predate FVID0161;K00 adds coverage,not another ID."
+    },
+    {
+      "log": "evidence/batch-157-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-157-player-build.log",
+      "exit": 0
+    }
+  ],
+  "qualification": [
+    "Eight stereo failures and six healthy controls isolate invalid129/255 instrument components. Before PCM prefixes match;mute/right-channel assertions expose the changed defaults and diagnostics remain expected. Forced media PCM and actual-worker gates fail at packet2 with matching clocks and byte count.",
+    "One accepted-instrument classification now gates both selection and default restoration. Invalid components remain ignored/reported while their valid notes and commands execute. Populated and valid-empty128 restores remain active.",
+    "56 exact rate/channel PCM pairs,28 actual-worker seek/EOF target variants,20 integrations,35 units,fixture reproduction and player build pass. Panning-only faults were already inaudible in mono;all variants count as zero extra IDs.",
+    "The historical adapter confirms the normalization root predates the earlier key-off change;all56 current reference streams remain byte-for-byte unchanged by this fix. It is supplementary evidence,not a replacement for actual worker acceptance.",
+    "No instrument129/255 support is claimed:the invalid component is gracefully ignored and separately diagnosed. Valid note/effect behavior is compared with independently normalized rows. Full FT2 mixing,envelopes/fadeout,performance and physical listening remain outside scope.",
+    "The diagnostic field documentation is clarified to describe valid empty selection/note pairs sharing a report;no universal per-cell limit is claimed for distinct invalid component and missing-note events. No field or interface type changes."
+  ],
+  "counting": "One pre-existing invalid-instrument default-restoration defect. Volume,pan,key-off,notes,controls and all fixture/test variants add no extra IDs."
+}

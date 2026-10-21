@@ -9,7 +9,7 @@ use super::{
     cavlc::read_residual,
 };
 use crate::{Result, invalid};
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum IntraLuma {
     Blocks4([Intra4Mode; 16]),
     Blocks8 {
@@ -23,13 +23,13 @@ pub enum IntraLuma {
         cr: [u16; 64],
     },
 }
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Chroma422 {
     pub dc: [[i32;8];2],
     pub ac: [[[i32;16];8];2],
     pub pcm: [[u16;128];2],
 }
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct IntraMacroblock {
     pub chroma422: Option<Box<Chroma422>>,
     pub address: u32,
@@ -57,6 +57,7 @@ pub fn luma_block_xy(index: usize) -> Result<(usize, usize)> {
 }
 pub struct IntraCavlcReader<'a> {
     bits: BitReader<'a>,
+    residual: Option<super::avc_slice::PartitionCursor<'a>>,
     sps: &'a Sps,
     pps: &'a Pps,
     address: u32,
@@ -196,6 +197,7 @@ impl<'a> IntraCavlcReader<'a> {
         };
         Ok(Self {
             bits,
+            residual: header.partition_cursor(true)?,
             sps,
             pps,
             address: header
@@ -350,8 +352,93 @@ impl<'a> IntraCavlcReader<'a> {
                     .previous_address
                     .is_some_and(|a| self.pair_field(a as usize / 2) == Some(true))
     }
+    /// Resume shared 4:4:4 macroblock syntax after both chroma residuals.
+    pub(crate) fn resume_444(&mut self, bits: &BitReader<'a>) {
+        self.bits = bits.clone();
+    }
+    /// Advance the component's shared-syntax position after an inter/skip block.
+    pub(crate) fn advance_444_inter(&mut self,address:usize,counts:[u8;16])->Result<()> {
+        if self.sps.chroma_format!=0||self.address as usize!=address||self.mbaff&&self.pair_field(address/2).is_none() {
+            return Err(invalid("invalid AVC 444 inter component position"));
+        }
+        self.record_inter(address,counts,[[0;4];2])?;
+        self.advance_address()
+    }
+    /// ChromaArrayType=3 reuses the shared modes/CBP, but owns coefficient contexts.
+    pub(crate) fn read_444_component(&mut self, bits: &mut BitReader<'a>, template: &IntraMacroblock) -> Result<IntraMacroblock> {
+        if self.sps.chroma_format != 0 || self.address != template.address
+            || self.mbaff && self.pair_field(template.address as usize / 2).is_none() {
+            return Err(invalid("invalid AVC 4:4:4 component residual state"));
+        }
+        self.bits = bits.clone();
+        let mut mb = template.clone();
+        let address = mb.address as usize;
+        mb.luma_dc.fill(0);
+        mb.luma_levels.fill([0;16]);
+        if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma { levels.fill([0;64]); }
+        if matches!(mb.luma, IntraLuma::Pcm { .. }) {
+            let mut y=[0;256];
+            for value in &mut y { *value=self.bits.read(self.sps.bit_depth_luma)? as u16; }
+            mb.luma=IntraLuma::Pcm { y, cb:[0;64], cr:[0;64] };
+            self.luma_counts[address*16..address*16+16].fill(16);
+            self.modes[address*16..address*16+16].fill(2);
+        } else {
+            let nxn=!matches!(mb.luma, IntraLuma::Block16(_));
+            let field = self.field_picture || self.mbaff && self.pair_field(address / 2) == Some(true);
+            self.read_luma_residual(&mut mb,nxn,field)?;
+        }
+        self.advance_address()?;
+        *bits=self.bits.clone();
+        Ok(mb)
+    }
+    fn read_luma_residual(&mut self, mb: &mut IntraMacroblock, nxn: bool, field: bool) -> Result<()> {
+        let address=mb.address as usize;
+        if !nxn {
+            let context = self.coefficient_context(0, address, [0, 0])?;
+            mb.luma_dc = inverse_scan_4x4(
+                &read_residual(&mut self.bits, context, 16)?.coefficients,
+                field,
+            );
+        }
+        for block in 0..16 {
+            let (bx, by) = luma_block_xy(block)?;
+            let mut count = 0;
+            if mb.coded_block_pattern & (1 << (block / 4)) != 0 {
+                let context = self.coefficient_context(0, address, [bx, by])?;
+                let r = read_residual(&mut self.bits, context, if nxn { 16 } else { 15 })?;
+                count = r.total_coefficients;
+                if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
+                    for i in 0..16 {
+                        levels[block / 4][4 * i + block % 4] = r.coefficients[i];
+                    }
+                }
+                let mut levels = r.coefficients;
+                if !nxn {
+                    levels.copy_within(0..15, 1);
+                    levels[0] = 0;
+                }
+                mb.luma_levels[by * 4 + bx] = inverse_scan_4x4(&levels, field);
+            }
+            self.luma_counts[address * 16 + by * 4 + bx] = count;
+        }
+        if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
+            for block in levels {
+                *block = super::avc_transform8::inverse_scan_8x8(block, field);
+            }
+        }
+        Ok(())
+    }
     pub fn bit_position(&self) -> usize {
         self.bits.position()
+    }
+    pub(super) fn finish_partition(&mut self) -> Result<()> {
+        if let Some(residual) = &mut self.residual { residual.finish()?; }
+        Ok(())
+    }
+    fn swap_partition(&mut self) {
+        if let Some(residual) = &mut self.residual {
+            std::mem::swap(&mut self.bits, &mut residual.bits);
+        }
     }
     pub fn read_macroblock(&mut self) -> Result<Option<IntraMacroblock>> {
         if self.finished {
@@ -362,6 +449,7 @@ impl<'a> IntraCavlcReader<'a> {
                 return Err(invalid("MBAFF slice ends with incomplete macroblock pair"));
             }
             self.bits.finish_rbsp()?;
+            self.finish_partition()?;
             self.finished = true;
             return Ok(None);
         }
@@ -540,6 +628,7 @@ impl<'a> IntraCavlcReader<'a> {
             chroma_ac: [[[0; 16]; 4]; 2],
         };
         if mb_type == 25 {
+            self.swap_partition();
             while !self.bits.position().is_multiple_of(8) {
                 if self.bits.bit()? {
                     return Err(invalid("nonzero PCM alignment bit"));
@@ -558,6 +647,7 @@ impl<'a> IntraCavlcReader<'a> {
                     *value = self.bits.read(self.sps.bit_depth_chroma)? as u16;
                 }
             }
+            self.swap_partition();
             mb.luma = IntraLuma::Pcm { y, cb, cr };
             mb.qp = 0;
             self.luma_counts[address * 16..address * 16 + 16].fill(16);
@@ -631,39 +721,8 @@ impl<'a> IntraCavlcReader<'a> {
                 super::avc_residual_syntax::update_qp(self.qp, delta, self.sps.bit_depth_luma)?;
         }
         mb.qp = self.qp;
-        if mb_type != 0 {
-            let context = self.coefficient_context(0, address, [0, 0])?;
-            mb.luma_dc = inverse_scan_4x4(
-                &read_residual(&mut self.bits, context, 16)?.coefficients,
-                field,
-            );
-        }
-        for block in 0..16 {
-            let (bx, by) = luma_block_xy(block)?;
-            let mut count = 0;
-            if mb.coded_block_pattern & (1 << (block / 4)) != 0 {
-                let context = self.coefficient_context(0, address, [bx, by])?;
-                let r = read_residual(&mut self.bits, context, if mb_type == 0 { 16 } else { 15 })?;
-                count = r.total_coefficients;
-                if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
-                    for i in 0..16 {
-                        levels[block / 4][4 * i + block % 4] = r.coefficients[i];
-                    }
-                }
-                let mut levels = r.coefficients;
-                if mb_type != 0 {
-                    levels.copy_within(0..15, 1);
-                    levels[0] = 0;
-                }
-                mb.luma_levels[by * 4 + bx] = inverse_scan_4x4(&levels, field);
-            }
-            self.luma_counts[address * 16 + by * 4 + bx] = count;
-        }
-        if let IntraLuma::Blocks8 { levels, .. } = &mut mb.luma {
-            for block in levels {
-                *block = super::avc_transform8::inverse_scan_8x8(block, field);
-            }
-        }
+        self.swap_partition();
+        self.read_luma_residual(&mut mb, mb_type == 0, field)?;
         if mb.coded_block_pattern >> 4 != 0 {
             for component in 0..2 {
                 if let Some(wide)=&mut mb.chroma422 {
@@ -692,6 +751,7 @@ impl<'a> IntraCavlcReader<'a> {
                 self.chroma_counts[component][address * cells + block] = count;
             }
         }
+        self.swap_partition();
         self.advance_address()?;
         Ok(Some(mb))
     }

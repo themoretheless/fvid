@@ -11765,7 +11765,7 @@ positions, parity orders, NAL arrival orders and filter modes0/1/2. A subsequent
 P pair proves the mixed non-reference picture did not replace the retained PCM
 references. The own scalar oracle includes the normative identical-list L1 swap,
 opposite-parity chroma vertical MV correction, implicit signed weights, clipping
-and deblocking. Explicit optional JM accepted all720 and matched every YUV byte.
+and deblocking. Explicit optional JM accepted all 720 and matched every YUV byte.
 The pre-fix PCM/L0 reproducer is byte-identical in the final expanded family.
 No private source media, parameter sets, FFmpeg or network were used. Ordinary
 tests read committed fixtures and never run the generator or JM.
@@ -11775,7 +11775,7 @@ nonzero mixed-slice motion, explicit weighted_bipred1, or wider depth/profile
 combinations. Validation passed:201 AVC unit tests, both integration tests over3068 streams
 (exact YUV/reset and software playback/seek/rewind), and existing B direct/skip
 and implicit-weight field regressions. All1441 new artifacts regenerated
-byte-identically; explicit optional JM again matched all720 in every plane.
+byte-identically; explicit optional JM again matched all 720 in every plane.
 There are216 paired weight0/weight2 controls with observable pixel differences.
 
 ### Mixed CABAC I/P and I/B complementary fields (2026-10-10)
@@ -13080,3 +13080,3728 @@ that repeated an aligned reset, updated the anchor on a discardable CRA, or
 removed the absent-LSB full-reset guard each failed the specific regression;
 all were restored before the final gates. An initial non-reference discardable
 witness did not distinguish the anchor mutation and was replaced with CRA.
+
+### 2026-10-21 — shared 4:4:4 MBAFF inter acceptance and constrained-intra fix
+
+The shared full-resolution MBAFF inter path is now qualified by 1008 owned
+I/P/P scenarios, 720 reordered I/P/B/P scenarios and 192 enabled-deblocking
+scenarios. These cover CAVLC, CABAC init 0/1/2, 8/8, 10/12 and 14/8 component
+depths and frame/field/columns/checker pair layouts. P cases exercise selected
+parity, six-tap fractional prediction on every component, component weights,
+AC4/AC8 frame/field scans, lower-block skip and mixed intra/inter with
+constrained controls. B cases exercise nonzero retained motion, frame/field
+vertical-unit conversion, spatial and temporal direct, direct skip, explicit
+bi-prediction twins and plain/explicit/implicit weights. Filter cases use
+independent physical-owner edge traversal with actual residual bS=2 and IDC
+0/2; their echo picture checks filtered reference publication. Every matrix
+compares full native planes, cropped software MP4 bytes, presentation order,
+timing, reset and rewind. Fixture generators run separately without FFmpeg.
+
+A further 16 owned monochrome MBAFF regressions exposed a real constrained
+prediction failure: the lower frame I16 block used the preceding inter edge,
+producing 121 at luma sample 512 instead of midpoint 128. The general MBAFF
+reconstructor now excludes inter samples from intra readiness when PPS
+constrained prediction is enabled. Motion and entropy neighbourhoods retain
+separate availability. Ordinary-prediction controls remain accepted; CAVLC
+and all three CABAC init settings pass the fixed pixel/MP4/reset regressions.
+
+Validation: 219 AVC codec-library unit tests passed; 42 focused integration
+suites passed (81 tests, zero ignored), including shared/full-resolution,
+monochrome, 4:2:2, separate-plane, field/PAFF and existing MBAFF independent
+reference samples. The four current matrices regenerated 12328 artifacts
+byte-identically; the extended legacy 4:2:2 B author also preserved all 4033
+artifacts with default arguments. Tests were offline without default features.
+These acceptance matrices do not prove universal H.264 support: full-resolution
+MBAFF C-only residual edge flags, unequal component QPs, further partition/tool
+combinations and other codec gaps still require qualification and fixes.
+
+### 2026-10-21 — shared 4:4:4 MBAFF component flags/QPs and P partitions
+
+Two further owned offline matrices qualified 2928 previously uncovered tool
+combinations without requiring decoder changes:
+
+- `avc_444_mbaff_component_deblock`: 1728 I/P/P movies spanning all/Cb-only/
+  Cr-only AC4/AC8 residuals, mapped PPS component QP offsets 0/0 and -6/+6,
+  IDC 0/1/2, CAVLC and CABAC init 0/1/2, four frame/field pair topologies and
+  8/8, 10/12, 14/8 precision. The independent scalar filter retains mixed
+  frame/field bS=1 even for zero-residual components, and uses component
+  residual flags for bS=2. Witnesses distinguish false shared component flags,
+  luma QP substituted in residuals/filtering, missing slice-edge suppression,
+  and missing filtering. Tests assert actual PPS offsets and filter IDC.
+- `avc_444_mbaff_p_partitions`: 1200 I/P/P movies spanning 16x8, 8x16, 8x8,
+  8x4, 4x8, 4x4, mixed and CAVLC ref0-8x8 syntax; signed fractional MVDs,
+  opposite reference parity, ASO, all four topologies and entropy settings,
+  and the same precision combinations. Independent per-cell prediction grids
+  and six-tap sampling on all full-resolution planes distinguish substituting
+  one vector for all partitions. These partition cases disable filtering and
+  carry no residuals or explicit weights.
+
+Both acceptance tests compare every coded native sample, cropped normalized
+software-MP4 byte, exact presentation timestamps/durations, decoder reset,
+reader rewind and reference echo. QP mapping/4:4:4 substitution was checked
+against ITU-T H.264 (06/2019), clauses 8.5.5, 8.5.8/table 8-15 and 8.7.
+No FFmpeg, external codec or network is needed for generation or ordinary tests.
+
+Validation: both new suites passed, as did four affected prior integration
+suites (shared MBAFF P, shared MBAFF inter filtering, 4:2:2 P partitions and
+separate-plane MBAFF 8x8 scaling/ASO/deblocking). Six generators reproduced
+30610 artifacts byte-identically: 10370 new component-filter, 7202 new P
+partition, 6050 prior shared P, 1154 prior shared filter, 2161 separate-plane
+and 3673 prior 4:2:2 partition artifacts. Default author arguments preserve the
+old streams. This closes qualification gaps for the combinations above;
+per-block varying component activity and partition/residual/filter interactions,
+broader B partition combinations and other codec gaps remain unqualified.
+
+### 2026-10-21 — shared 4:4:4 MBAFF B partition/weight and retained-direct qualification
+
+Two owned acceptance matrices added 5136 scenarios without requiring a decoder
+change:
+
+- `avc_444_mbaff_b_partitions` covers 3984 I/I/B/P movies: all 35 B partition
+  table variants (18 macroblock two-partition types, 13 uniform subpartition
+  types and four mixed patterns), CAVLC and CABAC init 0/1/2, four MBAFF pair
+  topologies, 8/8, 10/12 and 14/8 component depths, signed fractional MVDs,
+  per-group selected-field references and ASO. Every variant has plain
+  prediction; 16 patterns additionally exercise explicit component weighting,
+  implicit frame weighting and implicit per-cell selected-field POC weighting.
+  Independent list grids, spatial-direct neighbour freezing, six-tap sampling
+  of every full-resolution component, uni/bi weight arithmetic and clipping
+  produce the goldens. Witnesses distinguish picture-minimum POC substitution
+  and ignoring opposite-field reference indices.
+- `avc_444_mbaff_b_temporal_partitions` covers 1152 I/P/B/P movies with direct
+  subblocks mixed with explicit L0/L1/bi subpartitions. A future P reference
+  carries signed nonzero fractional motion in the opposite pair topology;
+  the scalar author converts vertical units before temporal POC scaling and
+  predicts explicit cells in the resulting shared neighbour grid. Three
+  direct/mixed patterns combine both signs, all entropy/precision/topology
+  settings and plain/explicit/implicit/selected-field weights. Zeroing retained
+  direct motion must change every case. Field-versus-picture POC, opposite
+  reference POC and clipping witnesses are also nonzero.
+
+Tests assert actual PPS weighting/bottom-POC flags, slice types, ASO addresses,
+POC deltas, CABAC init and temporal-direct flags. Every coded native component
+sample and cropped normalized software-MP4 byte is checked, with presentation
+ordering, exact timestamps/durations, reset, rewind and a reference echo. No
+FFmpeg, external codec, network or private media/parameters are used in fixture
+generation or ordinary test execution. Future non-IDR PCM intra headers and
+per-cell selected references are explicit optional author parameters; default
+arguments preserve earlier streams.
+
+Both new suites passed. Four prior shared-P/shared-B and 4:2:2 B partition/
+weight suites passed. Six generators reproduced 60994 artifacts byte-identically:
+27890 new B partition, 8066 new temporal-subpartition, 5881 prior 4:2:2 B
+partition, 8065 prior 4:2:2 weighted partition, 6050 prior shared P and 5042
+prior shared B artifacts. This is pixel acceptance of the stated combinations,
+not universal H.264 or whole-codec completion. These B matrices carry no
+residuals and disable deblocking; partition/residual/scaling/filter interactions
+and broader codec gaps remain unqualified.
+
+### 2026-10-21 — retained shared 4:4:4 MBAFF B residual/scaling/filter interactions
+
+`avc_444_mbaff_b_residual` adds 8640 owned I/I/B/P movies, all accepted through
+the native decoder and software MP4 reader. 4608 cases carry AC4 in eight B
+partition patterns; 4032 carry AC8 in seven legally eligible patterns. Both
+cover CAVLC and CABAC init 0/1/2, frame/field/columns/checker pairs, 8/8, 10/12
+and 14/8 depths, all/Cb-only/Cr-only/per-block-checker residual activity and
+filter IDC 0/1/2. QP offsets, explicit prediction weights and custom twelve-list
+PPS scaling cycle across the entropy/layout/mode/depth schedule; this is not a
+full Cartesian product of those extra selectors. Component inter scaling
+weights differ for both transform sizes.
+
+The independent scalar author resolves separate list/motion/ref grids and
+fractional full-resolution predictions, applies component precision/clipping,
+mapped QPs, inverse transforms and frame/field scans, then traverses physical
+MBAFF edges. bS uses actual per-component block residuals, mixed frame/field
+rules, selected reference identity, two-list/swapped equivalence and field
+vertical thresholds. Witnesses distinguish omitted residuals, omitted filtering,
+false common component flags, ignored motion strengths/slice boundaries and
+flat scaling. Sparse activity changes within a macroblock and component, so
+CBF/nC histories must track actual blocks rather than one plane-wide flag.
+
+B is an actual reference picture; the final P has frame_num 3 and predicts
+that B without residual or filtering. Its samples must equal the filtered B,
+qualifying DPB publication too. Tests assert PPS scaling/QP/weight flags,
+reference marking, ASO, deblocking IDC and frame numbering; compare every coded
+native sample and cropped normalized MP4 byte; and repeat reset/rewind with
+presentation ordering and exact 40 ms clocks. The first diagnostic author
+omitted adaptive_ref_pic_marking_mode_flag after changing B nal_ref_idc from
+zero. That unrelated slice-header failure was corrected in the author before
+acceptance; it was not a decoder bug or a passing refusal test. No decoder
+changes were needed for the resulting matrix.
+
+Validation: the ordinary full 8640-case suite passed; an earlier 4608-case AC4
+prefix diagnostic also passed. Four affected prior integration suites passed
+(shared component filtering, shared B partitions, separate-plane MBAFF 8x8 and
+4:2:2 B partitions). Six generators reproduced 112834 artifacts byte-identically:
+60482 new B-residual artifacts, 6050 shared P, 27890 shared B partition, 2161
+separate-plane, 10370 prior component-filter and 5881 prior 4:2:2 B partition
+artifacts. A bounded preparation cache accelerates scalar regeneration while
+preserving all bytes. Generation and ordinary tests need no FFmpeg, external
+codec, network or private media/parameters.
+
+This qualifies the saved combinations, not universal codec/profile conformance,
+arbitrary scaling matrices/DPB histories, all temporal-direct/residual/filter
+interactions, or a 60-fps gate. The overall no-codec-gaps goal remains open.
+
+### 2026-10-21 — active in-band layered HEVC MP4 dispatch and empty-hvcC bootstrap
+
+The separate LayeredDecoder/LayeredMp4VideoReader already reconstruct nonbase
+pictures; the base HevcDecoder guard is intentional. A real common-entry gap
+was confirmed instead: `Mp4VideoReader` chose the decoder from the first recorded
+VPS, ignoring an active layered VPS delivered before the first picture in hev1.
+The original synthetic `pcm-independent-base-inline` failed on its first read
+with `multilayer or external-base HEVC VPS is not implemented`, while explicit
+layered-reader controls decoded the same entropy and matched original pixels.
+
+Common dispatch now resolves the first picture's received PPS -> SPS -> VPS
+chain across configuration and in-band prefix samples. It stops at that first
+coded picture, ignores layer 63, bounds parameter/packet/candidate storage, and
+invalidates the demux position before ordinary source construction. A complete
+single-VPS hvc1 keeps its existing no-packet-scan open path; a counted-read
+regression observes zero coded-payload bytes until the first read_frame call.
+The layered source can now begin without a recorded VPS and obtain its initial
+selection snapshot from received parameters activated by a picture. No NAL
+layer rewriting or relaxation of the base decoder's guard is involved.
+
+25 saved short hev1 regressions cover independent/dependent layers, dependent
+segments, separate colour planes and inter prediction with base-only recorded
+parameters replaced inline or in a metadata sample, empty hvcC with either
+layout, and an unselected first recorded VPS preceding the active one. Tests
+check actual configuration preconditions, displayed layer 3, complete packed
+pixels against original owned YUV, original sample IDs/PTS (including metadata
+prefix offsets), 40 ms durations, EOF, rewind and seek. The muxer's optional
+empty_configuration switch is explicit and requires hev1; ordinary defaults
+remain byte-identical. The MP4 Registration Authority defines hev1 as carrying
+parameter sets in the sample entry or samples:
+https://mp4ra.org/registered-types/codecs
+
+Validation: all 143 selected HEVC integration suites passed (455 tests, none
+ignored), followed by the updated three-test regression including the counted
+hvc1-open control. The no-default-features/player build check passed offline.
+All 26 new artifacts regenerated byte-identically; five prior owned layered
+movies also remuxed byte-identically with default arguments. Generation and
+ordinary tests need no FFmpeg, external codec, network or private media.
+This fixes initial dispatch/bootstrap; arbitrary later switching between base
+and layered output-set policies, extractor sample entries and overall codec
+completion are not claimed by these witnesses.
+
+
+## HEVC base hev1 incomplete configuration bootstrap, 2026-10-21
+
+Native single-layer hev1 now accepts an initially empty or partial hvcC bank.
+The strict from_configuration API still requires a complete SPS/PPS pair;
+from_inband_configuration opts into received-parameter bootstrap, and
+try_parameters exposes readiness without a metadata-query panic. Received PPS
+can precede its missing SPS, including PPS-only recorded configurations and
+reverse-order parameter-only samples. Reset restores the initial partial bank.
+The player selects this mode only for hev1 and avoids initializing its hardware
+path before a parameter pair exists.
+
+The owned empty-inline witness previously failed at open with
+`HEVC configuration has no parameter-set pair`. Six original coded seeds across
+eight layouts now provide 48 acceptance movies. Reader and direct-decoder tests
+compare complete Y/Cb/Cr samples, source sample IDs, PTS, 40 ms durations, EOF,
+rewind, sync seek, metadata readiness and reset. The six original configured
+seeds remain strict API controls. Separate unresolved-PPS reception checks the
+aggregate storage budget and reset-required error state; it is a refusal test,
+not an accepted malformed playback claim. Current, reset and staged PPS banks
+are included in the owned reception-storage accounting.
+
+Generation is separate from tests and uses no FFmpeg, external codec, network
+or private input. All 51 bootstrap artifacts and 26 prior layered artifacts
+regenerated byte-identically; six original seed movies remuxed byte-identically
+with default mux arguments. The focused four-test suite passed; HEVC library
+unit validation passed 346 tests with one ignored explicit fixture generator.
+All 144 top-level HEVC integration targets passed: 460 tests, none ignored.
+The offline no-default-features/player build check also passed. Scoped
+diff whitespace validation passed.
+
+This closes initial base-layer hev1 bootstrap, not universal codec coverage.
+Arbitrary replacement ordering against an incompatible already recorded SPS
+with the same ID remains unqualified.
+
+
+## HEVC same-ID PPS/SPS replacement within a packet prefix, 2026-10-21
+
+PPS reception now checks identifiers immediately and resolves full contextual
+syntax against the completed staged parameter bank at the end of that packet,
+before publication or picture decoding. A PPS preceding its replacement SPS
+must not be interpreted using the stale SPS with the same ID. Existing final
+binding, slice-order, random-access, raw-identity/no-update and error/reset
+checks remain in force.
+
+The first candidate used a tiled PPS that happened to remain valid with the
+old SPS; it was rejected as evidence for this failure. The final owned witness
+transitions from existing PCM RExt pictures to existing SCC ACT 4:4:4 pictures.
+Parser controls prove the new PPS is invalid with the old SPS but valid with
+the received SPS. Before this fix, VPS/PPS/SPS inline reception failed with
+`HEVC ACT requires interleaved 4:4:4`; ordinary VPS/SPS/PPS reception decoded
+the same entropy successfully. Six saved acceptance movies cover VPS/SPS/PPS,
+VPS/PPS/SPS and PPS/VPS/SPS in an inline or combined metadata prefix. Changed
+VPS still precedes the new SPS, following H.265 7.4.2.4.2 ordering constraints:
+https://www.itu.int/rec/T-REC-H.265-202601-I/en
+
+Reader acceptance checks every old/new Y/Cb/Cr sample against the original
+owned oracles, sample IDs, PTS, exact duration (including the 80 ms last old
+picture across a metadata sample), EOF, rewind and seek to the new IDR. Both
+public native constructors decode both sequences twice with reset and verify
+that slice-header queries are side-effect free. Seven generator artifacts
+regenerate byte-identically; no FFmpeg, external codec, network or private
+input is needed. Four focused suites passed all 17 tests, including malformed
+updates, raw parameter identity, no-update guidance and incomplete bootstrap.
+
+This closes same-packet contextual replacement. Arbitrary pending replacement
+across separate packets remains unqualified, and overall codec completeness
+is not established by these witnesses.
+
+Final validation for this change: HEVC library tests passed 346 with one ignored
+explicit fixture generator. All 145 selected HEVC integration targets passed
+462 tests with none ignored. The offline no-default-features/player build
+check passed. Scoped diff whitespace validation passed.
+
+
+## AVC same-ID PPS/SPS reception and avc3 seek parameter history, 2026-10-21
+
+AVC PPS reception now validates the NAL/header/size and both IDs independently
+of SPS-dependent syntax, then performs full binding against the completed
+staged packet bank before publishing updates. This avoids parsing a new PPS
+against stale same-ID chroma geometry: 4:4:4 with 8x8 transforms signals twelve
+scaling-list-presence flags, whereas the preceding monochrome SPS implies eight.
+Shared PPS parsing retains the original header, size, RBSP, ID and full-syntax
+checks. H.264 7.4.1.2.1 defines contextual constraints on active parameter sets:
+https://www.itu.int/rec/T-REC-H.264-202408-I/en
+
+The owned direct-decoder baseline failed at the first new picture in
+`y8-c8-pps-sps-inline` with `AVC in-band PPS has no valid SPS`. Parser controls
+prove the PPS is valid only with the new SPS; fully configured old/new controls
+match independent PCM oracles. A separate reader baseline found that seek to
+the new IDR in `y8-c8-sps-pps-prefix` failed with `invalid intra macroblock type`
+after otherwise successful sequential playback: reset lost parameters received
+in the metadata sample preceding that keyframe.
+
+AvcDecoder now exposes reset-only parameter priming without picture decoding,
+with a per-packet budget check and failed-state/reset contract. Software MP4
+avc3 seek recovers preceding parameter history using this API, sharing the
+existing HEVC preroll mechanism; avc1 keeps its prior seek path. The priming
+scan does not decode or retain prior pictures. Arbitrary cross-packet pending
+replacement and hardware transitions are not qualified by this change.
+
+Twelve authored movies cover Y/C depths 8/8, 10/12 and 14/8, two prefix orders
+and inline/combined metadata layouts, with actual monochrome pictures before
+the 4:4:4 IDR transition. Four new tests verify all native component samples,
+component depths, sample IDs, PTS, exact intervals, EOF, seek, rewind, direct
+reset, priming lifecycle, deferred full-syntax refusal and recovery. The single
+truncated PPS artifact is a refusal control, not malformed-playback acceptance.
+All 26 generated artifacts regenerate byte-identically. Generation and tests
+need no FFmpeg, external codec, network or private media. The four focused
+AVC/HEVC suites passed 13 tests.
+
+Final validation: 219 AVC library tests in fvid-codecs and eight shared AVC
+library tests in fvid-media passed with none ignored. All 277 top-level AVC/HEVC
+integration targets passed 834 tests with none ignored. The offline
+no-default-features/player build check and scoped diff whitespace check passed.
+These results qualify the stated changes, not complete support for all codecs.
+
+
+## Matroska AVC/HEVC parameter history across random access, 2026-10-21
+
+Native software Matroska seek now restores received AVC/HEVC parameters from
+preceding blocks of the selected video track after reset and before decoding
+the chosen keyframe. It primes only parameter syntax, using one reused packet
+buffer with a restored-payload budget check before reading. Other tracks are
+skipped. A failed parameter replay leaves the reader requiring rewind, rather
+than continuing with partially restored state. VP9/AV1/FFV1 and hardware seek
+paths do not enter this parameter replay branch.
+
+Two original synthetic baseline failures were isolated from successful full
+sequential/rewind controls: AVC `avc-y8-c8-sps-pps-prefix.mkv` failed after seek
+with `invalid intra macroblock type`, and HEVC `hevc-32-33-34-prefix.mkv` failed
+with `missing HEVC header alignment bit`. Both lost parameters received before
+the new IDR when resetting their decoder. Inline replacement controls decoded
+the same coded pictures correctly.
+
+36 saved acceptance movies wrap the existing 12 AVC and six HEVC parameter
+layouts, with and without an interleaved subtitle track carrying non-video
+bytes. Separate clusters exercise lazy scanning. Tests assert the selected
+codec, exact keyframe index, parameter-only blocks and actual companion track,
+then compare every packed component sample, depth, geometry, time interval,
+EOF and rewind. Fresh seek, seek after old-frame playback and repeated seek
+must reproduce every new-sequence frame and interval.
+
+Four separate damaged-stream controls distinguish refusal from acceptance:
+header-only old VCL pictures refuse sequential playback but permit seek to an
+independent new IDR, proving no old picture entropy is decoded during priming;
+PPS bodies missing contextual syntax must instead refuse seek, poison further
+reading until rewind, restore the initial valid old frame on rewind and also
+refuse sequential reception of the malformed update. Neither control is a claim
+of full playback acceptance for a damaged stream.
+
+The 60 generator artifacts regenerate byte-identically. Six focused new tests
+and six existing AVC/HEVC parameter tests pass (12 tests across three suites).
+Generation and ordinary tests need no FFmpeg, external codec, network or
+private input. Hardware parameter transitions, CodecState updates, arbitrary
+cross-packet pending replacement and full codec completeness remain unqualified.
+
+The first expanded no-player run completed 41 targets (114 tests) before finding
+an obsolete expectation in native_matroska_mux's AAC padding test. Twelve
+feature-gated targets in that run contained no tests, so that run is not the
+final playback gate. The AAC assertion expected the first audible sample to
+move to zero after negative DiscardPadding; the current interval API explicitly
+addresses the container clock from zero, and the existing player padding
+fixture `start.mkv` places its first audible packet at 10 ms. The output had
+128 leading silent samples followed by the exact expected original samples,
+not different reconstructed AAC content. Container Duration in the same test
+also retained that head interval.
+
+The test now asserts the zero-origin timeline exactly: head padding beyond
+CodecDelay contributes silence, remaining audible samples stay byte-identical,
+and the output sample count equals coded length minus delay and tail. It adds
+an overlapping delay=64/head=128 case; all three cases passed. PCM comparisons
+now report the first differing frame rather than dumping entire buffers. No
+AAC decoder/scheduler implementation was changed for this expectation update.
+The full selected integration set is rerun with player enabled so the actual
+feature-gated playback tests execute.
+
+
+## PCM empty endpoints and quantized sample origins, 2026-10-21
+
+Enabling the actual player tests exposed two additional PCM defects. First,
+a completely indexed valid track whose packets all trim away reported unknown
+duration rather than known zero. The duration scan now distinguishes a valid
+received packet from an audible window. Existing all-preroll acceptance and a
+new authored all-padding 60 ms VP9/PCM video verify zero duration after playback,
+rewind and seek, with no invented source packet at EOF.
+
+Second, the existing 44.1 kHz same-sample-origin and negative-sample-grid videos
+lost a useful neighbour (881 versus 882 samples, and 880 versus 881). Exact
+sample-origin recovery now recognizes only the lower/upper integer-ns
+representations of a whole sample before subtracting sample-count CodecDelay.
+Skip and presentation point use that same recovered origin. It does not round
+explicit seek floors or widen matching to a container tick. New 48 kHz same-
+sample-origin and negative-grid videos extend these literal-field witnesses;
+all 46 preroll generator artifacts regenerate byte-identically, preserving the
+39 prior non-manifest artifacts.
+
+Standalone public PCM presentation calls retain their prior signed timestamp
+and geometry behavior before indexed history has initialized a sample clock;
+indexed playback continues to use its accumulated exact coordinates. Existing
+partial-frame refusal, i64-bound timestamps, empty decoded frames and normal
+indexed PCM playback remain tested without weakening those API checks.
+
+Two older test expectations were reconciled with established clock contracts:
+the CodecDelay generator retains literal source ns fields while restoring the
+one-ns delay to zero whole samples for audible PCM points, and whole-container
+owned PCM/Opus references include leading silence where packet APIs expose only
+the timestamped audible window. Packet payload, exact sample-count, precision,
+strict seek-floor and excess-padding refusal assertions remain intact. All
+seven prior delay movies remained byte-identical; the new all-padding case
+adds a movie and empty audible oracle. The six related player suites passed
+33 tests before adding the expanded 48 kHz controls; all four expanded preroll
+tests then passed as well. Full player-enabled validation is recorded below.
+
+ALAC's older sample-clock smoke test also expected raw millisecond block times
+rather than its already implemented restored sample clock. It now independently
+checks the authored 240 ms/48 kHz stream's three frame sizes (4096, 4096, 3328),
+its literal block times (0, 85 ms, 171 ms), and exact sample presentation points
+(0, 85,333,333 ns, 170,666,666 ns). All six mixed-codec sample-clock tests pass;
+no ALAC codec implementation was changed for this expectation correction.
+The existing sample-clock fixture generator still uses legacy FFmpeg and was
+not invoked or migrated in this step; the new parameter/PCM fixtures described
+above use owned generators only. A full player-enabled run with no-fail-fast
+collects every remaining result, rather than hiding later failures behind the
+first failed target.
+
+The no-fail-fast player run also surfaced an old laced-export expectation which
+compared concatenated audible-window bytes to zero-origin container export.
+The packet-level lace oracle/timestamps and excess-padding refusals already
+passed unchanged. The f32/f64 whole-container expectation now explicitly prefixes
+the first audible sample's declared offset as silence, preserving every audible
+sample byte. It no longer incorrectly collapses a video/audio synchronization
+gap. No lacing/parser or whole-container decode implementation was changed for
+this expectation update; malformed/oversized lace controls remain refusals.
+
+Final validation after all stated fixes and contract-expectation updates: 67
+player-enabled WebM library tests passed, none ignored. All 56 selected
+Matroska/WebM/parameter/seek integration targets passed 216 tests with zero
+failures, ignored tests or empty feature-gated targets. This includes AVC/HEVC
+parameter history, VP9 long-GOP cache/seek, actual audio worker playback,
+Opus/Vorbis preroll, PCM origins/geometry/zero endpoints, lacing, AAC/ALAC/FLAC
+clocks, and native export/copy checks. The offline no-default-features/player
+build check and scoped diff whitespace check passed. The three touched owned
+generators reproduce 60 + 16 + 46 artifacts byte-identically. These gates
+qualify this milestone; the overall codec-gap objective remains open.
+
+
+## Sample-clock fixture generation without FFmpeg, 2026-10-21
+
+The six-format sample-clock generator no longer invokes FFmpeg. Native encoder
+coverage for all six formats is not available, so this change does not pretend
+to re-encode arbitrary audio natively. Instead, the original fixed nonzero
+240 ms/48 kHz tone's coded audio is preserved as independent frozen reference
+vectors, and normal generation authors fresh neutral VP9 and Matroska bytes.
+The vectors were captured before replacing the original movie files; normal
+generation never reads its own output. Encoded codec configurations and every
+original audio packet, timestamp, duration, signed padding, reference, codec
+delay and default duration are byte/field-identical after regeneration.
+
+FLAC, ALAC, MP3, MP2, stereo Vorbis and AC3 remain compressed, nonzero audio;
+none was replaced by silence or PCM. The original ALAC 4096/4096/3328 sample
+frames and coarse millisecond clocks remain explicit controls. Frozen vectors
+record the original synthetic movie hashes and coded payload/configuration
+hashes. They are synthetic reference data, never private source media or private
+parameter sets, and are independent of the generated destination movies.
+
+External reference encoding is now isolated in
+benches/generate_matroska_audio_sample_clock_reference.py. Its default output
+is ignored benchmarks/data, not the checked-in reference directory. The fixed
+reference recipe is retained, but no external reference encoding was executed
+for this migration. The helper's CLI/import path was checked with --help.
+Native audio encoding and other remaining legacy generator dependencies are
+separate unfinished work; this does not establish complete codec coverage.
+
+Three Python checks passed: saved movie hashes; byte-identical generation with
+an absent output directory, empty PATH and forbidden subprocess/network; and
+exact preservation of every audio payload/configuration/clock field for all
+six cases. All six Rust player-enabled sample-clock tests passed. The Rust
+checks now also assert every pixel of all twelve owned neutral video pictures,
+all 20 ms intervals, finite decoded PCM and substantial nonzero signal, while
+retaining exact clock, rewind and worker comparisons. There is no loss of the
+original codec or nonzero-audio coverage. Scoped diff whitespace checks passed.
+
+
+## HEVC received HDR SEI restoration during seek, 2026-10-21
+
+HevcDecoder::prime_parameters now restores received static HDR as well as
+VPS/SPS/PPS. Observation runs only after the complete packet's parameter/header
+validation succeeds, so an invalid PPS cannot publish preceding HDR changes.
+No old pictures or references are decoded/retained. Reset still restores its
+recorded configuration HDR snapshot, not a later received override.
+
+The baseline direct priming call ignored valid mastering-volume SEI. The saved
+prefix-hvc1.mp4 and prefix.mkv controls decoded exact original pixels and HDR
+through sequential playback/rewind, then lost mastering display on seek to
+cycle 2. Inline HDR controls decoded the same pixels correctly. The fix restores
+all mastering primaries/white, luminances, MaxCLL and MaxFALL at the first output
+after the selected entry point, including split mastering/light packets.
+
+Nine acceptance movies cover hvc1, hev1 and Matroska in inline, combined-prefix
+and split-prefix layouts. Each of three independent coded sequences supplies
+a complete unchanged HDR declaration before its first picture, following
+H.265 D.3.28/D.3.35 CLVS scope rather than changing static values mid-sequence:
+https://www.itu.int/rec/T-REC-H.265-202601-I/en
+Tests check all native pixels, MP4 sample indices, sequential/rewind EOF,
+forward/backward/repeated seek and first-output HDR. Manifest preconditions
+independently require all nine cases and the exact metadata-only packet indices.
+A configured-hvcC control proves recorded HDR survives reset after override.
+A valid-HDR-plus-incomplete-PPS packet separately refuses priming, preserves old
+HDR atomically and requires reset; it is not damaged-video acceptance.
+
+All 21 generated artifacts regenerate byte-identically using only original
+owned synthetic coded samples/YUV and authored HDR payloads. No FFmpeg, external
+codec, network or private input is needed. Five focused suites passed 19 tests;
+the updated recorded-HDR reset control passed the three-test HDR suite too.
+Per-output-frame metadata snapshots during lookahead, layered/hardware HDR
+policy and other SEI state remain unqualified by this milestone.
+
+Final validation: all 147 selected HEVC/Matroska parameter integration targets
+passed 471 tests with none ignored. HEVC library validation passed 346 tests
+with one ignored explicit fixture generator. The final three-test HDR suite
+also passed after adding manifest coverage/index preconditions. The offline
+no-default-features/player build check and scoped diff whitespace validation
+passed. All 21 HDR artifacts regenerated byte-identically. This closes received
+static-HDR restoration at seek entry points; it does not prove overall codec
+completion or the explicitly unqualified metadata scopes above.
+
+### Presented-frame HDR survives decoder lookahead
+
+The nine owned `hevc-hdr-seek` movies now verify full mastering/light metadata
+on every output picture, alongside exact pixels, sequential playback, rewind
+and repeated forward/backward seeks. The baseline failed both inline-hvc1.mp4
+and inline.mkv at sequence A picture 2: MaxCLL was already 1400 from sequence B
+instead of the displayed picture's 1000. This is an acceptance regression, not
+a refusal test, and ordinary execution needs neither FFmpeg nor network.
+
+MP4 and Matroska retain an HDR snapshot beside each queued decoded frame and
+expose the last presented snapshot through `bitstream_hdr()`. Rewind/seek clear
+the presented snapshot. Before presentation starts, available decoder/open
+metadata remains accessible. Incremental queued HDR storage is charged to the
+existing reordering budget; the public MP4 `VideoFrame` structure is unchanged.
+The focused three-test HDR suite passes. Hardware, layered HDR, all AV1 dynamic
+metadata semantics and other SEI state are not qualified by this milestone.
+
+Validation: 56 related integration targets passed 216 tests with none ignored.
+MP4 and Matroska reader unit filters passed 6 and 12 tests respectively.
+The final three-test HDR suite also passes repeated EOF metadata assertions.
+The player-feature integration builds and scoped whitespace checks pass.
+This closes the reproduced software HEVC HDR lookahead failure, not universal
+codec coverage.
+
+### AV1 received HDR overrides its opening snapshot
+
+A new short owned AV1 reproducer (`av1-hdr-sequence`) demonstrates an independent
+reader bug: direct native decoding receives MaxCLL/MaxFALL 1000/400, 1400/500 and
+750/250 correctly, but MP4/WebM kept reporting the opening 1000/400 on picture 1.
+`decoder_hdr()` merged the cached opening metadata over the live decoder state.
+It now uses live metadata first and fills unnamed halves from the opening seed.
+This complements the per-presented-frame snapshot fix; queue snapshots alone
+could not fix a reader that always captured the initial light statement.
+
+Three acceptance tests check direct reception and both container readers with
+exact original pixels, sample indices for MP4, sequential replay, EOF, rewind
+and repeated seek replay. The six generated artifacts use only an existing
+owned synthetic AV1 key picture/configuration plus authored metadata. Generation
+is separate from tests and regenerates byte-identically with empty PATH and
+subprocess/socket creation denied. No FFmpeg/network/private inputs are needed.
+The shared AV1 container wrapper accepts an optional saved configuration so this
+generator does not need to invoke even the native configuration-field tool.
+
+AV1 metadata scope reference:
+https://aomediacodec.github.io/av1-spec/#general-metadata-obu-semantics
+This milestone does not qualify HDR10+, hardware or layered metadata policy,
+all metadata types, or overall codec completion.
+
+Validation: all 71 selected AV1/HEVC HDR integration targets passed 137 tests,
+none ignored. MP4/WebM reader unit filters passed 6/12 tests. Offline player
+feature builds and scoped whitespace checks pass. All six generated artifacts
+were compared byte-for-byte after regeneration with external tools/network
+forbidden. Overall codec coverage remains incomplete and unproven.
+
+### AV1 explicit zero content light is received state
+
+The `av1-hdr-sequence` generator now also writes a `zero-` variant with
+1000/400, 0/0 and 750/250 CLL statements before three independent owned key
+pictures. Baseline direct decoding, MP4 and WebM all reported the old 1000/400
+for picture 1 rather than the explicitly received 0/0 statement. The three
+playback tests now pass with exact original pixels and seek/rewind/EOF checks.
+
+AV1 metadata application distinguishes a received CLL payload from absence:
+well-formed zero CLL replaces old light values, while unknown/absent metadata
+does not clear the last statement. The decoder retains CLL presence alongside
+its initial reset snapshot and offers presence-aware opening fallback. Both
+container readers use that fallback; packet and open-signal scanners use the
+same received-block application. Generic HdrMetadata merging in other codecs
+is unchanged. Recorded zero CLL/reset, absent padding, missing-state fallback
+and both scanner orders have explicit controls. All eleven generated artifacts
+regenerate byte-identically with PATH empty and subprocess/network denied.
+This qualifies AV1 received static CLL handling, not all codec/HDR behavior.
+
+Validation: all 72 selected AV1/HEVC HDR integration targets passed 141 tests
+with none ignored. Focused AV1 metadata/decoder and MP4/WebM reader library
+filters passed 11/13/6/12 tests respectively. Offline player-feature builds,
+all eleven fixture regeneration comparisons and scoped whitespace checks pass.
+This closes the reproduced explicit-zero CLL state failure; overall codec
+completion remains unproven.
+
+### HEVC received zero content light across CLVS boundaries
+
+The new owned `hevc-hdr-zero` witness mirrors the nine software HDR seek layouts
+with explicit CLL 0/0 in the second independent coded sequence. Baseline decoder
+priming, MP4 and Matroska all preserved MaxCLL 1000 where 0 was transmitted.
+Three acceptance regressions now pass every exact picture/mastering/light value,
+sequential/rewind EOF, repeated seek and the existing atomic parameter-error
+control. A fourth control checks observation, absence-versus-zero fallback and
+an explicit zero CLL retained in the hvcC reset snapshot.
+
+SEI parsing retains CLL receipt and copies valid zero payloads independently of
+mastering display. Decoder configuration, observation and normal decoding all
+use that received-state application. A malformed outer SEI cannot partially
+commit the new statement. Reset restores both initial numeric HDR and receipt
+state; Matroska opening fallback respects explicit zero light. Generic HDR merge
+semantics in other codecs are unchanged.
+
+All 21 artifacts regenerate byte-identically with PATH empty and subprocess/
+network forbidden. Generation is separate from ordinary tests, with no private
+media or FFmpeg dependency. Fixtures preserve constant declarations within each
+CLVS, following ITU-T H.274 8.10.2:
+https://www.itu.int/rec/T-REC-H.274-202309-I/en
+Observation-path tests do not qualify hardware playback, layered metadata or
+all HDR tools. Overall codec completion remains unproven.
+
+Validation: all 150 selected HEVC/AV1 HDR/Matroska parameter integration
+targets passed 485 tests, none ignored. HEVC library validation passed 346
+tests with one ignored explicit long-term fixture generator. MP4/WebM reader
+library filters passed 6/12 tests. Offline player-feature builds and scoped
+whitespace checks pass. Both original and zero generators reproduce all 21
+artifacts in their own directories without external tools/network. Overall
+codec completion remains unproven.
+
+### Native XM ordinary volume slide Axy
+
+Source inspection found a real native-rendering gap: XM Axy was counted as an
+ignored effect. The owned `xm-volume-slide` acceptance witness uses ten authored
+scores and independent speed-1 Cxx tick scores. After correcting unequal policy
+release tails in the reproducer, the baseline has equal output lengths and fails
+exact PCM comparison on the first downward slide at 11025 Hz mono.
+
+Axy now executes on ticks 1..speed-1. Each voice retains its last executed
+nonzero parameter for A00; speed-1 rows do not update that memory. The upper
+nibble wins if both are nonzero, and volume saturates at 0/64. Note/instrument
+triggers retain per-channel effect memory; reset clears it. Tick deadlines use
+the existing absolute sample grid and endpoint iteration, preserving delayed
+key-off/cut scheduling without per-sample cell scans or extra tick allocations.
+Reference semantics:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+All ten cases match every independent-control PCM byte at 11025/44100 Hz,
+mono/stereo, with no ignored features. Cases include direction, clamping,
+conflicting nibbles, A00, initial empty memory, blank rows, retrigger, per-channel
+memory and speed-1 behavior. Twenty-two artifacts regenerate byte-identically
+with empty PATH and denied subprocess/network; ordinary tests require no FFmpeg
+or fixture generation. This closes ordinary Axy, not volume-column slides,
+portamento/vibrato combinations, envelopes or complete XM/codec coverage.
+
+Validation: all 32 selected XM integration targets passed 74 tests with none
+ignored, including the new independent-control audio-worker rewind/seek/EOF
+test. Existing E6x literal traces/expanded PCM and key-off/cut worker regressions
+also pass after the shared tick scheduler change. The XM library filter passed
+35 tests. Offline player-feature compilation, all 22 artifact regeneration
+comparisons and scoped whitespace checks pass. Overall codec completion remains
+unproven.
+
+### Native XM volume-column ordinary slides
+
+Volume-column 6x/7x was still counted as ignored. A new owned fifteen-case
+acceptance witness (`xm-column-volume-slide`) reproduces different PCM bytes
+with equal lengths for column-down at 11025 Hz mono. The actual audio worker
+also differed in the first packet. Independent controls use literal speed-1
+Cxx tick scores, with equalized end-of-score release policy tails.
+
+Column slides now run on nonzero ticks before ordinary effects, saturate at
+0/64 and never read/write A00 memory. Zero column arguments mean zero change.
+The shared tick scheduler recognizes column slides as well as Axy. Existing
+8x/9x fine slides remain tick-zero behavior and have explicit acceptance controls.
+Fifteen cases cover directions, zero/no-memory, clamping, fine commands,
+Cxx/column order, column/Axy clipping order, delayed cut/key-off interactions,
+A00-memory independence, speed=1 and independent channels. The first full test
+matches every PCM byte at 11025/44100 Hz in mono/stereo, with no ignored features.
+Reference semantics: FT2 volume-column dispatch precedes ordinary-effect dispatch:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+The worker expectation uses exact second-row source boundaries, including the
+20-ms speed=1 row rather than assuming every row spans 80 ms. Other scores use
+80-ms boundaries. This follows existing XM row-level seek semantics and avoids
+mistaking an incorrect test packet boundary for a decoding failure. Expected
+PCM still comes solely from independent Cxx control scores. All 32 new and 22
+original Axy artifacts regenerate byte-identically with external tools/network
+denied. Other XM effects/envelopes and overall codec completion remain open.
+
+Validation: all 33 XM integration targets passed 76 tests with none ignored,
+including independent-control worker sequential/rewind/second-row seek/EOF
+coverage. The XM library filter passed 35 tests. Offline player-feature builds,
+32 new plus 22 original artifact regeneration comparisons and scoped whitespace
+checks passed. Overall codec completion remains unproven.
+
+### Native XM main-column fine volume EAx/EBx
+
+Source inspection found EAx/EBx counted as ignored. The new owned fourteen-case
+`xm-fine-volume-slide` witness reproduces unequal PCM with equal lengths for
+up-memory at 11025 Hz mono, and an equal-size first-packet PCM mismatch through
+the actual audio worker. Independent controls expand literal tick volumes to
+speed-1 Cxx scores, with equalized explicit release tails.
+
+EAx/EBx now execute once on tick zero, after the volume column. Each channel
+retains separate up/down argument memories; zero arguments recall only the same
+direction. Axy and column commands cannot overwrite those memories. Clamping is
+0/64. Note triggers retain effect memory; full decoder reset clears it. Speed=1
+still executes/stores fine effects, unlike ordinary Axy's nonzero-tick execution.
+Reference dispatch and fineVolSlideUp/fineVolFineDown semantics:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+All fourteen cases match every independent Cxx-control PCM byte at 11025/44100
+Hz, mono/stereo, with no ignored features. Controls cover direction-specific
+memory, empty memory, saturation, clipped column/fine order, later column ticks,
+A00 independence, column fine commands not storing main fine memory, retrigger,
+channel locality and speed=1. The focused new/ordinary/column suites also pass
+actual-worker sequential, rewind, second-row seek and EOF comparisons. All 30
+artifacts regenerate byte-identically with PATH empty and external execution /
+network denied. This closes EAx/EBx, not envelopes, all tracker effects, absolute
+FT2 mixer equivalence or overall codec completion.
+
+Validation: all 34 XM integration targets passed 78 tests with none ignored,
+including ordinary/column/fine slide independent PCM and actual audio-worker
+rewind/seek/EOF acceptance. The XM library filter passed 35 tests. Offline
+player-feature builds, all 30 fixture regeneration comparisons and scoped
+whitespace checks passed. Overall codec completion remains unproven.
+
+### Native XM global volume slide Hxy
+
+Hxy was counted as ignored, and the mixer cached global gain for a whole row.
+The new sixteen-score owned witness `xm-global-volume-slide` proves the missing
+behavior through different equal-length PCM for down at 11025 Hz mono and an
+equal-size first-packet mismatch in the actual audio worker. Independent control
+scores state literal Gxx global volumes at each speed-1 tick; they do not use the
+Hxy implementation to calculate expected levels. Common explicit release rows
+avoid unrelated policy-tail timing differences.
+
+Hxy now executes on nonzero ticks and retains per-channel H00 memory independently
+of Axy. Gain is refreshed after each complete tick before mixing more samples.
+High nibble wins when both are nonzero; each channel immediately updates/clamps
+the shared volume in channel order. Two opposite clipping-order controls prove
+this cannot be replaced by summing signed channel deltas. Silent channels still
+execute global effects. Speed=1 executes no H tick and does not update memory;
+Gxx changes gain without clearing H00 memory. Reset clears all channel memories
+and restores the initial global volume.
+Reference: FT2 globalVolSlide and channel dispatch:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+All sixteen cases match every independent Gxx-control PCM byte at 11025/44100
+Hz, mono/stereo, with no ignored features. Worker sequential/rewind/second-row
+seek/EOF comparisons also pass. All 34 artifacts regenerate byte-identically
+with PATH empty and external execution/network denied. Original 22 Axy, 32
+column and 30 fine artifacts remain byte-identical with the wrapper's default
+Cxx mode. This closes Hxy, not envelopes, all effects or complete codec coverage.
+
+Two added controls explicitly qualify initial empty H00 after rewind despite a
+later stored H02, and global-zero muting followed by H10 preserving sample phase
+against literal G00/G01/G02/G03 tick controls.
+
+Validation: all 35 XM integration targets passed 80 tests with none ignored.
+After adding initial-H00 rewind and global-zero phase controls, the updated
+sixteen-case Hxy suite again passed both direct and worker tests. The XM library
+filter passed 35 tests. Offline player-feature builds, all 34 final global-slide
+artifact comparisons and scoped whitespace checks passed. Overall codec
+completion remains unproven.
+
+### Native XM panning slides Pxy and volume-column Dx/Ex
+
+Both paths were counted as ignored. Separate authored acceptance tests reproduce
+P-left and column-left PCM mismatches at 11025 Hz stereo with equal lengths;
+the actual audio worker also differs in its first equal-size packet. Twenty-four
+scores use independent literal 8xx placements at speed-1 ticks, fixed channel
+volumes and equalized explicit release tails, not the slide code for expected
+positions. The companion VP9/PCM video is owned synthetic material.
+
+Pxy now executes on nonzero ticks with channel-local P00 memory, separate from
+Axy and column effects. The high nibble moves right and takes priority; low moves
+left, saturating at 0/255. Dx/Ex column slides execute first without effect
+memory. Explicit compatibility handling preserves FT2's D0 byte-wrap quirk
+(jump left) and distinguishes E0 (no change). Both directions, clipping order,
+reset/empty memory, set-pan retaining memory, speed=1, retrigger, silent-channel
+memory, independent channels, changed-direction memory, Cx tick-zero ordering
+and Axy independence have literal controls. Reference functions panningSlide,
+v_PanSlideLeft/Right and dispatch:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+All twenty-four cases match every independent 8xx PCM byte at 11025/44100 Hz,
+stereo/mono, with no ignored features. Mono preserves the unchanged dry mix.
+Worker sequential/rewind/second-row seek/EOF comparisons pass. All 50 artifacts
+regenerate byte-identically with external tools/network forbidden. This closes
+Pxy/Dx/Ex within the native XM profile, not envelopes, remaining effects,
+absolute FT2 mixer parity or overall codec completion.
+
+Validation: all 36 XM integration targets passed 83 tests with none ignored,
+including separate Pxy/Dx-Ex acceptance and actual-worker rewind/seek/EOF.
+The XM library filter passed 35 tests. Offline player-feature builds, all 50
+artifact regeneration comparisons and scoped whitespace checks passed. Overall
+codec completion remains unproven.
+
+### Native XM E9x sample retrigger
+
+E9x was counted as ignored. The owned `xm-retrigger` witness reproduces an
+every-tick PCM mismatch at 11025 Hz mono with equal lengths, plus a first equal-
+size packet mismatch through the actual audio worker. Independent controls state
+literal note/hold events per speed-1 tick rather than computing them through
+E9x. Common explicit release rows prevent unrelated tail-length differences.
+
+The decoder retains an unmapped note number. E91..E9F execute on nonzero ticks
+that are multiples of the low nibble; E90 restarts only on tick zero, without
+interval memory, and explicit new-note/key-off handling is preserved. Empty
+history does not create a phantom note. Repeats use the existing note-trigger
+path to reselect the current instrument/keymap/pitch and reset position/direction,
+without restoring channel volume/pan or reapplying previous sample offsets.
+The regular tick schedule now covers repeats as well as slides; no note-trigger
+or cell scan is added per PCM sample. Full reset clears remembered notes.
+Reference: FT2 retrigNote, getNewNote and triggerNote:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+Twenty-two scores cover intervals, tick-zero semantics, empty history, speed=1,
+volume/pan retention, offset reset, unlooped revival, ping-pong reset, independent
+channels, key-off, instrument-only commands and new pitch. Two instrument-
+selection cases use an owned duplicate instrument with relative note +12 so a
+phase-only implementation cannot match the explicit control notes. The tests
+require every PCM byte at 11025/44100 Hz, mono/stereo, no ignored features, and
+actual-worker sequential/rewind/second-row seek/EOF equivalence. All 46 artifacts
+regenerate byte-identically with external tools/network forbidden. Original
+volume and panning artifacts remain byte-identical after adding the optional
+literal-note control callback. Envelopes, all effects, absolute FT2 mixer parity
+and overall codec completion remain unqualified.
+
+Validation: all 37 XM integration targets passed 85 tests with none ignored,
+including the expanded twenty-two-case retrigger/direct-worker acceptance.
+The XM library filter passed 35 tests. Offline player-feature builds, all 46
+new artifact comparisons, the 168 unchanged prior slide artifacts and scoped
+whitespace checks passed. Overall codec completion remains unproven.
+
+### Native XM EDx note delay
+
+EDx was counted as ignored and new notes started immediately. The owned
+`xm-note-delay` witness demonstrates unequal PCM with equal lengths for ED2 at
+11025 Hz mono, plus the actual audio worker's first equal-size packet mismatch.
+Independent controls author complete tick cells rather than calculating delays
+through EDx. Common explicit release rows avoid unrelated policy-tail differences.
+
+Instrument selection now occurs on tick zero, while ED1..EDF defers note/sample
+defaults and direct column volume/pan to its nonzero deadline. Deadlines outside
+the row speed do not fire or carry. ED0 retains ordinary tick-zero semantics.
+A zero note at the deadline recalls the prior note; empty history stays empty.
+Ordinary column slides still precede delayed triggers. Fine column 8x/9x commands
+skipped at tick zero are not reapplied at the deadline. Unknown column behavior
+is reported once even if the delayed note never fires. Invalid selections already
+reported on tick zero are not double-counted by the deadline's normal note path.
+Reference: FT2 getNewNote early selection and noteDelay:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+Twenty-two scores qualify delays 1/2/3/15, speed boundaries, cancellation/no carry,
+ED0, old-note continuation, recall/empty history, direct volume/pan, fine-column
+inertness, ordinary-column/default ordering, key-off, independent channel timers,
+speed=1 and selection of an instrument with relative note +12. All cases match
+every PCM byte of independent literal tick-cell controls at 11025/44100 Hz in
+mono/stereo with no ignored features. Actual worker sequential/rewind/second-row
+seek/EOF acceptance also passes. All 46 artifacts regenerate byte-identically
+with PATH empty and external execution/network denied. This closes EDx in the
+native XM profile, not all effects, envelopes, absolute FT2 parity or complete
+codec coverage.
+
+Validation: all 38 XM integration targets passed 87 tests with none ignored,
+including the twenty-two-case delayed-note direct/worker acceptance and existing
+retrigger/slide/clock regressions. The XM library filter passed 35 tests. Offline
+player-feature builds, all 46 artifact regeneration comparisons and scoped
+whitespace checks passed. Overall codec completion remains unproven.
+
+### Native XM EEx held row cycles and continuation dispatch
+
+EEx was counted as ignored and did not extend the container timeline. The owned
+hold-one baseline emits 10584 bytes rather than 14112 at 11025 Hz mono, while the
+worker's second equal-size packet differs from independent literal tick controls.
+Explicit common release rows exclude an unrelated end-policy tail mismatch.
+
+Timeline layout now emits bounded basic cycles with a private parallel
+continuation directory; public TimelineRow fields are unchanged. A validated
+internal row-packet flag tells the decoder not to read notes/defaults/tick-zero
+commands again. Held cycles run nonzero-effect dispatch at local tick zero,
+including Axy/Hxy/Pxy, E9x and ED0 semantics, while E90 and fine/direct zero-tick
+commands are not replayed as new rows. Last EEx channel wins, including EE0.
+Held cycles retain originating cells while the flow cursor processes E6x and
+pattern jumps. The existing native one-pass global-order policy is preserved.
+Every held cycle counts toward the configured row limit. Timeline/directory
+allocations are fallible and duration accumulation is checked.
+Reference: FT2 patternDelay, getNextPos and tickReplayer:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+Twenty authored scores match every independent literal tick-control PCM byte
+at 11025/44100 Hz, mono/stereo, with no ignored features. They cover zero/max/
+channel priority, ordinary/fine/direct columns, held-cycle effect boundaries,
+retrigger/delay, speed=1 and E6x/same-order/next-order interactions. Worker
+sequential/rewind/second-cycle seek/EOF comparisons pass. Literal flow traces
+and exact row-budget limits qualify the continuation directory separately from
+PCM; unknown packet flags have a refusal control, not unknown-mode acceptance.
+All 42 artifacts regenerate byte-identically with external tools/network denied.
+Other flow combinations, envelopes, remaining effects, absolute FT2 mixer parity
+and overall codec completion remain unqualified.
+
+Validation: all 39 XM integration targets passed 90 tests with none ignored,
+including the twenty-case held-cycle direct/worker acceptance and explicit
+flow/flag/row-limit controls. The XM library filter passed 35 tests. Offline
+player-feature builds, all 42 artifact regeneration comparisons and scoped
+whitespace checks passed. Overall codec completion remains unproven.
+
+### Native XM Rxy multi-note retrigger and volume table
+
+Rxy was counted as ignored. The new owned volume-op-0 witness demonstrates
+unequal PCM with equal lengths at 11025 Hz mono even without a volume change:
+phase restarts were missing. The actual audio worker differs in its second
+same-size packet. Independent speed-1 tick-cell controls specify every expected
+note and volume, with common explicit release rows rather than unequal tails.
+
+Rxy now has independent low/high nibble memories, a persistent per-channel
+counter and all sixteen volume operations with 0/64 clamping. Direct column
+volume/pan overrides apply on each firing. Tick-zero stepping uses the column
+handler's result, including zero direct/fine/pan results. Instrument triggers,
+periodic E9x and EDx reset the counter, while bare E90 and new notes without an
+instrument preserve it. Held EEx cycles execute the regular dispatcher at local
+zero; speed=1 and empty argument state are covered. Note restart uses current
+instrument/keymap/pitch while retaining channel defaults and argument memories.
+Reference: FT2 multiNoteRetrig, doMultiNoteRetrig and triggerInstrument:
+https://github.com/8bitbubsy/ft2-clone/blob/master/src/ft2_replayer.c
+
+Thirty-four literal-score controls cover the volume table, separate arguments,
+row-spanning counters, result-dependent gates, counter reset distinctions,
+independent channels, initial empty state after rewind and held cycles. All
+cases match every PCM byte at 11025/44100 Hz, mono/stereo, with no ignored
+features, including actual-worker sequential/rewind/second-row seek/EOF.
+One initial volume-memory control was corrected to respect the direct-column
+override on every trigger; the production override and original missing-phase
+baseline were preserved. All 70 artifacts regenerate byte-identically with
+PATH empty and external execution/network denied. Unsupported column effects,
+envelopes, absolute FT2 mixer parity and overall codec completion remain open.
+
+Validation: all 40 XM integration targets passed 92 tests with none ignored,
+including the thirty-four-case Rxy direct/worker acceptance and existing
+retrigger/delay/held-cycle/slide regressions. The XM library filter passed 35
+tests. Offline player-feature builds, all 70 artifact regeneration comparisons
+and scoped whitespace checks passed. Overall codec completion remains unproven.
+
+### XM Txy tremor: independent tick-level acceptance
+
+Implemented Txy with per-channel parameter memory, nibble-plus-one on/off
+lengths, persistent paused phase and separate logical/output volume state.
+Normal tick zero does not execute/store Txy; held EEx cycle zero does. Blank
+rows, panning and global volume preserve the muted output. Volume writes restore
+output, while instrument/E9x/EDx phase resets differ from bare E90/Rxy/new notes
+without instruments. Existing Rxy and slides retain their volume-write ordering.
+
+The owned `xm-tremor` fixture has 24 independently authored literal Cxx control
+scores plus a separately decoded owned VP9/PCM companion. Before the fix,
+phase-11 had equal PCM lengths but different bytes, including worker packet0.
+After the fix all cases match every PCM byte at 11025/44100 Hz mono/stereo,
+with no ignored commands. The actual worker also matches sequential, rewind,
+second-row seek and EOF. All 50 artifacts regenerate byte-identically with an
+empty PATH and denied subprocess/network operations. Ordinary tests never
+regenerate fixtures or require FFmpeg. Full codec coverage remains unproven.
+
+Validation: all 41 XM integration targets passed 94 tests with none ignored;
+the XM library filter passed 35 tests. The new 24-case direct/worker acceptance,
+previous retrigger/delay/held-cycle/slide regressions, offline deterministic
+regeneration and scoped whitespace checks passed.
+
+### XM ordinary/fine/extra-fine pitch slides
+
+Implemented 1xx/2xx, E1x/E2x and X1x/X2x with six independent parameter memories,
+period mutation without sample restart, note/retrigger period reset, held-cycle
+scheduling, upward clamp and the FT2 signed downward-clamp behavior. The existing
+native linear/Amiga pitch profile and fractional finetunes are preserved.
+
+The owned `xm-pitch-slide` fixture has 42 scores with literal tick-period/phase
+reset traces, two no-slide controls and an independently decoded owned video
+companion. The reference resampler interprets no effect commands or memories.
+All PCM bytes match at 11025/44100 Hz mono/stereo; the actual audio worker matches
+the independent reference through sequential/rewind/second-row seek/EOF. The
+no-slide controls isolate equal-length PCM differences while matching a constant
+period oracle exactly. Initial oracle tail-length and signed-zero errors were
+corrected before accepting this baseline. All 46 artifacts regenerate identically
+with PATH empty and subprocess/network denied. No ordinary test generates
+fixtures or requires FFmpeg. Exact FT2 tables, other pitch effects/envelopes and
+complete codec coverage remain unqualified.
+
+Validation: all 42 XM integration targets passed 97 tests with none ignored;
+the XM library filter passed 35 tests. Its old unsupported-effect accounting
+case now uses still-unsupported tone portamento (3xx), rather than the newly
+supported ordinary slide. The new acceptance independently requires zero ignored
+effects for every fixture. Scoped whitespace and deterministic regeneration
+checks passed. Full codec completion is not established.
+
+### XM tone portamento: 3xx/5xx and volume-column Fx
+
+Implemented per-channel tone targets, direction and shared main/column speed,
+without restarting/reselecting the active sample. Target notes use active-sample
+tuning; a new instrument selects the next sample and restores active defaults.
+3xx/Fx store speed during row preparation even at speed1; 5xx shares the Axy
+volume-slide memory. Column Fx preparation takes priority over main 3xx, while
+ordinary tick execution preserves double steps and E90/ED/K00 ordering. E9/ED
+recall the original triggered note, rather than the later portamento target.
+
+The owned `xm-tone-portamento` fixture has 56 linear/Amiga scores with literal
+period/volume/reset traces and a separately decoded owned VP9/PCM companion.
+Before implementation, up-linear had equal-length but different PCM, including
+worker packet1 (28224 bytes each). All cases now match every PCM byte at
+11025/44100 Hz mono/stereo with no ignored commands. The actual worker matches
+the independent reference through sequential/rewind/second-row seek/EOF.
+Controls corrected an Amiga rounding error and the direction retained after
+arrival/ED; the implementation was not changed to fit those control mistakes.
+All 58 files regenerate byte-identically with PATH empty and denied external
+commands/network. Ordinary tests do not regenerate fixtures or require FFmpeg.
+Glissando, other pitch effects, envelopes, absolute FT2 parity and complete codec
+coverage remain open.
+
+Validation: all 43 XM integration targets passed 99 tests with none ignored;
+the XM library filter passed 35 tests. Unsupported-effect accounting now uses
+still-unsupported vibrato (4xx/column Bx) rather than the newly accepted tone
+portamento/Fx. New fixtures independently require zero ignored commands. Scoped
+whitespace checks and offline byte-identical regeneration passed. This does not
+establish full codec coverage.
+
+### XM arpeggio and glissando: literal period qualification
+
+Implemented 0xy arpeggio and E3x glissando with separate base/output pitch.
+Arpeggio uses FT2's backward remaining-tick clock and high-speed table-overflow
+behavior; every new row restores an outgoing arpeggio before note/delay setup.
+The bounded note search preserves FT2's high-note ceiling while using existing
+native pitch laws. E3x quantizes only portamento output, retaining the raw period
+for future slides/arpeggio. Active sample finetune survives instrument selection.
+
+The owned `xm-arpeggio-glissando` fixture has 68 linear/Amiga scores with literal
+period/volume/reset traces, two glissando-off controls and an independently
+decoded video companion. Before implementation, arp-four-linear had equal-length
+but different PCM, including worker packet0 (28224 bytes each). All cases now
+match every PCM byte at 11025/44100Hz mono/stereo, with no ignored commands. E30
+controls match independent raw-portamento traces and differ from intended
+quantization. Worker acceptance matches independent PCM through sequential,
+rewind, second-row seek and EOF. Exact high-note clamp boundary/below-boundary,
+zero-offset fractional finetune, high-speed/held clocks and independent channel
+states are included. All 72 artifacts regenerate identically with PATH empty and
+external commands/network denied; all 58 previous tone fixtures remain identical.
+Ordinary tests require no FFmpeg or fixture generation. Absolute FT2 pitch/mixer
+parity, vibrato/tremolo, envelopes and overall codec completion remain open.
+
+Validation: all 44 XM integration targets passed 102 tests with none ignored;
+the XM library filter passed 35 tests. The new 68-case direct/worker suite and
+two-control quantization reproduction also passed after explicitly requiring
+both off controls to exist. Offline deterministic generation preserves 72 new
+and 58 prior artifacts; scoped whitespace checks passed. This is not evidence
+of complete codec coverage.
+
+### XM vibrato/tremolo and waveform controls
+
+Implemented 4xy/6xy and column Ax/Bx vibrato, 7xy tremolo, and E4x/E7x wave/no-reset
+controls. Per-channel phase, speed/depth memory, instrument reset behavior,
+column/main execution order and FT2 tremolo ramp's vibrato-sign quirk are
+preserved. Main vibrato restores base pitch when its command ends; column-only
+vibrato can retain its last output. Tremolo keeps logical volume separate from
+persistent temporary output; real volume writes/tremor restore the appropriate
+value. Ax handling now supplies Rxy's result-dependent tick-zero gate. A zero
+output period explicitly freezes the sample cursor instead of keeping the
+previous frequency. No-reset tremolo follows the hardened reference without
+reproducing original FT2's interrupt-lock bug.
+
+The owned `xm-vibrato-tremolo` fixture has 80 linear/Amiga scores with literal
+period/volume/reset traces, four modulation-off controls and a separately decoded
+owned video companion. Before implementation, vib-sine-cycle-linear had
+equal-length but different PCM, including worker packet1 (28224 bytes each).
+All cases now match every PCM byte at 11025/44100 Hz mono/stereo with no ignored
+commands. Off controls match independent unmodulated traces and differ from
+intended output at equal lengths. Worker acceptance checks sequential, rewind,
+second-row seek and EOF against independent reference PCM. Full-nibble wrapping,
+reset/retain distinctions, independent channels, tremolo clipping/sign quirks,
+shared-volume memory and zero-period freeze are included. All 86 artifacts
+regenerate identically with PATH empty and external commands/network denied;
+all 72 prior arpeggio/glissando artifacts are unchanged. Ordinary tests need no
+FFmpeg or fixture generation. Instrument auto-vibrato, envelopes/fadeout, exact
+FT2 table/mixer parity and complete codec coverage remain open.
+
+Validation: all 45 XM integration targets passed 105 tests with none ignored;
+the XM library filter passed 35 tests. The 80-case direct/worker acceptance and
+four-control missing-modulation reproduction passed. Unsupported-effect reporting
+now exercises reserved effect 0x22 and volume-column0x51, rather than newly
+supported 4xx/Bx. New acceptance independently requires zero ignored features.
+All 86 new and 72 preceding artifacts passed offline regeneration comparisons;
+scoped whitespace checks passed. Complete codec coverage is not established.
+
+### XM instrument auto-vibrato and delayed activation
+
+The parser now retains the four auto-vibrato parameter bytes. The renderer
+applies per-channel instrument modulation on every tracker tick, including
+normal/held tick0, after pattern effects. A separate pattern-output/final-pitch
+layer prevents modulation feedback. Sweep, signed amplitude rounding, strict
+cap/equality/key-off behavior, wave/rate wrapping and instrument/reset ownership
+follow the reference while retaining native pitch/mixer laws.
+
+The owned `xm-auto-vibrato` fixture has 54 linear/Amiga scores with literal final
+period/volume/reset traces, four depth-zero controls and a separately decoded
+owned video companion. Parser acceptance checks the parameter bytes of both
+instrument owners. Before implementation, sine-linear had equal-length but
+different PCM, including worker packet0 (28224 bytes each). Tests additionally
+exposed EDx first-note activation missing its following tick; its direct and
+worker equal-length baseline was reproduced and dispatch now activates mid-row.
+All cases match every PCM byte at 11025/44100 Hz mono/stereo with no ignored
+features, including independent worker sequential/rewind/second-row seek/EOF.
+Controls match unmodulated PCM and differ from intended modulation. All 60 new
+artifacts regenerate identically with PATH empty and denied external commands/
+network; all 86 prior modulation artifacts remain identical. Ordinary tests need
+no FFmpeg or fixture generation. Envelopes/fadeout, exact FT2 table/mixer parity,
+physical output and complete codec coverage remain open.
+
+Validation: all 46 XM integration targets passed 108 tests with none ignored;
+the XM library filter passed 35 tests. The new 54-case direct/worker suite,
+parameter parsing and four depth-zero reproduction controls passed. All 60 new
+and 86 preceding artifacts passed offline byte-identical regeneration; scoped
+whitespace checks passed. Complete codec coverage is not established.
+
+### XM volume/pan envelopes and release fadeout
+
+The parser retains envelope point counts and sustain/loop indices. Native
+fixed-point cursors now apply volume and pan envelopes on every tracker tick,
+with sustain/loop transitions and envelope release on key-off. Instrument fadeout
+uses its 0..32768 accumulator; channel volume/temporary modulation, envelope and
+fade remain separate gain factors. Per-channel pan envelopes preserve the
+reference's full-scale wrap and pan-sustain key-off behavior. Instrument/E9/ED
+reset, bare-note/E90 continuation, dynamic first-note scheduling, Kxx release and
+ECx hard volume cut are qualified. Enabled unrenderable point metadata stays
+explicitly reported; native fadeout no longer increments Ignored.fades.
+
+The owned `xm-envelopes` fixture has 56 linear/Amiga acceptance scores with
+literal final gain/pan/reset traces, six disabled-feature controls, one separate
+unrenderable-index reporting score and an independently decoded video companion.
+Before implementation, volume-fall-linear had equal-length but different PCM,
+including worker packet0 (28224 bytes each). Every acceptance PCM byte now
+matches at 11025/44100 Hz mono/stereo, with no ignored commands. Worker acceptance
+checks independent sequential/rewind/second-row seek/EOF PCM. Controls match
+independent unshaped/unfaded/centered traces and differ from intended output.
+The malformed-index case is not playback acceptance. All 65 artifacts regenerate
+identically with PATH empty and external commands/network denied; all 60 prior
+auto-vibrato artifacts stay identical. Ordinary tests require no FFmpeg or
+fixture generation. Lxx positioning, exact FT2 table/mixer parity, physical
+output and complete codec coverage remain open.
+
+Validation: all 47 XM integration targets passed 112 tests with none ignored;
+the XM library filter passed 35 tests. The 56-case direct/worker acceptance, six
+disabled-feature controls, parser metadata checks and separately labeled invalid
+index reporting passed. All 65 new and 60 preceding artifacts passed offline
+byte-identical regeneration; scoped whitespace checks passed. Legacy ignored
+fadeout expectations now require zero while malformed envelope reporting remains
+explicit. Complete codec coverage is not established.
+
+### XM Lxx envelope positioning
+
+Implemented Lxx after note/instrument/volume-column setup and before the tick's
+shape update. It primes fixed-point interpolation one tick before the selected
+position; exact-node sustain/loop transitions still run through the normal
+cursor. Positioning preserves sample phase, key-off/fade state and active-owner
+selection. Pan positioning follows the reference's volume-sustain-flag gate.
+Point access is bounded and interpolation uses wide wrapping intermediates for
+safe signed elapsed positions.
+
+The owned `xm-envelope-position` fixture has 64 linear/Amiga acceptance scores
+with literal final gain/pan/reset traces, four omitted-command controls, one
+separate unrenderable zero-point reporting case and an independently decoded
+video companion. Before implementation, mid-segment-linear had equal-length but
+different PCM, including worker packet0 (28224 bytes each). Every acceptance byte
+now matches at 11025/44100 Hz mono/stereo, with no ignored commands. Worker
+acceptance checks independent sequential/rewind/second-row seek/EOF PCM. The
+controls match independent unpositioned traces and differ from intended output;
+invalid metadata reporting is not intended-playback acceptance. All 71 artifacts
+regenerate identically with PATH empty and external commands/network denied;
+all 65 preceding envelope files remain identical. Ordinary tests require no
+FFmpeg or fixture generation. Exact FT2 table/mixer parity, physical output,
+other unqualified behavior and complete codec coverage remain open.
+
+Validation: all 48 XM integration targets passed 116 tests with none ignored;
+the XM library filter passed 35 tests. The 64-case direct/worker acceptance,
+four omitted-Lxx controls and separately labeled unrenderable-shape reporting
+passed. All 71 new and 65 preceding artifacts passed offline byte-identical
+regeneration; scoped whitespace checks passed. Full codec completion remains
+unproven.
+
+### XM E5x per-note finetune
+
+Implemented all sixteen E5x values at actual note triggering, retaining the
+active finetune on the voice. No-note, instrument-only, key-off and Fx
+portamento-preparation paths do not retune. Ordinary triggers/retriggers restore
+sample tuning. Portamento target computation now uses the active voice tuning,
+including a prior E5x override, rather than reloading the original sample value.
+
+The owned `xm-set-finetune` fixture has 64 linear/Amiga scores with literal
+period/volume/reset traces, four omitted-command controls and an independently
+decoded owned video companion. Before implementation, nibble-0-linear had
+equal-length but different PCM, including worker packet0 (28224 bytes each).
+Every acceptance PCM byte now matches at 11025/44100 Hz mono/stereo with no
+ignored commands; worker acceptance checks independent sequential/rewind/
+second-row seek/EOF PCM. Controls match independent default tuning and differ
+from intended output. All 70 artifacts regenerate identically with PATH empty
+and external commands/network denied; all 58 prior tone-portamento files remain
+identical. Ordinary tests require no FFmpeg or fixture generation. Exact FT2
+table/mixer parity, physical output, other unqualified behavior and complete
+codec coverage remain open.
+
+Validation: all 49 XM integration targets passed 119 tests with none ignored;
+the XM library filter passed 35 tests. The 64-case direct/worker acceptance and
+four omitted-E5x controls passed. All 70 new and 58 preceding artifacts passed
+offline byte-identical regeneration; scoped whitespace checks passed. Complete
+codec coverage is not established.
+
+### AVC primary-picture preparation with redundant coded areas
+
+The codec-wide audit found a real AVC dispatch gap beyond the XM milestones:
+primary and redundant slices entered one coverage/type list, rejecting a valid
+access unit as overlapping macroblocks. Preparation now resolves redundant
+headers with their own SPS/PPS binding, validates picture association and the
+PPS POC-presence constraint, and retains only primary slices. Their count,
+coverage and uniform-type promises remain strict. Redundant payloads do not
+advance reference/POC state or create additional output pictures; bounded header
+parsing remains subject to the original packet byte limit.
+
+The owned `avc-redundant-primary` fixture has twelve Extended-profile two-picture
+PCM-I/P-skip videos, explicit primary-only packet controls and independently
+authored scalar plane samples. Redundant PCM differs by +1, so accidentally
+using it changes the oracle. Cases include ASO, split primaries, partial coded
+areas, ranks1/2/127, nonzero NRI variation and alternative PPS/default QP. The
+original direct and MP4 baseline specifically failed on macroblock overlap.
+All primary pixels now match; forced-software MP4 outputs exactly two pictures
+through rewind/sync-seek/EOF. Preparation checks original primary NALs/ranges and
+exact/short packet limits. Six negative cases check header/identity/POC/PPS,
+duplicate-primary and redundant-only failures, reset latching and recovery after
+reset. Redundant-only refusal is not missing-primary recovery acceptance.
+All 85 artifacts regenerate identically with PATH empty and external commands/
+network denied; ordinary tests require no FFmpeg or fixture generation.
+Missing-primary loss recovery, data partitions, other unqualified tools/profiles
+and full codec completion remain open.
+
+Validation: all 133 AVC integration targets passed 385 tests with none ignored;
+the AVC library filter passed three tests. The focused suite then passed five
+tests, including the added independent PCM-codeword/alignment/sample/trailing-
+bit validation of all 48 redundant NAL payloads. This verifies actual redundant
+payload validity beyond the selection/primary-pixel checks. All 85 artifacts
+passed offline byte-identical regeneration and scoped whitespace checks passed.
+Full codec coverage and missing-primary recovery remain unproven.
+
+### AVC data partitioning: transactional inter entropy cursors
+
+The inter coefficient field now has separate category-2 control / category-4
+residual entry points for frame/field and MBAFF macroblocks. Existing combined
+streams use the same residual readers. The two partition cursors and coefficient
+neighbour state commit only after both header and residual parsing succeed;
+truncated residual input leaves all three unchanged. Zero coded-block patterns
+consume no residual bits, including an empty C input.
+
+Two unit regressions use independently authored seven-bit control and nine-bit
+nonzero residual codewords, compare against the literal combined stream, check
+frame/field scan positions, committed counts and truncation rollback. These are
+entropy-reader tests, not partitioned-video acceptance: NAL 2/3/4 association,
+partition B intra/PCM routing, slice termination and end-to-end owned synthetic
+video fixtures remain required before enabling data partition playback. No
+unsupported-stream refusal was removed or reclassified as acceptance.
+
+Validation: offline `fvid-codecs --lib avc_coefficient_field` passed seven tests;
+the broader `fvid-codecs --lib avc_` filter passed 217 tests, zero failures/ignored.
+Logs: `/tmp/fvid-partitioned-field-tests.log` and
+`/tmp/fvid-partitioned-avc-units.log`. Ordinary tests use literal owned codewords
+and require neither fixture generation nor FFmpeg/network access.
+
+### AVC partition A/B/C dispatch and native pixel acceptance
+
+The AVC decoder and bounded access-unit preparer now recognize NAL2 as a coded
+slice and bind residual NAL3/4 by slice ID, colour plane and redundant-picture
+rank. Partition A's slice ID is consumed before macroblock syntax. B carries
+intra residuals and PCM alignment/samples; C carries inter residuals. Frame,
+field and MBAFF entropy readers use their existing coefficient contexts with
+separate partition cursors. Every present primary residual stream must be used
+and terminate correctly; missing required streams fail on entropy reads. Orphan,
+duplicate, order, identity/reference-class and packet byte-bound checks run
+without silently discarding malformed primary data. A residual-only packet is
+rejected instead of producing no picture. Non-Extended partition streams are
+rejected under the profile constraints of H.264 Annex A.
+
+The owned fixture adds 14 three-picture 32x16 Extended-profile videos, combined-
+stream controls and scalar golden pixels. Both intra residual and PCM B paths,
+nonzero C, PCM/inter neighbour contexts in both orders, absent unneeded C,
+reverse-ordered split slices and non-adjacent ASO association are exercised.
+All 104 generated artifacts (97,118 bytes) regenerate byte-identically with PATH
+empty and external commands/network denied. PCM samples are all nonzero under
+the Extended-profile restriction. Positive decoding is compared plane-for-plane
+against both scalar golden data and combined NAL1 controls; MP4 uses forced
+software decoding through rewind/sync-seek/EOF. Thirteen malformed cases are
+separate refusals and require decoder reset/recovery.
+
+For the baseline, the original NAL1/5-only coded-picture dispatch was temporarily
+reinstated, then restored after the test: the positive fixture failed on exactly
+`unsupported in-band AVC NAL` following a valid IDR. This establishes the original
+failure rather than a malformed fixture failure. Baseline log:
+`/tmp/fvid-data-partitions-baseline.log`.
+
+This is not complete codec qualification: B/SP/SI, FMO, field/MBAFF and redundant
+partition combinations need their own partitioned-video acceptance matrices;
+changing PPS redundant-counter presence within one partitioned access unit is
+still explicitly unsupported. Missing-primary recovery and other codec gaps
+remain open. Earlier entropy-only qualification is superseded by these enabled
+video acceptance tests, without claiming those remaining combinations passed.
+
+Final qualification: all 134 AVC integration targets passed 392 tests, with zero
+failures or ignored tests (`/tmp/fvid-data-partitions-avc-regressions.log`). The
+updated AVC codec library filter passed 217 tests; the final focused suite passed
+six tests, including the separately classified mixed-PPS refusal. Logs:
+`/tmp/fvid-data-partitions-avc-units.log` and
+`/tmp/fvid-data-partitions-final-focused.log`. Scoped whitespace checks passed.
+This verifies the stated matrix, not complete AVC or codec-wide coverage.
+
+### AVC partitioned pictures with mixed PPS redundant-counter presence
+
+Removed the per-access-unit counter-presence restriction. H.264 permits primary
+and redundant coded pictures to use different PPS (with the specified POC flag
+constraint), activates a PPS on each coded slice/partition A, and requires the
+primary coded picture before redundant coded pictures in ascending counter order.
+Preparation now follows that activation/order, parsing B/C headers with the active
+PPS and requiring the associated owner to belong to the current coded picture.
+ASO remains permitted within each coded picture; prior-rank A and late B/C cannot
+silently attach to metadata retained from a previous rank.
+
+The former refusal regression was enabled as acceptance only after reproducing
+its exact `PPS changes redundant counter presence` failure in
+`/tmp/fvid-partition-mixed-counter-baseline.log`. Four more owned three-picture
+MP4 fixtures cover primary counter-absent / redundant counter-present PPS,
+full/reversed split slices, slice-ID reuse and ranks1/2/127. Redundant PCM differs
+by +1. Every primary plane matches scalar expected data and independently
+serialized primary-only controls through reset and software MP4 rewind/seek/EOF.
+Twenty-four redundant B payloads separately validate their actual PCM MB types,
+zero alignment, every synthetic sample and trailing bits. New negative order
+fixtures test descending ranks, reintroduced primary A, and a late primary B
+header interpreted under the newly active PPS; decoder reset/recovery is checked.
+
+All 135 generated artifacts (167,286 bytes) regenerate identically with PATH
+empty and external commands/network denied; fixture generation remains separate
+from ordinary tests. The previous mixed-PPS refusal is superseded by acceptance,
+not counted as successful playback. This does not establish missing-primary
+recovery or partitioned B/SP/SI/FMO/field/MBAFF acceptance; those remain open.
+
+Final qualification: 134 AVC integration targets qualified 397 tests with zero
+failures/ignored in the final matrix. The initial run passed its first 79 targets
+(114 tests), then encountered a newly added negative MP4 test that incorrectly
+required returning the seed before reorder buffering discovered the intended
+error. That assertion was corrected to permit early discovery while checking the
+exact error and any emitted pixels; no production behavior changed for this test
+correction. The failed run is retained in
+`/tmp/fvid-mixed-counter-avc-regressions.log`. The corrected target and all 54
+remaining targets passed 283 tests in
+`/tmp/fvid-mixed-counter-avc-remainder.log`, completing the 134-target matrix.
+Source hashes were frozen and rechecked for that run in
+`/tmp/fvid-mixed-counter-final-source-hashes.json`.
+The focused partition suite passed all 11 tests; AVC codec library units passed
+217 tests. Logs: `/tmp/fvid-mixed-counter-final-focused.log` and
+`/tmp/fvid-mixed-counter-avc-units.log`. The three negative order packets also
+have owned MP4 reproducers checked through software playback and rewind. Scoped
+whitespace checks passed. Full codec coverage remains unproven.
+
+### AVC partitioned B pictures: two-reference prediction and presentation order
+
+Qualified the existing generic A/B/C entropy path on 22 owned Extended-profile
+B matrices instead of treating I/P evidence as proof for B. The new five-picture
+fixtures retain two distinct references (coordinate samples and +4 samples), so
+L0/L1/Bi produce independently different golden values. Cases exercise nonzero
+C residuals, temporal/spatial direct, B-skip and skip-to-coded transitions,
+PCM-to-inter/inter-to-PCM count contexts, intra4 B residuals in mixed B slices,
+and reversed two-slice ASO. Headers separately prove actual non-reference B
+NAL2/3/4, frame_num/POC, active list counts and direct-mode flags.
+
+Decode order 0/3/1/2/4 is compared against presentation-order scalar samples and
+independently serialized combined-stream controls. Each of five pictures matches
+all component samples through two decoder-reset passes. The successor P detects
+accidental retention of non-reference B pictures. Software MP4 playback reorders
+pictures with exact 40ms PTS/durations through EOF, rewind and sync seek. Literal
+chroma values 42/134/44 separately distinguish L0/L1/Bi without residual code.
+No production decoder change was needed for this matrix; the evidence closes an
+unqualified path, not all B tool combinations or codec-wide completion.
+
+The new generator writes 137 owned artifacts (182,366 bytes). All regenerate
+byte-identically with PATH empty and commands/network denied, as do all 135 prior
+I/P/mixed-counter artifacts (167,286 bytes). The shared writer gained explicit B
+header, prediction/skip, reference and frame/POC controls while preserving its
+previous outputs. Ordinary tests do not run generators or invoke FFmpeg/network.
+Reference-coded B, weighting, nonzero motion/reference-list changes and combined
+SP/SI/FMO/field/MBAFF partition matrices remain unqualified, as does recovery of
+missing primary data. These finite tests do not establish complete H.264.
+
+Validation: the new B target passed three tests; related I/P/mixed-counter and
+redundant-primary targets passed eleven and five respectively (19 tests total,
+zero failures/ignored). Final log: `/tmp/fvid-partitioned-b-regressions-final.log`.
+Scoped whitespace checks passed. No full AVC rerun or production-decoder change
+is claimed for this fixture-only qualification milestone; the earlier full AVC
+matrix remains separately dated evidence.
+
+### AVC partitioned SP/SI switching acceptance
+
+The generic A/B/C path now has explicit switching qualification: fourteen owned
+Extended-profile 32x16 videos exercise primary SP and secondary SP (signed coded
+and skip), SI switching (signed and zero residual) and ordinary I_NxN within SI
+as a no-switch control. QPY26 stays fixed while QSY changes through 0/26/51;
+chroma maps QS51 to39. Each left MB uses switching while the right is PCM in B;
+signed inter residuals are in C, intra residuals are in B. Single-slice and
+reversed two-slice ASO cases prevent adjacency assumptions. All PCM is nonzero.
+
+All component pixels match both independently serialized combined-stream controls
+and owned integer-matrix luma/primary-chroma/secondary-chroma oracle results,
+including signed DC/AC, temporal SP reference reconstruction and current-picture
+SI DC prediction. Software MP4 verifies four pictures and exact 40ms clocks
+through EOF, rewind and sync seek. The header test checks 63 actual SP/SI slice
+headers, QP/QS and primary/secondary flags, correct B/C presence, and exact/short
+packet budgets. Ordinary SI intra is QS-invariant; SI switching differs from the
+ordinary control, and signed primary SP differs from skip. These checks go beyond
+header or PCM acceptance. The existing native decoder required no production
+change for this finite matrix.
+
+All 115 new artifacts (127,334 bytes) regenerate byte-identically with PATH empty
+and external commands/network denied. Both prior partition matrices also remain
+byte-identical: 135 I/P/mixed-counter artifacts and 137 B artifacts. Generation
+is separate from tests and uses no FFmpeg or private source content.
+
+Validation: seven related integration targets passed 35 tests, zero failures or
+ignored tests, in `/tmp/fvid-partitioned-switching-regressions.log`. The new target
+passed three tests. Scoped whitespace checks passed. This fixture-only milestone
+does not claim a fresh full AVC run, full SP/SI coverage, weighting/nonzero motion,
+constrained prediction, deblocking, FMO, field/MBAFF or missing-primary recovery.
+Full codec completion remains unproven.
+
+### AVC partitioned FMO maps with ASO and multiple slices per group
+
+Qualified the A/B/C path with 120 owned Extended-profile 32x32 three-picture
+videos: FMO map types0–6, both changing-map directions at cycle2, coded, PCM/inter
+mixed and PCM/skip mixed macroblocks. Every variant has a one-slice-per-group
+and a one-slice-per-MB counterpart. ASO reverses slice order and interleaves all
+A/B/C units by category. Opposite signed nonzero C residuals for group0 and group1
+make incorrect payload ownership or direction handling visible in the scalar
+oracle. Coefficient tokens use actual same-slice nC contexts (0/1/9/16), including
+PCM adjacency and isolated contexts after splitting groups into multiple slices.
+
+Every output component sample matches both scalar coordinate/transform-basis
+goldens and independently serialized combined-stream controls through reset.
+Software MP4 verifies three pictures, exact 40ms PTS/durations, EOF, rewind and
+sync seek. Separate checks cover 720 actual P/FMO slice headers, literal group
+maps, change-cycle, unique partition IDs and entropy offsets, absent/required C,
+ASO category ordering and exact/short packet byte limits. Repeated reference
+updates separately preserve the literal opposite-group signed basis samples.
+The existing decoder passed without a production change; this qualification
+must not be mistaken for a new decoder implementation or full codec coverage.
+
+All 741 generated artifacts (1,350,374 bytes) regenerate identically with PATH
+empty and external commands/network denied. Every PCM sample is nonzero under
+the Extended-profile constraint. No private media or codec parameters are used;
+ordinary tests never generate fixtures or invoke FFmpeg/network.
+
+Validation: five related integration targets passed 25 tests, zero failures or
+ignored tests, in `/tmp/fvid-partitioned-fmo-regressions.log`. The new FMO target
+passed three tests; scoped whitespace checks passed. This fixture-only milestone
+does not claim a fresh full AVC run or arbitrary geometry/group counts, all
+motion/weight/residual tools, combined B/SP/SI FMO, field/MBAFF, deblocking or
+missing-primary recovery. Full codec completion remains unproven.
+
+### AVC partitioned PAFF field decoding and PCM/skip fast paths
+
+Found and fixed a production gap beyond prior frame/MBAFF entropy qualification:
+the bespoke PAFF field reconstruction loop still read inter residuals from A.
+The owned valid field stream specifically failed with `AVC P field skip exceeds
+picture` after consuming control bits as coefficients. The direct PCM-field path
+also read alignment/samples from A and failed with `truncated or oversized bit
+field`. Pre-fix logs are retained in
+`/tmp/fvid-partitioned-interlaced-baseline.log` and
+`/tmp/fvid-partitioned-pcm-field-baseline.log`.
+
+Field inter reconstruction now consumes category4 coefficients from C while
+control remains in A. Its embedded intra context consumes/finishes B. The direct
+PCM path similarly switches only alignment/samples to B and finishes B/C; it
+still directly handles PCM rather than hiding the issue with a fallback. The
+pure-skip field copy path rejects surplus B/C and retains valid copy behavior.
+Normal combined CAVLC/CABAC paths keep their existing readers and reconstruction.
+There are no new dependencies or FFmpeg fallback, frame buffers or sample copies.
+
+The owned matrix adds 240 three-frame 32x32 videos: 192 MBAFF and 48 PAFF field
+sequences, I/PCM and coded/mixed P, both field orders, seed and reference layout
+changes, one/two slices, ASO/interleaved A/B/C and optional two-group FMO. Distinct
+physical rows and horizontal-vs-vertical signed basis samples independently prove
+frame/field scan orientation, parity and pairing. PAFF list modification selects
+the previous frame's same-parity field. Every component sample is compared with
+both physical-coordinate scalar goldens and combined-stream controls over reset.
+Software MP4 checks three complete frames, exact 40ms clocks, EOF, rewind and
+sync seek. The direct PCM API checks 32 fields via independent even/odd row
+extraction; metadata checks 960 partitioned headers and exact byte bounds.
+
+Pure-skip fields have separate acceptance, and five malformed packets/short MP4s
+cover missing B/C and surplus B/C with intended errors and reset/rewind recovery.
+All 2,227 generated artifacts (3,960,038 bytes) regenerate identically with PATH
+empty and commands/network denied. Generation is separate from ordinary tests;
+all source samples/parameters are owned synthetic data and PCM values are nonzero.
+The focused seven-test suite passed in
+`/tmp/fvid-partitioned-interlaced-final-focused.log`.
+Partitioned B/SP/SI interlaced combinations, nonzero motion/weighting/filtering,
+other geometries/group counts and missing-primary recovery remain unqualified;
+full codec coverage is not established by this matrix.
+
+Final qualification: all 138 AVC integration targets passed 413 tests, zero
+failures or ignored tests, in
+`/tmp/fvid-partitioned-interlaced-avc-regressions.log`. The updated AVC codec
+library filter passed 217 tests, zero failures/ignored, in
+`/tmp/fvid-partitioned-interlaced-avc-units.log`. The seven focused tests passed.
+Source hashes were frozen before the full run and verified after it using
+`/tmp/fvid-partitioned-interlaced-qualification-hashes.json`. All 2,227 fixture
+artifacts were verified against deterministic generation, hashed before their
+integration target executed, and checked unchanged after the run in
+`/tmp/fvid-partitioned-interlaced-fixture-hashes.json`. Scoped whitespace checks
+passed. These are native field-decoder fixes with actual pixel acceptance, not
+only new refusal tests; codec-wide completion remains unproven.
+
+### AVC partitioned interlaced switching and two-reference B qualification
+
+Added explicit interlaced tool matrices after the PAFF B/C routing fix, without
+assuming its I/P proof covers SP/SI/B. The switching matrix has 184 owned four-
+frame 32x32 videos: 128 MBAFF primary/secondary SP and 56 PAFF SP/SI/ordinary-SI-
+intra controls. QS0/26/51, signed/zero luma/chroma DC/AC, all adaptive pair
+layouts, skip top/bottom/both, both field orders, split slices and ASO are checked.
+Owned integer-matrix oracles distinguish switching quantization and field AC scan;
+whole skipped independent MBAFF pairs use their actual inferred frame layout.
+All samples match both those matrices and independently serialized combined
+controls through reset. Software MP4 checks pair completion, four complete frames,
+40ms PTS/duration, EOF, rewind and sync seek. Metadata verifies 1,272 actual
+SP/SI headers and B/C categories; ordinary SI-intra is QS-invariant and differs
+from switching SI.
+
+The B matrix adds 128 owned five-frame videos, 64 each for MBAFF and PAFF. Two
+references differ by four, separating L0/L1/Bi expected samples. Modes include
+spatial/temporal direct, skip and mixed PCM/L1, pair layouts, field orders,
+single/split slices and ASO. Non-reference B pictures share frame_num2, with
+decode order0/3/1/2/4; output pixels and exact MP4 presentation times must reorder
+correctly through reset, rewind and seek. A successor P tests reference selection
+using default lists in MBAFF and on the first PAFF field; the second field uses
+an explicit old same-parity reference. Header checks prove 640 actual B headers,
+zero NRI across residual partitions, L0/L1 list modifications, POC/frame_num,
+direct modes, payload categories and byte bounds. Both pixel controls and scalar
+physical-coordinate/transform-basis goldens must match every sample. Future and
+successor golden pictures are separately verified to be exactly seed+4.
+
+The existing native decoder passed both finite matrices without a new production
+change. All 2,051 switching artifacts (2,276,441 bytes) and 2,179 B artifacts
+(2,777,754 bytes) regenerate identically with PATH empty and commands/network
+denied. Parameter sets/samples are owned synthetic data; every seed PCM sample
+is nonzero. Generators are separate from ordinary tests and use no FFmpeg.
+This is bounded acceptance, not proof of MBAFF SI, reference-coded B, arbitrary
+geometries or all FMO/constrained/motion/weight/filter combinations, missing-
+primary recovery, complete H.264, or codec-wide completion.
+
+Validation: nine related integration targets passed 41 tests, zero failures or
+ignored tests, in `/tmp/fvid-partitioned-interlaced-tools-final.log`. Each new
+target passed three tests. Scoped whitespace checks passed. No fresh full AVC
+run or production-decoder change is claimed for this fixture-only milestone;
+the preceding full AVC qualification remains separate evidence.
+
+### AVC partitioned MBAFF SI with constrained ordinary/PCM neighbours
+
+Closed another unqualified A/B path with 672 owned four-frame 32x32 Extended-
+profile videos: all four adaptive pair layouts, seven switching/ordinary/PCM
+patterns, constrained prediction on/off, signed/zero luma-only or luma+chroma
+DC/AC, one/two slices and ASO/interleaved partitions. QS0/26/51 exercises switching
+quantization; PCM values are nonzero and component/address-specific. Category2
+stays in A while category3 includes SI residuals and PCM alignment/samples in B.
+Slices with no category3 data omit B, and C is always absent. This covers residual
+and PCM consumption in one B stream rather than only separate per-tool streams.
+
+All samples match an independent per-sample availability/spatial-DC/integer-
+matrix oracle and combined-stream native controls through reset. The original
+owned SI writer directly serializes those controls; all 3,360 control slices were
+also verified byte-identical to the original nonpartitioned writer. Software MP4
+checks four complete pictures, exact 40ms clocks, EOF, rewind and sync seek. A
+manual category2 trace verifies every pair field flag, SI/ordinary/PCM type,
+prediction flag, CBP and QP delta before trailing bits. Metadata checks 3,360
+actual SI headers, QP/QS, constrained flags, B presence/offsets and byte bounds.
+Goldens explicitly distinguish constrained/unconstrained switching neighbours.
+
+The existing native decoder passed without a production change. All 5,383 new
+artifacts (7,703,571 bytes) regenerate identically with PATH empty and external
+commands/network denied. No private samples/parameters are used; generation is
+separate from ordinary tests and uses no FFmpeg.
+
+Validation: ten related integration targets passed 44 tests, zero failures or
+ignored tests, in `/tmp/fvid-partitioned-mbaff-si-regressions.log`; the new target
+passed three tests. The final control-writer refactor left all generated files
+byte-identical. Scoped whitespace checks passed. This fixture-only milestone
+does not claim a fresh full AVC run, arbitrary geometry/FMO/motion/weight/filter
+combinations, missing-primary recovery, complete H.264 or codec-wide completion.
+
+## AVC complete redundant-picture recovery (2026-10-21)
+
+The decoder now resolves a missing primary by selecting the lowest complete
+redundant representation before mutating POC or reference state. A bounded
+entropy coverage probe rejects incomplete/overlapping payloads and advances to
+the next available rank. Reconstruction receives the selected PPS and normalized
+rank; original NAL/RBSP entropy offsets, reference class and source-rank metadata
+are preserved. Existing strict-primary preparation helpers retain their refusal
+contract. The former decoder refusal fixture is now an explicit acceptance test.
+
+The owned recovery matrix contains 66 short synthetic videos: ordinary and
+A/B/C slices, split/ASO, ranks 1/2/127, lower partial/late/truncated candidates,
+PPS changes, PCM/P recovery, IDR startup and non-reference lifetime. Every pixel
+is checked against an independent scalar oracle and rank-zero control through
+two successors and reset. Software MP4 tests check 40 ms clocks, EOF, rewind
+and sync seek. Six malformed/incomplete packets retain explicit refusal tests.
+657 generated files (633,058 bytes, excluding handwritten README) regenerate
+identically with PATH empty and process/network creation denied.
+
+This closes complete-representation fallback for this matrix, not composition
+of partial redundant areas, damaged-primary recovery, arbitrary geometry/tools
+or complete AVC/codec-wide support.
+
+Validation: all 142 AVC integration targets passed 427 tests, with zero
+failures or ignored tests (`/tmp/fvid-redundant-full-avc.log`); all 217 AVC
+library unit tests passed (`/tmp/fvid-redundant-avc-units.log`). Frozen AVC
+source/test and recovery-fixture hashes remained identical throughout the run.
+The three timeline-animation tests also passed in the normal project library
+build after resolving the prior codec compilation blocker.
+
+
+## AVC disjoint redundant-region composition (2026-10-21)
+
+Missing-primary recovery now accumulates disjoint slices in ascending rank order
+when their PPS and reference marking agree. Entropy-derived macroblock masks
+validate each candidate and prevent overlap before POC/DPB mutation. Once the
+union covers the picture, slices are sorted spatially with updated virtual
+coverage ranges. Wire RBSP and entropy offsets remain unchanged. Uniform-type
+promises apply to each wire representation; the virtual picture may use I/P
+slices from different ranks. Source metadata reports the lowest selected rank,
+while original ranks remain available in each selected NAL. Three simultaneously
+live masks are charged to the existing context budget; region allocation is
+fallible.
+
+The old disjoint-ranks refusal now passes as explicit decoder acceptance. On
+the pre-change production source it failed with the specific expected
+`no complete coded picture` error (`/tmp/fvid-regions-baseline.log`). The owned
+matrix expands to 84 videos, covering reversed spatial rank order, ranks 1/2/127,
+I/I, I/P, P/I and P/P regions, scalar/control pixels, successor references,
+reset and exact MP4 timing/rewind/seek. Both redundant integration targets pass
+11 tests (`/tmp/fvid-regions-final-focused.log`). 837 generated artifacts
+(785,447 bytes) reproduce identically without external commands or network.
+
+Partial overlap inside one higher-rank slice, composition across distinct PPS,
+recovery of damaged primary slices and general codec-wide completion remain
+open. Existing whole-representation fallback remains for an overlapping higher
+slice that cannot yet be used independently; it is not claimed to implement
+sample-level lowest-rank replacement in that case.
+
+Validation: the final frozen source passed all 142 AVC integration targets,
+428 tests, zero failures/ignored (`/tmp/fvid-regions-full-avc.log`), plus
+217 AVC library unit tests (`/tmp/fvid-regions-avc-units.log`). Source/test and
+generated-fixture hashes remained unchanged throughout qualification.
+
+
+## AVC primary-slice loss and payload recovery (2026-10-21)
+
+Packets carrying redundancy now entropy-check primary coverage before mutating
+POC/DPB. Independently decodable primary slices retain rank-zero priority;
+missing or truncated-payload slices can be replaced by disjoint redundant
+slices with the same PPS and compatible reference marking. The collector admits
+rank zero, salvages usable slices individually and retains the existing full
+coverage/overlap checks. Primary-only packets keep their original reconstruction
+path; tools outside the recovery probe also retain the healthy-primary path.
+Malformed headers and length framing still fail before recovery selection.
+
+The new owned matrix covers 88 short videos: ordinary/A-B-C, either spatial
+half missing/corrupt, I/I, I/P, P/I and P/P, ASO, startup IDR and non-reference
+lifetime. Goldens distinguish intact base+2 regions from replacement base+1 PCM
+or unchanged inter samples; control slices preserve spatial boundaries and
+prediction types. Tests check all samples through two successors and reset,
+exact software MP4 clocks, EOF/rewind/sync seek, source rank/entropy offsets,
+and refusal of the same damaged primary when no redundancy is supplied.
+Every truncated fixture independently demonstrates valid primary headers, a
+complete intact slice and the specific truncated-bit-field entropy failure.
+The acceptance test on pre-change source failed with `incomplete intra slice`
+(`/tmp/fvid-primary-recovery-baseline.log`). Three focused targets pass 16 tests
+(`/tmp/fvid-primary-recovery-final-focused.log`).
+
+The existing 84-case redundant matrix now also retains a valid slice beside a
+truncated slice in the same rank; split/ASO scalar/control expectations were
+updated to lowest-rank ownership. All 954 new artifacts (868,519 bytes) and
+837 updated redundant artifacts (785,523 bytes) regenerate identically with
+PATH empty and external commands/network denied. No private inputs are used.
+
+Recovery within a damaged slice, partially overlapping slices, distinct-PPS
+composition, malformed header/framing recovery and full codec-wide completion
+remain open. This finite acceptance matrix does not establish those cases.
+
+Validation: all 143 AVC integration targets passed 433 tests, with zero
+failures or ignored tests (`/tmp/fvid-primary-recovery-full-avc.log`), plus
+217 AVC unit tests (`/tmp/fvid-primary-recovery-avc-units.log`). Frozen AVC
+source/test and both generated-fixture snapshots remained unchanged.
+
+## WavPack false stereo, WVX fixup and native Matroska dispatch (2026-10-21)
+
+The native WavPack decoder previously refused every false-stereo block, treated
+valid WVX bitstreams as unread after the last sample, and calculated the extended
+CRC before zero/one/duplicate fixup. Matroska did not select A_WAVPACK4 despite a
+factory arm, and that arm expected a full raw header rather than the compact
+Matroska packet mapping.
+
+Coded-channel count is now separate from output channels. False stereo runs mono
+entropy/decorrelation, mono sample CRC and integer fixup, then duplicates finished
+PCM. Contradictory mono/false-stereo flags remain invalid. Extended CRC now covers
+the restored value; up to 15 one bits close the stream at a 16-bit boundary.
+CRC, missing data and extra trailing words still refuse the whole block.
+
+The reader admits mono/stereo A_WAVPACK4, preserves its two-byte version setup
+and the decoder rebuilds the 32-byte raw header from the standard 12-byte compact
+packet. Container rate and output channels are validated. Independent blocks
+seek directly while retaining a presentation floor; partial-block PCM uses ceil
+to reach the requested sample. Existing other-codec playback paths are retained.
+
+99 owned 60 ms videos cover terms 1/2/8/17/18, positive/negative weights, storage
+8/16/24/32, quiet/larger samples, shifts, INT32 zero/one/duplicate restoration,
+explicit low bits, 8/48/37.5 kHz, and false/unequal-stereo/false transitions.
+Independent scalar PCM and mono controls are checked byte-for-byte through
+reset. Software video/audio decoding, EOF, rewind, 35 ms sample-exact seek and
+audio worker capture qualify the public playback route. Six malformed packets
+and corresponding movies qualify main/WVX CRC, padding, truncation and trailing
+word refusals. Setup/rate/channel mismatches are also tested.
+
+Three acceptance probes on pre-fix source reproduced the exact distinct failures
+(`/tmp/fvid-wavpack-baseline.log`): unsupported dual-mono, unread WVX bits and
+no Matroska decoder for A_WAVPACK4. Final qualification passed 277 library tests
+(codec and WebM-audio filters) plus 47 integration tests across twelve targets,
+324 total, with no failures/ignored tests (`/tmp/fvid-wavpack-audio-regressions.log`).
+Source/test/generator and fixture snapshots stayed identical throughout the run.
+802 generated artifacts (2,838,791 bytes) regenerate identically with PATH empty
+and process/network creation denied. No external codec or private data is used
+by generation or ordinary tests.
+
+Primary specifications checked: WavPack 4/5 File Format, reference unpack.c
+(integer fixup before false-stereo expansion), pack.c (WVX CRC and one padding),
+and Matroska Codec Mappings / WavPack. The codec-gap audit also distinguished
+HEVC 3D Main depth-chroma guards from valid-stream gaps: H.265 V11 I.11.1.1
+requires depth-layer chroma_format_idc=0, so those guards were not removed.
+
+WavPack hybrid, floating point, DSD, multichannel and other unqualified tools,
+along with remaining gaps in other codecs, remain open. This finite matrix is
+not codec-wide completion and does not claim a fresh full AVC/HEVC run.
+
+## Native WavPack IEEE-754 and optimized WVX (2026-10-21)
+
+The decoder no longer refuses every floating-point block. It validates the
+32-bit float storage/metadata, reconstructs sign/exponent/mantissa with integer
+operations, verifies extended CRC on the original IEEE fields, then expands
+false stereo. PCM output copies IEEE words directly, preserving signed zero and
+NaN payloads. float_norm_exp remains a hint for optional output normalization;
+the lossless decode API retains the original words. Core magnitudes and shifts
+are checked before normalization to avoid malformed-stream overflow/loop hazards.
+
+Optional new WVX metadata is now parsed instead of silently ignored. Float
+minimum-zero/maximum-one fields reduce literal mantissa reads; INT32 maximum
+width reduces low-bit reads and restores implied zeros. Mixed extended formats
+in one block refuse. Both streams retain CRC and word-padding validation before
+any output packet is returned. Hybrid/correction, DSD and multichannel guards
+remain explicit; no external WavPack/FFmpeg dependency was introduced.
+
+Owned qualification adds 180 60 ms float videos: ordinary/false stereo, raw mono
+controls, exponent/shift/mantissa modes, legacy/optimized WVX, signed zeros,
+subnormals, signed Inf and quiet/signaling NaN payloads. Scalar expected IEEE
+words use a closed-form calculation and literal exceptional words. Four extra
+videos qualify optimized INT32 full/partial/zero low-bit reads and duplicate-bit
+restoration. All PCM bytes are checked through reset, Matroska decode, neutral
+video, EOF, rewind and sample-exact seek. Headless audio-worker capture checks
+finite float PCM and timing; this is not a physical-device claim for non-finites.
+Ten malformed packet/video witnesses qualify exact metadata, CRC, length,
+padding, conflicting-flags, unsafe-shift and mixed-stream refusal conditions.
+
+Two probes on pre-change source reproduced the actual gaps
+(`/tmp/fvid-wavpack-float-baseline.log`): unsupported float and missing optimized
+integer bits. The final frozen source passed 277 audio-codec/WebM-reader unit
+tests and 51 integration tests across thirteen targets, 328 total, no failures
+or ignored tests (`/tmp/fvid-wavpack-float-regressions.log`). Source/test/generator
+and fixture hashes remained unchanged. All 1,217 new artifacts (6,110,212 bytes)
+and the preceding 802 integer artifacts (2,838,791 bytes) regenerate identically
+with PATH empty and external commands/network denied. Generation and ordinary
+tests use no private data or external codec.
+
+Primary semantics were verified against WavPack's unpack_floats.c, pack_floats.c,
+open_utils.c and public wavpack.h. The finite matrix is not complete WavPack or
+codec-wide completion: hybrid, correction streams, DSD, multichannel and other
+unqualified tools/metadata/combinations, plus other codec gaps, remain open.
+
+
+## 2026-10-21 — complete multichannel WavPack sample frames
+
+Native WavPack now assembles all mono/stereo components of a sample frame before
+publishing PCM. INITIAL/FINAL boundaries, channel totals, component format,
+sample count/index, known total samples and channel metadata must agree. Header
+indices and totals use the format's 40-bit encoding. Every component completes
+its CRC and integer/float fixup before interleaving; failure returns no partial
+PCM and does not commit a newly discovered speaker layout.
+
+The Matroska path restores the standard compact multi-block mapping, inspects
+first-frame speaker metadata and binds that layout across decoder reset and
+seek. Both legacy and current channel-info forms are parsed. The device stereo
+router now accepts the format's 4096-channel limit, retaining established WAVE
+weights for assigned speakers and equal averaging for unspecified layouts.
+Existing eight-channel PCM rematrix admission remains unchanged. Unsupported
+future stream versions refuse explicitly; supported stream versions are 0x402
+through 0x410, including WavPack 5's current stream representation.
+
+The pre-change probe failed the valid six-channel witness at the actual decoder
+gate (`WavPack stream has more than two channels`), rather than an unrelated
+corrupt-packet error: `/tmp/fvid-wavpack-multichannel-baseline.log`.
+The owned acceptance matrix contains 115 short videos with 3/6/8/20/256/4096
+channels, mixed component widths, false stereo, integer and float reconstruction,
+optimized extra bits, short/long legacy/current metadata and wide counters.
+Raw and compact Matroska decode are compared to independent component controls
+and scalar PCM. Tests also cover neutral video, EOF, rewind, partial-block seek,
+headless audio-worker PCM and software device routing. Fourteen raw malformed
+frames, four compact-mapping/version witnesses and layout/CRC controls preserve
+specific refusal reasons. Raw-only fields removed by compact mapping have valid
+normalization movies, not mislabeled malformed-video refusal expectations.
+
+Frozen source passed 257 codec units, 20 WebM-audio reader units, 57 integration
+tests across fourteen targets and seven media-routing/rematrix units: 341 passed,
+zero failed or ignored. Logs: `/tmp/fvid-wavpack-multichannel-codec-units.log`,
+`/tmp/fvid-wavpack-multichannel-reader-units.log`,
+`/tmp/fvid-wavpack-multichannel-integrations.log`,
+`/tmp/fvid-wavpack-multichannel-router-units.log` and
+`/tmp/fvid-wavpack-multichannel-pcm-units.log`.
+Source hashes remained unchanged during qualification. All 8,988 new generated
+artifacts (49,843,973 bytes), plus 1,217 float and 802 false-stereo artifacts,
+regenerate byte-for-byte with PATH empty and process/network access denied.
+Snapshots: `/tmp/fvid-wavpack-multichannel-qualification-hashes.json` and
+`/tmp/fvid-wavpack-multichannel-fixture-hashes.json`.
+
+The native assembly and mapping follow the primary
+[Matroska WavPack mapping](https://www.matroska.org/technical/codec_specs.html#wavpack)
+and [WavPack metadata reader](https://github.com/dbry/WavPack/blob/master/src/open_utils.c).
+This finite matrix does not establish codec-wide completion. Hybrid/correction,
+DSD, custom channel identities, four-byte custom-rate metadata and other
+unqualified tools/profiles/combinations remain open. Physical multichannel audio
+devices and exhaustive malformed inputs were not qualified by this milestone.
+
+
+## 2026-10-21 — WavPack extended custom sample rates
+
+Resolved the previously explicit four-byte custom-rate metadata gap. The native
+parser accepts both three- and four-byte forms, retains the 31-bit extended rate
+and ignores its reserved high bit, matching the primary
+[WavPack metadata reader](https://github.com/dbry/WavPack/blob/master/src/open_utils.c#L614-L631).
+A zero effective rate now refuses before constructing a zero-denominator PCM
+packet. No external codec or production dependency was added.
+
+The before-fix acceptance run reached the specific defect on the first valid
+four-byte witness: `WavPack custom sample rate is the wrong length`
+(`/tmp/fvid-wavpack-custom-rate-before.log`). The owned matrix contains thirty
+short mono/stereo/six-channel videos, three-/four-byte forms, 37,500 Hz and the
+24-bit/31-bit limits and boundary, with and without the reserved bit. Exact PCM
+and rate denominators survive raw reset, compact Matroska decode, rewind and
+the reader's decoded-packet presentation path. Three neutral video frames per
+movie also decode. Five malformed videos verify length and zero-rate refusals,
+including reserved-bit-only metadata, and recovery on a following good frame.
+These extreme rates qualify format representation, not physical audio-device
+capabilities, worker pacing, resampling or arbitrary-rate seek.
+
+Frozen source passed 257 codec units, twenty reader units and 59 integration
+tests across fifteen targets: 336 passed, zero failures or ignored tests. Logs:
+`/tmp/fvid-wavpack-custom-rate-codec-units.log`,
+`/tmp/fvid-wavpack-custom-rate-reader-units.log` and
+`/tmp/fvid-wavpack-custom-rate-integrations.log`.
+The 251 new artifacts (1,270,037 bytes) and all preceding multichannel, float and
+false-stereo matrices regenerate byte-for-byte with PATH empty and process and
+network access denied. Source hashes remained unchanged during qualification;
+snapshots are `/tmp/fvid-wavpack-custom-rate-source-hashes.json` and
+`/tmp/fvid-wavpack-custom-rate-fixture-hashes.json`.
+
+Hybrid/correction, DSD, custom channel identities and other unqualified
+WavPack tools and codec-wide profiles/combinations remain open. This acceptance
+matrix does not establish the overall no-codec-gaps goal.
+
+
+## 2026-10-21 — native WavPack hybrid integer main streams
+
+Replaced the blanket hybrid refusal with an owned main-stream entropy path.
+Hybrid profiles restore slow levels, bitrate accumulators and optional signed
+deltas. Sample-pair updates compute SNR/bitrate error limits and stereo balance;
+residual intervals are narrowed to their quantized midpoint, while a zero error
+limit uses the exact truncated code. Zero runs decay slow levels without
+advancing the bitrate accumulators. Decorrelation, joint stereo and CRC complete
+before lossy integer clipping/fixup and false-stereo expansion. Missing low-bit
+streams and 32-bit implied-bit shift redistribution follow main-stream semantics.
+Shaping metadata does not alter main-stream samples; correction reconstruction
+is still refused explicitly. No production codec dependency was added.
+
+The unchanged decoder failed the actual before-fix acceptance witness with
+`WavPack hybrid block: lossy coding is not supported`
+(`/tmp/fvid-wavpack-hybrid-before.log`). The owned matrix now has 105 short
+VP9/WavPack acceptance videos: 96 nonzero entropy cases spanning 8/16/24/32-bit
+mono/stereo/false stereo, eight profile variants, signed deltas, both saturated
+balance branches, zero error limits, joint stereo, header shifts and INT32 tools;
+six zero-run predictor controls and three mixed six-channel assemblies. Five
+malformed/unsupported witnesses retain specific profile, exponent, truncated
+entropy and correction errors. A correction refusal is not lossless acceptance.
+Raw/Matroska PCM, neutral video, reset/rewind, sample-exact 35 ms seek, presentation
+and headless audio-worker packet/timing windows match scalar expectations.
+
+An independently built reference WavPack at commit
+`c9515833d1867d9ec03774d954369107f2e88a73` decoded all 105 concatenated raw
+streams to identical PCM with zero CRC errors. That check exposed and corrected
+an excessive MAG declaration in the synthetic generator before final acceptance.
+The optional harness is `benches/wavpack_hybrid_reference.c` with
+`benches/check_wavpack_hybrid_reference.py`; its reference library exists only in
+/tmp, not in production, fixture generation or ordinary tests. Evidence is
+`/tmp/fvid-wavpack-hybrid-reference-results.json`.
+The entropy/profile semantics were checked against the primary
+[WavPack word reader](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/read_words.c),
+[profile state updates](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/entropy_utils.c)
+and [sample fixup](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/unpack.c).
+
+Final frozen source passed 257 codec units, twenty reader units and 62 integration
+tests across sixteen targets: 339 passed, zero failed or ignored. Logs:
+`/tmp/fvid-wavpack-hybrid-final-codec-units.log`,
+`/tmp/fvid-wavpack-hybrid-final-reader-units.log` and
+`/tmp/fvid-wavpack-hybrid-final-integrations.log`.
+All 1,139 new artifacts (3,217,351 bytes), plus the preceding four WavPack
+matrices, regenerate byte-for-byte with PATH empty and subprocess/network access
+denied. Source hashes remained unchanged during final qualification. Snapshots:
+`/tmp/fvid-wavpack-hybrid-source-hashes.json` and
+`/tmp/fvid-wavpack-hybrid-fixture-hashes.json`.
+
+The finite matrix does not prove every hybrid stream: correction/shaping
+reconstruction, float-hybrid combinations, other predictor/profile combinations,
+DSD and custom channel identities remain open. Physical-device playback and
+codec-wide completion are not established by these headless checks.
+
+
+## 2026-10-21 — native WavPack correction and shaping reconstruction
+
+Implemented paired main/correction decode through full raw headers and standard
+compact Matroska packets. The shared container reader indexes BlockAdditional
+without reading payloads during indexing, retains ID/default/element-order
+semantics and charges retained index memory and main-plus-additional byte reads.
+The audio reader passes ID 1 WavPack correction to the native codec. Supplementary
+bytes are not silently dropped by a transforming export: metadata completeness
+is cleared because transform writers do not preserve additions yet.
+
+Correction entropy restores exact values within each final quantizer interval.
+Lossy predictor histories remain independent from corrected samples; CROSS_DECORR
+uses pre-update predictor state for corrected stereo. Compact/expanded shaping,
+old/new negative weights, signed deltas and implicit zero shaping are supported.
+Zero-error frames can have no correction-bit metadata while retaining corrected
+shaping and CRC semantics. Corrected CRC, integer/float fixup and complete-frame
+assembly finish before publishing PCM or committing speaker layout. Header/window
+mismatch, malformed correction and last-component CRC errors cannot fall back to
+lossy output. Other BlockAddIDs are not interpreted as WavPack correction.
+
+A pre-change source probe failed both intended acceptance conditions: ignored
+BlockAdditional returned lossy PCM, and a nonzero stereo predictor -1 witness
+failed its sample CRC (`/tmp/fvid-wavpack-correction-before.log`). Inspection and
+synthetic tests also exposed wrong retained history in -2 and swapped samples /
+missing histories in -3. All three shared predictor implementations were fixed.
+The source probe restored exact candidate bytes afterward and was removed.
+
+The owned acceptance matrix has 306 60 ms videos. It covers 8/16/24/32-bit
+mono/stereo/false stereo, SNR/bitrate/deltas/zero limits, shaping forms, both
+shaping signs, new shaping/deltas, CROSS_DECORR, joint stereo, adaptive predictor
+terms 1/8/17/18/-1/-2/-3 and eighteen mixed six-channel cases. Raw pairs, direct
+compact pairs, container decode, scalar lossy/lossless PCM, EOF, reset/rewind,
+35 ms partial-block seek, presentation and headless audio-worker windows pass.
+Malformed correction controls check exact CRC/bitstream/header/ID errors and
+subsequent decoder recovery; a failed last corrected component does not latch a
+new speaker mask. Packet-plus-additional admission and unknown-ID isolation pass.
+Laced correction has an explicit refusal witness, not a playback acceptance claim.
+
+The independent reference at commit
+`c9515833d1867d9ec03774d954369107f2e88a73` returned identical PCM and zero CRC
+errors for all 306 streams in each of paired and main-only modes. Reproducible
+optional tooling lives under `benches/wavpack_hybrid_reference.c` and
+`benches/check_wavpack_hybrid_reference.py`. The external library is built only
+in /tmp and is not linked into FVid or ordinary tests. Reports:
+`/tmp/fvid-wavpack-correction-reference-results.json` and
+`/tmp/fvid-wavpack-correction-main-reference-results.json`.
+Semantics follow the primary
+[Matroska WavPack mapping](https://www.matroska.org/technical/codec_specs.html#wavpack),
+[WavPack correction reconstruction](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/unpack.c)
+and [shaping metadata](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/decorr_utils.c).
+
+Final frozen source passed 257 codec units, twenty audio-reader units, 26 root
+container units, 68 integration tests across seventeen targets and ten media
+reader/probe units: 381 passed, zero failed or ignored. Logs:
+`/tmp/fvid-wavpack-correction-codec-units.log`,
+`/tmp/fvid-wavpack-correction-reader-units.log`,
+`/tmp/fvid-wavpack-correction-container-units.log`,
+`/tmp/fvid-wavpack-correction-integrations.log` and
+`/tmp/fvid-wavpack-correction-media-units.log`.
+All 4,605 new artifacts (7,679,313 bytes) and the preceding five WavPack matrices
+regenerate byte-for-byte with PATH empty and process/network access denied.
+The hybrid malformed-correction expectation now checks truncated entropy rather
+than blanket unsupported refusal; its current 1,139 artifacts total 3,217,328
+bytes. Snapshots are `/tmp/fvid-wavpack-correction-source-hashes.json` and
+`/tmp/fvid-wavpack-correction-fixture-hashes.json`; source stayed unchanged during
+final qualification.
+
+Full codec completion is still unproven: DSD, laced correction, float-hybrid and
+other predictor/extra-bit/profile combinations, custom channel identities and
+other codec families' gaps remain open. Physical-device output is not established
+by these headless tests.
+
+
+## 2026-10-21 — native WavPack DSD reconstruction and PCM playback
+
+Removed the blanket DSD refusal and added owned raw, fast static byte-context
+range and high adaptive bitwise decoding. Fast decoding handles verbatim/sparse
+RLE probability tables, up to five history bits, cumulative byte selection and
+range restarts without an external lookup/decode library. High decoding restores
+initial table/filter/factor state, adapts shared probabilities and per-channel
+integer filters, and checks each component's DSD sample CRC before expansion.
+Rate metadata supplies a power-of-two byte-frame multiplier with checked u32
+output-clock arithmetic. Malformed flags, metadata, probability geometry,
+truncation and CRC return errors rather than substitute samples.
+
+The public raw DSD accessor returns canonical interleaved MSB-first bytes and the
+byte-frame rate. Playback uses a stateful symmetric 56-tap 8x decimator into
+normalized float PCM, retaining startup extrapolation and rounding widths.
+Filter/layout publication is transactional: all components validate before a
+staged filter is committed. Reset/rewind clears filter history. Matroska caches
+DSD track kind; DSD seek replays from the beginning to reconstruct exact history
+before presentation trimming. Existing independent-block PCM WavPack seeks keep
+their direct path. This is functional replay, not bounded-preroll optimization.
+
+The old source failed both raw and container acceptance probes with the intended
+`WavPack DSD block is not supported` gate (`/tmp/fvid-wavpack-dsd-before.log`).
+The probe restored exact candidate bytes and was removed afterward. The owned
+matrix now has 256 short videos: four coding/table variants, four channel
+layouts, three byte clocks, four signal patterns, and 64 additional 1/7/15/16
+sample blocks. Literal DSD and scalar FIR oracles verify exact bytes, float PCM,
+timebases, compact Matroska, neutral video, EOF, reset/rewind, sample-exact seek,
+presentation and headless audio-worker windows. Fourteen malformed videos retain
+specific refusal conditions. Last-component CRC tests check fresh-mask atomicity
+and filter history after previously accepted frames.
+
+An independent reference built at commit
+`c9515833d1867d9ec03774d954369107f2e88a73` matches all 256 native DSD byte streams
+and all 256 PCM outputs with zero CRC errors. The optional harness is
+`benches/wavpack_dsd_reference.c` / `benches/check_wavpack_dsd_reference.py`;
+its report is `/tmp/fvid-wavpack-dsd-reference-results.json`. Calls use matching
+packet-sized windows: reference startup extrapolation changes with the first
+visible call length, so combining tiny blocks into one call changes that startup
+policy. An initial 1–2 LSB startup difference exposed the reference's double
+literal before its final integer cast; explicit operation widths resolved it.
+Primary semantics were inspected in the pinned
+[DSD implementation](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/unpack_dsd.c)
+and [DSD encoder](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/pack_dsd.c).
+The reference library remains separate in /tmp; no production dependency changed.
+
+Final frozen source passed 257 codec units, twenty audio-reader units, 26 root
+container units and 72 integration tests across eighteen targets: 375 passed,
+zero failed or ignored. Logs: `/tmp/fvid-wavpack-dsd-codec-units.log`,
+`/tmp/fvid-wavpack-dsd-reader-units.log`,
+`/tmp/fvid-wavpack-dsd-container-units.log` and
+`/tmp/fvid-wavpack-dsd-integrations.log`.
+All 2,335 new artifacts (8,227,770 bytes) and the preceding six WavPack matrices
+regenerate byte-for-byte with PATH empty and process/network access denied.
+Hashes are `/tmp/fvid-wavpack-dsd-source-hashes.json` and
+`/tmp/fvid-wavpack-dsd-fixture-hashes.json`; source remained unchanged during
+final qualification.
+
+Codec-wide completion is still unproven. Laced correction, float-hybrid and other
+predictor/extra-bit/profile combinations, custom channel identities, DSD seek
+acceleration and other codec families' gaps remain open. Physical DSD output,
+physical audio-device compatibility and sustained performance are not established
+by the finite native/headless matrix.
+
+
+## 2026-10-21 — hybrid float/WVX and foreign-ID main-stream lacing
+
+Fixed a confirmed float reconstruction gap: the lossless WVX mantissa bound was
+also applied to main streams without correction bits. Lossy hybrid cores can
+exceed that sentinel; their wrapped integer shift, sign, mantissa normalization
+and exponent change now use the distinct no-WVX path. The strict corrected/WVX
+bound and float CRC remain in force. New malformed controls verify that this
+acceptance does not relax those refusals or poison the next good pair.
+
+Also fixed a Matroska admission error: WavPack lacing was rejected whenever any
+BlockAdditional existed, including a foreign ID. The guard now applies only to
+the codec's correction ID 1. Three owned Xiph/fixed/EBML movies with ID 2 verify
+six exact main-stream windows, PCM and partial-block seek. Unknown supplementary
+payload is not treated as correction. Transform writers still cannot preserve
+arbitrary additions and therefore retain the metadata-completeness guard.
+
+The original-source run reproduced all three specific acceptance failures:
+foreign-ID lacing hit the correction guard, and both lossy/main and paired float
+acceptance reached the over-broad mantissa bound
+(`/tmp/fvid-wavpack-float-hybrid-before.log`). The new owned matrix has 216 videos:
+135 paired cases span mono/stereo/false stereo, three hybrid profiles, five WVX
+mantissa forms and three exponent ranges; 81 no-WVX controls exercise oversized
+lossy cores and shifts. Scalar IEEE words retain non-finites without conversion.
+Raw/compact pair decode, Matroska, neutral video, EOF, reset/rewind, exact seek,
+presentation and finite headless audio-worker capture pass. Physical-device or
+non-finite-output behavior is not established by the worker tests.
+
+Independent WavPack reference commit
+`c9515833d1867d9ec03774d954369107f2e88a73` matches all 216 streams in corrected
+and main-only modes, byte-for-byte, with zero CRC errors. The optional reference
+helper now preserves native IEEE float words rather than numerically converting
+those words as integer PCM. The earlier 184 float/optimized-INT32 cases also
+match independently. Reports are
+`/tmp/fvid-wavpack-float-hybrid-reference-results.json`,
+`/tmp/fvid-wavpack-float-hybrid-main-reference-results.json` and
+`/tmp/fvid-wavpack-float-existing-reference-results.json`.
+
+The primary
+[float reconstruction](https://github.com/dbry/WavPack/blob/c9515833d1867d9ec03774d954369107f2e88a73/src/unpack_floats.c)
+provides separate no-WVX semantics. Inspection of the pinned
+[MKVToolNix WavPack packetizer](https://codeberg.org/mbunkus/mkvtoolnix/src/commit/108603c4cc2d1bcee8c2fcc9bd43745d55632450/src/output/p_wavpack.cpp)
+confirms it disables lacing when correction is present. The
+[Matroska WavPack mapping](https://www.matroska.org/technical/codec_specs.html#wavpack)
+defines correction per Block/BlockAdditional. A separate correction-per-lace
+packing was not confirmed; no guessed encoding is accepted or labeled supported.
+The ID 1 laced refusal remains a refusal, while foreign-ID main lacing is accepted.
+
+Frozen source passed 257 codec units, twenty audio-reader units, 26 container
+units, 77 integration tests across nineteen targets and ten media reader/probe
+units: 390 passed, zero failed or ignored. Logs:
+`/tmp/fvid-wavpack-float-hybrid-codec-units.log`,
+`/tmp/fvid-wavpack-float-hybrid-reader-units.log`,
+`/tmp/fvid-wavpack-float-hybrid-container-units.log`,
+`/tmp/fvid-wavpack-float-hybrid-integrations.log` and
+`/tmp/fvid-wavpack-float-hybrid-media-units.log`.
+All 2,682 new artifacts (4,671,238 bytes) and the preceding seven WavPack matrices
+regenerate byte-for-byte with PATH empty and process/network access denied.
+The generalized owned movie helper retains identical bytes with default options.
+Snapshots are `/tmp/fvid-wavpack-float-hybrid-source-hashes.json` and
+`/tmp/fvid-wavpack-float-hybrid-fixture-hashes.json`; source remained unchanged
+during final qualification. No external production dependency changed.
+
+The finite matrix is not codec-wide completion. Custom channel identities,
+other predictor/extra-bit/profile combinations, broader raw-file workflows,
+DSD seek acceleration and other codec families' gaps remain open or unverified.
+
+
+## Native standalone WavPack files (2026-10-21)
+
+The player now opens native `.wv` and paired `.wv`/`.wvc` files through an
+owned incremental reader. Selecting `.wvc` resolves its main file; a present
+malformed companion fails rather than silently selecting lossy main-only PCM.
+Case-insensitive companion extensions and actual automatic factory dispatch
+are covered. The new factory acceptance test fails with only the WavPack
+registration removed and passes with it restored (before log:
+`/tmp/fvid-wavpack-file-before.log`).
+
+Header-only indexing retains sample clocks, 40-bit origins, variable frame
+lengths and unknown totals without reading skipped entropy bodies. Opening
+materializes the first complete sample frame only. Integer/float/hybrid and
+DSD use the owned decoder; correction joins retain native headers and CRC
+validation. DSD seeks replay FIR history from the beginning. Prefix/trailer
+recognition is boundary-based: an encoded metadata payload ending in `TAG`
+is not removed as an ID3 trailer. Tag values are not imported as title metadata.
+
+`generate_wavpack_files.py` produces 1,317 positive native cases plus malformed
+controls, exact scalar PCM, correction companions and synthetic video codec
+controls. Native files themselves reproduce missing standalone opening; the
+video controls do not stand in for that acceptance gate. All 5,706 generated
+artifacts (128,350,213 bytes) regenerate identically with PATH empty and process
+creation/network sockets denied. Snapshot:
+`/tmp/fvid-wavpack-file-fixture-hashes.json`.
+
+Final scoped offline qualification: **393 passed, zero failed/ignored**:
+257 codec units, 20 WebM-audio units, 26 WebM-container units, eight player factory/
+worker/duration/preroll units and 82 integrations across 20 targets. Logs:
+`/tmp/fvid-wavpack-file-gate-{0..7}.log` and
+`/tmp/fvid-wavpack-file-integrations.log`. Source snapshot:
+`/tmp/fvid-wavpack-file-source-hashes.json`; no drift during these gates.
+This is not full codec completeness, device/GUI playback qualification or a
+performance claim. Broader codec profiles/tools and DSD seek acceleration remain
+open or unverified. Existing production dependency boundaries are preserved.
+
+`cargo check --offline --no-default-features --lib` and
+`cargo build --offline --no-default-features --features player --bin fvid-player`
+also pass. Build logs: `/tmp/fvid-wavpack-file-core-check.log` and
+`/tmp/fvid-wavpack-file-player-build.log`. Final source hashes remain identical.
+
+
+## E-AC-3 compatible BSIDs and spectral-extension attenuation (2026-10-21)
+
+The owned E-AC-3 decoder now accepts backward-compatible BSID 11..16 rather than
+requiring exactly 16. Reserved identifiers 9/10 and future 17/31 remain refused.
+The requirement is ETSI TS 102 366 V1.3.1 E.1.3.1.6:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.03.01_60/ts_102366v010301p.pdf
+The new acceptance test failed before the change at `long-bsid11` header
+recognition (`/tmp/fvid-eac3-bsid-before.log`), not at an unrelated entropy error.
+
+The broader E-AC-3 playback gate additionally exposed a pre-existing spectral
+extension attenuation error (`max_err=0.011671654` against the checked PCM
+reference in `/tmp/fvid-eac3-bsid-integrations.log`). The notch was skipped at
+the initial extension border when the first copied band did not wrap, and its
+coefficients used a denominator of 16 instead of the normative 15. Both are
+corrected per E.2.6.4.2.3/Table E.2.12. The existing strict reference test now
+passes unchanged. An independent literal-table coefficient test checks initial
+and subsequent wrap borders and verifies the non-wrap border remains untouched.
+
+`generate_eac3_bsid.py` authors 36 short VP9/E-AC-3 Matroska videos and elementary
+controls using owned bit writers: six IDs crossed with long/short/mixed windows,
+spectral extension, and two attenuation pairs. Version-16 comparisons establish
+exact PCM equivalence for compatible identification, including rewind and both
+reader paths; they are not a new independent oracle for every E-AC-3 tool.
+All 83 artifacts (704,117 bytes) regenerate identically with PATH empty,
+subprocess creation and sockets denied. No production dependency changed.
+
+Final scoped offline tests: **311 passed, zero failed/ignored**: 258 codec units,
+20 WebM-audio units, six elementary AC-3/E-AC-3 reader units and 27 integrations
+across six targets. Logs: `/tmp/fvid-eac3-bsid-{codec,webm,elementary}-final.log`
+and `/tmp/fvid-eac3-bsid-integrations-final.log`. Source/fixture snapshots:
+`/tmp/fvid-eac3-bsid-source-hashes.json` and
+`/tmp/fvid-eac3-bsid-fixture-hashes.json`. No source drift during qualification.
+Dependent/multiple E-AC-3 presentations, adaptive hybrid transform and broader
+codec-family completeness remain open. No physical audio/GUI acceptance or
+performance claim is made by this gate.
+
+The offline no-default-features player binary build also passes:
+`/tmp/fvid-eac3-bsid-player-build.log`; final source hashes still match.
+
+
+## AC-3-converted E-AC-3 stream type 2 (2026-10-21)
+
+The decoder now accepts independently decodable converted E-AC-3 (`strmtyp=2`).
+Stream type controls mixing metadata, short-frame `convsync`/`blkid`, original
+AC-3 `frmsizecod`, converter exponents and per-block converter SNR flags.
+Original frame-size metadata does not replace E-AC-3 sample/frame geometry.
+Reserved original size codes above 37 fail. The prior type-2 refusal test is
+replaced by type-3 refusal and positive type-2 acceptance; AC-3 syntax still fails
+before publishing E-AC-3 geometry. Dependent presentations remain unsupported.
+The syntax source is ETSI TS 102 366 Annex E E.1.2.2/E.1.2.3/E.1.2.4:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.03.01_60/ts_102366v010301p.pdf
+
+`generate_eac3_converted.py` authors 66 type-2 cases with independent-stream
+controls, each as native audio and short VP9/Matroska video. Crossed properties:
+1/2/3/6 blocks, BSID 11/16, long/short/mixed windows, optional converted mixing
+metadata and short-frame first/continuation forms. Exact direct-decoder and
+reader PCM, duration and rewind pass. This is PCM equivalence for the authored
+syntax, not an independent oracle for every reconstruction tool. Reserved
+original-frame-size controls fail. Disabling only type-2 admission makes the final
+acceptance fixture fail at `b1-long-id11-mix0` header recognition:
+`/tmp/fvid-eac3-converted-before-final.log`.
+
+All 267 generated artifacts (2,494,779 bytes) regenerate identically with PATH
+empty, subprocess creation and socket access denied. The preceding 83 BSID
+artifacts remain byte-identical after generalizing the owned writer. Tests never
+run either generator. Source/fixture snapshots:
+`/tmp/fvid-eac3-converted-source-hashes.json` and
+`/tmp/fvid-eac3-converted-fixture-hashes.json`.
+
+Scoped final qualification: **313 passed, zero failed/ignored**: 258 codec units,
+20 WebM-audio units, six elementary reader units and 29 integrations across seven
+targets. Logs: `/tmp/fvid-eac3-converted-{codec,webm,elementary,integrations}.log`.
+The offline no-default-features player binary build passes:
+`/tmp/fvid-eac3-converted-player-build.log`. Sources remained unchanged during
+final gates. No production dependency changed. Physical playback, performance,
+dependent substream assembly, enhanced coupling, adaptive hybrid transform and
+other codec-family gaps are not qualified by this finite matrix.
+
+
+## E-AC-3 AHT reconstruction and first playback qualification (2026-10-21)
+
+AHT no longer fails solely because `ahte` is set. Conditional per-plane flags are
+read only for eligible single-exponent-region planes, with the additional
+all-block/single-strategy requirement for the coupling plane. Owned reconstruction
+now selects high-efficiency bit allocation, decodes VQ/GAQ mantissas, performs the
+six-point inverse DCT and scales by exponents before the shared inverse MDCT,
+overlap and output folding. Mixed conventional/AHT planes retain bitstream order
+and grouped conventional quantizer state. Each active plane caches one six-block
+spectrum bounded by the codec's 256 bins. No external decoder dependency changed.
+
+The normative source is ETSI TS 102 366 V1.3.1 Annex E E.2.4, Table E.2.1 and
+Tables E.3.1..7:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.03.01_60/ts_102366v010301p.pdf
+The seven signed-Q15 codebooks contain 956 entries transcribed from the standard.
+Units exercise every index, forward/inverse spectral recovery, literal inverse-DCT
+basis/energy, GAQ small/large escapes, grouped gain syntax and invalid/truncated
+inputs. These component gates are not whole-file qualification for every tool.
+
+The first playback matrix comprises eight native/converted stereo cases (six
+active AHT and two headers declining AHT on all planes), all using hebap 19 and
+nonzero signed AHT DC spectra. Corresponding conventional scalar controls give
+exact PCM equality. Native/Matroska playback, plane flags, geometry, duration and
+rewind pass. Restoring the prior blanket refusal makes the final acceptance test
+fail specifically on active `type0-mask1` header recognition:
+`/tmp/fvid-eac3-aht-before-active.log`. The old header refusal expectation now
+checks successful conditional parsing instead of treating refusal as support.
+
+All 33 owned generated artifacts (596,868 bytes) regenerate identically with PATH
+empty, process creation and sockets denied. Prior BSID and converted matrices
+remain identical. Ordinary tests never regenerate fixtures or invoke FFmpeg.
+Source/fixture snapshots: `/tmp/fvid-eac3-aht-source-hashes.json` and
+`/tmp/fvid-eac3-aht-fixture-hashes.json`.
+
+Scoped final qualification: **318 passed, zero failed/ignored**: 262 codec units,
+20 WebM-audio units, six elementary reader units and 30 integrations across eight
+targets. Logs: `/tmp/fvid-eac3-aht-{codec,webm,elementary,integrations}-final.log`.
+Player binary build passes (`/tmp/fvid-eac3-aht-player-build.log`); sources stayed
+identical during final gates. The optional independent benchmark/reference script
+compares all eight videos to FFmpeg at max absolute PCM error <=6.24e-8. It
+explicitly accounts for audio_probe's existing 256-sample lead trimming:
+`/tmp/fvid-eac3-aht-reference.json`. FFmpeg is confined to that optional oracle.
+
+The separate reference-table audit is **not a passing gate**: the captured
+reference file SHA256 8d27f012cfbce48e252dabc161d57bd70b1d9a16a1faa7936f906548bea1fcc6
+has only 31 explicit rows for book 4, matching normative rows 1..31 and omitting
+row 0. The other six books match. The strict audit retains nonzero status and
+records this discrepancy in `/tmp/fvid-eac3-aht-tables-reference.json`; production
+keeps all 32 normative rows. Do not infer codec-wide correctness from that audit.
+
+Full playback qualification for nonzero AHT AC spectra, VQ/GAQ combinations,
+coupling and LFE remains open. Dependent substreams, enhanced coupling, transient
+pre-noise processing and other codec families also remain unqualified/incomplete.
+No physical audio playback or performance claim is made by this finite matrix.
+
+
+## E-AC-3 nonzero AHT AC playback qualification (2026-10-21)
+
+The owned writer now authors each AHT AC basis and their mixture, with a separate
+analytic inverse-DCT authoring path for conventional scalar controls. Default
+DC-only generator output remains byte-identical. No decoder reconstruction change
+was necessary for this matrix: this closes missing temporal acceptance evidence,
+not a claim that the preceding implementation was failing these streams.
+
+The 36 cases cross native/converted stream types, left/right/both AHT planes,
+and the five AC bases plus their mixture. Every case contains three six-block
+syncframes, native `.ec3` and owned VP9/Matroska video plus conventional controls.
+The exactly representable third AC basis requires byte-identical PCM. Irrational
+basis controls round analytic spectra to 16-bit mantissas; each manifest entry
+records its conservative L1 spectral rounding bound propagated through exponent
+scaling and overlap/add. Tests add 1e-7 for floating arithmetic and do not relax
+the bound after observing errors. Raw/Matroska decode, flags, geometry, duration
+and rewind pass. The six exact-basis cases also pass audio-worker rewind and a
+20 ms partial-first-packet seek on both reader paths with exact PCM and PTS.
+
+A sensitivity experiment temporarily discarded all AHT AC terms. The preceding
+DC matrix still passed; both new tests failed on PCM, with the direct check at
+`type0-mask1-ac1` reporting 0.0049403063 error against a 9.76e-6 bound. The source
+was restored before final qualification. Log:
+`/tmp/fvid-eac3-aht-ac-sensitivity.log`. This is a regression-sensitivity control,
+not a fabricated pre-fix failure claim.
+
+All 145 generated artifacts (2,689,984 bytes) regenerate identically with PATH
+empty, process creation and sockets denied. The preceding 33 DC artifacts remain
+identical. Ordinary tests do not generate fixtures or require FFmpeg/network.
+Snapshots: `/tmp/fvid-eac3-aht-ac-source-hashes.json` and
+`/tmp/fvid-eac3-aht-ac-fixture-hashes.json`.
+
+Scoped final gates: **320 passed, zero failed/ignored**: 262 codec units,
+20 WebM-audio units, six elementary reader units and 32 integrations across nine
+targets. Logs: `/tmp/fvid-eac3-aht-ac-{codec,webm,elementary,integrations}-final.log`.
+Player binary build passes (`/tmp/fvid-eac3-aht-ac-player-build.log`), with no
+source drift. The independent optional reference benchmark passes all 36 cases
+at the unchanged 1e-5 threshold; observed max absolute PCM error is
+7.29499151930213e-6 (`/tmp/fvid-eac3-aht-ac-reference.json`). FFmpeg is confined to
+that benchmark/reference script. This is a distinct nonzero-AC matrix, not the
+preceding DC matrix's lower measured error.
+
+Allocation remains scalar hebap 19 here. Full playback qualification for lower
+VQ/GAQ allocations, coupling and LFE remains open, along with the previously
+recorded codebook-reference discrepancy and other codec-family gaps. No physical
+audio or performance qualification is implied.
+
+
+## E-AC-3 AHT VQ/GAQ playback matrix (2026-10-21)
+
+The new owned authoring matrix closes missing full-file acceptance evidence for
+nonzero hebap 1..19, all four GAQ modes and all 956 normative VQ codeword indices.
+Its 400 cases cross native/converted types, quantizer/Gain modes and saturation/
+headroom. Conventional scalar controls are authored from reconstructed spectra
+and checked with an analytic L1 quantization-error bound, not a tolerance selected
+after failures. Flat exponent-8/10 masking is derived for the specific 73-bin
+fixture domain; production still uses its general masking routine. Codebook
+values are normative shared data, so this metamorphic gate is not independent
+proof of the numeric table values themselves.
+
+Two hundred full-scale cases were retained byte-for-byte while adding matched
+headroom cases with identical quantizer vectors. Raw/Matroska PCM, conditional
+flags, geometry, duration and rewind pass. Sixteen selected VQ/GAQ cases also pass
+exact audio-worker PCM/PTS with rewind and a 20 ms partial-first-packet seek on
+both reader paths. For worker transport, full-precision AHT PCM is the exact
+reference; rounded conventional PCM is used only by the bounded numeric gate.
+
+Sensitivity experiments separately forced VQ index zero and removed the GAQ
+large-mantissa bias while retaining payload consumption. The playback acceptance
+test failed specifically on numeric PCM: `o-448-g0-t0` error 0.24952006 versus
+3.94e-5 bound, and `o-320-g1-t0` error 0.059784047 versus 4.15e-5 bound. Logs:
+`/tmp/fvid-eac3-aht-quantizers-sensitivity-{vq,gaq}.log`. Sources were restored
+before final gates. No decoder reconstruction fix was necessary in this matrix;
+this milestone adds missing acceptance evidence rather than claiming an invented
+prior implementation defect.
+
+All 1,601 generated artifacts (30,278,281 bytes) regenerate identically with PATH
+empty, process creation and sockets denied. Ordinary tests never regenerate or
+invoke FFmpeg/network. Normative authoring tables live in
+`scripts/eac3_aht_author_codebooks.json`. Snapshots:
+`/tmp/fvid-eac3-aht-quantizers-source-hashes.json` and
+`/tmp/fvid-eac3-aht-quantizers-fixture-hashes.json`.
+
+Scoped final gates: **322 passed, zero failed/ignored**: 262 codec units,
+20 WebM-audio units, six elementary reader units and 34 integrations across ten
+targets. Logs: `/tmp/fvid-eac3-aht-quantizers-{codec,webm,elementary,integrations}-final.log`.
+Player binary build passes (`/tmp/fvid-eac3-aht-quantizers-player-build.log`), with
+no source drift. Production dependencies are unchanged.
+
+The optional FFmpeg 9.0.2 reference gate remains **partially failing**, not accepted
+as wholly green: 196/400 direct float comparisons pass at unchanged 1e-5.
+All 128 headroom cases without VQ4 pass. Their full-scale counterparts expose
+FVid's existing saturating PCM policy versus reference float values up to 1.279;
+a diagnostic saturated-reference comparison passes 126/128, with two scalar
+cases still slightly above 1e-5. No threshold was raised and no reference output
+is silently clamped for the primary comparison. Results:
+`/tmp/fvid-eac3-aht-quantizers-reference-headroom.json`.
+
+All 72 headroom VQ4 cases disagree. A separate controlled experiment on three
+cases constructs conventional controls from the captured reference's 31 explicit
+book-4 rows plus implicit zero row. Reference AHT PCM differs from these controls
+by <=7.62e-6, versus 0.034..0.042 from normative controls. This explains the sampled
+runtime discrepancy; FVid retains the 32-row ETSI table and introduces no fallback.
+Experiment: `benches/check_eac3_vq4_reference.py`;
+results `/tmp/fvid-eac3-vq4-discrepancy.json`. The broader reference compatibility
+discrepancy remains explicitly recorded.
+
+Coupling/LFE, zero-allocation dithering, changing frame configurations, dependent
+presentations, enhanced coupling, transient pre-noise processing and other codec
+families remain open/unqualified. This finite matrix is not codec-wide completion,
+physical-device acceptance or a performance result.
+
+## E-AC-3 AHT LFE and Dolby speaker assignment (2026-10-21)
+
+The owned 48-case matrix adds active LFE and all mixed full-band/LFE AHT flag
+combinations in native and converted streams. DC and AC basis 3 controls require
+exact PCM; mixed spectra use an analytic quantization-error bound. All cases
+check raw, Matroska and MP4 readers, duration, rewind and nonzero LFE output.
+Sixteen exact active-LFE cases on each of the three readers additionally check
+audio-worker PCM/PTS, rewind, a 20 ms partial-packet seek and backend speaker mask.
+
+The actual before-fix failure was missing channel identity: all three reader
+layout tests returned `None` instead of FL/FR/LFE `Some(0x0b)`, although numeric
+decoding already passed. AC-3 and E-AC-3 now expose the emitted PCM assignment
+from their owned headers; elementary, Matroska and MP4 readers retain it.
+Native center+LFE remains center+LFE even at two channels; actual mono/stereo
+downmixes expose their resulting layout. Unit checks cover all eight Dolby
+channel modes with/without LFE and the requested output counts. Stereo-router
+impulses distinguish LFE from center. Header probes rewind Matroska and do not
+consume the MP4 sample index; full three-packet comparisons guard packet loss.
+This qualifies initial assignment, not later in-band changes with the same width.
+
+`scripts/generate_eac3_aht_lfe.py` produces 289 artifacts / 6,859,668 bytes.
+MP4 samples include the Annex F.6 `dec3` configuration. The new matrix and five
+preceding E-AC-3 matrices regenerate byte-identically with PATH empty and
+process/socket creation denied. Ordinary tests require no FFmpeg or network.
+Fixture snapshot: `/tmp/fvid-eac3-aht-lfe-fixture-hashes.json`.
+
+Scoped validation: **344 passed, zero failed/ignored**: 264 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 44 integrations
+across twelve targets (including WavPack worker regression for the shared test
+backend). Logs: `/tmp/fvid-eac3-aht-lfe-codec.log`,
+`/tmp/fvid-eac3-aht-lfe-playback_{webm_audio,ac3,mp4_audio}.log` and
+`/tmp/fvid-eac3-aht-lfe-integrations.log`.
+
+Core `cargo check --offline --no-default-features --lib` and the player binary
+build with `--no-default-features --features player` pass. The 16-file source
+snapshot `/tmp/fvid-eac3-aht-lfe-source-hashes.json` remains unchanged after the
+final gates. Production dependencies are unchanged.
+
+The optional independently decoded reference passes all 48 new cases at the
+unchanged 1e-5 threshold; maximum absolute error 7.235532393679023e-6.
+Report: `/tmp/fvid-eac3-aht-lfe-reference.json`. This does not supersede the
+previously recorded VQ4/saturation reference discrepancies. Scalar hebap 19,
+fixed 48 kHz stereo+LFE and initial assignment are qualified here; coupling,
+VQ LFE, zero-allocation dithering, changing configurations, dependent streams,
+enhanced coupling and transient pre-noise remain open. Other codec families
+and physical-device/performance acceptance remain separately unqualified.
+
+## E-AC-3 coupled AHT and reused phase coordinates (2026-10-21)
+
+Fixed a real PCM regression in the common AC-3/E-AC-3 coupling-coordinate
+routine: when both channels reused coordinates, it cleared `phsflginu`, although
+the strategy and phase flags must remain in force. Later coupled bands of the
+right channel therefore lost their negative sign. The fix preserves this state
+until an actual coupling-strategy update; coordinate/phase parsing is unchanged.
+ETSI TS 102 366 clauses 7.4.2 and E.1.2.4 distinguish new coordinates from reuse.
+
+The new owned `eac3-aht-coupling` matrix has 192 cases: native/converted streams,
+coupling starts at bins 37/61, phase restoration off/on, all eight full-band and
+coupling AHT flag combinations, and DC/basis-3/mixed spectra. Conventional
+controls explicitly resend the same coordinates and phase in every block;
+test streams reuse them. Before the fix, both numeric and audio-worker tests
+failed on actual PCM (`t0-b0-p1-m1-dc` exact comparison), after phase-disabled
+cases passed. Log: `/tmp/fvid-eac3-aht-coupling-before.log`.
+
+All cases now pass conditional header flags, raw/Matroska numeric PCM, duration
+and rewind. DC/basis 3 require exact equality; mixture controls use an analytic
+spectral quantization bound with the authored coupling gains. All 128 exact
+cases on both readers also pass worker PCM/PTS, rewind and a 20 ms partial-packet
+seek. This qualifies ordinary/scalar AHT coupling, not enhanced coupling.
+
+The 769 generated artifacts / 14,352,308 bytes regenerate byte-identically with
+PATH empty and process/socket creation denied. Ordinary tests require neither
+FFmpeg nor network. Snapshot:
+`/tmp/fvid-eac3-aht-coupling-fixture-hashes.json`. Optional independent reference
+comparison passes **192/192** at unchanged 1e-5 threshold, maximum absolute
+error **8.279035682789981e-6**:
+`/tmp/fvid-eac3-aht-coupling-reference.json`. No reference clamp or tolerance
+increase is used. Earlier VQ4/saturation discrepancies remain open.
+
+Changing coupling regions, coupling VQ/GAQ, zero-allocation noise, enhanced
+coupling, changing output configurations, dependent presentations and transient
+pre-noise remain open/unqualified, along with other codec-family gaps. No
+physical-device or performance qualification is implied.
+
+Scoped final gates: **346 passed, zero failed/ignored**: 264 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 46 integrations
+across thirteen targets. Logs:
+`/tmp/fvid-eac3-aht-coupling-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core check without default features and player binary build pass, with unchanged
+production dependencies. The 15-file source snapshot
+`/tmp/fvid-eac3-aht-coupling-source-hashes.json` matches after final gates.
+
+## Owned enhanced E-AC-3 coupling (2026-10-21)
+
+Replaced the explicit enhanced-coupling refusal with owned parsing and spectral
+reconstruction in `src/codec/eac3_enhanced_coupling.rs`. This implements the
+Annex E sub-band map (including six-bin low bands), default/explicit grouping,
+the 32-entry amplitude mapping, initial/reused parameter syntax and reserved
+fields. It measures actual enhanced start/end bins before exponent allocation,
+selects enhanced rematrix counts, restores each participating channel and resets
+state between frames/seeks. Ordinary coupling remains on its existing path.
+The core exposes its existing coupled zero-allocation/dither policy to the new
+restoration path; that policy is not newly qualified by high-allocation fixtures.
+
+The owned 432-case matrix spans native/converted stereo, nine begin codes,
+default/explicit banding, all amplitude codes, ordinary scalar DC and scalar AHT
+basis-3/mixed spectra. Controls independently code the amplitude-scaled spectra
+without coupling. All cases pass raw/Matroska numeric PCM under the analytic
+quantization bound, nonzero output, duration and rewind. Thirty-six exact-input
+transport selections on both readers also pass worker PCM/PTS, rewind and a
+20 ms partial-packet seek. Worker transport compares to full-precision direct
+PCM; the separate uncoupled controls establish bounded signal correctness.
+Before implementation, the acceptance test failed on the actual unsupported
+enhanced-coupling branch: `/tmp/fvid-eac3-enhanced-coupling-before.log`.
+
+All 1,729 artifacts / 32,313,452 bytes regenerate byte-identically with PATH
+empty and process/socket creation denied. Ordinary tests require no FFmpeg or
+network. Snapshot: `/tmp/fvid-eac3-enhanced-coupling-fixture-hashes.json`.
+
+FFmpeg 9.0.2 emits audio-block errors for the enhanced stream; the reference
+source lists this mode as unsupported. It cannot establish direct enhanced
+acceptance. Optional uncoupled-control comparison remains explicitly **392/432**
+at the unchanged 1e-5 threshold. Forty mixed cases exceed it, maximum
+1.3727025361731648e-5. Report:
+`/tmp/fvid-eac3-enhanced-coupling-control-reference.json`.
+
+A controlled diagnostic reproduces the reference's Q23 coefficient truncation
+using temporary scalar mantissas floored to multiples of four at exponent 10.
+All 40 previously failing controls then differ by <=3.5157427191734314e-8:
+`/tmp/fvid-eac3-enhanced-coupling-control-precision.json`. Script:
+`benches/check_eac3_enhanced_control_precision.py`. This does not replace the
+primary report or alter production precision/thresholds. The optional reference
+driver now supports `--control` and uses `-xerror` so decode errors cannot be
+mistaken for valid PCM.
+
+Scoped final gates: **349 passed, zero failed/ignored**: 265 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 48 integrations
+across fourteen targets. Logs:
+`/tmp/fvid-eac3-enhanced-coupling-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core without default features and player binary build pass. Production
+dependencies are unchanged.
+The 14-file snapshot `/tmp/fvid-eac3-enhanced-coupling-source-hashes.json`
+matches after final gates. The modified optional reference driver also retains
+8/8 passing comparisons for the earlier `eac3-aht` matrix.
+
+This qualifies fixed stereo geometry and initial/reused enhanced parameters.
+Explicit mid-frame parameter updates, geometry/mode changes, multichannel,
+SPX combinations, coupling VQ/GAQ and zero-allocation noise remain unqualified.
+Dependent presentations, transient pre-noise and other codec-family gaps remain
+open. No physical-device or performance qualification is implied.
+
+## E-AC-3 coupling updates and tool transitions (2026-10-21)
+
+Fixed state continuity when ordinary and enhanced coupling appear in one frame.
+The prior enhanced implementation reset `firstcplcos` when switching tools, so
+an explicit coordinate-update bit was consumed as coordinate payload. It also
+classified the tool switch as a newly opened/moved region regardless of actual
+frequency bins, muting valid exponent reuse. The fix preserves per-participant
+history and compares actual start/end bins for reuse checks. Ordinary default
+banding is initialized at frame start even if the first coupled block is enhanced.
+
+The new 448-case owned matrix covers layouts 2..7, LFE on/off, native/converted
+streams, explicit/default enhanced banding, selected-channel amplitude updates,
+participant leave/join, changing start frequency, E-to-O, O-to-E and E-to-O-to-E.
+Tool-only transitions include both exponent refresh and reuse. Twenty-four wide
+stereo cases reach ordinary default merged bands. The first 424 cases' 1,696
+media artifacts were preserved byte-for-byte when the wide cases were added.
+
+Before the fix, the valid stereo `l2-f0-t0-e-o-x0-r0` fixture failed numeric PCM
+with error 0.7034164 versus analytic bound 1.4524324035644532e-5:
+`/tmp/fvid-eac3-coupling-updates-before.log`. The initial multichannel author
+included an erroneous stereo-only phase bit; that authoring error was corrected
+before qualifying multichannel acceptance. It is not counted as a decoder bug.
+
+All cases now pass comparison with separately coded uncoupled spectra, header
+checks, raw/Matroska PCM, duration, native speaker masks and rewind. Ninety-six
+selections on both readers pass audio-worker PCM/PTS, backend speaker assignment,
+rewind and a 5 ms partial-first-packet seek. Worker transport uses direct full
+precision PCM; the separate analytic-bound gate establishes signal correctness.
+
+The 1,793 generated artifacts / 33,539,996 bytes regenerate byte-identically
+with PATH empty and process/socket creation denied. Ordinary tests require no
+external codec/network. Snapshot:
+`/tmp/fvid-eac3-coupling-updates-fixture-hashes.json`. The preceding enhanced
+matrix also regenerated identically during this milestone.
+
+Optional independent comparison passes **448/448 uncoupled controls**, unchanged
+threshold 1e-5, maximum error 2.9910734156146646e-6:
+`/tmp/fvid-eac3-coupling-updates-control-reference.json`. This is control
+validation, not direct enhanced decoding by FFmpeg. Earlier mixed-spectrum
+Q23/VQ4/saturation discrepancies remain recorded, not silently overwritten.
+The optional driver now reads each case's block count, retaining six-block
+default compatibility.
+
+High-allocation scalar updates/transitions are qualified here. AHT combined with
+tool/participant changes, SPX combinations, low-allocation noise, dependent
+presentations, transient pre-noise and other codec-family gaps remain open.
+No physical audio or performance qualification is implied.
+
+Scoped final gates: **351 passed, zero failed/ignored**: 265 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 50 integrations
+across fifteen targets. Logs:
+`/tmp/fvid-eac3-coupling-updates-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core check without default features and player binary build pass. The 14-file
+snapshot `/tmp/fvid-eac3-coupling-updates-source-hashes.json` matches after final
+gates; production dependencies are unchanged. The generalized reference driver
+also retains 8/8 passing comparisons for the prior six-block `eac3-aht` matrix.
+
+## AHT combined with coupling updates/transitions (2026-10-21)
+
+The new owned 356-case matrix qualifies previously untested combinations of
+AHT with amplitude updates, E-to-O-to-E transitions, participant changes and
+changing coupling start frequency. It spans layouts 2..7, LFE, native/converted
+streams, exact-input AC basis 3 and mixed spectra. AHT is enabled only for
+eligible constant-extent/single-exponent-region planes. Other planes remain
+conventional; LFE AHT can survive full-band geometry changes. Duplicate activation
+sets are removed. Allocation remains scalar hebap 19 at exponent 10.
+
+Controls independently code amplitude-scaled reconstructed spectra without
+coupling. Three six-block AHT frames are compared with six three-block control
+frames, keeping both at 96 ms and within the 4096-byte frame limit even at 5.1.
+The analytic spectral quantization bound is fixed from the 73-bin fixture domain,
+not selected after a failure. Different frame boundaries additionally exercise
+overlap continuity. Every AHT flag, nonzero PCM, raw/Matroska signal, duration,
+native masks and rewind pass. All 178 basis-3 selections on both readers also
+pass worker PCM/PTS, speaker assignment, rewind and a 5 ms partial-packet seek.
+Transport uses full-precision direct PCM; the separate uncoupled controls are
+the bounded numeric oracle.
+
+No production reconstruction fix was necessary. The prior production source
+snapshot remains unchanged: this milestone adds missing acceptance evidence,
+not an invented decoder defect. All 1,425 generated artifacts / 39,880,272 bytes
+regenerate identically with PATH empty and process/socket creation denied.
+Ordinary tests invoke neither FFmpeg nor network. Snapshot:
+`/tmp/fvid-eac3-aht-updates-fixture-hashes.json`.
+
+The optional independent control comparison passes **356/356**, unchanged 1e-5
+threshold, maximum absolute error **7.251590432133526e-6**:
+`/tmp/fvid-eac3-aht-updates-control-reference.json`. This proves control
+compatibility, not direct enhanced decoding by FFmpeg. Earlier reference-policy
+discrepancies remain recorded separately.
+
+Low-allocation noise remains unqualified. Inspection identifies different AHT
+noise-domain and post-extraction dither paths, but does not yet establish that
+changing either is correct. No speculative noise rewrite was applied. Legal
+random sequences require a separate energy/correlation oracle, not raw PCM
+equality across unrelated PRNGs. SPX combinations, coupling VQ/GAQ, dependent
+presentations, transient pre-noise and other codec-family gaps also remain open.
+No hardware audio or performance acceptance is implied.
+
+Scoped final gates: **353 passed, zero failed/ignored**: 265 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 52 integrations
+across sixteen targets. Logs:
+`/tmp/fvid-eac3-aht-updates-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core check without default features and player binary build pass. The 18-file
+snapshot `/tmp/fvid-eac3-aht-updates-source-hashes.json` matches after final gates.
+Production dependencies are unchanged.
+
+## SPX noise state on decoder reset (2026-10-21)
+
+Fixed a real E-AC-3 rewind/reset defect: `Eac3Decoder::reset()` rebuilt the core
+dither state but did not reset the independent SPX random generator. The same
+noisy spectral-extension stream therefore produced different PCM after rewind.
+The reset now restores `NOISE_SEED`; normal frame boundaries do not reseed it.
+
+The owned 15-case `eac3-spx-noise` matrix crosses five blend codes and three
+notch-attenuation configurations, with elementary and short VP9/Matroska forms.
+Before the fix, the signal-only positive control passed but direct noisy reset,
+reader rewind and audio-worker rewind failed. `none-blend0` had maximum reset
+PCM error 0.07922463; worker failure was generation 1, packet 0. Log:
+`/tmp/fvid-eac3-spx-noise-before.log`.
+
+All five new tests pass: signal-only reset, noisy reset, reader rewind,
+signal/noise continuity across ordinary frame boundaries, and worker PCM/PTS,
+speaker assignment, rewind and 20 ms partial-packet seek. The continuity gate
+requires stationary signal controls to repeat and noisy frames to change,
+preventing a superficially deterministic fix that reseeds every frame or mutes
+noise. Each stream has three six-block 48 kHz stereo frames and nonzero PCM.
+
+The 31 generated artifacts / 284,824 bytes regenerate identically with PATH
+empty and process/socket creation denied. The shared authoring helper adds an
+optional blend parameter with unchanged default 31. All 83 earlier BSID-matrix
+artifacts also regenerate identically, covering its existing SPX attenuation
+variants. Snapshot: `/tmp/fvid-eac3-spx-noise-fixture-hashes.json`. Ordinary tests
+require no external codec/network.
+
+This proves deterministic reset and transport for FVid's own noise sequence;
+it does not require bitwise identity to a different legal PRNG. Statistical
+noise energy/correlation, zero-bit dither modes, SPX combined with AHT/coupling,
+dependent presentations and other codec-family gaps remain open. No hardware
+or performance acceptance is implied.
+
+Scoped final gates: **358 passed, zero failed/ignored**: 265 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 57 integrations
+across seventeen targets. Logs:
+`/tmp/fvid-eac3-spx-noise-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core check without default features and player binary build pass. The 14-file
+snapshot `/tmp/fvid-eac3-spx-noise-source-hashes.json` matches after final gates.
+Production dependencies are unchanged.
+
+## Full-band zero-bit AHT dither flags (2026-10-21)
+
+Fixed an actual disabled-dither defect in AHT reconstruction. Conventional
+zero-bit planes respected each block/channel flag, but AHT unconditionally copied
+noise from its six-block inverse-transform cache. The valid
+`a0-e8-t0-m1-off` case emitted peak 0.08947197 where exact zero was required
+after overlap. The before gate passed four tests (conventional behavior, coded
+controls, exponent/correlation checks and transport) and failed the specific AHT
+silence acceptance test: `/tmp/fvid-eac3-zero-bit-before.log`.
+
+The decoder now retains bounded full-band zero-bit markers from the allocation
+that describes the six-block AHT payload. It gates only those substituted-noise
+coefficients with the current block's flag. Coded coefficients are preserved,
+the cache remains intact for a later enable, and normal overlap tails are not
+cleared. First-allocation markers avoid relying on a later recomputed bap array.
+
+The owned matrix contains 112 zero-bit cases (native/converted, exponents 8/12,
+four AHT masks and seven per-block/channel flag patterns) and 16 high-allocation
+coded-signal controls, all long-window 48 kHz stereo. Every case checks
+raw/Matroska playback, finite PCM,
+duration and rewind. Exact silence is required only after two adjacent disabled
+blocks; the first disabled block must still emit its preceding overlap tail.
+Enabled noise must remain nonzero. Controls prove coded signal is not muted.
+Four exponent steps reduce amplitude exactly 16x. A fixed |correlation| <0.2
+stereo guard rejects accidentally shared noise; it is a finite regression check,
+not universal statistical certification. All 128 cases on both readers also
+pass worker PCM/PTS, assignment, rewind and a 20 ms partial-first-packet seek.
+
+The 257 artifacts / 4,830,852 bytes regenerate identically with PATH empty and
+process/socket creation denied. Snapshot:
+`/tmp/fvid-eac3-zero-bit-fixture-hashes.json`. Ordinary tests use no external
+codec/network.
+
+The optional strict-silence audit is explicitly **not green against FFmpeg
+9.0.2**: FVid is silent in all 16 all-off cases, while the reference is silent
+only in four conventional cases. Its twelve AHT cases emit noise up to peak
+0.1175970658659935. Report: `/tmp/fvid-eac3-zero-bit-reference.json`;
+driver `benches/check_eac3_zero_bit_reference.py` exits nonzero on this
+discrepancy. This is not a PRNG/tolerance comparison: disabled dither must be
+zero per ETSI TS 102 366 6.3.4 and E.1.2.4. Production follows that requirement,
+without fallback or altered reference thresholds.
+
+This qualifies the stated uncoupled full-band zero allocation and scalar controls.
+Other rates/windows/geometries, mixed zero/VQ/GAQ allocation, zero-bit coupling/LFE,
+SPX interactions, dependent
+presentations, transient pre-noise and other codec-family gaps remain open.
+No physical-device or performance qualification is implied.
+
+Scoped final gates: **363 passed, zero failed/ignored**: 265 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 62 integrations
+across eighteen targets. Logs:
+`/tmp/fvid-eac3-zero-bit-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core check without default features and player binary build pass. The 16-file
+snapshot `/tmp/fvid-eac3-zero-bit-source-hashes.json` matches after final gates.
+Production dependencies are unchanged. The optional external silence audit
+remains nonzero as described above; it is not counted among passing gates.
+
+## Mixed zero/VQ/GAQ AHT allocation (2026-10-21)
+
+Added the missing selective-dither acceptance matrix: 272 native/converted
+cases cross 17 SNR offsets, two critical-band starts and four GAQ modes. Eight
+four-band delta segments alternate -512/+512 with opposite patterns per channel.
+Analytic exponent-10 masking produces actual zero/coded mixtures, not the
+all-zero SNR shortcut. A private codec unit validates all decoded allocation
+arrays against the author, covering pointers 0..14. In 120 cases both channels
+simultaneously contain zero, VQ and GAQ; the other cases mix zero with GAQ.
+The seven VQ books contribute 852 sampled rows, supplementing rather than
+replacing the earlier all-956-word matrix. Shared normative table data is not
+new independent proof of the table values themselves.
+
+Dither is disabled explicitly. The independent conventional controls reconstruct
+the coded spectra, use true zero for zero-bit bins, and quantize scalar mantissas
+with explicit shift/exponent compensation. The numeric bound is derived from
+their actual spectral rounding error. All cases pass nonzero PCM, conditional
+headers, raw/Matroska duration and rewind. Ten selected mode-3 cases on both
+readers also pass worker PCM/PTS, assignment, rewind and a 20 ms partial-packet
+seek. Transport uses full-precision direct PCM; the separate conventional
+control gate establishes bounded signal correctness.
+
+The prior selective-dither implementation passes without a new reconstruction
+fix. The shared authoring helper adds zero-pointer handling without emitting
+coded words. All 1,601 previous quantizer artifacts / 30,278,281 bytes regenerate
+unchanged. The 1,089 new artifacts / 20,907,489 bytes also regenerate identically
+with PATH empty and process/socket creation denied. Snapshot:
+`/tmp/fvid-eac3-aht-mixed-zero-fixture-hashes.json`. No ordinary test requires
+FFmpeg or network.
+
+The optional independent reference passes **272/272 conventional controls**,
+unchanged threshold 1e-5, maximum absolute error 1.1920928955078125e-6:
+`/tmp/fvid-eac3-aht-mixed-zero-control-reference.json`. This does not establish
+direct AHT compatibility with the reference, whose disabled-dither/VQ4 and
+precision/saturation discrepancies remain separately recorded.
+
+This matrix uses flat exponent 10, 73 bins, long windows, 48 kHz and uncoupled
+stereo. Mixed zero with pointers 15..19 in one plane, enabled-noise mixtures,
+coupling/LFE/SPX interactions, dependent presentations, transient pre-noise and
+other codec-family gaps remain open. No hardware or performance qualification
+is implied.
+
+Scoped final gates: **366 passed, zero failed/ignored**: 266 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, and 64 integrations
+across nineteen targets. Logs:
+`/tmp/fvid-eac3-aht-mixed-zero-{codec,playback_webm_audio,playback_ac3,playback_mp4_audio,integrations}.log`.
+Core check without default features and player binary build pass. The 18-file
+snapshot `/tmp/fvid-eac3-aht-mixed-zero-source-hashes.json` matches after final
+gates. Production dependencies are unchanged.
+
+
+## Zero-bit ordinary coupling qualification (2026-10-21)
+
+Added 448 owned acceptance cases over exponents 8/12, independent/converted
+streams, coupling ranges 37..73 and 61..85 (the latter with phase flags), all
+eight AHT plane masks and seven per-channel/block dither patterns. Four
+integration tests pass raw/Matroska silence after overlap, noise re-enabling,
+exact 16x exponent scaling, stereo independence, rewind and worker PCM/PTS
+with 20 ms partial-packet seek. A private decoder test verifies actual zero
+coupling allocation and coupled-channel coefficients before transform, so
+uncoupled low-band noise cannot mask broken decoupling. Current production
+reconstruction passes without a new decoder fix.
+
+The normative basis is ETSI TS 102 366 V1.4.1 clause 6.3.4: zero-bit dither
+is conditional on channel flags and applied independently after decoupling.
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+
+All 769 previous coupled-AHT artifacts regenerate unchanged. The 897 new
+artifacts (16,915,348 bytes, excluding this README) regenerate identically
+with PATH empty and process/socket creation denied. Snapshot:
+`/tmp/fvid-coupling-zero-fixture-hashes.json`. Fixture generation remains
+separate; ordinary tests need neither FFmpeg nor network.
+
+This is ordinary fixed-geometry stereo coupling coverage, not completion of
+all codecs. AHT/LFE zero-bit policy needs stronger normative evidence before
+changing behavior. Enhanced-coupling noise, mixed high-allocation/noise spectra,
+dependent presentations and previously recorded codec gaps remain open.
+
+Scoped validation: **289 passed, zero failed/ignored** (267 codec units and
+22 integrations across seven coupling/AHT/zero-bit targets). Core check without
+default features and player binary build pass. Logs:
+`/tmp/fvid-coupling-zero-{codec,integrations,core,player}.log`.
+The four-source snapshot `/tmp/fvid-coupling-zero-source-hashes.json` matches
+after validation. Existing unrelated warnings remain; no performance claim.
+
+
+## Enhanced-coupling zero-bit noise qualification (2026-10-21)
+
+224 owned acceptance cases cover independent/converted streams, conventional
+and AHT coupling, exponents 8/12, enhanced begin codes 0/8, explicit/default
+band grouping and seven per-channel/block dither patterns. All 32 enhanced
+amplitude codes occur. Four integrations pass raw/Matroska silence after
+overlap, re-enabling, exact exponent scaling, stereo independence, rewind and
+worker PCM/PTS with 20 ms partial-packet seek. A private decoder regression
+verifies actual enhanced geometry/zero allocation and every coupled coefficient
+against an independently authored unity-amplitude companion times its specified
+gain. It also checks unchanged low bands and pre-transform noise independence.
+The existing amplitude unit checks literal normative Q12 amplitudes separately.
+Current production reconstruction passes; no decoder fix was necessary.
+
+All 1,729 old enhanced-coupling artifacts regenerate unchanged. The 673 new
+artifacts / 10,262,155 bytes (excluding README) regenerate identically with
+PATH empty and process/socket creation denied. Snapshot:
+`/tmp/fvid-enhanced-noise-fixture-hashes.json`. Generation is separate from
+tests; ordinary tests need no FFmpeg or network. Seven source hashes are in
+`/tmp/fvid-enhanced-noise-source-hashes.json`.
+
+This qualifies fixed-geometry stereo enhanced noise, not all enhanced begin
+codes, enabled-noise/coded-bin mixtures, all tool transitions, dependent
+presentations or AHT/LFE zero-bit policy. Those and the broader codec-family
+gaps remain open; no device or performance qualification is implied.
+
+Scoped validation: **296 passed, zero failed/ignored** (268 codec units plus
+28 integrations across nine enhanced/ordinary coupling, AHT and zero-bit targets).
+Core check without default features and player binary build pass. Logs:
+`/tmp/fvid-enhanced-noise-{codec,integrations,core,player}.log`.
+All seven source hashes match after validation. Existing unrelated warnings
+remain. No production dependency or reconstruction change was made here.
+
+
+## AHT zero-allocation LFE noise fix (2026-10-21)
+
+Reproduced `a0-e8-t0-m4-d0`: a zero-bit LFE emitted peak 0.029320521 with
+AHT, while conventional LFE retained true zero. The corrected pre-fix harness
+had one passing coded-signal test and three failing silence/reader/worker
+checks (`/tmp/fvid-lfe-zero-before.log`). Its initial generic positive threshold
+was too high for a seven-bin LFE signal; it was corrected before that baseline,
+not to relax silence, which remains exact zero.
+
+The selective AHT zero-allocation mask now includes LFE. Zero-bit LFE noise
+is suppressed after inverse AHT; coded coefficients, full-band dither switches,
+coupling and overlap behavior remain governed by their existing paths.
+96 owned cases span independent/converted streams, all eight plane masks,
+explicit full-band dither on/off, zero allocation at exponents 8/12 and coded
+controls at exponent 10. All four focused integrations pass raw/Matroska/MP4,
+signal identity, sample counts, rewind and worker PCM/PTS/assignment with
+20 ms partial-packet seek. A private unit verifies actual seven-bin LFE
+allocation (zero versus scalar 15/AHT 19) and pre-transform coefficients.
+
+Normative interpretation: section 6.3.4 of ETSI TS 102 366 makes zero-bit
+substitution conditional on channel flags. E.1.2.4 audblk only transmits or
+implicitly enables flags for full-band channels; E.2.4 changes AHT allocation,
+quantizers and inverse DCT. Preserving conventional LFE true-zero substitution
+in AHT is inferred from those combined rules; the document does not provide
+an explicit AHT-zero-LFE sentence. The reference parser also initializes LFE
+dither to zero, but its AHT branch unconditionally generates zero-pointer noise.
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+https://raw.githubusercontent.com/FFmpeg/FFmpeg/master/libavcodec/eac3dec.c
+
+Optional reference audit remains **red**: FVid silent 32/32, FFmpeg 9.0.2
+silent 16/32; all 16 AHT-LFE cases emit noise, maximum 0.0402078703045845.
+No tolerance was raised, nor is that audit counted as a green ordinary gate.
+`benches/check_eac3_lfe_zero_reference.py`, `/tmp/fvid-lfe-zero-reference.json`.
+
+All 289 old AHT/LFE artifacts regenerate unchanged. The 289 new artifacts /
+6,864,260 bytes (excluding README) regenerate identically with PATH empty and
+process/socket creation denied. Hashes: `/tmp/fvid-lfe-zero-fixture-hashes.json`.
+Ordinary tests require neither FFmpeg nor network. This does not qualify mixed
+LFE allocation, dependent presentations, all rates/profiles or other codec gaps.
+
+Scoped final validation: **381 passed, zero failed/ignored**: 269 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, plus 76 integrations
+across 22 targets. Logs: `/tmp/fvid-lfe-zero-{codec,webm,elementary,mp4,integrations}.log`.
+Core check without default features and player binary build pass. All seven
+source hashes match after validation. The separate optional reference audit
+above remains red and is excluded from this count. Existing unrelated warnings
+remain; no playback performance or hardware claim.
+
+
+## Multiplexed E-AC-3 base-programme compatibility (2026-10-21)
+
+Fixed a real unsupported-stream path: additional independent/dependent frames
+previously stopped base-programme playback. ETSI TS 102 366 E.2.8.1/E.2.8.2
+requires decoding independent substream 0 and skipping additional streams for
+output up to 5.1. The decoder now skips bounded unselected envelopes without
+consuming samples, priming, overlap or RNG state; skipped-only packets emit no
+PCM. The elementary reader counts only selected frames, and the Matroska sample
+clock excludes unselected frames within each packet. Reserved types remain
+refused; truncated skipped envelopes are reported rather than silently consumed.
+
+88 owned cases span native/converted base coding, conventional/AHT planes,
+coded/noise base signals, every independent ID 1..7, implicit/explicit dependent
+maps, and bundles with multiple programmes and dependent streams. Disabling
+only the routing branch reproduces the specific old Unsupported second-substream
+error (`/tmp/fvid-substreams-before.log`); the branch was restored before gates.
+Five integrations pass exact PCM/PTS versus base-only controls, raw/Matroska
+lengths, assignment, rewind, worker 20 ms partial seek, skipped-only packet state,
+reserved refusal and truncated-tail reporting. A private unit checks each
+fixture's envelope type/ID/size/CRC. Skipping validates the envelope, not the
+unselected audio syntax. The reconstruction-header refusal expectation is
+retained with clarified scope; it must never decode an extension as programme 0.
+
+The generator authors dependent headers/blocks directly, including compr,
+optional chanmap and omission of independent converter syntax. All 257 prior
+zero-bit artifacts regenerate unchanged. The 443 new artifacts / 12,378,354
+bytes (including two truncated-tail raw/video witnesses, excluding README)
+regenerate identically with PATH empty and process/
+socket creation denied. `/tmp/fvid-substreams-fixture-hashes.json`.
+Ordinary tests need neither FFmpeg nor network.
+
+Primary source:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+
+This completes the bounded base-programme routing behavior only. Dependent
+replacement/extension reconstruction up to 16 channels, programme-selection API,
+other container configurations and transient pre-noise synthesis remain open,
+along with the other previously recorded codec gaps. It is not complete
+E-AC-3 qualification, a hardware check, or a performance result.
+
+The truncated-tail witness exposed an additional parser failure: the elementary
+reader's 90-percent coverage heuristic rejected complete base frames when an
+incomplete skipped tail occupied more than ten percent of the file. The reader
+now distinguishes that recognized tail from unexplained bytes, preserves the
+three base packets and still reports truncation at EOF. The matched Matroska
+video reports the specific skipped-envelope length error. Initial failure:
+`/tmp/fvid-substreams-truncated-tail-before.log`. This does not relax reporting
+of malformed/unselected tails or accept their incomplete audio payloads.
+
+Scoped final validation: **387 passed, zero failed/ignored**: 270 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, plus 81 integrations
+across 23 targets. Logs:
+`/tmp/fvid-substreams-{codec,webm,elementary,mp4,integrations}.log`.
+Core check without default features and player binary build pass. Six source
+hashes in `/tmp/fvid-substreams-source-hashes.json` match after final gates.
+Existing unrelated warnings remain; no GUI, hardware or performance claim.
+
+
+## Native dependent-channel reconstruction layer (2026-10-21)
+
+Added `dependent_frame` and `DependentDecoder`: the native header reader now
+has an explicit dependent path retaining substream ID and optional channel map.
+The map cardinality counts the six pair entries as two channels and refuses a
+mismatch before audio. Dependent reconstruction retains coded plane order with
+an explicit `Folding::coded` path; independent native/downmix ordering is kept
+on its existing path. ID/channel-count mismatches are refused. Priming, CRC
+concealment, reset, transforms and coded AHT reuse the existing owned core.
+Default player dispatch still performs compatible programme-0 playback; the
+new low-level decoder does not pretend to assemble extension presentations.
+
+496 owned cases include all acmod values, optional LFE, IDs 0/7, implicit and
+explicit maps, eligible AHT masks, and DC/basis-3/mixed spectra. Six-block AHT
+coverage is limited to <=2 full-band channels; wider layouts use three scalar
+blocks. Sixteen additional map-location cases cover all singleton/pair entries.
+Each case has a matched conventional scalar control and complete ordering in
+a short synthetic VP9/Matroska video. Only the last dependent carries compr.
+Three integration tests pass coded-order PCM against controls with analytic
+rounding bounds, reset, video extraction/continuous state and explicit map/ID/
+stream-kind guards. The malformed video reaches the specific map-count error.
+No private media or parameter sets, external encoder or test-time generation.
+
+Optional independent check of scalar controls passes **496/496 comparisons**
+at unchanged 1e-5, maximum 7.175048267527018e-6; these comprise **48 unique
+control payloads**, not 496 independent signal designs.
+`/tmp/fvid-dependent-control-reference.json`. This is not direct dependent-
+presentation agreement with FFmpeg or a 7.1/16-channel player acceptance test.
+
+All 1,987 new artifacts / 63,917,985 bytes (excluding README) regenerate
+identically with PATH empty and process/socket creation denied. Corrected routing
+has 443 artifacts / 17,206,098 bytes. All 257 prior zero-bit artifacts remain
+unchanged. Hashes: `/tmp/fvid-dependent-fixture-hashes.json` and
+`/tmp/fvid-corrected-routing-fixture-hashes.json`.
+
+Authoring correction: E.1.3.1.2 assigns independent IDs sequentially and restarts
+dependent IDs at 0 after each independent programme. Earlier routing fixtures
+`ind2`..`ind7` omitted preceding independent streams, and the mixed fixture used
+dependent ID 7 after independent programme 7. They now use conforming sequences;
+a private regression verifies them. Earlier blanket conformance claims for those
+fixtures are superseded. Old hashes are retained separately. The original red
+routing witness `ind1` was already sequential and remains valid evidence.
+Primary clauses: E.1.3.1.2/E.1.3.1.8, E.2.8:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+
+Remaining: presentation association/replacement/extension assembly up to 16
+channels, final speaker layout, last-dependent DRC selection, programme-selection
+API and expanded player/worker output. Dependent coupling/SPX/VQ/GAQ/transient
+combinations and the other codec-family gaps remain unqualified. No full codec,
+GUI/device, performance or complete E-AC-3 claim is made by this layer.
+
+Scoped final validation: **390 passed, zero failed/ignored**: 270 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, plus 84 integrations
+across 24 targets. Logs:
+`/tmp/fvid-dependent-{codec,webm,elementary,mp4,integrations}.log`.
+Core check without default features and player binary build pass. Nine source
+hashes in `/tmp/fvid-dependent-source-hashes.json` match after final gates.
+The only post-freeze Rust edit was a stream-type field documentation correction;
+final core/player builds include it. No ordinary test requires FFmpeg/network.
+Existing unrelated warnings remain; presentation assembly remains unfinished.
+
+
+## Expanded E-AC-3 assembly, dynrng and split-packet clocks (2026-10-21)
+
+Added owned `presentation::PresentationDecoder`: separate stream transform
+histories, sequential dependent association, explicit SMPTE speaker identities,
+channel replacement/extension, a single last-dependent normal dynrng gain and
+final saturation. Children decode without per-stream clipping or dynrng, so
+neither an independent mix's conflicting gain nor early saturation contaminates
+the expanded output. Complete group detection uses the last-dependent compre
+flag. Pending/queued groups retain signed original source windows and report
+incomplete EOF. Normal decoder dispatch selects expanded assembly for 7..16
+channels; compatible output up to 5.1 retains its independent-programme path.
+The low-level dependent constructor still enforces its 1..6 coded-channel bound.
+
+Container integration probes up to one independent plus eight dependent frames
+for the initial map. Individual Matroska syncframes can be buffered until the
+programme is complete; zero-sample dependent packets do not advance/reset the
+selected sample clock. Speaker identities have stable WAVE ordering where the
+32-bit device map can represent them. Unknown extended positions are explicitly
+refused by device-facing readers; the semantic decoder retains them.
+
+Two real regressions were reproduced and fixed. Shared AC-3/E-AC-3 dynrng gain
+used bit 5 as the exponent sign instead of bit 7. A real code-0x01 PCM witness
+failed at -2.6481382e-7 versus -6.779234e-5; all 256 codes now pass exact gain and
+reuse checks in raw/Matroska. Separately, the old split-packet clock shortened
+44.1 kHz programme duration to 51.414965 ms instead of 52.244897 ms. The passing
+flat-48-kHz control did not expose it; a rational-rate fixture now checks exact
+packet PTS and duration. Red baselines:
+`/tmp/fvid-presentation-dynrng-before.log`,
+`/tmp/fvid-presentation-split-clock-before.log`.
+
+27 owned presentation cases cover conventional three-block base 5.1 with 7.1
+extensions, front replacement, 10-channel height and 16-channel semantic output.
+Independent scalar controls and explicit permutations/role maps form the PCM
+oracle. The clipping witness has pre-gain magnitude above unity and proves the
+final gain is applied before saturation. Direct assembly/reset, signed split and
+queued source windows, normal dispatch, Matroska masks/PCM/PTS and worker rewind/
+first-packet seeks pass. Selected 48/44.1 kHz cases also pass a 20 ms seek into the
+second packet. Sixteen-channel video is decoded through the semantic API; its
+unsupported device mapping is a passing refusal, not 16-channel device acceptance.
+No GUI/device/performance claim. Expanded AHT is not qualified by this scalar
+matrix. An early quad prototype was removed from expanded conformance coverage;
+output up to 5.1 uses the independent compatible mix.
+
+Optional independent normal-dynrng reference passes **256/256**, unchanged 1e-5,
+maximum 2.384185791015625e-7. Expanded reference remains **unvalidated/red**:
+21/21 wave-mappable cases have a geometry mismatch on individual-syncframe
+Matroska. FFmpeg 9.0.2 returns compatible six-channel PCM and warns that dependent
+frames are ignored without an independent frame. These observations do not
+establish full-presentation agreement or a blanket reference capability claim.
+`/tmp/fvid-presentation-dynrng-reference.json`,
+`/tmp/fvid-presentation-reference.json`. The red audit is excluded from ordinary
+passing gates. Older bundled-stage diagnostics remain separate.
+
+All 1,987 prior dependent artifacts regenerate unchanged after adding optional
+rate/block/gain/signal authoring parameters. New presentation artifacts: 289 /
+5,524,008 bytes; dynrng artifacts: 515 / 9,592,224 bytes (excluding READMEs).
+Both regenerate identically with PATH empty and process/socket creation denied.
+Hashes: `/tmp/fvid-presentation-fixture-hashes.json`,
+`/tmp/fvid-dynrng-fixture-hashes.json`. Ordinary tests never generate fixtures,
+invoke FFmpeg, or require network access.
+
+Primary basis: ETSI TS 102 366 6.7.2.2/Table 6.29 and E.2.8, plus Matroska's
+A_EAC3 individual-syncframe mapping:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+https://www.matroska.org/technical/codec_specs.html#a_eac3
+
+Remaining: extended device-role metadata, programme selection, changing
+maps/topologies, full heavy-compression behavior,
+expanded AHT/coupling/SPX and other rate/profile combinations, expanded MP4
+acceptance, and the other codec-family gaps. Complete codec coverage is unproven.
+
+Scoped final gates: **395 passed, zero failed/ignored**: 270 codec units,
+20 WebM-audio, six elementary and ten MP4-audio units, plus 89 integrations
+across 26 targets. Logs:
+`/tmp/fvid-presentation-{codec,webm,elementary,mp4,integrations}.log`.
+Core check without default features, player binary and audio_probe builds pass.
+All twelve source hashes in `/tmp/fvid-presentation-source-hashes.json` match
+after final gates. The separate expanded reference audit remains red/unvalidated
+and is excluded from ordinary passing counts. Existing unrelated warnings remain.
+
+
+### Raw expanded E-AC-3 follow-up (2026-10-21)
+
+`Ac3AudioReader::open` now selects complete native dependent presentations for
+all 21 WAVE-mappable 8/10-channel cases. `open_compatible` explicitly preserves
+the independent six-channel mix. Packet duration counts only primary samples;
+worker rewind and 20 ms second-packet seeks preserve native PCM assignment.
+Sixteen-role device output remains unsupported rather than mislabelled.
+Owned raw/Matroska truncated-tail fixtures preserve complete programmes and
+report the incomplete last dependent. Four raw-reader integrations accept these
+paths; the previous raw geometry witness failed with 6 versus expected 8 channels
+(`/tmp/fvid-raw-presentation-before.log`).
+
+Current focused verification: **14 passed, zero failed/ignored** across
+`eac3_raw_presentation`, `eac3_presentation`, `eac3_dynrng`, `eac3_substreams`;
+`/tmp/fvid-expanded-current.log`. Core check without default features passes
+(`/tmp/fvid-expanded-core-current.log`). All 291 generated presentation artifacts
+(5,585,787 bytes, excluding README) reproduce byte-for-byte with subprocess and
+socket creation denied. Earlier 395-test results above are historical scoped
+gates, not a rerun of the whole current dirty worktree.
+
+The isolated base-channel-relocation diagnostic FFmpeg build matches neutral
+48/44.1 kHz raw controls within 1.56e-8, but conflicting base dynrng still differs
+by 0.0257542. `/tmp/fvid-presentation-relocated-reference.json` records source
+revision, hashes and configuration. This is not official reference agreement;
+the official expanded audit remains red/unvalidated. These results do not prove
+full E-AC-3 or complete codec coverage.
+
+### MP4 E-AC-3 expanded geometry (2026-10-21)
+
+Reproduced ec-3 sample-entry placeholder channelcount=2 overriding the actual
+8-channel native presentation. Reader output channels now come from the first
+complete native programme, with its speaker mask passed to decoder/backend.
+Eight owned MP4 audiovisual witnesses bundle two three-block programmes per
+six-block sample, with truthful dec3 base/dependent metadata. Integration accepts
+8-channel mask, 4608-sample PCM and rewind against qualified native assembly.
+Red: `/tmp/fvid-eac3-mp4-before.log` (2 versus 8 channels). After:
+`/tmp/fvid-eac3-mp4-after.log` (five raw/MP4 presentation tests pass).
+Generator: `scripts/generate_eac3_mp4_presentation.py`; nine outputs regenerate
+exactly with subprocess/socket denied. No FFmpeg production or test dependency.
+This qualifies the eight conventional 48 kHz 7.1 cases, not all expanded MP4;
+10/16 channels, other rates and expanded tools still need their own acceptance.
+
+### Expanded MP4 worker/clock acceptance (2026-10-21)
+
+Extended owned MP4 presentation witnesses from eight to twenty cases: 8/10
+channels, front replacement and height pairs, one/two dependent substreams.
+The six-block sample packaging and dec3 dependent count/location metadata remain
+explicit. Source of chan_loc assignments: ETSI Table F.6.1 and Chromium
+`formats/mp4/ac3_constants.h` (linked in fixture README).
+
+New worker acceptance compares exact PCM, packet PTS, backend mask and final
+clock through ordinary playback, rewind, and partial-sample seeks at 20/40/80 ms
+for all twenty cases. Sequence acceptance checks three 1536-sample packets at
+0/32/64 ms and 96 ms total duration. All six raw/MP4 presentation integrations
+pass (`/tmp/fvid-eac3-mp4-expanded-seek-final.log`). The 21 generated artifacts
+(1,716,976 bytes excluding README) reproduce exactly with process/socket denied.
+No additional production fix was needed for these worker paths. This supersedes
+the earlier unqualified 10-channel conventional 48 kHz MP4 note; other rates,
+16-role device maps and expanded AHT/SPX/coupling remain unqualified.
+
+### MP4 Dolby seek history and 44.1 kHz (2026-10-21)
+
+Added a native authored 44.1 kHz expanded E-AC-3 MP4 video with rate-correct
+mdhd/sample entry/dec3 and rounded movie/track durations. Sequential sample-grid
+PCM/duration/PTS passed, but partial-sample worker seek reproduced equal-length
+wrong PCM (`/tmp/fvid-eac3-mp4-44100-before.log`). MP4 AC-3/E-AC-3 now preroll
+from the beginning to rebuild overlap/history, then present only the requested
+source window. This preserves correctness at linear seek cost; checkpoint and
+long-file seek performance remain open.
+
+All six raw/MP4 integrations pass over 21 MP4 cases, including worker rewind and
+20/40/80 ms seeks (`/tmp/fvid-eac3-mp4-44100-after.log`). The 22 artifacts
+(1,788,538 bytes excluding README) reproduce byte-for-byte with subprocess/socket
+denied. This qualifies the specific 44.1 kHz conventional 7.1 witness, not all
+rate/profile/tool combinations. Full codec coverage remains unproven.
+
+### Expanded dependent AHT acceptance (2026-10-21)
+
+Added eighteen owned six-block 48 kHz expanded AHT cases: stereo base plus three
+dependent stereo streams mapped to eight semantic roles, AHT masks 1/2/3,
+stationary/mixed coefficients and changing/boosting final gain. Independent
+scalar controls and an analytical rounding-error bound qualify assembly PCM;
+header probes explicitly require active AHT. Direct assembly/reset, decoder
+routing, split-syncframe Matroska clocks/layout and worker rewind/seek are
+covered. Raw-reader acceptance includes priming and worker second-programme seek.
+No production decoder change was needed for this family; this closes a coverage
+gap for existing implementation, not universal expanded AHT support.
+Generator `scripts/generate_eac3_expanded_aht.py` reuses a separate optional
+presentation authoring mode; ordinary/default artifacts remain byte-exact.
+253 new artifacts / 5,004,560 bytes reproduce with subprocess/socket denied.
+Expanded coupling/SPX, other base layouts/rates/quantizers and MP4 AHT packaging
+remain unqualified. Full codec coverage remains open.
+
+### Expanded AHT MP4 acceptance with base 5.1 (2026-10-21)
+
+Added eighteen owned 48 kHz six-block MP4 cases: silent independent base 5.1,
+active rear dependent AHT (masks 1/2/3), stationary/mixed spectra and varying
+normal DRC. Sample entry, dec3 base/dependent locations and complete-programme
+bitrate are explicitly generated. Independent scalar controls and analytical
+rounding bounds check PCM; probes assert active AHT, silent base and nonzero
+output. Tests cover direct assembly/reset, decoder dispatch, MP4 geometry/clocks
+and captured worker layout/rewind/5,40,80 ms partial-sample seeks. No production
+change was needed; this qualifies existing functionality, not all expanded AHT.
+Generator `scripts/generate_eac3_mp4_aht.py` emits 163 artifacts / 3,459,437 bytes
+(excluding README). Silent-base authoring uses an optional allocation flag;
+default dependent and presentation generation must remain byte-identical.
+Sounding-base AHT combinations, other rates/quantizers and coupling/SPX remain
+unqualified. Full codec coverage remains open.
+
+Final MP4-AHT qualification: explicit true-zero control initially caught inferred
+dither noise in the new fixture authoring, despite matching assembly PCM.
+The optional zero-allocation mode now explicitly transmits per-block dither-off
+flags. This is an authoring correction, not a decoder workaround. The final
+MP4-AHT/presentation/raw suite passes 12 tests, zero failed/ignored:
+`/tmp/fvid-eac3-mp4-aht-final.log`. Existing 1987 dependent artifacts remain
+byte-identical (63,917,985 bytes). Physical-device/performance gates are separate.
+
+### Broad native player/library gate refresh (2026-10-21)
+
+Ran the complete library suite with `cargo test --offline --no-default-features
+--features player --lib`. Initial current-tree result: 1013 passed, six failed,
+26 ignored (`/tmp/fvid-codec-broad-current.log`). Investigated each failure:
+three panel expectations predated the Spool row; the cache reuse test wrongly
+required RAM instead of verifying source contents/reuse; the AC-3 test counted
+coded rather than audible duration at 48/32 kHz; refill expected a former
+16-sample timestamp-rounding gap between contiguous PCM packets.
+
+Updated those expectations to the implemented contracts and strengthened cache
+and refill checks: complete authored bytes plus reuse after source unlink,
+exact second-packet PCM with no inserted silence. No decoder behavior was
+changed to satisfy stale tests. Final full library result: **1019 passed,
+zero failed, 26 ignored** (`/tmp/fvid-codec-broad-final.log`). Ignored physical
+GPU/Metal/VideoToolbox checks remain separate unproven gates. This is a library
+suite, not all integration targets, GUI acceptance or complete codec coverage.
+Normal dependency tree for this selected player configuration has no FFmpeg or
+libav crate entries (`/tmp/fvid-codec-player-dependency-tree.txt`). Other feature
+configurations/workflows are not qualified by that tree alone.
+
+### HEVC 3D Main depth chroma validation (2026-10-21)
+
+Inspected explicit chroma DIM/skip-intra refusals against H.265 V11 (01/2026),
+I.11.1.1. Conforming 3D Main depth-layer SPSs require chroma_format_idc=0;
+those coloured configurations are not a missing conforming picture feature.
+Found a real earlier validation gap: the layered SPS parser accepted effective
+3D Main depth configurations with chroma 1/2/3. It now returns Invalid with the
+specific monochrome constraint before picture tool dispatch. This check applies
+only when the effective profile signals compatibility with profile 8.
+
+New owned VPS/SPS and four MP4 configuration witnesses reproduce the old
+acceptance (`/tmp/fvid-hevc-depth-chroma-before.log`). The regression reads the
+actual MP4-configured SPS and distinguishes valid monochrome parameter acceptance
+from three invalid coloured variants. These are parameter validation gates,
+not picture playback acceptance. Fourteen artifacts / 60,291 bytes reproduce
+exactly with subprocess/socket denied; no private parameters or FFmpeg.
+New constraint plus existing 3D/layered SPS integrations: 13 passed, zero failed
+(`/tmp/fvid-hevc-depth-chroma-after.log`). Full codec coverage remains unproven.
+
+### Expanded AHT with a sounding base 5.1 (2026-10-21)
+
+Added eighteen owned six-block 48 kHz MP4 cases with nonzero conventional base
+5.1 and a dependent AHT rear pair. A fixture-only optional per-block SNR mode
+alternates high and true-zero allocation with explicit dither-off flags, keeping
+the six-channel base within a 4096-byte syncframe. Tests require nonzero signal
+in every base channel, real dependent AHT and base SNR strategy 1, so silent-base
+witnesses cannot accidentally stand in for this acceptance.
+
+The scalar-control assembly oracle checks role mapping, amplitude, common final
+DRC and analytical AHT rounding error. The shared MP4-AHT suite now covers 36
+silent/sounding cases through direct/reset/dispatch and MP4/backend capture,
+mask/PCM/PTS/duration, rewind and 5/40/80 ms partial-sample seeks. First acceptance
+passed (`/tmp/fvid-eac3-sounding-aht-first.log`); the stricter per-channel test
+and prior expanded raw/Matroska cases run in the final scoped gate below.
+New 163 artifacts / 3,459,599 bytes reproduce exactly with subprocess/socket
+denied. Existing silent-base, presentation, expanded-AHT and all 1987 dependent
+artifacts also regenerated byte-identically. No production decoder change was
+needed. Arbitrary base allocation, other rates/quantizers and coupling/SPX remain
+unqualified; this does not establish complete E-AC-3 or all-codec coverage.
+Final scoped gate: **5 passed, zero failed/ignored** across expanded raw/Matroska
+AHT and the 36-case MP4-AHT suite (`/tmp/fvid-eac3-sounding-aht-final.log`).
+
+### Expanded dependent ordinary coupling/AHT (2026-10-21)
+
+Added forty-eight owned six-block 48 kHz expanded cases: sounding conventional
+base 5.1 plus coupled AHT dependent rear pair. Two coupling geometries, phase
+on/off, masks 4/5/7 and stationary/mixed spectra cross unity/changing final gain.
+The fixture coupling writer now has an optional dependent-stream envelope and
+per-block normal gain; all old default coupling artifacts remain byte-identical.
+Probes require coupling in all six blocks and active coupling-plane AHT.
+
+The scalar-control oracle includes explicit speaker assembly and an analytical
+coupling-aware rounding bound. The shared MP4-AHT matrix grows to 84 cases;
+new raw/split-Matroska acceptance checks priming, mask, PCM, exact clocks and
+captured worker rewind/40 ms second-programme seek for all 48 coupled cases.
+First direct/MP4 pass: `/tmp/fvid-eac3-expanded-coupling-first.log`. No production
+decoder change was needed; this qualifies existing assembly with ordinary
+coupling/AHT rather than proving every enhanced-coupling/SPX combination.
+Generator `scripts/generate_eac3_expanded_coupling.py`: 433 artifacts / 9,224,384
+bytes, exact regeneration with subprocess/socket denied. Existing 769 coupling,
+291 presentation and both 163-artifact MP4-AHT sets also remain exact. All-codec
+completion remains unproven.
+Final scoped gate: **5 passed, zero failed/ignored** across existing coupling
+and the expanded direct/raw/Matroska/MP4 acceptance matrix:
+`/tmp/fvid-eac3-expanded-coupling-final.log`.
+
+### Expanded dependent enhanced coupling/AHT (2026-10-21)
+
+Added 48 owned six-block 48 kHz expanded programmes: sounding base 5.1 and a
+rear dependent using enhanced coupling/AHT. Three geometries, two coordinate
+seeds, default/explicit band maps, stationary/mixed spectra and normal DRC
+variation are crossed. Uncoupled scalar controls and the previously qualified
+analytical rounding bound provide the assembly oracle. Header/base probes
+require coupling, coupling-plane AHT and signal in all six base channels.
+The writer's optional dependent envelope/gain preserves ordinary default bytes.
+
+The shared MP4 matrix reaches 132 cases, and raw/split-Matroska worker acceptance
+covers 96 ordinary/enhanced coupled cases. Direct/reset/dispatch, PCM/masks,
+PTS/duration, raw priming, rewind and partial-sample seeks are included. First
+pass: `/tmp/fvid-eac3-expanded-enhanced-first.log`. No production decoder change
+was needed; this is finite qualification of existing implementation, not full
+codec coverage. Enhanced phase transitions, other rates/quantizers, SPX and
+changing topology remain unqualified.
+
+Generator `scripts/generate_eac3_expanded_enhanced_coupling.py` emits 433 artifacts
+/ 9,226,020 bytes, exact with subprocess/socket denied. Existing 1729 enhanced
+coupling / 32,313,452 bytes, 433 ordinary-expanded and 291 presentation artifacts
+also regenerate byte-identically. No FFmpeg or network in ordinary execution.
+Final scoped gate: **5 passed, zero failed/ignored**, existing enhanced-coupling
+and expanded assembly/raw/Matroska/MP4 suites:
+`/tmp/fvid-eac3-expanded-enhanced-final.log`.
+
+### Expanded dependent SPX/noise acceptance (2026-10-21)
+
+Added 30 owned six-block 48 kHz expanded SPX cases: sounding base 5.1, rear
+SPX dependent, three attenuation choices, five signal/noise blends and normal
+DRC variation. Raw, split-syncframe Matroska and MP4 variants share explicit
+programme metadata. Independent-envelope SPX controls qualify assembly and gain
+byte-exactly; they reuse existing SPX synthesis and are not a new independent
+mathematical/external-reference oracle for that algorithm.
+
+The shared MP4 matrix reaches 162 cases and raw/Matroska worker acceptance
+covers 126 coupling/SPX cases. Tests cover PCM, masks, clocks/duration, priming,
+rewind and partial seek. The strengthened direct test requires noise-bearing
+rear channels to advance between frames while signal-only output repeats.
+First pass: `/tmp/fvid-eac3-expanded-spx-first.log`. No production decoder
+change was needed for this family. Transient processing, other rates/quantizers,
+same-stream SPX/coupling combinations and changing layouts remain unqualified.
+
+Generator `scripts/generate_eac3_expanded_spx.py`: 271 artifacts / 4,290,977 bytes
+exact with subprocess/socket denied. Original 31 SPX-noise, 291 presentation and
+433 enhanced-expanded-coupling artifacts also remain byte-identical. Ordinary
+execution needs neither FFmpeg nor network. Full codec coverage remains open.
+Final scoped gate: **8 passed, zero failed/ignored** across the expanded
+assembly/raw/Matroska/MP4 matrix and existing SPX noise/reset/worker regressions:
+`/tmp/fvid-eac3-expanded-spx-final.log`.
+
+### MP4 expanded Dolby track-description consistency (2026-10-21)
+
+Reproduced a public-metadata mismatch: native E-AC-3 playback reported 8 decoded
+channels while `AudioStream::audio_tracks()` still reported the sample-entry
+placeholder 2 (`/tmp/fvid-eac3-track-metadata-before.log`). The MP4 reader now
+caches first-packet native Dolby channels for all valid audio tracks and reports
+selected-stream channels through its actual geometry API. Unreadable/unmapped
+unselected tracks keep their original metadata without rejecting a valid selected
+track. The demuxer position is invalidated after optional probes so actual playback
+re-seeks the selected first packet.
+
+All 21 existing expanded MP4 cases now check track descriptions. An additional
+owned two-track MP4 shares the same authored 7.1 samples through distinct track
+IDs. A regression selects either track, verifies both 8-channel descriptions,
+compares complete PCM/PTS and rewinds. This is API/capture acceptance, not physical
+sound-device qualification. Twenty-three artifacts / 1,859,944 bytes reproduce
+exactly with subprocess/socket denied; the previous 21 media artifacts remain
+byte-identical and only the manifest was extended. Initial 7 regressions and
+10 MP4-reader units passed; full library/current regressions are rerun below.
+Full codec coverage remains open.
+Final current-source gates: library **1019 passed, zero failed, 26 ignored**
+(`/tmp/fvid-track-metadata-library-final.log`), and **7 passed, zero failed/ignored**
+expanded raw/MP4 regressions (`/tmp/fvid-track-metadata-regressions-final.log`).
+The ignored hardware gates and full codec-family completion remain separate.
+
+### Native AC-3 geometry in MP4 (2026-10-21)
+
+Reproduced the equivalent AC-3 placeholder failure: a valid native 5.1 syncframe
+in an MP4 sample entry declaring channelcount=2 opened as two channels, unlike
+the identical six-channel-entry control (`/tmp/fvid-ac3-mp4-channels-before.log`).
+Dolby first-packet probing now derives AC-3 channels/mask from the syncframe,
+as it already did for expanded E-AC-3. Explicit codec downmix remains a separate
+API; the MP4 reader's automatic native geometry is corrected.
+
+New owned `ac3-mp4-channels` witnesses mux three existing repository-authored
+synthetic 5.1 tone frames with neutral VP9 video and frame-derived dac3 metadata.
+The test compares all PCM with the raw reader after its 256-sample priming,
+compares placeholder/native-six MP4s, verifies track channels/mask/PTS/duration,
+rewind and worker 40 ms partial-sample seek. No new mathematical AC-3 oracle or
+physical-device claim. Four artifacts / 60,045 bytes reproduce exactly with
+subprocess/socket denied. No private input, external encoder or network.
+
+New AC-3 plus expanded raw/MP4 regressions: 8 passed, zero failed/ignored
+(`/tmp/fvid-ac3-mp4-channels-after.log`). Existing AC-3 priming, CRC, exact seek,
+presentation delay, rate geometry and truncated EOF: 7 passed, zero failed/ignored
+(`/tmp/fvid-ac3-existing-after-channels.log`). MP4-reader unit gate follows below.
+Full codec coverage remains open.
+MP4-reader units: 10 passed, zero failed/ignored
+(`/tmp/fvid-ac3-channel-mp4-units.log`); total scoped gate **25 passed**.
+
+### Native AC-3 channel geometry in Matroska (2026-10-21)
+
+Extended the owned AC-3 witnesses with two Matroska videos: metadata channels=2
+versus native-six control, both carrying the same three clean 5.1 frames.
+The former reproduced two-channel automatic output
+(`/tmp/fvid-ac3-matroska-channels-before.log`). Selected Matroska AC-3 output
+channels and mask now follow the first syncframe, and selected-track metadata
+uses the actual stream geometry. Explicit decoder downmix remains independent;
+unselected Matroska descriptions retain their container metadata until opened.
+
+The shared regression compares all MP4/Matroska variants with raw native PCM
+(accounting for raw priming), clocks, metadata, rewind and worker 40 ms seek.
+AC-3 new/priming/rate and expanded raw/MP4 tests pass; logs:
+`/tmp/fvid-ac3-matroska-channels-after.log`. All six fixture artifacts / 96,011
+bytes regenerate exactly with subprocess/socket denied. The optional codec-name
+parameter in the Matroska fixture author leaves all 83 BSID and 31 SPX-noise
+artifacts byte-identical. No private media or FFmpeg/network needed.
+The complete player/library suite is rerun below; full codec coverage remains
+open rather than inferred from these synthetic cases.
+Final gate: library **1019 passed, zero failed, 26 ignored**
+(`/tmp/fvid-ac3-native-containers-library.log`), plus **11 passed, zero
+failed/ignored** in the targeted AC-3/E-AC-3 integrations. Hardware/GUI/full
+codec-family coverage remain separate unproven gates.
+
+### AC-3 automatic geometry trusts CRC-checked headers (2026-10-21)
+
+Reproduced a consequence of native first-header probing: corrupting the first
+AC-3 acmod without repairing CRC caused a correctly described six-channel MP4
+to open as mono (`/tmp/fvid-ac3-damaged-geometry-before.log`). Added public
+`ac3_decoder::checked_syncframe`, requiring the complete declared frame and the
+same full-frame CRC criterion used by decode. MP4/Matroska automatic geometry
+and mask setup now use it. Existing lightweight `syncframe` and decoder
+silence concealment remain independent.
+
+Three owned raw/MP4/Matroska witnesses retain two subsequent clean 5.1 frames.
+The regression verifies damaged geometry, checked-header rejection, retained
+container width, unknown mask instead of corrupted roles, first-frame silence,
+byte-exact subsequent PCM, rewind and worker partial seek. It compares with an
+explicitly configured native decoder; it does not repair contradictory container
+metadata or infer geometry from later frames when the first header is damaged.
+All nine fixture artifacts / 146,532 bytes reproduce exactly with subprocess
+and socket construction denied; no private source, encoder or network.
+
+AC-3 geometry/CRC/rate and expanded raw/MP4 integrations: **11 passed, zero
+failed/ignored** (`/tmp/fvid-ac3-damaged-geometry-after.log`). The complete
+player/library gate is rerun below. Full codec-family coverage remains open.
+Final current-source library gate: **1019 passed, zero failed, 26 ignored**
+(`/tmp/fvid-ac3-trusted-geometry-library.log`). Physical-device/GUI and complete
+codec-family qualification remain separate open gates.
+
+### E-AC-3 CRC-trusted first-header geometry (2026-10-21)
+
+Reproduced the equivalent E-AC-3 setup gap: a CRC-invalid first header changed
+native stereo+LFE to mono+LFE and MP4 exposed two instead of three channels
+(`/tmp/fvid-eac3-crc-geometry-before.log`). Added `eac3_decoder::checked_frame`,
+requiring the complete first frame and the decoder's existing CRC criterion.
+MP4/Matroska automatic geometry/mask setup now uses it. Untrusted first headers
+leave container channels intact and roles unknown. Lightweight probes and
+ordinary concealment are unchanged; this does not infer layout from later frames
+or solve damaged dependent maps/contradictory container metadata.
+
+Four owned raw/MP4/Matroska witnesses / 83,548 bytes reproduce with subprocess/
+socket denied. The test verifies bad syntax geometry, trusted-probe refusal,
+clean-control acceptance, first-frame silence, following three-channel PCM,
+rewind and worker partial seek against explicit native decoding. Initial AC-3,
+E-AC-3 CRC geometry and expanded raw/MP4 regressions: **10 passed, zero
+failed/ignored** (`/tmp/fvid-eac3-crc-geometry-after.log`). Full library and the
+162-case MP4 matrix are rerun below; full codec coverage remains open.
+Final gates: library **1019 passed, zero failed, 26 ignored**
+(`/tmp/fvid-eac3-trusted-geometry-library.log`), plus **3 passed, zero
+failed/ignored** over the 162-case expanded MP4 and 126-case raw/Matroska tool
+matrix (`/tmp/fvid-eac3-trusted-geometry-expanded.log`). Hardware/GUI/full
+codec-family qualification remain separate open gates.
+
+### E-AC-3 transient pre-noise processing preparation (2026-10-21)
+
+Inspected the actual missing path: audfrm skipped transprocloc/transproclen.
+ETSI TS 102 366 V1.4.1 E.1.3.2.21-.23/E.2.7 requires per-channel parameters,
+including references to later PCM. `Frame::transient_windows` now retains them
+as optional `TransientWindow { location, length }`, with location converted to
+PCM sample units. All inactive channels clear independently. The old skip-only
+unit expectation is replaced by parameter retention with the same audio boundary.
+
+Three owned raw/Matroska cases plus no-transient control check both channels,
+zero/maximum values, future positions, CRC, audio-bit offsets and actual demuxed
+packet metadata. Eight artifacts / 116,202 bytes regenerate with subprocess/
+socket denied; existing 291 presentation and 271 SPX artifacts remain exact.
+Parser/geometry integrations: 9 passed, zero failed/ignored
+(`/tmp/fvid-eac3-transient-parser-final.log`).
+
+**PCM transient correction is still unimplemented.** This is a necessary data
+path stage, not processing acceptance or completion. The manifest explicitly
+records pcm_processing_accepted=false. Remaining work includes PCM history,
+crossfades, events spanning frames, reset/seek, channel/downmix ordering and
+expanded-programme acceptance against an independent scalar PCM oracle.
+Normative source:
+https://www.etsi.org/deliver/etsi_ts/102300_102399/102366/01.04.01_60/ts_102366v010401p.pdf
+Full codec coverage remains open.
+Final E-AC-3 unit gate: 40 passed, zero failed/ignored
+(`/tmp/fvid-eac3-transient-units-final.log`); 49 scoped tests including the nine
+parser/geometry integrations. These passing gates do not qualify PCM correction.
+
+### Standalone transient PCM correction (2026-10-21)
+
+Implemented `eac3_decoder::transient::apply_window` following E.2.7.2. The
+single-channel operation computes previous-block pre-noise geometry, snapshots
+its bounded source region, copies synthesis PCM and applies complementary
+half-Hann transitions. It uses an absolute codec-sample origin, performs no
+clipping/folding, and checks all source/destination availability and clocks before
+mutation. The 1023-sample scratch bound follows directly from coding-block and
+window geometry rather than an arbitrary resource limit.
+
+Added 24 independent scalar PCM outputs plus an owned neutral VP9/float-PCM
+video. Tests compare the actual video waveform, corrected samples, unchanged
+neighbours, required non-no-op behavior and transactional failure on missing
+history/future PCM or clock overflow. The oracle uses separate Python f64
+arithmetic with a fixed conservative f32 rounding tolerance. Twenty-seven
+artifacts / 672,079 bytes regenerate exactly with subprocess/socket denied.
+Initial standalone+window metadata gate passed three tests
+(`/tmp/fvid-eac3-transient-pcm-first.log`); strengthened current gates follow.
+
+**Decoder integration is still pending.** The manifest explicitly sets
+`decoder_integration_accepted=false`. Existing decoding still does not invoke
+this operation. Remaining work includes streaming PCM history/withholding,
+frame-spanning events, priming/source windows, reset/seek and correction before
+channel folding/expanded assembly. This is substantive DSP implementation, not
+end-to-end transient feature acceptance or all-codec completion.
+Final scoped gates: 40 E-AC-3 units and 11 transient/geometry integrations,
+**51 passed, zero failed/ignored** (`/tmp/fvid-eac3-transient-pcm-units-final.log`,
+`/tmp/fvid-eac3-transient-pcm-final.log`). This does not qualify the not-yet-wired
+decoder streaming path.
+
+### Frame-streaming transient PCM component (2026-10-21)
+
+Added `transient::Stream` around the scalar correction operation: bounded PCM
+history with fresh-decoder zero prehistory, sample-positioned event queue,
+three-block output holdback, complete-block ready chunks with raw sample clocks,
+reset and EOF prefix correction without padding or duration extension. Future
+windows are ordered by their actual sample positions, not announcement order.
+The pure standalone operation retains its full-buffer atomic error contract.
+
+Five independent whole-buffer oracle/video cases exercise regular/short/mixed
+coding-frame sizes, future-before-nearer events, EOF-intersecting and beyond-EOF
+windows. Tests compare PCM, contiguous clocks, exact duration and reset replay.
+Two 1000-frame runs (none/per-frame future events) check bounded 2304-sample
+retained PCM and no stale state after invalid inputs. Sixteen artifacts /
+263,562 bytes regenerate with process/socket denied; the older 27 single-window
+outputs remain exact. No private media, FFmpeg, network or benchmark claim.
+
+**Decoder adapter remains pending.** `decoder_integration_accepted=false` is
+explicit in the manifest. Existing decoding still does not call this component;
+channel alignment, queued folding/gain/source-window metadata, priming, EOF,
+reset/seek and expanded programmes remain necessary integration/acceptance work.
+This is implementation of the required streaming layer, not full codec completion.
+
+Current scoped gates: 40 E-AC-3 units plus five standalone/streaming/metadata
+integrations, **45 passed, zero failed/ignored**:
+`/tmp/fvid-eac3-transient-stream-units-final.log`,
+`/tmp/fvid-eac3-transient-stream-final.log`, and the strengthened two-mode
+long-stream gate `/tmp/fvid-eac3-transient-stream-long-final.log`.
+
+### Native PCM insertion point before gain/folding (2026-10-21)
+
+Separated the shared AC-3/E-AC-3 core into inverse native-plane reconstruction,
+captured per-programme gains, and final PCM folding/clipping. The existing
+spectrum-to-output methods still invoke those stages in the same arithmetic
+order and introduce no native-plane array copy on the ordinary path. The
+new `Core::inverse_planes` exposes current signalled PCM for buffering/correction;
+`Core::output_gains` captures gain state, and `Folding::write_pcm` can finalize a
+corrected block later using its original copied mixing matrix and gains.
+Inactive scratch planes are not newly valid and must be zeroed/ignored by the
+future adapter according to that block's header.
+
+Two numeric regressions independently check centre/surround stereo sums, LFE
+exclusion, correction before final clamp, and captured dual-programme gains even
+when the live core gain has subsequently changed. Full current library gate:
+**1021 passed, zero failed, 26 ignored** (`/tmp/fvid-prefold-library.log`).
+
+**Transient decoder wiring remains pending.** This creates the actual core
+insertion/finalization interfaces without enabling a partial post-downmix effect.
+The adapter must align channel streams and queue original gain/folding/source
+window metadata, then handle priming, drain, reset/seek and expanded programmes.
+No default transient feature or all-codec completion is claimed by this refactor.
+Expanded matrix/container/streaming integration gate follows below.
+
+### Aligned native transient block adapter (2026-10-21)
+
+`transient::NativeBlocks<T>` now queues the seven native planes independently,
+releases only complete aligned 256-sample blocks, and retains each block's copied
+folding matrix, gains, final clipping policy and caller-owned source identity.
+Transient metadata is admitted only on the five full-bandwidth planes. Invalid
+coded locations are rejected before any channel is changed. EOF drains all
+planes to the exact endpoint; reset clears PCM and pending contexts.
+
+A numeric adapter test uses distinct channel waveforms, asymmetric transient
+events, per-block changing gains, output clipping and original source identities.
+It compares every output sample against the independently streamed mono channels,
+checks contiguous block identities and EOF, then repeats after reset. This checks
+adapter wiring, not an independent normative oracle (the mono operation already
+has separate generated whole-buffer oracles).
+
+The focused adapter test passed (`/tmp/fvid-transient-native-blocks.log`).
+**Actual E-AC-3 decoder integration remains pending**: this adapter is not yet
+called by `Eac3Decoder`, packet source-window grouping/priming/drain and expanded
+presentation integration still need implementation and synthetic coded-stream
+acceptance. No all-codec or transient playback completion is claimed.
+
+Full player-feature library after this adapter: **1022 passed, zero failed,
+26 ignored**, `/tmp/fvid-transient-native-library.log`. Ignored gates are not
+counted as verified hardware/runtime coverage.
+
+### Native transient reconstruction from coded E-AC-3 (2026-10-21)
+
+The actual E-AC-3 block decoder can now capture native PCM before gain/folding,
+using the same inverse transform as ordinary decoding. Capture zeroes inactive
+and coupling scratch planes, preserves LFE only when signalled, and attaches
+transient metadata only to the first block of the coding frame. Original gains,
+folding and clip mode travel with each block. `reconstruct_native` restores the
+capture switch even on errors; CRC concealment emits full native-silence blocks
+without trusting their transient metadata. A late frame syntax failure discards
+its partial native records before concealment (that late-fault branch has not
+received a dedicated coded-stream witness yet).
+
+Thirteen new owned artifacts / 185,599 bytes cover sounding stereo, dual mono and
+mono+LFE, matched metadata-free controls, neutral VP9 Matroska and damaged CRC.
+Regeneration was byte-identical with subprocess and sockets denied. Tests compare
+reconstructed native PCM and gains against controls, exact final output against
+the ordinary decoder, inactive planes, per-block windows, reset, and CRC silence.
+Reconstructed blocks also run through `NativeBlocks`; corrected output is required
+to differ from the nonzero uncorrected waveform while retaining source order and
+sample count. This is not an independent normative correction oracle; the existing
+standalone scalar-oracle fixtures retain that responsibility.
+
+Focused native/adapter gate: **3 passed, zero failed/ignored**, before adding the
+same cases' demux checks (`/tmp/fvid-transient-reconstruction.log`). Full current
+library gate below includes those demux checks.
+
+**Not yet enabled in the default player decoder.** Packet grouping with original
+source windows, priming, EOF queue drain and expanded-presentation coordination
+remain the next integration step. The fixture manifest deliberately keeps
+`player_integration_accepted=false`; codec-gap completion is still unproven.
+
+Full current player-feature library, including the coded native and container
+checks: **1024 passed, zero failed, 26 ignored**
+(`/tmp/fvid-transient-reconstruction-library.log`). Hardware/runtime gates that
+remain ignored are not counted as verified.

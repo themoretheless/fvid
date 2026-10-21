@@ -36,6 +36,88 @@ fn signal(vui: Option<&crate::codec::hevc_vui::Vui>) -> ColourDescription {
         })
         .unwrap_or_default()
 }
+// hev1 may introduce or replace its active parameter chain before the first
+// coded picture. Inspect only that prefix; ordinary complete hvc1 is unchanged
+// and does not incur an additional packet scan. Ignore unactivated VPS order.
+fn first_active_hevc_vps<R: Read + Seek>(
+    demuxer: &mut Mp4Reader<R>,
+    index: usize,
+    budget: usize,
+) -> Result<Option<Vec<u8>>> {
+    let track = &demuxer.tracks()[index];
+    let configuration = HevcConfig::parse(&track.configuration)?;
+    let mut vps = configuration
+        .arrays
+        .iter()
+        .filter(|a| a.nal_type == 32)
+        .flat_map(|a| a.units.iter().copied());
+    let first = vps.next();
+    let multiple = vps.next().is_some();
+    let copy = |nal: &[u8]| -> Result<Vec<u8>> {
+        if nal.len() > budget / 8 {
+            return Err(invalid("HEVC dispatch VPS exceeds memory budget"));
+        }
+        let mut out = Vec::new();
+        out.try_reserve_exact(nal.len())
+            .map_err(|_| invalid("cannot allocate HEVC dispatch VPS"))?;
+        out.extend_from_slice(nal);
+        Ok(out)
+    };
+    if track.codec == *b"hvc1"
+        && !multiple
+        && let Some(first) = first
+    {
+        return copy(first).map(Some);
+    }
+    let fallback = first.map(copy).transpose()?;
+    let length = configuration.length_size;
+    let count = track.samples.len();
+    let mut parameters = crate::codec::hevc_decoder::LayeredParameters::from_configuration(
+        &track.configuration,
+        budget / 2,
+    )?;
+    let mut packet = Vec::new();
+    for sample in 0..count {
+        let size = demuxer.tracks()[index]
+            .samples
+            .get(sample)
+            .ok_or_else(|| invalid("HEVC dispatch sample is absent"))?
+            .size as usize;
+        if size > budget / 8 {
+            return Err(invalid("HEVC dispatch packet exceeds memory budget"));
+        }
+        if packet.capacity() < size {
+            packet = Vec::new();
+            packet
+                .try_reserve_exact(size)
+                .map_err(|_| invalid("cannot allocate HEVC dispatch packet"))?;
+        }
+        if packet.capacity() > budget / 8 {
+            return Err(invalid(
+                "HEVC dispatch packet capacity exceeds memory budget",
+            ));
+        }
+        demuxer.read_packet(index, sample, &mut packet)?;
+        for nal in crate::codec::config::NalUnits::new(&packet, length)? {
+            let nal = nal?;
+            let header = crate::codec::hevc_nal::NalHeader::parse(nal)?;
+            if header.layer_id == 63 {
+                continue;
+            }
+            if matches!(header.unit_type, 32..=34) {
+                parameters.receive(nal)?;
+            }
+            if header.is_vcl() {
+                let result = copy(parameters.referenced_vps(nal)?);
+                demuxer.invalidate_position();
+                return result.map(Some);
+            }
+        }
+    }
+    demuxer.invalidate_position();
+    Ok(fallback)
+}
+
 impl<R: Read + Seek> SingleView<R> {
     fn reset(&mut self) {
         self.source.rewind();
@@ -146,9 +228,15 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
     }
     fn open_inner(reader: R, limits: Limits, budget: usize, hardware: bool) -> Result<Self> {
         let demuxer = Mp4Reader::open(reader, limits)?;
-        let index = demuxer.automatic_track_indices(&[*b"vide"]).into_iter()
-            .find(|&index| matches!(&demuxer.tracks()[index].codec,
-                b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"))
+        let index = demuxer
+            .automatic_track_indices(&[*b"vide"])
+            .into_iter()
+            .find(|&index| {
+                matches!(
+                    &demuxer.tracks()[index].codec,
+                    b"avc1" | b"avc3" | b"hvc1" | b"hev1" | b"vp09" | b"av01"
+                )
+            })
             .ok_or_else(|| invalid("MP4 has no supported AVC, HEVC, VP9 or AV1 video track"))?;
         Self::from_inner(demuxer, index, budget, hardware)
     }
@@ -156,7 +244,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
         Self::from_inner(demuxer, index, budget, true)
     }
     fn from_inner(
-        demuxer: Mp4Reader<R>,
+        mut demuxer: Mp4Reader<R>,
         index: usize,
         budget: usize,
         hardware: bool,
@@ -166,18 +254,13 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
         if matches!(&track.codec, b"hvc1" | b"hev1") {
-            let config = HevcConfig::parse(&track.configuration)?;
-            let nal = config
-                .arrays
-                .iter()
-                .find(|a| a.nal_type == 32)
-                .and_then(|a| a.units.first());
+            let nal = first_active_hevc_vps(&mut demuxer, index, budget)?;
             if let Some(nal) = nal {
                 // Inspect topology without relaxing the base decoder's guard.
                 let topology =
-                    crate::codec::hevc_vps::Vps::parse_layered_metadata(nal, budget / 2)?;
+                    crate::codec::hevc_vps::Vps::parse_layered_metadata(&nal, budget / 2)?;
                 if topology.layers.effective_max_layers() > 1 {
-                    let vps = LayeredVps::parse(nal, budget / 2)?;
+                    let vps = LayeredVps::parse(&nal, budget / 2)?;
                     let e = vps
                         .extension
                         .as_ref()
@@ -201,6 +284,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
                     let tid = (vps.vps.ordering.len() - 1) as u8;
                     let mut colour = crate::playback_native::AvcColour::default();
                     let mut stated = ColourDescription::default();
+                    let config = HevcConfig::parse(&demuxer.tracks()[index].configuration)?;
                     for array in &config.arrays {
                         for nal in &array.units {
                             if array.nal_type == 33

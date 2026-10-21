@@ -1,0 +1,21 @@
+{
+  "provenance": "Authored plain paragraph clocks isolate extension discovery from canonical Sync support. Five raw Y4M frames per directory; no private media, network or external tools.",
+  "cases": [
+    {
+      "name": "lower",
+      "subtitle": "video.sami"
+    },
+    {
+      "name": "upper",
+      "subtitle": "video.SAMI"
+    },
+    {
+      "name": "loose",
+      "subtitle": "video.en.sami"
+    },
+    {
+      "name": "smi-control",
+      "subtitle": "video.smi"
+    }
+  ]
+}

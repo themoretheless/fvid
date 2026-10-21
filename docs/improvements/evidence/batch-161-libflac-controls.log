@@ -1,0 +1,9 @@
+flac 1.5.0
+
+fixed-control.flac: exit0
+
+variable-control.flac: exit0
+
+fixed-wide-control.flac: exit0
+
+variable-wide-control.flac: exit0

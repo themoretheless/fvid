@@ -230,6 +230,8 @@ struct SamiLine {
     /// The language the tag names for itself, folded; one file commonly holds
     /// the same film captioned in several.
     language: String,
+    /// A Sync group, whose blank paragraphs explicitly clear a caption.
+    canonical: bool,
     /// The time the line comes on, which a line without one takes from the line
     /// before it.
     start: Option<Duration>,
@@ -239,32 +241,39 @@ struct SamiLine {
     text: String,
 }
 
-/// SAMI: the captions of a Windows Media file, where every line is a `<p>` whose
-/// timing sits in the tag's own attributes instead of in a range line. `Begin`
-/// and `End` count milliseconds, and the older `Sync` names a clock the way
-/// SubRip does, so the two forms are read apart rather than guessed at.
+/// SAMI paragraphs inherit a canonical `<Sync Start=milliseconds>` group.
+/// Legacy paragraph `Begin`/`End` milliseconds and `Sync` clock strings remain
+/// supported. Blank paragraphs in a Sync group clear the selected language.
 pub fn parse_sami(text: &str) -> Vec<Cue> {
     let folded = text.to_ascii_lowercase();
     let mut lines = Vec::new();
     let mut heard = None;
-    for (tag, body) in sami_tags(&folded, text) {
-        let start = attribute(tag, "begin")
-            .and_then(milliseconds)
-            .or_else(|| attribute(tag, "sync").filter(|clock| clock.contains(':')).and_then(clock));
-        let start = start.or(heard);
+    for paragraph in sami_tags(&folded, text) {
+        let tag = paragraph.tag;
+        let body = paragraph.body;
+        let start = attribute(tag, "begin").and_then(milliseconds).or_else(|| {
+            attribute(tag, "sync")
+                .filter(|clock| clock.contains(':'))
+                .and_then(clock)
+        });
+        let start = start.or(paragraph.sync.unwrap_or(heard));
+        if paragraph.sync.is_some() && start.is_none() {
+            continue;
+        }
         heard = start;
         lines.push(SamiLine {
             language: attribute(tag, "class").unwrap_or_default().to_owned(),
+            canonical: paragraph.sync.is_some(),
             start,
             end: attribute(tag, "end").and_then(milliseconds),
-            text: plain(&line_breaks(body)),
+            text: plain(&line_breaks(body).replace("&nbsp;", "\u{a0}")),
         });
     }
     let wanted = sami_language(&lines);
     let mut shown: Vec<(Duration, Option<Duration>, String)> = Vec::new();
     for line in lines
         .iter()
-        .filter(|line| line.language == wanted && !line.text.is_empty())
+        .filter(|line| line.language == wanted && (!line.text.is_empty() || line.canonical))
     {
         let Some(start) = line.start else { continue };
         match shown.last_mut().filter(|last| last.0 == start) {
@@ -272,8 +281,12 @@ pub fn parse_sami(text: &str) -> Vec<Cue> {
             // caption before it, not a caption that replaces it.
             Some(last) => {
                 last.1 = last.1.max(line.end);
-                last.2.push('\n');
-                last.2.push_str(&line.text);
+                if !line.text.is_empty() {
+                    if !last.2.is_empty() {
+                        last.2.push('\n');
+                    }
+                    last.2.push_str(&line.text);
+                }
             }
             None => shown.push((start, line.end, line.text.clone())),
         }
@@ -281,6 +294,9 @@ pub fn parse_sami(text: &str) -> Vec<Cue> {
     let starts: Vec<Duration> = shown.iter().map(|(start, _, _)| *start).collect();
     let mut cues = Vec::with_capacity(shown.len());
     for (nth, (start, end, text)) in shown.into_iter().enumerate() {
+        if text.is_empty() {
+            continue;
+        }
         let next = starts.get(nth + 1).copied();
         let end = end
             .filter(|end| *end > start)
@@ -317,40 +333,121 @@ fn sami_language(lines: &[SamiLine]) -> &str {
     wanted
 }
 
-/// The `<p>` tags of a SAMI body, each with the text that runs until the next
-/// one. A tag comes back folded because its attributes are matched case-blind;
-/// its text keeps the letters the file wrote.
-fn sami_tags<'a>(folded: &'a str, text: &'a str) -> Vec<(&'a str, &'a str)> {
+/// A paragraph and its enclosing Sync clock. Markup is scanned as whole tags,
+/// so quoted attributes cannot create another paragraph or clock.
+struct SamiParagraph<'a> {
+    tag: &'a str,
+    body: &'a str,
+    // Outer None: legacy P timing. Inner None: malformed canonical clock.
+    sync: Option<Option<Duration>>,
+}
+fn sami_tags<'a>(folded: &'a str, text: &'a str) -> Vec<SamiParagraph<'a>> {
     let bytes = folded.as_bytes();
-    let last = folded.find("</body").unwrap_or(folded.len());
-    let first = folded
-        .find("<body")
-        .map_or(0, |at| at + "<body".len())
-        .min(last);
-    let mut opens = Vec::new();
+    let (first, last) = sami_body_bounds(folded);
     let mut at = first;
+    let mut spans: Vec<(usize, usize, usize, Option<Option<Duration>>)> = Vec::new();
+    let mut sync = None;
     while at < last {
-        // `<p` opens a caption; `</p>` closes one, and `<param>` and `<pre>` are
-        // neither, so the byte after the name has to be the end of the name.
-        if bytes[at] == b'<'
-            && bytes.get(at + 1) == Some(&b'p')
-            && !bytes.get(at + 2).is_some_and(|byte| byte.is_ascii_alphanumeric())
-        {
-            opens.push(at);
-            at += 2;
-        } else {
+        if bytes[at] != b'<' {
             at += 1;
+            continue;
+        }
+        if folded[at..].starts_with("<!--") {
+            at = folded[at + 4..]
+                .find("-->")
+                .map_or(last, |end| at + 4 + end + 3);
+            continue;
+        }
+        let end = tag_closed_at(bytes, at).min(last);
+        let tag = &folded[at..end];
+        let name = tag[1..]
+            .split(|c: char| c.is_whitespace() || matches!(c, '>' | '/'))
+            .next()
+            .unwrap_or_default();
+        if name == "p" || name == "sync" {
+            if let Some(previous) = spans.last_mut() {
+                if previous.2 == last {
+                    previous.2 = at;
+                }
+            }
+            if name == "sync" {
+                sync = Some(attribute(tag, "start").and_then(milliseconds));
+            } else {
+                spans.push((at, end, last, sync));
+            }
+        }
+        at = end.max(at + 1);
+    }
+    spans
+        .into_iter()
+        .map(|(open, end, body_end, sync)| SamiParagraph {
+            tag: &folded[open..end],
+            body: &text[end..body_end],
+            sync,
+        })
+        .collect()
+}
+
+/// Locate actual body tags, skipping quoted values, comments and header raw text.
+fn sami_body_bounds(folded: &str) -> (usize, usize) {
+    let bytes = folded.as_bytes();
+    let mut from = 0;
+    let mut first = None;
+    while let Some(relative) = folded[from..].find('<') {
+        let at = from + relative;
+        if folded[at..].starts_with("<!--") {
+            from = folded[at + 4..]
+                .find("-->")
+                .map_or(bytes.len(), |end| at + 4 + end + 3);
+            continue;
+        }
+        let end = tag_closed_at(bytes, at);
+        let inside = &folded[at + 1..end];
+        let closing = inside.starts_with('/');
+        let name = inside
+            .strip_prefix('/')
+            .unwrap_or(inside)
+            .split(|c: char| c.is_whitespace() || matches!(c, '>' | '/'))
+            .next()
+            .unwrap_or_default();
+        if name == "body" {
+            if closing {
+                return (first.unwrap_or(0).min(at), at);
+            }
+            first.get_or_insert(end);
+        }
+        from = end;
+        let raw_close = if closing {
+            None
+        } else {
+            match name {
+                "title" => Some("</title"),
+                "style" => Some("</style"),
+                "script" => Some("</script"),
+                _ => None,
+            }
+        };
+        if let Some(needle) = raw_close {
+            loop {
+                let Some(relative) = folded[from..].find(needle) else {
+                    from = bytes.len();
+                    break;
+                };
+                let close = from + relative;
+                let after = close + needle.len();
+                if folded[after..]
+                    .chars()
+                    .next()
+                    .is_none_or(|c| c.is_whitespace() || matches!(c, '>' | '/'))
+                {
+                    from = tag_closed_at(bytes, close);
+                    break;
+                }
+                from = after;
+            }
         }
     }
-    let mut found = Vec::with_capacity(opens.len());
-    for (nth, open) in opens.iter().enumerate() {
-        let tag_end = tag_closed_at(bytes, *open).min(last);
-        let body_end = opens.get(nth + 1).copied().unwrap_or(last);
-        let tag = folded.get(*open..tag_end).unwrap_or_default();
-        let body = text.get(tag_end..body_end).unwrap_or_default();
-        found.push((tag, body));
-    }
-    found
+    (first.unwrap_or(0), bytes.len())
 }
 
 /// The byte past the `>` that ends a tag, which an attribute value may have put
@@ -374,24 +471,32 @@ fn tag_closed_at(bytes: &[u8], from: usize) -> usize {
 /// either case the writer chose. A name that only appears inside another
 /// attribute's value names nothing.
 fn attribute<'a>(tag: &'a str, name: &str) -> Option<&'a str> {
-    let bytes = tag.as_bytes();
-    let mut from = 0;
+    // Skip the tag name, then consume complete attributes and their values.
+    let mut rest = &tag[tag.find(char::is_whitespace)?..];
     loop {
-        let at = tag[from..].find(name)? + from;
-        from = at + name.len();
-        if at != 0 && bytes[at - 1].is_ascii_alphanumeric() {
-            continue;
-        }
-        let Some(rest) = tag.get(at + name.len()..).map(str::trim_start) else {
-            continue;
+        rest = rest.trim_start_matches(|c: char| c.is_whitespace() || c == '/');
+        if rest.is_empty() || rest.starts_with('>') { return None; }
+        let end = rest.find(|c: char| c.is_whitespace() || matches!(c, '=' | '>' | '/'))
+            .unwrap_or(rest.len());
+        let key = &rest[..end];
+        rest = rest[end..].trim_start();
+        let Some(after_equals) = rest.strip_prefix('=') else { continue; };
+        rest = after_equals.trim_start();
+        let (value, tail) = match rest.as_bytes().first()? {
+            b'"' | b'\'' => {
+                let quote = rest.as_bytes()[0] as char;
+                let quoted = &rest[1..];
+                let end = quoted.find(quote)?;
+                (&quoted[..end], &quoted[end + 1..])
+            }
+            _ => {
+                let end = rest.find(|c: char| c.is_whitespace() || c == '>')
+                    .unwrap_or(rest.len());
+                (rest[..end].trim_end_matches('/'), &rest[end..])
+            }
         };
-        let Some(value) = rest.strip_prefix('=').map(str::trim_start) else {
-            continue;
-        };
-        return match value.strip_prefix(['"', '\'']) {
-            Some(quoted) => Some(quoted.split(['"', '\'']).next().unwrap_or_default()),
-            None => Some(value.split_whitespace().next()?.trim_end_matches(['/', '>'])),
-        };
+        rest = tail;
+        if key == name { return Some(value); }
     }
 }
 
@@ -412,8 +517,8 @@ fn line_breaks(text: &str) -> String {
     let (mut at, mut from) = (0, 0);
     while at < bytes.len() {
         if bytes[at] == b'<'
-            && bytes.get(at + 1).is_some_and(|byte| *byte == b'b')
-            && bytes.get(at + 2).is_some_and(|byte| *byte == b'r')
+            && bytes.get(at + 1).is_some_and(|byte| byte.eq_ignore_ascii_case(&b'b'))
+            && bytes.get(at + 2).is_some_and(|byte| byte.eq_ignore_ascii_case(&b'r'))
             && !bytes.get(at + 3).is_some_and(|byte| byte.is_ascii_alphanumeric())
         {
             out.push_str(&text[from..at]);
@@ -473,7 +578,7 @@ pub fn sidecars(video: &Path) -> Vec<std::path::PathBuf> {
                 .and_then(|extension| extension.to_str())
                 .map(|extension| extension.to_ascii_lowercase())
                 .as_deref(),
-            Some("srt") | Some("vtt") | Some("ass") | Some("ssa") | Some("smi") | Some("smil")
+            Some("srt") | Some("vtt") | Some("ass") | Some("ssa") | Some("smi") | Some("sami") | Some("smil")
         );
         if !is_subtitle {
             continue;

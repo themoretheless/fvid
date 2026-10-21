@@ -1,0 +1,15 @@
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-opus)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.15s
+     Running tests/ogg_page_sequence.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_page_sequence-23fcb96e296dcec8)
+
+running 3 tests
+test streaming_reader_reports_discontinuity_without_publishing_the_bad_page ... ignored, enable when streaming reader tracks page sequence and rewind checkpoint
+lost-first-audio.ogg: streaming reader silently returns2packets,1920samples as complete EOS
+gap.ogg: streaming reader silently returns3packets,2880samples as complete EOS
+duplicate.ogg: streaming reader silently returns3packets,2880samples as complete EOS
+test monostream_packets_and_rewind_preserve_origins_and_wrapped_counters ... ok
+backward.ogg: streaming reader silently returns3packets,2880samples as complete EOS
+test baseline_streaming_reader_also_hides_page_loss_and_counter_corruption ... ok
+
+test result: ok. 2 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

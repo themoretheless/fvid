@@ -1,0 +1,4197 @@
+{
+  "provenance": "Owned IEEE-754 WavPack vectors: literal float words and zero-residual predictors.\nNo external codec, process, network, private sample or generated fixture is read.\n",
+  "cases": [
+    {
+      "name": "false-e0-s0-zero",
+      "file": "false-e0-s0-zero.mkv",
+      "oracle": "false-e0-s0-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e0-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-zero-1.wv",
+          "pts": 160,
+          "mono": "false-e0-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-zero-2.wv",
+          "pts": 320,
+          "mono": "false-e0-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s0-ones",
+      "file": "false-e0-s0-ones.mkv",
+      "oracle": "false-e0-s0-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e0-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-ones-1.wv",
+          "pts": 960,
+          "mono": "false-e0-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-ones-2.wv",
+          "pts": 1920,
+          "mono": "false-e0-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s0-same",
+      "file": "false-e0-s0-same.mkv",
+      "oracle": "false-e0-s0-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e0-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-same-1.wv",
+          "pts": 750,
+          "mono": "false-e0-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-same-2.wv",
+          "pts": 1500,
+          "mono": "false-e0-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s0-sent",
+      "file": "false-e0-s0-sent.mkv",
+      "oracle": "false-e0-s0-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e0-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-sent-1.wv",
+          "pts": 160,
+          "mono": "false-e0-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-sent-2.wv",
+          "pts": 320,
+          "mono": "false-e0-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s0-optimized",
+      "file": "false-e0-s0-optimized.mkv",
+      "oracle": "false-e0-s0-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e0-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-optimized-1.wv",
+          "pts": 960,
+          "mono": "false-e0-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s0-optimized-2.wv",
+          "pts": 1920,
+          "mono": "false-e0-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s8-zero",
+      "file": "false-e0-s8-zero.mkv",
+      "oracle": "false-e0-s8-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e0-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-zero-1.wv",
+          "pts": 750,
+          "mono": "false-e0-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-zero-2.wv",
+          "pts": 1500,
+          "mono": "false-e0-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s8-ones",
+      "file": "false-e0-s8-ones.mkv",
+      "oracle": "false-e0-s8-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e0-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-ones-1.wv",
+          "pts": 160,
+          "mono": "false-e0-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-ones-2.wv",
+          "pts": 320,
+          "mono": "false-e0-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s8-same",
+      "file": "false-e0-s8-same.mkv",
+      "oracle": "false-e0-s8-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e0-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-same-1.wv",
+          "pts": 960,
+          "mono": "false-e0-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-same-2.wv",
+          "pts": 1920,
+          "mono": "false-e0-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s8-sent",
+      "file": "false-e0-s8-sent.mkv",
+      "oracle": "false-e0-s8-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e0-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-sent-1.wv",
+          "pts": 750,
+          "mono": "false-e0-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-sent-2.wv",
+          "pts": 1500,
+          "mono": "false-e0-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e0-s8-optimized",
+      "file": "false-e0-s8-optimized.mkv",
+      "oracle": "false-e0-s8-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e0-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e0-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-optimized-1.wv",
+          "pts": 160,
+          "mono": "false-e0-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e0-s8-optimized-2.wv",
+          "pts": 320,
+          "mono": "false-e0-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s0-zero",
+      "file": "false-e1-s0-zero.mkv",
+      "oracle": "false-e1-s0-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e1-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-zero-1.wv",
+          "pts": 960,
+          "mono": "false-e1-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-zero-2.wv",
+          "pts": 1920,
+          "mono": "false-e1-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s0-ones",
+      "file": "false-e1-s0-ones.mkv",
+      "oracle": "false-e1-s0-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e1-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-ones-1.wv",
+          "pts": 750,
+          "mono": "false-e1-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-ones-2.wv",
+          "pts": 1500,
+          "mono": "false-e1-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s0-same",
+      "file": "false-e1-s0-same.mkv",
+      "oracle": "false-e1-s0-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e1-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-same-1.wv",
+          "pts": 160,
+          "mono": "false-e1-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-same-2.wv",
+          "pts": 320,
+          "mono": "false-e1-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s0-sent",
+      "file": "false-e1-s0-sent.mkv",
+      "oracle": "false-e1-s0-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e1-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-sent-1.wv",
+          "pts": 960,
+          "mono": "false-e1-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-sent-2.wv",
+          "pts": 1920,
+          "mono": "false-e1-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s0-optimized",
+      "file": "false-e1-s0-optimized.mkv",
+      "oracle": "false-e1-s0-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e1-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-optimized-1.wv",
+          "pts": 750,
+          "mono": "false-e1-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s0-optimized-2.wv",
+          "pts": 1500,
+          "mono": "false-e1-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s8-zero",
+      "file": "false-e1-s8-zero.mkv",
+      "oracle": "false-e1-s8-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e1-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-zero-1.wv",
+          "pts": 160,
+          "mono": "false-e1-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-zero-2.wv",
+          "pts": 320,
+          "mono": "false-e1-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s8-ones",
+      "file": "false-e1-s8-ones.mkv",
+      "oracle": "false-e1-s8-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e1-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-ones-1.wv",
+          "pts": 960,
+          "mono": "false-e1-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-ones-2.wv",
+          "pts": 1920,
+          "mono": "false-e1-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s8-same",
+      "file": "false-e1-s8-same.mkv",
+      "oracle": "false-e1-s8-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e1-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-same-1.wv",
+          "pts": 750,
+          "mono": "false-e1-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-same-2.wv",
+          "pts": 1500,
+          "mono": "false-e1-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s8-sent",
+      "file": "false-e1-s8-sent.mkv",
+      "oracle": "false-e1-s8-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e1-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-sent-1.wv",
+          "pts": 160,
+          "mono": "false-e1-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-sent-2.wv",
+          "pts": 320,
+          "mono": "false-e1-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e1-s8-optimized",
+      "file": "false-e1-s8-optimized.mkv",
+      "oracle": "false-e1-s8-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e1-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e1-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-optimized-1.wv",
+          "pts": 960,
+          "mono": "false-e1-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e1-s8-optimized-2.wv",
+          "pts": 1920,
+          "mono": "false-e1-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s0-zero",
+      "file": "false-e8-s0-zero.mkv",
+      "oracle": "false-e8-s0-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e8-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-zero-1.wv",
+          "pts": 750,
+          "mono": "false-e8-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-zero-2.wv",
+          "pts": 1500,
+          "mono": "false-e8-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s0-ones",
+      "file": "false-e8-s0-ones.mkv",
+      "oracle": "false-e8-s0-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e8-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-ones-1.wv",
+          "pts": 160,
+          "mono": "false-e8-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-ones-2.wv",
+          "pts": 320,
+          "mono": "false-e8-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s0-same",
+      "file": "false-e8-s0-same.mkv",
+      "oracle": "false-e8-s0-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e8-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-same-1.wv",
+          "pts": 960,
+          "mono": "false-e8-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-same-2.wv",
+          "pts": 1920,
+          "mono": "false-e8-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s0-sent",
+      "file": "false-e8-s0-sent.mkv",
+      "oracle": "false-e8-s0-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e8-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-sent-1.wv",
+          "pts": 750,
+          "mono": "false-e8-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-sent-2.wv",
+          "pts": 1500,
+          "mono": "false-e8-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s0-optimized",
+      "file": "false-e8-s0-optimized.mkv",
+      "oracle": "false-e8-s0-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e8-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-optimized-1.wv",
+          "pts": 160,
+          "mono": "false-e8-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s0-optimized-2.wv",
+          "pts": 320,
+          "mono": "false-e8-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s8-zero",
+      "file": "false-e8-s8-zero.mkv",
+      "oracle": "false-e8-s8-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e8-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-zero-1.wv",
+          "pts": 960,
+          "mono": "false-e8-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-zero-2.wv",
+          "pts": 1920,
+          "mono": "false-e8-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s8-ones",
+      "file": "false-e8-s8-ones.mkv",
+      "oracle": "false-e8-s8-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e8-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-ones-1.wv",
+          "pts": 750,
+          "mono": "false-e8-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-ones-2.wv",
+          "pts": 1500,
+          "mono": "false-e8-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s8-same",
+      "file": "false-e8-s8-same.mkv",
+      "oracle": "false-e8-s8-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e8-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-same-1.wv",
+          "pts": 160,
+          "mono": "false-e8-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-same-2.wv",
+          "pts": 320,
+          "mono": "false-e8-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s8-sent",
+      "file": "false-e8-s8-sent.mkv",
+      "oracle": "false-e8-s8-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e8-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-sent-1.wv",
+          "pts": 960,
+          "mono": "false-e8-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-sent-2.wv",
+          "pts": 1920,
+          "mono": "false-e8-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e8-s8-optimized",
+      "file": "false-e8-s8-optimized.mkv",
+      "oracle": "false-e8-s8-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e8-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e8-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-optimized-1.wv",
+          "pts": 750,
+          "mono": "false-e8-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e8-s8-optimized-2.wv",
+          "pts": 1500,
+          "mono": "false-e8-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s0-zero",
+      "file": "false-e24-s0-zero.mkv",
+      "oracle": "false-e24-s0-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e24-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-zero-1.wv",
+          "pts": 160,
+          "mono": "false-e24-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-zero-2.wv",
+          "pts": 320,
+          "mono": "false-e24-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s0-ones",
+      "file": "false-e24-s0-ones.mkv",
+      "oracle": "false-e24-s0-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e24-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-ones-1.wv",
+          "pts": 960,
+          "mono": "false-e24-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-ones-2.wv",
+          "pts": 1920,
+          "mono": "false-e24-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s0-same",
+      "file": "false-e24-s0-same.mkv",
+      "oracle": "false-e24-s0-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e24-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-same-1.wv",
+          "pts": 750,
+          "mono": "false-e24-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-same-2.wv",
+          "pts": 1500,
+          "mono": "false-e24-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s0-sent",
+      "file": "false-e24-s0-sent.mkv",
+      "oracle": "false-e24-s0-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e24-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-sent-1.wv",
+          "pts": 160,
+          "mono": "false-e24-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-sent-2.wv",
+          "pts": 320,
+          "mono": "false-e24-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s0-optimized",
+      "file": "false-e24-s0-optimized.mkv",
+      "oracle": "false-e24-s0-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e24-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-optimized-1.wv",
+          "pts": 960,
+          "mono": "false-e24-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s0-optimized-2.wv",
+          "pts": 1920,
+          "mono": "false-e24-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s8-zero",
+      "file": "false-e24-s8-zero.mkv",
+      "oracle": "false-e24-s8-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e24-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-zero-1.wv",
+          "pts": 750,
+          "mono": "false-e24-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-zero-2.wv",
+          "pts": 1500,
+          "mono": "false-e24-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s8-ones",
+      "file": "false-e24-s8-ones.mkv",
+      "oracle": "false-e24-s8-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e24-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-ones-1.wv",
+          "pts": 160,
+          "mono": "false-e24-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-ones-2.wv",
+          "pts": 320,
+          "mono": "false-e24-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s8-same",
+      "file": "false-e24-s8-same.mkv",
+      "oracle": "false-e24-s8-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e24-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-same-1.wv",
+          "pts": 960,
+          "mono": "false-e24-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-same-2.wv",
+          "pts": 1920,
+          "mono": "false-e24-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s8-sent",
+      "file": "false-e24-s8-sent.mkv",
+      "oracle": "false-e24-s8-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e24-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-sent-1.wv",
+          "pts": 750,
+          "mono": "false-e24-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-sent-2.wv",
+          "pts": 1500,
+          "mono": "false-e24-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e24-s8-optimized",
+      "file": "false-e24-s8-optimized.mkv",
+      "oracle": "false-e24-s8-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e24-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e24-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-optimized-1.wv",
+          "pts": 160,
+          "mono": "false-e24-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e24-s8-optimized-2.wv",
+          "pts": 320,
+          "mono": "false-e24-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s0-zero",
+      "file": "false-e25-s0-zero.mkv",
+      "oracle": "false-e25-s0-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e25-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-zero-1.wv",
+          "pts": 960,
+          "mono": "false-e25-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-zero-2.wv",
+          "pts": 1920,
+          "mono": "false-e25-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s0-ones",
+      "file": "false-e25-s0-ones.mkv",
+      "oracle": "false-e25-s0-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e25-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-ones-1.wv",
+          "pts": 750,
+          "mono": "false-e25-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-ones-2.wv",
+          "pts": 1500,
+          "mono": "false-e25-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s0-same",
+      "file": "false-e25-s0-same.mkv",
+      "oracle": "false-e25-s0-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e25-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-same-1.wv",
+          "pts": 160,
+          "mono": "false-e25-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-same-2.wv",
+          "pts": 320,
+          "mono": "false-e25-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s0-sent",
+      "file": "false-e25-s0-sent.mkv",
+      "oracle": "false-e25-s0-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e25-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-sent-1.wv",
+          "pts": 960,
+          "mono": "false-e25-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-sent-2.wv",
+          "pts": 1920,
+          "mono": "false-e25-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s0-optimized",
+      "file": "false-e25-s0-optimized.mkv",
+      "oracle": "false-e25-s0-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e25-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-optimized-1.wv",
+          "pts": 750,
+          "mono": "false-e25-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s0-optimized-2.wv",
+          "pts": 1500,
+          "mono": "false-e25-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s8-zero",
+      "file": "false-e25-s8-zero.mkv",
+      "oracle": "false-e25-s8-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e25-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-zero-1.wv",
+          "pts": 160,
+          "mono": "false-e25-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-zero-2.wv",
+          "pts": 320,
+          "mono": "false-e25-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s8-ones",
+      "file": "false-e25-s8-ones.mkv",
+      "oracle": "false-e25-s8-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e25-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-ones-1.wv",
+          "pts": 960,
+          "mono": "false-e25-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-ones-2.wv",
+          "pts": 1920,
+          "mono": "false-e25-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s8-same",
+      "file": "false-e25-s8-same.mkv",
+      "oracle": "false-e25-s8-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e25-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-same-1.wv",
+          "pts": 750,
+          "mono": "false-e25-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-same-2.wv",
+          "pts": 1500,
+          "mono": "false-e25-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s8-sent",
+      "file": "false-e25-s8-sent.mkv",
+      "oracle": "false-e25-s8-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e25-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-sent-1.wv",
+          "pts": 160,
+          "mono": "false-e25-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-sent-2.wv",
+          "pts": 320,
+          "mono": "false-e25-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e25-s8-optimized",
+      "file": "false-e25-s8-optimized.mkv",
+      "oracle": "false-e25-s8-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e25-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e25-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-optimized-1.wv",
+          "pts": 960,
+          "mono": "false-e25-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e25-s8-optimized-2.wv",
+          "pts": 1920,
+          "mono": "false-e25-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s0-zero",
+      "file": "false-e127-s0-zero.mkv",
+      "oracle": "false-e127-s0-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e127-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-zero-1.wv",
+          "pts": 750,
+          "mono": "false-e127-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-zero-2.wv",
+          "pts": 1500,
+          "mono": "false-e127-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s0-ones",
+      "file": "false-e127-s0-ones.mkv",
+      "oracle": "false-e127-s0-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e127-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-ones-1.wv",
+          "pts": 160,
+          "mono": "false-e127-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-ones-2.wv",
+          "pts": 320,
+          "mono": "false-e127-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s0-same",
+      "file": "false-e127-s0-same.mkv",
+      "oracle": "false-e127-s0-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e127-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-same-1.wv",
+          "pts": 960,
+          "mono": "false-e127-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-same-2.wv",
+          "pts": 1920,
+          "mono": "false-e127-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s0-sent",
+      "file": "false-e127-s0-sent.mkv",
+      "oracle": "false-e127-s0-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e127-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-sent-1.wv",
+          "pts": 750,
+          "mono": "false-e127-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-sent-2.wv",
+          "pts": 1500,
+          "mono": "false-e127-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s0-optimized",
+      "file": "false-e127-s0-optimized.mkv",
+      "oracle": "false-e127-s0-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e127-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-optimized-1.wv",
+          "pts": 160,
+          "mono": "false-e127-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s0-optimized-2.wv",
+          "pts": 320,
+          "mono": "false-e127-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s8-zero",
+      "file": "false-e127-s8-zero.mkv",
+      "oracle": "false-e127-s8-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e127-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-zero-1.wv",
+          "pts": 960,
+          "mono": "false-e127-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-zero-2.wv",
+          "pts": 1920,
+          "mono": "false-e127-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s8-ones",
+      "file": "false-e127-s8-ones.mkv",
+      "oracle": "false-e127-s8-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e127-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-ones-1.wv",
+          "pts": 750,
+          "mono": "false-e127-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-ones-2.wv",
+          "pts": 1500,
+          "mono": "false-e127-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s8-same",
+      "file": "false-e127-s8-same.mkv",
+      "oracle": "false-e127-s8-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e127-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-same-1.wv",
+          "pts": 160,
+          "mono": "false-e127-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-same-2.wv",
+          "pts": 320,
+          "mono": "false-e127-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s8-sent",
+      "file": "false-e127-s8-sent.mkv",
+      "oracle": "false-e127-s8-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e127-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-sent-1.wv",
+          "pts": 960,
+          "mono": "false-e127-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-sent-2.wv",
+          "pts": 1920,
+          "mono": "false-e127-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e127-s8-optimized",
+      "file": "false-e127-s8-optimized.mkv",
+      "oracle": "false-e127-s8-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e127-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e127-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-optimized-1.wv",
+          "pts": 750,
+          "mono": "false-e127-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e127-s8-optimized-2.wv",
+          "pts": 1500,
+          "mono": "false-e127-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s0-zero",
+      "file": "false-e150-s0-zero.mkv",
+      "oracle": "false-e150-s0-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e150-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-zero-1.wv",
+          "pts": 160,
+          "mono": "false-e150-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-zero-2.wv",
+          "pts": 320,
+          "mono": "false-e150-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s0-ones",
+      "file": "false-e150-s0-ones.mkv",
+      "oracle": "false-e150-s0-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e150-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-ones-1.wv",
+          "pts": 960,
+          "mono": "false-e150-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-ones-2.wv",
+          "pts": 1920,
+          "mono": "false-e150-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s0-same",
+      "file": "false-e150-s0-same.mkv",
+      "oracle": "false-e150-s0-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e150-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-same-1.wv",
+          "pts": 750,
+          "mono": "false-e150-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-same-2.wv",
+          "pts": 1500,
+          "mono": "false-e150-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s0-sent",
+      "file": "false-e150-s0-sent.mkv",
+      "oracle": "false-e150-s0-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e150-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-sent-1.wv",
+          "pts": 160,
+          "mono": "false-e150-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-sent-2.wv",
+          "pts": 320,
+          "mono": "false-e150-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s0-optimized",
+      "file": "false-e150-s0-optimized.mkv",
+      "oracle": "false-e150-s0-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e150-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-optimized-1.wv",
+          "pts": 960,
+          "mono": "false-e150-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s0-optimized-2.wv",
+          "pts": 1920,
+          "mono": "false-e150-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s8-zero",
+      "file": "false-e150-s8-zero.mkv",
+      "oracle": "false-e150-s8-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e150-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-zero-1.wv",
+          "pts": 750,
+          "mono": "false-e150-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-zero-2.wv",
+          "pts": 1500,
+          "mono": "false-e150-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s8-ones",
+      "file": "false-e150-s8-ones.mkv",
+      "oracle": "false-e150-s8-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e150-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-ones-1.wv",
+          "pts": 160,
+          "mono": "false-e150-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-ones-2.wv",
+          "pts": 320,
+          "mono": "false-e150-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s8-same",
+      "file": "false-e150-s8-same.mkv",
+      "oracle": "false-e150-s8-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e150-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-same-1.wv",
+          "pts": 960,
+          "mono": "false-e150-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-same-2.wv",
+          "pts": 1920,
+          "mono": "false-e150-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s8-sent",
+      "file": "false-e150-s8-sent.mkv",
+      "oracle": "false-e150-s8-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e150-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-sent-1.wv",
+          "pts": 750,
+          "mono": "false-e150-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-sent-2.wv",
+          "pts": 1500,
+          "mono": "false-e150-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e150-s8-optimized",
+      "file": "false-e150-s8-optimized.mkv",
+      "oracle": "false-e150-s8-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e150-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e150-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-optimized-1.wv",
+          "pts": 160,
+          "mono": "false-e150-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e150-s8-optimized-2.wv",
+          "pts": 320,
+          "mono": "false-e150-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s0-zero",
+      "file": "false-e254-s0-zero.mkv",
+      "oracle": "false-e254-s0-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e254-s0-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s0-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-zero-1.wv",
+          "pts": 960,
+          "mono": "false-e254-s0-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-zero-2.wv",
+          "pts": 1920,
+          "mono": "false-e254-s0-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s0-ones",
+      "file": "false-e254-s0-ones.mkv",
+      "oracle": "false-e254-s0-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e254-s0-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s0-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-ones-1.wv",
+          "pts": 750,
+          "mono": "false-e254-s0-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-ones-2.wv",
+          "pts": 1500,
+          "mono": "false-e254-s0-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s0-same",
+      "file": "false-e254-s0-same.mkv",
+      "oracle": "false-e254-s0-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e254-s0-same-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s0-same-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-same-1.wv",
+          "pts": 160,
+          "mono": "false-e254-s0-same-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-same-2.wv",
+          "pts": 320,
+          "mono": "false-e254-s0-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s0-sent",
+      "file": "false-e254-s0-sent.mkv",
+      "oracle": "false-e254-s0-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e254-s0-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s0-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-sent-1.wv",
+          "pts": 960,
+          "mono": "false-e254-s0-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-sent-2.wv",
+          "pts": 1920,
+          "mono": "false-e254-s0-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s0-optimized",
+      "file": "false-e254-s0-optimized.mkv",
+      "oracle": "false-e254-s0-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e254-s0-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s0-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-optimized-1.wv",
+          "pts": 750,
+          "mono": "false-e254-s0-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s0-optimized-2.wv",
+          "pts": 1500,
+          "mono": "false-e254-s0-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s8-zero",
+      "file": "false-e254-s8-zero.mkv",
+      "oracle": "false-e254-s8-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e254-s8-zero-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s8-zero-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-zero-1.wv",
+          "pts": 160,
+          "mono": "false-e254-s8-zero-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-zero-2.wv",
+          "pts": 320,
+          "mono": "false-e254-s8-zero-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s8-ones",
+      "file": "false-e254-s8-ones.mkv",
+      "oracle": "false-e254-s8-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e254-s8-ones-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s8-ones-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-ones-1.wv",
+          "pts": 960,
+          "mono": "false-e254-s8-ones-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-ones-2.wv",
+          "pts": 1920,
+          "mono": "false-e254-s8-ones-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s8-same",
+      "file": "false-e254-s8-same.mkv",
+      "oracle": "false-e254-s8-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-e254-s8-same-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s8-same-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-same-1.wv",
+          "pts": 750,
+          "mono": "false-e254-s8-same-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-same-2.wv",
+          "pts": 1500,
+          "mono": "false-e254-s8-same-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s8-sent",
+      "file": "false-e254-s8-sent.mkv",
+      "oracle": "false-e254-s8-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-e254-s8-sent-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s8-sent-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-sent-1.wv",
+          "pts": 160,
+          "mono": "false-e254-s8-sent-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-sent-2.wv",
+          "pts": 320,
+          "mono": "false-e254-s8-sent-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-e254-s8-optimized",
+      "file": "false-e254-s8-optimized.mkv",
+      "oracle": "false-e254-s8-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-e254-s8-optimized-0.wv",
+          "pts": 0,
+          "mono": "false-e254-s8-optimized-0-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-optimized-1.wv",
+          "pts": 960,
+          "mono": "false-e254-s8-optimized-1-mono.wv"
+        },
+        {
+          "file": "false-e254-s8-optimized-2.wv",
+          "pts": 1920,
+          "mono": "false-e254-s8-optimized-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s0-zero",
+      "file": "stereo-e0-s0-zero.mkv",
+      "oracle": "stereo-e0-s0-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e0-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s0-zero-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e0-s0-zero-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s0-ones",
+      "file": "stereo-e0-s0-ones.mkv",
+      "oracle": "stereo-e0-s0-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e0-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s0-ones-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e0-s0-ones-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s0-same",
+      "file": "stereo-e0-s0-same.mkv",
+      "oracle": "stereo-e0-s0-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e0-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s0-same-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e0-s0-same-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s0-sent",
+      "file": "stereo-e0-s0-sent.mkv",
+      "oracle": "stereo-e0-s0-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e0-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s0-sent-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e0-s0-sent-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s0-optimized",
+      "file": "stereo-e0-s0-optimized.mkv",
+      "oracle": "stereo-e0-s0-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e0-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s0-optimized-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e0-s0-optimized-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s8-zero",
+      "file": "stereo-e0-s8-zero.mkv",
+      "oracle": "stereo-e0-s8-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e0-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s8-zero-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e0-s8-zero-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s8-ones",
+      "file": "stereo-e0-s8-ones.mkv",
+      "oracle": "stereo-e0-s8-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e0-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s8-ones-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e0-s8-ones-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s8-same",
+      "file": "stereo-e0-s8-same.mkv",
+      "oracle": "stereo-e0-s8-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e0-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s8-same-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e0-s8-same-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s8-sent",
+      "file": "stereo-e0-s8-sent.mkv",
+      "oracle": "stereo-e0-s8-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e0-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s8-sent-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e0-s8-sent-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e0-s8-optimized",
+      "file": "stereo-e0-s8-optimized.mkv",
+      "oracle": "stereo-e0-s8-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e0-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e0-s8-optimized-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e0-s8-optimized-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s0-zero",
+      "file": "stereo-e1-s0-zero.mkv",
+      "oracle": "stereo-e1-s0-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e1-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s0-zero-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e1-s0-zero-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s0-ones",
+      "file": "stereo-e1-s0-ones.mkv",
+      "oracle": "stereo-e1-s0-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e1-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s0-ones-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e1-s0-ones-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s0-same",
+      "file": "stereo-e1-s0-same.mkv",
+      "oracle": "stereo-e1-s0-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e1-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s0-same-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e1-s0-same-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s0-sent",
+      "file": "stereo-e1-s0-sent.mkv",
+      "oracle": "stereo-e1-s0-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e1-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s0-sent-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e1-s0-sent-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s0-optimized",
+      "file": "stereo-e1-s0-optimized.mkv",
+      "oracle": "stereo-e1-s0-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e1-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s0-optimized-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e1-s0-optimized-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s8-zero",
+      "file": "stereo-e1-s8-zero.mkv",
+      "oracle": "stereo-e1-s8-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e1-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s8-zero-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e1-s8-zero-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s8-ones",
+      "file": "stereo-e1-s8-ones.mkv",
+      "oracle": "stereo-e1-s8-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e1-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s8-ones-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e1-s8-ones-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s8-same",
+      "file": "stereo-e1-s8-same.mkv",
+      "oracle": "stereo-e1-s8-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e1-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s8-same-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e1-s8-same-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s8-sent",
+      "file": "stereo-e1-s8-sent.mkv",
+      "oracle": "stereo-e1-s8-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e1-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s8-sent-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e1-s8-sent-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e1-s8-optimized",
+      "file": "stereo-e1-s8-optimized.mkv",
+      "oracle": "stereo-e1-s8-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e1-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e1-s8-optimized-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e1-s8-optimized-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s0-zero",
+      "file": "stereo-e8-s0-zero.mkv",
+      "oracle": "stereo-e8-s0-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e8-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s0-zero-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e8-s0-zero-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s0-ones",
+      "file": "stereo-e8-s0-ones.mkv",
+      "oracle": "stereo-e8-s0-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e8-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s0-ones-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e8-s0-ones-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s0-same",
+      "file": "stereo-e8-s0-same.mkv",
+      "oracle": "stereo-e8-s0-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e8-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s0-same-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e8-s0-same-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s0-sent",
+      "file": "stereo-e8-s0-sent.mkv",
+      "oracle": "stereo-e8-s0-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e8-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s0-sent-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e8-s0-sent-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s0-optimized",
+      "file": "stereo-e8-s0-optimized.mkv",
+      "oracle": "stereo-e8-s0-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e8-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s0-optimized-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e8-s0-optimized-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s8-zero",
+      "file": "stereo-e8-s8-zero.mkv",
+      "oracle": "stereo-e8-s8-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e8-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s8-zero-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e8-s8-zero-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s8-ones",
+      "file": "stereo-e8-s8-ones.mkv",
+      "oracle": "stereo-e8-s8-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e8-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s8-ones-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e8-s8-ones-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s8-same",
+      "file": "stereo-e8-s8-same.mkv",
+      "oracle": "stereo-e8-s8-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e8-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s8-same-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e8-s8-same-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s8-sent",
+      "file": "stereo-e8-s8-sent.mkv",
+      "oracle": "stereo-e8-s8-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e8-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s8-sent-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e8-s8-sent-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e8-s8-optimized",
+      "file": "stereo-e8-s8-optimized.mkv",
+      "oracle": "stereo-e8-s8-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e8-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e8-s8-optimized-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e8-s8-optimized-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s0-zero",
+      "file": "stereo-e24-s0-zero.mkv",
+      "oracle": "stereo-e24-s0-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e24-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s0-zero-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e24-s0-zero-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s0-ones",
+      "file": "stereo-e24-s0-ones.mkv",
+      "oracle": "stereo-e24-s0-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e24-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s0-ones-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e24-s0-ones-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s0-same",
+      "file": "stereo-e24-s0-same.mkv",
+      "oracle": "stereo-e24-s0-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e24-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s0-same-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e24-s0-same-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s0-sent",
+      "file": "stereo-e24-s0-sent.mkv",
+      "oracle": "stereo-e24-s0-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e24-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s0-sent-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e24-s0-sent-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s0-optimized",
+      "file": "stereo-e24-s0-optimized.mkv",
+      "oracle": "stereo-e24-s0-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e24-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s0-optimized-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e24-s0-optimized-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s8-zero",
+      "file": "stereo-e24-s8-zero.mkv",
+      "oracle": "stereo-e24-s8-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e24-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s8-zero-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e24-s8-zero-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s8-ones",
+      "file": "stereo-e24-s8-ones.mkv",
+      "oracle": "stereo-e24-s8-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e24-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s8-ones-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e24-s8-ones-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s8-same",
+      "file": "stereo-e24-s8-same.mkv",
+      "oracle": "stereo-e24-s8-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e24-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s8-same-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e24-s8-same-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s8-sent",
+      "file": "stereo-e24-s8-sent.mkv",
+      "oracle": "stereo-e24-s8-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e24-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s8-sent-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e24-s8-sent-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e24-s8-optimized",
+      "file": "stereo-e24-s8-optimized.mkv",
+      "oracle": "stereo-e24-s8-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e24-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e24-s8-optimized-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e24-s8-optimized-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s0-zero",
+      "file": "stereo-e25-s0-zero.mkv",
+      "oracle": "stereo-e25-s0-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e25-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s0-zero-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e25-s0-zero-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s0-ones",
+      "file": "stereo-e25-s0-ones.mkv",
+      "oracle": "stereo-e25-s0-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e25-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s0-ones-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e25-s0-ones-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s0-same",
+      "file": "stereo-e25-s0-same.mkv",
+      "oracle": "stereo-e25-s0-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e25-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s0-same-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e25-s0-same-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s0-sent",
+      "file": "stereo-e25-s0-sent.mkv",
+      "oracle": "stereo-e25-s0-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e25-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s0-sent-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e25-s0-sent-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s0-optimized",
+      "file": "stereo-e25-s0-optimized.mkv",
+      "oracle": "stereo-e25-s0-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e25-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s0-optimized-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e25-s0-optimized-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s8-zero",
+      "file": "stereo-e25-s8-zero.mkv",
+      "oracle": "stereo-e25-s8-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e25-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s8-zero-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e25-s8-zero-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s8-ones",
+      "file": "stereo-e25-s8-ones.mkv",
+      "oracle": "stereo-e25-s8-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e25-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s8-ones-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e25-s8-ones-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s8-same",
+      "file": "stereo-e25-s8-same.mkv",
+      "oracle": "stereo-e25-s8-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e25-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s8-same-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e25-s8-same-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s8-sent",
+      "file": "stereo-e25-s8-sent.mkv",
+      "oracle": "stereo-e25-s8-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e25-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s8-sent-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e25-s8-sent-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e25-s8-optimized",
+      "file": "stereo-e25-s8-optimized.mkv",
+      "oracle": "stereo-e25-s8-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e25-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e25-s8-optimized-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e25-s8-optimized-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s0-zero",
+      "file": "stereo-e127-s0-zero.mkv",
+      "oracle": "stereo-e127-s0-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e127-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s0-zero-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e127-s0-zero-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s0-ones",
+      "file": "stereo-e127-s0-ones.mkv",
+      "oracle": "stereo-e127-s0-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e127-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s0-ones-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e127-s0-ones-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s0-same",
+      "file": "stereo-e127-s0-same.mkv",
+      "oracle": "stereo-e127-s0-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e127-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s0-same-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e127-s0-same-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s0-sent",
+      "file": "stereo-e127-s0-sent.mkv",
+      "oracle": "stereo-e127-s0-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e127-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s0-sent-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e127-s0-sent-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s0-optimized",
+      "file": "stereo-e127-s0-optimized.mkv",
+      "oracle": "stereo-e127-s0-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e127-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s0-optimized-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e127-s0-optimized-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s8-zero",
+      "file": "stereo-e127-s8-zero.mkv",
+      "oracle": "stereo-e127-s8-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e127-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s8-zero-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e127-s8-zero-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s8-ones",
+      "file": "stereo-e127-s8-ones.mkv",
+      "oracle": "stereo-e127-s8-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e127-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s8-ones-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e127-s8-ones-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s8-same",
+      "file": "stereo-e127-s8-same.mkv",
+      "oracle": "stereo-e127-s8-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e127-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s8-same-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e127-s8-same-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s8-sent",
+      "file": "stereo-e127-s8-sent.mkv",
+      "oracle": "stereo-e127-s8-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e127-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s8-sent-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e127-s8-sent-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e127-s8-optimized",
+      "file": "stereo-e127-s8-optimized.mkv",
+      "oracle": "stereo-e127-s8-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e127-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e127-s8-optimized-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e127-s8-optimized-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s0-zero",
+      "file": "stereo-e150-s0-zero.mkv",
+      "oracle": "stereo-e150-s0-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e150-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s0-zero-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e150-s0-zero-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s0-ones",
+      "file": "stereo-e150-s0-ones.mkv",
+      "oracle": "stereo-e150-s0-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e150-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s0-ones-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e150-s0-ones-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s0-same",
+      "file": "stereo-e150-s0-same.mkv",
+      "oracle": "stereo-e150-s0-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e150-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s0-same-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e150-s0-same-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s0-sent",
+      "file": "stereo-e150-s0-sent.mkv",
+      "oracle": "stereo-e150-s0-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e150-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s0-sent-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e150-s0-sent-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s0-optimized",
+      "file": "stereo-e150-s0-optimized.mkv",
+      "oracle": "stereo-e150-s0-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e150-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s0-optimized-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e150-s0-optimized-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s8-zero",
+      "file": "stereo-e150-s8-zero.mkv",
+      "oracle": "stereo-e150-s8-zero.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e150-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s8-zero-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e150-s8-zero-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s8-ones",
+      "file": "stereo-e150-s8-ones.mkv",
+      "oracle": "stereo-e150-s8-ones.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e150-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s8-ones-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e150-s8-ones-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s8-same",
+      "file": "stereo-e150-s8-same.mkv",
+      "oracle": "stereo-e150-s8-same.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e150-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s8-same-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e150-s8-same-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s8-sent",
+      "file": "stereo-e150-s8-sent.mkv",
+      "oracle": "stereo-e150-s8-sent.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e150-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s8-sent-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e150-s8-sent-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e150-s8-optimized",
+      "file": "stereo-e150-s8-optimized.mkv",
+      "oracle": "stereo-e150-s8-optimized.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e150-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e150-s8-optimized-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e150-s8-optimized-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s0-zero",
+      "file": "stereo-e254-s0-zero.mkv",
+      "oracle": "stereo-e254-s0-zero.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e254-s0-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s0-zero-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e254-s0-zero-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s0-ones",
+      "file": "stereo-e254-s0-ones.mkv",
+      "oracle": "stereo-e254-s0-ones.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e254-s0-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s0-ones-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e254-s0-ones-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s0-same",
+      "file": "stereo-e254-s0-same.mkv",
+      "oracle": "stereo-e254-s0-same.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e254-s0-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s0-same-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e254-s0-same-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s0-sent",
+      "file": "stereo-e254-s0-sent.mkv",
+      "oracle": "stereo-e254-s0-sent.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e254-s0-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s0-sent-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e254-s0-sent-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s0-optimized",
+      "file": "stereo-e254-s0-optimized.mkv",
+      "oracle": "stereo-e254-s0-optimized.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e254-s0-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s0-optimized-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e254-s0-optimized-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s8-zero",
+      "file": "stereo-e254-s8-zero.mkv",
+      "oracle": "stereo-e254-s8-zero.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e254-s8-zero-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s8-zero-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e254-s8-zero-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s8-ones",
+      "file": "stereo-e254-s8-ones.mkv",
+      "oracle": "stereo-e254-s8-ones.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e254-s8-ones-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s8-ones-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e254-s8-ones-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s8-same",
+      "file": "stereo-e254-s8-same.mkv",
+      "oracle": "stereo-e254-s8-same.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-e254-s8-same-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s8-same-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-e254-s8-same-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s8-sent",
+      "file": "stereo-e254-s8-sent.mkv",
+      "oracle": "stereo-e254-s8-sent.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-e254-s8-sent-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s8-sent-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-e254-s8-sent-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-e254-s8-optimized",
+      "file": "stereo-e254-s8-optimized.mkv",
+      "oracle": "stereo-e254-s8-optimized.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-e254-s8-optimized-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-e254-s8-optimized-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-e254-s8-optimized-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-zeros-e0",
+      "file": "false-zeros-e0.mkv",
+      "oracle": "false-zeros-e0.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-zeros-e0-0.wv",
+          "pts": 0,
+          "mono": "false-zeros-e0-0-mono.wv"
+        },
+        {
+          "file": "false-zeros-e0-1.wv",
+          "pts": 960,
+          "mono": "false-zeros-e0-1-mono.wv"
+        },
+        {
+          "file": "false-zeros-e0-2.wv",
+          "pts": 1920,
+          "mono": "false-zeros-e0-2-mono.wv"
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "false-zeros-e24",
+      "file": "false-zeros-e24.mkv",
+      "oracle": "false-zeros-e24.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-zeros-e24-0.wv",
+          "pts": 0,
+          "mono": "false-zeros-e24-0-mono.wv"
+        },
+        {
+          "file": "false-zeros-e24-1.wv",
+          "pts": 750,
+          "mono": "false-zeros-e24-1-mono.wv"
+        },
+        {
+          "file": "false-zeros-e24-2.wv",
+          "pts": 1500,
+          "mono": "false-zeros-e24-2-mono.wv"
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "false-zeros-e25",
+      "file": "false-zeros-e25.mkv",
+      "oracle": "false-zeros-e25.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-zeros-e25-0.wv",
+          "pts": 0,
+          "mono": "false-zeros-e25-0-mono.wv"
+        },
+        {
+          "file": "false-zeros-e25-1.wv",
+          "pts": 160,
+          "mono": "false-zeros-e25-1-mono.wv"
+        },
+        {
+          "file": "false-zeros-e25-2.wv",
+          "pts": 320,
+          "mono": "false-zeros-e25-2-mono.wv"
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "false-zeros-e127",
+      "file": "false-zeros-e127.mkv",
+      "oracle": "false-zeros-e127.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-zeros-e127-0.wv",
+          "pts": 0,
+          "mono": "false-zeros-e127-0-mono.wv"
+        },
+        {
+          "file": "false-zeros-e127-1.wv",
+          "pts": 960,
+          "mono": "false-zeros-e127-1-mono.wv"
+        },
+        {
+          "file": "false-zeros-e127-2.wv",
+          "pts": 1920,
+          "mono": "false-zeros-e127-2-mono.wv"
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "false-zeros-e254",
+      "file": "false-zeros-e254.mkv",
+      "oracle": "false-zeros-e254.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-zeros-e254-0.wv",
+          "pts": 0,
+          "mono": "false-zeros-e254-0-mono.wv"
+        },
+        {
+          "file": "false-zeros-e254-1.wv",
+          "pts": 750,
+          "mono": "false-zeros-e254-1-mono.wv"
+        },
+        {
+          "file": "false-zeros-e254-2.wv",
+          "pts": 1500,
+          "mono": "false-zeros-e254-2-mono.wv"
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "stereo-zeros-e0",
+      "file": "stereo-zeros-e0.mkv",
+      "oracle": "stereo-zeros-e0.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-zeros-e0-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-zeros-e0-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-zeros-e0-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "stereo-zeros-e24",
+      "file": "stereo-zeros-e24.mkv",
+      "oracle": "stereo-zeros-e24.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-zeros-e24-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-zeros-e24-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-zeros-e24-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "stereo-zeros-e25",
+      "file": "stereo-zeros-e25.mkv",
+      "oracle": "stereo-zeros-e25.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-zeros-e25-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-zeros-e25-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-zeros-e25-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "stereo-zeros-e127",
+      "file": "stereo-zeros-e127.mkv",
+      "oracle": "stereo-zeros-e127.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-zeros-e127-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-zeros-e127-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-zeros-e127-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "stereo-zeros-e254",
+      "file": "stereo-zeros-e254.mkv",
+      "oracle": "stereo-zeros-e254.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-zeros-e254-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-zeros-e254-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-zeros-e254-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "zero"
+    },
+    {
+      "name": "false-exceptions",
+      "file": "false-exceptions.mkv",
+      "oracle": "false-exceptions.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-exceptions-0.wv",
+          "pts": 0,
+          "mono": "false-exceptions-0-mono.wv"
+        },
+        {
+          "file": "false-exceptions-1.wv",
+          "pts": 750,
+          "mono": "false-exceptions-1-mono.wv"
+        },
+        {
+          "file": "false-exceptions-2.wv",
+          "pts": 1500,
+          "mono": "false-exceptions-2-mono.wv"
+        }
+      ],
+      "family": "exception"
+    },
+    {
+      "name": "stereo-exceptions",
+      "file": "stereo-exceptions.mkv",
+      "oracle": "stereo-exceptions.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-exceptions-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-exceptions-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-exceptions-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "exception"
+    },
+    {
+      "name": "false-optimized-0-0",
+      "file": "false-optimized-0-0.mkv",
+      "oracle": "false-optimized-0-0.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-optimized-0-0-0.wv",
+          "pts": 0,
+          "mono": "false-optimized-0-0-0-mono.wv"
+        },
+        {
+          "file": "false-optimized-0-0-1.wv",
+          "pts": 960,
+          "mono": "false-optimized-0-0-1-mono.wv"
+        },
+        {
+          "file": "false-optimized-0-0-2.wv",
+          "pts": 1920,
+          "mono": "false-optimized-0-0-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-optimized-3-0",
+      "file": "false-optimized-3-0.mkv",
+      "oracle": "false-optimized-3-0.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "false-optimized-3-0-0.wv",
+          "pts": 0,
+          "mono": "false-optimized-3-0-0-mono.wv"
+        },
+        {
+          "file": "false-optimized-3-0-1.wv",
+          "pts": 750,
+          "mono": "false-optimized-3-0-1-mono.wv"
+        },
+        {
+          "file": "false-optimized-3-0-2.wv",
+          "pts": 1500,
+          "mono": "false-optimized-3-0-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-optimized-0-5",
+      "file": "false-optimized-0-5.mkv",
+      "oracle": "false-optimized-0-5.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "false-optimized-0-5-0.wv",
+          "pts": 0,
+          "mono": "false-optimized-0-5-0-mono.wv"
+        },
+        {
+          "file": "false-optimized-0-5-1.wv",
+          "pts": 160,
+          "mono": "false-optimized-0-5-1-mono.wv"
+        },
+        {
+          "file": "false-optimized-0-5-2.wv",
+          "pts": 320,
+          "mono": "false-optimized-0-5-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "false-optimized-23-1",
+      "file": "false-optimized-23-1.mkv",
+      "oracle": "false-optimized-23-1.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "false-optimized-23-1-0.wv",
+          "pts": 0,
+          "mono": "false-optimized-23-1-0-mono.wv"
+        },
+        {
+          "file": "false-optimized-23-1-1.wv",
+          "pts": 960,
+          "mono": "false-optimized-23-1-1-mono.wv"
+        },
+        {
+          "file": "false-optimized-23-1-2.wv",
+          "pts": 1920,
+          "mono": "false-optimized-23-1-2-mono.wv"
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-optimized-0-0",
+      "file": "stereo-optimized-0-0.mkv",
+      "oracle": "stereo-optimized-0-0.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-optimized-0-0-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-optimized-0-0-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-optimized-0-0-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-optimized-3-0",
+      "file": "stereo-optimized-3-0.mkv",
+      "oracle": "stereo-optimized-3-0.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "stereo-optimized-3-0-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-optimized-3-0-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "stereo-optimized-3-0-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-optimized-0-5",
+      "file": "stereo-optimized-0-5.mkv",
+      "oracle": "stereo-optimized-0-5.f32le",
+      "rate": 48000,
+      "frames": [
+        {
+          "file": "stereo-optimized-0-5-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-optimized-0-5-1.wv",
+          "pts": 960
+        },
+        {
+          "file": "stereo-optimized-0-5-2.wv",
+          "pts": 1920
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "stereo-optimized-23-1",
+      "file": "stereo-optimized-23-1.mkv",
+      "oracle": "stereo-optimized-23-1.f32le",
+      "rate": 37500,
+      "frames": [
+        {
+          "file": "stereo-optimized-23-1-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "stereo-optimized-23-1-1.wv",
+          "pts": 750
+        },
+        {
+          "file": "stereo-optimized-23-1-2.wv",
+          "pts": 1500
+        }
+      ],
+      "family": "normal"
+    },
+    {
+      "name": "optimized-int-false-dup0",
+      "file": "optimized-int-false-dup0.mkv",
+      "oracle": "optimized-int-false-dup0.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "optimized-int-false-dup0-0.wv",
+          "pts": 0,
+          "mono": "optimized-int-false-dup0-0-mono.wv"
+        },
+        {
+          "file": "optimized-int-false-dup0-1.wv",
+          "pts": 160,
+          "mono": "optimized-int-false-dup0-1-mono.wv"
+        },
+        {
+          "file": "optimized-int-false-dup0-2.wv",
+          "pts": 320,
+          "mono": "optimized-int-false-dup0-2-mono.wv"
+        }
+      ],
+      "family": "integer"
+    },
+    {
+      "name": "optimized-int-false-dup1",
+      "file": "optimized-int-false-dup1.mkv",
+      "oracle": "optimized-int-false-dup1.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "optimized-int-false-dup1-0.wv",
+          "pts": 0,
+          "mono": "optimized-int-false-dup1-0-mono.wv"
+        },
+        {
+          "file": "optimized-int-false-dup1-1.wv",
+          "pts": 160,
+          "mono": "optimized-int-false-dup1-1-mono.wv"
+        },
+        {
+          "file": "optimized-int-false-dup1-2.wv",
+          "pts": 320,
+          "mono": "optimized-int-false-dup1-2-mono.wv"
+        }
+      ],
+      "family": "integer"
+    },
+    {
+      "name": "optimized-int-stereo-dup0",
+      "file": "optimized-int-stereo-dup0.mkv",
+      "oracle": "optimized-int-stereo-dup0.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "optimized-int-stereo-dup0-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "optimized-int-stereo-dup0-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "optimized-int-stereo-dup0-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "integer"
+    },
+    {
+      "name": "optimized-int-stereo-dup1",
+      "file": "optimized-int-stereo-dup1.mkv",
+      "oracle": "optimized-int-stereo-dup1.f32le",
+      "rate": 8000,
+      "frames": [
+        {
+          "file": "optimized-int-stereo-dup1-0.wv",
+          "pts": 0
+        },
+        {
+          "file": "optimized-int-stereo-dup1-1.wv",
+          "pts": 160
+        },
+        {
+          "file": "optimized-int-stereo-dup1-2.wv",
+          "pts": 320
+        }
+      ],
+      "family": "integer"
+    }
+  ],
+  "invalid": [
+    {
+      "file": "float-crc.wv",
+      "movie": "float-crc.mkv",
+      "message": "float CRC"
+    },
+    {
+      "file": "float-truncated.wv",
+      "movie": "float-truncated.mkv",
+      "message": "ends inside its samples"
+    },
+    {
+      "file": "float-extra-word.wv",
+      "movie": "float-extra-word.mkv",
+      "message": "leaves its extra bits unread"
+    },
+    {
+      "file": "float-padding.wv",
+      "movie": "float-padding.mkv",
+      "message": "padding is not all ones"
+    },
+    {
+      "file": "float-info-short.wv",
+      "movie": "float-info-short.mkv",
+      "message": "float information must contain four bytes"
+    },
+    {
+      "file": "float-info-missing.wv",
+      "movie": "float-info-missing.mkv",
+      "message": "float information must contain four bytes"
+    },
+    {
+      "file": "float-width.wv",
+      "movie": "float-width.mkv",
+      "message": "requires 32-bit storage"
+    },
+    {
+      "file": "float-and-int.wv",
+      "movie": "float-and-int.mkv",
+      "message": "requires 32-bit storage"
+    },
+    {
+      "file": "float-shift-overflow.wv",
+      "movie": "float-shift-overflow.mkv",
+      "message": "float core exceeds mantissa range"
+    },
+    {
+      "file": "mixed-extended-streams.wv",
+      "movie": "mixed-extended-streams.mkv",
+      "message": "mixed extended bitstream formats"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0172",
+  "scope": "Standalone OggOpusReader logical-stream identity. Canonical reader already refuses missing/repeated same-serial BOS;foreign BOS may represent another logical stream at the generic parser layer,so no canonical defect is claimed.",
+  "before": "Five authored missing/repeated/foreign BOS cases all decode1920 samples with the original mono header. Foreign BOS silently changes reader.serial() without changing the stored head. Normal2 passed/1 ignored;forced intended refusal1 fails at missing-BOS admission.",
+  "reference": {
+    "url": "https://www.rfc-editor.org/rfc/rfc3533.html#section-4",
+    "finding": "A logical stream starts with BOS carrying codec initialization;serial identifies the logical stream. Grouping and chaining need separate decoding ownership. The existing standalone reader explicitly excludes multiple logical streams."
+  },
+  "fixtures": "tests/fixtures/playback-errors/ogg-stream-identity",
+  "source_sha256": "4f8658840bc56adea4fc21f1714e4f4e9bbe8a1d07e20da199e31430b232307e",
+  "before_snapshot": "evidence/batch-164-opus-reader-before.rs",
+  "checks_before": [
+    "evidence/batch-164-opus-before.log",
+    "evidence/batch-164-opus-acceptance-before.log"
+  ],
+  "counting": "Plan one immutable logical-stream identity/BOS-boundary fix. Missing/repeated flags,header/audio placement,foreign serials,fixtures and test APIs do not add separate IDs.",
+  "requirements": [
+    "All fault pages retain valid CRCs and consecutive counters and have no continuation flags;prior sequence/fragment fixes cannot mask this failure.",
+    "Require the initial BOS and lock serial ownership after it;reject another BOS encountered before EOS,before publishing its payload or mutating identity.",
+    "Preserve legitimate zero serials,arbitrary initial/wrapping counters,existing continuation handling,both packet APIs and rewind.",
+    "Distinguish supported single-stream acceptance from explicit refusal of a second BOS inside the active stream. Existing stop-at-first-EOS behavior is preserved,including sources with a later chained stream. No claim to add streaming multiplexing or decode later chains.",
+    "Check independent PCM and worker navigation on healthy controls,and separately decode the owned video companion. No private media or runtime generator dependency."
+  ],
+  "harness_maintenance": {
+    "log": "evidence/batch-164-root-harness-option-error.log",
+    "source": "evidence/batch-164-root-tests-initial.rs",
+    "repair": "The initial control assertion compared Option<Duration> to Duration. Wrap the independent literal40ms in Some;no production behavior changed and no improvement ID applies."
+  },
+  "candidate_sha256": {
+    "crates/fvid-opus/src/ogg/reader.rs": "ae762c42015c9ce2694b5010640c4f3c3ba53b33de0374f5cca0342c3b128046",
+    "crates/fvid-opus/tests/ogg_stream_identity.rs": "ecf174879607ec617009f90b6d1ddb9331bd2f3f5e18d0f11bf8f9979e7ba060",
+    "tests/ogg_stream_identity.rs": "9691ca74d669a041fc9ba8cbc277105c85bf732b1ca81d8e0e3b6a315eba26f6"
+  },
+  "implementation": "The initial page must carry BOS and establishes serial once. A later BOS encountered before the first stream ends refuses before replacing serial or publishing payload. Existing counter checkpoint distinguishes the first accepted page and remains restored on rewind;no new public state or interface.",
+  "root_controls_before": "evidence/batch-164-root-controls-before.log:2 passed,including4 worker target variants and separate video decode. Canonical refusals are existing controls,not this new defect.",
+  "preliminary_after": {
+    "integration": "evidence/batch-164-opus-after.log:7 passed,0 ignored",
+    "units": "evidence/batch-164-opus-units.log:65 passed,0 ignored",
+    "pending": "Root integrations,units,shared-media,core configuration and player build remain required before accepting172."
+  },
+  "completed_gates": {
+    "after": {
+      "passed": 40,
+      "log": "evidence/batch-164-after.log"
+    },
+    "root-units": {
+      "passed": 19,
+      "log": "evidence/batch-164-root-units.log"
+    },
+    "media-units": {
+      "passed": 7,
+      "log": "evidence/batch-164-media-units.log"
+    },
+    "media": {
+      "passed": 9,
+      "log": "evidence/batch-164-media.log"
+    },
+    "core": {
+      "passed": 6,
+      "log": "evidence/batch-164-core.log"
+    },
+    "opus-after": {
+      "passed": 7,
+      "log": "evidence/batch-164-opus-after.log"
+    },
+    "opus-units": {
+      "passed": 65,
+      "log": "evidence/batch-164-opus-units.log"
+    }
+  },
+  "accepted_id": "FVID-0172",
+  "validation": "batch-164-validation.json"
+}

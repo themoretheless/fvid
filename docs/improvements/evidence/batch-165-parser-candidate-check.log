@@ -1,0 +1,11 @@
+ima-short-0.avi: refused at the declared RIFF boundary: AVI RIFF chunk ends before its form type
+ima-short-2.avi: refused at the declared RIFF boundary: AVI RIFF chunk ends before its form type
+ima-short-4.avi: refused at the declared RIFF boundary: an AVI file with no header list
+ima-short-308.avi: refused at the declared RIFF boundary: an AVI file with no movi list
+ima-outside-index.avi: complete first RIFF ignores its outside index
+ms-short-0.avi: refused at the declared RIFF boundary: AVI RIFF chunk ends before its form type
+ms-short-2.avi: refused at the declared RIFF boundary: AVI RIFF chunk ends before its form type
+ms-short-4.avi: refused at the declared RIFF boundary: an AVI file with no header list
+ms-short-338.avi: refused at the declared RIFF boundary: an AVI file with no movi list
+ms-outside-index.avi: complete first RIFF ignores its outside index
+Candidate preflight: eight specific refusals,two outside-index acceptances,six preserved controls. Native gates still required;production source not changed.

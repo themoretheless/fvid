@@ -21,6 +21,25 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
 };
 
+#[path = "avc_444_inter_picture.rs"]
+mod colour444;
+
+pub(super) fn decode_full_resolution_inter_fields(
+    headers:&[&SliceHeader],sps:&Sps,pps:&Pps,
+    references:&[[&[(&super::avc_field_picture::PcmField,u64)];2]],
+    implicit:Option<&super::avc_field_picture::ImplicitFieldWeights<'_>>,
+    direct:Option<&[super::avc_direct::FieldDirectPrediction<'_>]>,
+    budget:usize,retain_motion:bool,
+)->Result<(super::avc_field_picture::PcmField,Option<MotionField>)>{
+    colour444::decode_fields(headers,sps,pps,references,implicit,direct,budget,retain_motion)
+}
+
+pub(super) fn decode_full_resolution_mbaff_inter(
+    headers:&[&SliceHeader],sps:&Sps,pps:&Pps,
+    references:&[[&[Option<&IntraPicture>];2]],
+    direct:Option<&[Option<&super::avc_direct::MbaffDirectPrediction<'_>>]>,budget:usize,filtered:bool,
+)->Result<(IntraPicture,MotionField)>{colour444::decode_mbaff(headers,sps,pps,references,direct,budget,filtered)}
+
 /// Everything an inter macroblock needs to be predicted and reconstructed
 /// once entropy decoding and motion derivation (both serial) are done.
 struct InterJob {
@@ -230,6 +249,9 @@ pub(crate) fn decode_inter_optional_slices_with_motion(
         })
     {
         return Err(invalid("invalid resolved inter slice contexts"));
+    }
+    if sps.chroma_format == 3 && !sps.separate_colour_plane {
+        return colour444::decode(headers,sps,pps,references_by_slice,direct_by_slice,budget);
     }
     if sps.mb_adaptive_frame_field
         && !sps.frame_mbs_only

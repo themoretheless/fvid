@@ -25,7 +25,7 @@ def header(size, values, matrix_offset=None):
     return bytes(data)
 
 
-def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1, chroma_depth=None, access_units=None, multilayer=False):
+def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False, presentation_order=None, chroma_format=1, chroma_depth=None, access_units=None, multilayer=False, empty_configuration=False, configuration_types=None):
     chroma_depth = depth if chroma_depth is None else chroma_depth
     if not 8 <= chroma_depth <= 16:
         raise ValueError("invalid fixture chroma depth")
@@ -98,11 +98,19 @@ def mux(stream, depth, width=64, height=64, rate=25, *, inband_parameters=False,
     sps = re.sub(b'\x00\x00\x03', b'\x00\x00', sps)
     if (sps[0] >> 1) & 7:
         raise ValueError('fixture muxer requires one temporal layer')
-    hvcc = bytes([1]) + sps[1:13] + bytes.fromhex('f000fc') + bytes([0xfc | chroma_format]) + bytes([0xf8 | (depth - 8), 0xf8 | (chroma_depth - 8)]) + b'\x00\x00' + bytes([0x0f, 3])
-    for kind, nals in parameters.items():
+    recorded=parameters
+    if configuration_types is not None:
+        if not inband_parameters or any(k not in parameters for k in configuration_types):
+            raise ValueError('partial fixture configuration requires hev1 parameter types')
+        recorded={k:v for k,v in parameters.items()if k in configuration_types}
+    hvcc = bytes([1]) + sps[1:13] + bytes.fromhex('f000fc') + bytes([0xfc | chroma_format]) + bytes([0xf8 | (depth - 8), 0xf8 | (chroma_depth - 8)]) + b'\x00\x00' + bytes([0x0f, len(recorded)])
+    for kind, nals in recorded.items():
         hvcc += bytes([(0 if inband_parameters else 0x80) | kind]) + struct.pack('>H', len(nals))
         for nal in nals:
             hvcc += struct.pack('>H', len(nal)) + nal
+    if empty_configuration:
+        if not inband_parameters:raise ValueError("empty fixture configuration requires hev1")
+        hvcc=hvcc[:22]+b"\x00"
     entry = bytearray(78)
     entry[6:8] = struct.pack('>H', 1)
     entry[24:28] = struct.pack('>HH', width, height)

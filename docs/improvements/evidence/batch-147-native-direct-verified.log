@@ -1,0 +1,8 @@
+
+running 1 test
+VideoToolbox: session creation failed (-12906); using the software VP9 decoder
+VideoToolbox: session creation failed (-12906); using the software VP9 decoder
+test player::tests::native_sami_attribute_values_do_not_change_playing_caption_clocks ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1019 filtered out; finished in 29.52s
+

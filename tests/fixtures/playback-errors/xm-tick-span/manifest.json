@@ -1,0 +1,128 @@
+{
+  "provenance": "Ten authored XM tempo-ratio scores. Independent controls use exact whole-tick periods at BPM100/125. Equal speed/BPM ratios must keep row times identical. K03/EC3 at150BPM and K02/EC2 at100BPM both target50ms. A fixed100ms decoder window isolates deadline rounding from row duration. Tail length follows the final row. Owned signed16 ramp and VP9/PCM companion only;no encoder,network or private media.",
+  "cases": [
+    {
+      "name": "row-150-6",
+      "file": "row-150-6.xm",
+      "control": "row-150-6-control.xm",
+      "before_failure": true,
+      "kind": "row",
+      "score_us": 1000000,
+      "duration_ms": 1100,
+      "post_row": 2
+    },
+    {
+      "name": "row-175-7",
+      "file": "row-175-7.xm",
+      "control": "row-175-7-control.xm",
+      "before_failure": true,
+      "kind": "row",
+      "score_us": 1000000,
+      "duration_ms": 1100,
+      "post_row": 2
+    },
+    {
+      "name": "row-225-9",
+      "file": "row-225-9.xm",
+      "control": "row-225-9-control.xm",
+      "before_failure": true,
+      "kind": "row",
+      "score_us": 1000000,
+      "duration_ms": 1100,
+      "post_row": 2
+    },
+    {
+      "name": "row-120-6",
+      "file": "row-120-6.xm",
+      "control": "row-120-6-control.xm",
+      "before_failure": true,
+      "kind": "row",
+      "score_us": 1250000,
+      "duration_ms": 1375,
+      "post_row": 2
+    },
+    {
+      "name": "tempo-change",
+      "file": "tempo-change.xm",
+      "control": "tempo-change-control.xm",
+      "before_failure": true,
+      "kind": "row",
+      "score_us": 1000000,
+      "duration_ms": 1100,
+      "post_row": 2
+    },
+    {
+      "name": "speed-change",
+      "file": "speed-change.xm",
+      "control": "speed-change-control.xm",
+      "before_failure": true,
+      "kind": "row",
+      "score_us": 1800000,
+      "duration_ms": 2000,
+      "post_row": 2
+    },
+    {
+      "name": "key-off-half-row",
+      "file": "key-off-half-row.xm",
+      "control": "key-off-half-row-control.xm",
+      "before_failure": true,
+      "kind": "deadline",
+      "score_us": 400000,
+      "duration_ms": 500,
+      "post_row": 1
+    },
+    {
+      "name": "note-cut-half-row",
+      "file": "note-cut-half-row.xm",
+      "control": "note-cut-half-row-control.xm",
+      "before_failure": true,
+      "kind": "deadline",
+      "score_us": 400000,
+      "duration_ms": 500,
+      "post_row": 1
+    },
+    {
+      "name": "exact-125-control",
+      "file": "exact-125-control.xm",
+      "control": "exact-125-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy",
+      "score_us": 1200000,
+      "duration_ms": 1320,
+      "post_row": 2
+    },
+    {
+      "name": "exact-100-control",
+      "file": "exact-100-control.xm",
+      "control": "exact-100-control-control.xm",
+      "before_failure": false,
+      "kind": "healthy",
+      "score_us": 1250000,
+      "duration_ms": 1375,
+      "post_row": 2
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "row-150-6.xm": "7eb1716359c77b12983e203d4389e7aaa09b5b8703e0b5d267e7fa5cb6faefdd",
+    "row-150-6-control.xm": "5dd18f2baa1e2a92f9ca72161a7fc14b41559d7898606c09572cf7f2333e5d25",
+    "row-175-7.xm": "50b6d5ea2250946ecea8cfa1a85cf40955a41a5732f70c2009ce1b46b7f82c41",
+    "row-175-7-control.xm": "5dd18f2baa1e2a92f9ca72161a7fc14b41559d7898606c09572cf7f2333e5d25",
+    "row-225-9.xm": "d09660f77eb50835bb6b9a0197ce93c1b3946dd05607855ea02b57e7095215fd",
+    "row-225-9-control.xm": "5dd18f2baa1e2a92f9ca72161a7fc14b41559d7898606c09572cf7f2333e5d25",
+    "row-120-6.xm": "18adf244c67cc10fac71adefbd1b77b8307f9da5e9ee6c37e50199fc8035aaa4",
+    "row-120-6-control.xm": "ce1839487a26f731d7feb5ec17779bd25b76cf64e5ac4f89cc874e68b065c7bc",
+    "tempo-change.xm": "31e2809f11f9c75615362c1a9b1d07fed008e88d8e5a061877a88135d6543e8b",
+    "tempo-change-control.xm": "772d3fcaff1a50ca6c6734154aa969f39dbca82edf66dd4d2e81530f172df455",
+    "speed-change.xm": "00df346c0ec2001adcb1affdffa0b590b90067c3654c148f33a0894f8d7eb5c7",
+    "speed-change-control.xm": "7a798d85f46b19820ad91f67c881b60b3fce708db244fed4f57e3e30219ef951",
+    "key-off-half-row.xm": "9da02b6f75d5788a2be0d7b6f194f038c78691b29bfba6dd95a1d962ffd2b41d",
+    "key-off-half-row-control.xm": "8b6e5bc92e2907c58b9a3433465ad6e5483d718f81d467d8eb98a112e8dfaec3",
+    "note-cut-half-row.xm": "e821b9ce585462dac750e6d8e4d13060b58f61f913cd1045d1fee7120a856fd4",
+    "note-cut-half-row-control.xm": "5327d951d8d76fb4196f942bcf58380cb824a338e4c21f986845dc5cc958dc4f",
+    "exact-125-control.xm": "4e9f0138e301dc2493a5e9df1897a0f92a1b1370d06b8b23509feadfa764b9c6",
+    "exact-125-control-control.xm": "4e9f0138e301dc2493a5e9df1897a0f92a1b1370d06b8b23509feadfa764b9c6",
+    "exact-100-control.xm": "ce1839487a26f731d7feb5ec17779bd25b76cf64e5ac4f89cc874e68b065c7bc",
+    "exact-100-control-control.xm": "ce1839487a26f731d7feb5ec17779bd25b76cf64e5ac4f89cc874e68b065c7bc"
+  }
+}

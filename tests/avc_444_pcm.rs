@@ -2,8 +2,8 @@ use fvid::codec::avc_decoder::AvcDecoder;
 use std::path::{Path, PathBuf};
 
 fn fixtures() -> (PathBuf, serde_json::Value, Vec<u16>) {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/playback-errors/avc-444-pcm");
+    let root =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/playback-errors/avc-444-pcm");
     let manifest =
         serde_json::from_slice(&std::fs::read(root.join("manifest.json")).unwrap()).unwrap();
     let golden = std::fs::read(root.join("samples.y16"))
@@ -14,7 +14,12 @@ fn fixtures() -> (PathBuf, serde_json::Value, Vec<u16>) {
     (root, manifest, golden)
 }
 
-fn expected_bytes(case: &serde_json::Value, frame: &serde_json::Value, golden: &[u16], packed: bool) -> Vec<u8> {
+fn expected_bytes(
+    case: &serde_json::Value,
+    frame: &serde_json::Value,
+    golden: &[u16],
+    packed: bool,
+) -> Vec<u8> {
     let w = case["width"].as_u64().unwrap() as usize;
     let h = case["height"].as_u64().unwrap() as usize;
     let count = w * h;
@@ -65,8 +70,7 @@ fn non_separated_444_progressive_cabac_and_mbaff_pcm_decode() {
         let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
         for _ in 0..2 {
             for (i, frame) in case["frames"].as_array().unwrap().iter().enumerate() {
-                let packet =
-                    std::fs::read(root.join(frame["packet"].as_str().unwrap())).unwrap();
+                let packet = std::fs::read(root.join(frame["packet"].as_str().unwrap())).unwrap();
                 let picture = decoder
                     .decode_order(&packet)
                     .unwrap_or_else(|e| panic!("{name} frame {i}: {e}"))
@@ -81,10 +85,18 @@ fn non_separated_444_progressive_cabac_and_mbaff_pcm_decode() {
                 let at = frame["offset"].as_u64().unwrap() as usize;
                 assert_eq!(picture.y, golden[at..at + count], "{name} Y");
                 assert_eq!(picture.cb, golden[at + count..at + 2 * count], "{name} Cb");
-                assert_eq!(picture.cr, golden[at + 2 * count..at + 3 * count], "{name} Cr");
+                assert_eq!(
+                    picture.cr,
+                    golden[at + 2 * count..at + 3 * count],
+                    "{name} Cr"
+                );
                 let mut planar = Vec::new();
                 picture.write_planar(&mut planar).unwrap();
-                assert_eq!(planar, expected_bytes(case, frame, &golden, false), "{name} planar");
+                assert_eq!(
+                    planar,
+                    expected_bytes(case, frame, &golden, false),
+                    "{name} planar"
+                );
             }
             decoder.reset();
         }
@@ -123,14 +135,15 @@ fn non_separated_444_progressive_cabac_and_mbaff_pcm_decode() {
 }
 
 #[test]
-fn non_separated_444_pcm_enforces_exact_memory_budgets_and_rejects_compressed_blocks() {
+fn non_separated_444_pcm_enforces_exact_memory_budgets() {
     let (root, manifest, _) = fixtures();
     for case in manifest["cases"].as_array().unwrap() {
         let name = case["name"].as_str().unwrap();
         let w = case["width"].as_u64().unwrap() as usize;
         let h = case["height"].as_u64().unwrap() as usize;
         let storage = w * h * 6;
-        let motion = fvid::codec::avc_reference_motion::ReferenceMotionField::storage_bytes(w, h).unwrap();
+        let motion =
+            fvid::codec::avc_reference_motion::ReferenceMotionField::storage_bytes(w, h).unwrap();
         let refs = if case["kind"] == "mbaff" { 2 } else { 1 };
         let working = if case["kind"] == "mbaff" {
             (w * h / 256) * 256 + 16384
@@ -148,29 +161,90 @@ fn non_separated_444_pcm_enforces_exact_memory_budgets_and_rejects_compressed_bl
     }
     let unsupported: serde_json::Value =
         serde_json::from_slice(&std::fs::read(root.join("unsupported.json")).unwrap()).unwrap();
-    assert_eq!(unsupported.as_array().unwrap().len(), 5);
-    for case in unsupported.as_array().unwrap() {
+    assert!(unsupported.as_array().unwrap().is_empty());
+}
+
+#[test]
+fn historical_mbaff_refusals_are_complete_component_acceptance() {
+    let (root, _, _) = fixtures();
+    let accepted: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root.join("accepted-mbaff.json")).unwrap()).unwrap();
+    assert_eq!(accepted.as_array().unwrap().len(), 4);
+    for case in accepted.as_array().unwrap() {
         let name = case["name"].as_str().unwrap();
-        let expect = case["expect"].as_str().unwrap();
-        let config = std::fs::read(root.join(format!("{name}.avcc"))).unwrap();
-        let packet = std::fs::read(root.join(format!("{name}.packet"))).unwrap();
-        let mut decoder = AvcDecoder::new(&config, 1 << 20).unwrap();
-        let err = decoder.decode_order(&packet).unwrap_err();
-        assert!(
-            matches!(err, fvid::Error::Unsupported(_)) && err.to_string().contains(expect),
-            "{name}: {err}"
-        );
-        let mp4 = std::fs::read(root.join(format!("{name}.mp4"))).unwrap();
+        let read = |ext: &str| std::fs::read(root.join(format!("{name}.{ext}"))).unwrap();
+        let expected: Vec<u16> = read("y16")
+            .chunks_exact(2)
+            .map(|b| u16::from_le_bytes([b[0], b[1]]))
+            .collect();
+        let mut decoder = AvcDecoder::new(&read("avcc"), 1 << 20).unwrap();
+        let picture = decoder
+            .decode_order(&read("packet"))
+            .unwrap_or_else(|e| panic!("{name}: {e}"))
+            .unwrap();
+        assert_eq!(picture.y, expected[..2048]);
+        assert_eq!(picture.cb, expected[2048..4096]);
+        assert_eq!(picture.cr, expected[4096..]);
         let mut reader = fvid::playback::video::mp4::Mp4VideoReader::open_software(
-            std::io::Cursor::new(mp4),
+            std::io::Cursor::new(read("mp4")),
             Default::default(),
             16 << 20,
         )
         .unwrap();
-        let err = reader.read_frame().err().unwrap();
-        assert!(
-            matches!(err, fvid::Error::Unsupported(_)) && err.to_string().contains(expect),
-            "MP4 {name}: {err}"
-        );
+        let packed = reader.read_frame().unwrap().unwrap().packed.unwrap();
+        let mut bytes = Vec::new();
+        for component in 0..3 {
+            for y in 2..62 {
+                for x in 1..31 {
+                    bytes.push(expected[component * 2048 + y * 32 + x] as u8);
+                }
+            }
+        }
+        assert_eq!(packed.frame.data, bytes, "{name}");
+        assert!(reader.read_frame().unwrap().is_none());
+    }
+}
+
+#[test]
+fn progressive_nonseparate_cabac_refusal_is_now_complete_component_acceptance() {
+    let (root, _, _) = fixtures();
+    let accepted: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(root.join("accepted.json")).unwrap()).unwrap();
+    assert_eq!(accepted.as_array().unwrap().len(), 1);
+    for case in accepted.as_array().unwrap() {
+        let name = case["name"].as_str().unwrap();
+        let read = |ext: &str| std::fs::read(root.join(format!("{name}.{ext}"))).unwrap();
+        let expected: Vec<u16> = read("y16")
+            .chunks_exact(2)
+            .map(|b| u16::from_le_bytes([b[0], b[1]]))
+            .collect();
+        let mut decoder = AvcDecoder::new(&read("avcc"), 1 << 20).unwrap();
+        for _ in 0..2 {
+            let picture = decoder.decode_order(&read("packet")).unwrap().unwrap();
+            assert_eq!(picture.y, expected[..512]);
+            assert_eq!(picture.cb, expected[512..1024]);
+            assert_eq!(picture.cr, expected[1024..]);
+            decoder.reset();
+        }
+        let mut reader = fvid::playback::video::mp4::Mp4VideoReader::open_software(
+            std::io::Cursor::new(read("mp4")),
+            Default::default(),
+            16 << 20,
+        )
+        .unwrap();
+        for _ in 0..2 {
+            let frame = reader.read_frame().unwrap().unwrap();
+            assert_eq!(frame.presentation_time.nanoseconds().unwrap(), 0);
+            assert_eq!(frame.duration.nanoseconds().unwrap(), 40_000_000);
+            let packed = frame.packed.unwrap();
+            assert_eq!(packed.depth, 8);
+            assert_eq!(packed.frame.subsampling, Some([1, 1]));
+            assert_eq!(
+                packed.frame.data,
+                expected.iter().map(|n| *n as u8).collect::<Vec<_>>()
+            );
+            assert!(reader.read_frame().unwrap().is_none());
+            reader.rewind();
+        }
     }
 }

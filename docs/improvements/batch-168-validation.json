@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0176"
+  ],
+  "checked_at": "2026-10-21T12:11:15.184837+00:00",
+  "sources": [
+    "src/container/avi.rs"
+  ],
+  "regressions": [
+    "tests/avi_chunk_extent.rs"
+  ],
+  "before": [
+    "evidence/batch-168-avi-before.rs",
+    "evidence/batch-168-tests-before.rs",
+    "evidence/batch-168-before.log",
+    "evidence/batch-168-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-168-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-168-related-after.log",
+      "passed": 32
+    },
+    {
+      "log": "evidence/batch-168-root-units.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-168-core.log",
+      "passed": 11
+    },
+    {
+      "log": "evidence/batch-168-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-168-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/avi.rs": "77e13397a8b74e7fca28323c8a17cfbc31be60a95d70bac4b36fd9dbbd5b0214",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/avi_chunk_extent.rs": "1837a53b3d991ad85e38921d0869db647ff4ce963cb8a7a5b31cc85f19ccabeb"
+  },
+  "qualification": [
+    "16 authored known audio-chunk body contradictions change only final01wb size:IMA/MS/integer16/IEEE32,direct/nested rec,overclaim8bytes/u32MAX. Available original coded bytes remain whole records. Old parser clips to8/32 bytes and native decoding emits exact literal PCM then successful EOF for all16. Baseline4pass/2ignored;both forced parser/source refusal gates fail at false admission.",
+    "The existing private Chunk.truncated flag is now enforced before publishing a known audio Record. Unknown chunk skipping,outer RIFF sentinel clamping,codec geometry and public signatures are unchanged. This is container record-body admission,with no change to streaming truncated-prefix or EOF policies in other formats.",
+    "Four focused checks assert precise Invalid audio-extent refusal for every malformed input,12 complete direct/nested/sentinel controls,and exact numeric PCM/clock/duration.24 actual worker interior/EOF target variants include rewind. Owned AVI VP9 is accompanied by independently decoded synthetic Matroska video;AVI video GUI and physical-device playback are not claimed.",
+    "32 related integrations retain classic PCM windows/seek,grouped ADPCM,G.711,AVI indexing,outer RIFF/header bounds and read limits.34 related units,11 minimal-configuration checks,pure fixture reproduction and player build pass. No tests are skipped or relaxed.",
+    "The initial related-unit run33pass/1fail exposed an obsolete helper contract:publish1016bytes of a1024-byte record and rely on optional idx1 refusal. Frozen actual-before container units17pass. The same unit now requires early exact refusal and empty output,plus positive complete1024-byte boundary traversal. Initial failure/source are archived. Production bytes are unchanged by this zero-ID test migration.",
+    "Ordinary tests read checked-in fixtures without generating them or using FFmpeg/network. No private source media,frames,audio or codec parameters were copied. No performance claim."
+  ],
+  "counting": "One known AVI audio-record body extent integrity fix. No extra IDs for codecs,nesting,overclaim widths,controls or test infrastructure."
+}

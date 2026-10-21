@@ -1,0 +1,31 @@
+{
+  "status": "accepted",
+  "candidate": "FVID-0167",
+  "problem": "AVI idx1 validation supports only movi-relative offsets,refusing the documented file-relative convention even when every entry matches the independently walked records.",
+  "reference": {
+    "url": "https://learn.microsoft.com/en-us/previous-versions/ms779634(v=vs.85)",
+    "section": "AVIOLDINDEX.dwOffset",
+    "finding": "Microsoft documents movi-list-relative offsets and files using file-start-relative offsets. This admits a second origin,not arbitrary offsets."
+  },
+  "before_snapshot": "evidence/batch-159-container-before.rs",
+  "before_sha256": "b220028b6728a28cb12062fb2a029c2bce3262cc5e49f08bbdf0fb7c4209e394",
+  "scope": "Index origin only. Eight flat/nested indexed AVI cases share owned VP9/ADPCM records with independent unindexed controls. Decoder PCM has literal predictor references; companion verifies identical VP9 separately. No AVI picture playback or performance claim.",
+  "requirements": [
+    "Reproduce four absolute-origin refusals at record-offset validation while four relative and four unindexed controls work.",
+    "Use one consistent origin for all checked audio index entries;mixed origins and incorrect lengths/offsets still refuse.",
+    "Retain record count,budget,ordering and exact payload checks.",
+    "Core parse acceptance,actual source PCM,worker play/rewind/seek/EOF,related AVI suites and affected builds must pass before acceptance."
+  ],
+  "rejected_audit_hypotheses": [
+    {
+      "hypothesis": "Unbounded recursive AVI LIST traversal",
+      "result": "Source already uses an explicit frame stack and NESTING=8 limit. No defect confirmed,no change,no ID."
+    }
+  ],
+  "confirmed_before": {
+    "normal": "evidence/batch-159-before.log:3 passed,2 ignored;4 absolute-origin cases fail only the intended offset check",
+    "forced": "evidence/batch-159-acceptance-before.log:2 failed,exit101;parser acceptance and source/worker acceptance blocked at same index validation,not at audio decode or seek"
+  },
+  "implementation": "Intersect movi-relative and file-relative possibilities across every checked audio index entry;never choose the convention independently for each entry. Retain walked lengths,record counts,order,budgets and checked arithmetic.",
+  "validation": "batch-159-validation.json"
+}

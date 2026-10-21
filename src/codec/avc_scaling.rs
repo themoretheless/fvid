@@ -58,9 +58,12 @@ impl ScalingMatrices {
     /// H.264 8.5: separate planes use their own 4x4 and 8x8 scaling lists.
     /// Resolve fallback before projecting the selected component onto luma.
     pub fn for_colour_plane(sps: &Sps, pps: &Pps, plane: usize) -> Result<Self> {
-        if sps.chroma_format != 3 || !sps.separate_colour_plane || plane >= 3 {
-            return Err(invalid("invalid AVC separate scaling plane"));
-        }
+        if !sps.separate_colour_plane { return Err(invalid("invalid AVC separate scaling plane")); }
+        Self::for_component(sps,pps,plane)
+    }
+    /// Resolve full-resolution component matrices before monochrome projection.
+    pub(crate) fn for_component(sps: &Sps, pps: &Pps, plane: usize) -> Result<Self> {
+        if sps.chroma_format != 3 || plane >= 3 { return Err(invalid("invalid AVC scaling component")); }
         if sps
             .scaling_lists
             .as_ref()

@@ -1,0 +1,114 @@
+{
+  "provenance": "Eight author-created XM modules with unused empty instrument headers at first,middle,last or all-empty positions. Six short-header failures and two existing full-header controls. Independent references use243-byte zero-sample headers. Four malformed variants require refusal. Owned signed16 ramp and authored VP9/PCM companion only;no encoder,network or private media.",
+  "cases": [
+    {
+      "name": "last-29",
+      "file": "last-29.xm",
+      "control": "last-29-control.xm",
+      "before_failure": true,
+      "empty_only": false,
+      "instruments": 2,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "first-29",
+      "file": "first-29.xm",
+      "control": "first-29-control.xm",
+      "before_failure": true,
+      "empty_only": false,
+      "instruments": 2,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "middle-29",
+      "file": "middle-29.xm",
+      "control": "middle-29-control.xm",
+      "before_failure": true,
+      "empty_only": false,
+      "instruments": 3,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "padded-64",
+      "file": "padded-64.xm",
+      "control": "padded-64-control.xm",
+      "before_failure": true,
+      "empty_only": false,
+      "instruments": 2,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "padded-240",
+      "file": "padded-240.xm",
+      "control": "padded-240-control.xm",
+      "before_failure": true,
+      "empty_only": false,
+      "instruments": 2,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "empty-only-29",
+      "file": "empty-only-29.xm",
+      "control": "empty-only-29-control.xm",
+      "before_failure": true,
+      "empty_only": true,
+      "instruments": 1,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "full-241-control",
+      "file": "full-241-control.xm",
+      "control": "full-241-control-control.xm",
+      "before_failure": false,
+      "empty_only": false,
+      "instruments": 2,
+      "duration_ms": 480,
+      "post_row": 1
+    },
+    {
+      "name": "full-243-control",
+      "file": "full-243-control.xm",
+      "control": "full-243-control-control.xm",
+      "before_failure": false,
+      "empty_only": false,
+      "instruments": 2,
+      "duration_ms": 480,
+      "post_row": 1
+    }
+  ],
+  "malformed": [
+    "bad-too-short-28.xm",
+    "bad-nonempty-29.xm",
+    "bad-truncated-29.xm",
+    "bad-huge-header.xm"
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "last-29.xm": "877bf1a0aa0a3c691eaa56fc28a27a9ef0fb7f95d46cfe994bf4a8a15a9c62a2",
+    "last-29-control.xm": "ae89e2d6f12653cd1e44f99fc25e3a35c5dd42ee2a7419304b18395cd2e663dc",
+    "first-29.xm": "4de65c705bcd72c8c72b03275af2bc6b453d289fb6ec667d60309b45ffc2426f",
+    "first-29-control.xm": "81e3893829f04cbe58d779222a9499dee24185542cf7d9cda3c98cdbcf9bc7f0",
+    "middle-29.xm": "e2de2236a8c66de12a68f9fdfb21489824485805b81bb04df4eb9948b90b1b6e",
+    "middle-29-control.xm": "25b3965a5136d9cd0e5d2160361e750d0a3198930fc8c080e3049ba03843ec21",
+    "padded-64.xm": "197e65533adc398933c2b65cecf6752784cfc64dca1966ba29c733bfc96d6f40",
+    "padded-64-control.xm": "ae89e2d6f12653cd1e44f99fc25e3a35c5dd42ee2a7419304b18395cd2e663dc",
+    "padded-240.xm": "78692623986eff3b7b9ffb6d08d11ee79cfb23bb479cb5cc115ec4b2e67529ad",
+    "padded-240-control.xm": "ae89e2d6f12653cd1e44f99fc25e3a35c5dd42ee2a7419304b18395cd2e663dc",
+    "empty-only-29.xm": "b3fb57df7c8bb46a53e1aa609647550990fdc60495b343ba338d5ff6387e1ac7",
+    "empty-only-29-control.xm": "63f6b241211defffc19841a123c82707fbd09808873faa93aba3cf9d669d97d4",
+    "full-241-control.xm": "4f24a49784cd16104502dd7a5184c6be11d603f17b2c70b6422e15441efb1981",
+    "full-241-control-control.xm": "ae89e2d6f12653cd1e44f99fc25e3a35c5dd42ee2a7419304b18395cd2e663dc",
+    "full-243-control.xm": "ae89e2d6f12653cd1e44f99fc25e3a35c5dd42ee2a7419304b18395cd2e663dc",
+    "full-243-control-control.xm": "ae89e2d6f12653cd1e44f99fc25e3a35c5dd42ee2a7419304b18395cd2e663dc",
+    "bad-too-short-28.xm": "7dd992047d6b8e21f62566ef69a906471162fdba168818c03d629de6d6f9797f",
+    "bad-nonempty-29.xm": "a28b175c3f17779b10e36a3bab1fe09fd25ce6d99f3827951491a74b5d5a22bc",
+    "bad-truncated-29.xm": "3e63f1ef45e8847f2994b92c38e9b3c5415281616a00b2acfda6e09d79bfd716",
+    "bad-huge-header.xm": "fc5d803d816fdae0cc17a706fdeb90c6a2731051d0e0023daf39a1130520f858"
+  }
+}

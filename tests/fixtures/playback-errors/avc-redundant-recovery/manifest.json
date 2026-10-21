@@ -1,0 +1,2365 @@
+{
+  "provenance": "Owned complete-representation AVC recovery, no external tools or private data.",
+  "cases": [
+    {
+      "name": "single-partition0-single",
+      "file": "single-partition0-single.mp4",
+      "oracle": "single-partition0-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "single-partition0-single-0.packet",
+          "control": "single-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "single-partition0-single-1.packet",
+          "control": "single-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "single-partition0-single-2.packet",
+          "control": "single-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "single-partition0-single-3.packet",
+          "control": "single-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "large-rank-partition0-single",
+      "file": "large-rank-partition0-single.mp4",
+      "oracle": "large-rank-partition0-single.yuv",
+      "rank": 127,
+      "ranks": [
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "large-rank-partition0-single-0.packet",
+          "control": "large-rank-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-single-1.packet",
+          "control": "large-rank-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-single-2.packet",
+          "control": "large-rank-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-single-3.packet",
+          "control": "large-rank-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "lowest-partition0-single",
+      "file": "lowest-partition0-single.mp4",
+      "oracle": "lowest-partition0-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "lowest-partition0-single-0.packet",
+          "control": "lowest-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-single-1.packet",
+          "control": "lowest-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-single-2.packet",
+          "control": "lowest-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-single-3.packet",
+          "control": "lowest-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partial-partition0-single",
+      "file": "partial-partition0-single.mp4",
+      "oracle": "partial-partition0-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "partial-partition0-single-0.packet",
+          "control": "partial-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "partial-partition0-single-1.packet",
+          "control": "partial-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "partial-partition0-single-2.packet",
+          "control": "partial-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "partial-partition0-single-3.packet",
+          "control": "partial-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "late-start-partition0-single",
+      "file": "late-start-partition0-single.mp4",
+      "oracle": "late-start-partition0-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "late-start-partition0-single-0.packet",
+          "control": "late-start-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-single-1.packet",
+          "control": "late-start-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-single-2.packet",
+          "control": "late-start-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-single-3.packet",
+          "control": "late-start-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "truncated-partition0-single",
+      "file": "truncated-partition0-single.mp4",
+      "oracle": "truncated-partition0-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "truncated-partition0-single-0.packet",
+          "control": "truncated-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-single-1.packet",
+          "control": "truncated-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-single-2.packet",
+          "control": "truncated-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-single-3.packet",
+          "control": "truncated-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "alternate-pps-partition0-single",
+      "file": "alternate-pps-partition0-single.mp4",
+      "oracle": "alternate-pps-partition0-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "alternate-pps-partition0-single-0.packet",
+          "control": "alternate-pps-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-single-1.packet",
+          "control": "alternate-pps-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-single-2.packet",
+          "control": "alternate-pps-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-single-3.packet",
+          "control": "alternate-pps-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "selected-pps-partition0-single",
+      "file": "selected-pps-partition0-single.mp4",
+      "oracle": "selected-pps-partition0-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 1,
+      "frames": [
+        {
+          "packet": "selected-pps-partition0-single-0.packet",
+          "control": "selected-pps-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-single-1.packet",
+          "control": "selected-pps-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-single-2.packet",
+          "control": "selected-pps-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-single-3.packet",
+          "control": "selected-pps-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "inter-partition0-single",
+      "file": "inter-partition0-single.mp4",
+      "oracle": "inter-partition0-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "inter-partition0-single-0.packet",
+          "control": "inter-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "inter-partition0-single-1.packet",
+          "control": "inter-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "inter-partition0-single-2.packet",
+          "control": "inter-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "inter-partition0-single-3.packet",
+          "control": "inter-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-partition0-single",
+      "file": "disjoint-partition0-single.mp4",
+      "oracle": "disjoint-partition0-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-partition0-single-0.packet",
+          "control": "disjoint-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-single-1.packet",
+          "control": "disjoint-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-single-2.packet",
+          "control": "disjoint-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-single-3.packet",
+          "control": "disjoint-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pi-partition0-single",
+      "file": "disjoint-pi-partition0-single.mp4",
+      "oracle": "disjoint-pi-partition0-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pi-partition0-single-0.packet",
+          "control": "disjoint-pi-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-single-1.packet",
+          "control": "disjoint-pi-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-single-2.packet",
+          "control": "disjoint-pi-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-single-3.packet",
+          "control": "disjoint-pi-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pp-partition0-single",
+      "file": "disjoint-pp-partition0-single.mp4",
+      "oracle": "disjoint-pp-partition0-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pp-partition0-single-0.packet",
+          "control": "disjoint-pp-partition0-single-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-single-1.packet",
+          "control": "disjoint-pp-partition0-single-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-single-2.packet",
+          "control": "disjoint-pp-partition0-single-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-single-3.packet",
+          "control": "disjoint-pp-partition0-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "single-partition0-split",
+      "file": "single-partition0-split.mp4",
+      "oracle": "single-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "single-partition0-split-0.packet",
+          "control": "single-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "single-partition0-split-1.packet",
+          "control": "single-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "single-partition0-split-2.packet",
+          "control": "single-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "single-partition0-split-3.packet",
+          "control": "single-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "large-rank-partition0-split",
+      "file": "large-rank-partition0-split.mp4",
+      "oracle": "large-rank-partition0-split.yuv",
+      "rank": 127,
+      "ranks": [
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "large-rank-partition0-split-0.packet",
+          "control": "large-rank-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-split-1.packet",
+          "control": "large-rank-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-split-2.packet",
+          "control": "large-rank-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-split-3.packet",
+          "control": "large-rank-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "lowest-partition0-split",
+      "file": "lowest-partition0-split.mp4",
+      "oracle": "lowest-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "lowest-partition0-split-0.packet",
+          "control": "lowest-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-split-1.packet",
+          "control": "lowest-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-split-2.packet",
+          "control": "lowest-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-split-3.packet",
+          "control": "lowest-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partial-partition0-split",
+      "file": "partial-partition0-split.mp4",
+      "oracle": "partial-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "partial-partition0-split-0.packet",
+          "control": "partial-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "partial-partition0-split-1.packet",
+          "control": "partial-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "partial-partition0-split-2.packet",
+          "control": "partial-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "partial-partition0-split-3.packet",
+          "control": "partial-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "late-start-partition0-split",
+      "file": "late-start-partition0-split.mp4",
+      "oracle": "late-start-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "late-start-partition0-split-0.packet",
+          "control": "late-start-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-split-1.packet",
+          "control": "late-start-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-split-2.packet",
+          "control": "late-start-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-split-3.packet",
+          "control": "late-start-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "truncated-partition0-split",
+      "file": "truncated-partition0-split.mp4",
+      "oracle": "truncated-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "truncated-partition0-split-0.packet",
+          "control": "truncated-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-split-1.packet",
+          "control": "truncated-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-split-2.packet",
+          "control": "truncated-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-split-3.packet",
+          "control": "truncated-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "alternate-pps-partition0-split",
+      "file": "alternate-pps-partition0-split.mp4",
+      "oracle": "alternate-pps-partition0-split.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "alternate-pps-partition0-split-0.packet",
+          "control": "alternate-pps-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-split-1.packet",
+          "control": "alternate-pps-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-split-2.packet",
+          "control": "alternate-pps-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-split-3.packet",
+          "control": "alternate-pps-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "selected-pps-partition0-split",
+      "file": "selected-pps-partition0-split.mp4",
+      "oracle": "selected-pps-partition0-split.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 1,
+      "frames": [
+        {
+          "packet": "selected-pps-partition0-split-0.packet",
+          "control": "selected-pps-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-split-1.packet",
+          "control": "selected-pps-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-split-2.packet",
+          "control": "selected-pps-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-split-3.packet",
+          "control": "selected-pps-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "inter-partition0-split",
+      "file": "inter-partition0-split.mp4",
+      "oracle": "inter-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "inter-partition0-split-0.packet",
+          "control": "inter-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "inter-partition0-split-1.packet",
+          "control": "inter-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "inter-partition0-split-2.packet",
+          "control": "inter-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "inter-partition0-split-3.packet",
+          "control": "inter-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-partition0-split",
+      "file": "disjoint-partition0-split.mp4",
+      "oracle": "disjoint-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-partition0-split-0.packet",
+          "control": "disjoint-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-split-1.packet",
+          "control": "disjoint-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-split-2.packet",
+          "control": "disjoint-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-split-3.packet",
+          "control": "disjoint-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pi-partition0-split",
+      "file": "disjoint-pi-partition0-split.mp4",
+      "oracle": "disjoint-pi-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pi-partition0-split-0.packet",
+          "control": "disjoint-pi-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-split-1.packet",
+          "control": "disjoint-pi-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-split-2.packet",
+          "control": "disjoint-pi-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-split-3.packet",
+          "control": "disjoint-pi-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pp-partition0-split",
+      "file": "disjoint-pp-partition0-split.mp4",
+      "oracle": "disjoint-pp-partition0-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pp-partition0-split-0.packet",
+          "control": "disjoint-pp-partition0-split-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-split-1.packet",
+          "control": "disjoint-pp-partition0-split-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-split-2.packet",
+          "control": "disjoint-pp-partition0-split-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-split-3.packet",
+          "control": "disjoint-pp-partition0-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "single-partition0-aso",
+      "file": "single-partition0-aso.mp4",
+      "oracle": "single-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "single-partition0-aso-0.packet",
+          "control": "single-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "single-partition0-aso-1.packet",
+          "control": "single-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "single-partition0-aso-2.packet",
+          "control": "single-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "single-partition0-aso-3.packet",
+          "control": "single-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "large-rank-partition0-aso",
+      "file": "large-rank-partition0-aso.mp4",
+      "oracle": "large-rank-partition0-aso.yuv",
+      "rank": 127,
+      "ranks": [
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "large-rank-partition0-aso-0.packet",
+          "control": "large-rank-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-aso-1.packet",
+          "control": "large-rank-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-aso-2.packet",
+          "control": "large-rank-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "large-rank-partition0-aso-3.packet",
+          "control": "large-rank-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "lowest-partition0-aso",
+      "file": "lowest-partition0-aso.mp4",
+      "oracle": "lowest-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "lowest-partition0-aso-0.packet",
+          "control": "lowest-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-aso-1.packet",
+          "control": "lowest-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-aso-2.packet",
+          "control": "lowest-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "lowest-partition0-aso-3.packet",
+          "control": "lowest-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partial-partition0-aso",
+      "file": "partial-partition0-aso.mp4",
+      "oracle": "partial-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "partial-partition0-aso-0.packet",
+          "control": "partial-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "partial-partition0-aso-1.packet",
+          "control": "partial-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "partial-partition0-aso-2.packet",
+          "control": "partial-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "partial-partition0-aso-3.packet",
+          "control": "partial-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "late-start-partition0-aso",
+      "file": "late-start-partition0-aso.mp4",
+      "oracle": "late-start-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "late-start-partition0-aso-0.packet",
+          "control": "late-start-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-aso-1.packet",
+          "control": "late-start-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-aso-2.packet",
+          "control": "late-start-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "late-start-partition0-aso-3.packet",
+          "control": "late-start-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "truncated-partition0-aso",
+      "file": "truncated-partition0-aso.mp4",
+      "oracle": "truncated-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "truncated-partition0-aso-0.packet",
+          "control": "truncated-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-aso-1.packet",
+          "control": "truncated-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-aso-2.packet",
+          "control": "truncated-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "truncated-partition0-aso-3.packet",
+          "control": "truncated-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "alternate-pps-partition0-aso",
+      "file": "alternate-pps-partition0-aso.mp4",
+      "oracle": "alternate-pps-partition0-aso.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "alternate-pps-partition0-aso-0.packet",
+          "control": "alternate-pps-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-aso-1.packet",
+          "control": "alternate-pps-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-aso-2.packet",
+          "control": "alternate-pps-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition0-aso-3.packet",
+          "control": "alternate-pps-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "selected-pps-partition0-aso",
+      "file": "selected-pps-partition0-aso.mp4",
+      "oracle": "selected-pps-partition0-aso.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 1,
+      "frames": [
+        {
+          "packet": "selected-pps-partition0-aso-0.packet",
+          "control": "selected-pps-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-aso-1.packet",
+          "control": "selected-pps-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-aso-2.packet",
+          "control": "selected-pps-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition0-aso-3.packet",
+          "control": "selected-pps-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "inter-partition0-aso",
+      "file": "inter-partition0-aso.mp4",
+      "oracle": "inter-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "inter-partition0-aso-0.packet",
+          "control": "inter-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "inter-partition0-aso-1.packet",
+          "control": "inter-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "inter-partition0-aso-2.packet",
+          "control": "inter-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "inter-partition0-aso-3.packet",
+          "control": "inter-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-partition0-aso",
+      "file": "disjoint-partition0-aso.mp4",
+      "oracle": "disjoint-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-partition0-aso-0.packet",
+          "control": "disjoint-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-aso-1.packet",
+          "control": "disjoint-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-aso-2.packet",
+          "control": "disjoint-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "disjoint-partition0-aso-3.packet",
+          "control": "disjoint-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pi-partition0-aso",
+      "file": "disjoint-pi-partition0-aso.mp4",
+      "oracle": "disjoint-pi-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pi-partition0-aso-0.packet",
+          "control": "disjoint-pi-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-aso-1.packet",
+          "control": "disjoint-pi-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-aso-2.packet",
+          "control": "disjoint-pi-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition0-aso-3.packet",
+          "control": "disjoint-pi-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pp-partition0-aso",
+      "file": "disjoint-pp-partition0-aso.mp4",
+      "oracle": "disjoint-pp-partition0-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pp-partition0-aso-0.packet",
+          "control": "disjoint-pp-partition0-aso-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-aso-1.packet",
+          "control": "disjoint-pp-partition0-aso-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-aso-2.packet",
+          "control": "disjoint-pp-partition0-aso-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition0-aso-3.packet",
+          "control": "disjoint-pp-partition0-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "single-partition1-single",
+      "file": "single-partition1-single.mp4",
+      "oracle": "single-partition1-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "single-partition1-single-0.packet",
+          "control": "single-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "single-partition1-single-1.packet",
+          "control": "single-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "single-partition1-single-2.packet",
+          "control": "single-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "single-partition1-single-3.packet",
+          "control": "single-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "large-rank-partition1-single",
+      "file": "large-rank-partition1-single.mp4",
+      "oracle": "large-rank-partition1-single.yuv",
+      "rank": 127,
+      "ranks": [
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "large-rank-partition1-single-0.packet",
+          "control": "large-rank-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-single-1.packet",
+          "control": "large-rank-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-single-2.packet",
+          "control": "large-rank-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-single-3.packet",
+          "control": "large-rank-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "lowest-partition1-single",
+      "file": "lowest-partition1-single.mp4",
+      "oracle": "lowest-partition1-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "lowest-partition1-single-0.packet",
+          "control": "lowest-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-single-1.packet",
+          "control": "lowest-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-single-2.packet",
+          "control": "lowest-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-single-3.packet",
+          "control": "lowest-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partial-partition1-single",
+      "file": "partial-partition1-single.mp4",
+      "oracle": "partial-partition1-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "partial-partition1-single-0.packet",
+          "control": "partial-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "partial-partition1-single-1.packet",
+          "control": "partial-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "partial-partition1-single-2.packet",
+          "control": "partial-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "partial-partition1-single-3.packet",
+          "control": "partial-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "late-start-partition1-single",
+      "file": "late-start-partition1-single.mp4",
+      "oracle": "late-start-partition1-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "late-start-partition1-single-0.packet",
+          "control": "late-start-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-single-1.packet",
+          "control": "late-start-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-single-2.packet",
+          "control": "late-start-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-single-3.packet",
+          "control": "late-start-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "truncated-partition1-single",
+      "file": "truncated-partition1-single.mp4",
+      "oracle": "truncated-partition1-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "truncated-partition1-single-0.packet",
+          "control": "truncated-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-single-1.packet",
+          "control": "truncated-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-single-2.packet",
+          "control": "truncated-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-single-3.packet",
+          "control": "truncated-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "alternate-pps-partition1-single",
+      "file": "alternate-pps-partition1-single.mp4",
+      "oracle": "alternate-pps-partition1-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "alternate-pps-partition1-single-0.packet",
+          "control": "alternate-pps-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-single-1.packet",
+          "control": "alternate-pps-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-single-2.packet",
+          "control": "alternate-pps-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-single-3.packet",
+          "control": "alternate-pps-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "selected-pps-partition1-single",
+      "file": "selected-pps-partition1-single.mp4",
+      "oracle": "selected-pps-partition1-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 1,
+      "frames": [
+        {
+          "packet": "selected-pps-partition1-single-0.packet",
+          "control": "selected-pps-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-single-1.packet",
+          "control": "selected-pps-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-single-2.packet",
+          "control": "selected-pps-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-single-3.packet",
+          "control": "selected-pps-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "inter-partition1-single",
+      "file": "inter-partition1-single.mp4",
+      "oracle": "inter-partition1-single.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "inter-partition1-single-0.packet",
+          "control": "inter-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "inter-partition1-single-1.packet",
+          "control": "inter-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "inter-partition1-single-2.packet",
+          "control": "inter-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "inter-partition1-single-3.packet",
+          "control": "inter-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-partition1-single",
+      "file": "disjoint-partition1-single.mp4",
+      "oracle": "disjoint-partition1-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-partition1-single-0.packet",
+          "control": "disjoint-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-single-1.packet",
+          "control": "disjoint-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-single-2.packet",
+          "control": "disjoint-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-single-3.packet",
+          "control": "disjoint-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pi-partition1-single",
+      "file": "disjoint-pi-partition1-single.mp4",
+      "oracle": "disjoint-pi-partition1-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pi-partition1-single-0.packet",
+          "control": "disjoint-pi-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-single-1.packet",
+          "control": "disjoint-pi-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-single-2.packet",
+          "control": "disjoint-pi-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-single-3.packet",
+          "control": "disjoint-pi-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pp-partition1-single",
+      "file": "disjoint-pp-partition1-single.mp4",
+      "oracle": "disjoint-pp-partition1-single.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pp-partition1-single-0.packet",
+          "control": "disjoint-pp-partition1-single-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-single-1.packet",
+          "control": "disjoint-pp-partition1-single-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-single-2.packet",
+          "control": "disjoint-pp-partition1-single-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-single-3.packet",
+          "control": "disjoint-pp-partition1-single-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "single-partition1-split",
+      "file": "single-partition1-split.mp4",
+      "oracle": "single-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "single-partition1-split-0.packet",
+          "control": "single-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "single-partition1-split-1.packet",
+          "control": "single-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "single-partition1-split-2.packet",
+          "control": "single-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "single-partition1-split-3.packet",
+          "control": "single-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "large-rank-partition1-split",
+      "file": "large-rank-partition1-split.mp4",
+      "oracle": "large-rank-partition1-split.yuv",
+      "rank": 127,
+      "ranks": [
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "large-rank-partition1-split-0.packet",
+          "control": "large-rank-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-split-1.packet",
+          "control": "large-rank-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-split-2.packet",
+          "control": "large-rank-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-split-3.packet",
+          "control": "large-rank-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "lowest-partition1-split",
+      "file": "lowest-partition1-split.mp4",
+      "oracle": "lowest-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "lowest-partition1-split-0.packet",
+          "control": "lowest-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-split-1.packet",
+          "control": "lowest-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-split-2.packet",
+          "control": "lowest-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-split-3.packet",
+          "control": "lowest-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partial-partition1-split",
+      "file": "partial-partition1-split.mp4",
+      "oracle": "partial-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "partial-partition1-split-0.packet",
+          "control": "partial-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "partial-partition1-split-1.packet",
+          "control": "partial-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "partial-partition1-split-2.packet",
+          "control": "partial-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "partial-partition1-split-3.packet",
+          "control": "partial-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "late-start-partition1-split",
+      "file": "late-start-partition1-split.mp4",
+      "oracle": "late-start-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "late-start-partition1-split-0.packet",
+          "control": "late-start-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-split-1.packet",
+          "control": "late-start-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-split-2.packet",
+          "control": "late-start-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-split-3.packet",
+          "control": "late-start-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "truncated-partition1-split",
+      "file": "truncated-partition1-split.mp4",
+      "oracle": "truncated-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "truncated-partition1-split-0.packet",
+          "control": "truncated-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-split-1.packet",
+          "control": "truncated-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-split-2.packet",
+          "control": "truncated-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-split-3.packet",
+          "control": "truncated-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "alternate-pps-partition1-split",
+      "file": "alternate-pps-partition1-split.mp4",
+      "oracle": "alternate-pps-partition1-split.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "alternate-pps-partition1-split-0.packet",
+          "control": "alternate-pps-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-split-1.packet",
+          "control": "alternate-pps-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-split-2.packet",
+          "control": "alternate-pps-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-split-3.packet",
+          "control": "alternate-pps-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "selected-pps-partition1-split",
+      "file": "selected-pps-partition1-split.mp4",
+      "oracle": "selected-pps-partition1-split.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 1,
+      "frames": [
+        {
+          "packet": "selected-pps-partition1-split-0.packet",
+          "control": "selected-pps-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-split-1.packet",
+          "control": "selected-pps-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-split-2.packet",
+          "control": "selected-pps-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-split-3.packet",
+          "control": "selected-pps-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "inter-partition1-split",
+      "file": "inter-partition1-split.mp4",
+      "oracle": "inter-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "inter-partition1-split-0.packet",
+          "control": "inter-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "inter-partition1-split-1.packet",
+          "control": "inter-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "inter-partition1-split-2.packet",
+          "control": "inter-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "inter-partition1-split-3.packet",
+          "control": "inter-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-partition1-split",
+      "file": "disjoint-partition1-split.mp4",
+      "oracle": "disjoint-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-partition1-split-0.packet",
+          "control": "disjoint-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-split-1.packet",
+          "control": "disjoint-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-split-2.packet",
+          "control": "disjoint-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-split-3.packet",
+          "control": "disjoint-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pi-partition1-split",
+      "file": "disjoint-pi-partition1-split.mp4",
+      "oracle": "disjoint-pi-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pi-partition1-split-0.packet",
+          "control": "disjoint-pi-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-split-1.packet",
+          "control": "disjoint-pi-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-split-2.packet",
+          "control": "disjoint-pi-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-split-3.packet",
+          "control": "disjoint-pi-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pp-partition1-split",
+      "file": "disjoint-pp-partition1-split.mp4",
+      "oracle": "disjoint-pp-partition1-split.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pp-partition1-split-0.packet",
+          "control": "disjoint-pp-partition1-split-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-split-1.packet",
+          "control": "disjoint-pp-partition1-split-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-split-2.packet",
+          "control": "disjoint-pp-partition1-split-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-split-3.packet",
+          "control": "disjoint-pp-partition1-split-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "single-partition1-aso",
+      "file": "single-partition1-aso.mp4",
+      "oracle": "single-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "single-partition1-aso-0.packet",
+          "control": "single-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "single-partition1-aso-1.packet",
+          "control": "single-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "single-partition1-aso-2.packet",
+          "control": "single-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "single-partition1-aso-3.packet",
+          "control": "single-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "large-rank-partition1-aso",
+      "file": "large-rank-partition1-aso.mp4",
+      "oracle": "large-rank-partition1-aso.yuv",
+      "rank": 127,
+      "ranks": [
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "large-rank-partition1-aso-0.packet",
+          "control": "large-rank-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-aso-1.packet",
+          "control": "large-rank-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-aso-2.packet",
+          "control": "large-rank-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "large-rank-partition1-aso-3.packet",
+          "control": "large-rank-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "lowest-partition1-aso",
+      "file": "lowest-partition1-aso.mp4",
+      "oracle": "lowest-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "lowest-partition1-aso-0.packet",
+          "control": "lowest-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-aso-1.packet",
+          "control": "lowest-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-aso-2.packet",
+          "control": "lowest-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "lowest-partition1-aso-3.packet",
+          "control": "lowest-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "partial-partition1-aso",
+      "file": "partial-partition1-aso.mp4",
+      "oracle": "partial-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "partial-partition1-aso-0.packet",
+          "control": "partial-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "partial-partition1-aso-1.packet",
+          "control": "partial-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "partial-partition1-aso-2.packet",
+          "control": "partial-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "partial-partition1-aso-3.packet",
+          "control": "partial-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "late-start-partition1-aso",
+      "file": "late-start-partition1-aso.mp4",
+      "oracle": "late-start-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "late-start-partition1-aso-0.packet",
+          "control": "late-start-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-aso-1.packet",
+          "control": "late-start-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-aso-2.packet",
+          "control": "late-start-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "late-start-partition1-aso-3.packet",
+          "control": "late-start-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "truncated-partition1-aso",
+      "file": "truncated-partition1-aso.mp4",
+      "oracle": "truncated-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "truncated-partition1-aso-0.packet",
+          "control": "truncated-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-aso-1.packet",
+          "control": "truncated-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-aso-2.packet",
+          "control": "truncated-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "truncated-partition1-aso-3.packet",
+          "control": "truncated-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "alternate-pps-partition1-aso",
+      "file": "alternate-pps-partition1-aso.mp4",
+      "oracle": "alternate-pps-partition1-aso.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "alternate-pps-partition1-aso-0.packet",
+          "control": "alternate-pps-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-aso-1.packet",
+          "control": "alternate-pps-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-aso-2.packet",
+          "control": "alternate-pps-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "alternate-pps-partition1-aso-3.packet",
+          "control": "alternate-pps-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "selected-pps-partition1-aso",
+      "file": "selected-pps-partition1-aso.mp4",
+      "oracle": "selected-pps-partition1-aso.yuv",
+      "rank": 2,
+      "ranks": [
+        2
+      ],
+      "pps": 1,
+      "frames": [
+        {
+          "packet": "selected-pps-partition1-aso-0.packet",
+          "control": "selected-pps-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-aso-1.packet",
+          "control": "selected-pps-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-aso-2.packet",
+          "control": "selected-pps-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "selected-pps-partition1-aso-3.packet",
+          "control": "selected-pps-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "inter-partition1-aso",
+      "file": "inter-partition1-aso.mp4",
+      "oracle": "inter-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "inter-partition1-aso-0.packet",
+          "control": "inter-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "inter-partition1-aso-1.packet",
+          "control": "inter-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "inter-partition1-aso-2.packet",
+          "control": "inter-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "inter-partition1-aso-3.packet",
+          "control": "inter-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-partition1-aso",
+      "file": "disjoint-partition1-aso.mp4",
+      "oracle": "disjoint-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-partition1-aso-0.packet",
+          "control": "disjoint-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-aso-1.packet",
+          "control": "disjoint-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-aso-2.packet",
+          "control": "disjoint-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "disjoint-partition1-aso-3.packet",
+          "control": "disjoint-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pi-partition1-aso",
+      "file": "disjoint-pi-partition1-aso.mp4",
+      "oracle": "disjoint-pi-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        127
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pi-partition1-aso-0.packet",
+          "control": "disjoint-pi-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-aso-1.packet",
+          "control": "disjoint-pi-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-aso-2.packet",
+          "control": "disjoint-pi-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pi-partition1-aso-3.packet",
+          "control": "disjoint-pi-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "disjoint-pp-partition1-aso",
+      "file": "disjoint-pp-partition1-aso.mp4",
+      "oracle": "disjoint-pp-partition1-aso.yuv",
+      "rank": 1,
+      "ranks": [
+        1,
+        2
+      ],
+      "pps": 0,
+      "frames": [
+        {
+          "packet": "disjoint-pp-partition1-aso-0.packet",
+          "control": "disjoint-pp-partition1-aso-0-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-aso-1.packet",
+          "control": "disjoint-pp-partition1-aso-1-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-aso-2.packet",
+          "control": "disjoint-pp-partition1-aso-2-control.packet"
+        },
+        {
+          "packet": "disjoint-pp-partition1-aso-3.packet",
+          "control": "disjoint-pp-partition1-aso-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-single-rank1",
+      "file": "non-reference-single-rank1.mp4",
+      "oracle": "non-reference-single-rank1.yuv",
+      "rank": 1,
+      "pps": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-single-rank1-0.packet",
+          "control": "non-reference-single-rank1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-single-rank1-1.packet",
+          "control": "non-reference-single-rank1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-single-rank1-2.packet",
+          "control": "non-reference-single-rank1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-single-rank1-3.packet",
+          "control": "non-reference-single-rank1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-single-rank127",
+      "file": "non-reference-single-rank127.mp4",
+      "oracle": "non-reference-single-rank127.yuv",
+      "rank": 127,
+      "pps": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-single-rank127-0.packet",
+          "control": "non-reference-single-rank127-0-control.packet"
+        },
+        {
+          "packet": "non-reference-single-rank127-1.packet",
+          "control": "non-reference-single-rank127-1-control.packet"
+        },
+        {
+          "packet": "non-reference-single-rank127-2.packet",
+          "control": "non-reference-single-rank127-2-control.packet"
+        },
+        {
+          "packet": "non-reference-single-rank127-3.packet",
+          "control": "non-reference-single-rank127-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-split-rank1",
+      "file": "non-reference-split-rank1.mp4",
+      "oracle": "non-reference-split-rank1.yuv",
+      "rank": 1,
+      "pps": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-split-rank1-0.packet",
+          "control": "non-reference-split-rank1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-split-rank1-1.packet",
+          "control": "non-reference-split-rank1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-split-rank1-2.packet",
+          "control": "non-reference-split-rank1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-split-rank1-3.packet",
+          "control": "non-reference-split-rank1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-split-rank127",
+      "file": "non-reference-split-rank127.mp4",
+      "oracle": "non-reference-split-rank127.yuv",
+      "rank": 127,
+      "pps": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-split-rank127-0.packet",
+          "control": "non-reference-split-rank127-0-control.packet"
+        },
+        {
+          "packet": "non-reference-split-rank127-1.packet",
+          "control": "non-reference-split-rank127-1-control.packet"
+        },
+        {
+          "packet": "non-reference-split-rank127-2.packet",
+          "control": "non-reference-split-rank127-2-control.packet"
+        },
+        {
+          "packet": "non-reference-split-rank127-3.packet",
+          "control": "non-reference-split-rank127-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-aso-rank1",
+      "file": "non-reference-aso-rank1.mp4",
+      "oracle": "non-reference-aso-rank1.yuv",
+      "rank": 1,
+      "pps": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-aso-rank1-0.packet",
+          "control": "non-reference-aso-rank1-0-control.packet"
+        },
+        {
+          "packet": "non-reference-aso-rank1-1.packet",
+          "control": "non-reference-aso-rank1-1-control.packet"
+        },
+        {
+          "packet": "non-reference-aso-rank1-2.packet",
+          "control": "non-reference-aso-rank1-2-control.packet"
+        },
+        {
+          "packet": "non-reference-aso-rank1-3.packet",
+          "control": "non-reference-aso-rank1-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "non-reference-aso-rank127",
+      "file": "non-reference-aso-rank127.mp4",
+      "oracle": "non-reference-aso-rank127.yuv",
+      "rank": 127,
+      "pps": 0,
+      "recovery_index": 1,
+      "frames": [
+        {
+          "packet": "non-reference-aso-rank127-0.packet",
+          "control": "non-reference-aso-rank127-0-control.packet"
+        },
+        {
+          "packet": "non-reference-aso-rank127-1.packet",
+          "control": "non-reference-aso-rank127-1-control.packet"
+        },
+        {
+          "packet": "non-reference-aso-rank127-2.packet",
+          "control": "non-reference-aso-rank127-2-control.packet"
+        },
+        {
+          "packet": "non-reference-aso-rank127-3.packet",
+          "control": "non-reference-aso-rank127-3-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-single-rank1",
+      "file": "startup-single-rank1.mp4",
+      "oracle": "startup-single-rank1.yuv",
+      "rank": 1,
+      "pps": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-single-rank1-0.packet",
+          "control": "startup-single-rank1-0-control.packet"
+        },
+        {
+          "packet": "startup-single-rank1-1.packet",
+          "control": "startup-single-rank1-1-control.packet"
+        },
+        {
+          "packet": "startup-single-rank1-2.packet",
+          "control": "startup-single-rank1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-single-rank127",
+      "file": "startup-single-rank127.mp4",
+      "oracle": "startup-single-rank127.yuv",
+      "rank": 127,
+      "pps": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-single-rank127-0.packet",
+          "control": "startup-single-rank127-0-control.packet"
+        },
+        {
+          "packet": "startup-single-rank127-1.packet",
+          "control": "startup-single-rank127-1-control.packet"
+        },
+        {
+          "packet": "startup-single-rank127-2.packet",
+          "control": "startup-single-rank127-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-split-rank1",
+      "file": "startup-split-rank1.mp4",
+      "oracle": "startup-split-rank1.yuv",
+      "rank": 1,
+      "pps": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-split-rank1-0.packet",
+          "control": "startup-split-rank1-0-control.packet"
+        },
+        {
+          "packet": "startup-split-rank1-1.packet",
+          "control": "startup-split-rank1-1-control.packet"
+        },
+        {
+          "packet": "startup-split-rank1-2.packet",
+          "control": "startup-split-rank1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-split-rank127",
+      "file": "startup-split-rank127.mp4",
+      "oracle": "startup-split-rank127.yuv",
+      "rank": 127,
+      "pps": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-split-rank127-0.packet",
+          "control": "startup-split-rank127-0-control.packet"
+        },
+        {
+          "packet": "startup-split-rank127-1.packet",
+          "control": "startup-split-rank127-1-control.packet"
+        },
+        {
+          "packet": "startup-split-rank127-2.packet",
+          "control": "startup-split-rank127-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-aso-rank1",
+      "file": "startup-aso-rank1.mp4",
+      "oracle": "startup-aso-rank1.yuv",
+      "rank": 1,
+      "pps": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-aso-rank1-0.packet",
+          "control": "startup-aso-rank1-0-control.packet"
+        },
+        {
+          "packet": "startup-aso-rank1-1.packet",
+          "control": "startup-aso-rank1-1-control.packet"
+        },
+        {
+          "packet": "startup-aso-rank1-2.packet",
+          "control": "startup-aso-rank1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "startup-aso-rank127",
+      "file": "startup-aso-rank127.mp4",
+      "oracle": "startup-aso-rank127.yuv",
+      "rank": 127,
+      "pps": 0,
+      "recovery_index": 0,
+      "frames": [
+        {
+          "packet": "startup-aso-rank127-0.packet",
+          "control": "startup-aso-rank127-0-control.packet"
+        },
+        {
+          "packet": "startup-aso-rank127-1.packet",
+          "control": "startup-aso-rank127-1-control.packet"
+        },
+        {
+          "packet": "startup-aso-rank127-2.packet",
+          "control": "startup-aso-rank127-2-control.packet"
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "partial.packet",
+      "message": "no complete coded picture"
+    },
+    {
+      "file": "truncated.packet",
+      "message": "no complete coded picture"
+    },
+    {
+      "file": "foreign-picture.packet",
+      "message": "identity mismatch"
+    },
+    {
+      "file": "reference-class.packet",
+      "message": "identity mismatch"
+    },
+    {
+      "file": "descending.packet",
+      "message": "counter order"
+    }
+  ]
+}

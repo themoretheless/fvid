@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running tests/ogg_continuation_boundary.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_continuation_boundary-5732918a0a6a889d)
+
+running 1 test
+
+thread 'joined_prefix_discards_every_fragment_then_rewind_repeats_the_whole_audio' (7098430) panicked at crates/fvid-opus/tests/ogg_continuation_boundary.rs:93:47:
+called `Result::unwrap()` on an `Err` value: InvalidStream("page continuation flag does not match the pending packet")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test joined_prefix_discards_every_fragment_then_rewind_repeats_the_whole_audio ... FAILED
+
+failures:
+
+failures:
+    joined_prefix_discards_every_fragment_then_rewind_repeats_the_whole_audio
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p fvid-opus --test ogg_continuation_boundary`

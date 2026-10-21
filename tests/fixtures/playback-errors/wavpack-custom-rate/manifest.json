@@ -1,0 +1,753 @@
+{
+  "provenance": "Owned WavPack custom-rate vectors, including the four-byte 31-bit form.\nNo external codec, process, network, private source or generated fixture is read.\n",
+  "samples": 750,
+  "cases": [
+    {
+      "name": "c1-r37500-bytes4-reserved0",
+      "channels": 1,
+      "rate": 37500,
+      "file": "c1-r37500-bytes4-reserved0.mkv",
+      "oracle": "c1-r37500-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c1-r37500-bytes4-reserved0-0.wv",
+          "packet": "c1-r37500-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r37500-bytes4-reserved0-1.wv",
+          "packet": "c1-r37500-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r37500-bytes4-reserved0-2.wv",
+          "packet": "c1-r37500-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r37500-bytes4-reserved1",
+      "channels": 1,
+      "rate": 37500,
+      "file": "c1-r37500-bytes4-reserved1.mkv",
+      "oracle": "c1-r37500-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c1-r37500-bytes4-reserved1-0.wv",
+          "packet": "c1-r37500-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r37500-bytes4-reserved1-1.wv",
+          "packet": "c1-r37500-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r37500-bytes4-reserved1-2.wv",
+          "packet": "c1-r37500-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r37500-bytes3-reserved0",
+      "channels": 1,
+      "rate": 37500,
+      "file": "c1-r37500-bytes3-reserved0.mkv",
+      "oracle": "c1-r37500-bytes3-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c1-r37500-bytes3-reserved0-0.wv",
+          "packet": "c1-r37500-bytes3-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r37500-bytes3-reserved0-1.wv",
+          "packet": "c1-r37500-bytes3-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r37500-bytes3-reserved0-2.wv",
+          "packet": "c1-r37500-bytes3-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r16777215-bytes4-reserved0",
+      "channels": 1,
+      "rate": 16777215,
+      "file": "c1-r16777215-bytes4-reserved0.mkv",
+      "oracle": "c1-r16777215-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c1-r16777215-bytes4-reserved0-0.wv",
+          "packet": "c1-r16777215-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r16777215-bytes4-reserved0-1.wv",
+          "packet": "c1-r16777215-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r16777215-bytes4-reserved0-2.wv",
+          "packet": "c1-r16777215-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r16777215-bytes4-reserved1",
+      "channels": 1,
+      "rate": 16777215,
+      "file": "c1-r16777215-bytes4-reserved1.mkv",
+      "oracle": "c1-r16777215-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c1-r16777215-bytes4-reserved1-0.wv",
+          "packet": "c1-r16777215-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r16777215-bytes4-reserved1-1.wv",
+          "packet": "c1-r16777215-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r16777215-bytes4-reserved1-2.wv",
+          "packet": "c1-r16777215-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r16777215-bytes3-reserved0",
+      "channels": 1,
+      "rate": 16777215,
+      "file": "c1-r16777215-bytes3-reserved0.mkv",
+      "oracle": "c1-r16777215-bytes3-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c1-r16777215-bytes3-reserved0-0.wv",
+          "packet": "c1-r16777215-bytes3-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r16777215-bytes3-reserved0-1.wv",
+          "packet": "c1-r16777215-bytes3-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r16777215-bytes3-reserved0-2.wv",
+          "packet": "c1-r16777215-bytes3-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r16777216-bytes4-reserved0",
+      "channels": 1,
+      "rate": 16777216,
+      "file": "c1-r16777216-bytes4-reserved0.mkv",
+      "oracle": "c1-r16777216-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c1-r16777216-bytes4-reserved0-0.wv",
+          "packet": "c1-r16777216-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r16777216-bytes4-reserved0-1.wv",
+          "packet": "c1-r16777216-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r16777216-bytes4-reserved0-2.wv",
+          "packet": "c1-r16777216-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r16777216-bytes4-reserved1",
+      "channels": 1,
+      "rate": 16777216,
+      "file": "c1-r16777216-bytes4-reserved1.mkv",
+      "oracle": "c1-r16777216-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c1-r16777216-bytes4-reserved1-0.wv",
+          "packet": "c1-r16777216-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r16777216-bytes4-reserved1-1.wv",
+          "packet": "c1-r16777216-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r16777216-bytes4-reserved1-2.wv",
+          "packet": "c1-r16777216-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r2147483647-bytes4-reserved0",
+      "channels": 1,
+      "rate": 2147483647,
+      "file": "c1-r2147483647-bytes4-reserved0.mkv",
+      "oracle": "c1-r2147483647-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c1-r2147483647-bytes4-reserved0-0.wv",
+          "packet": "c1-r2147483647-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r2147483647-bytes4-reserved0-1.wv",
+          "packet": "c1-r2147483647-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r2147483647-bytes4-reserved0-2.wv",
+          "packet": "c1-r2147483647-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c1-r2147483647-bytes4-reserved1",
+      "channels": 1,
+      "rate": 2147483647,
+      "file": "c1-r2147483647-bytes4-reserved1.mkv",
+      "oracle": "c1-r2147483647-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c1-r2147483647-bytes4-reserved1-0.wv",
+          "packet": "c1-r2147483647-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c1-r2147483647-bytes4-reserved1-1.wv",
+          "packet": "c1-r2147483647-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c1-r2147483647-bytes4-reserved1-2.wv",
+          "packet": "c1-r2147483647-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r37500-bytes4-reserved0",
+      "channels": 2,
+      "rate": 37500,
+      "file": "c2-r37500-bytes4-reserved0.mkv",
+      "oracle": "c2-r37500-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c2-r37500-bytes4-reserved0-0.wv",
+          "packet": "c2-r37500-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r37500-bytes4-reserved0-1.wv",
+          "packet": "c2-r37500-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r37500-bytes4-reserved0-2.wv",
+          "packet": "c2-r37500-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r37500-bytes4-reserved1",
+      "channels": 2,
+      "rate": 37500,
+      "file": "c2-r37500-bytes4-reserved1.mkv",
+      "oracle": "c2-r37500-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c2-r37500-bytes4-reserved1-0.wv",
+          "packet": "c2-r37500-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r37500-bytes4-reserved1-1.wv",
+          "packet": "c2-r37500-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r37500-bytes4-reserved1-2.wv",
+          "packet": "c2-r37500-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r37500-bytes3-reserved0",
+      "channels": 2,
+      "rate": 37500,
+      "file": "c2-r37500-bytes3-reserved0.mkv",
+      "oracle": "c2-r37500-bytes3-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c2-r37500-bytes3-reserved0-0.wv",
+          "packet": "c2-r37500-bytes3-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r37500-bytes3-reserved0-1.wv",
+          "packet": "c2-r37500-bytes3-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r37500-bytes3-reserved0-2.wv",
+          "packet": "c2-r37500-bytes3-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r16777215-bytes4-reserved0",
+      "channels": 2,
+      "rate": 16777215,
+      "file": "c2-r16777215-bytes4-reserved0.mkv",
+      "oracle": "c2-r16777215-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c2-r16777215-bytes4-reserved0-0.wv",
+          "packet": "c2-r16777215-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r16777215-bytes4-reserved0-1.wv",
+          "packet": "c2-r16777215-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r16777215-bytes4-reserved0-2.wv",
+          "packet": "c2-r16777215-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r16777215-bytes4-reserved1",
+      "channels": 2,
+      "rate": 16777215,
+      "file": "c2-r16777215-bytes4-reserved1.mkv",
+      "oracle": "c2-r16777215-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c2-r16777215-bytes4-reserved1-0.wv",
+          "packet": "c2-r16777215-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r16777215-bytes4-reserved1-1.wv",
+          "packet": "c2-r16777215-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r16777215-bytes4-reserved1-2.wv",
+          "packet": "c2-r16777215-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r16777215-bytes3-reserved0",
+      "channels": 2,
+      "rate": 16777215,
+      "file": "c2-r16777215-bytes3-reserved0.mkv",
+      "oracle": "c2-r16777215-bytes3-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c2-r16777215-bytes3-reserved0-0.wv",
+          "packet": "c2-r16777215-bytes3-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r16777215-bytes3-reserved0-1.wv",
+          "packet": "c2-r16777215-bytes3-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r16777215-bytes3-reserved0-2.wv",
+          "packet": "c2-r16777215-bytes3-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r16777216-bytes4-reserved0",
+      "channels": 2,
+      "rate": 16777216,
+      "file": "c2-r16777216-bytes4-reserved0.mkv",
+      "oracle": "c2-r16777216-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c2-r16777216-bytes4-reserved0-0.wv",
+          "packet": "c2-r16777216-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r16777216-bytes4-reserved0-1.wv",
+          "packet": "c2-r16777216-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r16777216-bytes4-reserved0-2.wv",
+          "packet": "c2-r16777216-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r16777216-bytes4-reserved1",
+      "channels": 2,
+      "rate": 16777216,
+      "file": "c2-r16777216-bytes4-reserved1.mkv",
+      "oracle": "c2-r16777216-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c2-r16777216-bytes4-reserved1-0.wv",
+          "packet": "c2-r16777216-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r16777216-bytes4-reserved1-1.wv",
+          "packet": "c2-r16777216-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r16777216-bytes4-reserved1-2.wv",
+          "packet": "c2-r16777216-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r2147483647-bytes4-reserved0",
+      "channels": 2,
+      "rate": 2147483647,
+      "file": "c2-r2147483647-bytes4-reserved0.mkv",
+      "oracle": "c2-r2147483647-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c2-r2147483647-bytes4-reserved0-0.wv",
+          "packet": "c2-r2147483647-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r2147483647-bytes4-reserved0-1.wv",
+          "packet": "c2-r2147483647-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r2147483647-bytes4-reserved0-2.wv",
+          "packet": "c2-r2147483647-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c2-r2147483647-bytes4-reserved1",
+      "channels": 2,
+      "rate": 2147483647,
+      "file": "c2-r2147483647-bytes4-reserved1.mkv",
+      "oracle": "c2-r2147483647-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c2-r2147483647-bytes4-reserved1-0.wv",
+          "packet": "c2-r2147483647-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c2-r2147483647-bytes4-reserved1-1.wv",
+          "packet": "c2-r2147483647-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c2-r2147483647-bytes4-reserved1-2.wv",
+          "packet": "c2-r2147483647-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r37500-bytes4-reserved0",
+      "channels": 6,
+      "rate": 37500,
+      "file": "c6-r37500-bytes4-reserved0.mkv",
+      "oracle": "c6-r37500-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c6-r37500-bytes4-reserved0-0.wv",
+          "packet": "c6-r37500-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r37500-bytes4-reserved0-1.wv",
+          "packet": "c6-r37500-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r37500-bytes4-reserved0-2.wv",
+          "packet": "c6-r37500-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r37500-bytes4-reserved1",
+      "channels": 6,
+      "rate": 37500,
+      "file": "c6-r37500-bytes4-reserved1.mkv",
+      "oracle": "c6-r37500-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c6-r37500-bytes4-reserved1-0.wv",
+          "packet": "c6-r37500-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r37500-bytes4-reserved1-1.wv",
+          "packet": "c6-r37500-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r37500-bytes4-reserved1-2.wv",
+          "packet": "c6-r37500-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r37500-bytes3-reserved0",
+      "channels": 6,
+      "rate": 37500,
+      "file": "c6-r37500-bytes3-reserved0.mkv",
+      "oracle": "c6-r37500-bytes3-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c6-r37500-bytes3-reserved0-0.wv",
+          "packet": "c6-r37500-bytes3-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r37500-bytes3-reserved0-1.wv",
+          "packet": "c6-r37500-bytes3-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r37500-bytes3-reserved0-2.wv",
+          "packet": "c6-r37500-bytes3-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r16777215-bytes4-reserved0",
+      "channels": 6,
+      "rate": 16777215,
+      "file": "c6-r16777215-bytes4-reserved0.mkv",
+      "oracle": "c6-r16777215-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c6-r16777215-bytes4-reserved0-0.wv",
+          "packet": "c6-r16777215-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r16777215-bytes4-reserved0-1.wv",
+          "packet": "c6-r16777215-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r16777215-bytes4-reserved0-2.wv",
+          "packet": "c6-r16777215-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r16777215-bytes4-reserved1",
+      "channels": 6,
+      "rate": 16777215,
+      "file": "c6-r16777215-bytes4-reserved1.mkv",
+      "oracle": "c6-r16777215-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c6-r16777215-bytes4-reserved1-0.wv",
+          "packet": "c6-r16777215-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r16777215-bytes4-reserved1-1.wv",
+          "packet": "c6-r16777215-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r16777215-bytes4-reserved1-2.wv",
+          "packet": "c6-r16777215-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r16777215-bytes3-reserved0",
+      "channels": 6,
+      "rate": 16777215,
+      "file": "c6-r16777215-bytes3-reserved0.mkv",
+      "oracle": "c6-r16777215-bytes3-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c6-r16777215-bytes3-reserved0-0.wv",
+          "packet": "c6-r16777215-bytes3-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r16777215-bytes3-reserved0-1.wv",
+          "packet": "c6-r16777215-bytes3-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r16777215-bytes3-reserved0-2.wv",
+          "packet": "c6-r16777215-bytes3-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r16777216-bytes4-reserved0",
+      "channels": 6,
+      "rate": 16777216,
+      "file": "c6-r16777216-bytes4-reserved0.mkv",
+      "oracle": "c6-r16777216-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c6-r16777216-bytes4-reserved0-0.wv",
+          "packet": "c6-r16777216-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r16777216-bytes4-reserved0-1.wv",
+          "packet": "c6-r16777216-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r16777216-bytes4-reserved0-2.wv",
+          "packet": "c6-r16777216-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r16777216-bytes4-reserved1",
+      "channels": 6,
+      "rate": 16777216,
+      "file": "c6-r16777216-bytes4-reserved1.mkv",
+      "oracle": "c6-r16777216-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c6-r16777216-bytes4-reserved1-0.wv",
+          "packet": "c6-r16777216-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r16777216-bytes4-reserved1-1.wv",
+          "packet": "c6-r16777216-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r16777216-bytes4-reserved1-2.wv",
+          "packet": "c6-r16777216-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r2147483647-bytes4-reserved0",
+      "channels": 6,
+      "rate": 2147483647,
+      "file": "c6-r2147483647-bytes4-reserved0.mkv",
+      "oracle": "c6-r2147483647-bytes4-reserved0.f32le",
+      "frames": [
+        {
+          "file": "c6-r2147483647-bytes4-reserved0-0.wv",
+          "packet": "c6-r2147483647-bytes4-reserved0-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r2147483647-bytes4-reserved0-1.wv",
+          "packet": "c6-r2147483647-bytes4-reserved0-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r2147483647-bytes4-reserved0-2.wv",
+          "packet": "c6-r2147483647-bytes4-reserved0-2.packet",
+          "pts": 1500
+        }
+      ]
+    },
+    {
+      "name": "c6-r2147483647-bytes4-reserved1",
+      "channels": 6,
+      "rate": 2147483647,
+      "file": "c6-r2147483647-bytes4-reserved1.mkv",
+      "oracle": "c6-r2147483647-bytes4-reserved1.f32le",
+      "frames": [
+        {
+          "file": "c6-r2147483647-bytes4-reserved1-0.wv",
+          "packet": "c6-r2147483647-bytes4-reserved1-0.packet",
+          "pts": 0
+        },
+        {
+          "file": "c6-r2147483647-bytes4-reserved1-1.wv",
+          "packet": "c6-r2147483647-bytes4-reserved1-1.packet",
+          "pts": 750
+        },
+        {
+          "file": "c6-r2147483647-bytes4-reserved1-2.wv",
+          "packet": "c6-r2147483647-bytes4-reserved1-2.packet",
+          "pts": 1500
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "zero-three.wv",
+      "movie": "zero-three.mkv",
+      "message": "sample rate is zero"
+    },
+    {
+      "file": "short.wv",
+      "movie": "short.mkv",
+      "message": "wrong length"
+    },
+    {
+      "file": "long.wv",
+      "movie": "long.mkv",
+      "message": "wrong length"
+    },
+    {
+      "file": "zero.wv",
+      "movie": "zero.mkv",
+      "message": "sample rate is zero"
+    },
+    {
+      "file": "reserved-only.wv",
+      "movie": "reserved-only.mkv",
+      "message": "sample rate is zero"
+    }
+  ]
+}

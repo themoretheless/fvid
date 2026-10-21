@@ -1,0 +1,54 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0157",
+    "FVID-0158"
+  ],
+  "checked_at": "2026-10-20T23:10:21.032376+00:00",
+  "before": [
+    "evidence/batch-149-before.log",
+    "evidence/batch-149-acceptance-before.log",
+    "evidence/batch-150-before.log",
+    "evidence/batch-150-cargo-acceptance-before.log",
+    "evidence/batch-149-native-before.log",
+    "evidence/batch-149-subtitles-before.rs"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-149-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-150-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-149-after.log",
+      "passed": 17,
+      "scope": "Nine native/library units and four two-test media integration targets."
+    },
+    {
+      "log": "evidence/batch-149-units-after.log",
+      "passed": 33
+    },
+    {
+      "log": "evidence/batch-149-player-build.log",
+      "passed": 0,
+      "scope": "Completed player build."
+    }
+  ],
+  "qualification": [
+    "Two independent corrections: line_breaks compares BR bytes without ASCII case sensitivity; sidecars includes the already parseable .sami extension. The functions and failure triggers are independent. Existing sort and filename matching policies remain unchanged.",
+    "Break baseline: three upper/mixed-case tags concatenate lines; lowercase already works. Exact1..2s clocks and independent SRT isolate the cause. Forced intended regression decodes valid authored raw video before failing at text.",
+    "Discovery baseline: lowercase,uppercase and language-suffixed .sami files load explicitly with exact text/clocks but are not found beside video; .smi and unrelated-name controls distinguish intended matching. Forced Cargo acceptance fails at missing path after valid authored raw video decode.",
+    "Both native before tests presented authored VP9 frames first,then failed specifically at concatenated caption text and empty selected subtitle name. Hardware session creation refused and software fallback was exercised.",
+    "After gates include the earlier attribute and canonical Sync regressions plus both new media targets,and actual presentation/forward/backward seeking for both corrections. The focused native/media gates passed; 33 related units and the player build also passed. No performance,hardware decoding,full HTML/SAMI compliance,physical font drawing or physical audio output is claimed.",
+    "Both new native tests presented actual VP9 frames and completed four forward/backward seek targets each. The BR test preserved the literal two-line caption; automatic discovery selected video.sami without an explicit subtitle file. Scope is caption data and selection,not physical glyph rendering. Audit150 discovery inputs are incorporated into this two-change batch149; no extra batch or fixture ID is counted."
+  ],
+  "counting": "Two independent defects. Four break variants,four discovery variants,unrelated filename controls,native presentations and seek targets add zero extra IDs.",
+  "commands": [
+    "CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target cargo test --locked --offline --features player --test sami_sync --test sami_attribute_values --test sami_break_case --test sami_sidecar_extension --lib -- sami_",
+    "CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target cargo test --locked --offline --features player --lib subtitles::",
+    "CARGO_INCREMENTAL=0 CARGO_TARGET_DIR=target cargo build --locked --offline --features player"
+  ]
+}

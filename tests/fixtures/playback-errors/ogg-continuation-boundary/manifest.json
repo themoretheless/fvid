@@ -1,0 +1,258 @@
+{
+  "provenance": "Authored CRC-valid,consecutively numbered Ogg pages. Three malformed missing-continuation cases and three valid joined-live prefixes isolate fragment handling;packet-shaped bytes inside required-to-accept nonzero Opus padding must not become new audio. Eight complete/prefix controls cover255-byte nil termination,multiple pages and an empty-page compatibility case. Nonzero padding is decoder-acceptance coverage per RFC6716,not a conforming-encoder-output claim. All payloads and metadata are authored;owned VP9/PCM companion,no encoder/private media/network.",
+  "reference": [
+    "https://www.rfc-editor.org/rfc/rfc7845.html#section-3",
+    "https://www.rfc-editor.org/rfc/rfc6716.html#section-3.2.5"
+  ],
+  "controls": [
+    {
+      "file": "one-page-padded.ogg",
+      "parts": [
+        {
+          "file": "padded20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true
+    },
+    {
+      "file": "split-padded.ogg",
+      "parts": [
+        {
+          "file": "padded20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true
+    },
+    {
+      "file": "completed-prefix.ogg",
+      "parts": [
+        {
+          "file": "padded20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": false,
+      "stream_reader": true
+    },
+    {
+      "file": "zero-terminator.ogg",
+      "parts": [
+        {
+          "file": "exact255.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true
+    },
+    {
+      "file": "parent-one-page.ogg",
+      "parts": [
+        {
+          "file": "parent40.packet",
+          "frames": 1920
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true
+    },
+    {
+      "file": "parent-three-pages.ogg",
+      "parts": [
+        {
+          "file": "parent40.packet",
+          "frames": 1920
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true
+    },
+    {
+      "file": "empty-bridge.ogg",
+      "parts": [
+        {
+          "file": "padded20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": false
+    },
+    {
+      "file": "plain-ten.ogg",
+      "parts": [
+        {
+          "file": "raw10.packet",
+          "frames": 480
+        }
+      ],
+      "ended": true,
+      "stream_reader": true
+    }
+  ],
+  "malformed": [
+    {
+      "file": "missing-final-prefix.ogg",
+      "parts": [
+        {
+          "file": "padded20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": false,
+      "stream_reader": true,
+      "before_parts": [
+        {
+          "file": "raw10.packet",
+          "frames": 480
+        }
+      ]
+    },
+    {
+      "file": "missing-middle.ogg",
+      "parts": [
+        {
+          "file": "parent40.packet",
+          "frames": 1920
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true,
+      "before_parts": [
+        {
+          "file": "parent40.packet",
+          "frames": 1920
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ]
+    },
+    {
+      "file": "missing-zero-terminator-prefix.ogg",
+      "parts": [
+        {
+          "file": "exact255.packet",
+          "frames": 960
+        }
+      ],
+      "ended": false,
+      "stream_reader": true,
+      "before_parts": [
+        {
+          "file": "empty.packet",
+          "frames": 0
+        }
+      ],
+      "before_source_refusal": true
+    }
+  ],
+  "joined": [
+    {
+      "file": "joined-tail.ogg",
+      "parts": [
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true,
+      "before_parts": [
+        {
+          "file": "raw10.packet",
+          "frames": 480
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ]
+    },
+    {
+      "file": "joined-two-pages.ogg",
+      "parts": [
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true,
+      "before_parts": [
+        {
+          "file": "padded20.packet",
+          "frames": 960
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ]
+    },
+    {
+      "file": "joined-zero-terminator.ogg",
+      "parts": [
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "ended": true,
+      "stream_reader": true,
+      "before_parts": [
+        {
+          "file": "empty.packet",
+          "frames": 0
+        },
+        {
+          "file": "raw20.packet",
+          "frames": 960
+        }
+      ],
+      "before_source_refusal": true
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "mono.head": "e61b2e422c979808500317ae6237303b880e8e4e7d9f37f692cd899cfe01237f",
+    "raw20.packet": "e472bbfc3250acf87bfacdc4b112e39e9c7d863b6e8806baca718f57d17a5bb6",
+    "raw10.packet": "aef28399b03fccce47376d0cf804331670643a6dd4376129105d243d3c59a93c",
+    "padded20.packet": "e9b8994ffd18a00e2f05536e30c7f55f3ca66983eb25cd034ef7ba6f4145a7f2",
+    "exact255.packet": "45b00f33f75f98506fcd921739c22752d85251d98e61f7df435807bb6d808207",
+    "parent40.packet": "3f09dfd50703feeda1aedf07975a096fadf315b96b4843265bc30402e5cb2866",
+    "parent510.packet": "2833811895a798bf1d60d3690fa72e0dee6dc4710c4b50be32c24b07543e8ca7",
+    "empty.packet": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "one-page-padded.ogg": "651dc6f8c9a189f047e8fc4d9e78c4da8a80c4c2be7edc808aac14da1a0dc0ef",
+    "split-padded.ogg": "3d923088f2deb1656cbd247086758d0a9d0afabe241f81af9fe29d620789ec3c",
+    "completed-prefix.ogg": "7686f350283c6da1a40aabcecbb02ae3f84d3b7b274f00e29302aefdd16d7279",
+    "zero-terminator.ogg": "51ace710fc50eb12fe5b558bde72d065aad1824bfd4ec54ee8df46087dfeacb3",
+    "parent-one-page.ogg": "f03a492636d62a594508a88ab9c8aa50727aca92d0191d1e9c9977fbf605b4fe",
+    "parent-three-pages.ogg": "70dc2920d68409dfa1ea54eb3488f0a1bd83af0cd788090b42b886e1feee3f39",
+    "empty-bridge.ogg": "cf92111bd8c3bb5e93aed035323c65c63196d1ccd94a6e65de782199c59f6646",
+    "plain-ten.ogg": "060d6c947f24f80de646488de5aeae1b58a3ced517917dc51fd018323baad512",
+    "missing-final-prefix.ogg": "c69c5a533b50dff8665975d19b0813571bdb429d1ab8bc87194dd7a3d2f794a3",
+    "missing-middle.ogg": "8154e551afdff54765e7b43af0d0981abf05410eca168c9fb305fa9a991336d9",
+    "missing-zero-terminator-prefix.ogg": "9c8539b61e6596e54383673fb89ffb6e4b784488c3267822d2153862b9ee4596",
+    "joined-tail.ogg": "ad3f32755235577f46857229c614cac04d918bda7a16682c89c5960f203fd5b3",
+    "joined-two-pages.ogg": "ba7d060f041c517d9820cae8ca831dfb60aac283bf3ba647f8ab44e18b46a7fa",
+    "joined-zero-terminator.ogg": "b31cd9cb9d6a2187bb6ea24ef2fcde3a8a0de672cb0fb45d957b0bd497293160"
+  }
+}

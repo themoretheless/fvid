@@ -1,0 +1,44 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0163"
+  ],
+  "checked_at": "2026-10-21T01:06:57.591291+00:00",
+  "before": [
+    "evidence/batch-155-before-verified.log",
+    "evidence/batch-155-acceptance-before-verified.log",
+    "evidence/batch-155-decoder-before.rs"
+  ],
+  "primary_reference": [
+    "evidence/batch-152-reference.json",
+    "batch-155-audit.json"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-155-after.log",
+      "passed": 15,
+      "new_pcm_combinations": 40,
+      "new_worker_target_variants": 20
+    },
+    {
+      "log": "evidence/batch-155-units-after.log",
+      "passed": 35
+    },
+    {
+      "log": "evidence/batch-155-fixtures-after.log",
+      "passed": 1
+    },
+    {
+      "log": "evidence/batch-155-player-build.log",
+      "exit": 0
+    }
+  ],
+  "qualification": [
+    "Six authored valid-slot2/9/128 failures reproduce wrong previous-sample audio. Four healthy controls cover initially empty,populated and default-level out-of-format129/255 behavior. Independent references explicitly populate the same slots with empty instruments.",
+    "Instrument-only selection preserves active sample phase until the later note. Explicit instrument1 recovers.40 exact PCM combinations,20 actual-worker target variants,15 focused/related tests and35 units pass.",
+    "A prior unit incorrectly required an absent valid slot to replay the previous instrument. It now requires silence while preserving the one-missing-cell diagnostic. The initially empty control no longer double-counts its combined missing selection/note;two affected cells report two events. No field or interface type changes.",
+    "Initial29-byte empty controls failed in the parser before reaching selection. That unrelated initial failure and generator/control are retained. The verified decoder gates use full243-byte controls;short empty headers are a separate unaccepted batch156 issue.",
+    "129/255 controls preserve the existing default-volume case;muted/panning side effects of such invalid IDs remain an unconfirmed separate hypothesis. Full FT2 synthesis,envelopes/fadeout and physical audio listening are not claimed."
+  ],
+  "counting": "One valid-but-unpopulated instrument-slot selection defect. Ten scores,statistics correction,unit expectation migration,controls and worker variants add zero extra IDs."
+}

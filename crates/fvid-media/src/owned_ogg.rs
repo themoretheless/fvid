@@ -149,10 +149,24 @@ pub struct Ogg {
 
 /// A serial with a chain still being written, and the bytes of the packet it is
 /// in the middle of.
+enum PartialPacket {
+    Available(Vec<u8>),
+    MissingPrefix,
+}
+impl PartialPacket {
+    fn is_open(&self) -> bool {
+        match self {
+            Self::Available(bytes) => !bytes.is_empty(),
+            Self::MissingPrefix => true,
+        }
+    }
+}
+
 struct Open {
     serial: u32,
+    next_sequence: u32,
     chain: usize,
-    pending: Vec<u8>,
+    pending: PartialPacket,
 }
 
 impl Ogg {
@@ -212,6 +226,7 @@ impl Ogg {
             }
             pages += 1;
             let serial = u32::from_le_bytes(head[14..18].try_into().expect("four serial bytes"));
+            let sequence = u32::from_le_bytes(head[18..22].try_into().expect("four sequence bytes"));
             let granule = i64::from_le_bytes(head[6..14].try_into().expect("eight granule bytes"));
             let position = match open.iter().position(|at| at.serial == serial) {
                 Some(position) => {
@@ -235,8 +250,10 @@ impl Ogg {
                     }
                     open.push(Open {
                         serial,
+                        // Preserve the existing arbitrary initial-counter profile.
+                        next_sequence: sequence,
                         chain: chains.len(),
-                        pending: Vec::new(),
+                        pending: PartialPacket::Available(Vec::new()),
                     });
                     chains.push(Chain {
                         serial,
@@ -249,6 +266,16 @@ impl Ogg {
                     open.len() - 1
                 }
             };
+            {
+                let stream = &mut open[position];
+                if sequence != stream.next_sequence {
+                    return Err(invalid(&format!(
+                        "Ogg page {pages} of bitstream {serial:#x} has sequence {sequence}, expected {}",
+                        stream.next_sequence
+                    )));
+                }
+                stream.next_sequence = sequence.wrapping_add(1);
+            }
             // The segment table is the packet boundary: a run of 255s keeps going,
             // and the first byte under 255 ends the packet with as many more bytes
             // as it says. A run that reaches the end of the page unfinished is the
@@ -267,6 +294,17 @@ impl Ogg {
                 runs.push((start, length, true));
             }
             let at_open = &mut open[position];
+            if counted != 0 {
+                let continues = flags & CONTINUES != 0;
+                if at_open.pending.is_open() && !continues {
+                    return Err(invalid("Ogg page is missing the continuation flag for an unfinished packet"));
+                }
+                if !at_open.pending.is_open() && continues {
+                    // A joined stream can begin with only the tail of a packet.
+                    // Its bytes are not decodable without the missing prefix.
+                    at_open.pending = PartialPacket::MissingPrefix;
+                }
+            }
             chains[at_open.chain].last_page = pages;
             // Only the last packet the page finishes carries its position: a page
             // numbers itself by where that packet ends, and every packet before it
@@ -274,17 +312,27 @@ impl Ogg {
             let finishes = runs.len() - usize::from(runs.last().is_some_and(|(_, _, open)| *open));
             for (number, (offset, length, unfinished)) in runs.into_iter().enumerate() {
                 let piece = &segments[offset..offset + length];
-                let data = if number == 0 && flags & CONTINUES != 0 {
-                    at_open.pending.extend_from_slice(piece);
-                    if unfinished {
+                let data = match &mut at_open.pending {
+                    PartialPacket::MissingPrefix => {
+                        if !unfinished {
+                            at_open.pending = PartialPacket::Available(Vec::new());
+                        }
                         continue;
                     }
-                    std::mem::take(&mut at_open.pending)
-                } else if unfinished {
-                    at_open.pending.extend_from_slice(piece);
-                    continue;
-                } else {
-                    piece.to_vec()
+                    PartialPacket::Available(pending) => {
+                        if number == 0 && flags & CONTINUES != 0 {
+                            pending.extend_from_slice(piece);
+                            if unfinished {
+                                continue;
+                            }
+                            std::mem::take(pending)
+                        } else if unfinished {
+                            pending.extend_from_slice(piece);
+                            continue;
+                        } else {
+                            piece.to_vec()
+                        }
+                    }
                 };
                 listed += 1;
                 if listed > limits.packets {
@@ -304,7 +352,7 @@ impl Ogg {
                 });
             }
             if flags & ENDS != 0 {
-                if !at_open.pending.is_empty() {
+                if at_open.pending.is_open() {
                     return Err(invalid(&format!(
                         "bitstream {serial:#x} ends at byte {at} with a packet still open"
                     )));

@@ -1,0 +1,18 @@
+
+running 3 tests
+test empty_slot_actual_worker_preserves_selection_recovery_seek_and_eof ... ignored, enable with valid missing-instrument slot selection repair
+test missing_valid_slots_match_explicit_empty_instruments_and_report_once_per_cell ... ignored, enable with valid missing-instrument slot selection repair
+"slot-2-note": PCM differs=true,missing diagnostics actual=1,empty control=2
+"slot-2-select-then-note": PCM differs=true,missing diagnostics actual=1,empty control=1
+"slot-9-note": PCM differs=true,missing diagnostics actual=1,empty control=2
+"slot-9-select-then-note": PCM differs=true,missing diagnostics actual=1,empty control=1
+"slot-128-note": PCM differs=true,missing diagnostics actual=1,empty control=2
+"slot-128-select-then-note": PCM differs=true,missing diagnostics actual=1,empty control=1
+"out-of-format-129-control": PCM differs=false,missing diagnostics actual=1,empty control=0
+"out-of-format-255-control": PCM differs=false,missing diagnostics actual=1,empty control=0
+"initial-empty-slot-control": PCM differs=false,missing diagnostics actual=3,empty control=2
+"populated-slot-control": PCM differs=false,missing diagnostics actual=0,empty control=0
+test missing_valid_instrument_slots_currently_replay_prior_sample ... ok
+
+test result: ok. 1 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.13s
+

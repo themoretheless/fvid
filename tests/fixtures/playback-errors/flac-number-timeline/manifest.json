@@ -1,0 +1,1530 @@
+{
+  "provenance": "Eleven owned checksum-valid constant16bit FLAC streams violate frame/sample continuity or change blocking strategy. All subframes still decode to independent literal PCM,isolating missing file-clock validation. Four legal controls include changing variable blocks,short final blocks and multi-byte coded numbers. Owned VP9/PCM companion;pure Python,no encoder,network or private media.",
+  "reference": "https://www.rfc-editor.org/rfc/rfc9639.html#section-9.1.5",
+  "cases": [
+    {
+      "file": "fixed-first.flac",
+      "expected": "fixed-first.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "fixed-first-0.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-first-1.frame",
+          "number": 2,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-first-2.frame",
+          "number": 3,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "fixed-gap.flac",
+      "expected": "fixed-gap.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "fixed-gap-0.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-gap-1.frame",
+          "number": 2,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-gap-2.frame",
+          "number": 3,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "fixed-duplicate.flac",
+      "expected": "fixed-duplicate.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "fixed-duplicate-0.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-duplicate-1.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-duplicate-2.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "fixed-backward.flac",
+      "expected": "fixed-backward.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "fixed-backward-0.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-backward-1.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-backward-2.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "variable-first.flac",
+      "expected": "variable-first.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "variable-first-0.frame",
+          "number": 64,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "variable-first-1.frame",
+          "number": 128,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-first-2.frame",
+          "number": 192,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "variable-gap.flac",
+      "expected": "variable-gap.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "variable-gap-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "variable-gap-1.frame",
+          "number": 128,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-gap-2.frame",
+          "number": 192,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "variable-overlap.flac",
+      "expected": "variable-overlap.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "variable-overlap-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "variable-overlap-1.frame",
+          "number": 32,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-overlap-2.frame",
+          "number": 128,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "variable-backward.flac",
+      "expected": "variable-backward.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "variable-backward-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "variable-backward-1.frame",
+          "number": 64,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-backward-2.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "variable-wide-gap.flac",
+      "expected": "variable-wide-gap.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "variable-wide-gap-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "variable-wide-gap-1.frame",
+          "number": 68719476735,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-wide-gap-2.frame",
+          "number": 128,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "mixed-fixed-variable.flac",
+      "expected": "mixed-fixed-variable.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "mixed-fixed-variable-0.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "mixed-fixed-variable-1.frame",
+          "number": 64,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "mixed-fixed-variable-2.frame",
+          "number": 2,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "mixed-variable-fixed.flac",
+      "expected": "mixed-variable-fixed.f32le",
+      "frames": 192,
+      "packets": [
+        {
+          "file": "mixed-variable-fixed-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "mixed-variable-fixed-1.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "mixed-variable-fixed-2.frame",
+          "number": 128,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        }
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "file": "fixed-control.flac",
+      "expected": "fixed-control.f32le",
+      "frames": 135,
+      "packets": [
+        {
+          "file": "fixed-control-0.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-control-1.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-control-2.frame",
+          "number": 2,
+          "variable": false,
+          "frames": 7,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "variable-control.flac",
+      "expected": "variable-control.f32le",
+      "frames": 103,
+      "packets": [
+        {
+          "file": "variable-control-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 32,
+          "level": 4096
+        },
+        {
+          "file": "variable-control-1.frame",
+          "number": 32,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-control-2.frame",
+          "number": 96,
+          "variable": true,
+          "frames": 7,
+          "level": 8192
+        }
+      ]
+    },
+    {
+      "file": "fixed-wide-control.flac",
+      "expected": "fixed-wide-control.f32le",
+      "frames": 8320,
+      "packets": [
+        {
+          "file": "fixed-wide-control-0.frame",
+          "number": 0,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-1.frame",
+          "number": 1,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-2.frame",
+          "number": 2,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-3.frame",
+          "number": 3,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-4.frame",
+          "number": 4,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-5.frame",
+          "number": 5,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-6.frame",
+          "number": 6,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-7.frame",
+          "number": 7,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-8.frame",
+          "number": 8,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-9.frame",
+          "number": 9,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-10.frame",
+          "number": 10,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-11.frame",
+          "number": 11,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-12.frame",
+          "number": 12,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-13.frame",
+          "number": 13,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-14.frame",
+          "number": 14,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-15.frame",
+          "number": 15,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-16.frame",
+          "number": 16,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-17.frame",
+          "number": 17,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-18.frame",
+          "number": 18,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-19.frame",
+          "number": 19,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-20.frame",
+          "number": 20,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-21.frame",
+          "number": 21,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-22.frame",
+          "number": 22,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-23.frame",
+          "number": 23,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-24.frame",
+          "number": 24,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-25.frame",
+          "number": 25,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-26.frame",
+          "number": 26,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-27.frame",
+          "number": 27,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-28.frame",
+          "number": 28,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-29.frame",
+          "number": 29,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-30.frame",
+          "number": 30,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-31.frame",
+          "number": 31,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-32.frame",
+          "number": 32,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-33.frame",
+          "number": 33,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-34.frame",
+          "number": 34,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-35.frame",
+          "number": 35,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-36.frame",
+          "number": 36,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-37.frame",
+          "number": 37,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-38.frame",
+          "number": 38,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-39.frame",
+          "number": 39,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-40.frame",
+          "number": 40,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-41.frame",
+          "number": 41,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-42.frame",
+          "number": 42,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-43.frame",
+          "number": 43,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-44.frame",
+          "number": 44,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-45.frame",
+          "number": 45,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-46.frame",
+          "number": 46,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-47.frame",
+          "number": 47,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-48.frame",
+          "number": 48,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-49.frame",
+          "number": 49,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-50.frame",
+          "number": 50,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-51.frame",
+          "number": 51,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-52.frame",
+          "number": 52,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-53.frame",
+          "number": 53,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-54.frame",
+          "number": 54,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-55.frame",
+          "number": 55,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-56.frame",
+          "number": 56,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-57.frame",
+          "number": 57,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-58.frame",
+          "number": 58,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-59.frame",
+          "number": 59,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-60.frame",
+          "number": 60,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-61.frame",
+          "number": 61,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-62.frame",
+          "number": 62,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-63.frame",
+          "number": 63,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-64.frame",
+          "number": 64,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-65.frame",
+          "number": 65,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-66.frame",
+          "number": 66,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-67.frame",
+          "number": 67,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-68.frame",
+          "number": 68,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-69.frame",
+          "number": 69,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-70.frame",
+          "number": 70,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-71.frame",
+          "number": 71,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-72.frame",
+          "number": 72,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-73.frame",
+          "number": 73,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-74.frame",
+          "number": 74,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-75.frame",
+          "number": 75,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-76.frame",
+          "number": 76,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-77.frame",
+          "number": 77,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-78.frame",
+          "number": 78,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-79.frame",
+          "number": 79,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-80.frame",
+          "number": 80,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-81.frame",
+          "number": 81,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-82.frame",
+          "number": 82,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-83.frame",
+          "number": 83,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-84.frame",
+          "number": 84,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-85.frame",
+          "number": 85,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-86.frame",
+          "number": 86,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-87.frame",
+          "number": 87,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-88.frame",
+          "number": 88,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-89.frame",
+          "number": 89,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-90.frame",
+          "number": 90,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-91.frame",
+          "number": 91,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-92.frame",
+          "number": 92,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-93.frame",
+          "number": 93,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-94.frame",
+          "number": 94,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-95.frame",
+          "number": 95,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-96.frame",
+          "number": 96,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-97.frame",
+          "number": 97,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-98.frame",
+          "number": 98,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-99.frame",
+          "number": 99,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-100.frame",
+          "number": 100,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-101.frame",
+          "number": 101,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-102.frame",
+          "number": 102,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-103.frame",
+          "number": 103,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-104.frame",
+          "number": 104,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-105.frame",
+          "number": 105,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-106.frame",
+          "number": 106,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-107.frame",
+          "number": 107,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-108.frame",
+          "number": 108,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-109.frame",
+          "number": 109,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-110.frame",
+          "number": 110,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-111.frame",
+          "number": 111,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-112.frame",
+          "number": 112,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-113.frame",
+          "number": 113,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-114.frame",
+          "number": 114,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-115.frame",
+          "number": 115,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-116.frame",
+          "number": 116,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-117.frame",
+          "number": 117,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-118.frame",
+          "number": 118,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-119.frame",
+          "number": 119,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-120.frame",
+          "number": 120,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-121.frame",
+          "number": 121,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-122.frame",
+          "number": 122,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-123.frame",
+          "number": 123,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-124.frame",
+          "number": 124,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-125.frame",
+          "number": 125,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-126.frame",
+          "number": 126,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "fixed-wide-control-127.frame",
+          "number": 127,
+          "variable": false,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "fixed-wide-control-128.frame",
+          "number": 128,
+          "variable": false,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "fixed-wide-control-129.frame",
+          "number": 129,
+          "variable": false,
+          "frames": 64,
+          "level": 4096
+        }
+      ]
+    },
+    {
+      "file": "variable-wide-control.flac",
+      "expected": "variable-wide-control.f32le",
+      "frames": 256,
+      "packets": [
+        {
+          "file": "variable-wide-control-0.frame",
+          "number": 0,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        },
+        {
+          "file": "variable-wide-control-1.frame",
+          "number": 64,
+          "variable": true,
+          "frames": 64,
+          "level": -4096
+        },
+        {
+          "file": "variable-wide-control-2.frame",
+          "number": 128,
+          "variable": true,
+          "frames": 64,
+          "level": 8192
+        },
+        {
+          "file": "variable-wide-control-3.frame",
+          "number": 192,
+          "variable": true,
+          "frames": 64,
+          "level": 4096
+        }
+      ]
+    }
+  ],
+  "sha256": {
+    "video.mkv": "e67f683c0c1d6d7a730cdd88380da04f28e35d89a910fb71c8e0f102f44d3601",
+    "fixed-first-0.frame": "7eef0a785dc506b3c84abc05cb2ef1ffbbc26b703f088c2cec4da12f9f67681b",
+    "fixed-first-1.frame": "e42ee7887cab346a5cd9bae97af9e1baf7ac889f4ed310d0160e38784261e645",
+    "fixed-first-2.frame": "19387547466aab87d64e6ba152a75ba1e4b1b4d882c19fb4247e591cd40aa349",
+    "fixed-first.flac": "07a10c55c1c5c8f540f0f1be7dd679b220e9b48c62ba707354b6c8777024095b",
+    "fixed-first.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "fixed-gap-0.frame": "e7bc389b50a2102867628018b42850f43ef0a831ab728d43323c86c5a4d0d727",
+    "fixed-gap-1.frame": "e42ee7887cab346a5cd9bae97af9e1baf7ac889f4ed310d0160e38784261e645",
+    "fixed-gap-2.frame": "19387547466aab87d64e6ba152a75ba1e4b1b4d882c19fb4247e591cd40aa349",
+    "fixed-gap.flac": "19bf329814082d45da7eb88046e4f8031ee94377e8a053362e3eec74af0094d8",
+    "fixed-gap.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "fixed-duplicate-0.frame": "e7bc389b50a2102867628018b42850f43ef0a831ab728d43323c86c5a4d0d727",
+    "fixed-duplicate-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "fixed-duplicate-2.frame": "5a7af32c9e4b6177f825dca94f0e0e512fdb6c3e7fd4fd0a42836e90843fd251",
+    "fixed-duplicate.flac": "7de1b100be1e2b8ab82a85f89eb6dba7eaf263b2299acc1df3652e142b9f38ac",
+    "fixed-duplicate.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "fixed-backward-0.frame": "e7bc389b50a2102867628018b42850f43ef0a831ab728d43323c86c5a4d0d727",
+    "fixed-backward-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "fixed-backward-2.frame": "15f0ad342ddbcfe1dd1b10e9c75d1331769f1e730f9c2a34c17fcc1f9f1c61c0",
+    "fixed-backward.flac": "d3eb2d7d9c03d7b964d084190911f5eccfff51ecf5e478e290183daf607d84dc",
+    "fixed-backward.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "variable-first-0.frame": "dac71451068d11ed004d538ca9fd0dd82ad0109a0c7517ff88e2b478d4f918a4",
+    "variable-first-1.frame": "a082d9353cb71a2407dee5ca1370870b61288ba617b4859efdab62376e99585b",
+    "variable-first-2.frame": "70151bafb762ddc57df29e71f8301dcabf83ff9dad3a6b3382dd5c2eb174244b",
+    "variable-first.flac": "f8785becc67f291cc24b59f4fcf11eeef1f6934416e199e35de667074480498d",
+    "variable-first.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "variable-gap-0.frame": "bb4bd0fb636a956d80d71f456014b93585ed03ef59110a9657916abbe44943bf",
+    "variable-gap-1.frame": "a082d9353cb71a2407dee5ca1370870b61288ba617b4859efdab62376e99585b",
+    "variable-gap-2.frame": "70151bafb762ddc57df29e71f8301dcabf83ff9dad3a6b3382dd5c2eb174244b",
+    "variable-gap.flac": "ff16f8ff481ef7e4848ca55b62e8f27d8c7d963bff0fd1bd2b378aed0a796420",
+    "variable-gap.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "variable-overlap-0.frame": "bb4bd0fb636a956d80d71f456014b93585ed03ef59110a9657916abbe44943bf",
+    "variable-overlap-1.frame": "2c17611d1f2db1d5992edc9ed9cb0644d62fdebe6bf9888b15936d58ea8d9dc3",
+    "variable-overlap-2.frame": "eb070608198c7141786731b1cfd05a2f5f5dd6f85d4edcd0339b20d6acb2230b",
+    "variable-overlap.flac": "47cb316c5695c2fb4dec26012fc7a3f64949de29dd9f66519fe02e68e9bd48c5",
+    "variable-overlap.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "variable-backward-0.frame": "bb4bd0fb636a956d80d71f456014b93585ed03ef59110a9657916abbe44943bf",
+    "variable-backward-1.frame": "ec4879a62a6bf7ee69a5b63e4ee6f29da312f131d0edd0fc0147f16018288fd5",
+    "variable-backward-2.frame": "c4ccbb72e740dbb97364e2c71512beb7f831b1b2c903502661da8fc96f84446d",
+    "variable-backward.flac": "923a4245ac3dd4a07400018546355b03f745d3b800a69c86c84b2eb4583a30a4",
+    "variable-backward.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "variable-wide-gap-0.frame": "bb4bd0fb636a956d80d71f456014b93585ed03ef59110a9657916abbe44943bf",
+    "variable-wide-gap-1.frame": "079a5d353aacffaec55ec407c5056ee8df60b5298477d6c79b3b4a9fd786c8b0",
+    "variable-wide-gap-2.frame": "eb070608198c7141786731b1cfd05a2f5f5dd6f85d4edcd0339b20d6acb2230b",
+    "variable-wide-gap.flac": "672280ce65992830999cb36dcb273581c527ff7f1a6d3b52bdd59741bf2eb289",
+    "variable-wide-gap.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "mixed-fixed-variable-0.frame": "e7bc389b50a2102867628018b42850f43ef0a831ab728d43323c86c5a4d0d727",
+    "mixed-fixed-variable-1.frame": "ec4879a62a6bf7ee69a5b63e4ee6f29da312f131d0edd0fc0147f16018288fd5",
+    "mixed-fixed-variable-2.frame": "6247d674fdc4342e389216571212c0e6b1a64e7b220228c77671689425fad803",
+    "mixed-fixed-variable.flac": "478f37d3637066bc76e2c60b661c0dd7f69f7ee8649d58745f9f06e104dcc086",
+    "mixed-fixed-variable.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "mixed-variable-fixed-0.frame": "bb4bd0fb636a956d80d71f456014b93585ed03ef59110a9657916abbe44943bf",
+    "mixed-variable-fixed-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "mixed-variable-fixed-2.frame": "eb070608198c7141786731b1cfd05a2f5f5dd6f85d4edcd0339b20d6acb2230b",
+    "mixed-variable-fixed.flac": "0e4041014d17caf31e1a41089c07e97777c6310e42d5e7361356f50099b4a12b",
+    "mixed-variable-fixed.f32le": "9c6a7e571ddb15427ac0e82521008f8da9fef8863c33a4cd98cfc01840862447",
+    "fixed-control-0.frame": "e7bc389b50a2102867628018b42850f43ef0a831ab728d43323c86c5a4d0d727",
+    "fixed-control-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "fixed-control-2.frame": "c8efa488853b810ce5ccaf25f280e08b7d7fdc1515e7756d9eea7396b9f0e9fe",
+    "fixed-control.flac": "8e5ea05055a7e19fb724246239164a192629e0401215d016a43e71d9521ca8f2",
+    "fixed-control.f32le": "4c5a843cc89c014c7639bde9554a7dad96d311fa1aad4db2bb31c76be9206649",
+    "variable-control-0.frame": "aab035282f7b89f6c2af8623672fd14be87df66b2544226be1eedcf14f03eee8",
+    "variable-control-1.frame": "2c17611d1f2db1d5992edc9ed9cb0644d62fdebe6bf9888b15936d58ea8d9dc3",
+    "variable-control-2.frame": "fd57b298234e29773da478b63ea5b2605f1cc02f66f039fceb2dcb4205f2fb7f",
+    "variable-control.flac": "29db2535427be5170899aa5e8b0dc1dad32463422500341f5e895bb0108d91e6",
+    "variable-control.f32le": "adf0843bab64169af5a9daee0ed925a6d992ced52e32684bcc0e872c14774201",
+    "fixed-wide-control-0.frame": "e7bc389b50a2102867628018b42850f43ef0a831ab728d43323c86c5a4d0d727",
+    "fixed-wide-control-1.frame": "e41816d073141577270810158913da9d222d0837e138f9dc47f44ca789dd1d50",
+    "fixed-wide-control-2.frame": "6247d674fdc4342e389216571212c0e6b1a64e7b220228c77671689425fad803",
+    "fixed-wide-control-3.frame": "abe96ebcd35d4f92545b63b92be3a1567dff09158557af18596a83b9a6ee3625",
+    "fixed-wide-control-4.frame": "74c93ec6741a26a882bee9886ef5a42ae01b451a581fa58ab446ddd6e362c689",
+    "fixed-wide-control-5.frame": "ab82cdc063b33cda09621a6e9445f24b35971793f829a4ef4ba87e1e8825ef3a",
+    "fixed-wide-control-6.frame": "fe4fdbc6756668864ad04d63901b579876cf38babcff17a86648a57f9078365e",
+    "fixed-wide-control-7.frame": "f47cfb43d80e8bf2c154aae59aac3594fbb8cce3bfd71f251eaa077598acc125",
+    "fixed-wide-control-8.frame": "d7b5afb35539ea5202f96c827e66f6a80c8ed6c94bb267823040a1e8bdae236a",
+    "fixed-wide-control-9.frame": "da74a33862ffefef001e239efea3c272619453392f4866cc7dc594d785d15a3a",
+    "fixed-wide-control-10.frame": "9b4ba624ad1f181e9b8d0a765d7bc4b7f4fc3d2e91aaa584945133aecff80ceb",
+    "fixed-wide-control-11.frame": "0c6a5c11ddd736adfddc0f08fc65fb13250d17be4a902524780c8b3395732cfd",
+    "fixed-wide-control-12.frame": "ad77855347ac89ea136bdca1b8fbc8b04e14efcadea8ca425cdc69347542878a",
+    "fixed-wide-control-13.frame": "9777cef03165e3a09cbf8c79d47fdad0caef88fa7b700934fb36c0c96980f828",
+    "fixed-wide-control-14.frame": "eb3cde5bbaf039aa4fde449155b1c719c53b39f1ed4440a557c0b4fad9bb3021",
+    "fixed-wide-control-15.frame": "7e602bc6352e66587076234c3e7e845b036684d4d2b8820eef38ef93ab3a137d",
+    "fixed-wide-control-16.frame": "9000a668b8c2daff4fe39c8d9c2b92eaff574e1115fb5448b739a230b9e5bb44",
+    "fixed-wide-control-17.frame": "ee04f3916b212ce406e5e2e04bba00b1a3a159fd510d63b686f5160df877cc7d",
+    "fixed-wide-control-18.frame": "a3fcdd660917512d8ed0f4b4df07b53f080bf80f284a97041c51363cd9a5626f",
+    "fixed-wide-control-19.frame": "64d819048c7b151e0999b0b1f422fee74f4e3faad30247f0934ec9db460d749f",
+    "fixed-wide-control-20.frame": "58954b4879a94a11462b76cd2a1288651e1a65cff5a5f6ed18a8577e5eef823d",
+    "fixed-wide-control-21.frame": "3d1ca172b5613d0c86f9bf94f83e67ffc2167716bf4055b0e3bda08597b16d45",
+    "fixed-wide-control-22.frame": "cc77298dcfa56efc4af4733f68eb1043a5e5f8bf86c5bb9cde014a4f91f1ea0e",
+    "fixed-wide-control-23.frame": "9d73cc003c3d08a43be04ad093813ffcf55841cac8d630d7484f9b0161973063",
+    "fixed-wide-control-24.frame": "ba58271f31a6c39c851a87cb0cb8b368e67cb874206a334b3013a6778b3b5627",
+    "fixed-wide-control-25.frame": "82d5177745d121b1dffb735a017df81e4cad51f898f63586d458b5307711483e",
+    "fixed-wide-control-26.frame": "696ef4e968113af1494d2919bac31dca46c7e0a18ca506b0d4f73ffaace71a67",
+    "fixed-wide-control-27.frame": "abd4aa19a2c6454f7a4462153d4119ca1ef26fe21c0785607f894efec88abd97",
+    "fixed-wide-control-28.frame": "44b42c01c9e02fa6ee4e636ba574d9bae4a7e8d34d84efd7d58870093d2f8238",
+    "fixed-wide-control-29.frame": "14d2b8b30d2e9bf07c3b339f449cb3a726ea252c743cdfb330bae11ebf4aa809",
+    "fixed-wide-control-30.frame": "ff7e682712992a99650de59f16a9cb367c866d2cac5ec28d1bfacbc0a8937545",
+    "fixed-wide-control-31.frame": "9cb31bb5abd36e80b7c47afcb5bed448c1fc31f8f795d2cf86214eefc6d00a82",
+    "fixed-wide-control-32.frame": "32a33cc9b85ceb13a309617882393c8227c464eeadb9dbaa44502750887c0fe4",
+    "fixed-wide-control-33.frame": "1db6c9a493d427681b1dbb8202003329ca291d55af66e9c87544313e7480a4c3",
+    "fixed-wide-control-34.frame": "5edcd1c6eb00a630b0bdcce5d15de66cd28ad6741503372a83326085e9797973",
+    "fixed-wide-control-35.frame": "cbc6157bfe187dd1ab37beeaa24168dd20f093eaa25013763ca7a81cff82aa95",
+    "fixed-wide-control-36.frame": "2dc7e7f0adeaa49da6a12715740c360d276fe5d651f3d6fe8762557142c3696a",
+    "fixed-wide-control-37.frame": "3422db0de6b7a8472b4962df07ea5feb1837748d0b8e779563282b95ef08bbac",
+    "fixed-wide-control-38.frame": "5baf787c12d1dda85152a07ac2603bebf797f17f1a2a78fe64a373b58d4e349f",
+    "fixed-wide-control-39.frame": "9565516794b2816b8b5796060f4d5750488b9fba76d03b30f83afa01bb25a6c6",
+    "fixed-wide-control-40.frame": "cb9e8dacd0aee10fe01c42aaffe7b37ee78e653b3b9a1fc98d05e617506da5c6",
+    "fixed-wide-control-41.frame": "ab89facf84c2f4f4596174b395dce3934ea51de03ca2cd5c30baca6a562e580f",
+    "fixed-wide-control-42.frame": "b9d7489e5de76d0219f28e3678a0686cacde682fcbc66e3b71563bd8585a368a",
+    "fixed-wide-control-43.frame": "580c2002bf02f87bfac3d73ff249386ffb3443bb2c3638a84b27f8d150f87339",
+    "fixed-wide-control-44.frame": "803111a6abdfb44de1e16574f6bf77925c7f216bf67b32441fa163145ef64945",
+    "fixed-wide-control-45.frame": "97ac9a0c81f4e380fff3294e88b8dc67f6b5ca4902bdfeb60db26cf2d60bae0b",
+    "fixed-wide-control-46.frame": "f353dcb645db0a1bf5c0d980558cbc20fb0b656e9ff07c0f7b58d221a2ea4004",
+    "fixed-wide-control-47.frame": "3f2ddff8d87a175cf69c492cbfc821f6ec4c522a755a8a7b1a7a0a877e0649c1",
+    "fixed-wide-control-48.frame": "369da13a9ba294479c6a3f02c9641d52aef5e48af30253c178651f7a200a746d",
+    "fixed-wide-control-49.frame": "fe0f141a76e692818663ec6f3d4f5a97140c9740ece6cd44a5d3f06ea78a49c7",
+    "fixed-wide-control-50.frame": "43e1055c5d154ac095049e58be7018ae54cb47a3a5612f2909560bd41bd9e600",
+    "fixed-wide-control-51.frame": "239bcbb94b9880b118a9a74bf282b5625627de82aa9abae8c03f59675cc9eeb0",
+    "fixed-wide-control-52.frame": "2e167ccf4471f5c88639ea1a79ef3efa063163ad34ffdf50d9e4ce07cfaba8bf",
+    "fixed-wide-control-53.frame": "d32dfe7620c6d8203bfff2d2a385727f35c5a844d84c8eed308b347fdf3293ec",
+    "fixed-wide-control-54.frame": "a1e79a0eb13f63d54f1e30043180b4db1072e1f6360eb6d194defb074523b188",
+    "fixed-wide-control-55.frame": "a6a38e05f5ed4a8e3b32c8869e594c7b557a9b442d1cd0a2b4ce69b36930e68a",
+    "fixed-wide-control-56.frame": "b7574bfe04070db89a9c338dc0c096990274adeb85104d09a0d3529a35917ce7",
+    "fixed-wide-control-57.frame": "dc4b5959abf89be0f7172f6bac3d8e147bd05ca4b31386ca276290c3f8dd9019",
+    "fixed-wide-control-58.frame": "909310402b0c71351e783ce2cd2a07da021aa59604ef83b6db6dcf635d784f2f",
+    "fixed-wide-control-59.frame": "0838f1120b9e6fd6fb61bc11c3890e710e62e65b7407439441042a3a9be36cb9",
+    "fixed-wide-control-60.frame": "abea5688ac4fe3f53c0e3458ccc944e6e7678cf86384f66e01d49b271d832d97",
+    "fixed-wide-control-61.frame": "89b6c294c73d64d0860f1d03bec39cc155186590a3b795a117b200d95e040e93",
+    "fixed-wide-control-62.frame": "f31924101088bbe1437cfa0687051eb3ffcb8514a92d04e8b0e5a016225db83c",
+    "fixed-wide-control-63.frame": "714449d8e2554537d9f771d70ee0a241bf7800e1ae6e3da297e5f33f0c2d6401",
+    "fixed-wide-control-64.frame": "4942f6e03c64a1ee54d9504cff684983c1b1c3d149542e4f5e08f1d80df74838",
+    "fixed-wide-control-65.frame": "a898235d9fcf85ed37642747cbf67f3b407875e1af4d81e633d04346ea33b8b1",
+    "fixed-wide-control-66.frame": "42d261472538afac38e5af95bcd140a70f64e2bf77c98a0024af9fbd498243b1",
+    "fixed-wide-control-67.frame": "0763e71c1a12158e26295bc1eeecbe82898037a6636a45f93bc0b6d1f526159a",
+    "fixed-wide-control-68.frame": "a6aaf6efdd4f7d701d3cde72be86ed799c723b54bac0ab86cce15d156cd1f32c",
+    "fixed-wide-control-69.frame": "1a794fbb1d05195d7c9561f89834475e98914a308083c5ec3f50f18fa2033ca7",
+    "fixed-wide-control-70.frame": "dd38681cb250681833f2fbbf12cdabf13afb0e96c2b62b169c4b600dd2b945f8",
+    "fixed-wide-control-71.frame": "3d88ad81c122f873eb2bb6c0ef846eeb50e3c865e5a7dba7b4c56136ad4d59e6",
+    "fixed-wide-control-72.frame": "117140318a6e389d774b9e706ec096c4e0ef2991395e280dd97f7efb56b8bf5d",
+    "fixed-wide-control-73.frame": "8c4bb45f730a43dd1fe80d3ffc5aec5218de2722403901ba0d58ba2466145cbe",
+    "fixed-wide-control-74.frame": "6f61f9c82884f07d0130596cad5ed062f4eed04d18aaf31fd20115869903184e",
+    "fixed-wide-control-75.frame": "7b8fad9acfad43a96d1f275220363aad5597313710ab0ea21dd6a0866f914326",
+    "fixed-wide-control-76.frame": "a10ec9293ccb0583a63d45b69fdd5f100f2267ffed547b338b535adeb542df60",
+    "fixed-wide-control-77.frame": "5a8044c177381f1e4bf3d87a0032c3676213e8fca43f1a9f90bfecf499abfecd",
+    "fixed-wide-control-78.frame": "fcaa6a1948c24d1f546dec591646e397eaeff4c69ab96be1242a878caf27cb00",
+    "fixed-wide-control-79.frame": "3dfe42f5a0d856a3803da47a7065f8a5cc17c97a7b0c8c0047893d82163ffb0e",
+    "fixed-wide-control-80.frame": "f1f8fc757fda698c4126996e8a7e153dac75b0d339a4b7b16b6852b51f4a90e7",
+    "fixed-wide-control-81.frame": "2024c268a4ceb9f7cc2b027268532a92c245233ac4c74e3196aa570d3f7b04f1",
+    "fixed-wide-control-82.frame": "11ea5f0b46068bea372357a5411365f6186f7e3e42a2924b658e2f3c75471287",
+    "fixed-wide-control-83.frame": "7d79acfcb8e4cc16c5475b4e2414370db2325596b2c5ef73314ca54a8593a2f8",
+    "fixed-wide-control-84.frame": "c64a91d2f7e21c0736a944ee203335666f84b5b30c97f180ba8884dec2ba0f64",
+    "fixed-wide-control-85.frame": "0633a2884ca4bee859aa7fc47c2351bb64f83a14193ee4095dd0680c2dcca729",
+    "fixed-wide-control-86.frame": "462b823a0026aa48ca46dbbad3273981a30b039a40993ae5ec267c97612da40e",
+    "fixed-wide-control-87.frame": "093108dc85eb7bab02af1c8196fa7178fd63f3cfa4df26406b9ee8c651d5c003",
+    "fixed-wide-control-88.frame": "7a1bf8619c89f96f4858d25cb2f8e4ee208637003a14c41c42b44f40a0cf5cd7",
+    "fixed-wide-control-89.frame": "943f4dded041cc1831a86862c0fddc90dc90406669d7a43e5570d912f81ea0e5",
+    "fixed-wide-control-90.frame": "0e07db4b302ed96b5af14490b0152f4ecc060326a5e1bb24cfbfd598f546d54f",
+    "fixed-wide-control-91.frame": "627dc70c8e734d0f77f13d7146319d87c5584a33cb4e721ddf3b53384798f486",
+    "fixed-wide-control-92.frame": "4d09598533b661084633f4693843b1416bf6409a435cb05d7e0a139cfcf5b43d",
+    "fixed-wide-control-93.frame": "64fc6ed2889f28810d76e9867b64611fd43c9096618293eea00861ccfa98b2ad",
+    "fixed-wide-control-94.frame": "a9325e9c4a7ab860d5837021adfa34123e076f89aa19aabcda4942dbabef046f",
+    "fixed-wide-control-95.frame": "606a2ba68687f4f5e145a65168fd783683bec2fe4bb245cab849932164279b08",
+    "fixed-wide-control-96.frame": "9f4be73a0e0efaac450cfac13dab40dfe07b9b4c33f54ace61016c779ced03d4",
+    "fixed-wide-control-97.frame": "2072b558bff25ccb2fc1ed0d01c178d76a8788f36c03d6413ecf72eb43ea95a9",
+    "fixed-wide-control-98.frame": "4c2cb33dac87e3aede6e36b795a3a0783c66d697bd9460fb0150208fe1017a79",
+    "fixed-wide-control-99.frame": "152f43f68be8deee6bd60d83bfe76f516761f1e66875455026f9d5da3b0b48e1",
+    "fixed-wide-control-100.frame": "6d22cebd30392e4a6d0defed225739d9dc90fe9b7efcca57c28ead8bee743075",
+    "fixed-wide-control-101.frame": "43f1137c13eca822f8c2928bfabdfbce549e38d4f8f29bea5bd4a7f05fefe774",
+    "fixed-wide-control-102.frame": "38e2ade1fe4525d417248c29bbc2ff29e902e1dfebea2484b2892e122860d219",
+    "fixed-wide-control-103.frame": "e2c90b4838f4831b10a699a1f1dd741801b12cae4d5f5525941e7ceb89f9c4d0",
+    "fixed-wide-control-104.frame": "1319bb163d678ca7f86515d53fc3e08885c976b086aa10a734425f7f1c0193cd",
+    "fixed-wide-control-105.frame": "33852f2280d7b46677348c4077d9f9276e17c25d74d936c00393258863b8ee0b",
+    "fixed-wide-control-106.frame": "e74032547acfc8dd807ca1d1a19d928626bca4e1fd19e9f986f5e5b7b9a63753",
+    "fixed-wide-control-107.frame": "13bbd5dc7e0ddab9ffeb09319372364568dab715720db18a307817a18699d563",
+    "fixed-wide-control-108.frame": "2894baff5f6c26517c1fdfab94fd118acaa53aeb82b9f7bb3db7e791df84bb07",
+    "fixed-wide-control-109.frame": "9f0a516b2fa0c45d760d85281a221db26d47a1ce41fa6c414fc699377409e6a4",
+    "fixed-wide-control-110.frame": "277e386f3ce88640d9c6d9fa8e1af65f4b5eb88322e3f2a69d19e95379281bcd",
+    "fixed-wide-control-111.frame": "9208e6eae0a40df1bd77b5bc08553a734968942f64d4803555e712385821ccc1",
+    "fixed-wide-control-112.frame": "7414cfe8c1249f3ae123e4fec991371383c21d0effbbbfa57b664f3fecbf536b",
+    "fixed-wide-control-113.frame": "36f6a235535e5f611bda8eedb234580ef4f546134e23faa8099bb63cdbdddeee",
+    "fixed-wide-control-114.frame": "8a7e427cebda005e0b39dadf1bfa4f5967df68648595cf715bb89c6fe1a8ae38",
+    "fixed-wide-control-115.frame": "550fc574642713e4241c0ed36b37c61c0c5cb32d5365cd7d6e9a3c51bb124180",
+    "fixed-wide-control-116.frame": "dbb2d6df4b319e2adc673140b96ccfda8cc4325ee61d31f2cfb6d47ae2fc581a",
+    "fixed-wide-control-117.frame": "89cf33cf320c888e7aac6542b3d894770301fc0daf06071647c8e05f95945c13",
+    "fixed-wide-control-118.frame": "3615a00bf78d95ce36fad2c24b75673a52330d442091d3241e8bd45f0301a0b4",
+    "fixed-wide-control-119.frame": "5ae0e42408e4a1c4fb346b5cc029b57f945f3ce57a92bc9cd8541896eecafd2f",
+    "fixed-wide-control-120.frame": "65b1b72326d00f490995c7701cfac3cc112d7049b3c6c498de275c7e4a5b648f",
+    "fixed-wide-control-121.frame": "792c83b555add70ac50ddda737d96ff4e77ee69bbe6ebf75de1a55019d0d0735",
+    "fixed-wide-control-122.frame": "29da97ddc58b439fd787759b58b71e47411807f953d0f2442ae3241e6be4dcd9",
+    "fixed-wide-control-123.frame": "92af5e3647a063e02831baacd6e740f86ddc5168088ecf77bfe64ef18e59a5c8",
+    "fixed-wide-control-124.frame": "45fe8a4a0775e25dc3e358878d169463420aa445b286705bdec8b1b5151c665f",
+    "fixed-wide-control-125.frame": "d543a101dd7656620f05cfa62006bef0a1ee490bebdff845bc69e138381ce06d",
+    "fixed-wide-control-126.frame": "f3a77e80dcafd8723fc70ce32a244f11758ee8474456d5e478c08ddab50d0372",
+    "fixed-wide-control-127.frame": "46bce86c64c29cefbb880225229eace16ea1312c09f5eb06f4cd6318b92f6b5d",
+    "fixed-wide-control-128.frame": "06745eaa9f3cd727178bb14eaad14bd4bd8838041af6472eea30fa262756d869",
+    "fixed-wide-control-129.frame": "2caa61e7ec98aa720e83233c3797f5cb4069517991429919e17de0a93dcc2768",
+    "fixed-wide-control.flac": "95936489e5b60d6b8497329019cf9afc7119620e1874e4591f89a785a704b798",
+    "fixed-wide-control.f32le": "70340830672c03a5dd61b32675c10cee60474826d3e0760cd742370a750e2e5f",
+    "variable-wide-control-0.frame": "bb4bd0fb636a956d80d71f456014b93585ed03ef59110a9657916abbe44943bf",
+    "variable-wide-control-1.frame": "ec4879a62a6bf7ee69a5b63e4ee6f29da312f131d0edd0fc0147f16018288fd5",
+    "variable-wide-control-2.frame": "eb070608198c7141786731b1cfd05a2f5f5dd6f85d4edcd0339b20d6acb2230b",
+    "variable-wide-control-3.frame": "44dde1d782c7eec8ee5f8f3d82170fdc391896b6f93691e8adf4463582f61246",
+    "variable-wide-control.flac": "63341cf7da9e2594785db5bd9dfa5d470b377d28fe4bb9afe06752b93eaf27c5",
+    "variable-wide-control.f32le": "3e7f24d251b5c5be216272e28835d56e4e7f9c961975ad47174a1ca901fdef38"
+  }
+}

@@ -1,0 +1,10 @@
+   Compiling fvid-opus v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-opus)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.46s
+     Running tests/ogg_page_sequence.rs (/private/tmp/fvid-opus-sequence-170-target/debug/deps/ogg_page_sequence-23fcb96e296dcec8)
+
+running 2 tests
+test streaming_reader_reports_discontinuity_without_publishing_the_bad_page ... ok
+test monostream_packets_and_rewind_preserve_origins_and_wrapped_counters ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

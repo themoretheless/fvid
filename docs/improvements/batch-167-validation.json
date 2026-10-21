@@ -1,0 +1,58 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0175"
+  ],
+  "checked_at": "2026-10-21T11:55:48.895463+00:00",
+  "sources": [
+    "src/playback/audio/avi_audio.rs"
+  ],
+  "regressions": [
+    "tests/avi_pcm.rs"
+  ],
+  "before": [
+    "evidence/batch-167-reader-before.rs",
+    "evidence/batch-167-tests-before.rs",
+    "evidence/batch-167-before.log",
+    "evidence/batch-167-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-167-after.log",
+      "passed": 7
+    },
+    {
+      "log": "evidence/batch-167-related-after.log",
+      "passed": 25
+    },
+    {
+      "log": "evidence/batch-167-root-units.log",
+      "passed": 34
+    },
+    {
+      "log": "evidence/batch-167-core.log",
+      "passed": 9
+    },
+    {
+      "log": "evidence/batch-167-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-167-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/avi_audio.rs": "467cd92fea8fa2a7e35c3b792567b9bde828e1c9a0f79076f760cf57a1039b3e",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/avi_pcm.rs": "8de70670f2e8152d7b4dc7c1b5af2be21c8023019ce7805b70f5fd9f5ca799d5"
+  },
+  "qualification": [
+    "13 authored classic PCM programs:unsigned8,signed16/24/32,IEEE32/64 mono/stereo and8193-frame single-chunk window control. Independent WAV wrappers and literal dyadic float32 PCM already pass before the fix. All4 forced acceptance gates fail specifically at missing AVI framing;baseline4 pass/4 ignored.",
+    "Existing native PCM decoder IDs retain integer signedness and IEEE little-endian format. Private encoded-frame stride and2048-frame windows extend sample-span traversal. Geometry,byte rate,stream clock,whole interleaved frames and exact declared frame count are validated before packet admission. Raw index metadata remains bounded by original record budget;no descriptor per frame/window.",
+    "7 focused regressions assert exact PCM,packet PTS/duration and bounded packet payload,negative/interior/boundary/EOF/MAX seeks and actual rewind.26 actual worker target variants cover interior frame3 and EOF across all13 programs. Helpers consume the state left by the requested seek/rewind without a masking second seek.",
+    "6 malformed/unsupported controls assert precise Invalid geometry/clock/count/partial-frame or Unsupported width refusal after feature admission. Their original generic refusal is not mistaken for proof of those specific checks before the fix.",
+    "25 related integrations preserve grouped ADPCM,G.711,AVI index/RIFF/header/clock/EOF and full-input limits.34 related root units,9 minimal-configuration core checks,fixture reproduction and player build pass. The old PCM refusal unit retained an ADPCM4-bit width;it now explicitly checks that unsupported width rather than falsely describing16-bit PCM.",
+    "Owned AVI includes VP9;separate Matroska video is actually decoded. No AVI video GUI,physical-device,multichannel/WAVEFORMATEXTENSIBLE,full-format or measured performance claim. Generation stays pure Python and separate from ordinary offline tests."
+  ],
+  "counting": "One classic AVI linear PCM framing capability. No extra IDs for widths,channels,windows,seek variants,fixtures or test maintenance."
+}

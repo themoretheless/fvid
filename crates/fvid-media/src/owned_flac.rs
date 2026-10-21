@@ -136,6 +136,8 @@ const HEADER_BITS: [Option<u16>; 8] = [
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[doc(hidden)]
 pub struct Header {
+    number: u64,
+    variable: bool,
     samples: u32,
     sample_rate: Option<u32>,
     bits: Option<u16>,
@@ -207,6 +209,8 @@ pub fn frame_header(bytes: &[u8]) -> Option<Header> {
         return None;
     }
     Some(Header {
+        number,
+        variable: bytes[1] & 1 != 0,
         samples,
         sample_rate,
         bits: HEADER_BITS[bits],
@@ -402,10 +406,30 @@ impl Flac {
         let capacity_limit = (index_bytes / std::mem::size_of::<Frame>()).min(limits.packets);
         let mut frames: Vec<Frame> = Vec::new();
         let mut pts = 0u64;
+        let mut blocking_strategy = None;
         let mut start = head.data_start;
         while start < end {
             let at = frame_header(&bytes[start..])
                 .ok_or_else(|| invalid(&format!("no frame header at byte {start}")))?;
+            // A valid CRC does not make a discontinuous coded clock valid.
+            // Fixed streams count preceding frames; variable streams count
+            // preceding samples. Do not silently replace either with our clock.
+            if blocking_strategy.is_some_and(|variable| variable != at.variable) {
+                return Err(invalid("FLAC blocking strategy changes within the stream"));
+            }
+            blocking_strategy = Some(at.variable);
+            let expected_number = if at.variable {
+                pts
+            } else {
+                u64::try_from(frames.len())
+                    .map_err(|_| invalid("FLAC frame index exceeds coded-number range"))?
+            };
+            if at.number != expected_number {
+                return Err(invalid(&format!(
+                    "FLAC frame {} coded number {} disagrees with expected {expected_number}",
+                    frames.len(), at.number
+                )));
+            }
             if at.sample_rate.is_some_and(|rate| rate != head.sample_rate) {
                 return Err(invalid(&format!(
                     "frame {} states {} Hz in a {} Hz stream",

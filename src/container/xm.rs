@@ -48,6 +48,8 @@ pub const PACKET_TIMESCALE: u32 = 1_000;
 /// tempo it is played under, the ticks that divide it, and a byte held at zero so
 /// the channel cells start on a round offset.
 pub const ROW_HEADER_BYTES: usize = 8;
+/// Internal row-packet flag: hold the previous row, without retriggering tick zero.
+pub const ROW_CONTINUATION_FLAG: u8 = 1;
 /// Bytes per channel cell of a row: note, instrument, volume column, and the two
 /// bytes of the effect.
 pub const CELL_BYTES: usize = 5;
@@ -96,11 +98,10 @@ const ENVELOPE_FLAG_LOOP: u8 = 4;
 /// arrays is, and where they sit in the instrument header.
 const ENVELOPE_POINTS: usize = 12;
 const ENVELOPE_BYTES: usize = ENVELOPE_POINTS * 4;
-/// Bytes in a sample record, and the shortest instrument header that states its
-/// own name, its sample count and both envelopes.
+/// Bytes in one sample record.
 const SAMPLE_RECORD_BYTES: usize = 40;
-/// The instrument fields this reader names run through the fadeout, which ends
-/// at 241; the tracker itself states two more bytes of reserved data after it.
+/// Extended instrument fields run through the fadeout at241 bytes; declared
+/// headers may contain additional reserved padding.
 const INSTRUMENT_HEADER_BYTES: usize = 241;
 const MAGIC: &[u8] = b"Extended Module: ";
 const OFFSET_NAME: usize = 17;
@@ -124,6 +125,8 @@ const MIN_HEADER_SIZE: u32 = (OFFSET_ORDERS - OFFSET_HEADER_SIZE + ORDER_TABLE_B
 /// Where the instrument header's own fields sit, from its start.
 const INSTRUMENT_NAME: usize = 4;
 const INSTRUMENT_SAMPLE_COUNT: usize = 27;
+/// A sample-free instrument needs only its name,type and sample count.
+const INSTRUMENT_BASE_BYTES: usize = INSTRUMENT_SAMPLE_COUNT + 2;
 const INSTRUMENT_KEYMAP: usize = 33;
 const INSTRUMENT_VOLUME_ENVELOPE: usize = 129;
 const INSTRUMENT_FLAGS: usize = 233;
@@ -248,6 +251,10 @@ impl Sample {
 /// holds when its author never drew one, and `on` says exactly that.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Envelope {
+    pub length: u8,
+    pub sustain_point: u8,
+    pub loop_start: u8,
+    pub loop_end: u8,
     /// Frame number and value of each point, in the file's own order. The frame
     /// is counted in ticks, which is why the mixer rather than this reader turns
     /// it into time.
@@ -256,6 +263,14 @@ pub struct Envelope {
 }
 
 impl Envelope {
+    /// Bound all metadata-driven point access before rendering.
+    pub(crate) fn playable(&self) -> bool {
+        let n = usize::from(self.length);
+        n > 0 && n <= self.points.len() && n <= ENVELOPE_POINTS
+            && (!self.sustain() || usize::from(self.sustain_point) < n)
+            && (!self.looped() || (self.loop_start <= self.loop_end && usize::from(self.loop_end) < n))
+    }
+
     /// Whether the instrument asks to be shaped by this envelope at all.
     pub fn on(&self) -> bool {
         self.flags & ENVELOPE_FLAG_ON != 0
@@ -270,10 +285,19 @@ impl Envelope {
     }
 }
 
-/// An instrument: the samples it holds, the map from a note to one of them, and
-/// the two envelopes that shape them.
+/// Instrument auto-vibrato, separate from pattern-column modulation.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct AutoVibrato {
+    pub waveform: u8,
+    pub sweep: u8,
+    pub depth: u8,
+    pub rate: u8,
+}
+
+/// Samples, note mapping, envelopes and instrument modulation.
 #[derive(Clone, Debug)]
 pub struct Instrument {
+    pub auto_vibrato: AutoVibrato,
     pub name: String,
     pub samples: Vec<Sample>,
     /// 96 bytes, one per note the tracker shows, holding a zero-based index into
@@ -322,6 +346,7 @@ pub struct Module {
     pub speed: u8,
     pub bpm: u16,
     timeline: Vec<TimelineRow>,
+    row_continuations: Vec<bool>,
     last_microsecond: u64,
 }
 
@@ -419,7 +444,7 @@ impl Module {
                 )));
             }
         }
-        let (timeline, last_microsecond) =
+        let (timeline, row_continuations, last_microsecond) =
             lay_out_timeline(&orders, &patterns, speed, bpm, limits)?;
         Ok(Self {
             name: read_name(bytes, OFFSET_NAME, 20),
@@ -434,6 +459,7 @@ impl Module {
             speed,
             bpm,
             timeline,
+            row_continuations,
             last_microsecond,
         })
     }
@@ -481,7 +507,7 @@ impl Module {
     pub fn packet(&self, index: usize) -> Vec<u8> {
         let mut data = Vec::new();
         match self.timeline.get(index) {
-            Some(row) => write_row(self, row, &mut data),
+            Some(row) => write_row(self, row, self.row_continuations[index], &mut data),
             None => {
                 let tail = self.packet_time(index).1;
                 let length = u32::try_from(tail).unwrap_or(u32::MAX);
@@ -538,13 +564,13 @@ impl Module {
 
 /// One row of a packet: how long it lasts, the tempo that says so, and its
 /// cells, in channel order.
-fn write_row(module: &Module, row: &TimelineRow, data: &mut Vec<u8>) {
+fn write_row(module: &Module, row: &TimelineRow, continuation: bool, data: &mut Vec<u8>) {
     data.extend_from_slice(
         &(u32::try_from(row.duration_microseconds).unwrap_or(u32::MAX)).to_le_bytes(),
     );
     data.extend_from_slice(&row.bpm.to_le_bytes());
     data.push(row.speed);
-    data.push(0);
+    data.push(if continuation { ROW_CONTINUATION_FLAG } else { 0 });
     for cell in module.row_cells(row) {
         data.extend_from_slice(&[
             cell.note,
@@ -574,6 +600,9 @@ pub fn read_row(bytes: &[u8]) -> Result<Row> {
             "module row packet holds neither a whole row nor a whole number of cells",
         ));
     }
+    if bytes[7] & !ROW_CONTINUATION_FLAG != 0 {
+        return Err(invalid("unknown module row continuation flags"));
+    }
     Ok(Row {
         duration_microseconds: u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
         bpm: u16::from_le_bytes([bytes[4], bytes[5]]),
@@ -594,7 +623,13 @@ pub fn read_row(bytes: &[u8]) -> Result<Row> {
 /// Microseconds one tick lasts at a tempo: the tracker divides a beat into 24
 /// ticks, which is the same number as `2 500 000 / bpm`.
 pub fn tick_microseconds(bpm: u16) -> u64 {
-    2_500_000 / u64::from(bpm.max(1))
+    tick_span_microseconds(bpm, 1)
+}
+
+/// Convert the whole interval before rounding to the native microsecond clock.
+/// Multiplying a rounded single tick loses fractions once for every tick.
+pub(crate) fn tick_span_microseconds(bpm: u16, ticks: u8) -> u64 {
+    u64::from(ticks) * 2_500_000 / u64::from(bpm.max(1))
 }
 
 /// A tempo the format accepts, or `None` for one it does not. A tempo of 0 would
@@ -620,8 +655,9 @@ fn lay_out_timeline(
     speed: u8,
     bpm: u16,
     limits: &Limits,
-) -> Result<(Vec<TimelineRow>, u64)> {
+) -> Result<(Vec<TimelineRow>, Vec<bool>, u64)> {
     let mut timeline: Vec<TimelineRow> = Vec::new();
+    let mut continuations = Vec::new();
     let mut entered: HashSet<usize> = HashSet::new();
     // E6x state belongs to each channel and survives order changes, as in FT2.
     let channels = patterns.first().map_or(0, Pattern::channels);
@@ -636,6 +672,8 @@ fn lay_out_timeline(
     let mut speed = speed;
     let mut bpm = bpm;
     let mut microseconds = 0u64;
+    let mut delay_remaining = 0u8;
+    let mut source = (0usize, 0usize);
     while order < orders.len() {
         let pattern = &patterns[usize::from(orders[order])];
         if row >= pattern.row_count() {
@@ -646,71 +684,89 @@ fn lay_out_timeline(
         }
         // Finite local row repeats do not re-enter the order. Keep the existing
         // one-pass policy for global order jumps entering row zero again.
-        if order_entry && row == 0 && !entered.insert(order) {
-            break;
-        }
-        order_entry = false;
+        let continuation = delay_remaining != 0;
         let mut next_order = None;
         let mut loop_jump = false;
-        for (cell, (start, remaining)) in pattern.row(row).iter().zip(&mut loop_states) {
-            match cell.effect {
-                EFFECT_TEMPO if cell.parameter != 0 => {
-                    if cell.parameter <= SPEED_MAX {
-                        speed = clamp_speed(u16::from(cell.parameter)).unwrap_or(speed);
-                    } else if let Some(tempo) = clamp_bpm(u16::from(cell.parameter)) {
-                        bpm = tempo;
-                    }
-                }
-                EFFECT_JUMP => {
-                    next_order = Some(usize::from(cell.parameter));
-                    break_row = 0;
-                }
-                EFFECT_BREAK => {
-                    let resume = usize::from(cell.parameter >> 4) * 10
-                        + usize::from(cell.parameter & 0xF);
-                    break_row = if resume <= 63 { resume } else { 0 };
-                    // Dxx retains an earlier Bxx destination; a later Bxx
-                    // overwrites it and resets the shared break row to zero.
-                    next_order.get_or_insert(order + 1);
-                }
-                0x0E if cell.parameter >> 4 == 6 => {
-                    let repeats = cell.parameter & 15;
-                    if repeats == 0 {
-                        *start = row as u8;
-                    } else {
-                        let repeat = if *remaining == 0 {
-                            *remaining = repeats;
-                            true
-                        } else {
-                            *remaining -= 1;
-                            *remaining != 0
-                        };
-                        if repeat {
-                            break_row = usize::from(*start);
-                            loop_jump = true;
+        let mut requested_delay = 0;
+        if !continuation {
+            if order_entry && row == 0 && !entered.insert(order) {
+                break;
+            }
+            order_entry = false;
+            source = (order, row);
+            for (cell, (start, remaining)) in pattern.row(row).iter().zip(&mut loop_states) {
+                match cell.effect {
+                    EFFECT_TEMPO if cell.parameter != 0 => {
+                        if cell.parameter <= SPEED_MAX {
+                            speed = clamp_speed(u16::from(cell.parameter)).unwrap_or(speed);
+                        } else if let Some(tempo) = clamp_bpm(u16::from(cell.parameter)) {
+                            bpm = tempo;
                         }
                     }
+                    EFFECT_JUMP => {
+                        next_order = Some(usize::from(cell.parameter));
+                        break_row = 0;
+                    }
+                    EFFECT_BREAK => {
+                        let resume = usize::from(cell.parameter >> 4) * 10
+                            + usize::from(cell.parameter & 0xF);
+                        break_row = if resume <= 63 { resume } else { 0 };
+                        // Dxx retains an earlier Bxx destination; a later Bxx
+                        // overwrites it and resets the shared break row to zero.
+                        next_order.get_or_insert(order + 1);
+                    }
+                    0x0E if cell.parameter >> 4 == 0xE => {
+                        // Last channel wins, including EE0 overriding an earlier hold.
+                        requested_delay = (cell.parameter & 15) + 1;
+                    }
+                    0x0E if cell.parameter >> 4 == 6 => {
+                        let repeats = cell.parameter & 15;
+                        if repeats == 0 {
+                            *start = row as u8;
+                        } else {
+                            let repeat = if *remaining == 0 {
+                                *remaining = repeats;
+                                true
+                            } else {
+                                *remaining -= 1;
+                                *remaining != 0
+                            };
+                            if repeat {
+                                break_row = usize::from(*start);
+                                loop_jump = true;
+                            }
+                        }
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
-        let duration = u64::from(speed) * tick_microseconds(bpm);
+        let duration = tick_span_microseconds(bpm, speed);
         if timeline.len() >= limits.rows {
             return Err(invalid(&format!(
                 "module does not end within the {} rows this reader takes",
                 limits.rows
             )));
         }
+        timeline.try_reserve(1).map_err(|_| invalid("module timeline allocation failed"))?;
+        continuations.try_reserve(1).map_err(|_| invalid("module continuation allocation failed"))?;
         timeline.push(TimelineRow {
-            order,
-            row,
+            order: source.0,
+            row: source.1,
             start_microseconds: microseconds,
             duration_microseconds: duration,
             speed,
             bpm,
         });
-        microseconds += duration;
-        row = if loop_jump { break_row } else { row + 1 };
+        continuations.push(continuation);
+        microseconds = microseconds.checked_add(duration).ok_or_else(|| invalid("module timeline duration overflow"))?;
+        row += 1;
+        if requested_delay != 0 { delay_remaining = requested_delay; }
+        if delay_remaining != 0 {
+            delay_remaining -= 1;
+            if delay_remaining != 0 { row -= 1; }
+        }
+        if loop_jump { row = break_row; }
         if next_order.is_some() || row >= pattern.row_count() {
             order = next_order.unwrap_or(order + 1);
             let resume = break_row;
@@ -724,7 +780,7 @@ fn lay_out_timeline(
             order_entry = true;
         }
     }
-    Ok((timeline, microseconds))
+    Ok((timeline, continuations, microseconds))
 }
 
 fn parse_patterns(
@@ -881,11 +937,11 @@ fn parse_instruments(
         let header_size = read_le_u32(bytes, start)?;
         let header_size = usize::try_from(header_size)
             .ok()
-            .filter(|size| *size >= INSTRUMENT_HEADER_BYTES)
+            .filter(|size| *size >= INSTRUMENT_BASE_BYTES)
             .ok_or_else(|| {
                 invalid(&format!(
                     "instrument {index} states a header of {header_size} bytes, shorter than the \
-                     {INSTRUMENT_HEADER_BYTES} up to its fadeout"
+                     {INSTRUMENT_BASE_BYTES} up to its sample count"
                 ))
             })?;
         let header_end = start
@@ -898,6 +954,33 @@ fn parse_instruments(
         }
         let name = read_name(bytes, start + INSTRUMENT_NAME, 22);
         let sample_count = usize::from(read_le_u16(bytes, start + INSTRUMENT_SAMPLE_COUNT)?);
+        if header_size < INSTRUMENT_HEADER_BYTES {
+            if sample_count != 0 {
+                return Err(invalid(&format!(
+                    "instrument {index} states a header of {header_size} bytes, shorter than the \
+                     {INSTRUMENT_HEADER_BYTES} up to its fadeout"
+                )));
+            }
+            // No sample headers,keymap or envelopes follow the29-byte core.
+            // Skip any declared padding without borrowing the next instrument's
+            // bytes,and expose the same neutral metadata as a full empty header.
+            let envelope = Envelope {
+                points: vec![(0, 0); ENVELOPE_POINTS],
+                flags: 0,
+                ..Envelope::default()
+            };
+            instruments.push(Instrument {
+                name,
+                samples: Vec::new(),
+                keymap: vec![0; 96],
+                volume_envelope: envelope.clone(),
+                panning_envelope: envelope,
+                fadeout: 0,
+                auto_vibrato: AutoVibrato::default(),
+            });
+            *at = header_end;
+            continue;
+        }
         sample_total += sample_count;
         if sample_total > limits.samples {
             return Err(invalid(&format!(
@@ -912,10 +995,18 @@ fn parse_instruments(
         let volume_envelope = Envelope {
             points: read_envelope(bytes, start + INSTRUMENT_VOLUME_ENVELOPE)?,
             flags: flags as u8,
+            length: bytes[start + 225],
+            sustain_point: bytes[start + 227],
+            loop_start: bytes[start + 228],
+            loop_end: bytes[start + 229],
         };
         let panning_envelope = Envelope {
             points: read_envelope(bytes, start + INSTRUMENT_VOLUME_ENVELOPE + ENVELOPE_BYTES)?,
             flags: (flags >> 8) as u8,
+            length: bytes[start + 226],
+            sustain_point: bytes[start + 230],
+            loop_start: bytes[start + 231],
+            loop_end: bytes[start + 232],
         };
         let fadeout = read_le_u16(bytes, start + INSTRUMENT_FADEOUT)?;
         // The sample records start where the instrument's own header ends, which
@@ -1019,6 +1110,12 @@ fn parse_instruments(
             volume_envelope,
             panning_envelope,
             fadeout,
+            auto_vibrato: AutoVibrato {
+                waveform: bytes[start + 235],
+                sweep: bytes[start + 236],
+                depth: bytes[start + 237],
+                rate: bytes[start + 238],
+            },
         });
     }
     Ok(instruments)

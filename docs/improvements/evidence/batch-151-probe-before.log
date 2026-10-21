@@ -1,0 +1,2 @@
+quoted-body-close: []; independent plain control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+comment-body-close: []; independent plain control=[Cue { start: 1s, end: 2s, text: "Строка α" }]

@@ -173,7 +173,9 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
         // its native queue use half; emitted-but-unconsumed pictures a quarter.
         limits.packet_bytes = limits.packet_bytes.min(budget / 8);
         let demuxer = Mp4Reader::open(reader, limits)?;
-        let track_index = demuxer.automatic_track_indices(&[*b"vide"]).into_iter()
+        let track_index = demuxer
+            .automatic_track_indices(&[*b"vide"])
+            .into_iter()
             .find(|&index| matches!(&demuxer.tracks()[index].codec, b"hvc1" | b"hev1"))
             .ok_or_else(|| invalid("MP4 has no HEVC video track"))?;
         Self::from_demuxer(demuxer, track_index, output_layer_set, highest_tid, budget)
@@ -209,13 +211,14 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             .iter()
             .filter(|a| a.nal_type == 32)
             .flat_map(|a| a.units.iter())
-            .next()
-            .ok_or_else(|| invalid("layered HEVC configuration has no VPS"))?;
+            .next();
         if highest_tid > 6 {
             return Err(invalid("invalid HEVC extraction target"));
         }
         let selection_budget = budget / 4;
-        let mut vps = Arc::new(LayeredVps::parse(vps, selection_budget)?);
+        let mut vps = vps
+            .map(|nal| LayeredVps::parse(nal, selection_budget).map(Arc::new))
+            .transpose()?;
         let mut inventory_parameters =
             LayeredParameters::from_configuration(&track.configuration, budget / 8)?;
         let count = track.samples.len();
@@ -235,18 +238,20 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             demuxer.read_packet(track_index, index, &mut packet)?;
             let mut base_restart = false;
             if boundary {
-                retain_selection(
-                    &mut epochs,
-                    first_sample,
-                    scan,
-                    vps.clone(),
-                    output_layer_set,
-                    highest_tid,
-                    selection_budget.saturating_sub(seek_storage(&seek_preroll)),
-                )?;
-                first_sample = index;
-                scan = SubstreamScan::default();
-                seen_vcl = false;
+                if let Some(vps) = &vps {
+                    retain_selection(
+                        &mut epochs,
+                        first_sample,
+                        scan,
+                        vps.clone(),
+                        output_layer_set,
+                        highest_tid,
+                        selection_budget.saturating_sub(seek_storage(&seek_preroll)),
+                    )?;
+                    first_sample = index;
+                    scan = SubstreamScan::default();
+                    seen_vcl = false;
+                }
                 boundary = false;
             }
             let mut candidate: Option<Arc<LayeredVps>> = None;
@@ -273,7 +278,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                         .checked_sub(
                             selection_storage(&epochs)
                                 .saturating_add(seek_storage(&seek_preroll))
-                                .saturating_add(snapshot_bytes(&vps))
+                                .saturating_add(vps.as_ref().map_or(0, |v| snapshot_bytes(v)))
                                 .saturating_add(
                                     candidate.as_ref().map_or(0, |v| snapshot_bytes(v)),
                                 ),
@@ -283,13 +288,14 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 }
             }
             if let Some(received) = candidate {
-                if *received != *vps {
+                if vps.as_ref().is_none_or(|v| **v != *received) {
                     if seen_vcl {
                         retain_selection(
                             &mut epochs,
                             first_sample,
                             scan,
-                            vps,
+                            vps.take()
+                                .ok_or_else(|| invalid("HEVC coded epoch has no VPS"))?,
                             output_layer_set,
                             highest_tid,
                             selection_budget.saturating_sub(seek_storage(&seek_preroll)),
@@ -298,7 +304,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                         scan = SubstreamScan::default();
                         seen_vcl = false;
                     }
-                    vps = received;
+                    vps = Some(received);
                 }
             }
             scan.observe(&packet, length_size)?;
@@ -319,8 +325,8 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                 boundary |= h.unit_type == 37 || h.unit_type == 36 && h.layer_id == 0;
             }
             let required = vps
-                .extension
                 .as_ref()
+                .and_then(|v| v.extension.as_ref())
                 .and_then(|e| e.output.sets.get(output_layer_set))
                 .map_or(0, |set| set.necessary);
             let safe = present != 0
@@ -339,7 +345,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
                     if selection_storage(&epochs)
                         .saturating_add(seek_storage(&seek_preroll))
                         .saturating_add(growth)
-                        .saturating_add(vps.retained_bytes())
+                        .saturating_add(vps.as_ref().map_or(0, |v| v.retained_bytes()))
                         > selection_budget
                     {
                         return Err(invalid("HEVC seek inventory exceeds memory budget"));
@@ -361,7 +367,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             &mut epochs,
             first_sample,
             scan,
-            vps,
+            vps.ok_or_else(|| invalid("layered HEVC source has no active VPS"))?,
             output_layer_set,
             highest_tid,
             selection_budget.saturating_sub(seek_storage(&seek_preroll)),

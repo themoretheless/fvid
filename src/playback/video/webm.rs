@@ -44,6 +44,7 @@ enum VideoDecoder {
 }
 struct Frame {
     paired: bool,
+    hdr: HdrMetadata,
     decoded: Picture,
     pts: i64,
     duration: Option<u64>,
@@ -67,6 +68,7 @@ pub struct WebmVideoReader<R> {
     pending_field: Option<(i64, Option<u64>, bool)>,
     future_pts: Option<Vec<i64>>,
     queued: Vec<Frame>,
+    presented_hdr: Option<HdrMetadata>,
     queue_budget: usize,
     rgb: Vec<u8>,
     dimensions: [usize; 2],
@@ -284,6 +286,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             pending_field: None,
             future_pts,
             queued: Vec::new(),
+            presented_hdr: None,
             queue_budget,
             rgb: Vec::new(),
             dimensions: [0; 2],
@@ -513,7 +516,13 @@ impl<R: Read + Seek> WebmVideoReader<R> {
     /// for the files that write them only inside a packet. The reader asks those
     /// bytes when it opens, so a caller that grades the first picture is not left
     /// asking a decoder that has not run yet.
+    /// After presentation begins, this describes the last returned frame, even
+    /// when decoding has already looked ahead into a new HDR sequence. Before
+    /// the first frame (and after reset), it describes available decoder metadata.
     pub fn bitstream_hdr(&self) -> HdrMetadata {
+        self.presented_hdr.unwrap_or_else(|| self.decoder_hdr())
+    }
+    fn decoder_hdr(&self) -> HdrMetadata {
         let live = match &self.decoder {
             VideoDecoder::Av1(d) => d.hdr(),
             VideoDecoder::Vp9(_) | VideoDecoder::Avc(_) | VideoDecoder::Ffv1(_) => {
@@ -522,9 +531,11 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             VideoDecoder::Hevc(d) => d.hdr(),
         };
         let seed = self.open_signal.map(|(_, seed)| seed).unwrap_or_default();
-        let mut hdr = live;
-        hdr.merge(seed);
-        hdr
+        match &self.decoder {
+            VideoDecoder::Av1(d) => d.hdr_with_fallback(seed),
+            VideoDecoder::Hevc(d) => d.hdr_with_fallback(seed),
+            _ => live.filled_with(seed),
+        }
     }
     /// The cap this reader sizes its RGB picture by, which is the cap a caller
     /// converting the planes it hands over has to size by too.
@@ -628,6 +639,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.pending = None;
         self.pending_field = None;
         self.queued.clear();
+        self.presented_hdr = None;
         self.base = None;
         self.start = 0;
         self.end = 0;
@@ -712,8 +724,35 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.pending = None;
         self.pending_field = None;
         self.queued.clear();
+        self.presented_hdr = None;
         self.failed = false;
         self.index = index;
+        if index > 0 && !self.hardware_accelerated()
+            && matches!(&self.decoder, VideoDecoder::Avc(_) | VideoDecoder::Hevc(_)) {
+            // Random access discards references, not received parameter history.
+            // Replay only this track's parameter updates; earlier coded pictures
+            // are neither decoded nor retained. Reuse one bounded packet buffer.
+            let restored = (|| -> Result<()> {
+                let mut packet = Vec::new();
+                for before in 0..index {
+                    if self.demux.packets[before].track != self.track { continue; }
+                    if self.demux.packet_payload_size(before)? > self.queue_budget {
+                        return Err(invalid("Matroska parameter preroll packet exceeds decode budget"));
+                    }
+                    self.demux.read_packet_into(before, &mut packet)?;
+                    match &mut self.decoder {
+                        VideoDecoder::Avc(decoder) => decoder.prime_parameters(&packet)?,
+                        VideoDecoder::Hevc(decoder) => decoder.prime_parameters(&packet)?,
+                        _ => unreachable!(),
+                    }
+                }
+                Ok(())
+            })();
+            if let Err(error) = restored {
+                self.failed = true;
+                return Err(error);
+            }
+        }
         // Pinning the origin matters only before the first frame: without it the
         // keyframe jumped to would become the start of the timeline and the
         // position would read back as zero.
@@ -790,6 +829,8 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             };
             let mut bytes = 0usize;
             for frame in self.queued.iter().chain(std::iter::once(&frame)) {
+                bytes = bytes.checked_add(std::mem::size_of::<HdrMetadata>())
+                    .ok_or_else(|| invalid("Matroska queued HDR storage overflow"))?;
                 match &frame.decoded {
                     Picture::Coded(p, _) => {
                         for plane in [&p.y, &p.cb, &p.cr] {
@@ -859,6 +900,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                         .map_err(|error| invalid(&error.to_string()))?;
                     if let Some(surface) = surface {
                         visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Surface(surface, hardware.colour),
                             pts,
@@ -878,6 +920,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             Picture::Coded(Arc::new(picture), hardware.colour)
                         };
                         visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                             paired: false,
                             decoded,
                             pts,
@@ -919,6 +962,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                 Picture::Coded(picture, AvcColour::from_vui(vui)?)
                             };
                             visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                                 paired,
                                 decoded,
                                 pts,
@@ -933,6 +977,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                             p,d.parameters().0.chroma_format,d.parameters().0.vui.as_ref(),
                         )?;
                         visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Packed(Arc::new(packed)),
                             pts,
@@ -960,6 +1005,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                     let p = PackedPlanar::with_alpha(decoded.frame, decoded.depth, colour, decoded.alpha)?
                         .with_rgb_limited(rgb_limited)?;
                     visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                             paired: false,
                         decoded: Picture::Packed(Arc::new(p)),
                         pts,
@@ -976,6 +1022,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                                 ));
                             }
                             visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                             paired: false,
                                 decoded: Picture::Vp9(Box::new(decoded)),
                                 pts,
@@ -987,6 +1034,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
                 VideoDecoder::Av1(d) => {
                     if let Some(decoded) = d.decode_container_sample(&packet)? {
                         visible = Some(Frame {
+                            hdr: HdrMetadata::default(),
                             paired: false,
                             decoded: Picture::Av1(decoded),
                             pts,
@@ -998,6 +1046,9 @@ impl<R: Read + Seek> WebmVideoReader<R> {
             }
             // Invisible blocks are still fully decoded: later frames may
             // reference them. Only their presentation is suppressed.
+            if let Some(frame) = &mut visible {
+                frame.hdr = self.decoder_hdr();
+            }
             if visible.is_some() && !self.demux.packets[index].invisible {
                 return Ok(visible);
             }
@@ -1133,6 +1184,7 @@ impl<R: Read + Seek> WebmVideoReader<R> {
         self.start = start;
         self.end = start + u128::from(duration);
         self.frames += 1;
+        self.presented_hdr = Some(current.hdr);
         Ok(Some(CurrentFrame {
             decoded: current.decoded,
             size,

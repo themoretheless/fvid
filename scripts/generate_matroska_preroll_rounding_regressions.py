@@ -22,7 +22,9 @@ def generate():
     for name,rate,delay,origin,skip in [
         ('delay-48000-two',48000,41667,0,2),('delay-44100-one',44100,22676,0,1),('delay-44100-four',44100,90703,0,4),
         ('control-48000-one',48000,20833,0,1),('same-sample-origin',44100,22676,22675,0),
+        ('same-sample-origin-48000',48000,20834,20833,0),
         ('negative-sample-grid',44100,0,-22676,1),('control-negative-grid',48000,0,-20833,1),
+        ('negative-sample-grid-48000',48000,0,-20834,1),
         ('strict-negative-fraction',48000,0,-1000,1),('strict-negative-millisecond',44100,0,-1_000_000,45),
         ('positive-origin',44100,22676,20_000_000,0),('subsample-delay',8000,1,0,0),('all-preroll',8000,100_000_000,0,160)]:
         media,raw=clip(rate,delay,origin,skip);files[name+'.mkv']=media;files[name+'-source.f32le']=raw;files[name+'-expected.f32le']=raw[skip*4:]

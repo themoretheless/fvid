@@ -1,0 +1,7 @@
+
+running 2 tests
+test sami_ignores_attribute_looking_text_inside_other_values ... ok
+test sami_attributes_match_independent_caption_clocks_and_untimed_skip_controls ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

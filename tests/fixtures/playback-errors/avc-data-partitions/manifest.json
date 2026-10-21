@@ -1,0 +1,331 @@
+{
+  "cases": [
+    {
+      "name": "I-pcm-pcm-split0",
+      "file": "I-pcm-pcm-split0.mp4",
+      "oracle": "I-pcm-pcm-split0.yuv",
+      "frames": [
+        {
+          "packet": "I-pcm-pcm-split0-1.packet",
+          "control": "I-pcm-pcm-split0-1-control.packet"
+        },
+        {
+          "packet": "I-pcm-pcm-split0-2.packet",
+          "control": "I-pcm-pcm-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "I-pcm-pcm-split1",
+      "file": "I-pcm-pcm-split1.mp4",
+      "oracle": "I-pcm-pcm-split1.yuv",
+      "frames": [
+        {
+          "packet": "I-pcm-pcm-split1-1.packet",
+          "control": "I-pcm-pcm-split1-1-control.packet"
+        },
+        {
+          "packet": "I-pcm-pcm-split1-2.packet",
+          "control": "I-pcm-pcm-split1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-inter-pcm-split0",
+      "file": "P-inter-pcm-split0.mp4",
+      "oracle": "P-inter-pcm-split0.yuv",
+      "frames": [
+        {
+          "packet": "P-inter-pcm-split0-1.packet",
+          "control": "P-inter-pcm-split0-1-control.packet"
+        },
+        {
+          "packet": "P-inter-pcm-split0-2.packet",
+          "control": "P-inter-pcm-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-inter-pcm-split1",
+      "file": "P-inter-pcm-split1.mp4",
+      "oracle": "P-inter-pcm-split1.yuv",
+      "frames": [
+        {
+          "packet": "P-inter-pcm-split1-1.packet",
+          "control": "P-inter-pcm-split1-1-control.packet"
+        },
+        {
+          "packet": "P-inter-pcm-split1-2.packet",
+          "control": "P-inter-pcm-split1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-pcm-inter-split0",
+      "file": "P-pcm-inter-split0.mp4",
+      "oracle": "P-pcm-inter-split0.yuv",
+      "frames": [
+        {
+          "packet": "P-pcm-inter-split0-1.packet",
+          "control": "P-pcm-inter-split0-1-control.packet"
+        },
+        {
+          "packet": "P-pcm-inter-split0-2.packet",
+          "control": "P-pcm-inter-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-pcm-inter-split1",
+      "file": "P-pcm-inter-split1.mp4",
+      "oracle": "P-pcm-inter-split1.yuv",
+      "frames": [
+        {
+          "packet": "P-pcm-inter-split1-1.packet",
+          "control": "P-pcm-inter-split1-1-control.packet"
+        },
+        {
+          "packet": "P-pcm-inter-split1-2.packet",
+          "control": "P-pcm-inter-split1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-inter-inter-split0",
+      "file": "P-inter-inter-split0.mp4",
+      "oracle": "P-inter-inter-split0.yuv",
+      "frames": [
+        {
+          "packet": "P-inter-inter-split0-1.packet",
+          "control": "P-inter-inter-split0-1-control.packet"
+        },
+        {
+          "packet": "P-inter-inter-split0-2.packet",
+          "control": "P-inter-inter-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-inter-inter-split1",
+      "file": "P-inter-inter-split1.mp4",
+      "oracle": "P-inter-inter-split1.yuv",
+      "frames": [
+        {
+          "packet": "P-inter-inter-split1-1.packet",
+          "control": "P-inter-inter-split1-1-control.packet"
+        },
+        {
+          "packet": "P-inter-inter-split1-2.packet",
+          "control": "P-inter-inter-split1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-zero-zero-split0",
+      "file": "P-zero-zero-split0.mp4",
+      "oracle": "P-zero-zero-split0.yuv",
+      "frames": [
+        {
+          "packet": "P-zero-zero-split0-1.packet",
+          "control": "P-zero-zero-split0-1-control.packet"
+        },
+        {
+          "packet": "P-zero-zero-split0-2.packet",
+          "control": "P-zero-zero-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-zero-zero-split1",
+      "file": "P-zero-zero-split1.mp4",
+      "oracle": "P-zero-zero-split1.yuv",
+      "frames": [
+        {
+          "packet": "P-zero-zero-split1-1.packet",
+          "control": "P-zero-zero-split1-1-control.packet"
+        },
+        {
+          "packet": "P-zero-zero-split1-2.packet",
+          "control": "P-zero-zero-split1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "I-intra4-pcm-split0",
+      "file": "I-intra4-pcm-split0.mp4",
+      "oracle": "I-intra4-pcm-split0.yuv",
+      "frames": [
+        {
+          "packet": "I-intra4-pcm-split0-1.packet",
+          "control": "I-intra4-pcm-split0-1-control.packet"
+        },
+        {
+          "packet": "I-intra4-pcm-split0-2.packet",
+          "control": "I-intra4-pcm-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "I-intra4-pcm-split1",
+      "file": "I-intra4-pcm-split1.mp4",
+      "oracle": "I-intra4-pcm-split1.yuv",
+      "frames": [
+        {
+          "packet": "I-intra4-pcm-split1-1.packet",
+          "control": "I-intra4-pcm-split1-1-control.packet"
+        },
+        {
+          "packet": "I-intra4-pcm-split1-2.packet",
+          "control": "I-intra4-pcm-split1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-intra4-pcm-split0",
+      "file": "P-intra4-pcm-split0.mp4",
+      "oracle": "P-intra4-pcm-split0.yuv",
+      "frames": [
+        {
+          "packet": "P-intra4-pcm-split0-1.packet",
+          "control": "P-intra4-pcm-split0-1-control.packet"
+        },
+        {
+          "packet": "P-intra4-pcm-split0-2.packet",
+          "control": "P-intra4-pcm-split0-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "P-intra4-pcm-split1",
+      "file": "P-intra4-pcm-split1.mp4",
+      "oracle": "P-intra4-pcm-split1.yuv",
+      "frames": [
+        {
+          "packet": "P-intra4-pcm-split1-1.packet",
+          "control": "P-intra4-pcm-split1-1-control.packet"
+        },
+        {
+          "packet": "P-intra4-pcm-split1-2.packet",
+          "control": "P-intra4-pcm-split1-2-control.packet"
+        }
+      ]
+    }
+  ],
+  "mixed_counter": [
+    {
+      "name": "mixed-counter-split0-ranks1",
+      "file": "mixed-counter-split0-ranks1.mp4",
+      "oracle": "mixed-counter-split0-ranks1.yuv",
+      "frames": [
+        {
+          "packet": "mixed-counter-split0-ranks1-1.packet",
+          "control": "mixed-counter-split0-ranks1-1-control.packet"
+        },
+        {
+          "packet": "mixed-counter-split0-ranks1-2.packet",
+          "control": "mixed-counter-split0-ranks1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "mixed-counter-split0-ranks3",
+      "file": "mixed-counter-split0-ranks3.mp4",
+      "oracle": "mixed-counter-split0-ranks3.yuv",
+      "frames": [
+        {
+          "packet": "mixed-counter-split0-ranks3-1.packet",
+          "control": "mixed-counter-split0-ranks3-1-control.packet"
+        },
+        {
+          "packet": "mixed-counter-split0-ranks3-2.packet",
+          "control": "mixed-counter-split0-ranks3-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "mixed-counter-split1-ranks1",
+      "file": "mixed-counter-split1-ranks1.mp4",
+      "oracle": "mixed-counter-split1-ranks1.yuv",
+      "frames": [
+        {
+          "packet": "mixed-counter-split1-ranks1-1.packet",
+          "control": "mixed-counter-split1-ranks1-1-control.packet"
+        },
+        {
+          "packet": "mixed-counter-split1-ranks1-2.packet",
+          "control": "mixed-counter-split1-ranks1-2-control.packet"
+        }
+      ]
+    },
+    {
+      "name": "mixed-counter-split1-ranks3",
+      "file": "mixed-counter-split1-ranks3.mp4",
+      "oracle": "mixed-counter-split1-ranks3.yuv",
+      "frames": [
+        {
+          "packet": "mixed-counter-split1-ranks3-1.packet",
+          "control": "mixed-counter-split1-ranks3-1-control.packet"
+        },
+        {
+          "packet": "mixed-counter-split1-ranks3-2.packet",
+          "control": "mixed-counter-split1-ranks3-2-control.packet"
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "file": "orphan.packet",
+      "message": "precedes partition A"
+    },
+    {
+      "file": "duplicate-b.packet",
+      "message": "duplicate or out-of-order"
+    },
+    {
+      "file": "duplicate-c.packet",
+      "message": "duplicate or out-of-order"
+    },
+    {
+      "file": "c-before-b.packet",
+      "message": "duplicate or out-of-order"
+    },
+    {
+      "file": "missing-b.packet",
+      "message": "bit"
+    },
+    {
+      "file": "missing-c.packet",
+      "message": "bit"
+    },
+    {
+      "file": "reference-class.packet",
+      "message": "reference class"
+    },
+    {
+      "file": "truncated-c.packet",
+      "message": "bit"
+    },
+    {
+      "file": "duplicate-a.packet",
+      "message": "duplicate partition A"
+    },
+    {
+      "file": "wrong-id.packet",
+      "message": "no matching partition A"
+    },
+    {
+      "file": "wrong-rank.packet",
+      "message": "no matching partition A"
+    },
+    {
+      "file": "unneeded-c.packet",
+      "message": "without residual syntax"
+    },
+    {
+      "file": "truncated-b.packet",
+      "message": "bit"
+    }
+  ],
+  "provenance": "Owned Extended SPS/PPS; PCM coordinate oracle; inter inverse-transform literal basis; no private media/external commands/network."
+}

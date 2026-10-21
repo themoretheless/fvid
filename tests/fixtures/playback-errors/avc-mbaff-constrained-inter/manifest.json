@@ -1,0 +1,82 @@
+[
+  {
+    "name": "mono-mbaff-e-1-frame-constrained0",
+    "entropy": -1,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e-1-frame-constrained1",
+    "entropy": -1,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e-1-checker-constrained0",
+    "entropy": -1,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e-1-checker-constrained1",
+    "entropy": -1,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e0-frame-constrained0",
+    "entropy": 0,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e0-frame-constrained1",
+    "entropy": 0,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e0-checker-constrained0",
+    "entropy": 0,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e0-checker-constrained1",
+    "entropy": 0,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e1-frame-constrained0",
+    "entropy": 1,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e1-frame-constrained1",
+    "entropy": 1,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e1-checker-constrained0",
+    "entropy": 1,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e1-checker-constrained1",
+    "entropy": 1,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e2-frame-constrained0",
+    "entropy": 2,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e2-frame-constrained1",
+    "entropy": 2,
+    "constrained": true
+  },
+  {
+    "name": "mono-mbaff-e2-checker-constrained0",
+    "entropy": 2,
+    "constrained": false
+  },
+  {
+    "name": "mono-mbaff-e2-checker-constrained1",
+    "entropy": 2,
+    "constrained": true
+  }
+]

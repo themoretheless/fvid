@@ -1,0 +1,6 @@
+quoted-body-close: None; SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+comment-body-close: None; SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+title-raw-close: None; SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+style-raw-close: None; SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+title-control: Some([Cue { start: 1s, end: 2s, text: "Строка α" }]); SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]
+comment-control: Some([Cue { start: 1s, end: 2s, text: "Строка α" }]); SRT control=[Cue { start: 1s, end: 2s, text: "Строка α" }]

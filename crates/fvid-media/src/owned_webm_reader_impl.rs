@@ -141,6 +141,7 @@ pub struct WebmReader<R> {
     disabled_tracks: std::collections::BTreeSet<u64>,
     limits: Limits,
     read_packet_bytes: usize,
+    block_additions: std::collections::BTreeMap<usize,Vec<(u64,u64,usize)>>,
     /// Where the walk of the Segment's children stands. Blocks are indexed a
     /// cluster at a time, so the first picture does not wait for the whole file.
     at: u64,
@@ -353,6 +354,7 @@ impl<R: Read + Seek> WebmReader<R> {
             disabled_tracks: Default::default(),
             limits,
             read_packet_bytes: limits.packet_bytes,
+            block_additions: Default::default(),
             segment_end: segment.end.unwrap_or(file_end),
             at: segment.data,
             scale: 1_000_000u64,
@@ -403,6 +405,7 @@ impl<R: Read + Seek> WebmReader<R> {
             zlib_sizes,
             vorbis_lace_setups,
             read_packet_bytes,
+            block_additions,
             duration_ticks,
             info_seen,
             chapter_runs,
@@ -812,6 +815,28 @@ impl<R: Read + Seek> WebmReader<R> {
                                         padding = Some(sint(&mut *reader, *field)?);
                                     }
                                 }
+                                let mut additions=Vec::new();
+                                for field in fs.iter().filter(|f|f.id==0x75a1) {
+                                    *metadata_complete=false; // Transform writers do not preserve additions yet.
+                                    for more in fields(&mut *reader,*field,&mut *elements,limits.elements)? {
+                                        if more.id!=0xa6 {continue;}
+                                        let mut id=None;let mut payload=None;
+                                        for part in fields(&mut *reader,more,&mut *elements,limits.elements)? {
+                                            match part.id {
+                                                0xee=>{if id.is_some(){return Err(invalid("duplicate Matroska BlockAddID"));}id=Some(uint(&mut *reader,part)?);},
+                                                0xa5=>{if payload.is_some(){return Err(invalid("duplicate Matroska BlockAdditional"));}payload=Some(part);},
+                                                _=>{},
+                                            }
+                                        }
+                                        let id=id.unwrap_or(1);
+                                        if id==0 || additions.iter().any(|&(old,_,_)|old==id){return Err(invalid("invalid or duplicate Matroska BlockAddID"));}
+                                        let p=payload.ok_or_else(||invalid("Matroska BlockMore lacks BlockAdditional"))?;
+                                        let size=usize::try_from(end(p)?-p.data).map_err(|_|invalid("Matroska BlockAdditional size overflow"))?;
+                                        if size>limits.packet_bytes {return Err(invalid("Matroska BlockAdditional exceeds packet budget"));}
+                                        additions.try_reserve(1).map_err(|_|invalid("cannot allocate Matroska additions index"))?;
+                                        additions.push((id,p.data,size));
+                                    }
+                                }
                                 let first = packets.len();
                                 for block in fs {
                                     if block.id == 0xa1 {
@@ -830,6 +855,10 @@ impl<R: Read + Seek> WebmReader<R> {
                                 }
                                 for packet in &mut packets[first..] {
                                     packet.duration_ns = duration;
+                                }
+                                if !additions.is_empty() {
+                                    if packets.len()!=first+1 && additions.iter().any(|&(id,_,_)|id==1) && packets.get(first).is_some_and(|p|tracks.iter().any(|t|t.number==p.track && t.codec=="A_WAVPACK4")) {return Err(invalid("laced Matroska WavPack correction is not supported"));}
+                                    if packets.len()>first {block_additions.insert(first,additions);}
                                 }
                                 if let Some(padding) = padding.filter(|_| packets.len() > first) {
                                     let position = if padding < 0 { first } else { packets.len()-1 };
@@ -1112,6 +1141,8 @@ impl<R: Read + Seek> WebmReader<R> {
         }
         let mut total = 0;
         vector(&mut total, &self.packets)?;
+        records(&mut total,self.block_additions.len())?;
+        for additions in self.block_additions.values(){vector(&mut total,additions)?;}
         vector(&mut total, &self.track_scales)?;
         vector(&mut total, &self.scaled_audio_timings)?;
         vector(&mut total, &self.frame_prefixes)?;
@@ -1232,6 +1263,16 @@ impl<R: Read + Seek> WebmReader<R> {
             .map_or(&[][..], |(_, prefix)| prefix.as_slice());
         let zlib = self.zlib_tracks.contains(&p.track);
         read_frame_payload(&mut self.reader, p, prefix, zlib, zlib.then_some(restored_size), self.read_packet_bytes, out)
+    }
+
+    /// Read codec supplemental bytes associated with a BlockGroup packet.
+    pub fn read_block_additional(&mut self,index:usize,id:u64)->Result<Option<Vec<u8>>>{
+        if index>=self.packets.len(){return Err(invalid("WebM packet index out of bounds"));}
+        let Some(&(_,offset,size))=self.block_additions.get(&index).and_then(|a|a.iter().find(|&&(key,_,_)|key==id)) else {return Ok(None);};
+        let main=self.packet_payload_size(index)?;
+        if size.checked_add(main).is_none_or(|n|n>self.read_packet_bytes){return Err(invalid("Matroska packet and additions exceed budget"));}
+        let mut data=Vec::new();data.try_reserve_exact(size).map_err(|_|invalid("cannot allocate Matroska BlockAdditional"))?;data.resize(size,0);
+        goto(&mut self.reader,offset)?;self.reader.read_exact(&mut data)?;Ok(Some(data))
     }
 
     pub fn read_packet(&mut self, index: usize) -> Result<Vec<u8>> {

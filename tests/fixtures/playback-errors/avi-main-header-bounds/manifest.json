@@ -1,0 +1,84 @@
+{
+  "provenance": "Six malformed owned AVI VP9/ADPCM files declare an avih too short to carry dwStreams,with a later JUNK word/size equal to2. Four complete56/64-byte controls and literal predictor PCM. Same VP9 frame in owned Matroska companion. Refusal regression,not acceptance of malformed playback. Pure Python,no private media,encoder or network.",
+  "cases": [
+    {
+      "file": "ima-short-0.avi",
+      "declared_header": 0,
+      "control": "ima-standard.avi",
+      "expected": "ima.f32le",
+      "frames": 27
+    },
+    {
+      "file": "ima-short-16.avi",
+      "declared_header": 16,
+      "control": "ima-standard.avi",
+      "expected": "ima.f32le",
+      "frames": 27
+    },
+    {
+      "file": "ima-short-20.avi",
+      "declared_header": 20,
+      "control": "ima-standard.avi",
+      "expected": "ima.f32le",
+      "frames": 27
+    },
+    {
+      "file": "ms-short-0.avi",
+      "declared_header": 0,
+      "control": "ms-standard.avi",
+      "expected": "ms.f32le",
+      "frames": 12
+    },
+    {
+      "file": "ms-short-16.avi",
+      "declared_header": 16,
+      "control": "ms-standard.avi",
+      "expected": "ms.f32le",
+      "frames": 12
+    },
+    {
+      "file": "ms-short-20.avi",
+      "declared_header": 20,
+      "control": "ms-standard.avi",
+      "expected": "ms.f32le",
+      "frames": 12
+    }
+  ],
+  "controls": [
+    {
+      "file": "ima-standard.avi",
+      "expected": "ima.f32le",
+      "frames": 27
+    },
+    {
+      "file": "ima-padded.avi",
+      "expected": "ima.f32le",
+      "frames": 27
+    },
+    {
+      "file": "ms-standard.avi",
+      "expected": "ms.f32le",
+      "frames": 12
+    },
+    {
+      "file": "ms-padded.avi",
+      "expected": "ms.f32le",
+      "frames": 12
+    }
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "ima-short-0.avi": "269be443a2a0807369e48fb1536ed79f2f65c179244f79cdd91960b8410fb621",
+    "ima-short-16.avi": "b6f2fa2285afb61d6e4f54bba1a32458daa20243400e8671954a627b92c7b602",
+    "ima-short-20.avi": "615cd5181e4c5d0e206378445b5b95ff521d04bd61e95c9049434fbb9be502b8",
+    "ima-standard.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f",
+    "ima-padded.avi": "56fdae0659aa36185f405a9223f49bffdc632282b579fd09fc57d8d2337af370",
+    "ms.f32le": "d35ee49b68fa2e1fb8d67b7a2c0cb26efac6d95eb83c897c5e2dcec7c147ae81",
+    "ms-short-0.avi": "172c2b73b336c7301c5bc11dbc142fc173782e9ea75d3ca4e426b24aaa239d0e",
+    "ms-short-16.avi": "b821ad97ee62b93f678f13179be8136d6c9ab7b67ccb474b7273ad5037755360",
+    "ms-short-20.avi": "4ff938fa2a1aea982b70ce6d9110a397b70517bae5dfe7269e67a793eb20c77d",
+    "ms-standard.avi": "c26a2b060e651708c7972ea814ceb95e2b67d0cf4d384aaf4770ba09f6c5a814",
+    "ms-padded.avi": "ab84c0710cf2099ae17d08fa1bd8011963900f267b5ff6a9e2e4dc85ba901ac8"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "provenance": "Eight owned AVI VP9/ADPCM files with identical four records,flat or rec-list grouped,idx1 offsets relative to movi type or file origin. Four independent unindexed controls and literal predictor PCM. Identical VP9 frame decoded in owned Matroska companion;AVI picture playback not claimed. Pure Python, no private media,encoder or network.",
+  "reference": "https://learn.microsoft.com/en-us/previous-versions/ms779634(v=vs.85)",
+  "cases": [
+    {
+      "file": "ima-flat-movi.avi",
+      "control": "ima-flat-control.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "before_failure": false,
+      "origin": "movi",
+      "nested": false
+    },
+    {
+      "file": "ima-flat-file.avi",
+      "control": "ima-flat-control.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "before_failure": true,
+      "origin": "file",
+      "nested": false
+    },
+    {
+      "file": "ima-nested-movi.avi",
+      "control": "ima-nested-control.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "before_failure": false,
+      "origin": "movi",
+      "nested": true
+    },
+    {
+      "file": "ima-nested-file.avi",
+      "control": "ima-nested-control.avi",
+      "expected": "ima.f32le",
+      "frames": 27,
+      "block_frames": 9,
+      "before_failure": true,
+      "origin": "file",
+      "nested": true
+    },
+    {
+      "file": "ms-flat-movi.avi",
+      "control": "ms-flat-control.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "before_failure": false,
+      "origin": "movi",
+      "nested": false
+    },
+    {
+      "file": "ms-flat-file.avi",
+      "control": "ms-flat-control.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "before_failure": true,
+      "origin": "file",
+      "nested": false
+    },
+    {
+      "file": "ms-nested-movi.avi",
+      "control": "ms-nested-control.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "before_failure": false,
+      "origin": "movi",
+      "nested": true
+    },
+    {
+      "file": "ms-nested-file.avi",
+      "control": "ms-nested-control.avi",
+      "expected": "ms.f32le",
+      "frames": 12,
+      "block_frames": 4,
+      "before_failure": true,
+      "origin": "file",
+      "nested": true
+    }
+  ],
+  "malformed": [
+    "bad-mixed-origins.avi",
+    "bad-wrong-offset.avi",
+    "bad-wrong-length.avi",
+    "bad-huge-offset.avi"
+  ],
+  "sha256": {
+    "video.mkv": "829b75bf3bb710ac9abd4a06aa8002f5303e298b65b361444b0c421251da2605",
+    "ima-flat-control.avi": "6f3f658fa7725e330891807ef152956282d3543a1d658973e0a78276443ccd2f",
+    "ima-flat-movi.avi": "61f5bbe5b8f2efebfe931895d53d872ee9ff25c05b40c0a3c23be2533ff69b15",
+    "bad-mixed-origins.avi": "8c0a9496669a6f6d1b1f5ce890ad8e94c1f79369d73293550728e9cbe4427351",
+    "bad-wrong-offset.avi": "42f4efc00dd580b2ccb9bf849883c7210cc795e5c7ff6942860b3f7b269dcd6e",
+    "bad-wrong-length.avi": "f5086d585bcc0ea95462d1b5e6f70b9a45353f6f6d5800cb7ec8238edc7893af",
+    "bad-huge-offset.avi": "bd109ea738f773cffb480ebe740e19bf4567b53d435b344bc59895f6d365e8df",
+    "ima-flat-file.avi": "2c2432693756f6ed2ae9df68fb4680073fbff11315a611411f14bb97cf25e89f",
+    "ima-nested-control.avi": "0f8200c5ae42a5b653beabb6d681d82aa525e76609a573c96758c8fd4afbd0e6",
+    "ima-nested-movi.avi": "ab28e00dd5ccfaee23985c9fed67a616f42e3d0485b16333a8068661d6d65238",
+    "ima-nested-file.avi": "e0abbd51ca420b25d0470362079ed7d1c5a9cc31c35ec08a802d10a0e625f7b2",
+    "ima.f32le": "7376e942ff425553c05c491a6275830ec37a985e6d8cc8a83929a1b390cb476a",
+    "ms-flat-control.avi": "c26a2b060e651708c7972ea814ceb95e2b67d0cf4d384aaf4770ba09f6c5a814",
+    "ms-flat-movi.avi": "90c4a531d8decbc4f9e8ae8ee4aafdf4dfe6664fb002f25373d185fca609c0bc",
+    "ms-flat-file.avi": "342c5a865328932c13e28879bb11a9e39ac9a4da45d888a69dec8cffc5c472c5",
+    "ms-nested-control.avi": "92c0feb63d42c35731e3ce9d867f24cd3322ae3d2237f4a6b1b9db80d9d6008e",
+    "ms-nested-movi.avi": "160e35c47becb14d004947a42adefdbe337075b2a1bc6989b824c81d64c54ef1",
+    "ms-nested-file.avi": "8d349b858b24aec3c7bf48271a152b3390d77fc65a2849d821b2d345b4010c3e",
+    "ms.f32le": "d35ee49b68fa2e1fb8d67b7a2c0cb26efac6d95eb83c897c5e2dcec7c147ae81"
+  }
+}

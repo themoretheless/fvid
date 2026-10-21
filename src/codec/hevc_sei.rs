@@ -209,30 +209,48 @@ pub fn active_parameters_from_nal(nal: &[u8], budget: usize) -> Result<Option<Ac
 /// A malformed 137 or 144 payload is dropped rather than failed: the metadata
 /// only guides tone mapping, so it must not cost the picture it describes.
 pub fn hdr_from_rbsp(rbsp: &[u8]) -> Result<HdrMetadata> {
+    Ok(received_hdr_from_rbsp(rbsp)?.0)
+}
+fn received_hdr_from_rbsp(rbsp: &[u8]) -> Result<(HdrMetadata, bool)> {
     let mut hdr = HdrMetadata::default();
+    let mut cll_received = false;
     visit_messages(rbsp, |message| {
-        let decoded = if message.payload_type == u32::from(SEI_MDCV) {
-            HdrMetadata::from_mdcv(message.payload)
-        } else if message.payload_type == u32::from(SEI_CLLI) {
-            HdrMetadata::from_clli(message.payload)
-        } else {
-            None
-        };
-        if let Some(decoded) = decoded {
-            hdr.merge(decoded);
+        if message.payload_type == u32::from(SEI_CLLI) {
+            if let Some(decoded) = HdrMetadata::from_clli(message.payload) {
+                hdr.light = decoded.light;
+                cll_received = true;
+            }
+        } else if message.payload_type == u32::from(SEI_MDCV) {
+            if let Some(decoded) = HdrMetadata::from_mdcv(message.payload) {
+                hdr.merge(decoded);
+            }
         }
     })?;
-    Ok(hdr)
+    Ok((hdr, cll_received))
 }
-
-/// Static HDR metadata from one NAL unit, or `None` when it states none.
-pub fn hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<HdrMetadata>> {
+fn received_hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<(HdrMetadata, bool)>> {
     let rbsp = NalRbsp::parse(nal, budget)?;
     if !is_sei_unit(rbsp.header.unit_type) {
         return Ok(None);
     }
     rbsp.header.require_base_layer()?;
-    Ok(Some(hdr_from_rbsp(&rbsp.bytes)?))
+    Ok(Some(received_hdr_from_rbsp(&rbsp.bytes)?))
+}
+/// Static HDR metadata from one NAL unit, or `None` when it states none.
+pub fn hdr_from_nal(nal: &[u8], budget: usize) -> Result<Option<HdrMetadata>> {
+    Ok(received_hdr_from_nal(nal, budget)?.map(|(hdr, _)| hdr))
+}
+/// Apply complete received guidance, including explicit zero CLL. Malformed
+/// outer SEI framing returns an error without changing the previous statement.
+pub(crate) fn update_hdr_from_nal(hdr: &mut HdrMetadata, nal: &[u8], budget: usize) -> Result<bool> {
+    let Some((received, cll_received)) = received_hdr_from_nal(nal, budget)? else {
+        return Ok(false);
+    };
+    hdr.merge(received);
+    if cll_received {
+        hdr.light = received.light;
+    }
+    Ok(cll_received)
 }
 
 #[cfg(test)]

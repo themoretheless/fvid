@@ -1,0 +1,14 @@
+error: missing documentation for a struct
+   --> /private/tmp/fvid-ogg-continuation-171-candidate/src/ogg/reader.rs:133:1
+    |
+133 | pub struct OggOpusReader<R: Read> {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+note: the lint level is defined here
+   --> /private/tmp/fvid-ogg-continuation-171-candidate/src/lib.rs:136:9
+    |
+136 | #![deny(missing_docs)]
+    |         ^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

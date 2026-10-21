@@ -1,0 +1,87 @@
+{
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/playback/audio/avi_audio.rs": "467cd92fea8fa2a7e35c3b792567b9bde828e1c9a0f79076f760cf57a1039b3e",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/avi_pcm.rs": "8de70670f2e8152d7b4dc7c1b5af2be21c8023019ce7805b70f5fd9f5ca799d5"
+  },
+  "checks": [
+    {
+      "name": "related-after",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--test",
+        "avi_adpcm_grouped",
+        "--test",
+        "avi_riff_boundary",
+        "--test",
+        "avi_index_origin",
+        "--test",
+        "avi_main_header_bounds",
+        "--test",
+        "avi_audio_eof",
+        "--test",
+        "avi_duration_grid",
+        "--test",
+        "audio_read_limit",
+        "--test",
+        "g711_native"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-167-related-after.log"
+    },
+    {
+      "name": "root-units",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--features",
+        "player",
+        "--lib",
+        "avi"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-167-root-units.log"
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "avi_pcm",
+        "--test",
+        "avi_adpcm_grouped",
+        "--test",
+        "avi_riff_boundary",
+        "--test",
+        "avi_index_origin",
+        "--test",
+        "avi_main_header_bounds"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-167-core.log"
+    },
+    {
+      "name": "player-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--features",
+        "player"
+      ],
+      "exit_code": 0,
+      "log": "docs/improvements/evidence/batch-167-player-build.log"
+    }
+  ]
+}
