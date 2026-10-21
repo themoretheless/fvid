@@ -1,0 +1,41 @@
+   Compiling fvid-cpu v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-cpu)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.72s
+     Running unittests src/lib.rs (/private/tmp/fvid-verify-cpu/debug/deps/fvid_cpu-cc34e240f25b82f4)
+
+running 19 tests
+test tests::avc_chroma_bilinear_matches_scalar ... ok
+test tests::avc_hsum_and_vsum_match_scalar ... ok
+test tests::hevc_fir_accumulate_matches_scalar ... ok
+test tests::hevc_deblock_luma_batch4_scalar_matches_reference ... ok
+test tests::hevc_deblock_luma_batch4_neon_matches_scalar ... ok
+test tests::hevc_inverse_dct_dc_only ... ok
+test tests::hevc_inverse_neon_matches_scalar ... ok
+test tests::interp8_vertical_matches_scalar ... ok
+test tests::reverse_bytes_matches_std ... ok
+test tests::plane_copy_preserves_rows_and_padding ... ok
+test tests::reverse_copy_matches ... ok
+test tests::sbr_qmf_synthesis32_slot_matches_scalar ... ok
+test tests::sbr_qmf_synthesis_slot_matches_scalar ... ok
+test tests::step2_swap ... ok
+test tests::av1_wiener_7tap_matches_scalar ... ok
+test tests::av1_cdef_block_neon_matches_scalar ... ok
+test tests::vp9_filter_batch4_scalar_matches_lane ... ok
+test tests::hevc_inverse_dct_matches_dense_matrix_and_scalar ... ok
+test tests::vp9_filter_batch4_neon_matches_scalar ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/hflip_contract.rs (/private/tmp/fvid-verify-cpu/debug/deps/hflip_contract-2b786a1481158cdb)
+
+running 2 tests
+test invalid_copy_geometry_leaves_the_destination_unchanged ... ok
+test copy_matches_in_place_without_touching_row_padding ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests fvid_cpu
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

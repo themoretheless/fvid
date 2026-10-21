@@ -1,0 +1,11 @@
+{
+  "status": "pending_player_regressions",
+  "registry_accepted": 178,
+  "cpu_tests_passed": 21,
+  "fixture_hash_checks": 134873,
+  "fixture_hash_errors": 0,
+  "source_compilation": "current player library produced before blocked binary compilation",
+  "player_regressions": "queued on shared Cargo lock; direct rustc test compilation also waits while loading proc-macro dylib",
+  "blocker": "sampled rustc stack ends in dyld Loader::mapSegments -> fcntl while loading macro dylib. No failed-test result inferred.",
+  "main_pushed": false
+}

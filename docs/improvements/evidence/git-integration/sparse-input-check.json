@@ -1,0 +1,5 @@
+{
+  "test": "tests/mp4_signed_offset.rs",
+  "change": "Replace empty BufRead implementation with actual BufReader::with_capacity(1024, Sparse). Keep packet bytes, analytic pixels, clocks, seeks, EOF and read-volume limits unchanged.",
+  "accepted_improvements_added": 0
+}
