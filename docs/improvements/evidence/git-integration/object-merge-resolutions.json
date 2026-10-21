@@ -212738,5 +212738,40 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-motion-tonemap-wip-20261007",
+    "incoming": "b56a2e5f9ee4cb61d82a7070c219cff0781af9aa",
+    "conflicts": {
+      "src/codec/avc_decoder.rs": {
+        "1": [
+          "100644",
+          "512304c9165d793bb5f202f7c54cbd80e7a9191c"
+        ],
+        "2": [
+          "100644",
+          "95bb141db12d52ad171e85e7d9f0f40a30884700"
+        ],
+        "3": [
+          "100644",
+          "1084f5a57c4b843a5f92b089fd78d1b87d471755"
+        ]
+      },
+      "src/codec/avc_reference_motion.rs": {
+        "1": [
+          "100644",
+          "e14ebe9ee36c1ffdff8a5ccea2142423dd732987"
+        ],
+        "2": [
+          "100644",
+          "5c590531b177cea69c27b449e1a2991f45d23b8c"
+        ],
+        "3": [
+          "100644",
+          "76be30ec11e8f0b2f6a08ab1622c544711dab5c9"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
