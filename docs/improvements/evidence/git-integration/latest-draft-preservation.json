@@ -1,0 +1,11 @@
+{
+  "branch": "codex/preserve-concurrent-memory-draft-1792621241",
+  "commit": "a044b3623d804b7d2f59fff6c66220dbd6a1ae29",
+  "merge_commit": "86b6ea716bd601e4f2b9a885c2817321520a61a1",
+  "restored_hooks": [
+    "src/codec/hevc_block.rs"
+  ],
+  "production_source_matches_verified_revision": "d6302d04f9ae52802e9368d46810227e88bd3c69",
+  "unqualified_memory_sources_preserved_in_branch": true,
+  "accepted_improvements_added": 0
+}

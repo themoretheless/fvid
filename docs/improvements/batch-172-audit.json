@@ -1,5 +1,5 @@
 {
-  "status": "investigating",
+  "status": "accepted",
   "candidate": "FVID-0179",
   "source": "src/container/mp4.rs",
   "source_sha256": "aa8e4936e837e38646647b79d0404332536393b57c65e4db4b63b35e8f6ce08f",

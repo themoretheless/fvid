@@ -1,3 +1,4 @@
+    Blocking waiting for file lock on build directory
 warning: unreachable pattern
    --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
     |
@@ -429,6 +430,7 @@ warning: function `supports` is never used
    |               ^^^^^^^^
 
 warning: `fvid-media` (lib) generated 40 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
 warning: method `iter` is never used
   --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
    |
@@ -438,12 +440,6 @@ warning: method `iter` is never used
    |                   ^^^^
    |
    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
-
-warning: trait `InternedMetadata` is never used
-   --> src/container/string_interner.rs:108:11
-    |
-108 | pub trait InternedMetadata {
-    |           ^^^^^^^^^^^^^^^^
 
 warning: function `adjust_luma` is never used
     --> src/player.rs:1590:4
@@ -463,9 +459,8 @@ warning: function `covered_span` is never used
 4328 | fn covered_span(covered: (u64, u64), total: u64) -> [f32; 2] {
      |    ^^^^^^^^^^^^
 
-warning: `fvid` (lib) generated 5 warnings
-   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.92s
+warning: `fvid` (lib) generated 4 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14m 56s
      Running tests/hls_parser_regressions.rs (target/debug/deps/hls_parser_regressions-a1c1f7a01fb76e88)
 
 running 5 tests
@@ -475,44 +470,44 @@ test cancelling_in_the_final_write_does_not_report_success ... ok
 test protocol_decimal_integers_do_not_accept_a_leading_plus ... ok
 test control_assembles_to_the_decodable_synthetic_video ... ok
 
-test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
 
      Running tests/mp4.rs (target/debug/deps/mp4-39e337392fbba28a)
 
 running 20 tests
-test a_foreign_track_never_has_its_sample_table_read ... ok
-test an_anamorphic_file_states_the_shape_of_its_pixels ... ok
-test a_chapter_list_in_the_movies_own_clock_needs_no_second_reading ... ok
 test extended_box_size ... ok
 test a_file_of_only_unplayable_tracks_names_the_gap ... ok
+test a_chapter_list_in_the_movies_own_clock_needs_no_second_reading ... ok
+test an_anamorphic_file_states_the_shape_of_its_pixels ... ok
 test a_title_that_is_not_text_costs_only_the_title ... ok
-test a_track_keeps_the_title_and_language_the_file_gives_it ... ok
-test a_language_that_is_not_three_letters_reads_as_nothing_said ... ok
 test hevc_track_validates_hevc_configuration ... ok
-test invalid_box_reports_offset_size_and_remaining_bytes ... ok
-test a_track_reports_the_shape_of_its_pixels ... ok
-test a_header_turns_the_picture_upright ... ok
-test indexed_packets_timestamps_sync_and_edits ... ok
+test a_language_that_is_not_three_letters_reads_as_nothing_said ... ok
 test an_unplayable_track_is_left_out_without_costing_the_picture ... ok
+test a_foreign_track_never_has_its_sample_table_read ... ok
 test every_truncation_is_rejected_and_limits_are_enforced ... ok
-test rejects_invalid_tables_offsets_and_external_references ... ok
-test a_movies_own_chapter_list_names_its_parts ... ok
+test invalid_box_reports_offset_size_and_remaining_bytes ... ok
+test indexed_packets_timestamps_sync_and_edits ... ok
+test a_track_keeps_the_title_and_language_the_file_gives_it ... ok
 test a_truncated_chapter_list_leaves_the_movie_playable ... ok
+test a_movies_own_chapter_list_names_its_parts ... ok
+test a_header_turns_the_picture_upright ... ok
+test a_track_reports_the_shape_of_its_pixels ... ok
+test rejects_invalid_tables_offsets_and_external_references ... ok
 test mutated_metadata_never_panics ... ok
 test a_quicktime_text_track_does_not_spoil_the_picture ... ok
 
-test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 38.40s
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 56.16s
 
      Running tests/mp4_audio_clocks.rs (target/debug/deps/mp4_audio_clocks-d26bd6810a57aa1c)
 
 running 8 tests
 test decoded_geometry_and_fractional_negative_preroll_are_bounded ... ok
-test standard_audio_clock ... ok
-test sample_clock_control ... ok
-test negative_composition_audio_start ... ok
-test millisecond_media_clock ... ok
-test video_rate_media_clock ... ok
 test unrelated_audio_rate_clock ... ok
+test sample_clock_control ... ok
+test millisecond_media_clock ... ok
+test standard_audio_clock ... ok
+test video_rate_media_clock ... ok
+test negative_composition_audio_start ... ok
 test seek_inside_pcm_and_alac_packets_trims_to_first_sample_at_or_after_target ... ok
 
 test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
@@ -532,7 +527,7 @@ test owned_audio_file_geometry_and_interval_follow_enabled_stream ... ok
 test all_flag_versions_and_layouts_keep_exact_playback_seek_and_eof ... ok
 test explicit_video_index_can_still_inspect_the_disabled_track ... ok
 
-test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 32.12s
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 32.02s
 
      Running tests/mp4_fragment_description.rs (target/debug/deps/mp4_fragment_description-c3f076a4373ba761)
 
@@ -542,7 +537,7 @@ test playback::unresolved_description_refuses_before_native_decoder_admission ..
 test supported_effective_descriptions_keep_packets_clocks_and_budgets ... ok
 test playback::healthy_descriptions_keep_analytic_planes_rgb_public_seek_and_eof ... ok
 
-test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
      Running tests/mp4_pcm_choice.rs (target/debug/deps/mp4_pcm_choice-a977b9ff650965a8)
 
@@ -558,7 +553,7 @@ test control_samples_are_contiguous_distinct_and_exact ... ok
 test a_failed_seek_invalidates_the_cached_cursor_before_recovery ... ok
 test authored_colors_play_with_exact_samples_timestamps_seek_rewind_and_eof ... ok
 
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
      Running tests/vp9_chroma.rs (target/debug/deps/vp9_chroma-8a508abeeb15afdf)
 
@@ -570,5 +565,5 @@ test coloured_dc_residuals_match_independent_analytic_planes ... ok
 test webm_rgb_uses_full_chroma_geometry_at_every_sample_depth ... ok
 test webm_chroma_geometry_pixels_resize_seek_and_rewind ... ok
 
-test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
 

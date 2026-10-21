@@ -1332,4 +1332,4 @@ mod retained_surface_tests {
 #[cfg(feature = "metal")]
 mod metal;
 #[cfg(feature = "metal")]
-pub use metal::MetalPlanes;
+pub use metal::{METAL_UMA_PAGE_BYTES, MetalPlanes, UmaSharedBuffer};

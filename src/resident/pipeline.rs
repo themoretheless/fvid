@@ -140,6 +140,15 @@ impl GpuPipeline {
             Engine::Cuda(p) => p.device_name(),
         }
     }
+    /// True when the pipeline executes compute shaders directly on zero-copy UMA shared memory.
+    pub fn uses_uma_zero_copy(&self) -> bool {
+        match &self.inner {
+            #[cfg(feature = "gpu")]
+            Engine::Wgpu(p) => p.uses_uma_compute(),
+            #[cfg(feature = "cuda")]
+            Engine::Cuda(_) => false,
+        }
+    }
     /// Includes resident textures/buffers, staging, uniforms and caller boundary buffers.
     /// Excludes driver/compiler overhead; this is not a strict RSS/VRAM bound.
     pub fn controlled_memory_bytes(&self) -> usize {

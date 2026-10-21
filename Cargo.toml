@@ -41,9 +41,9 @@ unsafe_code = "forbid"
 default = ["gpu", "cuda"]
 player = ["fvid-codecs/player", "dep:fvid-opus", "dep:pollster", "dep:naga", "dep:eframe", "dep:rfd", "dep:fvid-platform", "dep:cpal", "dep:symphonia", "videotoolbox", "fvid-vt?/metal", "fvid-media/player", "fvid-media/http-input"]
 # Hardware decode and H.264/HEVC encode through VideoToolbox; a no-op off macOS.
-videotoolbox = ["dep:fvid-vt"]
+videotoolbox = ["dep:fvid-vt", "fvid-vt?/metal"]
 cuda = ["dep:fvid-cuda"]
-gpu = ["dep:wgpu", "dep:pollster", "dep:naga"]
+gpu = ["dep:wgpu", "dep:pollster", "dep:naga", "dep:fvid-vt", "fvid-vt?/metal"]
 mcp = ["media", "dep:rmcp", "dep:tokio", "dep:axum", "dep:serde"]
 media = ["fvid-media/http-input"]
 # Owned media + CUDA NVDEC/NVENC (no FFmpeg/libav backend).

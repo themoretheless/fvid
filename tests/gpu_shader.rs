@@ -254,6 +254,56 @@ fn programmable_filters_translate_to_every_shader_backend() {
     }
 }
 
+#[cfg(feature = "gpu")]
+#[test]
+fn compute_shader_and_programmable_filters_translate_to_metal_and_spirv() {
+    let compute_base = include_str!("../src/gpu/compute.wgsl");
+    for source in [
+        compute_base,
+        fvid::resident::ByteShader::new(include_str!("../shaders/negate.wgsl"))
+            .unwrap()
+            .compute_compiled_source(),
+        fvid::resident::ByteShader::new(include_str!("../shaders/boxblur.wgsl"))
+            .unwrap()
+            .compute_compiled_source(),
+    ] {
+        let (module, info) = shader(source);
+        assert_eq!(module.entry_points.len(), 1);
+        assert_eq!(module.entry_points[0].stage, ShaderStage::Compute);
+        assert_eq!(module.entry_points[0].name, "compute_main");
+        let resources = msl::EntryPointResources {
+            resources: module
+                .global_variables
+                .iter()
+                .filter_map(|(_, global)| {
+                    let resource = global.binding?;
+                    let mut target = msl::BindTarget::default();
+                    target.buffer = Some(resource.binding as u8);
+                    Some((resource, target))
+                })
+                .collect(),
+            ..Default::default()
+        };
+        let msl_options = msl::Options {
+            lang_version: (2, 0),
+            fake_missing_bindings: false,
+            per_entry_point_map: [("compute_main".into(), resources)].into(),
+            ..Default::default()
+        };
+        let msl_pipeline = msl::PipelineOptions {
+            entry_point: Some((ShaderStage::Compute, "compute_main".into())),
+            ..Default::default()
+        };
+        let (msl_source, reflection) =
+            msl::write_string(&module, &info, &msl_options, &msl_pipeline)
+                .expect("MSL compute translation must succeed");
+        let translated_name = reflection.entry_point_names[0]
+            .as_ref()
+            .expect("MSL compute entry point");
+        assert!(msl_source.contains(translated_name));
+    }
+}
+
 #[cfg(feature = "player")]
 #[test]
 fn display_shader_translates_all_player_paths_to_every_backend() {

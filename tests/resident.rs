@@ -77,6 +77,12 @@ fn check_hardware(backend: Backend) {
         let options = ExecutionOptions { backend, device: 0 };
         let mut gpu = GpuPipeline::new(&header, &transforms, options, 256 * 1024 * 1024)
             .expect("physical GPU required; no fallback");
+        if backend == Backend::Metal {
+            assert!(
+                gpu.uses_uma_zero_copy(),
+                "Apple Silicon Metal must use UMA zero-copy compute buffers"
+            );
+        }
         let admitted = gpu.controlled_memory_bytes();
         if width == 8 && format == "420" {
             assert!(GpuPipeline::new(&header, &transforms, options, admitted - 1).is_err());

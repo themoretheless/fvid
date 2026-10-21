@@ -1,24 +1,25 @@
+    Blocking waiting for file lock on build directory
 warning: unreachable pattern
    --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
     |
-492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
-    |       ^ no value can reach this
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
     |
 note: multiple earlier patterns match some of the same values
    --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
     |
-482 | ...             merge_order::Selection::Initial(i)=>{
-    |                 ---------------------------------- matches some of the same values
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
 ...
-486 | ...             merge_order::Selection::ViewSynthesis=>return Ok(Resolv...
-    |                 ------------------------------------- matches some of the same values
-487 | ...             merge_order::Selection::Texture=>return Ok(Resolved::Te...
-    |                 ------------------------------- matches some of the same values
-488 | ...             merge_order::Selection::InterView=>{selected_iv=1;(spec...
-    |                 --------------------------------- matches some of the same values
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
 ...
-492 | ...             _=>return Err(invalid("unexpected HEVC depth IV merge s...
-    |                 ^ ...and 3 other patterns collectively make this unreachable
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
     = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
 
 warning: function `intra_plane` is never used
@@ -32,7 +33,7 @@ warning: function `intra_plane` is never used
 warning: function `read_inter_coefficients_422` is never used
   --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
    |
-34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,patter...
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 warning: function `candidates` is never used
@@ -94,7 +95,7 @@ warning: struct `Run` is never constructed
 warning: function `expand_runs` is never used
    --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
     |
-431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run])...
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
     |               ^^^^^^^^^^^
 
 warning: associated function `new` is never used
@@ -156,7 +157,6 @@ warning: function `make_view_format` is never used
 
 warning: `fvid-codecs` (lib) generated 12 warnings
 warning: `fvid-cuda` (lib) generated 8 warnings
-   Compiling fvid-media v0.1.0 (/Users/themoretheless/Documents/Sources/fvid/crates/fvid-media)
 warning: variable does not need to be mutable
    --> crates/fvid-media/src/owned_xfade.rs:325:5
     |
@@ -223,19 +223,19 @@ warning: associated function `identifiers` is never used
 warning: function `try_mp4_as` is never used
   --> crates/fvid-media/src/owned_probe.rs:61:15
    |
-61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Op...
+61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
    |               ^^^^^^^^^^
 
 warning: function `try_webm_as` is never used
   --> crates/fvid-media/src/owned_probe.rs:82:15
    |
-82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<O...
+82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
    |               ^^^^^^^^^^^
 
 warning: function `try_adts_as` is never used
    --> crates/fvid-media/src/owned_probe.rs:102:15
     |
-102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<...
+102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
     |               ^^^^^^^^^^^
 
 warning: function `supports` is never used
@@ -259,7 +259,7 @@ warning: function `supports` is never used
 warning: function `supports` is never used
   --> crates/fvid-media/src/owned_wave_remux.rs:22:15
    |
-22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &Copy...
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
    |               ^^^^^^^^
 
 warning: function `supports_concat` is never used
@@ -292,7 +292,7 @@ warning: method `nul_name` is never used
  6 |           impl PixelFormat {
    |           ---------------- method in this implementation
 ...
- 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
    |                             ^^^^^^^^
 ...
 16 | / formats! {
@@ -333,7 +333,7 @@ warning: function `inspect` is never used
 warning: function `geometry` is never used
   --> crates/fvid-media/src/owned_raw_flac.rs:75:15
    |
-75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(...
+75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
    |               ^^^^^^^^
 
 warning: function `supports` is never used
@@ -357,7 +357,7 @@ warning: function `supports` is never used
 warning: function `geometry` is never used
   --> crates/fvid-media/src/owned_matroska_alac_export.rs:95:15
    |
-95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u...
+95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,options...
    |               ^^^^^^^^
 
 warning: function `supports` is never used
@@ -429,7 +429,6 @@ warning: function `supports` is never used
 85 | pub(crate) fn supports(
    |               ^^^^^^^^
 
-   Compiling fvid v0.1.0 (/Users/themoretheless/Documents/Sources/fvid)
 warning: `fvid-media` (lib) generated 40 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
 warning: method `iter` is never used
   --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
@@ -450,7 +449,7 @@ warning: function `adjust_luma` is never used
 warning: function `adjust_rgb` is never used
     --> src/player.rs:1601:15
      |
-1601 | pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5...
+1601 | pub(crate) fn adjust_rgb(source: &[u8], out: &mut Vec<u8>, s: &[f32; 5]) {
      |               ^^^^^^^^^^
 
 warning: function `covered_span` is never used
@@ -460,3 +459,4 @@ warning: function `covered_span` is never used
      |    ^^^^^^^^^^^^
 
 warning: `fvid` (lib) generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 02s

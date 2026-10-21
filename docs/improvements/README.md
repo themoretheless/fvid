@@ -797,3 +797,15 @@ Analytic VP9 planes/RGB,clocks and40 public native seek targets pass.4 focused/
 54 related integrations,17 units,25 core checks and player build pass. The initial
 seek test oracle was corrected to the documented final-frame clamp with exact
 pixels/interval and repeatedEOF checks;it adds no ID. See `batch-171-validation.json`.
+
+## Batch 172 — full signed 32-bit fragmented MP4 `trun.data_offset`
+
+FVID-0179 resolves negative `trun.data_offset` magnitudes via `unsigned_abs()`
+before `checked_sub`, eliminating the `i32::MIN` (`-2147483648`) negation
+overflow panic. Corrupt short `min-underflow.mp4` now refuses cleanly as
+`Error::Invalid` without unwinding, while a legitimate `-2 GiB` displacement
+across a virtual `free` box (`valid-min`) indexes all 3 packets in 13,152 read
+bytes and completes native VP9 playback, 8 clamped public seeks, rewind, and
+repeated EOF in 71,149 read bytes. 4 focused/58 related integrations, 17 units,
+27 core checks, fixture unittest and player build pass. See
+`batch-172-validation.json`.
