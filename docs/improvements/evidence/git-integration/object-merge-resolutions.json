@@ -212785,5 +212785,56 @@
     "incoming": "b2eb8f063f6eaaf951bfbc0be8778d27fba05f58",
     "conflicts": {},
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-ssr-ps-preparation-20261009",
+    "incoming": "4970771713c8fdc50b74a94f01b9d174a6617298",
+    "conflicts": {
+      "crates/fvid-media/src/owned_aac/aac_sbr_ps.rs": {
+        "1": [
+          "100644",
+          "7d04d70b896101cafe0ed114ed54a08b72abe55b"
+        ],
+        "2": [
+          "100644",
+          "3c221da15321255dc345ad17e9b18efaa3c683d2"
+        ],
+        "3": [
+          "100644",
+          "b3077dcce4f9143e95b736b80b8d3b29c6a5203b"
+        ]
+      },
+      "scripts/generate_aac_ssr_ps_fixtures.py": {
+        "2": [
+          "100644",
+          "5cb04c4683cd9248bac7ed0e22b8a17107881bf2"
+        ],
+        "3": [
+          "100644",
+          "78e41de14324c830508cfca97e52ce0892169b1f"
+        ]
+      },
+      "tests/aac_ssr_ps.rs": {
+        "2": [
+          "100644",
+          "27729f90c934d316dfe73235f2193d6bc9cea890"
+        ],
+        "3": [
+          "100644",
+          "db8631803455f2d3c74fb8532282eb2549dc5479"
+        ]
+      },
+      "tests/fixtures/playback-errors/aac-ssr-ps.json": {
+        "2": [
+          "100644",
+          "6a733ffaad82bf5033b10d120620a010c0f05d01"
+        ],
+        "3": [
+          "100644",
+          "38ff84a1a154fee0c3b3b2da5639ddaae1e0bed4"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
