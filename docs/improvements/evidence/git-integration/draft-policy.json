@@ -1,0 +1,13 @@
+{
+  "not_accepted_optimizations": [
+    "src/codec/cu_state_pool.rs",
+    "src/codec/hevc_ctu_context.rs",
+    "src/codec/hevc_neighbor_cache.rs",
+    "src/color/simd_rgb_convert.rs",
+    "src/container/string_interner.rs",
+    "src/codec/vp9_parallel.rs",
+    "src/codec/simd_dct.rs"
+  ],
+  "reason": "Unfinished historic experiments without repeatable comparison; preserve in Git ancestry, do not expose in production. Current implementations supersede HEVC/hardware/player branch work.",
+  "original_checkpoint": "70483dda73"
+}
