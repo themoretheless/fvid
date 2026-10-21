@@ -1,0 +1,9 @@
+{
+  "revision": "d6302d04f9ae52802e9368d46810227e88bd3c69",
+  "root": "/private/tmp/fvid-delivery-d6302d04f9ae",
+  "shared_target": "/Users/themoretheless/Documents/Sources/fvid/target",
+  "fixtures": "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures",
+  "draft_branch": "codex/preserve-concurrent-memory-draft-1792621241",
+  "draft_commit": "030a8f62fb1b63405cc10603c145918b251e9758",
+  "reason": "Validate committed production source independently of ongoing unqualified memory/HEVC working-tree edits. Synthetic checked-in fixtures are shared read-only and hash-audited."
+}

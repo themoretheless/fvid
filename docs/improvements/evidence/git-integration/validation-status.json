@@ -1,11 +1,37 @@
 {
-  "status": "pending_player_regressions",
-  "registry_accepted": 178,
+  "status": "passed_for_qualified_production_tree",
+  "verified_code_revision": "d6302d04f9ae52802e9368d46810227e88bd3c69",
+  "source_and_regression_inputs_verified": 1942,
+  "build": {
+    "passed": true,
+    "command": "cargo build --locked --offline --features player",
+    "source": "isolated committed checkout"
+  },
+  "unit_tests": {
+    "passed": 1028,
+    "failed": 0,
+    "previously_ignored_unchanged": 26
+  },
+  "integration_tests": {
+    "targets": 21,
+    "passed": 61,
+    "failed": 0,
+    "ignored": 0
+  },
   "cpu_tests_passed": 21,
   "fixture_hash_checks": 134873,
   "fixture_hash_errors": 0,
-  "source_compilation": "current player library produced before blocked binary compilation",
-  "player_regressions": "queued on shared Cargo lock; direct rustc test compilation also waits while loading proc-macro dylib",
-  "blocker": "sampled rustc stack ends in dyld Loader::mapSegments -> fcntl while loading macro dylib. No failed-test result inferred.",
-  "main_pushed": false
+  "trun": {
+    "corrupt_min_offset_refuses_without_panic": true,
+    "legal_minus_2_gib_native_playback_and_seek": true,
+    "logical_size": 2147484382,
+    "actual_read_bytes": 75630,
+    "maximum_allowed_read_request": 65536,
+    "decoder_budget": 33554432
+  },
+  "accepted_improvements": 178,
+  "campaign_target": 1000,
+  "improvements_added_by_git_delivery": 0,
+  "performance_optimizations_accepted_by_delivery": 0,
+  "late_unqualified_drafts": "Preserved in separate refs and main ancestry; omitted from qualified runtime source. Live GPU work remains with its owning task."
 }

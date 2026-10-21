@@ -1,0 +1,115 @@
+
+running 6 tests
+test pending_header_reset_padding_and_compressed_budget_are_checked ... ok
+test malformed_separate_frames_have_specific_errors ... ok
+test mp4_separate_groups_preserve_pixels_and_refuse_incomplete_end ... ok
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+test end_of_input_and_configuration_reject_incomplete_frames ... ok
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+test multiple_groups_publish_only_a_complete_picture_and_match_pixels ... ok
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+test separate_frame_pixels_maps_reset_webm_and_seek_match_oracle ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+

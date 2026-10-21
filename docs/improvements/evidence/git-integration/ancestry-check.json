@@ -43,12 +43,14 @@
     "codex/preserve-av1-verification-20261009-ps-absence",
     "codex/preserve-codec-player-wip-20261006",
     "codex/preserve-concurrent-av1-fixtures-20261009",
+    "codex/preserve-concurrent-memory-draft-1792621241",
     "codex/preserve-dependent-sbr-draft-20261009",
     "codex/preserve-field-longterm-progress-20261006",
     "codex/preserve-fvid-session-20261021-203652",
     "codex/preserve-hevc-colour-plane-draft-20261009",
     "codex/preserve-hevc-context-wip-20261007",
     "codex/preserve-hevc-motion-identity-20261012",
+    "codex/preserve-live-gpu-draft-20261022",
     "codex/preserve-motion-tonemap-wip-20261007",
     "codex/preserve-player-progress-20261006",
     "codex/preserve-rgb-lut-wip-20261006",
@@ -56,5 +58,7 @@
     "codex/verify-b-field-gaps-20261006",
     "main"
   ],
-  "not_in_main": []
+  "not_in_main": [],
+  "stash_count": 4,
+  "release_refs_preserved": true
 }

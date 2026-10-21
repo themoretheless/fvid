@@ -1,0 +1,132 @@
+
+running 1 test
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 0 restoration [1, 1, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 1 restoration [2, 2, 2]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 0 restoration [1, 0, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 1 restoration [2, 1, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 1 restoration [1, 2, 2]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 0 restoration [2, 2, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 1 restoration [1, 2, 2]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 1 restoration [3, 2, 2]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 0 restoration [1, 1, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 0 restoration [1, 0, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 1 restoration [1, 2, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 0 restoration [0, 0, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 1 restoration [1, 0, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 1 restoration [1, 2, 0]
+av1-superres-segmentation-depth8-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 0 restoration [0, 0, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 1 restoration [2, 2, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 0 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 1 restoration [2, 2, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 1 restoration [3, 2, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 0 restoration [0, 0, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 1 restoration [2, 2, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 1 restoration [2, 2, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 0 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 1 restoration [0, 1, 1]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 0 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 1 restoration [0, 2, 2]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 0 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth10-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 0 restoration [2, 0, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: type 1 restoration [2, 2, 2]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom9.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 0 restoration [2, 0, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 1 restoration [2, 1, 2]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: type 1 restoration [1, 2, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom12.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 0 restoration [2, 0, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 1 restoration [2, 2, 1]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: type 1 restoration [2, 1, 2]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation0-denom16.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 0 restoration [0, 2, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 1 restoration [1, 1, 1]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: type 1 restoration [0, 1, 1]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom9.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 0 restoration [0, 2, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 1 restoration [0, 1, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom12.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 0 restoration [0, 2, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update true temporal false primary 7
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update false temporal false primary 0
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: type 1 restoration [0, 0, 0]
+av1-superres-segmentation-depth12-colors3-chroma1-layout1-vflip1-q32-orientation1-denom16.obu: segmentation true update false temporal false primary 0
+VideoToolbox: session creation failed (-8971); using the software AV1 decoder
+test owned_superres_segment_maps_pixels_reset_and_seek ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.21s
+

@@ -1,0 +1,8 @@
+{
+  "branch": "codex/preserve-live-gpu-draft-20261022",
+  "commit": "4f94c30e48918fe1c5f9b2411786fc99b8599106",
+  "merge_commit": "65103f4ba833da579e08e1dda87a98dadf826580",
+  "qualified_source_revision": "d6302d04f9ae52802e9368d46810227e88bd3c69",
+  "working_gpu_edits_preserved_in_place": true,
+  "reason": "Late concurrent GPU edits are preserved for their owning task and separate qualification; checked production source remains unchanged."
+}

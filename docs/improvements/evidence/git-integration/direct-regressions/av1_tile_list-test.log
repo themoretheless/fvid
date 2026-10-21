@@ -1,0 +1,14 @@
+
+running 9 tests
+test general_packet_tile_list_refusal_reproduces_missing_side_information ... ok
+test owned_camera_tile_list_pixels_external_context_and_preserved_sparse_output ... ok
+test sb128_camera_tile_list_pixels_distinct_anchors_and_sparse_canvas ... ok
+test camera_tile_list_high_depth_and_full_chroma_matrix ... ok
+test lossy_camera_tile_list_transform_reconstruction_matrix ... ok
+test primary_ref_none_camera_tile_list_matrix ... ok
+test adapted_anchor_cdf_camera_tile_list_matrix ... ok
+test reverse_moving_camera_tile_lists_across_context_depth_chroma_and_superblocks ... ok
+test moving_camera_tile_list_reconstruction_across_context_depth_chroma_and_superblocks ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.05s
+
