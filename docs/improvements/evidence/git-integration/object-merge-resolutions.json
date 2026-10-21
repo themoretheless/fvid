@@ -212773,5 +212773,11 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-player-progress-20261006",
+    "incoming": "d06d70a40fe9dd67e7d78457ab8a373d6c9d9896",
+    "conflicts": {},
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
