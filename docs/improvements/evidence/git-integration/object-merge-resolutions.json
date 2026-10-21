@@ -8274,5 +8274,26 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-active-player-20261008",
+    "incoming": "842f3bf3ad110e13fc3a0772a724716d78e0a4bb",
+    "conflicts": {
+      "src/player_gpu.rs": {
+        "1": [
+          "100644",
+          "20db2ae9d7f372e7293576a48ee474269519d451"
+        ],
+        "2": [
+          "100644",
+          "7e3e0415b1608995adb965d6822ca4fca8bfb672"
+        ],
+        "3": [
+          "100644",
+          "269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
