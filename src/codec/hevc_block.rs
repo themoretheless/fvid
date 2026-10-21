@@ -51,10 +51,10 @@ pub fn decode(
     b: &mut impl ResidualBins,
     c: Config,
     scaling: &ScalingLists,
-    scratch: &mut Vec<i32>,
+    scratch_pool: &mut crate::memory::TransformScratchBuffer,
     out: &mut Vec<i32>,
 ) -> Result<()> {
-    read(b, c)?.reconstruct(scaling, scratch, out)
+    read(b, c)?.reconstruct(scaling, scratch_pool, out)
 }
 pub(crate) struct Coefficients {
     config: Config,
@@ -179,7 +179,7 @@ impl Coefficients {
     pub(crate) fn reconstruct(
         self,
         scaling: &ScalingLists,
-        scratch: &mut Vec<i32>,
+        scratch_pool: &mut crate::memory::TransformScratchBuffer,
         out: &mut Vec<i32>,
     ) -> Result<()> {
         let c = self.config;

@@ -1,0 +1,963 @@
+{
+  "removed": [
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e",
+      "bytes": 8971936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.d",
+      "bytes": 354
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.0.rcgu.o",
+      "bytes": 422688
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.2.rcgu.o",
+      "bytes": 592576
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.6.rcgu.o",
+      "bytes": 391448
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.4.rcgu.o",
+      "bytes": 346608
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.8.rcgu.o",
+      "bytes": 547032
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.1.rcgu.o",
+      "bytes": 475424
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.3.rcgu.o",
+      "bytes": 447784
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.7.rcgu.o",
+      "bytes": 518536
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_chroma_grain-24388535f9ae7b7e.av1_chroma_grain.13ac6c23bd6b3b49-cgu.5.rcgu.o",
+      "bytes": 328936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1",
+      "bytes": 8997184
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.d",
+      "bytes": 359
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.2.rcgu.o",
+      "bytes": 378192
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.0.rcgu.o",
+      "bytes": 423112
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.8.rcgu.o",
+      "bytes": 287240
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.4.rcgu.o",
+      "bytes": 433848
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.6.rcgu.o",
+      "bytes": 449552
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.3.rcgu.o",
+      "bytes": 371944
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.1.rcgu.o",
+      "bytes": 476600
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.5.rcgu.o",
+      "bytes": 378760
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_lossy_palette-c6680de9f43f5af1.av1_lossy_palette.9860ebf9a02d3e13-cgu.7.rcgu.o",
+      "bytes": 555056
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_model_trace-70822f36cc1e864d",
+      "bytes": 1963248
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_model_trace-70822f36cc1e864d.d",
+      "bytes": 274
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_model_trace-70822f36cc1e864d.av1_model_trace.95646973d194d99d-cgu.0.rcgu.o",
+      "bytes": 42776
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8",
+      "bytes": 11153984
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.d",
+      "bytes": 364
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.01.rcgu.o",
+      "bytes": 613128
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.13.rcgu.o",
+      "bytes": 479736
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.11.rcgu.o",
+      "bytes": 694368
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.03.rcgu.o",
+      "bytes": 610936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.07.rcgu.o",
+      "bytes": 253064
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.15.rcgu.o",
+      "bytes": 426600
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.09.rcgu.o",
+      "bytes": 729120
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.05.rcgu.o",
+      "bytes": 397368
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.00.rcgu.o",
+      "bytes": 703488
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.12.rcgu.o",
+      "bytes": 364840
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.10.rcgu.o",
+      "bytes": 540736
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.02.rcgu.o",
+      "bytes": 697632
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.06.rcgu.o",
+      "bytes": 477264
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.14.rcgu.o",
+      "bytes": 183080
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.08.rcgu.o",
+      "bytes": 419328
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_separate_frame-17d402c0d4b979c8.av1_separate_frame.ef299d0f4dc252e5-cgu.04.rcgu.o",
+      "bytes": 261632
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078",
+      "bytes": 8865048
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.d",
+      "bytes": 399
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.0.rcgu.o",
+      "bytes": 426440
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.2.rcgu.o",
+      "bytes": 630672
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.6.rcgu.o",
+      "bytes": 340312
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.4.rcgu.o",
+      "bytes": 459664
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.1.rcgu.o",
+      "bytes": 479104
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.3.rcgu.o",
+      "bytes": 691840
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_superres_segmentation-d279420cc7162078.av1_superres_segmentation.1430e58a095bdff7-cgu.5.rcgu.o",
+      "bytes": 393680
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_tile_list-88b601335c930f11",
+      "bytes": 2608096
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_tile_list-88b601335c930f11.d",
+      "bytes": 339
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_tile_list-88b601335c930f11.av1_tile_list.2af489c096733ead-cgu.1.rcgu.o",
+      "bytes": 235176
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_tile_list-88b601335c930f11.av1_tile_list.2af489c096733ead-cgu.2.rcgu.o",
+      "bytes": 332808
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_tile_list-88b601335c930f11.av1_tile_list.2af489c096733ead-cgu.0.rcgu.o",
+      "bytes": 359456
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761",
+      "bytes": 10916200
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.d",
+      "bytes": 394
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.07.rcgu.o",
+      "bytes": 684808
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.09.rcgu.o",
+      "bytes": 505992
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.05.rcgu.o",
+      "bytes": 701376
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.01.rcgu.o",
+      "bytes": 488296
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.03.rcgu.o",
+      "bytes": 720600
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.06.rcgu.o",
+      "bytes": 722344
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.08.rcgu.o",
+      "bytes": 473776
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.04.rcgu.o",
+      "bytes": 567760
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.00.rcgu.o",
+      "bytes": 426024
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_fragment_description-c3f076a4373ba761.mp4_fragment_description.64dfa1459a44b3a9-cgu.02.rcgu.o",
+      "bytes": 480432
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1",
+      "bytes": 10918080
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.d",
+      "bytes": 359
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.12.rcgu.o",
+      "bytes": 633064
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.00.rcgu.o",
+      "bytes": 425248
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.02.rcgu.o",
+      "bytes": 493944
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.10.rcgu.o",
+      "bytes": 384144
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.14.rcgu.o",
+      "bytes": 402736
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.06.rcgu.o",
+      "bytes": 448216
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.04.rcgu.o",
+      "bytes": 270152
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.08.rcgu.o",
+      "bytes": 199608
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.13.rcgu.o",
+      "bytes": 239320
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.01.rcgu.o",
+      "bytes": 486464
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.03.rcgu.o",
+      "bytes": 510152
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.11.rcgu.o",
+      "bytes": 320744
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.15.rcgu.o",
+      "bytes": 406256
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.07.rcgu.o",
+      "bytes": 462336
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.05.rcgu.o",
+      "bytes": 444728
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/mp4_signed_offset-34f5f1c7cbcfa0e1.mp4_signed_offset.fcc603029ec364fe-cgu.09.rcgu.o",
+      "bytes": 201488
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc",
+      "bytes": 8797840
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.d",
+      "bytes": 349
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.1.rcgu.o",
+      "bytes": 475024
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.3.rcgu.o",
+      "bytes": 677392
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.5.rcgu.o",
+      "bytes": 388688
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.0.rcgu.o",
+      "bytes": 422280
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.2.rcgu.o",
+      "bytes": 486376
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.6.rcgu.o",
+      "bytes": 335880
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration-64cc6905e7e2f6cc.av1_restoration.1fea61e8c252069f-cgu.4.rcgu.o",
+      "bytes": 447696
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332",
+      "bytes": 8824680
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.d",
+      "bytes": 374
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.3.rcgu.o",
+      "bytes": 542664
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.1.rcgu.o",
+      "bytes": 477056
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.5.rcgu.o",
+      "bytes": 390544
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.2.rcgu.o",
+      "bytes": 723152
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.0.rcgu.o",
+      "bytes": 424360
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.4.rcgu.o",
+      "bytes": 441024
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_cdef-4607aed8c3d07332.av1_restoration_cdef.89320affe80d8e9e-cgu.6.rcgu.o",
+      "bytes": 346032
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c",
+      "bytes": 8863672
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.d",
+      "bytes": 379
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.0.rcgu.o",
+      "bytes": 424776
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.2.rcgu.o",
+      "bytes": 600168
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.6.rcgu.o",
+      "bytes": 337160
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.4.rcgu.o",
+      "bytes": 508320
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.1.rcgu.o",
+      "bytes": 477472
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.3.rcgu.o",
+      "bytes": 686496
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_inter-21b3d617798f190c.av1_restoration_inter.5f2bfe4358f97539-cgu.5.rcgu.o",
+      "bytes": 392192
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35",
+      "bytes": 8852568
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.d",
+      "bytes": 379
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.6.rcgu.o",
+      "bytes": 332008
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.4.rcgu.o",
+      "bytes": 583704
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.0.rcgu.o",
+      "bytes": 424776
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.2.rcgu.o",
+      "bytes": 497008
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.5.rcgu.o",
+      "bytes": 390904
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.1.rcgu.o",
+      "bytes": 477472
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_multi-2bb162e200046f35.av1_restoration_multi.386d7274d9b41e04-cgu.3.rcgu.o",
+      "bytes": 619928
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0",
+      "bytes": 8829896
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.d",
+      "bytes": 369
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.3.rcgu.o",
+      "bytes": 674592
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.1.rcgu.o",
+      "bytes": 476648
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.5.rcgu.o",
+      "bytes": 390160
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.2.rcgu.o",
+      "bytes": 501184
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.0.rcgu.o",
+      "bytes": 423944
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.4.rcgu.o",
+      "bytes": 547232
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/av1_restoration_odd-8122f5b36b700ea0.av1_restoration_odd.ca38877e66349359-cgu.6.rcgu.o",
+      "bytes": 345768
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0",
+      "bytes": 14493536
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.d",
+      "bytes": 430
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.4.rcgu.o",
+      "bytes": 520984
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.00.rcgu.o",
+      "bytes": 533024
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.02.rcgu.o",
+      "bytes": 337728
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.10.rcgu.o",
+      "bytes": 413808
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.6.rcgu.o",
+      "bytes": 250072
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.06.rcgu.o",
+      "bytes": 407760
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.2.rcgu.o",
+      "bytes": 545248
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.0.rcgu.o",
+      "bytes": 417408
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.04.rcgu.o",
+      "bytes": 276144
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.08.rcgu.o",
+      "bytes": 358128
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.01.rcgu.o",
+      "bytes": 452856
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.5.rcgu.o",
+      "bytes": 300016
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.7.rcgu.o",
+      "bytes": 274136
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.03.rcgu.o",
+      "bytes": 277216
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.3.rcgu.o",
+      "bytes": 651952
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.07.rcgu.o",
+      "bytes": 319160
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.05.rcgu.o",
+      "bytes": 286960
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.09.rcgu.o",
+      "bytes": 319640
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_playback-c71d8ddfb7f1e6a0.eac3_playback.827abaca14974067-cgu.1.rcgu.o",
+      "bytes": 483472
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5",
+      "bytes": 14798656
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.d",
+      "bytes": 544
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.3.rcgu.o",
+      "bytes": 337416
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.1.rcgu.o",
+      "bytes": 455880
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.5.rcgu.o",
+      "bytes": 488744
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.7.rcgu.o",
+      "bytes": 479848
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.2.rcgu.o",
+      "bytes": 745816
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.0.rcgu.o",
+      "bytes": 534936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.4.rcgu.o",
+      "bytes": 322568
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.8.rcgu.o",
+      "bytes": 503512
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_presentation-b6c3fb063429aef5.eac3_presentation.d61b851cf1989023-cgu.6.rcgu.o",
+      "bytes": 341712
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685",
+      "bytes": 15278648
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.d",
+      "bytes": 564
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.08.rcgu.o",
+      "bytes": 320264
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.04.rcgu.o",
+      "bytes": 472432
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.06.rcgu.o",
+      "bytes": 457056
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.02.rcgu.o",
+      "bytes": 495872
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.00.rcgu.o",
+      "bytes": 455048
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.09.rcgu.o",
+      "bytes": 281504
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.05.rcgu.o",
+      "bytes": 442704
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.07.rcgu.o",
+      "bytes": 282960
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.03.rcgu.o",
+      "bytes": 604368
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_raw_presentation-78f2631badf41685.eac3_raw_presentation.709ea2ed32a92ae6-cgu.01.rcgu.o",
+      "bytes": 532296
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f",
+      "bytes": 13645248
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.d",
+      "bytes": 364
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.eac3_transient_pcm.fb3bee7dd58f38f3-cgu.0.rcgu.o",
+      "bytes": 453648
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.eac3_transient_pcm.fb3bee7dd58f38f3-cgu.2.rcgu.o",
+      "bytes": 283320
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.eac3_transient_pcm.fb3bee7dd58f38f3-cgu.4.rcgu.o",
+      "bytes": 259000
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.eac3_transient_pcm.fb3bee7dd58f38f3-cgu.1.rcgu.o",
+      "bytes": 450024
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.eac3_transient_pcm.fb3bee7dd58f38f3-cgu.3.rcgu.o",
+      "bytes": 309112
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_pcm-d23a5300b86f038f.eac3_transient_pcm.fb3bee7dd58f38f3-cgu.5.rcgu.o",
+      "bytes": 388808
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb",
+      "bytes": 14285944
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.d",
+      "bytes": 483
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.3.rcgu.o",
+      "bytes": 589808
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.1.rcgu.o",
+      "bytes": 457520
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.5.rcgu.o",
+      "bytes": 313736
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.2.rcgu.o",
+      "bytes": 677352
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.0.rcgu.o",
+      "bytes": 537816
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.4.rcgu.o",
+      "bytes": 620376
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_playback-b38b8b8075990cfb.eac3_transient_playback.1276219a21e73b18-cgu.6.rcgu.o",
+      "bytes": 362136
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4",
+      "bytes": 15473968
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.d",
+      "bytes": 594
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.07.rcgu.o",
+      "bytes": 650312
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.09.rcgu.o",
+      "bytes": 401912
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.05.rcgu.o",
+      "bytes": 417872
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.01.rcgu.o",
+      "bytes": 459384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.03.rcgu.o",
+      "bytes": 376664
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.06.rcgu.o",
+      "bytes": 564192
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.08.rcgu.o",
+      "bytes": 279696
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.04.rcgu.o",
+      "bytes": 637160
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.00.rcgu.o",
+      "bytes": 539728
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.10.rcgu.o",
+      "bytes": 285232
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_presentation-8717f35c9054fda4.eac3_transient_presentation.1e358829ce06af05-cgu.02.rcgu.o",
+      "bytes": 404904
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb",
+      "bytes": 13565960
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.d",
+      "bytes": 379
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.eac3_transient_stream.7effdd1a6f7cbcb8-cgu.4.rcgu.o",
+      "bytes": 286528
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.eac3_transient_stream.7effdd1a6f7cbcb8-cgu.2.rcgu.o",
+      "bytes": 296256
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.eac3_transient_stream.7effdd1a6f7cbcb8-cgu.0.rcgu.o",
+      "bytes": 455048
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.eac3_transient_stream.7effdd1a6f7cbcb8-cgu.5.rcgu.o",
+      "bytes": 332616
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.eac3_transient_stream.7effdd1a6f7cbcb8-cgu.3.rcgu.o",
+      "bytes": 282960
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_stream-342055fa15b836fb.eac3_transient_stream.7effdd1a6f7cbcb8-cgu.1.rcgu.o",
+      "bytes": 530600
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2",
+      "bytes": 13545784
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2.d",
+      "bytes": 384
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2.eac3_transient_windows.b3fe0f70a01a5c70-cgu.4.rcgu.o",
+      "bytes": 288392
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2.eac3_transient_windows.b3fe0f70a01a5c70-cgu.0.rcgu.o",
+      "bytes": 455512
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2.eac3_transient_windows.b3fe0f70a01a5c70-cgu.2.rcgu.o",
+      "bytes": 496976
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2.eac3_transient_windows.b3fe0f70a01a5c70-cgu.1.rcgu.o",
+      "bytes": 515640
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/eac3_transient_windows-456e6ad46cc24fe2.eac3_transient_windows.b3fe0f70a01a5c70-cgu.3.rcgu.o",
+      "bytes": 281040
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f",
+      "bytes": 135501304
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.d",
+      "bytes": 71829
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.08.rcgu.o",
+      "bytes": 8453568
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.04.rcgu.o",
+      "bytes": 14943624
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.06.rcgu.o",
+      "bytes": 9252232
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.14.rcgu.o",
+      "bytes": 8299032
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.10.rcgu.o",
+      "bytes": 7929608
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.02.rcgu.o",
+      "bytes": 8343864
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.00.rcgu.o",
+      "bytes": 9549936
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.12.rcgu.o",
+      "bytes": 8499336
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.09.rcgu.o",
+      "bytes": 11944344
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.05.rcgu.o",
+      "bytes": 9546072
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.07.rcgu.o",
+      "bytes": 6030016
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.15.rcgu.o",
+      "bytes": 12283632
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.11.rcgu.o",
+      "bytes": 17829280
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.03.rcgu.o",
+      "bytes": 8828376
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.01.rcgu.o",
+      "bytes": 4783008
+    },
+    {
+      "path": "/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f.fvid.60b8080aa5d6fe14-cgu.13.rcgu.o",
+      "bytes": 9712344
+    }
+  ],
+  "skipped_active": [],
+  "selected_executables": 22,
+  "bytes": 595241615
+}

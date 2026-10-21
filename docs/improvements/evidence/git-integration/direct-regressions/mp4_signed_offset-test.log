@@ -1,0 +1,17 @@
+
+running 4 tests
+logical 13160 bytes:index and3 exact packets read13144 actual bytes in9 calls
+logical 13160 bytes:index and3 exact packets read13144 actual bytes in9 calls
+logical 2147484382 bytes:index and3 exact packets read13152 actual bytes in10 calls
+test the_entire_signed_range_resolves_or_refuses_without_panicking ... ok
+logical 2147484381 bytes:index and3 exact packets read13152 actual bytes in10 calls
+test ordinary_negative_and_adjacent_boundary_controls_keep_exact_packets ... ok
+logical 2147484382 bytes:native PCM-free VP9 full playback/navigation read75630 actual bytes
+logical 13160 bytes:native PCM-free VP9 full playback/navigation read75534 actual bytes
+test playback::valid_min_displacement_plays_without_gigabyte_reads_and_corruption_refuses ... ok
+logical 13160 bytes:native PCM-free VP9 full playback/navigation read74606 actual bytes
+logical 2147484381 bytes:native PCM-free VP9 full playback/navigation read75630 actual bytes
+test playback::ordinary_and_adjacent_offsets_keep_analytic_playback_and_public_navigation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

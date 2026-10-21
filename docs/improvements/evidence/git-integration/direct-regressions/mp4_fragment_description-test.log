@@ -1,0 +1,9 @@
+
+running 4 tests
+test a_nonempty_fragment_must_resolve_a_supported_description ... ok
+test playback::unresolved_description_refuses_before_native_decoder_admission ... ok
+test supported_effective_descriptions_keep_packets_clocks_and_budgets ... ok
+test playback::healthy_descriptions_keep_analytic_planes_rgb_public_seek_and_eof ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

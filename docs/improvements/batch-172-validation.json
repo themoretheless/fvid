@@ -1,0 +1,59 @@
+{
+  "status": "accepted",
+  "accepted_ids": [
+    "FVID-0179"
+  ],
+  "checked_at": "2026-10-21T22:50:17+00:00",
+  "sources": [
+    "src/container/mp4.rs"
+  ],
+  "regressions": [
+    "tests/mp4_signed_offset.rs"
+  ],
+  "before": [
+    "evidence/batch-172-mp4-before.rs",
+    "evidence/batch-172-tests-before.rs",
+    "evidence/batch-172-before.log",
+    "evidence/batch-172-acceptance-before.log"
+  ],
+  "checks": [
+    {
+      "log": "evidence/batch-172-after.log",
+      "passed": 4
+    },
+    {
+      "log": "evidence/batch-172-related-after.log",
+      "passed": 58
+    },
+    {
+      "log": "evidence/batch-172-mp4-units.log",
+      "passed": 17
+    },
+    {
+      "log": "evidence/batch-172-core.log",
+      "passed": 27
+    },
+    {
+      "log": "evidence/batch-172-player-build.log",
+      "exit_code": 0
+    },
+    {
+      "log": "evidence/batch-172-fixtures-after.log",
+      "passed": 1
+    }
+  ],
+  "source_hashes": {
+    "/Users/themoretheless/Documents/Sources/fvid/src/container/mp4.rs": "27543a3d0f6be31a77657db04a7cb1852107e0fd845f0f2f86f21aa889f01fc4",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/mp4_signed_offset.rs": "3ad36ec2840504c31bd39de23b966d44d817251518302d2c70e1a8e003143e40",
+    "/Users/themoretheless/Documents/Sources/fvid/scripts/generate_mp4_signed_offset_regressions.py": "7d928d13d264b6be7e7398967d757d72492ac81eb37c853744a85e25815d9962",
+    "/Users/themoretheless/Documents/Sources/fvid/tests/fixtures/playback-errors/mp4-signed-offset/manifest.json": "9e59d16144cef6c23a1eaf62df819b6bd5b232b4d710a19f3adb2aba491079ab"
+  },
+  "qualification": [
+    "Pre-fix trun.data_offset resolution negated signed i32 inside i32 (-shift), panicking with 'attempt to negate with overflow' at src/container/mp4.rs:1718:60 on both corrupt short min-underflow.mp4 and legitimate virtual valid-min (-2147483648 across a 2 GiB free box). Pre-fix baseline passed 3/3 controls and both forced acceptance tests failed specifically at the i32::MIN negation overflow panic.",
+    "Converting negative trun.data_offset magnitude via u64::from(shift.unsigned_abs()) before base.checked_sub(...) eliminates the i32::MIN negation overflow while preserving exact signed displacement semantics and checked base underflow refusal.",
+    "Corrupt short min-underflow.mp4 now refuses cleanly as Error::Invalid ('MP4 fragment data offset precedes base') without panicking. Legitimate virtual valid-min indexes all 3 packets (reading 13,152 actual bytes in 10 calls) and plays all 3 native 16x16 VP9 frames with exact analytic planes/RGB (128/130), 50 Hz clocks (0/20/40 ms, 60 ms duration), 8 public clamped seek targets, rewind, and repeated EOF in 71,149 actual bytes read.",
+    "4 focused tests, 58 related MP4/HLS/VP9 integration tests, 17 MP4 unit tests, 27 minimal-configuration (--no-default-features) tests, offline fixture generator unittest, and full player build pass.",
+    "ISO/IEC 14496-12:2015, 8.8.8 specifies trun.data_offset as a signed 32-bit integer relative to the fragment base offset. All fixtures are pure synthetic offline VP9/fMP4 plans requiring neither FFmpeg nor network access."
+  ],
+  "counting": "One signed trun.data_offset magnitude overflow fix (FVID-0179). No extra IDs for virtual sparse reader, control cases, or fixture generator."
+}

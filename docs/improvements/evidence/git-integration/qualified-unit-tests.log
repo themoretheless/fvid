@@ -1,0 +1,1530 @@
+   Compiling fvid-platform v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-platform)
+   Compiling fvid-media v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-media)
+   Compiling fvid-control v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-control)
+   Compiling fvid-cpu v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-cpu)
+   Compiling fvid-codecs v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-codecs)
+warning: unreachable pattern
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+492 |                         _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |                         ^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_motion.rs:492:25
+    |
+482 | ...   merge_order::Selection::Initial(i)=>{
+    |       ---------------------------------- matches some of the same values
+...
+486 | ...   merge_order::Selection::ViewSynthesis=>return Ok(Resolved::ViewSynthesis),
+    |       ------------------------------------- matches some of the same values
+487 | ...   merge_order::Selection::Texture=>return Ok(Resolved::Texture),
+    |       ------------------------------- matches some of the same values
+488 | ...   merge_order::Selection::InterView=>{selected_iv=1;(special.inter_view.copied().ok_or_else(||invalid("missing selected HEVC IV...
+    |       --------------------------------- matches some of the same values
+...
+492 | ...   _=>return Err(invalid("unexpected HEVC depth IV merge selection")),
+    |       ^ ...and 3 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `intra_plane` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/avc_deblock.rs:184:15
+    |
+184 | pub(super) fn intra_plane(
+    |               ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `read_inter_coefficients_422` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_inter_coefficients.rs:34:15
+   |
+34 | pub(super) fn read_inter_coefficients_422(bits:&mut BitReader<'_>,pattern:u8,transform8:bool,neighbours:CoefficientNeighbours,chroma...
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `candidates` is never used
+  --> crates/fvid-codecs/src/../../../src/codec/avc_mv.rs:78:4
+   |
+78 | fn candidates(n: Neighbours) -> Result<[Neighbour; 3]> {
+   |    ^^^^^^^^^^
+
+warning: function `inverse2` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:190:4
+    |
+190 | fn inverse2(input: &[i32], output: &mut [i32]) {
+    |    ^^^^^^^^
+
+warning: function `inverse4` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:218:15
+    |
+218 | inverse_size!(inverse4, inverse2, 4);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse8` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:219:15
+    |
+219 | inverse_size!(inverse8, inverse4, 8);
+    |               ^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse16` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:220:15
+    |
+220 | inverse_size!(inverse16, inverse8, 16);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `inverse32` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_transform.rs:221:15
+    |
+221 | inverse_size!(inverse32, inverse16, 32);
+    |               ^^^^^^^^^
+    |
+    = note: this warning originates in the macro `inverse_size` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: enum `RunKind` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:420:17
+    |
+420 | pub(crate) enum RunKind {
+    |                 ^^^^^^^
+
+warning: struct `Run` is never constructed
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:425:19
+    |
+425 | pub(crate) struct Run {
+    |                   ^^^
+
+warning: function `expand_runs` is never used
+   --> crates/fvid-codecs/src/../../../src/codec/hevc_palette.rs:431:15
+    |
+431 | pub(crate) fn expand_runs(size: usize, maximum_index: u8, runs: &[Run]) -> Result<Vec<u8>> {
+    |               ^^^^^^^^^^^
+
+warning: `fvid-codecs` (lib) generated 12 warnings
+   Compiling fvid-media-info v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-media-info)
+   Compiling fvid-opus v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-opus)
+   Compiling fvid v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae)
+warning: variable does not need to be mutable
+   --> crates/fvid-media/src/owned_xfade.rs:325:5
+    |
+325 |     mut visit: impl FnMut(&GeometryFrame, u64, u64) -> Result<(), String>,
+    |     ----^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `encode` is never used
+   --> crates/fvid-media/src/owned_y4m_impl.rs:212:8
+    |
+ 31 | impl Header {
+    | ----------- method in this implementation
+...
+212 |     fn encode(&self, width: usize, height: usize) -> String {
+    |        ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `apply_pixel_filters` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:502:15
+    |
+502 | pub(crate) fn apply_pixel_filters(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:509:15
+    |
+509 | pub(crate) fn apply_pixel_filters_cached(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_pixel_filters_cached_at` is never used
+   --> crates/fvid-media/src/owned_y4m_decode.rs:518:15
+    |
+518 | pub(crate) fn apply_pixel_filters_cached_at(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `esds_for_mp4` is never used
+   --> crates/fvid-media/src/owned_aac/adts_impl.rs:334:15
+    |
+334 | pub(crate) fn esds_for_mp4(asc: &[u8]) -> Option<Vec<u8>> {
+    |               ^^^^^^^^^^^^
+
+warning: method `read_short` is never used
+  --> crates/fvid-media/src/owned_aac/bits_impl.rs:42:19
+   |
+ 7 | impl<'a> BitReader<'a> {
+   | ---------------------- method in this implementation
+...
+42 |     pub(crate) fn read_short(&mut self, count: u8) -> Result<u16> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `identifiers` is never used
+   --> crates/fvid-media/src/owned_avc_impl.rs:509:19
+    |
+495 | impl Pps {
+    | -------- associated function in this implementation
+...
+509 |     pub(crate) fn identifiers(nal: &[u8]) -> Result<(u32, u32)> {
+    |                   ^^^^^^^^^^^
+
+warning: function `try_mp4_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:61:15
+   |
+61 | pub(crate) fn try_mp4_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^
+
+warning: function `try_webm_as` is never used
+  --> crates/fvid-media/src/owned_probe.rs:82:15
+   |
+82 | pub(crate) fn try_webm_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+   |               ^^^^^^^^^^^
+
+warning: function `try_adts_as` is never used
+   --> crates/fvid-media/src/owned_probe.rs:102:15
+    |
+102 | pub(crate) fn try_adts_as(path: &Path, format: Option<&str>) -> Result<Option<MediaInfo>, String> {
+    |               ^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_audio_export.rs:8:15
+  |
+8 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_audio_plan.rs:75:15
+   |
+75 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:22:15
+   |
+22 | pub(crate) fn supports(source: &Path, destination: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports_concat` is never used
+  --> crates/fvid-media/src/owned_wave_remux.rs:72:15
+   |
+72 | pub(crate) fn supports_concat(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_wave_plan.rs:6:15
+  |
+6 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+  |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_adts_loudness.rs:50:15
+   |
+50 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_adts_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: method `nul_name` is never used
+  --> crates/fvid-media/src/owned_pixel_format.rs:9:27
+   |
+ 6 |           impl PixelFormat {
+   |           ---------------- method in this implementation
+...
+ 9 |               pub(crate) fn nul_name(self) -> &'static [u8] { match self { $( Self::$variant => concat!($name, "\0").as_bytes(), )* } }
+   |                             ^^^^^^^^
+...
+16 | / formats! {
+17 | |     Yuv420p, "yuv420p", Some((1, 1)), 1;
+18 | |     Yuv422p, "yuv422p", Some((1, 0)), 1;
+19 | |     Yuv444p, "yuv444p", Some((0, 0)), 1;
+...  |
+58 | |     Gray16Be, "gray16be", None, 2;
+59 | | }
+   | |_- in this macro invocation
+   |
+   = note: this warning originates in the macro `formats` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `aac_packet_plan` is never used
+  --> crates/fvid-media/src/owned_mp4_aac_plan_impl.rs:34:15
+   |
+34 | pub(crate) fn aac_packet_plan(
+   |               ^^^^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_opus_export.rs:134:15
+    |
+134 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_opus_export.rs:33:15
+   |
+33 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `inspect` is never used
+ --> crates/fvid-media/src/owned_matroska_copy_impl.rs:8:15
+  |
+8 | pub(crate) fn inspect<R: Read + Seek>(
+  |               ^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_raw_flac.rs:75:15
+   |
+75 | pub(crate) fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16)> {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_flac_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_mp3_export.rs:45:15
+   |
+45 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `geometry` is never used
+  --> crates/fvid-media/src/owned_matroska_alac_export.rs:95:15
+   |
+95 | pub(crate) fn geometry(source:&Path,options:&CopyOptions)->Result<(u32,u16)>{let (rate,channels,_)=geometry_with_mask(source,options...
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_aac_export.rs:37:15
+   |
+37 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: method `convert` is never used
+   --> crates/fvid-media/src/owned_pcm_decoder_impl.rs:139:8
+    |
+ 79 | impl PcmDecoder {
+    | --------------- method in this implementation
+...
+139 |     fn convert(&self, data: &[u8]) -> Result<Vec<u8>> {
+    |        ^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_matroska_pcm_export.rs:41:15
+   |
+41 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_mp4_audio_export.rs:109:15
+    |
+109 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_container_loudness.rs:59:15
+   |
+59 | pub(crate) fn supports(source: &Path, options: &CopyOptions) -> bool {
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+ --> crates/fvid-media/src/owned_container_loudnorm.rs:6:15
+  |
+6 | pub(crate) fn supports(
+  |               ^^^^^^^^
+
+warning: function `pack_bgra` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:8728:15
+     |
+8728 | pub(crate) fn pack_bgra(
+     |               ^^^^^^^^^
+
+warning: function `take_aligned` is never used
+    --> crates/fvid-media/src/owned_play_controls_impl.rs:9440:15
+     |
+9440 | pub(crate) fn take_aligned(
+     |               ^^^^^^^^^^^^
+
+warning: function `supports` is never used
+   --> crates/fvid-media/src/owned_ogg_vorbis_export.rs:104:15
+    |
+104 | pub(crate) fn supports(
+    |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_ogg_joint_export.rs:68:15
+   |
+68 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: function `supports` is never used
+  --> crates/fvid-media/src/owned_g711_wave_export.rs:85:15
+   |
+85 | pub(crate) fn supports(
+   |               ^^^^^^^^
+
+warning: `fvid-media` (lib) generated 40 warnings (run `cargo fix --lib -p fvid-media` to apply 1 suggestion)
+   Compiling fvid-vt v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-vt)
+   Compiling fvid-cuda v0.1.0 (/private/tmp/fvid-delivery-d6302d04f9ae/crates/fvid-cuda)
+warning: associated function `new` is never used
+  --> crates/fvid-cuda/src/nvenc_session.rs:63:19
+   |
+62 | impl FunctionTable {
+   | ------------------ associated function in this implementation
+63 |     pub(crate) fn new() -> Self {
+   |                   ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `validate_surface` is never used
+   --> crates/fvid-cuda/src/nvenc_session.rs:950:4
+    |
+950 | fn validate_surface(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: associated function `unpack` is never used
+ --> crates/fvid-cuda/src/nvenc.rs:9:8
+  |
+8 | impl NvencVersion {
+  | ----------------- associated function in this implementation
+9 |     fn unpack(value: u32) -> Result<Self, String> {
+  |        ^^^^^^
+
+warning: function `query_result` is never used
+   --> crates/fvid-cuda/src/nvenc.rs:116:4
+    |
+116 | fn query_result(status: i32, packed: u32) -> Result<NvencVersion, String> {
+    |    ^^^^^^^^^^^^
+
+warning: field `sample_bytes` is never read
+  --> crates/fvid-cuda/src/nv12_buffer.rs:36:5
+   |
+31 | pub struct Nv12Buffer {
+   |            ---------- field in this struct
+...
+36 |     sample_bytes: u32,
+   |     ^^^^^^^^^^^^
+
+warning: function `layout` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:299:4
+    |
+299 | fn layout(width: u32, height: u32) -> Result<(u32, usize), String> {
+    |    ^^^^^^
+
+warning: function `make_view` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:323:4
+    |
+323 | fn make_view(pointer: u64, width: u32, height: u32, pitch: u32) -> Result<Nv12View, String> {
+    |    ^^^^^^^^^
+
+warning: function `make_view_format` is never used
+   --> crates/fvid-cuda/src/nv12_buffer.rs:326:4
+    |
+326 | fn make_view_format(
+    |    ^^^^^^^^^^^^^^^^
+
+warning: `fvid-cuda` (lib) generated 8 warnings
+warning: unused import: `FRAME_LENGTH`
+  --> src/codec/alac_decoder.rs:69:60
+   |
+69 |         AlacDecoder, Bits, COOKIE_CHANNELS, COOKIE_FIELDS, FRAME_LENGTH, FULL_SCALE, Params,
+   |                                                            ^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `core` is never read
+    --> src/codec/ac3_decoder.rs:2881:9
+     |
+2881 |         core.strategy.gain=[0.25,0.125];
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+     = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `iter` is never used
+  --> src/codec/../../crates/fvid-media/src/owned_aac/aac_ssr_metadata_impl.rs:17:19
+   |
+16 | impl<T> PacketQueue<T> {
+   | ---------------------- method in this implementation
+17 |     pub(crate) fn iter(&self) -> impl Iterator<Item = &T> {
+   |                   ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `fvid` (lib test) generated 3 warnings (run `cargo fix --lib -p fvid --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5m 39s
+     Running unittests src/lib.rs (/Users/themoretheless/Documents/Sources/fvid/target/debug/deps/fvid-7dbacfbd28f9219f)
+
+running 1054 tests
+test audio::cpal_backend::explicit_aac_speaker_route_regressions::real_device_aac_pce_layout_smoke ... ignored, requires physical default output; opens paused without emitting sound
+test audio::cpal_backend::eof_drain_regressions::device_errors_survive_seek_but_old_stream_errors_cannot_poison_restart ... ok
+test audio::cpal_backend::clock_progress_regressions::rate_switch_zero_suspend_and_seek_keep_the_rendered_clock_continuous ... ok
+test audio::cpal_backend::eof_drain_regressions::rendered_callback_tail_waits_for_latency_and_survives_pause_until_flush ... ok
+test audio::cpal_backend::eof_drain_regressions::stop_does_not_wait_for_an_unconsumed_output_queue ... ok
+test audio::cpal_backend::finite_stretch_regressions::returning_to_normal_rate_finishes_the_inflight_segment_and_finite_tail ... ok
+test audio::cpal_backend::finite_stretch_regressions::finite_short_audio_emits_its_rate_adjusted_duration_and_drains ... ok
+test audio::cpal_backend::clock_progress_regressions::stretched_master_clock_tracks_rendered_frames_not_search_retirement ... ok
+test audio::cpal_backend::finite_stretch_regressions::zero_rate_preserves_finite_input_and_resumes_without_a_stuck_segment ... ok
+test audio::cpal_backend::eof_drain_regressions::device_failure_terminates_drain_as_error_without_false_eof ... ok
+test audio::cpal_backend::packet_timeline_regressions::oversized_gap_refuses_atomically_before_publishing_silence_or_payload ... ok
+test audio::cpal_backend::packet_timeline_regressions::overlapping_and_duplicate_packets_do_not_repeat_already_queued_samples ... ok
+test audio::cpal_backend::finite_stretch_regressions::finite_rates_fractional_carry_stereo_and_callback_boundaries_match_reference ... ok
+test audio::cpal_backend::physical_layout_smoke::real_device_flac_layout_smoke ... ignored, requires a physical default output device; opens paused and emits no sound
+test audio::cpal_backend::packet_timeline_regressions::packet_timestamp_gap_preserves_silence_and_following_audio ... ok
+test audio::cpal_backend::packet_conservation_regressions::one_large_decoded_access_unit_reaches_the_output_ring_without_loss ... ok
+test audio::cpal_backend::packet_timeline_regressions::leading_gap_and_seek_anchor_preserve_the_declared_packet_start ... ok
+test audio::cpal_backend::packet_timeline_regressions::stereo_gap_wraps_without_reusing_old_buffer_samples ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::overflow_budget_and_partial_frame_refusals_preserve_queued_audio ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::partial_fixture_pcm_refuses_without_publishing_any_samples ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::flush_after_growth_drops_old_audio_and_reanchors_output_clock ... ok
+test audio::cpal_backend::explicit_flac_speaker_route_regressions::actual_cpal_push_ring_and_callback_follow_authored_flac_speaker_oracles ... ok
+test audio::cpal_backend::tests::a_flush_rewinds_both_positions ... ok
+test audio::cpal_backend::tests::a_flush_forgets_the_half_finished_segment ... ok
+test audio::cpal_backend::tests::a_stereo_stream_survives_wrapping_the_ring ... ok
+test audio::cpal_backend::tests::a_stretched_read_joins_a_window_that_wraps ... ok
+test audio::cpal_backend::tests::explicit_output_selection_matches_names_and_never_falls_back ... ok
+test audio::sample_duration_tests::sample_duration_matches_packet_clock_through_u64_bounds ... ok
+test audio::tests::a_full_scale_frame_is_left_alone ... ok
+test audio::tests::a_short_window_and_a_late_rate_change_cost_nothing_extra ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::growth_preserves_wrapped_stereo_tail_and_consumed_position ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::actual_audio_worker_preserves_large_packet_through_device_callback_and_navigation ... ok
+test audio::tests::a_stretch_at_the_recorded_rate_hands_the_stream_back ... ok
+test audio::cpal_backend::tests::a_stretched_read_moves_the_clock_by_its_rate ... ok
+test audio::tests::all_known_codecs_have_a_display_name ... ok
+test audio::tests::boost_lifts_the_body_and_holds_the_peak ... ok
+test audio::tests::cutting_never_clips ... ok
+test audio::tests::default_rate_consumes_one_frame_per_frame ... ok
+test audio::tests::level_scales_linearly_below_full_scale ... ok
+test audio::tests::muted_output_is_silent ... ok
+test audio::tests::non_finite_samples_stay_silent ... ok
+test audio::tests::rate_consumes_the_exact_total_over_time ... ok
+test audio::cpal_backend::clock_progress_regressions::callback_clock_is_sample_exact_across_rates_channels_and_fractional_phase ... ok
+test audio::cpal_backend::eof_drain_regressions::public_position_refreshes_during_long_packet_pacing ... ok
+test audio::cpal_backend::eof_drain_regressions::actual_worker_finishes_short_stretched_audio_and_device_eof_at_all_rates ... ok
+test audio::cpal_backend::eof_drain_regressions::seek_cancels_old_drain_and_rejects_a_late_callback_tail ... ok
+test audio_thread::duration_publication_guards::completion_publication_preserves_known_length_on_unknown_or_invalid_eof ... ok
+test audio_thread::exact_seek_clock_regressions::duration_to_seek_ticks_preserves_the_stored_matroska_boundary ... ok
+test audio::cpal_backend::eof_drain_regressions::pause_and_resume_keep_the_pending_tail_alive ... ok
+test audio::tests::the_stretch_retires_what_the_rate_asked_for ... ok
+test audio::cpal_backend::eof_drain_regressions::accelerated_device_refills_when_source_lead_is_exhausted ... ok
+test audio::cpal_backend::finite_stretch_regressions::grown_finite_access_unit_retires_the_last_partial_processing_segment ... ok
+test audio::cpal_backend::eof_drain_regressions::source_eof_waits_until_the_device_consumes_queued_pcm ... ok
+test audio::cpal_backend::ring_growth_admission_regressions::grown_ring_stretch_matches_contiguous_fixture_samples ... ok
+test audio::cpal_backend::eof_drain_regressions::pcm_frontier_includes_decoded_packet_duration ... ok
+test audio_thread::adts_seek_tests::adts_seek_and_rewind_preserve_continuous_decoder_samples ... ok
+test audio::tests::a_stretched_pair_keeps_each_channel_on_its_own ... ok
+test audio_thread::preroll_control_tests::pause_and_stop_interrupt_preroll_between_access_units ... ok
+test audio_thread::pause_failure_regressions::pause_failure_reports_terminal_error_and_stops_device_after_valid_pcm ... ok
+test audio::tests::a_stretched_stream_loses_length_and_keeps_its_pitch ... ok
+test audio_thread::flush_failure_regressions::failed_navigation_flush_cannot_mix_new_decoding_into_old_device_queue ... ok
+test audio_thread::ps_edit_worker_tests::source_gap_is_rejected_after_pending_ps_pcm_is_drained ... ok
+test audio_thread::ps_eof_tests::ps_and_lc_trait_checkpoints_reject_wrong_codec_and_restore_pending_source_metadata ... ok
+test audio_thread::ogg_opus_configuration_tests::ogg_opus_worker_reconfigures_mapping_and_gain_after_boundaries_and_navigation ... ok
+test audio_thread::mp4_edit_scheduler_tests::gap_and_repeat_playback_matches_owned_pcm_export ... ok
+test audio_thread::sample_seek_clock_regressions::inverse_seek_recovers_floored_sample_boundaries_and_keeps_other_targets_floored ... ok
+test audio::cpal_backend::explicit_aac_speaker_route_regressions::actual_cpal_ring_and_callbacks_follow_independent_aac_pce_stereo_oracles ... ok
+test audio_thread::ps_eof_tests::ps_worker_uses_original_unequal_windows_and_queues_eof_before_ended ... ok
+test audio_thread::tests::pacing_holds_the_decoder_at_the_lead ... ok
+test audio_thread::scheduling_step_tests::silence_and_reset_preserve_queued_pcm_and_timestamps ... ok
+test audio::tests::a_stretched_stream_keeps_its_wave_continuous ... ok
+test audio_thread::tests::seek_counts_ticks_in_the_stream_timescale ... ok
+test audio_thread::tests::level_and_rate_reach_the_device ... ok
+test audio_thread::tests::rewind_anchors_the_clock_at_zero ... ok
+test audio_thread::ogg_opus_output_layout_tests::ogg_opus_channel_changes_preserve_pcm_without_restarting_the_backend ... ok
+test codec::aac_bands::tests::asc_drives_ics_band_limit ... ok
+test codec::aac_bands::tests::explicit_rates_switch_at_the_geometry_boundaries ... ok
+test codec::aac_bands::tests::indexed_rates_have_standard_counts_and_complete_geometry ... ok
+test codec::aac_bands::tests::short_frame_geometry_covers_all_indexed_rates ... ok
+test codec::aac_channel::tests::channel_payload_reaches_owned_synthesis ... ok
+test codec::aac_channel::tests::noise_bands_reconstruct_per_window_and_rollback_on_late_error ... ok
+test codec::aac_channel::tests::reconstruction_scales_each_short_group_and_band ... ok
+test codec::aac_channel::tests::unsupported_tools_do_not_consume_channel_header ... ok
+test codec::aac_decoder::tests::container_and_aac_config_must_describe_the_same_pcm ... ok
+test codec::aac_decoder::tests::damaged_packet_is_an_error_and_requires_reset ... ok
+test codec::aac_decoder::tests::timestamp_overflow_does_not_wrap_or_poison_codec_state ... ok
+test codec::aac_huffman::tests::all_spectral_symbols_decode_with_signed_components ... ok
+test codec::aac_huffman::tests::escape_extremes_and_truncation_are_transactional ... ok
+test audio_thread::vorbis_worker_tests::ogg_vorbis_rate_changes_keep_backend_clock_through_seek_and_rewind ... ok
+test codec::aac_huffman::tests::every_scalefactor_code_decodes_and_tables_are_prefix_free ... ok
+test codec::aac_ics::quantized_deinterleave_tests::quantized_mapping_matches_independent_window_coordinates ... ok
+test codec::aac_ics::tests::bad_spectral_layout_preserves_output_and_empty_bands_zero_fill ... ok
+test codec::aac_ics::tests::every_short_grouping_partitions_eight_windows ... ok
+test codec::aac_ics::tests::long_syntax_and_errors_preserve_cursor ... ok
+test codec::aac_ics::tests::sections_expand_escape_lengths_and_reject_invalid_runs ... ok
+test codec::aac_ics::tests::short_sections_keep_group_boundaries_and_special_codebooks ... ok
+test codec::aac_ics::tests::deinterleave_restores_every_coefficient_for_all_groupings ... ok
+test audio_thread::checkpoint_seek_tests::warmed_aac_seek_skips_source_prefix_without_changing_pcm ... ok
+test audio_thread::vorbis_worker_tests::ogg_vorbis_channel_changes_keep_backend_geometry_through_seek_and_rewind ... ok
+test codec::aac_native::he_aac_native_tests::extended_asc_keeps_core_rate_ps_and_unspecified_flags_distinct ... ok
+test audio_thread::ps_edit_worker_tests::factory_ps_worker_accepts_silence_repeated_ranges_eof_seek_and_rewind ... ok
+test audio_thread::matroska_aac_seek_tests::matroska_aac_seek_preserves_pcm_and_nanosecond_timestamps ... ok
+test audio_thread::no_edit_seek_tests::no_edit_aac_seek_matches_continuous_pcm ... ok
+test audio_thread::tests::the_track_waits_for_a_play_command ... ok
+test codec::aac_native::ltp_compat_dispatch_tests::root_ltp_long_short_transitions_match_scalar_pcm ... ok
+test codec::aac_native::ltp_compat_dispatch_tests::root_cce_prediction_metadata_matches_coupled_scalar_pcm ... ok
+test codec::aac_native::tests::bad_packet_does_not_advance_noise_or_overlap ... ok
+test codec::aac_native::he_aac_native_tests::missing_sbr_fill_keeps_pcm_clock_noise_history_and_checkpoint_replay ... ok
+test codec::aac_native::tests::mono_44100_matches_pcm_reference ... ok
+test codec::aac_native::tests::packet_tns_filters_spectrum_before_synthesis ... ok
+test codec::aac_native::tests::checkpoint_restores_exact_continuous_pcm_and_rejects_other_config ... ok
+test codec::aac_native::tests::public_decoder_matches_saved_pcm_and_reset ... ok
+test codec::aac_native::he_aac_native_tests::implicit_sbr_with_container_output_clock_matches_independent_pcm ... ok
+test codec::aac_noise::tests::cloning_correlates_shapes_and_reset_repeats_initial_band ... ok
+test codec::aac_noise::tests::errors_preserve_state_and_output ... ok
+test codec::aac_noise::tests::every_noise_energy_and_band_width_has_expected_norm ... ok
+test codec::aac_pair::tests::common_window_mask_modes_and_two_channel_payloads ... ok
+test codec::aac_pair::tests::mid_side_reconstructs_only_masked_bands_in_each_short_group ... ok
+test audio_thread::mp4_edit_scheduler_tests::nonzero_media_range_repeats_restore_aac_overlap_before_seek ... ok
+test codec::aac_pair::tests::reserved_mask_is_rejected_before_channels ... ok
+test codec::aac_pair::tests::stereo_noise_correlation_energy_and_error_rollback ... ok
+test codec::aac_pce::fill_tests::ancillary_fill_is_bounded_and_transactional_at_every_bit_offset ... ok
+test codec::aac_pce::fill_tests::dynamic_range_fill_is_bounded_at_every_bit_offset ... ok
+test codec::aac_pce::fill_tests::opaque_extensions_skip_only_the_declared_payload_at_every_offset ... ok
+test codec::aac_pulse::tests::invalid_offsets_and_truncation_preserve_cursor ... ok
+test codec::aac_pulse::tests::maximum_pulses_remain_reconstructible ... ok
+test codec::aac_pulse::tests::signed_zero_and_repeated_pulses_apply_before_quantization ... ok
+test codec::aac_quant::tests::cubes_reconstruct_exact_fourth_powers_and_octaves ... ok
+test codec::aac_native::tests::surround_pcm_matches_reference_channel_order ... ok
+test codec::aac_quant::tests::invalid_input_does_not_partially_write_band ... ok
+test codec::aac_quant::tests::entire_escape_range_matches_independent_power_evaluation ... ok
+test audio_thread::vorbis_worker_tests::ogg_codec_changes_keep_backend_pcm_clock_through_navigation ... ok
+test codec::aac_scalefactors::rvlc_tests::rvlc_forbidden_words_and_every_payload_truncation_preserve_cursor ... ok
+test codec::aac_scalefactors::rvlc_tests::rvlc_all_signed_deltas_and_escape_words_preserve_adjacent_bits ... ok
+test codec::aac_scalefactors::rvlc_tests::rvlc_short_groups_keep_separate_spectral_noise_and_intensity_accumulators ... ok
+test codec::aac_scalefactors::tests::accumulators_remain_separate_and_cross_groups ... ok
+test codec::aac_scalefactors::tests::first_noise_is_absolute_even_after_group_boundary ... ok
+test codec::aac_scalefactors::tests::out_of_range_truncated_and_reserved_inputs_are_transactional ... ok
+test codec::aac_spectral::hcr_header_tests::reserved_hcr_lengths_adapt_and_header_truncation_is_transactional ... ok
+test codec::aac_spectral::tests::mixed_books_preserve_group_band_order_and_skip_special_bands ... ok
+test codec::aac_spectral::tests::truncation_and_tuple_misalignment_do_not_consume_input ... ok
+test codec::aac_spectral::tests::zero_bands_need_no_payload ... ok
+test codec::aac_ssr_metadata::tests::delayed_metadata_is_bounded_atomic_and_checkpointable ... ok
+test codec::aac_tns::tests::short_empty_windows_and_zero_order_do_not_read_coefficients ... ok
+test codec::aac_tns::tests::excessive_order_and_truncation_preserve_cursor ... ok
+test codec::aac_tns::tests::signed_compressed_coefficients_use_original_resolution ... ok
+test codec::ac3_decoder::pre_fold_pcm_regressions::corrected_native_planes_are_mixed_before_final_clamp ... ok
+test codec::ac3_decoder::pre_fold_pcm_regressions::delayed_dual_programme_pcm_uses_captured_gains ... ok
+test codec::ac3_decoder::speaker_assignment_regressions::every_native_dolby_layout_and_downmix_retains_speaker_identity ... ok
+test codec::aac_pair::tests::real_adts_stereo_all_pairs_parse ... ok
+test codec::ac3_decoder::pre_fold_pcm_regressions::single_surround_reaches_both_stereo_sides_and_the_full_mono_sum ... ok
+test codec::ac3_decoder::speaker_assignment_regressions::existing_ac3_headers_publish_native_and_requested_stereo_masks ... ok
+test codec::aac_native::ltp_compat_dispatch_tests::root_syntax_metadata_reaches_owned_ltp_state_without_pcm_or_checkpoint_drift ... ok
+test codec::ac3_decoder::tests::a_mono_frame_at_32_khz_holds_its_own_rate ... ok
+test codec::ac3_decoder::tests::a_coupled_pair_rebuilds_from_one_spectrum ... ok
+test codec::ac3_decoder::tests::a_truncated_frame_mutes_instead_of_reaching_past_the_packet ... ok
+test codec::ac3_decoder::tests::a_stereo_pair_keeps_its_two_tone_mixtures ... ok
+test codec::ac3_decoder::tests::an_impossible_geometry_is_refused ... ok
+test codec::ac3_decoder::tests::bytes_without_a_syncword_are_refused ... ok
+test codec::ac3_decoder::tests::every_fixture_states_its_own_geometry ... ok
+test codec::adpcm_ct_decoder::tests::a_byte_decodes_its_high_code_first ... ok
+test codec::adpcm_ct_decoder::tests::a_level_run_climbs_toward_the_damping_s_equilibrium ... ok
+test codec::ac3_decoder::tests::a_reset_decoder_repeats_itself ... ok
+test codec::adpcm_ct_decoder::tests::a_seek_restarts_the_coding_from_silence ... ok
+test codec::adpcm_ct_decoder::tests::a_track_that_is_not_mono_has_no_geometry_to_decode ... ok
+test codec::adpcm_ct_decoder::tests::every_byte_value_lands_on_the_reference_codebook ... ok
+test codec::adpcm_ct_decoder::tests::the_damping_rounds_down_so_the_coding_is_not_sign_symmetric ... ok
+test codec::adpcm_ct_decoder::tests::the_predictor_is_clamped_at_both_ends_of_a_sample ... ok
+test codec::adpcm_ct_decoder::tests::the_sign_bit_moves_the_direction_and_not_the_adaptation ... ok
+test codec::ac3_decoder::tests::a_surround_frame_keeps_its_planes_apart ... ok
+test codec::ac3_decoder::tests::a_surround_frame_folds_to_its_lo_ro_pair ... ok
+test audio_thread::presentation_window_tests::worker_queues_container_window_after_consuming_complete_aac_packet ... ok
+test codec::adpcm_ct_decoder::tests::the_state_carries_across_the_packets_the_container_hands_over ... ok
+test codec::adpcm_decoder::tests::a_coding_wider_than_four_bits_is_refused_not_guessed_at ... ok
+test codec::adpcm_decoder::tests::a_microsoft_block_counts_its_two_stored_samples ... ok
+test codec::adpcm_decoder::tests::a_microsoft_tag_without_setup_data_has_no_block_to_read ... ok
+test codec::adpcm_decoder::tests::a_padded_last_block_stops_where_the_track_says_it_does ... ok
+test codec::adpcm_decoder::tests::a_wav_shaped_ima_block_holds_its_predictor_and_its_codes ... ok
+test codec::adpcm_decoder::tests::apple_ima_needs_no_setup_of_its_own ... ok
+test codec::adpcm_decoder::tests::the_dispatch_names_ask_the_same_arithmetic_as_the_ids ... ok
+test codec::alac_decoder::tests::a_channel_with_no_bits_left_in_its_frame_is_refused ... ok
+test codec::adpcm_decoder::tests::apples_block_is_the_one_its_format_fixes ... ok
+test codec::adpcm_decoder::tests::the_wave_format_reads_its_geometry_where_the_structure_puts_it ... ok
+test codec::alac_decoder::tests::a_cookie_that_states_nothing_a_frame_can_hold_is_refused ... ok
+test codec::alac_decoder::tests::a_predicted_sample_is_cut_to_the_width_the_frame_codes ... ok
+test codec::alac_decoder::tests::a_residual_travels_as_a_magnitude_with_its_sign_in_the_last_bit ... ok
+test codec::alac_decoder::tests::a_pair_is_unmixed_by_the_weight_in_its_header ... ok
+test codec::alac_decoder::tests::a_run_of_equal_samples_is_coded_once_and_the_next_one_carries_the_sign ... ok
+test codec::alac_decoder::tests::a_run_of_nine_ones_asks_for_the_value_it_could_not_hold ... ok
+test codec::alac_decoder::tests::a_frame_short_of_its_own_bytes_is_refused ... ok
+test codec::aac_native::tests::real_tns_file_matches_pcm_reference ... ok
+test codec::alac_decoder::tests::a_zero_run_that_outruns_its_frame_is_refused ... ok
+test codec::alac_decoder::tests::bits_come_from_the_top_of_the_byte_and_a_short_read_shows_itself ... ok
+test codec::alac_decoder::tests::a_tone_at_either_depth_holds_the_same_samples ... ok
+test codec::alac_decoder::tests::every_depth_reaches_the_scale_the_reference_gives_it ... ok
+test codec::alac_decoder::tests::each_container_spelling_of_the_name_reaches_this_decoder ... ok
+test codec::alac_decoder::tests::a_tones_first_samples_are_the_ones_the_references_bytes_hold ... ok
+test codec::alac_decoder::tests::silence_decodes_to_silence ... ok
+test codec::alac_decoder::tests::large_frame_limits_and_discrete_multichannel_cookies_are_accepted_without_scratch ... ok
+test codec::alac_decoder::tests::the_cookie_fields_land_where_the_format_puts_them ... ok
+test codec::alac_decoder::tests::the_predictor_adds_each_residual_to_its_own_prediction ... ok
+test codec::config::tests::aac_lc_and_sbr_absent_extension ... ok
+test codec::config::tests::avc_config_and_every_truncation ... ok
+test codec::alac_decoder::tests::both_containers_reach_the_same_samples_from_the_same_frames ... ok
+test codec::config::tests::esds_accepts_audio_with_a_cleared_reserved_bit ... ok
+test codec::config::tests::esds_extracts_only_nested_decoder_specific_data ... ok
+test codec::config::tests::hevc_arrays_and_reserved_bits ... ok
+test codec::config::tests::nal_framing_terminates_on_error ... ok
+test codec::eac3_decoder::aht::tests::every_normative_vq_codeword_preserves_the_six_dimensional_spectrum ... ok
+test codec::eac3_decoder::aht::tests::gain_adaptive_small_large_and_ungrouped_paths_consume_exact_words ... ok
+test codec::eac3_decoder::aht::tests::inverse_dct_literal_basis_and_energy_are_normalized ... ok
+test codec::eac3_decoder::aht::tests::reserved_gain_groups_truncated_data_and_invalid_allocations_are_errors ... ok
+test codec::eac3_decoder::enhanced_coupling::tests::all_normative_amplitudes_include_unity_and_silence ... ok
+test codec::alac_decoder::tests::every_frame_of_a_real_file_lands_on_the_references_bits ... ok
+test codec::adpcm_ct_decoder::tests::the_head_of_the_run_lands_on_the_same_reference_samples ... ok
+test codec::adpcm_ct_decoder::tests::every_sample_of_a_real_file_lands_on_the_reference ... ok
+test codec::eac3_decoder::spx_notch_regressions::specification_notches_cover_initial_border_and_only_later_wraps ... ok
+test codec::eac3_decoder::native_transient_reconstruction_tests::bad_crc_native_reconstruction_conceals_whole_frame_without_transient_metadata ... ok
+test codec::eac3_decoder::tests::a_block_that_does_not_couple_resolves_nothing_for_coupling ... ok
+test codec::eac3_decoder::tests::a_frame_carries_its_blocks_offsets_only_when_the_strategy_says_so ... ok
+test codec::eac3_decoder::tests::a_frame_of_coupling_blocks_states_its_strategy_once ... ok
+test codec::eac3_decoder::tests::a_frame_of_one_channel_states_nothing_for_coupling ... ok
+test codec::eac3_decoder::tests::a_frame_that_does_not_couple_states_nothing_for_it ... ok
+test codec::eac3_decoder::tests::a_frame_states_the_bit_its_first_block_starts_at ... ok
+test codec::eac3_decoder::tests::a_frame_that_names_the_reserved_offset_strategy_is_refused_by_name ... ok
+test codec::eac3_decoder::tests::a_frame_that_states_a_strategy_per_block_is_read_that_way ... ok
+test codec::eac3_decoder::tests::a_frame_that_states_a_strategy_per_block_resolves_it_as_written ... ok
+test codec::eac3_decoder::tests::a_frame_that_states_where_its_blocks_begin_is_read_to_the_last_of_them ... ok
+test codec::eac3_decoder::tests::a_frame_with_the_low_frequency_channel_states_its_strategy_for_every_block ... ok
+test codec::eac3_decoder::tests::a_frame_without_metadata_ends_where_the_real_ones_do ... ok
+test codec::eac3_decoder::tests::a_stereo_frame_codes_exponents_in_two_of_its_six_blocks ... ok
+test codec::eac3_decoder::tests::a_header_longer_than_the_frame_that_carries_it_is_not_read ... ok
+test codec::eac3_decoder::tests::an_ac_three_frame_is_refused_before_it_is_misread ... ok
+test codec::eac3_decoder::tests::a_surround_frame_reuses_the_exponents_its_earlier_blocks_coded ... ok
+test codec::eac3_decoder::tests::an_external_mixing_group_fills_the_bytes_it_declares ... ok
+test codec::eac3_decoder::tests::audio_frame_tool_flags_preserve_conditional_offsets ... ok
+test codec::eac3_decoder::tests::block_starts_that_cannot_frame_a_block_are_refused ... ok
+test codec::eac3_decoder::tests::conversion_layer_block_counts_and_reduced_rates_are_accepted_in_headers ... ok
+test codec::eac3_decoder::tests::no_frame_code_leaves_its_first_block_without_a_strategy ... ok
+test codec::eac3_decoder::tests::every_frame_of_a_stream_states_the_same_geometry ... ok
+test codec::eac3_decoder::tests::reconstruction_header_refuses_unselected_or_reserved_streams ... ok
+test codec::eac3_decoder::tests::per_block_mixing_configurations_are_counted_per_block ... ok
+test codec::eac3_decoder::tests::the_low_frequency_channel_is_one_of_the_ones_a_frame_counts ... ok
+test codec::eac3_decoder::tests::the_mixing_metadata_of_a_broadcast_stream_leaves_the_audio_where_it_starts ... ok
+test codec::eac3_decoder::tests::the_flags_a_block_reads_are_handed_to_it_by_its_frame ... ok
+test codec::eac3_decoder::tests::transient_processing_windows_are_kept_without_moving_the_audio_boundary ... ok
+test codec::eac3_decoder::native_transient_reconstruction_tests::coded_transient_native_reconstruction_matches_control_before_correction ... ok
+test codec::eac3_decoder::transient_packet_timing_tests::transient_reset_drops_pending_source_windows_and_restores_priming ... ok
+test codec::eac3_decoder::transient::native_block_tests::native_transient_blocks_preserve_channel_clock_gain_source_and_drain ... ok
+test codec::eac3_decoder::walker_trace::trace_one_file ... ok
+test codec::g722_decoder::tests::a_code_byte_is_always_two_samples ... ok
+test codec::aac_native::he_aac_native_tests::sbr_discovery_changes_clock_atomically_and_restores_undetected_checkpoints ... ok
+test codec::g722_decoder::tests::a_split_stream_decodes_as_one_stream_does ... ok
+test codec::g722_decoder::tests::a_second_channel_is_refused_rather_than_guessed ... ok
+test codec::g722_decoder::tests::a_stream_starts_where_the_reference_starts ... ok
+test codec::g722_decoder::tests::an_all_zero_stream_runs_away_the_way_the_reference_does ... ok
+test codec::g722_decoder::tests::every_sample_of_a_real_file_lands_on_the_references_bits ... ok
+test codec::g722_decoder::tests::output_stays_inside_the_scale_the_samples_are_read_at ... ok
+test codec::g722_decoder::tests::reset_forgets_every_memory_the_stream_left_behind ... ok
+test codec::g722_decoder::tests::the_spec_says_what_the_packets_carry ... ok
+test codec::g726_decoder::tests::a_code_with_no_step_moves_nothing_of_its_own ... ok
+test codec::g726_decoder::tests::a_geometry_the_coding_does_not_have_is_refused ... ok
+test codec::eac3_decoder::transient_packet_timing_tests::default_transient_decoder_keeps_source_windows_priming_drain_and_reset ... ok
+test codec::g726_decoder::tests::a_steady_code_rings_past_a_samples_range_and_wraps ... ok
+test codec::g726_decoder::tests::a_stream_starts_where_the_reference_starts ... ok
+test codec::g726_decoder::tests::a_code_is_always_one_sample ... ok
+test codec::g726_decoder::tests::bits_that_cannot_fill_a_code_are_read_as_nothing ... ok
+test codec::g726_decoder::tests::a_stream_split_on_block_boundaries_decodes_as_one_stream_does ... ok
+test codec::g726_decoder::tests::reset_forgets_every_memory_the_stream_left_behind ... ok
+test codec::gsm_decoder::tests::a_microsoft_block_is_read_from_each_byte_s_low_bit ... ok
+test codec::gsm_decoder::tests::a_frame_reaches_back_into_the_block_before_it ... ok
+test codec::gsm_decoder::tests::a_packet_is_a_whole_number_of_blocks ... ok
+test codec::eac3_decoder::substream_routing_regressions::authored_envelopes_name_each_skipped_programme_and_dependent_stream ... ok
+test codec::g726_decoder::tests::every_sample_of_a_real_file_lands_on_the_references_bits ... ok
+test codec::gsm_decoder::tests::a_track_that_is_not_mono_has_no_geometry_to_decode ... ok
+test codec::gsm_decoder::tests::a_wide_product_wraps_before_it_shifts ... ok
+test codec::gsm_decoder::tests::a_rate_the_block_does_not_divide_whole_decodes_the_same_run ... ok
+test codec::gsm_decoder::tests::an_all_zero_block_is_the_quietest_row_not_quiet ... ok
+test codec::mace_decoder::tests::a_byte_s_three_slots_come_out_in_the_order_each_coding_reads_them ... ok
+test codec::aac_native::he_aac_native_tests::crc_failure_preserves_aac_and_sbr_histories_and_rejects_mismatched_checkpoints ... ok
+test codec::mace_decoder::tests::a_mac_take_is_indexed_in_blocks_and_read_one_a_packet ... ok
+test codec::gsm_decoder::tests::every_sample_of_a_real_file_lands_on_the_reference ... ok
+test codec::mace_decoder::tests::a_row_of_four_entries_answers_eight_codes_by_reading_itself_backwards ... ok
+test codec::mace_decoder::tests::a_run_that_is_not_a_whole_number_of_blocks_is_refused ... ok
+test codec::mace_decoder::tests::a_seek_restarts_both_predictors_from_the_quiet_end_of_the_table ... ok
+test codec::mace_decoder::tests::a_third_channel_and_a_track_with_no_rate_are_refused_at_the_construction ... ok
+test codec::mace_decoder::tests::the_clip_into_the_predictor_keeps_the_mac_binary_s_uneven_bottom_end ... ok
+test codec::gsm_decoder::tests::the_post_filter_clips_where_everywhere_else_wraps ... ok
+test codec::mace_decoder::tests::the_codebooks_drive_the_negative_half_of_both_tables ... ok
+test codec::mace_decoder::tests::the_table_position_follows_the_step_and_loses_a_thirty_second_of_itself ... ok
+test codec::mace_decoder::tests::the_output_is_eight_bits_wide_in_a_sixteen_bit_sample ... ok
+test codec::mace_decoder::tests::the_codebooks_run_the_predictor_onto_both_ends_of_its_range_and_the_takes_do_not ... ok
+test codec::mace_decoder::tests::six_to_one_reads_the_same_bytes_as_twice_the_samples ... ok
+test codec::mace_decoder::tests::two_channels_hold_their_own_predictors_and_come_out_as_two_runs ... ok
+test codec::mace_decoder::tests::three_to_one_reads_a_run_of_the_mac_s_own_bytes_bit_for_bit ... ok
+test codec::midi_decoder::tests::a_bend_moves_the_keys_already_down ... ok
+test codec::midi_decoder::tests::a_held_key_sounds_at_its_own_pitch ... ok
+test codec::midi_decoder::tests::a_channel_set_to_nothing_is_silent_and_a_full_one_is_not ... ok
+test codec::midi_decoder::tests::a_packet_becomes_the_frames_its_window_spans ... ok
+test codec::midi_decoder::tests::a_note_started_in_one_packet_is_held_across_the_next ... ok
+test codec::mace_decoder::tests::where_a_packet_is_cut_changes_no_sample ... ok
+test codec::midi_decoder::tests::a_program_number_is_kept_for_a_listing ... ok
+test codec::midi_decoder::tests::both_channels_carry_the_same_performance ... ok
+test codec::midi_decoder::tests::a_reset_forgets_what_was_held ... ok
+test codec::midi_decoder::tests::a_released_note_is_silent_and_stays_silent ... ok
+test codec::midi_decoder::tests::events_further_into_a_packet_sound_later_in_its_samples ... ok
+test codec::midi_decoder::tests::how_hard_a_key_is_struck_changes_how_loud_it_is ... ok
+test codec::midi_decoder::tests::records_written_by_the_container_are_read_back ... ok
+test codec::midi_decoder::tests::refuses_a_packet_it_cannot_read ... ok
+test codec::midi_decoder::tests::sustain_keeps_the_existing_voice_budget_and_releases_unrendered_keys ... ok
+test codec::midi_decoder::tests::the_envelope_rises_holds_and_a_released_note_falls_away ... ok
+test codec::midi_decoder::tests::one_channels_notes_off_leaves_the_other_sounding_and_a_panic_stops_all ... ok
+test codec::pcm_decoder::tests::a_24_bit_sample_keeps_its_value_across_the_wrap ... ok
+test codec::pcm_decoder::tests::a_missing_width_falls_back_to_the_containers_default ... ok
+test codec::pcm_decoder::tests::a_partial_frame_is_refused_before_publication ... ok
+test codec::pcm_decoder::tests::every_container_name_reaches_its_own_layout ... ok
+test codec::midi_decoder::tests::maximum_bend_sensitivity_keeps_discrete_phase_bounded_and_resettable ... ok
+test codec::pcm_decoder::tests::floats_pass_through_in_both_widths ... ok
+test codec::pcm_decoder::tests::integers_of_every_width_land_on_the_same_scale ... ok
+test codec::pcm_decoder::tests::interleaved_channels_stay_interleaved ... ok
+test codec::midi_decoder::tests::too_many_keys_at_once_let_the_oldest_go ... ok
+test codec::pcm_decoder::tests::sign_extension_reads_both_byte_orders ... ok
+test codec::pcm_decoder::tests::widths_with_no_definition_are_refused_at_open ... ok
+test codec::symphonia_decoder::tests::a_missing_decoder_is_refused_at_open ... ok
+test codec::symphonia_decoder::tests::an_mp3_stream_needs_no_setup_of_its_own ... ok
+test codec::truespeech_decoder::tests::a_blocks_bits_are_read_word_by_word_from_the_top_of_each ... ok
+test codec::truespeech_decoder::tests::a_blended_filter_runs_the_synthesis_into_its_clip ... ok
+test codec::truespeech_decoder::tests::a_block_alignment_that_is_not_the_coding_s_own_is_refused ... ok
+test codec::truespeech_decoder::tests::a_block_of_nothing_is_silent_only_because_its_pulses_are_small ... ok
+test codec::truespeech_decoder::tests::a_fact_that_contradicts_the_blocks_is_carried_rather_than_cross_checked ... ok
+test codec::truespeech_decoder::tests::a_track_that_is_not_mono_has_no_geometry_to_decode ... ok
+test codec::truespeech_decoder::tests::a_seek_restarts_the_coding_from_its_empty_history ... ok
+test codec::truespeech_decoder::tests::a_tail_shorter_than_a_block_codes_no_sample_and_a_packet_without_one_is_refused ... ok
+test codec::truespeech_decoder::tests::a_track_that_names_two_channels_is_refused ... ok
+test codec::truespeech_decoder::tests::a_zero_block_codes_the_codebooks_first_entries_and_no_offsets ... ok
+test codec::truespeech_decoder::tests::every_written_block_lands_on_the_reference_codebook ... ok
+test codec::truespeech_decoder::tests::the_four_copy_offset_codes_are_stated_back_to_front ... ok
+test codec::truespeech_decoder::tests::the_format_number_alone_states_the_geometry ... ok
+test codec::midi_decoder::tests::channel_tuning_extremes_preserve_note_identity_and_bounded_phase ... ok
+test codec::truespeech_decoder::tests::the_state_carries_across_the_packets_the_container_hands_over ... ok
+test codec::truespeech_decoder::tests::the_widest_copy_offset_code_still_rings_against_its_predecessor ... ok
+test codec::wavpack_decoder::tests::a_stereo_16_bit_file_decodes_to_ffmpegs_samples ... ok
+test codec::xm_decoder::tests::a_held_note_is_the_sample_volume_at_its_pan ... ok
+test codec::xm_decoder::tests::a_key_off_cuts_because_nothing_holds_the_note ... ok
+test codec::xm_decoder::tests::a_loop_of_its_own_frames_never_leaves_them ... ok
+test codec::xm_decoder::tests::a_ping_pong_loop_turns_around_inside_its_own_range ... ok
+test codec::xm_decoder::tests::a_reset_silences_what_was_sounding ... ok
+test codec::xm_decoder::tests::a_sample_without_a_loop_stops_when_it_runs_out ... ok
+test codec::xm_decoder::tests::every_thing_a_row_asks_for_that_is_not_played_is_counted ... ok
+test codec::xm_decoder::tests::refuses_what_it_cannot_play ... ok
+test codec::xm_decoder::tests::the_amiga_table_is_the_same_law_on_the_hardware_clock ... ok
+test codec::xm_decoder::tests::the_fixture_plays_its_notes_holds_them_and_lets_go ... ok
+test codec::xm_decoder::tests::the_linear_table_is_the_formats_own_reference ... ok
+test audio_thread::ps_edit_worker_tests::core_clock_ps_mp4_uses_asc_output_rate_for_pcm_edits_seek_and_rewind ... ok
+test codec::eac3_decoder::lfe_zero_allocation_regressions::lfe_witnesses_really_select_zero_or_coded_allocation ... ok
+test color::grade::tests::a_buffer_that_is_not_whole_pixels_is_not_read_past_its_end ... ok
+test audio_thread::ps_matroska_preroll_tests::original_ps_matroska_preroll_is_trimmed_and_eof_seek_rewind_keep_stereo_history ... ok
+test color::grade::tests::a_camera_log_replaces_the_signal_the_file_states ... ok
+test codec::truespeech_decoder::tests::a_header_stating_any_other_byte_rate_or_depth_reads_the_same_run ... ok
+test codec::truespeech_decoder::tests::the_take_is_read_in_the_player_s_own_windows ... ok
+test codec::truespeech_decoder::tests::the_head_of_the_run_lands_on_the_same_reference_samples ... ok
+test color::grade::tests::a_curve_only_conversion_runs_off_byte_tables_that_the_grid_agrees_with ... ok
+test codec::truespeech_decoder::tests::every_sample_of_a_real_file_lands_on_the_reference ... ok
+test color::grade::tests::a_curve_the_module_cannot_name_hands_its_codes_to_the_lut_as_they_came ... ok
+test color::grade::tests::a_camera_log_plan_gets_no_byte_tables ... ok
+test color::grade::tests::a_grading_lut_is_applied_after_the_derived_conversion ... ok
+test color::grade::tests::a_frame_is_graded_the_same_whichever_worker_paints_it ... ok
+test color::grade::tests::a_picture_on_the_panel_and_curve_it_states_is_left_alone ... ok
+test color::grade::tests::a_named_panel_is_what_an_hlg_code_means ... ok
+test color::grade::tests::a_small_frame_is_painted_by_the_thread_that_called_it ... ok
+test color::grade::tests::a_gamut_the_caller_names_outranks_the_file_and_the_curve ... ok
+test color::grade::tests::a_told_grade_applies_the_log_then_the_tone_map_then_the_cube ... ok
+test color::grade::tests::a_grade_hands_the_shader_the_table_it_reads ... ok
+test color::grade::tests::an_hdr_destination_keeps_the_full_scale_and_runs_no_shoulder ... ok
+test color::grade::tests::a_log_curve_lends_its_gamut_where_the_file_names_none ... ok
+test color::grade::tests::hdr_is_compressed_for_an_sdr_panel_even_when_nobody_chose_a_curve ... ok
+test color::lut::tests::a_1d_domain_is_the_input_range_and_its_values_are_left_alone ... ok
+test color::lut::tests::a_1d_table_keeps_its_values_past_the_ends ... ok
+test color::lut::tests::a_3dl_can_declare_its_grid_by_a_mesh_line_behind_keywords ... ok
+test color::lut::tests::a_3dl_divides_by_the_depth_its_header_declares ... ok
+test color::lut::tests::a_3dl_with_no_declaration_is_read_from_its_row_count ... ok
+test color::lut::tests::a_cube_that_is_not_a_lut_says_what_it_is ... ok
+test color::lut::tests::a_cube_with_both_tables_is_read_for_its_3d_grid ... ok
+test color::lut::tests::a_dat_keeps_its_nodes_unscaled_and_unclipped ... ok
+test color::lut::tests::a_dat_lists_its_grid_blue_fastest_like_a_3dl ... ok
+test color::lut::tests::a_dat_of_fractions_and_a_3dl_of_codes_do_not_change_places ... ok
+test color::lut::tests::a_dat_without_a_directive_is_read_from_its_row_count_past_comments ... ok
+test color::grade::tests::a_stream_that_states_its_light_compresses_from_it ... ok
+test color::grade::tests::shader_stages_borrow_original_domains_and_preserve_intermediate_headroom ... ok
+test color::lut::tests::a_node_outside_the_display_range_survives_the_parse ... ok
+test color::grade::tests::the_same_light_on_a_desktop_surface_is_re_encoded ... ok
+test color::lut::tests::a_pre_lut_section_is_read_past_and_leaves_the_grid_alone ... ok
+test color::grade::tests::a_row_of_pixels_is_rewritten_in_place_and_a_identity_grade_skips_it ... ok
+test color::lut::tests::a_spi1d_curve_is_read_with_its_from_pair_as_the_input_range ... ok
+test color::lut::tests::a_spi1d_spreads_one_two_or_three_values_per_row ... ok
+test color::lut::tests::a_spi3d_and_the_cube_of_the_same_numbers_agree ... ok
+test color::lut::tests::a_spi3d_row_places_its_node_by_its_own_indices ... ok
+test color::lut::tests::a_vendor_key_line_does_not_move_the_grid_or_close_the_file ... ok
+test color::lut::tests::affine_lut_is_reproduced_everywhere_by_trilinear_and_tetrahedral ... ok
+test color::lut::tests::a_real_spi1d_is_the_srgb_curve_over_the_range_it_declares ... ok
+test color::lut::tests::an_input_range_pair_is_read_as_the_domain_of_its_own_table ... ok
+test color::lut::tests::a_long_1d_table_is_read_while_a_grid_keeps_its_bound ... ok
+test color::lut::tests::bad_3dl_files_are_rejected ... ok
+test color::lut::tests::bad_dat_files_are_rejected ... ok
+test color::lut::tests::bad_spi_files_are_rejected ... ok
+test color::lut::tests::both_interpolators_converge_on_the_sampled_function ... ok
+test color::lut::tests::a_grid_that_only_moves_the_triangle_is_not_an_identity ... ok
+test color::lut::tests::a_plain_transfer_cube_keeps_the_light_its_codes_state ... ok
+test color::lut::tests::cube_1d_accepts_one_or_three_channels_per_row ... ok
+test color::lut::tests::cube_3d_parses_with_red_varying_fastest ... ok
+test color::lut::tests::cube_3dl_parses_12bit_rows ... ok
+test color::lut::tests::cube_round_trips_through_text ... ok
+test color::lut::tests::domain_is_applied_on_read_and_write ... ok
+test color::lut::tests::an_unmapped_conversion_moves_between_curve_families ... ok
+test color::lut::tests::every_interpolator_hits_the_nodes_exactly ... ok
+test color::grade::tests::a_master_beyond_the_panels_reach_rolls_instead_of_burning ... ok
+test color::lut::tests::every_reading_has_a_label_that_reads_back ... ok
+test color::lut::tests::from_text_routes_each_format_to_its_own_reader ... ok
+test color::lut::tests::graded_cube_maps_a_pq_range_onto_an_sdr_display ... ok
+test color::lut::tests::log_without_a_published_gamut_converts_in_the_destination_space ... ok
+test color::lut::tests::malformed_cubes_are_rejected ... ok
+test color::lut::tests::transfer_lut_is_the_curve_sampled_on_a_code_grid ... ok
+test container::adts::mp4_descriptor_tests::sl_configuration_is_inside_multibyte_es_descriptor ... ok
+test container::audio_timeline::tests::gap_repeat_seek_and_fractional_boundaries ... ok
+test container::avi::tests::a_chunk_that_overclaims_ends_where_the_run_does ... ok
+test container::avi::tests::a_file_that_is_not_an_avi_is_not_a_file_with_no_audio ... ok
+test container::avi::tests::a_file_without_an_index_is_read_by_its_records_alone ... ok
+test container::avi::tests::a_geometry_that_cannot_be_laid_out_is_refused ... ok
+test container::avi::tests::a_group_that_states_no_format_describes_no_stream_this_reader_reads ... ok
+test container::avi::tests::a_header_or_a_format_that_stops_short_is_refused ... ok
+test container::avi::tests::a_movi_boundary_cannot_publish_a_partial_audio_record ... ok
+test container::avi::tests::a_picture_stream_in_front_does_not_take_the_audios_number ... ok
+test container::avi::tests::a_record_with_no_bytes_in_it_is_refused ... ok
+test container::avi::tests::a_records_own_group_does_not_move_it_in_the_timeline ... ok
+test container::avi::tests::a_stream_holding_nothing_is_not_a_file_holding_nothing ... ok
+test container::avi::tests::an_id_that_claims_a_picture_stream_is_audio_is_a_disagreement ... ok
+test container::avi::tests::an_index_that_disagrees_with_the_records_is_refused ... ok
+test container::avi::tests::only_a_streams_own_id_names_its_records ... ok
+test container::avi::tests::the_headers_of_a_real_audio_stream_are_the_streams_own ... ok
+test container::avi::tests::the_main_header_and_the_stream_groups_have_to_agree ... ok
+test container::avi::tests::the_readers_own_budgets_are_its_to_set ... ok
+test container::mp4::tests::a_disc_and_the_albums_own_artist_read_from_their_boxes ... ok
+test container::mp4::tests::a_fragment_of_audio_is_indexed_as_its_own_run_states ... ok
+test container::mp4::tests::a_fragment_saying_something_no_reader_can_honour_is_refused ... ok
+test container::mp4::tests::a_fragment_that_leaves_out_its_decode_time_continues_the_track ... ok
+test container::mp4::tests::a_mace_table_that_does_not_divide_into_blocks_is_refused ... ok
+test container::mp4::tests::a_mace_track_is_indexed_in_blocks_though_its_table_counts_samples ... ok
+test container::mp4::tests::a_track_number_reads_from_its_binary_box_both_writers_spell_it ... ok
+test container::mp4::tests::colr_reads_both_writers_spellings_of_the_cicp_triple ... ok
+test container::mp4::tests::every_fragmented_sample_reads_the_bytes_its_index_points_at ... ok
+test container::mp4::tests::fragments_of_video_keep_the_decode_stamps_and_the_restart_points ... ok
+test container::mp4::tests::tags_this_reader_cannot_read_leave_the_file_unstated ... ok
+test container::mp4::tests::the_coding_s_block_is_two_or_one_bytes_a_channel_and_six_samples_whichever_it_is ... ok
+test container::mp4::tests::the_movie_tags_name_it_in_either_writers_spelling ... ok
+test audio_thread::checkpoint_seek_tests::warmed_adts_and_matroska_seek_restore_exact_pcm_tails ... ok
+test container::mp4::tests::the_rights_and_the_note_read_from_their_atoms_both_ways ... ok
+test color::lut::tests::an_hlg_picture_is_scaled_to_the_panel_that_reads_it ... ok
+test container::mp4::tests::the_wave_record_sits_where_the_entry_version_puts_the_children ... ok
+test container::mp4_concat::tests::a_second_packet_trimmed_at_both_ends_retains_existing_routing ... ok
+test container::mp4_concat::tests::delay_spanning_multiple_packets_becomes_per_packet_head_padding ... ok
+test container::mp4_concat::tests::unrepresentable_negative_packet_time_is_not_admitted ... ok
+test container::mp4_matroska::tests::reordered_variable_cadence_uses_presentation_intervals ... ok
+test container::ogg::checksum_regression::resealing_last_ogg_page_preserves_the_intended_granule_mutation ... ok
+test container::opus_packet::tests::all_toc_durations_and_frame_count_limits ... ok
+test container::opus_packet::tests::identification_and_preskip ... ok
+test container::opus_packet::tests::vbr_padding_and_short_packets_are_checked ... ok
+test container::smf::tests::a_file_without_a_tempo_states_the_default_one ... ok
+test container::smf::tests::a_note_on_with_no_velocity_is_a_note_off ... ok
+test container::mp4::tests::the_sound_a_fragment_indexes_is_the_sound_the_player_hears ... ok
+test container::smf::tests::a_packet_ends_at_its_own_window ... ok
+test container::smf::tests::delta_times_span_the_variable_length_range ... ok
+test container::smf::tests::every_channel_and_meta_message_the_format_has_is_read_or_dropped ... ok
+test container::smf::tests::extension_chunks_do_not_replace_missing_declared_tracks ... ok
+test container::smf::tests::holds_to_its_own_bounds ... ok
+test container::smf::tests::packet_records_survive_the_round_trip ... ok
+test container::smf::tests::reads_a_single_track_file_and_its_events ... ok
+test container::smf::tests::refuses_a_data_byte_with_no_status_to_run ... ok
+test container::smf::tests::refuses_a_file_that_is_not_one ... ok
+test container::smf::tests::refuses_a_packet_that_is_not_whole_records ... ok
+test container::smf::tests::refuses_a_timeline_it_cannot_place ... ok
+test container::smf::tests::refuses_data_that_runs_past_the_file ... ok
+test container::smf::tests::running_status_carries_a_note_run_without_repeating_it ... ok
+test container::smf::tests::tracks_of_a_format_one_file_share_the_timeline ... ok
+test container::smf::tests::tempo_changes_move_later_ticks_without_moving_earlier_ones ... ok
+test container::webm::tests::a_chapter_list_that_cannot_be_walked_leaves_the_file_playable ... ok
+test container::webm::tests::a_colour_element_states_its_range_in_matroskas_own_numbers ... ok
+test container::webm::tests::a_colour_element_carries_the_triple_and_the_mastering_volume ... ok
+test container::webm::tests::a_file_with_no_stated_length_is_indexed_whole_at_open ... ok
+test container::webm::tests::a_file_keeps_every_tag_that_names_it_rather_than_one_track ... ok
+test container::webm::tests::a_real_file_lets_the_reader_name_its_tracks ... ok
+test container::webm::tests::a_real_file_names_itself_and_its_author_in_its_tags ... ok
+test container::webm::tests::a_real_file_names_itself_in_its_information_block ... ok
+test container::webm::tests::a_tag_of_the_file_names_it_and_a_tag_of_one_track_does_not ... ok
+test container::webm::tests::a_track_keeps_the_name_and_the_language_either_spelling_gives_it ... ok
+test container::webm::tests::a_track_number_arrives_under_whichever_name_its_writer_chose ... ok
+test container::webm::tests::a_video_track_keeps_its_crop_borders_and_shows_only_what_survives_them ... ok
+test container::webm::tests::a_video_track_display_size_becomes_the_shape_of_its_pixels ... ok
+test container::webm::tests::audio_track_reads_its_float_rate_and_codec_private ... ok
+test container::webm::tests::block_duration_scales_once_across_lazy_clusters_and_rejects_overflow ... ok
+test container::webm::tests::chapter_times_are_nanoseconds_independent_of_segment_scale ... ok
+test container::webm::tests::chapter_atoms_come_out_in_the_files_own_clock ... ok
+test container::webm::tests::declared_duration_uses_final_scale_and_validates_float ... ok
+test container::webm::tests::delay_and_signed_discard_padding_keep_nanosecond_units ... ok
+test container::webm::tests::malformed_vints_lacing_and_limits_fail ... ok
+test container::webm::tests::overflowing_crop_borders_keep_the_whole_picture ... ok
+test container::webm::tests::opening_a_timed_file_stops_at_the_first_cluster ... ok
+test container::webm::tests::rectangular_projection_roll_has_clockwise_display_orientation ... ok
+test container::webm::tests::scanning_to_a_point_leaves_the_file_behind_it_unread ... ok
+test container::webm::tests::unknown_segment_and_cluster_sizes_signed_timestamps_and_packet_reads ... ok
+test container::webm::tests::the_album_artist_the_disc_and_the_publisher_keep_their_spellings ... ok
+test container::xm::tests::a_break_names_the_row_the_tracker_shows_it_in_decimal ... ok
+test container::xm::tests::a_file_that_is_not_a_module_is_refused_before_anything_is_read ... ok
+test container::xm::tests::a_keymap_points_a_note_at_a_sample_and_no_note_at_nothing ... ok
+test container::xm::tests::a_loop_counted_in_bytes_is_read_as_frames_and_clamped_to_what_there_is ... ok
+test container::xm::tests::a_module_reads_back_as_the_rows_and_shapes_it_states ... ok
+test container::xm::tests::a_module_that_jumps_back_is_one_pass_of_what_it_played ... ok
+test container::xm::tests::a_module_lying_about_its_own_sizes_is_refused_not_read_past_them ... ok
+test container::xm::tests::a_packet_index_lands_on_the_last_row_that_had_begun ... ok
+test container::xm::tests::a_row_plays_the_pattern_its_order_names ... ok
+test container::xm::tests::a_row_that_states_tempo_measures_the_rows_from_it_on ... ok
+test container::xm::tests::a_sample_in_a_form_this_reader_does_not_undo_is_named_as_one ... ok
+test container::xm::tests::both_packed_forms_of_a_row_hold_the_same_cells ... ok
+test container::xm::tests::the_committed_fixtures_are_the_bytes_the_builder_writes ... ok
+test container::xm::tests::every_packet_reads_back_as_the_row_that_wrote_it ... ok
+test container::xm::tests::the_note_column_keeps_what_the_format_names_and_drops_what_it_does_not ... ok
+test container::xm::tests::the_layout_a_version_before_1_04_used_is_read_where_it_put_things ... ok
+test container::xm::tests::the_samples_delta_coded_in_the_file_are_the_frames_in_memory ... ok
+test edit::tests::geometry_requires_decode ... ok
+test container::xm::tests::the_tempo_a_module_starts_at_falls_back_to_the_tracker_s_own_defaults ... ok
+test edit::tests::hybrid_plan_transcodes_video_and_copies_audio ... ok
+test gpu::tests::layout_handles_unaligned_payload ... ok
+test native_export::overlay::tests::foreground_selection_uses_its_cadence_and_holds_eof ... ok
+test native_pixels::colorhold_tests::native_colour_metadata_selects_matrix_and_preserves_selected_samples ... ok
+test native_pixels::colorize_tests::colorize_native_decode_and_lossless_export_accept_high_depth_odd_frames ... ok
+test codec::eac3_decoder::mixed_zero_allocation_regressions::authored_delta_segments_really_mix_zero_vq_and_gaq_allocations ... ok
+test hardware_export::tests::publication_cleans_failures_and_preserves_competing_destinations ... ok
+test native_pixels::overlay::tests::invalid_foreground_or_alignment_leaves_destination_unchanged ... ok
+test native_pixels::overlay::tests::mixed_depth_clipping_and_invalid_source_are_atomic ... ok
+test native_pixels::overlay::tests::precision_conversion_preserves_range_endpoints_and_neutral_chroma ... ok
+test native_pixels::overlay::tests::odd_yuv420_preserves_plane_borders_and_high_depth ... ok
+test native_pixels::overlay::tests::rgb_negative_offsets_clip_exact_pixels ... ok
+test native_probe::average_rate_tests::average_uses_total_clock_and_exact_reduced_ratio ... ok
+test native_probe::average_rate_tests::unknown_or_unrepresentable_timing_is_not_guessed ... ok
+test native_probe::payload_rate_tests::unknown_clock_and_overflow_remain_unknown ... ok
+test native_probe::payload_rate_tests::uses_payload_bytes_and_total_source_clock ... ok
+test native_subtitle::tests::entities_are_literal_text_not_ass_or_html_commands ... ok
+test playback::tests::converts_chroma_planes_in_all_supported_layouts ... ok
+test playback::tests::decode_black_white_and_rewind ... ok
+test playback::tests::rejects_invalid_rate_budget_and_truncation ... ok
+test playback_aac::tests::a_file_that_is_not_a_run_of_adts_frames_is_refused ... ok
+test playback_aac::tests::a_frame_with_crc_states_a_nine_byte_header ... ok
+test playback_aac::tests::a_header_that_states_nothing_playable_is_refused ... ok
+test native_pixels::monochrome_tests::monochrome_native_decode_and_lossless_export_accept_high_depth_odd_frames ... ok
+test playback_aac::tests::a_real_file_is_exactly_the_frames_its_headers_count ... ok
+test color::lut::tests::camera_log_cube_delivers_the_destination_curve_at_the_vendor_anchor ... ok
+test playback_aac::tests::a_seek_restores_history_before_the_exact_output_sample ... ok
+test playback_aac::tests::the_setup_block_carries_the_config_the_header_states ... ok
+test playback_aac::tests::the_wrapper_grows_with_a_config_a_container_handed_over ... ok
+test playback_aac::tests::a_mono_file_decodes_from_the_setup_block_its_frames_state ... ok
+test playback_ac3::tests::a_file_that_is_not_a_run_of_syncframes_is_refused ... ok
+test playback_ac3::tests::a_frames_length_comes_from_its_rate_and_size_code ... ok
+test playback_aac::tests::timestamps_count_the_samples_a_frame_holds ... ok
+test playback_ac3::tests::a_real_file_is_exactly_the_frames_its_header_counts ... ok
+test color::lut::tests::every_log_profile_produces_a_usable_rec709_cube ... ok
+test playback_ac3::tests::a_seek_restores_history_before_the_requested_audible_sample ... ok
+test playback_ac3::tests::timestamps_count_the_samples_a_frame_always_holds ... ok
+test playback_aiff::tests::a_header_that_is_not_an_audio_interchange_file_is_refused ... ok
+test playback_aiff::tests::a_real_headers_numbers_are_read_as_the_muxer_meant_them ... ok
+test playback_ac3::tests::the_packets_it_hands_over_decode_as_the_tag_says ... ok
+test playback_aiff::tests::a_stereo_run_of_the_width_the_header_names_reaches_the_decoder ... ok
+test playback_aiff::tests::a_take_at_the_rate_the_mac_really_writes_is_a_measured_barrier_to_opening_it ... ok
+test playback_aiff::tests::an_eight_bit_run_is_signed_which_is_not_what_a_wave_file_of_the_same_width_holds ... ok
+test playback_aiff::tests::an_aifc_header_names_its_byte_order_and_its_rejections ... ok
+test playback_aiff::tests::authoring_chunks_are_walked_past_and_odd_sizes_are_aligned ... ok
+test playback_aiff::tests::every_rate_a_muxer_writes_in_extended_form_is_read_exactly ... ok
+test playback_aiff::tests::the_fourcc_states_a_block_the_header_does_not ... ok
+test playback_aiff::tests::the_run_is_cut_at_the_player_s_own_grain_and_a_byte_over_a_block_is_not_handed_over ... ok
+test playback_aiff::tests::the_sample_run_is_cut_into_windows_and_the_cursor_lands_on_one ... ok
+test playback_aiff::tests::the_samples_are_twos_complement_big_endian ... ok
+test playback_au::tests::a_file_that_is_not_a_pcm_run_is_refused ... ok
+test playback_au::tests::a_real_headers_words_are_read_as_the_muxer_meant_them ... ok
+test playback_au::tests::a_run_of_unknown_length_is_the_file_and_a_known_one_is_capped ... ok
+test playback_aiff::tests::the_windows_reach_the_decoder_as_one_continuous_run ... ok
+test playback_aiff::tests::what_a_mace_header_lying_about_its_own_fields_changes_is_only_its_claim ... ok
+test playback_au::tests::the_sample_run_is_cut_into_windows_and_the_cursor_lands_on_one ... ok
+test playback_au::tests::an_annotation_moves_where_the_samples_begin ... ok
+test playback_au::tests::a_second_stereo_frame_is_the_width_the_header_states ... ok
+test playback_au::tests::the_samples_are_twos_complement_big_endian ... ok
+test playback_au::tests::the_two_wider_linear_slots_are_read_as_the_muxer_wrote_them ... ok
+test playback_au::tests::unsupported_au_codings_remain_refused ... ok
+test playback_avi_audio::tests::a_byte_rate_the_block_and_rate_do_not_give_is_refused ... ok
+test playback_avi_audio::tests::a_geometry_the_coding_does_not_have_is_refused_not_guessed_at ... ok
+test playback_avi_audio::tests::a_length_that_does_not_count_the_run_is_a_disagreement ... ok
+test playback_avi_audio::tests::a_coding_with_no_arm_is_named_by_the_number_the_file_states ... ok
+test playback_avi_audio::tests::a_microsoft_stream_carries_its_prediction_tables_in_the_setup_record ... ok
+test playback_avi_audio::tests::a_record_that_contains_a_partial_block_is_refused ... ok
+test playback_avi_audio::tests::a_second_track_key_has_nothing_to_land_on ... ok
+test playback_avi_audio::tests::a_stream_that_starts_later_is_not_offset_for ... ok
+test playback_avi_audio::tests::a_timeline_that_is_not_the_blocks_duration_is_refused ... ok
+test playback_avi_audio::tests::an_unsupported_pcm_width_is_named_without_claiming_no_decoder ... ok
+test playback_avi_audio::tests::seeking_lands_on_the_block_a_timestamp_falls_in ... ok
+test playback_flac::tests::a_block_that_reaches_past_the_file_is_refused ... ok
+test playback_avi_audio::tests::a_wav_shaped_ima_stream_reads_as_its_blocks_and_their_timing ... ok
+test playback_flac::tests::a_file_that_is_not_a_flac_file_is_not_a_stream ... ok
+test playback_flac::tests::a_frame_header_needs_its_own_checksum ... ok
+test playback_flac::tests::a_frame_that_names_another_channel_count_is_refused ... ok
+test playback_flac::tests::a_frame_that_names_another_rate_is_refused ... ok
+test playback_flac::tests::a_frame_with_corrupted_residual_or_checksum_is_refused ... ok
+test playback_flac::tests::a_metadata_block_between_frames_ends_one_and_is_not_a_packet ... ok
+test playback_flac::tests::a_real_files_frames_are_where_the_reference_demuxer_puts_them ... ok
+test playback_flac::tests::a_stated_sample_count_that_disagrees_with_the_frames_is_refused ... ok
+test playback_flac::tests::a_stereo_stream_is_two_channels_and_its_side_stereo_frame_plays ... ok
+test playback_flac::tests::a_stream_info_that_is_too_short_to_state_a_geometry_is_refused ... ok
+test playback_flac::tests::a_stream_at_another_rate_and_frames_that_agree_with_ffprobe ... ok
+test playback_flac::tests::a_truncated_tail_is_refused ... ok
+test playback_flac::tests::a_twenty_four_bit_stream_keeps_its_width ... ok
+test playback_flac::tests::limits_cut_a_file_that_would_run_on ... ok
+test playback_flac::tests::packets_are_whole_frames_and_their_timestamps_count_samples ... ok
+test playback_flac::tests::seek_and_rewind_land_on_a_frame_that_starts_the_samples_there ... ok
+test playback_flac::tests::stated_frame_sizes_that_disagree_with_the_frames_are_refused ... ok
+test playback_flac::tests::the_checksums_are_the_ones_the_format_names ... ok
+test playback_flac::tests::the_setup_record_the_decoder_wants_is_the_files_own_stream_info ... ok
+test playback_flac::tests::the_short_last_frame_states_its_own_block_size ... ok
+test playback_mp3::tests::a_file_that_holds_no_frame_header_is_refused ... ok
+test playback_avi_audio::tests::the_records_the_reader_hands_over_are_the_blocks_the_decoder_wants ... ok
+test playback_mp3::tests::a_layer_ii_stream_is_read_by_the_same_walk ... ok
+test playback_mp3::tests::a_layer_one_header_without_a_complete_frame_is_not_audio ... ok
+test playback_mp3::tests::a_real_files_frames_are_where_the_reference_demuxer_puts_them ... ok
+test playback_mp3::tests::a_run_that_does_not_open_on_a_header_resyncs_to_the_next_one ... ok
+test playback_mp3::tests::a_second_tag_follows_the_first ... ok
+test playback_mp3::tests::a_run_that_stops_short_of_the_end_of_the_file_is_not_a_stream ... ok
+test playback_mp3::tests::a_stream_that_changes_its_geometry_midway_is_refused ... ok
+test playback_mp3::tests::a_tag_at_the_end_is_not_audio ... ok
+test playback_mp3::tests::an_id3v2_length_is_read_as_seven_bits_per_byte ... ok
+test playback_mp3::tests::layer3_seek_rebuilds_history_and_preserves_exact_sample_target ... ok
+test playback_flac::tests::every_packet_of_a_real_file_decodes_to_the_samples_the_reference_counts ... ok
+test playback_mp3::tests::the_packets_decode_to_the_track_the_stream_runs_to ... ok
+test playback_aac::tests::a_five_one_file_states_the_setup_block_its_frames_describe ... ok
+test playback_aac::tests::the_packets_it_hands_over_decode_as_the_tag_says ... ok
+test playback_mp4::tests::media_time_preserves_fractional_and_negative_timestamps ... ok
+test playback_mp4::tests::presentation_intervals_follow_composition_order ... ok
+test playback_mp4_audio::edit_seek_tests::seek_anchor_applies_priming_offset_once ... ok
+test playback_mp4_audio::tests::a_named_file_lists_its_audio_tracks_by_what_it_says ... ok
+test color::lut::tests::camera_cube_converts_through_the_vendor_gamut_when_one_is_published ... ok
+test codec::eac3_decoder::enhanced_noise_regressions::enhanced_zero_bins_apply_all_amplitudes_to_independent_channel_noise ... ok
+test playback_mp4_audio::tests::a_pcm_track_over_the_sample_budget_leaves_the_picture ... ok
+test playback_mp4_audio::tests::a_pcm_track_indexes_as_runs_of_chunks ... ok
+test playback_mp4_audio::tests::both_audio_tracks_are_listed_and_openable ... ok
+test playback_mp4_audio::tests::a_pcm_track_decodes_sample_by_sample ... ok
+test playback_mp4_audio::tests::each_track_states_its_own_length ... ok
+test playback_mp4_audio::tests::each_pcm_tag_is_read_at_its_own_width_and_order ... ok
+test playback_mp4_subtitles::tests::a_chain_of_boxes_keeps_only_its_text ... ok
+test playback_mp4_subtitles::tests::a_group_of_display_parameters_states_its_own_text ... ok
+test playback_mp4_subtitles::tests::a_length_stated_sample_gives_its_string ... ok
+test playback_mp4_subtitles::tests::a_mov_text_track_is_listed_and_read ... ok
+test playback_mp4_subtitles::tests::a_titled_subtitle_track_is_listed_by_its_title ... ok
+test playback_mp4_subtitles::tests::both_mov_text_tracks_are_listed_and_read_apart ... ok
+test audio::cpal_backend::signed_aac_timeline_regressions::signed_aac_windows_reach_the_cpal_callback_at_their_original_sample_positions ... ok
+test playback_mp4_audio::tests::aac_duration_counts_leading_silence_and_repeated_ranges ... ok
+test codec::aac_native::he_aac_native_tests::complete_authored_lc_plus_sbr_blocks_match_independent_pcm_and_clock ... ok
+test codec::eac3_decoder::zero_coupling_regressions::coupled_zero_bins_obey_flags_before_transform_and_do_not_share_noise ... ok
+test audio_thread::ps_edit_worker_tests::implicit_ps_mono_metadata_edits_seek_and_rewind_use_negotiated_stereo_stride ... ok
+test playback_native::tests::a_turn_moves_every_pixel_to_its_place ... ok
+test playback_mp4_audio::tests::the_second_track_decodes_at_its_own_rate ... ok
+test color::lut::tests::every_camera_log_cube_can_stop_at_linear_light ... ok
+test playback_native::tests::a_y4m_stream_states_only_the_matrix_its_converter_uses ... ok
+test playback_native::tests::a_frame_split_between_workers_matches_its_own_strips ... ok
+test playback_native::tests::edit_window_preserves_track_units_and_rounds_fractional_end_up ... ok
+test playback_native::tests::format_detection_handles_small_buffers_and_y4m_rewind ... ok
+test playback_native::tests::images_and_unknown_data_are_not_dispatched_as_mp4 ... ok
+test playback_native::tests::planes_turn_with_their_own_geometry ... ok
+test playback_native::tests::video_fourccs_read_as_the_names_a_viewer_shows ... ok
+test playback_native::tests::webm_signature_never_enters_mp4_parser ... ok
+test playback_ogg_audio::tests::a_chained_pair_of_streams_is_read_as_one_timeline ... ok
+test playback_ogg_audio::tests::a_chained_pair_that_changes_coding_mid_file_is_refused ... ok
+test playback_ogg_audio::tests::a_file_whose_page_checksum_lies_is_refused ... ok
+test playback_ogg_audio::tests::a_header_that_does_not_add_up_is_refused_rather_than_timed_wrong ... ok
+test playback_ogg_audio::tests::a_real_files_packets_are_where_its_own_pages_put_them ... ok
+test playback_ogg_audio::tests::a_timestamp_lands_on_the_packet_at_or_before_it ... ok
+test playback_ogg_audio::tests::an_opus_bitstream_is_refused_by_name ... ok
+test playback_ogg_audio::tests::every_packet_is_stamped_by_its_decoded_overlap ... ok
+test playback_ogg_audio::tests::the_fixture_decodes_to_pcm ... ok
+test playback_smf::tests::a_midi_file_supplies_the_geometry_it_does_not_state ... ok
+test playback_smf::tests::packets_cover_the_timeline_and_one_more_window ... ok
+test playback_smf::tests::refuses_anything_that_is_not_a_performance ... ok
+test playback_smf::tests::the_cursor_rewinds_and_lands_on_a_time ... ok
+test playback_smf::tests::the_whole_file_renders_at_the_rate_the_track_promises ... ok
+test playback_spool::ram_tests::admitted_ram_cache_keeps_loaded_start_after_seek_until_item_is_dropped ... ok
+test playback_spool::ram_tests::dropping_a_ram_ring_releases_the_shared_allocation ... ok
+test playback_spool::ram_tests::shared_source_avoids_reopen_and_keeps_independent_cursors ... ok
+test playback_spool::ram_tests::single_worker_serves_uncached_tail_and_start_with_a_pinned_playhead ... ok
+test playback_spool::ram_tests::startup_storage_is_transferred_without_a_second_allocation ... ok
+test playback_thread::precision_tests::alpha_converter_rotates_all_channels_and_counts_source_opacity_storage ... ok
+test playback_thread::precision_tests::decoded_main10_picture_reaches_gpu_without_narrowing ... ok
+test playback_thread::precision_tests::identity_rgb_frames_use_rgb_presentation_without_yuv_shader ... ok
+test playback_thread::precision_tests::playback_keeps_source_precision_and_rotation_for_gpu ... ok
+test playback_thread::precision_tests::source_precision_queue_honours_byte_budget_even_at_large_frames ... ok
+test playback_wav::tests::a_creative_fact_is_cross_checked_because_nothing_else_states_the_length ... ok
+test playback_wav::tests::a_creative_track_that_states_another_width_is_refused ... ok
+test playback_wav::tests::a_creative_wave_states_nothing_but_its_code_width ... ok
+test playback_wav::tests::a_data_chunk_longer_than_the_file_is_read_as_the_file ... ok
+test playback_wav::tests::a_fact_claim_is_only_checked_against_a_run_that_is_all_there ... ok
+test playback_wav::tests::a_g_711_wave_names_its_table_and_codes_one_byte_per_sample ... ok
+test playback_wav::tests::a_g_722_header_that_contradicts_itself_is_refused ... ok
+test playback_wav::tests::a_g_722_run_is_cut_into_windows_of_frames ... ok
+test playback_wav::tests::a_g_722_wave_codes_two_samples_a_byte ... ok
+test playback_wav::tests::a_g_722_wave_reaches_the_decoder_as_the_run_it_claims ... ok
+test playback_wav::tests::a_g_726_header_that_contradicts_itself_is_refused ... ok
+test playback_wav::tests::a_g_726_run_ends_where_its_blocks_do ... ok
+test playback_wav::tests::a_g_726_run_is_cut_into_windows_of_frames ... ok
+test playback_wav::tests::a_g_726_wave_reaches_the_decoder_as_the_run_it_claims ... ok
+test playback_wav::tests::a_g_726_wave_states_its_code_width_in_its_byte_rate ... ok
+test playback_wav::tests::a_gsm_block_narrower_than_the_full_rate_is_refused_by_name ... ok
+test playback_wav::tests::a_gsm_byte_rate_is_the_blocks_own_division_of_the_rate ... ok
+test playback_wav::tests::a_gsm_fact_is_carried_rather_than_cross_checked ... ok
+test playback_wav::tests::a_gsm_header_that_contradicts_itself_is_refused ... ok
+test playback_wav::tests::a_gsm_wave_states_its_rate_in_its_block_alignment ... ok
+test playback_wav::tests::a_missing_or_short_chunk_is_refused ... ok
+test playback_wav::tests::a_stale_envelope_size_still_leaves_the_sample_run_readable ... ok
+test playback_wav::tests::a_stereo_g_722_wave_is_read_and_then_refused_by_the_coding ... ok
+test playback_wav::tests::a_stereo_g_726_wave_is_read_and_then_refused_by_the_coding ... ok
+test playback_wav::tests::an_extensible_header_is_read_by_its_sub_format ... ok
+test playback_wav::tests::every_field_of_the_header_has_to_agree_with_the_others ... ok
+test playback_wav::tests::packets_are_windows_of_frames_stamped_in_samples ... ok
+test playback_wav::tests::the_cursor_rewinds_and_lands_on_a_window ... ok
+test playback_wav::tests::the_extensible_header_a_muxer_actually_writes_is_read ... ok
+test playback_wav::tests::the_header_states_what_the_decoder_needs ... ok
+test playback_wav::tests::the_reference_creative_take_reads_as_its_own_bytes ... ok
+test playback_wav::tests::the_reference_gsm_take_reads_as_its_own_blocks ... ok
+test playback_wav::tests::the_samples_arrive_as_the_pcm_decoder_writes_them ... ok
+test playback_webm::seek_cache::tests::eviction_respects_budget_and_never_restores_a_point_before_the_gop ... ok
+test playback_webm::seek_cache::tests::status_view_does_not_keep_a_closed_items_cache_alive ... ok
+test playback_webm::seek_cache::tests::zero_budget_keeps_no_decoder_or_picture_storage ... ok
+test codec::aac_native::he_aac_native_tests::complete_stereo_cpe_sbr_matches_both_independent_mono_oracles_and_crc_rollback ... ok
+test color::grade::tests::a_chained_grade_is_not_a_single_lookup ... ok
+test color::grade::tests::only_a_conversion_that_keeps_the_channels_apart_gets_tables ... ok
+test playback_webm::tests::a_cropped_webm_reaches_the_player_with_its_borders_and_full_frames ... ok
+test playback_webm::tests::cached_simpleblocks_follow_variable_presentation_intervals ... ok
+test playback_webm::tests::duration_and_progress_use_video_origin_and_index_fallback ... ok
+test playback_webm::tests::native_detection_timing_rgb_eof_and_rewind ... ok
+test playback_webm::tests::a_seek_lands_on_the_frame_continuous_playback_shows ... ok
+test playback_webm::tests::seeking_before_the_first_frame_keeps_the_track_origin ... ok
+test playback_webm_audio::aac_sample_window_regressions::nanosecond_packet_rounding_never_discards_an_extra_whole_sample ... ok
+test playback_webm_audio::tests::a_24_bit_pcm_track_decodes_block_by_block ... ok
+test playback_webm_audio::tests::a_dolby_track_is_listed_with_the_lossy_ones_it_sits_beside ... ok
+test playback_webm_audio::tests::a_flac_track_decodes_to_its_exact_length ... ok
+test playback_webm_audio::tests::a_float_pcm_track_decodes_block_by_block ... ok
+test playback_webm_audio::tests::a_layer_ii_track_reaches_the_arm_the_layer_iii_route_shares ... ok
+test playback_webm_audio::tests::a_named_file_lists_its_audio_tracks_by_what_it_says ... ok
+test playback_webm_audio::tests::a_track_is_named_by_what_the_file_says_and_what_it_holds ... ok
+test playback_webm_audio::tests::an_aac_track_arrives_with_only_the_config_and_is_wrapped ... ok
+test playback_webm_audio::tests::an_aac_track_without_a_usable_setup_block_is_refused_by_name ... ok
+test playback_webm_audio::tests::an_mp3_track_decodes_frame_by_frame ... ok
+test playback_webm_audio::tests::laced_headers_pass_through_untouched ... ok
+test playback_webm_audio::tests::missing_setup_header_is_an_error ... ok
+test playback_webm_audio::tests::only_the_stream_info_body_of_a_flac_setup_block_is_read ... ok
+test playback_webm_audio::tests::raw_headers_drop_the_comment_packet ... ok
+test playback_webm_audio::tests::the_blocks_state_the_track_length ... ok
+test playback_webm_audio::tests::the_fixture_lists_its_audio_tracks ... ok
+test playback_webm_audio::tests::the_track_list_includes_opus_alongside_flac ... ok
+test playback_webm_audio::tests::the_track_list_still_skips_unknown_audio ... ok
+test playback_webm_audio::tests::vorbis_fixture_decodes_to_pcm ... ok
+test playback_webm_subtitles::tests::a_default_duration_ends_the_plain_text_blocks ... ok
+test playback_webm_subtitles::tests::a_titled_subtitle_track_is_listed_by_its_title ... ok
+test playback_webm_subtitles::tests::a_track_is_named_by_its_title_then_its_language_then_its_format ... ok
+test playback_webm_subtitles::tests::a_track_name_beats_the_format_and_a_picture_track_is_left_out ... ok
+test playback_webm_subtitles::tests::an_ass_block_that_names_its_own_range_is_timed_by_the_script ... ok
+test playback_webm_subtitles::tests::an_ass_track_is_listed_by_its_title_and_read_from_its_blocks ... ok
+test playback_webm_subtitles::tests::an_ssa_track_is_listed_and_read_by_its_script_lines ... ok
+test playback_webm_subtitles::tests::both_text_tracks_are_listed_and_read_apart ... ok
+test playback_xm::tests::a_module_supplies_the_geometry_it_does_not_state ... ok
+test playback_xm::tests::packets_are_the_rows_and_one_more ... ok
+test playback_xm::tests::refuses_anything_that_is_not_a_module ... ok
+test playback_xm::tests::the_cursor_rewinds_and_lands_on_a_time ... ok
+test playback_xm::tests::the_stamps_add_up_to_the_timeline_without_drift ... ok
+test playback_xm::tests::the_whole_module_renders_at_the_rate_the_track_promises ... ok
+test playback_mp4::tests::an_av1_metadata_obu_states_its_own_light ... ok
+test player::audio_duration_publication_regressions::completed_audio_duration_reaches_the_sound_only_player_timeline ... ok
+test playback_native::tests::a_codings_own_statement_replaces_a_containers_silence ... ok
+test playback_native::tests::a_real_hdr10_files_light_reaches_the_caller_that_tone_maps_it ... ok
+test playback_webm::tests::a_track_that_writes_its_light_only_in_band_answers_at_open ... ok
+test playback_native::tests::an_item_states_the_shape_of_its_pixels ... ok
+test player::gpu_option_tests::metal_player_presents_shared_main10_and_can_snapshot_it ... ignored, requires physical VideoToolbox decoding
+test playback_mp4::tests::an_hevc_sei_states_its_own_light ... ok
+test playback_native::tests::a_real_hdr10_files_signal_reaches_the_caller_that_grades_it ... ok
+test playback_mp4::tests::an_hevc_parameter_set_states_its_own_signal ... ok
+test playback_native::tests::a_real_hlg_files_signal_reaches_the_caller_that_grades_it ... ok
+test player::http_input_tests::closing_download_owner_cancels_the_worker_flag ... ok
+test player::http_input_tests::native_player_hls_decodes_all_frames_and_seeks ... ignored, explicit loopback HLS playback; ordinary tests need no network
+test player::http_input_tests::native_player_http_input_retains_file_for_reopen_and_seek ... ignored, explicit loopback HTTP player acceptance; ordinary tests need no network
+test player::native_wavpack_file_factory_regressions::correction_selection_and_invalid_companion_are_strict ... ok
+test player::ogg_opus_track_dispatch_tests::ogg_opus_track_selection_reaches_the_player_factory ... ok
+test player::parallel_vorbis_player_factory_selects_the_second_track ... ok
+test player::native_wavpack_file_factory_regressions::automatic_native_file_dispatch_preserves_exact_pcm ... ok
+test player::gpu_option_tests::player_gpu_selection_is_explicit ... ok
+test player::player_skin::tests::builtins_and_file_validation ... ok
+test player::audio_truncated_eof_player_regressions::known_incomplete_audio_removes_the_failed_handle_while_healthy_eof_remains_replayable ... ok
+test playback_mp4::tests::an_avc_parameter_set_in_the_record_states_its_signal_at_open ... ok
+test container::mp4::tests::the_picture_a_fragment_indexes_reaches_the_picture_route ... ok
+test playback_native::tests::a_volume_without_a_content_light_grades_against_its_own_peak ... ok
+test playback_native::tests::a_turned_item_is_shown_upright ... ok
+test player::subtitle_paint_tests::subtitle_paint_emits_black_outline_and_white_fill ... ok
+test player::mixed_ogg_player_catalogue_routes_both_codecs_in_bos_order ... ok
+test player::subtitle_paint_tests::subtitle_paint_preserves_authored_line_breaks ... ok
+test player::subtitle_paint_tests::subtitle_paint_stays_above_visible_controls ... ok
+test player::tests::a_bitrate_needs_a_size_and_a_length ... ok
+test player::tests::a_closed_region_rewinds_at_its_end ... ok
+test player::tests::a_crop_and_a_forced_shape_apply_one_after_the_other ... ok
+test player::tests::a_crop_counts_the_shape_the_container_draws_and_not_the_one_stored ... ok
+test player::tests::a_crop_keeps_the_largest_centred_part_of_the_picture ... ok
+test player::tests::a_cropped_picture_is_fitted_to_the_frame_by_what_is_left ... ok
+test player::tests::a_cycle_is_dealt_over_the_whole_list_once ... ok
+test player::tests::a_faster_rate_shows_each_picture_for_shorter ... ok
+test player::tests::a_file_size_takes_the_largest_unit_it_fills ... ok
+test player::tests::a_file_that_captions_nothing_leaves_the_captions_alone ... ok
+test player::tests::a_file_that_names_its_parts_jumps_between_them ... ok
+test player::gpu_option_tests::rgb_presentation_keeps_codes_without_a_second_cpu_texture ... ok
+test player::audio_restart_preroll_regressions::paused_audio_rewind_waits_for_an_explicit_play_command ... ok
+test player::subtitle_paint_tests::subtitle_paint_centers_each_wrapped_row_inside_video ... ok
+test playback_webm::tests::av1_video_uses_native_reader_and_rewinds ... ok
+test player::tests::a_file_with_two_subtitle_tracks_walks_between_them ... ok
+test player::tests::a_forced_shape_is_fitted_to_the_frame_like_the_files_own ... ok
+test player::tests::a_forced_shape_is_the_proportion_the_picture_is_drawn_at ... ok
+test player::tests::a_frame_rate_is_whole_when_it_rounds_to_whole ... ok
+test player::preferred_audio_worker_regressions::actual_preferred_audio_worker_preserves_pcm_clock_rewind_and_seek ... ok
+test player::tests::a_list_names_the_files_that_are_actually_there ... ok
+test player::tests::a_late_window_catches_up_and_preserves_the_final_picture ... ok
+test player::tests::a_magnified_picture_grows_past_the_frame_it_was_fitted_to ... ok
+test player::tests::a_matroska_item_names_its_own_codec_and_parts ... ok
+test player::tests::a_moment_falls_in_the_last_chapter_started ... ok
+test player::tests::a_named_file_joins_the_captions_of_the_open_item ... ok
+test player::tests::a_live_audio_clock_presents_seek_preview_without_waiting_for_wall_clock ... ok
+test player::tests::a_named_gamut_grades_an_item_that_asked_for_nothing_else ... ok
+test player::tests::a_files_in_band_light_reaches_the_grade_the_session_bakes ... ok
+test player::tests::a_named_subtitle_file_leads_the_list_the_player_guesses ... ok
+test playback_webm::tests::seeking_a_single_cluster_av1_file_replays_the_same_pictures ... ok
+test player::tests::a_pixel_shape_changes_the_width_it_draws_at ... ok
+test player::tests::a_positive_audio_delay_lets_the_picture_run_ahead ... ok
+test player::subtitle_paint_tests::subtitle_paint_native_video_seek_and_cue_end ... ok
+test player::tests::a_named_panel_moves_where_the_picture_lands ... ok
+test player::tests::a_random_start_holds_the_cycle_the_queue_was_dealt ... ok
+test player::tests::a_sami_sidecar_captions_the_item_beside_which_it_lies ... ok
+test player::tests::a_sidecar_sits_in_front_of_the_tracks_in_the_file ... ok
+test player::tests::a_size_comes_from_the_path_and_nothing_else ... ok
+test player::tests::a_saved_picture_is_the_one_the_grade_made ... ok
+test player::tests::a_snapshot_is_named_by_the_time_it_was_taken ... ok
+test player::tests::a_snapshot_without_a_picture_says_so ... ok
+test player::tests::a_snapshot_writes_the_picture_on_screen ... ok
+test player::tests::a_named_grid_and_reading_change_how_the_picture_is_baked ... ok
+test player::tests::a_step_onto_a_broken_item_keeps_the_picture ... ok
+test player::tests::a_video_picks_up_the_sidecar_beside_it ... ok
+test player::tests::a_shuffled_item_running_out_walks_the_cycle ... ok
+test player::tests::a_snapshot_converts_planes_before_writing_them ... ok
+test player::tests::an_anamorphic_item_names_the_shape_of_its_pixels ... ok
+test player::tests::an_ass_track_of_the_file_is_listed_painted_and_walked ... ok
+test player::tests::an_empty_list_has_nothing_to_continue_into ... ok
+test player::tests::an_av1_tracks_in_band_signal_is_graded_at_open ... ok
+test player::tests::an_avc_records_vui_is_graded_at_open ... ok
+test player::tests::an_unusable_list_is_opened_as_itself_so_the_error_says_why ... ok
+test player::tests::aspect_shapes_read_the_way_vlcs_menu_writes_them ... ok
+test player::tests::audio_tracks_wrap_around_the_list ... ok
+test player::tests::an_hlg_item_is_graded_at_the_panels_own_peak ... ok
+test player::tests::an_unnamed_item_opens_its_panel_with_its_picture ... ok
+test player::tests::both_containers_hand_the_player_the_same_chapter_list ... ok
+test player::tests::cache_lines_separate_ram_and_disk_and_retain_ranges_after_seeks ... ok
+test player::tests::clocks_are_seconds_or_a_ladder_of_them ... ok
+test player::tests::background_open_returns_immediately_and_can_be_superseded ... ok
+test player::tests::control_lines_read_like_vlc ... ok
+test player::tests::crop_shapes_read_the_way_vlcs_menu_writes_them ... ok
+test player::tests::cues_are_live_inside_their_span ... ok
+test player::tests::cloud_startup_stays_loading_until_delayed_source_arrives ... ok
+test player::tests::embedded_selection_is_not_shifted_by_a_sidecar_and_can_start_hidden ... ok
+test player::tests::every_sound_this_build_decodes_has_the_name_a_viewer_gives_it ... ok
+test player::tests::folders_expand_in_name_order_and_ignore_unrelated_files ... ok
+test player::tests::jump_modifiers_take_the_longer_rungs ... ok
+test player::tests::late_repaints_do_not_slow_the_media_clock ... ok
+test player::tests::media_play_indices_keep_their_zero_based_meaning ... ok
+test player::tests::native_audio_device_options_work_without_an_input_or_window ... ok
+test player::tests::background_reopen_replaces_a_full_decoder_queue ... ok
+test player::tests::native_hdr_mastering_preserves_corners_and_changes_content_peak ... ok
+test player::audio_restart_preroll_regressions::restarted_video_holds_audio_until_the_first_picture_is_ready ... ok
+test player::tests::each_item_is_graded_from_the_signal_it_states ... ok
+test player::tests::native_hdr_display_and_content_limits_change_highlight_mapping ... ok
+test player::tests::native_media_hdr_operator_names_reach_the_owned_grade ... ok
+test player::tests::native_sami_extension_is_discovered_and_survives_seeking ... ok
+test player::tests::native_sami_break_case_preserves_caption_lines ... ok
+test player::tests::native_spherical_projection_uses_owned_mapping_and_keeps_clock ... ok
+test player::tests::native_startup_honors_window_exit_and_subtitle_alias_options ... ok
+test player::tests::native_stereo_preserves_timing_and_selects_eye_channels ... ok
+test player::tests::neighbouring_cached_frames_form_one_solid_strip ... ok
+test player::tests::next_file_is_cached_during_current_playback_and_reused_at_eof ... ok
+test player::tests::number_keys_are_tenths_of_the_timeline ... ok
+test player::tests::only_a_magnified_picture_slides_and_never_bare_an_edge ... ok
+test player::tests::only_a_seekable_track_loops ... ok
+test player::tests::play_and_exit_waits_for_the_playlist_and_keeps_errors_visible ... ok
+test player::tests::play_options_read_the_queue_and_their_own_values ... ok
+test player::tests::play_options_refuse_what_they_cannot_honour ... ok
+test player::tests::prefetch_tracks_shuffle_and_queue_replacement ... ok
+test player::tests::rate_steps_through_the_vlc_presets ... ok
+test player::tests::repeat_cycles_in_vlc_order ... ok
+test player::tests::repeating_one_item_reopens_it ... ok
+test player::tests::seeking_after_audio_failure_keeps_video_playing ... ok
+test player::tests::skin_options_reach_the_player ... ok
+test player::tests::slow_source_shows_buffering_and_resumes_when_frames_arrive ... ok
+test player::tests::space_pauses_without_activating_the_focused_skin_button ... ok
+test player::tests::spherical_arrow_is_consumed_before_transport_seek ... ok
+test player::tests::spherical_look_on_pause_preserves_clock_and_bounds_angles ... ok
+test player::tests::spherical_stereo_never_samples_the_other_eye ... ok
+test player::tests::spherical_toggle_redraws_a_paused_frame_from_original_codes ... ok
+test player::tests::subtitle_size_and_margin_have_ends ... ok
+test player::tests::subtitles_toggle_and_survive_an_empty_track ... ok
+test player::tests::swap_uses_packet_timestamps_and_does_not_colour_container_headers ... ok
+test player::tests::the_adjusted_luma_holds_its_anchors_and_bends_its_midpoint ... ok
+test player::tests::the_aspect_key_walks_vlcs_shapes_and_back_to_the_files_own ... ok
+test player::tests::the_audio_delay_key_is_bounded_at_ten_seconds ... ok
+test player::tests::native_sami_attribute_values_do_not_change_playing_caption_clocks ... ok
+test player::tests::the_buffer_line_names_seconds_and_slots ... ok
+test player::tests::the_buffer_span_scales_with_the_item ... ok
+test player::tests::the_chapter_keys_say_when_the_file_names_no_parts ... ok
+test player::tests::the_chapter_keys_walk_the_list_and_stop_at_either_end ... ok
+test player::tests::native_sami_body_boundaries_preserve_caption_and_seek ... ok
+test player::tests::the_command_line_hands_the_picture_a_magnification_to_start_at ... ok
+test player::tests::the_command_line_names_the_colour_grade_to_start_with ... ok
+test player::tests::the_command_line_names_the_cube_and_how_its_nodes_are_joined ... ok
+test player::tests::the_command_line_names_the_gamut_the_bytes_are_read_in ... ok
+test player::tests::the_command_line_names_the_panel_the_picture_is_graded_for ... ok
+test player::tests::the_command_line_names_the_picture_settings_to_start_with ... ok
+test player::tests::the_command_line_names_the_shape_to_start_cropped_to ... ok
+test player::tests::the_command_line_names_the_shape_to_start_drawn_at ... ok
+test player::tests::the_command_line_reads_the_lut_before_anything_is_opened ... ok
+test player::tests::the_container_borders_and_the_crop_menu_stack_from_the_coded_edges ... ok
+test player::tests::the_crop_key_walks_vlcs_shapes_and_back_to_the_whole_picture ... ok
+test player::tests::the_delay_key_is_bounded_at_ten_seconds ... ok
+test player::tests::the_delay_key_shifts_the_cue_timeline ... ok
+test player::tests::the_effects_dialog_opens_on_vlcs_own_accelerator_and_keeps_its_values ... ok
+test player::tests::the_end_clock_flips_between_length_and_what_is_left ... ok
+test player::tests::the_end_of_an_item_starts_the_next_one ... ok
+test player::tests::the_fine_rate_walks_by_tenths_inside_the_ladder ... ok
+test player::tests::the_information_key_has_nothing_to_name ... ok
+test player::tests::the_level_the_repeat_and_both_delays_start_where_the_keys_hold_them ... ok
+test player::tests::the_list_advances_until_the_end_and_then_per_repetition ... ok
+test player::tests::the_load_key_has_nothing_to_caption ... ok
+test player::tests::the_local_copy_is_drawn_where_the_item_keeps_it ... ok
+test player::tests::the_local_copy_says_what_it_covers ... ok
+test player::tests::the_loop_key_marks_a_then_b_then_clears ... ok
+test player::tests::native_sami_sync_clocks_clear_and_seek_like_independent_subrip ... ok
+test player::tests::the_panel_keeps_every_fact_the_container_states_about_the_file ... ok
+test player::tests::a_file_with_nothing_to_show_and_no_sound_allowed_refuses ... ok
+test player::tests::the_panel_leads_with_the_name_the_container_gives_the_file ... ok
+test player::tests::a_file_with_two_mov_text_tracks_walks_between_them ... ok
+test player::tests::a_sound_only_item_is_described_by_its_track ... ok
+test player::tests::a_paused_start_shows_its_first_picture_and_waits ... ok
+test player::tests::the_matroska_lists_say_what_the_file_says_about_each_track ... ok
+test player::default_track_selection_regressions::automatic_audio_open_uses_container_preference_in_the_player ... ok
+test player::pcm_run_alignment_factory_regressions::player_factory_does_not_publish_aligned_prefixes_of_malformed_fixed_frame_runs ... ok
+test player::tests::the_command_line_can_pick_the_sound_or_leave_it_out ... ok
+test player::tests::the_preroll_is_measured_against_the_item_it_buffers_for ... ok
+test player::tests::the_rgb_pixels_follow_the_bundle_the_way_the_planes_do ... ok
+test player::tests::the_settings_bundle_is_the_identity_at_vlcs_defaults ... ok
+test player::tests::the_panel_says_what_a_picture_is_and_what_is_done_to_it ... ok
+test player::tests::the_sliders_fold_into_the_bundle_the_way_vlcs_filter_folds_them ... ok
+test player::tests::the_start_switches_and_the_track_numbers_count_from_one ... ok
+test player::tests::the_shuffled_list_walks_its_cycle_and_returns_its_steps ... ok
+test player::tests::the_subtitle_key_needs_a_choice_to_do_anything ... ok
+test player::tests::the_subtitle_option_lands_on_the_track_it_names ... ok
+test player::tests::the_track_key_needs_a_choice_to_do_anything ... ok
+test player::tests::the_zoom_key_walks_vlcs_menu_and_stops_at_both_ends ... ok
+test player::tests::timeline_animation_expands_reverses_and_settles ... ok
+test player::tests::timeline_animation_has_equal_speed_across_refresh_rates ... ok
+test player::tests::timeline_animation_position_initializes_exactly_then_tracks_new_targets ... ok
+test player::tests::timeline_animation_starts_smoothly_after_idle ... ok
+test player::tests::volume_walks_the_slider_and_stops_at_both_ends ... ok
+test player::tests::the_panel_lists_what_the_open_item_carries ... ok
+test player::tests::a_bare_adts_file_opens_as_sound_with_the_config_its_frames_state ... ok
+test player::audio_chunk_topology_factory_regressions::player_factory_refuses_partial_ambiguous_chunk_payloads_and_keeps_normal_controls ... ok
+test player::tests::a_file_with_two_audio_tracks_walks_between_them ... ok
+test player_gpu::tests::a_chroma_ramp_divides_the_routes_by_its_interpolation ... ok
+test player_gpu::tests::a_frame_with_flat_chroma_pays_the_shader_the_cpus_bytes ... ok
+test player::tests::a_bare_dolby_digital_file_opens_as_sound_with_its_own_geometry ... ok
+test player::tests::the_stop_time_ends_the_item_it_was_given_for ... ok
+test player::tests::the_panel_stays_until_the_key_closes_it ... ok
+test player_gpu::tests::display_shader_converts_to_native_encoder_yuv ... ignored, requires physical Metal
+test player_gpu::tests::display_shader_executes_after_colour_conversion ... ignored, requires a physical GPU; failure to initialize is a failure
+test player::tests::the_panel_lists_the_place_a_file_names_in_its_album ... ok
+test player_gpu::tests::encoder_chroma_averages_aligned_pixels_including_odd_edges ... ignored, requires physical Metal
+test player_gpu::tests::encoder_crop_matches_independent_rgb_crop_in_all_planes ... ignored, requires physical Metal
+test player_gpu::tests::encoder_rgb_scaling_matches_independent_bilinear_source_sampling ... ignored, requires physical Metal
+test player_gpu::tests::encoder_rotates_output_geometry_and_chroma_sampling ... ignored, requires physical Metal
+test player_gpu::tests::encoder_scales_native_output_and_aligns_chroma_to_output_pixels ... ignored, requires physical Metal
+test player_gpu::tests::display_shader_validates_and_rejects_extra_resources ... ok
+test player_gpu::tests::hardware_export_copies_mp4_audio_with_gapless_timing ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::hardware_surfaces_render_with_colour_and_custom_shader ... ignored, requires physical VideoToolbox and Metal
+test player_gpu::tests::hardware_video_mux_interleaves_subtitles_and_preserves_tail ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::metal_output_surface_initializes_native_encoder_planes ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::metal_p010_output_initializes_exact_codes_and_encodes_main10 ... ignored, requires physical Metal and Main10 VideoToolbox
+test player_gpu::tests::native_crop_scaling_matches_cropped_rotated_packed_source ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::native_shader_export_stream_encodes_muxes_and_reopens ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::odd_native_crop_matches_independent_float_reference ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::rgb_frames_run_display_shader_and_gpu_adjustment ... ignored, requires physical GPU
+test player_gpu::tests::rgba_frames_composite_after_adjustment_without_transparent_color_bleeding ... ignored, requires physical GPU
+test player_gpu::tests::rgba_shader_templates_validate_without_a_device ... ok
+test player_gpu::tests::sequential_1d_grading_preserves_float_nodes_and_long_tables ... ignored, requires a physical GPU for float 1D LUT qualification
+test player_gpu::tests::sequential_3d_grading_preserves_authored_domains ... ignored, requires a physical GPU for sequential LUT qualification
+test player_gpu::tests::shader_renders_into_native_encoder_surface ... ignored, requires physical Metal and VideoToolbox
+test player_gpu::tests::source_precision_planes_use_gpu_conversion_and_display_shader ... ignored, requires a physical GPU; source precision must be tested by readback
+test player_gpu::tests::a_slider_moved_over_a_held_graded_picture_reaches_the_shader ... ok
+test player_gpu::tests::encoder_shader_validates_nv12_p010_and_ranges ... ok
+test player_gpu::tests::the_video_shader_validates_and_the_params_fit_the_uniform ... ok
+test snapshot::tests::a_picture_over_one_block_writes_each_of_them ... ok
+test snapshot::tests::a_small_picture_survives_the_round_trip ... ok
+test snapshot::tests::pixels_that_do_not_match_their_size_are_refused ... ok
+test snapshot::tests::the_checksums_match_their_reference_vectors ... ok
+test subtitles::tests::a_cue_is_live_between_its_times ... ok
+test subtitles::tests::a_mark_at_the_head_of_a_file_names_its_encoding ... ok
+test subtitles::tests::a_sami_file_shows_the_language_it_captions_in ... ok
+test subtitles::tests::a_sami_line_inherits_the_time_it_was_given ... ok
+test subtitles::tests::a_sami_paragraph_carries_its_own_clock ... ok
+test subtitles::tests::a_script_line_of_another_field_list_shows_nothing ... ok
+test subtitles::tests::a_sidecar_in_a_legacy_encoding_loads_with_its_text ... ok
+test subtitles::tests::a_stated_length_outlines_the_line_it_states ... ok
+test subtitles::tests::a_windows_1251_file_reads_as_the_text_it_holds ... ok
+test subtitles::tests::an_ass_block_gives_up_its_text_whichever_fields_it_keeps ... ok
+test subtitles::tests::an_end_before_the_start_is_not_a_cue ... ok
+test subtitles::tests::an_old_sami_sync_names_a_clock ... ok
+test subtitles::tests::ass_events_keep_text_after_the_tenth_field ... ok
+test subtitles::tests::clocks_accept_both_separators_and_the_short_form ... ok
+test subtitles::tests::delay_shifts_the_whole_file ... ok
+test player_gpu::tests::a_grade_changed_over_a_held_picture_moves_the_bound_table ... ok
+test subtitles::tests::sniffing_picks_the_format_by_its_header ... ok
+test subtitles::tests::subrip_cues_keep_their_counter_and_blank_lines ... ok
+test subtitles::tests::sidecars_sort_exact_names_before_loose_ones ... ok
+test subtitles::tests::webvtt_skips_its_header_notes_and_cue_settings ... ok
+test virtual_camera::crop_tests::crop_copies_exact_rgb_pixels_without_a_second_frame_buffer ... ok
+test virtual_camera::fit_tests::letterbox_preserves_aspect_pixels_and_opaque_borders ... ok
+test virtual_camera::loop_tests::loops_at_eof_and_preserves_original_camera_clock ... ok
+test virtual_camera::native_source_tests::fractional_frame_boundary_seek_and_eof_are_exact ... ok
+test virtual_camera::frame_tests::latest_frame_replaces_stale_frames_and_holds_on_disconnect ... ok
+test virtual_camera::source_tests::file_to_camera_pixels_seek_and_eof ... ok
+test virtual_camera::tests::rational_rate_does_not_accumulate_rounding_error_or_backlog ... ok
+test virtual_camera::tests::seek_pause_and_loop_preserve_camera_time ... ok
+test player::tests::the_panel_names_the_album_its_artist_its_disc_and_its_publisher ... ok
+test player::preferred_audio_worker_regressions::explicit_audio_choice_and_invalid_index_fallback_remain_compatible ... ok
+test player_gpu::tests::a_slider_over_a_plain_picture_costs_a_rounding_step ... ok
+test player::tests::the_audio_list_says_what_the_file_says_about_each_track ... ok
+test player::tests::the_panel_shows_the_rating_the_matroska_file_was_given ... ok
+test player::tests::the_panel_shows_the_rights_and_the_note_where_the_file_stated_them ... ok
+test player::timeline_release_duration_factory_regressions::player_audio_duration_covers_the_complete_synthesized_release ... ok
+test player::tests::the_panel_names_the_codec_and_the_track_key_keeps_it_current ... ok
+test player::wav_unsigned8_factory_regressions::player_audio_factory_admits_unsigned8_wave_track_geometry ... ok
+test player::player_automatic_audio_choice_skips_unsupported_default_pcm_width ... ok
+test player::wav_valid_bits_factory_regressions::player_factory_admits_left_aligned_extensible_pcm_storage_widths ... ok
+test player_gpu::tests::a_grade_and_a_slider_reach_the_window_in_the_cpus_order ... ok
+test player_gpu::tests::the_shader_grades_its_own_codes_as_the_cpu_would ... ok
+test player_gpu::tests::the_shader_and_the_cpu_read_the_same_table_to_the_byte ... ok
+
+test result: ok. 1028 passed; 0 failed; 26 ignored; 0 measured; 0 filtered out; finished in 84.25s
+

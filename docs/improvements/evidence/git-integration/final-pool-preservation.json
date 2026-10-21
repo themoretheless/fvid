@@ -1,0 +1,11 @@
+{
+  "branch": "codex/preserve-concurrent-memory-draft-1792621241",
+  "commit": "41bf5255572a262a005ab854ccce45c1cd00c21b",
+  "merge_commit": "3c1fc917aa665d0633b9ed43dc0dbeffdd4f1439",
+  "runtime_source_unchanged": true,
+  "live_tracked_pool_hooks_restored": [
+    "src/codec/hevc_transform.rs",
+    "src/codec/hevc_picture.rs"
+  ],
+  "reason": "Pool API lacks shared-crate ownership and repeated performance evidence; existing Vec scratch already reuses capacity. Preserve all prototype source in ancestry, keep qualified interfaces."
+}
