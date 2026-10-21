@@ -172904,5 +172904,1890 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-av1-verification-20261008-quant-matrix",
+    "incoming": "40882d86f836ab637979e3e108781b8e71e17969",
+    "conflicts": {
+      "src/codec/av1_picture.rs": {
+        "1": [
+          "100644",
+          "aadeb73bcd0070140bd8f56c0bf2c5a4a3dbd1c2"
+        ],
+        "2": [
+          "100644",
+          "d70ef73e15e9b9b10466869437e6c05d5c99ef55"
+        ],
+        "3": [
+          "100644",
+          "348abde6a53449f208a1431b75279d5e44526f22"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-depth10-colors3-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "b18f009bf56b6b5e92fb77ad0559f513457d92ef"
+        ],
+        "3": [
+          "100644",
+          "ccd3ce32498db2b53d17a81cc75cb40ae3cb0e95"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-depth10-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "144134ce99f6f64645217ecc78adac0c471e4de0"
+        ],
+        "3": [
+          "100644",
+          "a70c0e814a6aee4aa9147c0392ffe46548cb9536"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-depth12-colors3-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "8710204df9d8637159e86d1dccece55a501644ed"
+        ],
+        "3": [
+          "100644",
+          "ad8a4a9d6210efa35c0f55cd986977fa82dcc05b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-depth12-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "335721743c490aacae835bb1e6282e3915082dfd"
+        ],
+        "3": [
+          "100644",
+          "d1b8d5289844970df7639f09cc8a1c2e1fa9b22d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-depth8-colors3-chroma1-layout1-vflip1-q32.webm": {
+        "2": [
+          "100644",
+          "a02f9768049612bb2350d42394ade364ce61d689"
+        ],
+        "3": [
+          "100644",
+          "db9a65f832eaf9fc7ae3531296ba80815d0067b9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-depth8-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "bcdd898e1f173e5f09ac1a92a894386d66c31581"
+        ],
+        "3": [
+          "100644",
+          "4aaafcd53ea270afdb326a2a2d730f925b9212d3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-generated.json": {
+        "2": [
+          "100644",
+          "041003781f0efcdcbaae5f7e22d62ddbaaba27f7"
+        ],
+        "3": [
+          "100644",
+          "46741ebb6384265f3322183bbbb50fd19ff8657b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-generated.json": {
+        "2": [
+          "100644",
+          "5f9abd77733dbcb6ed3f691057c4ddd78e7da313"
+        ],
+        "3": [
+          "100644",
+          "817fa77312f8a65c18e7e45755df9bccee7759a2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt0-v-2.webm": {
+        "2": [
+          "100644",
+          "e45bb7f9c5f6be9423e338dc489657497992263f"
+        ],
+        "3": [
+          "100644",
+          "977e476b6de4aa53715b15f216eedfaafe83158a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt0-v-63.webm": {
+        "2": [
+          "100644",
+          "5d2de4b42753008f67f6b607c7ed1a99b7e9b500"
+        ],
+        "3": [
+          "100644",
+          "e4320ad18f7816002e063037d905ae5c399f7274"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt0-v0.webm": {
+        "2": [
+          "100644",
+          "99294a5929f87dffac72c3665b9a0e2785c7cd46"
+        ],
+        "3": [
+          "100644",
+          "08980b434d82ea20aeb6741ac9314de9d65fdd2b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt0-v1.webm": {
+        "2": [
+          "100644",
+          "91069d7fc148ad377258b07868c61aefb34a0eaf"
+        ],
+        "3": [
+          "100644",
+          "55ff8e7a2eef9bcb91f8de343d3a3a185ab2dc62"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt0-v255.webm": {
+        "2": [
+          "100644",
+          "e1b73ed1e0264b0454a8691bd1cf81c33788f86c"
+        ],
+        "3": [
+          "100644",
+          "edd477def5174b9261264a46ba7c521571a6dd1e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt0-v3.webm": {
+        "2": [
+          "100644",
+          "a79fa4d29949c781130eaa6b30ea7b1273f6513c"
+        ],
+        "3": [
+          "100644",
+          "d03cdb6574862a8dd4bfde22bf0208125b64a616"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt1-v-2.webm": {
+        "2": [
+          "100644",
+          "f95cf78aa31b8cf091e66f99aa8bc08d68e7f59d"
+        ],
+        "3": [
+          "100644",
+          "bf52c35711f0a406542d16430ca6ff26b3aeef49"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt1-v-63.webm": {
+        "2": [
+          "100644",
+          "4f6cce649260eb4c635de446bc366dbd227c0153"
+        ],
+        "3": [
+          "100644",
+          "30286dba984bb7c601a6c1ae3b66d82a0f1ce4f9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt1-v0.webm": {
+        "2": [
+          "100644",
+          "a9e0ff27992ecd5e4c8a2a90fc59a905cb5bf8c4"
+        ],
+        "3": [
+          "100644",
+          "c2ca40c5a6c6a32d780dc63ea04e8dd91217da17"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt1-v1.webm": {
+        "2": [
+          "100644",
+          "2bf5c33ca4aa7bc383a0737436b333523b10a083"
+        ],
+        "3": [
+          "100644",
+          "74b34d9947e6021a1130b41911cb1228621a7c7b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt1-v255.webm": {
+        "2": [
+          "100644",
+          "da9164555ec499bbb9591fdda1214a28e525f7fb"
+        ],
+        "3": [
+          "100644",
+          "5efaee9f2c1d107b9fee4207fd8b6c7b566f7867"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi0-adapt1-v3.webm": {
+        "2": [
+          "100644",
+          "810bb5a38adb91cc94ca10a0367ceb734c7df0e1"
+        ],
+        "3": [
+          "100644",
+          "d34ec8fb0fdd33ff30396d809f289b7dc55fa2e2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi1-adapt0-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "2adf4097112b3479d4ed31c07f63e896c3951765"
+        ],
+        "3": [
+          "100644",
+          "feab0ff8b83764f7dd06bf1e9a7f2051ffff0cf1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi1-adapt0-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "9f33a70a5edc2d4c146dba6e45632fb3d91cf358"
+        ],
+        "3": [
+          "100644",
+          "a5046112736ab9ba7ea0e45c4000dd7e8bf9845b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi1-adapt1-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "21e414e8bd45e7f735dbed08b13fb2d8b2f3eb5c"
+        ],
+        "3": [
+          "100644",
+          "6d4292488fea821a678be9637a19cf9b25c3a878"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r0-multi1-adapt1-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "6ccb04abe004188524d24fc977006adeb79d7135"
+        ],
+        "3": [
+          "100644",
+          "12b58c82ae6df2427de783994a6d1f3530e1e37f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt0-v-2.webm": {
+        "2": [
+          "100644",
+          "2bfd868a7a5e2a869e59b8ac06e48eb0fcf856b8"
+        ],
+        "3": [
+          "100644",
+          "cac4e5fe76cfd870fbd54cef2ece073910507bca"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt0-v-63.webm": {
+        "2": [
+          "100644",
+          "ab9eaa896e764e8eee105c812b6580c5d2f7f5b6"
+        ],
+        "3": [
+          "100644",
+          "0eec7f7d22ce313ec3c3bcf1b275ad0375c428e3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt0-v0.webm": {
+        "2": [
+          "100644",
+          "e576a2b1c1a66b6d0e0bd6f666e48ab54490bfa1"
+        ],
+        "3": [
+          "100644",
+          "96dbfa5e84fb929a793678b80635498f52db0b86"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt0-v1.webm": {
+        "2": [
+          "100644",
+          "e47ab192410ebb18e74222088d9ef8499c5b39d9"
+        ],
+        "3": [
+          "100644",
+          "eb74e316092d6892e47e300e99f91c2e2d370403"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt0-v255.webm": {
+        "2": [
+          "100644",
+          "a7de7e07bfa6e087497ea53b007c4f1860e5c99e"
+        ],
+        "3": [
+          "100644",
+          "3d4a40883f17b600b5d4366f0f134f780b7676ce"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt0-v3.webm": {
+        "2": [
+          "100644",
+          "78e95b03ca32e938b632dc3d3cd38bcb7c99e3ac"
+        ],
+        "3": [
+          "100644",
+          "aefcde947c0719e3d07b8f528f2612ee655dfacd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt1-v-2.webm": {
+        "2": [
+          "100644",
+          "060a3a55d51a633f48ab2576751e3e275d5d4bf0"
+        ],
+        "3": [
+          "100644",
+          "de0a9edc85b27bf3b7d3d4ae1192632c4562538d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt1-v-63.webm": {
+        "2": [
+          "100644",
+          "8d9f578a60afa34caa13c2c2ea6e6e622cb8efa4"
+        ],
+        "3": [
+          "100644",
+          "905fa80b62b61ded235922d4ede345dcfa815bbd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt1-v0.webm": {
+        "2": [
+          "100644",
+          "93a3307feda31add54fcf7c7e8a4704135d529dd"
+        ],
+        "3": [
+          "100644",
+          "501fc2cfd949b75f56f1dea3e3a034215e1e3d03"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt1-v1.webm": {
+        "2": [
+          "100644",
+          "a59cb1c997eef87174e0ce9ef2f42c842b036c6c"
+        ],
+        "3": [
+          "100644",
+          "1a764b172dcd49970ee0c9cc85856c56636eec32"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt1-v255.webm": {
+        "2": [
+          "100644",
+          "3b8a102b59be620ba423096fc556a761030658ba"
+        ],
+        "3": [
+          "100644",
+          "1b692b231c553b9c6efe52526fabc64e783e8dd2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi0-adapt1-v3.webm": {
+        "2": [
+          "100644",
+          "075336fffe35ec8ac5411383b8936caa9062cf8e"
+        ],
+        "3": [
+          "100644",
+          "b63ec23b619f5e862daf08e7c8147e10cdd30d06"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi1-adapt0-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "c0487c8c8a4e9dd2ac31a305851244e18ea23e23"
+        ],
+        "3": [
+          "100644",
+          "d3aa252a7a582a0b609b6c90a41c8ac82ca42df4"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi1-adapt0-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "d4a5887f6098e10ede1a9f055cbaa45681e814af"
+        ],
+        "3": [
+          "100644",
+          "df8e2e4356cbd8d7a22ea81fb0a07f04cfd1d87f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi1-adapt1-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "37dd38de081dc2799723e9f2ea6476cb31e73842"
+        ],
+        "3": [
+          "100644",
+          "40a65deebd8fa87f03cd16e222af3af5f6c0a6c0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r1-multi1-adapt1-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "cfbe17798e4caa94e191f3297a605f6dbf9151d8"
+        ],
+        "3": [
+          "100644",
+          "4754ef6ca4e1a42be0ca18599917f6a402848005"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt0-v-2.webm": {
+        "2": [
+          "100644",
+          "8b102c6e29146acae9fc41e25bcd918d51f4af81"
+        ],
+        "3": [
+          "100644",
+          "1a38234fe57206adb674d3d7c1b68b0e6ea2b1df"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt0-v-63.webm": {
+        "2": [
+          "100644",
+          "9ace57faf2c18b43cc385dcccdc06c5a3bcf2cdf"
+        ],
+        "3": [
+          "100644",
+          "3c1ecd3acb13d94362845f7107869bef99529609"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt0-v0.webm": {
+        "2": [
+          "100644",
+          "d309d540de84275ab5873f3d643e32b2f8cd96eb"
+        ],
+        "3": [
+          "100644",
+          "5d982195bda6df7a3cb4f0bf695f15fd9d7b38a6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt0-v1.webm": {
+        "2": [
+          "100644",
+          "f3d1bec5c944985d8cc93347b9a1f50da3f585d4"
+        ],
+        "3": [
+          "100644",
+          "a7b62e72f28bee74fcc21566a6bc2583943365c2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt0-v255.webm": {
+        "2": [
+          "100644",
+          "ac0b62d8e2cb19c6b54dee97d4efe6ddb3633bf8"
+        ],
+        "3": [
+          "100644",
+          "b0e4e487f2d1dfa3138f9b62e9a07d703a03218c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt0-v3.webm": {
+        "2": [
+          "100644",
+          "eea4c0bb64bc426f8adfe8d349bc27d14414b215"
+        ],
+        "3": [
+          "100644",
+          "086064507b752f66d7443a9b40529ff949e95dab"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt1-v-2.webm": {
+        "2": [
+          "100644",
+          "fa5201ac3e88cfc59107eb42919051e4ce801b62"
+        ],
+        "3": [
+          "100644",
+          "8c57f893f5c4bc172dd0824dc4e9175b602076fa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt1-v-63.webm": {
+        "2": [
+          "100644",
+          "3886b62f03af93f06c48ca5b5ede70fd4b56c9d4"
+        ],
+        "3": [
+          "100644",
+          "2132e5361944c66cca2aaded62e49545fed0817a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt1-v0.webm": {
+        "2": [
+          "100644",
+          "c0f2d7d1631cd8bd14d4cb4c393501d6fb04f744"
+        ],
+        "3": [
+          "100644",
+          "812cf87ace9ab6c501a677c647508fd84083f62c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt1-v1.webm": {
+        "2": [
+          "100644",
+          "e1b3534648aea2eea357130704e519ec91d85936"
+        ],
+        "3": [
+          "100644",
+          "970fa11dd0142bfc4480a7cebca9df9bc85d7634"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt1-v255.webm": {
+        "2": [
+          "100644",
+          "d40eb1a6cf0bc1073ce4a12fda4ce7303bfa6165"
+        ],
+        "3": [
+          "100644",
+          "14737f68e905f2dbd5ce2d277fa6e977df85cf7b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi0-adapt1-v3.webm": {
+        "2": [
+          "100644",
+          "d06841b50290808195b499b1cc7371c48f3487b9"
+        ],
+        "3": [
+          "100644",
+          "ed64545fd25120d2cfc6a97f3bf6c4914cdcf41c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi1-adapt0-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "fab83dd86fac33d0f30b37667c8b1a965951e1ff"
+        ],
+        "3": [
+          "100644",
+          "c21571c7ef6e4784a9452a80711e3025f4b18b2f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi1-adapt0-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "c003a59d3e2a10b16e3a9baa199c38aa9bfded2a"
+        ],
+        "3": [
+          "100644",
+          "e3581e49132e6ad1e8973030d84babb06d9755d2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi1-adapt1-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "e23c104d0f841f3181327529bfc3eeb15fa22ab6"
+        ],
+        "3": [
+          "100644",
+          "1042cc507cb0060377f026bd4ef80dcdde21ba61"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r2-multi1-adapt1-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "9a199beff693ce765c9fd3734a3b96b9503d90d5"
+        ],
+        "3": [
+          "100644",
+          "84d17f9c63b93fba4f1d187875da6b3c1c9c1f1d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt0-v-2.webm": {
+        "2": [
+          "100644",
+          "e50032a6004c898c16d1a6f9dc4b838e4b855b1d"
+        ],
+        "3": [
+          "100644",
+          "2aeb460870ed5ee872d65213474827977892260e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt0-v-63.webm": {
+        "2": [
+          "100644",
+          "5766adb6a9b51fab5ac41b54ee03cf2532966dca"
+        ],
+        "3": [
+          "100644",
+          "9296e22f2f35d43d289d6926a813932593dbb96c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt0-v0.webm": {
+        "2": [
+          "100644",
+          "0f988eb7b82c972a427d311ca7d7113a431ddcd4"
+        ],
+        "3": [
+          "100644",
+          "832c0dcab9f0948db8a1a2eee29b39283fb8e83f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt0-v1.webm": {
+        "2": [
+          "100644",
+          "98960a7c5f7e7da716d5701845e8d7402149e20b"
+        ],
+        "3": [
+          "100644",
+          "e4a9521d345a0b5208b7d9b4acf3cf6d55db4855"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt0-v255.webm": {
+        "2": [
+          "100644",
+          "daf2f7e84d37339a3204115f1b9314cafc75df3b"
+        ],
+        "3": [
+          "100644",
+          "4084f78b98dd1d1c3d3eed995b913b356161adbe"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt0-v3.webm": {
+        "2": [
+          "100644",
+          "ee169a00882a5cc6015e362193cf91d982b610ef"
+        ],
+        "3": [
+          "100644",
+          "034858ed574e517f7b6aa935b5660fbf1044ba77"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt1-v-2.webm": {
+        "2": [
+          "100644",
+          "d32860b3a0757ee700ecee38898ed1c2544fe0b5"
+        ],
+        "3": [
+          "100644",
+          "8db3e67dcc0f652f8b12c2cec6d86d4e7a93a72b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt1-v-63.webm": {
+        "2": [
+          "100644",
+          "410741ff98d7d2f7ab14a539ad1e45502b7197f5"
+        ],
+        "3": [
+          "100644",
+          "c645e1cb6bc6eba772d3685d7ee894c8b2780b21"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt1-v0.webm": {
+        "2": [
+          "100644",
+          "24a111d03511b3e5c86e9eddbbd684b9c7bcacc4"
+        ],
+        "3": [
+          "100644",
+          "0a6ff3eecf72f3df91b25173054ee97259e04693"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt1-v1.webm": {
+        "2": [
+          "100644",
+          "b1311f061fc3fa6dbf26907a08f8f24e0950c882"
+        ],
+        "3": [
+          "100644",
+          "547f5b202bdb4307b25a49ad9d8bdf9148571c7a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt1-v255.webm": {
+        "2": [
+          "100644",
+          "bcb6604eb538d1823e7719b79bd5e0f50f1bcfd7"
+        ],
+        "3": [
+          "100644",
+          "c2fe5149e04658f0111eb15bbbcf190225e7f836"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi0-adapt1-v3.webm": {
+        "2": [
+          "100644",
+          "f2a13e123e3d15c0bb346ee6a71ec0302120050d"
+        ],
+        "3": [
+          "100644",
+          "5f1b50e69b5845a14f230e5e98a47c358ff9090a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi1-adapt0-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "e710551d3d0d14efd6477f1d6f7a663aedd024d1"
+        ],
+        "3": [
+          "100644",
+          "41a43dc38c0bbe01bf3ceec329ec80980ce2122e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi1-adapt0-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "224e8b03715c6136aaf2efb50f4acea3d52f4468"
+        ],
+        "3": [
+          "100644",
+          "13dae22dcbe76b1828ae9655beaeee24b15b096b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi1-adapt1-v-255_255_-3_2.webm": {
+        "2": [
+          "100644",
+          "f5e446f0f506d54708ac4bfd1ba4f15a07f94815"
+        ],
+        "3": [
+          "100644",
+          "63e954e09bae7474be3fdeb2055d82564b53aaaa"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-owned-r3-multi1-adapt1-v1_-2_3_-63.webm": {
+        "2": [
+          "100644",
+          "7971822494314f6679dc9d6a36cfb61be14eeb86"
+        ],
+        "3": [
+          "100644",
+          "4a1a2311fe97e56367c234fd2e20aefe243dac7e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q40.webm": {
+        "2": [
+          "100644",
+          "fe473d6f0db87567c60cbcdba70f2d3763931da2"
+        ],
+        "3": [
+          "100644",
+          "1d306f6db96f83d0ada58bc7b40ce8549fd4f2e5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "eba388539fb5126342b5bc98b0b0e528ede7446d"
+        ],
+        "3": [
+          "100644",
+          "71bf918751c24cd5b0759aff2e517904f792e8bf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q40.webm": {
+        "2": [
+          "100644",
+          "5f52120ec2b9026a049aa4a3da9925197ac279c1"
+        ],
+        "3": [
+          "100644",
+          "20979e91d83146ed6d898baf59efe288fe267a53"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "1eaf5cf70daf8f72322ba96bedeef1e393a8bf1a"
+        ],
+        "3": [
+          "100644",
+          "39d1812493c063774ca71d71255e266adad53cb7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q40.webm": {
+        "2": [
+          "100644",
+          "bc78193786b07dc243881491c8da3feabcd0ecff"
+        ],
+        "3": [
+          "100644",
+          "bf8df07775ae574e0aaf7c66ad646a8f27f3e12f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "211d6a3cbbfcbb01d42b7e7f7fd14c6f1d1b27b1"
+        ],
+        "3": [
+          "100644",
+          "937c721615570a6de1cb03232afd038f9227c922"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40-phase1.webm": {
+        "2": [
+          "100644",
+          "2d95607bd1666e45490b2e780cd5593625dea79d"
+        ],
+        "3": [
+          "100644",
+          "977ad70b81713ec0e922c7b4d6f9caab50b9b281"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q40.webm": {
+        "2": [
+          "100644",
+          "59f24bc4005584dded681e9ae121b9df7a813e8b"
+        ],
+        "3": [
+          "100644",
+          "7d708c5eb0d3e79e26c1df84b4e6457ead5a85fd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "d78925fc3b1de1db3f2ecab234656faa50f57997"
+        ],
+        "3": [
+          "100644",
+          "ca2ab834ecd1280587aed14ecc106efa61c753eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth8-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "261373100bd1e501552744e91637ce0333d44a6d"
+        ],
+        "3": [
+          "100644",
+          "f1f5f8eae881b5970d6f678b79a406948be0c620"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth8-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "4b5af43669b7c148ed02f8123452739c785bcd93"
+        ],
+        "3": [
+          "100644",
+          "c48748604b287f424ae12ce71b0dd2e43895de87"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-generated.json": {
+        "2": [
+          "100644",
+          "34aec79172aab1f87237e9d27b80c700817727bc"
+        ],
+        "3": [
+          "100644",
+          "c7b3f52d93b2a00052c4fd388e15a5c3d7d10189"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth10-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "15ef77a91ca472f630506f046f2f92061e32d4dd"
+        ],
+        "3": [
+          "100644",
+          "30821df9cebdcb9178dbbfe3bc61d61b90dd59c4"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth12-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "865b5fbbafb19db6c1c5fed83142d9fa5a3b1f75"
+        ],
+        "3": [
+          "100644",
+          "d842ce0b846b8086dca340dca1cc2d5e5532a919"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-depth8-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "399e7dbc91de9e9d98bb193989413092e7bd510e"
+        ],
+        "3": [
+          "100644",
+          "6fd1d8365fac374dd17acb5207fb0ac63291cc41"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-generated.json": {
+        "1": [
+          "100644",
+          "fc83fba8b1639275678b6c259828be67694a950b"
+        ],
+        "2": [
+          "100644",
+          "b0ba22e5ea63fbe9ee34b445f929eb6532927713"
+        ],
+        "3": [
+          "100644",
+          "7682faca342200a3df1aa37c3c0b8c887a30db24"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm0-block16.webm": {
+        "2": [
+          "100644",
+          "7fa15ce6bda852ceb52d3a032fe9e4500d4c20ac"
+        ],
+        "3": [
+          "100644",
+          "f913962fc2de3588f8d71a7bf6c9d586f046f17d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm0-block4.webm": {
+        "2": [
+          "100644",
+          "287c22b99ecb656d200db507389672084235fa30"
+        ],
+        "3": [
+          "100644",
+          "b5be97fbd41a2367813cb7a9586b79c546efdc6b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm0-block64.webm": {
+        "2": [
+          "100644",
+          "8a28564483615ef63c95dbabcf46408cd951eedd"
+        ],
+        "3": [
+          "100644",
+          "973367ff72a71facd6cafa8d914a61e82848001a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm0-block8.webm": {
+        "2": [
+          "100644",
+          "231960fddbdcf120428fe99b4cc852cbcf8c08fe"
+        ],
+        "3": [
+          "100644",
+          "be39c1ec1b3eadec8bb3264c4f936109759801f5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm14-block16.webm": {
+        "2": [
+          "100644",
+          "ecab14e69aac2255dfdcfbfb82122c1fefc6c8cd"
+        ],
+        "3": [
+          "100644",
+          "e278edfd317a5fb2dedbe03092015df6e2ee8a82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm14-block4.webm": {
+        "2": [
+          "100644",
+          "5523426bc077fb28e69a1a7f157f5a35264a1eb0"
+        ],
+        "3": [
+          "100644",
+          "5cdf68406b1765bd7365c5f57b7768d6d347997b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm14-block64.webm": {
+        "2": [
+          "100644",
+          "dccf14e931ff81c2e02f9a8e251d180bb0020439"
+        ],
+        "3": [
+          "100644",
+          "a0e2ad352a9271df9b764128e63c593653e2f3c3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm14-block8.webm": {
+        "2": [
+          "100644",
+          "b4edbee04baf811118f009c1b90cb089d2ae1c7c"
+        ],
+        "3": [
+          "100644",
+          "977665a7bdabf184ecc941e8629d2cf00b536311"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm15-block16.webm": {
+        "2": [
+          "100644",
+          "2a3e89a2dab784f7d1f2c995fdee95946aa3338f"
+        ],
+        "3": [
+          "100644",
+          "a2c827b55911b5e78152e554a9c7bb4ff4455b74"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm15-block4.webm": {
+        "2": [
+          "100644",
+          "df870ed3dde976b44e1f6a0fdd4baa61408da878"
+        ],
+        "3": [
+          "100644",
+          "a21103a03d731efbd8edcb4f236ae37e3c879eea"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm15-block64.webm": {
+        "2": [
+          "100644",
+          "9228029edda575150470082746015dfe123eefa5"
+        ],
+        "3": [
+          "100644",
+          "58dc1c76b37b35bc9144a27dacb0a0bd09ff6acd"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm15-block8.webm": {
+        "2": [
+          "100644",
+          "87a9da8f47289f709a816859842ad2eb739327d7"
+        ],
+        "3": [
+          "100644",
+          "3b4b83221314c43c8b3d083bb53eb0ba48c1a834"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-block16.webm": {
+        "2": [
+          "100644",
+          "a8c4a209fa5cfd3fa058dad4e9c9e2d20d3f48f2"
+        ],
+        "3": [
+          "100644",
+          "07ec92598c9c3714bf258989d9017f28897732e0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-block4.webm": {
+        "2": [
+          "100644",
+          "8060d85d764735da66ed709505170fb296a720d3"
+        ],
+        "3": [
+          "100644",
+          "bdb507149270a4139d931ea78ee1aa4e1bbebbaf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-block64.webm": {
+        "2": [
+          "100644",
+          "a4ef719cc35a1c5dbda55b46693c08ee9c2dd737"
+        ],
+        "3": [
+          "100644",
+          "9c13f013c3cbefbd4c4492bab9c8859b0ee2d34d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-block8.webm": {
+        "2": [
+          "100644",
+          "642eccf95635fb46c8da56eda31c55b8afd18912"
+        ],
+        "3": [
+          "100644",
+          "dd96a2cfefd58af84f0b2d09de9bb7fc4a7cfb56"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm0-block16.webm": {
+        "2": [
+          "100644",
+          "2d259038731f0af84b8d73fad125edbbbf928c5a"
+        ],
+        "3": [
+          "100644",
+          "2ca73fd762200e97baca48d5d92cbd8b2282f61d"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm0-block4.webm": {
+        "2": [
+          "100644",
+          "0f8ae98049915fb3d5662a8dd617b1df937a08e0"
+        ],
+        "3": [
+          "100644",
+          "d7a4c38f7aa4e79401c68395b6b3a9469a88fdf1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm0-block64.webm": {
+        "2": [
+          "100644",
+          "5313d0e8a87fb61b144c0c4c7b76c15ef924b1bd"
+        ],
+        "3": [
+          "100644",
+          "d1cd5aedbceb3bf851caba81246673f091923eb1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm0-block8.webm": {
+        "2": [
+          "100644",
+          "9ae4f2346e6a838504bcee8f020624f40e107862"
+        ],
+        "3": [
+          "100644",
+          "23891ac965411e5fe25d72fc96fc0cbb52d0a9fb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm14-block16.webm": {
+        "2": [
+          "100644",
+          "674cb453f2f3b90eac948bf4eb78f0000971c452"
+        ],
+        "3": [
+          "100644",
+          "0103fea5837f93a90aed246ca504273bc5c97e7a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm14-block4.webm": {
+        "2": [
+          "100644",
+          "0595c08f0173c4446d91fbaad5b13f986faed680"
+        ],
+        "3": [
+          "100644",
+          "f22810f1a1f7ec9a7370f9b8aab8c9888f8dddf1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm14-block64.webm": {
+        "2": [
+          "100644",
+          "e68cb4eeb1dda57ba446869f37acc25033558384"
+        ],
+        "3": [
+          "100644",
+          "0b3eb329b97a6f6a3f17bf3e98338c00164b65a8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm14-block8.webm": {
+        "2": [
+          "100644",
+          "20835d99dedd05e0664ae557ece324593e7cd80f"
+        ],
+        "3": [
+          "100644",
+          "c6a52771c9c7d3bfe0ebcb9c9c8263b6d677096f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm15-block16.webm": {
+        "2": [
+          "100644",
+          "bfa12921361b9a1e3a6cafd94e2f534f6e7bfb92"
+        ],
+        "3": [
+          "100644",
+          "32465d17d40735accadf12178af5dd7f1dc0b622"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm15-block4.webm": {
+        "2": [
+          "100644",
+          "543f2be7d144350cc759d0b8df9efd5e7b8f6a6c"
+        ],
+        "3": [
+          "100644",
+          "83d02565422315cc640a2a01a3d29871970a8e77"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm15-block64.webm": {
+        "2": [
+          "100644",
+          "d9b8d02e48d02489be54fe070aaf3860b74a35fb"
+        ],
+        "3": [
+          "100644",
+          "a05fdc252e1bccd21e358bc2b3e52cf0ef31df82"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm15-block8.webm": {
+        "2": [
+          "100644",
+          "f6b4a67b2bcda72313f754f138bce3aab31fd1c9"
+        ],
+        "3": [
+          "100644",
+          "0815ed870619cb53b8cade5434b939468c3d8a60"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-block16.webm": {
+        "2": [
+          "100644",
+          "49ce18b7a8f51dd76f8a202675fec4517f3c0391"
+        ],
+        "3": [
+          "100644",
+          "2511f63e94048faeb2b249bca661e658a4c13458"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-block4.webm": {
+        "2": [
+          "100644",
+          "33bbcbb6baa4171fa39d125d6e6df7cff161bd36"
+        ],
+        "3": [
+          "100644",
+          "dd91fed2021f770befd7d020b8450517cd85dae0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-block64.webm": {
+        "2": [
+          "100644",
+          "c18ac1e74c22aa54e5008d85578f496b5d920175"
+        ],
+        "3": [
+          "100644",
+          "b693a6ad715acc496f5e29504dc6c1c090d932d6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-block8.webm": {
+        "2": [
+          "100644",
+          "56026810dc82cc047409a29a845aa1b3e6a454eb"
+        ],
+        "3": [
+          "100644",
+          "61b632a61c129f57f3e92d9b72cad49a158d6b22"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm0-block16.webm": {
+        "2": [
+          "100644",
+          "a2e51679158f9727504f68251a5254f1969c981d"
+        ],
+        "3": [
+          "100644",
+          "35b15209badcd38caf8f43155cfc108708898a48"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm0-block4.webm": {
+        "2": [
+          "100644",
+          "2fbe8f7af2309c9301cb1850eb4f13fd6d0510f5"
+        ],
+        "3": [
+          "100644",
+          "7301ce7f477eda76218c262d46815fcf4df095c0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm0-block64.webm": {
+        "2": [
+          "100644",
+          "b3fa9ee90036bbac2d7894f62285fec9f4bc882c"
+        ],
+        "3": [
+          "100644",
+          "6ec5325f8f5a1011dd9feca6a1ccd592e2966576"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm0-block8.webm": {
+        "2": [
+          "100644",
+          "ef20fa6dc2ba1872a7d3ed5e7f2bf9560e459c06"
+        ],
+        "3": [
+          "100644",
+          "f8fe0b76c1ae3cbdebbdfb201ee2e472e2fcc9eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm14-block16.webm": {
+        "2": [
+          "100644",
+          "e327c19fe72d124993bcf28861a711b2e5257528"
+        ],
+        "3": [
+          "100644",
+          "80f87e3347384092c1c01b3801a0a9392fd5be59"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm14-block4.webm": {
+        "2": [
+          "100644",
+          "af92f9a92246f2757c2f1e7147156863643a8c58"
+        ],
+        "3": [
+          "100644",
+          "81ae80673a35a96a24278223310e683e316abd2f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm14-block64.webm": {
+        "2": [
+          "100644",
+          "ef23f95860cc26fbae9018a700daf88d9344ba04"
+        ],
+        "3": [
+          "100644",
+          "c1cd73f6f0de09aacddceff2b5c5c2816d500ab6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm14-block8.webm": {
+        "2": [
+          "100644",
+          "ab5d3863aead2b405a27bfde3897626cd4a15109"
+        ],
+        "3": [
+          "100644",
+          "e77b4c49f8a3e85ed1bfe4f69e5561afbf489d34"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm15-block16.webm": {
+        "2": [
+          "100644",
+          "ca3c1f767ff1a832f2b84e3b53cd9ee537ab17eb"
+        ],
+        "3": [
+          "100644",
+          "524441971c3c7d20e87402502e765fc4e92d5ba4"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm15-block4.webm": {
+        "2": [
+          "100644",
+          "cb42c276ab5fa67ed71331d947ce82c4e3e10f2c"
+        ],
+        "3": [
+          "100644",
+          "ccd1872ba548e64123e3cc016236b9e102f6014e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm15-block64.webm": {
+        "2": [
+          "100644",
+          "4f1b8726737c7154eab08b818f54927f0432fd1b"
+        ],
+        "3": [
+          "100644",
+          "d9fc3532029f254370a03680cf12453fd36df63c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm15-block8.webm": {
+        "2": [
+          "100644",
+          "9a97e1dcab62cb7c6a581d841ab98ead62994125"
+        ],
+        "3": [
+          "100644",
+          "db410cea116050b7c4754480a43129c61b7d0785"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-block16.webm": {
+        "2": [
+          "100644",
+          "0930ab79f69e76c77d1b54cc45f17c3ca365bd0d"
+        ],
+        "3": [
+          "100644",
+          "86dcd8ea2eb5fe38c524ef98d7ad01caf1a8b868"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-block4.webm": {
+        "2": [
+          "100644",
+          "512e9bb35abe72c1a75679f0a1f8c4ce27b2d661"
+        ],
+        "3": [
+          "100644",
+          "c50d50dcec174daa6f7b36f6008e777913887b27"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-block64.webm": {
+        "2": [
+          "100644",
+          "4437b80fd94bf68567ed8fe4b2ec5464d0fb2dfd"
+        ],
+        "3": [
+          "100644",
+          "40e34918b1cdca31604c9de446e55a55287eebf1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-block8.webm": {
+        "2": [
+          "100644",
+          "42c37daef62d8a336963efeb9a20f43a17b5f48a"
+        ],
+        "3": [
+          "100644",
+          "fd5e755b0cf31288eb70a1f66e1516b4a3f31f48"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-blocks-generated.json": {
+        "2": [
+          "100644",
+          "b64e7cb327e5ebe2037fca398bfe0d750956c30e"
+        ],
+        "3": [
+          "100644",
+          "d49ebf85b8b12a4313ba3297d467ea6ad1975e23"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm0.webm": {
+        "2": [
+          "100644",
+          "7132fb9b402a0ebdcedacfee8007bd22574ceeaf"
+        ],
+        "3": [
+          "100644",
+          "b39cd2472787976e403aa224e04ba1ce70bb2483"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm1.webm": {
+        "2": [
+          "100644",
+          "2efff54df31d768dbf02c11df31a1d901e54a54f"
+        ],
+        "3": [
+          "100644",
+          "c2da7b4145bd152a722f785191de04b461f1bec3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm10.webm": {
+        "2": [
+          "100644",
+          "85970bc2d74d574fb60507ccf6b00fb53d0a6a85"
+        ],
+        "3": [
+          "100644",
+          "fdd3b3f84d24ad00b25d00d1ba7d81ab4f32127b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm11.webm": {
+        "2": [
+          "100644",
+          "5d60e6564031b33bd1124fa698f65959c869098c"
+        ],
+        "3": [
+          "100644",
+          "b2c28be61ecfdeb6ea95c5b1752655ba106a5e76"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm12.webm": {
+        "2": [
+          "100644",
+          "6dc0a8b9c3516d8e7371320f52c0040cd59f3031"
+        ],
+        "3": [
+          "100644",
+          "4c1742ea2fa77f4e16ed948dd59c2496345aceb3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm13.webm": {
+        "2": [
+          "100644",
+          "d3b2d89fb7acc22294768fcaf0bd5e52f4dfdf03"
+        ],
+        "3": [
+          "100644",
+          "d0a487717ed6ade31a4285c86cbe86d610d53389"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm14.webm": {
+        "2": [
+          "100644",
+          "4d3b0449a5217405d0625a8bfd31801117bd6414"
+        ],
+        "3": [
+          "100644",
+          "578e72b785812ab5a242ce1db7978fb012f7ca7b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm15.webm": {
+        "2": [
+          "100644",
+          "9bac2c2004e26a0472fe8f7d452a290c8fb7a043"
+        ],
+        "3": [
+          "100644",
+          "f2970c40fa048183102aeab462d0376d8c75a362"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm2.webm": {
+        "2": [
+          "100644",
+          "cf7766937e8f0326ca81c00ce7fc486b1ea67b22"
+        ],
+        "3": [
+          "100644",
+          "0585257040bee1c748790bf504399eb0ef11a2d5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm3.webm": {
+        "2": [
+          "100644",
+          "6c89a75df251795a3056c3eeedcd8b480d86fd52"
+        ],
+        "3": [
+          "100644",
+          "c0640c011f42beff3d5894cb80cc098dd4a43147"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm4.webm": {
+        "2": [
+          "100644",
+          "90647ac1f3699539b75b645ac2e1835dcf7fb942"
+        ],
+        "3": [
+          "100644",
+          "034206179081f1305bed0b7ff83cc52f020d86e1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm5.webm": {
+        "2": [
+          "100644",
+          "a4c1723ccdb961f6d2418856db938dd5096705c8"
+        ],
+        "3": [
+          "100644",
+          "d811f1991b7bd3f87ffd078da36a6b27fbaae0ac"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm6.webm": {
+        "2": [
+          "100644",
+          "aa1d6de2919ad6d7db3b92254bd3d9d5b6d792ca"
+        ],
+        "3": [
+          "100644",
+          "a1ec3ae9c9ca574f278bb3146391d7b85ef02304"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm7.webm": {
+        "2": [
+          "100644",
+          "ad7fe7eedc6522637238cf4519c1b8b9a9410a0e"
+        ],
+        "3": [
+          "100644",
+          "48374772420cbc2f932eea38d03819177087e014"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm8.webm": {
+        "2": [
+          "100644",
+          "439a99c7786068dd21e66b4174a6dcde08d68b57"
+        ],
+        "3": [
+          "100644",
+          "e5e108d57510b437789cb82135f1032d4ce9f612"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth10-colors3-chroma1-layout1-vflip1-q32-qm9.webm": {
+        "2": [
+          "100644",
+          "bc50a798a6bbc122ea9abe06622c2f47952309ea"
+        ],
+        "3": [
+          "100644",
+          "e33d51ced2f53776ee258efd49fea816646832a8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm0.webm": {
+        "2": [
+          "100644",
+          "2376b6b4b62a5649c50fce0cb780e09f8ef43700"
+        ],
+        "3": [
+          "100644",
+          "ea033bf44ab6e7460fc16741db4dcc161adc0065"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm1.webm": {
+        "2": [
+          "100644",
+          "5996726e6abb10865ce577a9ba39b7f16b4f50e0"
+        ],
+        "3": [
+          "100644",
+          "c6210a1a83214089fa1c364d9da4640d60d14c1f"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm10.webm": {
+        "2": [
+          "100644",
+          "18e7dc830f969972d6a18823b37b5fc7ee3e0631"
+        ],
+        "3": [
+          "100644",
+          "60ee6d2cdd3be0e52c57e377473293a195dd0bb3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm11.webm": {
+        "2": [
+          "100644",
+          "4d40ded3b101dc36d43cce535d91bbd379f2ddfb"
+        ],
+        "3": [
+          "100644",
+          "4ca8087fff3c43fe283c1e2f92ac4839ecbaa3a0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm12.webm": {
+        "2": [
+          "100644",
+          "e89ff2d8234654ad32111f8b8113d3f3ab358204"
+        ],
+        "3": [
+          "100644",
+          "a60d40871ab918c7b17c14ea7fdbe05f973cb502"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm13.webm": {
+        "2": [
+          "100644",
+          "6337ecc07a479338951941ffdd47fc65a074daa3"
+        ],
+        "3": [
+          "100644",
+          "49f03ae83ff1c82b81d00e07bef58cf361aa63e5"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm14.webm": {
+        "2": [
+          "100644",
+          "04155faa75d827e3e4089e09ff49d11400358388"
+        ],
+        "3": [
+          "100644",
+          "a4f1f180b28926d291db27d905835df6d4cc60e7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm15.webm": {
+        "2": [
+          "100644",
+          "064ab9cfbc7bdcd1c374c97823686ced6c069fc4"
+        ],
+        "3": [
+          "100644",
+          "d636adb804f954058acc1d37ff30e05f5312cf14"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm2.webm": {
+        "2": [
+          "100644",
+          "351dfeefd7848cee4555f8d06b73d10516634bf6"
+        ],
+        "3": [
+          "100644",
+          "b0b1c158b1f3d477505cc5f1a9b0a48d4b837855"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm3.webm": {
+        "2": [
+          "100644",
+          "770a4ebeee9c1e95dc57cd5e5023159d530e397d"
+        ],
+        "3": [
+          "100644",
+          "4116c41e5096415c5fa2653bad2d7cacd49a39b2"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm4.webm": {
+        "2": [
+          "100644",
+          "c235244d4e4e8f69d07866e87eb5d96d014c28de"
+        ],
+        "3": [
+          "100644",
+          "8264e71d9a8a3a61db42890c4474e8938e6234cf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm5.webm": {
+        "2": [
+          "100644",
+          "4143237c009b2e7e4adbad5c1ff69b5705aacb1f"
+        ],
+        "3": [
+          "100644",
+          "643bb5ef665f3f8282402a83830e94b7ada62762"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm6.webm": {
+        "2": [
+          "100644",
+          "73a699c5b68d9a2a2f9179e27256c9d20781b7a0"
+        ],
+        "3": [
+          "100644",
+          "47c826287102d1585e321e4b2bf479e08eead899"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm7.webm": {
+        "2": [
+          "100644",
+          "78096a7a4fdd7094f91179a38a57f396e8e9bfbf"
+        ],
+        "3": [
+          "100644",
+          "a07b1adee6245afafcf6d9b78072d0bfab915e22"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm8.webm": {
+        "2": [
+          "100644",
+          "012fa4c3a018ad5000774bb553c10da594d9e4c4"
+        ],
+        "3": [
+          "100644",
+          "c51f98317b68448b78291869e7c869f49a60e732"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth12-colors3-chroma1-layout1-vflip1-q32-qm9.webm": {
+        "2": [
+          "100644",
+          "43e78dd6cd1731ecaf8c496f3e27b51867ef828e"
+        ],
+        "3": [
+          "100644",
+          "b7ba5e57dbd5dc778ed467aed890fc45a9839f78"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm0.webm": {
+        "2": [
+          "100644",
+          "a734f828d17a83480a90230db4333e194883a940"
+        ],
+        "3": [
+          "100644",
+          "d48998d6f90df95cbeafa15f8de4a8a2e440ada9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm1.webm": {
+        "2": [
+          "100644",
+          "26ede9aa5f41e8dacfae3eb77bc346b22704516a"
+        ],
+        "3": [
+          "100644",
+          "fd3e690ff36a4331e5daf06bb8936709dea8d8e1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm10.webm": {
+        "2": [
+          "100644",
+          "c41704ad5fe4347525108791b3c3191f33bf1684"
+        ],
+        "3": [
+          "100644",
+          "d40eb17c60260169cd45fac3a657b3ddb15175da"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm11.webm": {
+        "2": [
+          "100644",
+          "72efc5d9d208b14992885c53e4a8b8857775a6e9"
+        ],
+        "3": [
+          "100644",
+          "64ba7904a782528c04ad9862447011a6d2a085ef"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm12.webm": {
+        "2": [
+          "100644",
+          "63f9722cd39897a99eff5b1cab25950739e6691c"
+        ],
+        "3": [
+          "100644",
+          "f89cc97908a680dda4baef865f02d45d0c619e03"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm13.webm": {
+        "2": [
+          "100644",
+          "53ce4c2b02d869fb5ebbe5c403716eefa0cc07e6"
+        ],
+        "3": [
+          "100644",
+          "aaf848a74fdf494c392875fc8618bbfda6e3b0e8"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm14.webm": {
+        "2": [
+          "100644",
+          "b621ec8946a602afabff9c340f9d5ac205d07114"
+        ],
+        "3": [
+          "100644",
+          "6b29f7dfec00a0d615e252fceacf038c2f597470"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm15.webm": {
+        "2": [
+          "100644",
+          "01ed96957b6b6659023094682dfb8ed52a9a12b8"
+        ],
+        "3": [
+          "100644",
+          "6d9e615ded8da7559b70c93444bed60dfd19d9bf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm2.webm": {
+        "2": [
+          "100644",
+          "d5a98846bded278606500040412dbe0043c9a163"
+        ],
+        "3": [
+          "100644",
+          "5ea8ba8ffebbdac82a5c9a22e33f5332ea42caf1"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm3.webm": {
+        "2": [
+          "100644",
+          "28087c9e1dcd9597aa4f04494434c5390e44ca62"
+        ],
+        "3": [
+          "100644",
+          "9b9d509d5d086091e166a9e2a80885175b096146"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm4.webm": {
+        "2": [
+          "100644",
+          "d4683a55b58c5acc929f6b3e60de6d0825c5d85f"
+        ],
+        "3": [
+          "100644",
+          "564bd6e387c9aaf29bee9734f0889707d2014c7b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm5.webm": {
+        "2": [
+          "100644",
+          "67ae365fc5eb556ff84283bea4afc039f386c4f3"
+        ],
+        "3": [
+          "100644",
+          "10218bfbec18bb5280dc4b3401fcbaf14076631c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm6.webm": {
+        "2": [
+          "100644",
+          "c566e528f8a42815ab8a5738bb23f70c87368ecd"
+        ],
+        "3": [
+          "100644",
+          "8e9ab2fd66335b1a71ff753cbadba7a75343bd80"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm7.webm": {
+        "2": [
+          "100644",
+          "931716a342391f18f0e3ceb61290419e2f1d769e"
+        ],
+        "3": [
+          "100644",
+          "1c68a78c30b73bd1b61575ab04ffd41caa1ccf9a"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm8.webm": {
+        "2": [
+          "100644",
+          "d1118036026ecc59698f2121608ea48862970ff8"
+        ],
+        "3": [
+          "100644",
+          "023fb9ac14517172409b510eb24f0c6e96a392e3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-depth8-colors3-chroma1-layout1-vflip1-q32-qm9.webm": {
+        "2": [
+          "100644",
+          "f5f025ca627c15880b7c1bf4b7bb8735e1523eed"
+        ],
+        "3": [
+          "100644",
+          "d1e0793419735e3d6f022eeb58830b47e1e45c15"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-quant-matrix-generated.json": {
+        "2": [
+          "100644",
+          "d3b14482a12f732b98d18745a9dd29220fc38385"
+        ],
+        "3": [
+          "100644",
+          "99879e95a443180255f3652d519bfc40b81b732a"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
