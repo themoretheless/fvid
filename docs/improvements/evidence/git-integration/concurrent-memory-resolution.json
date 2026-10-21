@@ -1,0 +1,8 @@
+{
+  "branch": "codex/preserve-concurrent-memory-draft-1792621241",
+  "commit": "3f59a1881fe250cfef2f943131854f815e784bdb",
+  "parent": "449630ac666798aa7753092f68b148ac5343480a",
+  "working_module": "src/memory.rs",
+  "resolution": "Use explicit #[path = \"memory.rs\"], restore crate::buffer export. Keep unfinished allocator API detached; preserve its originals in the WIP branch and keep live untracked source files.",
+  "accepted_improvements_added": 0
+}

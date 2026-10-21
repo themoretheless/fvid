@@ -103,6 +103,7 @@ pub use error::{Error, Result};
 pub(crate) use error::{invalid, unsupported};
 mod view;
 pub use view::{FrameView, PlaneView, RowView};
+#[path = "memory.rs"]
 mod memory;
 mod parallel;
 pub(crate) use memory::buffer;
