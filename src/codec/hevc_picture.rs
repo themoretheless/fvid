@@ -499,7 +499,7 @@ fn decode_internal(
         reconstruction: Vec::new(),
         scratch: Vec::new(),
         pred_scratch: Vec::new(),
-        transform_scratch: Vec::new(),
+        transform_scratch: crate::memory::TransformScratchBuffer::default(),
         residual_scratch: Vec::new(),
         #[cfg(test)]
         cross_component_blocks: 0,
@@ -1022,7 +1022,7 @@ pub(crate) fn decode_slices_internal(
         reconstruction: Vec::new(),
         scratch: Vec::new(),
         pred_scratch: Vec::new(),
-        transform_scratch: Vec::new(),
+        transform_scratch: crate::memory::TransformScratchBuffer::default(),
         residual_scratch: Vec::new(),
         #[cfg(test)]
         cross_component_blocks: 0,
@@ -1392,7 +1392,7 @@ struct Decoder<'a> {
     reconstruction: Vec<Reconstruction>,
     scratch: Vec<i32>,
     pred_scratch: Vec<u16>,
-    transform_scratch: Vec<i32>,
+    transform_scratch: crate::memory::TransformScratchBuffer,
     residual_scratch: Vec<i32>,
     #[cfg(test)]
     cross_component_blocks: usize,
