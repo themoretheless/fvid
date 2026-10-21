@@ -4434,5 +4434,366 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-active-drafts-20261009-ps-absence",
+    "incoming": "cf14432df6f648da23ee9a486002f5b76e7fc6f9",
+    "conflicts": {
+      "crates/fvid-media/src/owned_aac/aac_sbr_ps.rs": {
+        "1": [
+          "100644",
+          "0ab859271b519db29aa5be4fb93621f42e503746"
+        ],
+        "2": [
+          "100644",
+          "3c221da15321255dc345ad17e9b18efaa3c683d2"
+        ],
+        "3": [
+          "100644",
+          "652a4bea75ceb6d420db22b22bd4915cd0d9c1a5"
+        ]
+      },
+      "scripts/generate_aac_ps_absence_fixtures.py": {
+        "2": [
+          "100644",
+          "d572545a445fa6e899a4dad06defd038ffa73445"
+        ],
+        "3": [
+          "100644",
+          "c0752e79003700aa8d696bad5b66642457edb04c"
+        ]
+      },
+      "tests/fixtures/playback-errors/aac-ps-absence-oracles.json": {
+        "2": [
+          "100644",
+          "39a50867c9db5389f4276f6d3ac78b073bc9ab7d"
+        ],
+        "3": [
+          "100644",
+          "d3158848ff5c71bd277841b21f02f22bb5d9581c"
+        ]
+      },
+      "tests/fixtures/playback-errors/aac-ps-absence-pcm.bin": {
+        "2": [
+          "100644",
+          "e65be92f2b291e93528807c065f3824606caa8cb"
+        ],
+        "3": [
+          "100644",
+          "2519f544f803753d1204f8436d273d222024f8ef"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "eba388539fb5126342b5bc98b0b0e528ede7446d"
+        ],
+        "3": [
+          "100644",
+          "71bf918751c24cd5b0759aff2e517904f792e8bf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "1eaf5cf70daf8f72322ba96bedeef1e393a8bf1a"
+        ],
+        "3": [
+          "100644",
+          "39d1812493c063774ca71d71255e266adad53cb7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "211d6a3cbbfcbb01d42b7e7f7fd14c6f1d1b27b1"
+        ],
+        "3": [
+          "100644",
+          "937c721615570a6de1cb03232afd038f9227c922"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "d78925fc3b1de1db3f2ecab234656faa50f57997"
+        ],
+        "3": [
+          "100644",
+          "ca2ab834ecd1280587aed14ecc106efa61c753eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-probe.json": {
+        "2": [
+          "100644",
+          "05630201344238738a4b10c8dcc32f9b4ccf10c0"
+        ],
+        "3": [
+          "100644",
+          "b76d5335261b7235353c20dab68e67379069afd0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "2dd7261162291f77be1e2e634575585ff34f356a"
+        ],
+        "3": [
+          "100644",
+          "60023f3dc3916240fb3306a4c1e59e710b4c7e88"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "d2bd6923c6543a3399c5291ceaae8952bab2a5f8"
+        ],
+        "3": [
+          "100644",
+          "c7b76ad373148cb7baa381d2b3848ed9b9ede17e"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "5229c5cd28d67cf0d9df7edefdf8b661c2d87141"
+        ],
+        "3": [
+          "100644",
+          "9161573528b47a18c90c92bfce10fa4ccaa63b29"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "309659530403dca33227de00805fba6eda67d1bb"
+        ],
+        "3": [
+          "100644",
+          "fa130578cb27fda1e0cfbb9630a18f2b402c6bc7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "5a7bd5e18721823afee64d1277ea3c8b51a1c36f"
+        ],
+        "3": [
+          "100644",
+          "c0d93fb13bf6211788ef262c0acc7e797c2817eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth10-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "bb30294614bda373586bbfa97de2213044607adb"
+        ],
+        "3": [
+          "100644",
+          "8a28fe43451f361e6155a7d4df4296b571bb04a9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "eaf9e573db41ab7794d27edd0d384b09012d8531"
+        ],
+        "3": [
+          "100644",
+          "a7c203f123eff23a50e535ad99e7d61e98c62acb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "f29a2d0093ba01b4e437952dd4373f4e371110f4"
+        ],
+        "3": [
+          "100644",
+          "bad8e2a927af41a4beee56e82cef652bfed1e8e0"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "239de51e6a08d5401e385243a4d8f03795c83375"
+        ],
+        "3": [
+          "100644",
+          "0da813737c9d64903c9ac97c324d1ddb345349ca"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "d554fda19b98585d113233b1f82f09446ca5ad7f"
+        ],
+        "3": [
+          "100644",
+          "77d95510a442b515fe0f9672fbe618963716138b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "14ea83a044cab20670b3618eca0c15002002ad34"
+        ],
+        "3": [
+          "100644",
+          "5196b59c6931ac6fe1af4bb43528a2a09b2a19bc"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth12-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "0e6f3a21ffbd87a4e8121a249af77db0855a379b"
+        ],
+        "3": [
+          "100644",
+          "cf31b65da1eac00e223bb2634dd0a5246e0821f9"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "52cc907eaeb4c399f61c339b177219810347d650"
+        ],
+        "3": [
+          "100644",
+          "0224dbc73c417f82e669d7458e29b0f126554512"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q32-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "2624dc9d461fae5b9fdd0f3faa7db18a3db2c8b0"
+        ],
+        "3": [
+          "100644",
+          "b47836cac7b96e74e095b416089cdf20112826f3"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q48-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "2ad995fd2034b2ef0040375ff859d4cae304c48a"
+        ],
+        "3": [
+          "100644",
+          "348b2df6b42dc56a12f92269caa2136e972ed34b"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q48-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "fb98e473bc2cf9e578a3b0e88ac32e27a12d79e0"
+        ],
+        "3": [
+          "100644",
+          "a265a2caa3844203d916791abc2029005b5549a6"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q56-qm7-orientation0.webm": {
+        "2": [
+          "100644",
+          "82bc78c3f5f1ba9094ec2415b32b9bb52abaec73"
+        ],
+        "3": [
+          "100644",
+          "a03502e662d3198c7415f64cd2b13e72da25c140"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-restoration-depth8-colors3-chroma1-layout0-vflip1-q56-qm7-orientation1.webm": {
+        "2": [
+          "100644",
+          "808ce120fdd7eb89e5069cc1b7f8a2ceec8c1fe4"
+        ],
+        "3": [
+          "100644",
+          "e98966d9050000a06fbcdac2a2a8563b04c36aef"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-absence-packets.bin": {
+        "2": [
+          "100644",
+          "1b537e00f8f5a02f1582c8bf03274dd3d02785c4"
+        ],
+        "3": [
+          "100644",
+          "1387f90d6ffd1c76a4145850326a9cfd8086f5f7"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-late-ps-1024-synthetic.mp4": {
+        "2": [
+          "100644",
+          "b768c773d5dc6ada1f33a398797b6fa3919c768f"
+        ],
+        "3": [
+          "100644",
+          "588fc3ebea030bcedb907225c4cb5a966527f836"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-late-ps-960-synthetic.mp4": {
+        "2": [
+          "100644",
+          "f231240e3fe69342543e4d103fd6c08d348507a4"
+        ],
+        "3": [
+          "100644",
+          "c3201e0676cb27e0156c50d31c0a04b8cc0581af"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-missing-middle-1024-synthetic.mp4": {
+        "2": [
+          "100644",
+          "bd1445f2c7973042d20eeabdf491fe7f4a627c2b"
+        ],
+        "3": [
+          "100644",
+          "dc358db767576745b73fa418ef502f8694f1d9b7"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-missing-middle-960-synthetic.mp4": {
+        "2": [
+          "100644",
+          "96f57365b00dd73e0b3f80131f0a9fbe4e7b7645"
+        ],
+        "3": [
+          "100644",
+          "96fc9c360bc56cb106f569b167273841a0d1fb4f"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-trailing-mono-1024-synthetic.mp4": {
+        "2": [
+          "100644",
+          "b1bfbc069dbe61f374fd114674b51c519799d162"
+        ],
+        "3": [
+          "100644",
+          "29cb5f0a35f1c8502726b6eb6fcbf43a7d5fe1bb"
+        ]
+      },
+      "tests/fixtures/playback-errors/he-aac-ps-trailing-mono-960-synthetic.mp4": {
+        "2": [
+          "100644",
+          "8a1a3483e558fc5d6b6b2e319e991164912c35dd"
+        ],
+        "3": [
+          "100644",
+          "ea2d4f8c6ed09a6cd871ecfb6c4e74a17f0ac7e6"
+        ]
+      },
+      "tests/he_aac_ps_absence.rs": {
+        "2": [
+          "100644",
+          "f04aa8b6001c0ba0094535cb1dcce067c44ee2ca"
+        ],
+        "3": [
+          "100644",
+          "b377ec5bf23b6ce1d14984db44a554c2f7fab47a"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
