@@ -212689,5 +212689,54 @@
     "incoming": "0fb5780bdd7dfbd8a89ed3090905f706c919f5fa",
     "conflicts": {},
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-hevc-motion-identity-20261012",
+    "incoming": "14ea88f13eff40c4e50a6c94a6a3884e3cf1ae3e",
+    "conflicts": {
+      "src/codec/hevc_colour_planes.rs": {
+        "1": [
+          "100644",
+          "4b52a3675d31eac76faf5cd0d40a800673ece10b"
+        ],
+        "2": [
+          "100644",
+          "e0a0aef5b11f3ab1597719440418bfbcdcd00579"
+        ],
+        "3": [
+          "100644",
+          "6b526759edba3d4505ae5239151ef7292201717d"
+        ]
+      },
+      "src/codec/hevc_motion.rs": {
+        "1": [
+          "100644",
+          "98439965772a3a861e7ae7f215f4505b89e81876"
+        ],
+        "2": [
+          "100644",
+          "85bf6d5b3c3521e6d50301d4710180c9fd5e37a4"
+        ],
+        "3": [
+          "100644",
+          "91c2489f651f734af2d58dc4cd9d7187a5c5b294"
+        ]
+      },
+      "src/codec/hevc_picture.rs": {
+        "1": [
+          "100644",
+          "63092a02ab89defafd82f7024c9402510866da17"
+        ],
+        "2": [
+          "100644",
+          "f796b400a3cd7532fd2b436c1a502e3d628ed164"
+        ],
+        "3": [
+          "100644",
+          "768f916282378a98e94a7d53deea11c61be9c634"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
