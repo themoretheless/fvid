@@ -821,5 +821,118 @@
       }
     },
     "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
+  },
+  {
+    "branch": "codex/preserve-active-drafts-20261008-quant-matrix",
+    "incoming": "cc446e9576c30dc46d0f3466de2d4e7b8e6ecbc2",
+    "conflicts": {
+      "src/codec/hevc_transform.rs": {
+        "1": [
+          "100644",
+          "4146483f5fe416874abbf51633060d630bbb0670"
+        ],
+        "2": [
+          "100644",
+          "1b4da8b6a7fb42f2b2b391f24835a2e8a70f4e69"
+        ],
+        "3": [
+          "100644",
+          "6eb542b0585e176ee264ab370e5f0c9ef1728ec9"
+        ]
+      },
+      "src/codec/mod.rs": {
+        "1": [
+          "100644",
+          "58f5ec07587476bfebb7c38aa992782de4ff015b"
+        ],
+        "2": [
+          "100644",
+          "b1824a867e4491b3b9c44edbd31563de3ef5cd11"
+        ],
+        "3": [
+          "100644",
+          "d2f0ab741dc698ca56b452c02e231610e6b1346c"
+        ]
+      },
+      "src/codec/vp9_picture.rs": {
+        "1": [
+          "100644",
+          "92129bc6be8962289c3fe9a48f4d12c1f608c7e0"
+        ],
+        "2": [
+          "100644",
+          "22c7fccd76b08a130f934fddb0ca402449638e83"
+        ],
+        "3": [
+          "100644",
+          "ebfecbf8055cb972a2c5be0e0baf68a111285843"
+        ]
+      },
+      "src/player_gpu.rs": {
+        "1": [
+          "100644",
+          "20db2ae9d7f372e7293576a48ee474269519d451"
+        ],
+        "2": [
+          "100644",
+          "7e3e0415b1608995adb965d6822ca4fca8bfb672"
+        ],
+        "3": [
+          "100644",
+          "269e45a51bbe4b0a758b4ffbc2ebd46e905f7b3c"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "eba388539fb5126342b5bc98b0b0e528ede7446d"
+        ],
+        "3": [
+          "100644",
+          "71bf918751c24cd5b0759aff2e517904f792e8bf"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth10-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "1eaf5cf70daf8f72322ba96bedeef1e393a8bf1a"
+        ],
+        "3": [
+          "100644",
+          "39d1812493c063774ca71d71255e266adad53cb7"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout0-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "211d6a3cbbfcbb01d42b7e7f7fd14c6f1d1b27b1"
+        ],
+        "3": [
+          "100644",
+          "937c721615570a6de1cb03232afd038f9227c922"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-delta-lf-tiles-depth12-colors3-chroma1-layout1-vflip1-q48.webm": {
+        "2": [
+          "100644",
+          "d78925fc3b1de1db3f2ecab234656faa50f57997"
+        ],
+        "3": [
+          "100644",
+          "ca2ab834ecd1280587aed14ecc106efa61c753eb"
+        ]
+      },
+      "tests/fixtures/playback-errors/av1-lossy-palette-probe.json": {
+        "2": [
+          "100644",
+          "05630201344238738a4b10c8dcc32f9b4ccf10c0"
+        ],
+        "3": [
+          "100644",
+          "b76d5335261b7235353c20dab68e67379069afd0"
+        ]
+      }
+    },
+    "decision": "Keep reviewed superseding implementations and stricter tests; keep current paired AV1 fixtures; retain incoming versions in merge ancestry. Exclude unqualified optimization drafts."
   }
 ]
