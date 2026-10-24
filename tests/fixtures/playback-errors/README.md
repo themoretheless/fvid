@@ -4851,4 +4851,36 @@ fragmented and first-used-entry-3 variants, repeated edits, interval export,
 float64 precision and WAVE publication run in `mp4_audio_export_transitions`.
 The fixtures regenerate byte-exactly without external processes or network
 (23 artifacts / 1605797 bytes). No private media or parameter sets are copied.
-Rate/channel-change refusal is a safety assertion, not normalization acceptance.
+Rate/channel-change acceptance is covered separately by the normalization fixtures below.
+
+
+`mp4-geometry-normalization/` exercises rate/layout normalization on one exact
+output grid. Its owned neutral VP9 videos carry irregular PCM packet lengths,
+48/32/44.1 kHz mono/stereo changes, negative PTS, trimmed tails and repeated
+fractional source edits. Float64 witnesses retain perturbations below float32
+precision. AAC LC/Main and delayed SSR use authored spectra, independent native
+IMDCT/overlap/IPQF oracles and literal output-grid convolution. Generate with
+`scripts/generate_mp4_geometry_normalization.py`; run `mp4_geometry_normalization`
+for raw f32/f64, WAVE publication, mono folding, public API and actual CLI output.
+The old geometry refusal was replayed on a valid witness, then restored before
+acceptance. A separate public-route witness caught the former CLI/static-reader
+refusal; it now verifies emitted PCM as well.
+
+`mp4-geometry-lossless-adpcm/` extends the same acceptance to ALAC raw/Rice and
+IMA4/IMA-WAV/MS-ADPCM duration clocks. Generate separately with
+`scripts/generate_mp4_geometry_lossless_adpcm.py`. ALAC cookies admit each
+authored description's largest actual packet; old default fixture bytes stay
+unchanged. Independent ADPCM predictors provide mono PCM and exact opposite
+stereo channels whose physical mono fold is zero. Tests compare the waveform,
+intervals, output clock, frame count and published WAVE, including entry-3
+starts, fragmentation, repeats and intentional coded padding. Generators need
+no FFmpeg, external process, network or private source material; tests use the
+committed fixtures and do not invoke generators.
+
+The geometry generator also authors a four-front-channel AAC PCE control and
+a changing-layout witness. The default normalization test requires the specific
+explicit-destination refusal before output; acceptance compares 48/32 kHz stereo
+and seven-channel output with independent waveform oracles. The normalization
+set contains 47 artifacts / 3432322 bytes; lossless/ADPCM contains 17 artifacts /
+449807 bytes. Regeneration is byte-exact with network and subprocess creation
+disabled. No private media or parameter sets are copied.

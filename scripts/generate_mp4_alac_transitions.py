@@ -14,13 +14,16 @@ def convert(data, compressed=False):
     sizes = struct.unpack('>6I', tables[b'stsz'][12:])
     packets = []
     entries = []
-    for rate, channels, depth in [(48000, 2, 16), (32000, 1, 16), (44100, 2, 24)]:
+    for identity, (rate, channels, depth) in enumerate([(48000, 2, 16), (32000, 1, 16), (44100, 2, 24)]):
         entry = bytearray(28)
         entry[6:8] = struct.pack('>H', 1)
         entry[16:20] = struct.pack('>HH', channels, depth)
         entry[24:28] = word(rate << 16)
         cookie = bytearray(24)
-        cookie[:4] = word(rate // 50)
+        # Authored source entries are S16 stereo, F32 mono and S24 stereo.
+        # The cookie admits the largest actual packet, including irregular cuts.
+        source_stride = [4, 4, 6][identity]
+        cookie[:4] = word(max(sizes[i] // source_stride for i in range(identity, 6, 3)))
         cookie[5:10] = bytes([depth, 40, 10, 14, channels])
         cookie[20:24] = word(rate)
         entries.append(atom(b'alac', entry + atom(b'alac', word(0) + cookie)))

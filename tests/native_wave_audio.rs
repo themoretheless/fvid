@@ -586,7 +586,7 @@ fn wave_concat_rejects_riff_overflow_before_copying_payload() {
 }
 
 #[test]
-fn multichannel_identity_preserves_mask_and_rematrix_needs_known_layout() {
+fn multichannel_identity_preserves_mask_and_known_layouts_fold_to_stereo() {
     let d = dir();
     for (channels, mask) in [
         (4u16, 0u32),
@@ -617,14 +617,32 @@ fn multichannel_identity_preserves_mask_and_rematrix_needs_known_layout() {
         );
         let plan = fvid::native_plan::decode_audio(&source, &Default::default()).unwrap();
         assert_eq!(plan.command, "decode-audio");
-        let bad = d.0.join(format!("{channels}-{mask}-bad.wav"));
-        assert!(export(&source, &bad, None, 1.0, Some(2), None, None, None, None).is_err());
-        assert!(!bad.exists());
-        let request = fvid::media_info::AudioDecodeTransform {
-            channels: Some(2),
-            ..Default::default()
-        };
-        assert!(fvid::native_plan::decode_audio(&source, &request).is_err());
+        let mixed = d.0.join(format!("{channels}-{mask}-stereo.wav"));
+        let request = fvid::media_info::AudioDecodeTransform { channels:Some(2), ..Default::default() };
+        if matches!((channels,mask),(4,0x33)|(8,0x63f)) {
+            let stats=export(&source,&mixed,None,1.0,Some(2),None,None,None,None).unwrap();
+            assert_eq!((stats.channels,stats.sample_frames),(2,137));
+            assert!(fvid::native_plan::decode_audio(&source,&request).is_ok());
+            let raw=d.0.join(format!("{channels}-{mask}-stereo.f32le"));
+            export(&mixed,&raw,None,1.0,None,None,None,None,None).unwrap();
+            let actual=values(&raw);
+            let k=std::f64::consts::FRAC_1_SQRT_2;
+            let expected:Vec<f32>=samples.chunks_exact(usize::from(channels)).flat_map(|f| {
+                let (left,right)=if channels==4 {
+                    (f64::from(f[0])+f64::from(f[2])*k,f64::from(f[1])+f64::from(f[3])*k)
+                }else{
+                    (f64::from(f[0])+(f64::from(f[2])+f64::from(f[4])+f64::from(f[6]))*k,
+                     f64::from(f[1])+(f64::from(f[2])+f64::from(f[5])+f64::from(f[7]))*k)
+                };
+                [left as f32,right as f32]
+            }).collect();
+            assert_eq!(actual.len(),expected.len());
+            for (a,b)in actual.iter().zip(expected) {assert!((a-b).abs()<1e-6);}
+        }else{
+            assert!(export(&source,&mixed,None,1.0,Some(2),None,None,None,None).is_err());
+            assert!(!mixed.exists());
+            assert!(fvid::native_plan::decode_audio(&source,&request).is_err());
+        }
         {
             let api = d.0.join(format!("{channels}-{mask}-api.f32le"));
             fvid::media::decode_audio(&source, &api, &Default::default()).unwrap();

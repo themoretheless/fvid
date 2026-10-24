@@ -348,6 +348,17 @@ use crate::container::mp4::Mp4Reader as Mp4TimelineReader;
 use crate::native_audio_decoder::PacketPcmDecoder as Mp4TimelineDecoder;
 use crate::container::audio_timeline::AudioTimeline as Mp4AudioSchedule;
 use crate::native_audio_decoder::NativeAudioCheckpoint as Mp4AacCheckpoint;
+use fvid_media::owned_mp4_audio_normalization::coefficients as mp4_normalization_coefficients;
+type Mp4NormalizationTrack = crate::container::mp4::Track;
+type Mp4PcmScalar = f32;
+type Mp4OutputResampler = fvid_media::owned_resample::Resampler<Vec<u8>>;
+#[allow(dead_code)] // Export uses only the arithmetic subset of the shared playback clock.
+mod mp4_export_clock {
+    use crate::{Error, Result, invalid};
+    use crate::container::mp4::Edit;
+    use std::{cmp::Ordering, time::Duration};
+    include!("../crates/fvid-media/src/owned_mp4_edit_clock_impl.rs");
+}
 include!("../crates/fvid-media/src/owned_mp4_audio_timeline_impl.rs");
 
 /// Decode Matroska AAC on its container presentation timeline. Decode negative

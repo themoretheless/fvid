@@ -1,0 +1,233 @@
+{
+  "cases": [
+    {
+      "name": "pcm",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm-edits",
+      "oracle": "pcm-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "precise": true
+    },
+    {
+      "name": "pcm-fragmented",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm-fragmented-edits",
+      "oracle": "pcm-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "precise": true
+    },
+    {
+      "name": "pcm-start-third",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm-start-third-edits",
+      "oracle": "pcm-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "precise": true
+    },
+    {
+      "name": "pcm-start-third-fragmented",
+      "oracle": "pcm.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm-start-third-fragmented-edits",
+      "oracle": "pcm-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "precise": true
+    },
+    {
+      "name": "pcm-negative",
+      "oracle": "pcm-negative.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm-trim",
+      "oracle": "pcm-trim.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5258,
+      "precise": true
+    },
+    {
+      "name": "pcm64",
+      "oracle": "pcm64.f32le",
+      "oracle64": "pcm64.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm64-edits",
+      "oracle": "pcm64-edits.f32le",
+      "oracle64": "pcm64-edits.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "precise": true
+    },
+    {
+      "name": "pcm64-fragmented",
+      "oracle": "pcm64.f32le",
+      "oracle64": "pcm64.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "pcm64-third",
+      "oracle": "pcm64.f32le",
+      "oracle64": "pcm64.f64le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "precise": true
+    },
+    {
+      "name": "aac-changes",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "precise": false
+    },
+    {
+      "name": "aac-changes-edits",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "precise": false
+    },
+    {
+      "name": "aac-fragmented",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "precise": false
+    },
+    {
+      "name": "aac-fragmented-edits",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "precise": false
+    },
+    {
+      "name": "aac-third",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "precise": false
+    },
+    {
+      "name": "aac-third-edits",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "precise": false
+    },
+    {
+      "name": "aac-equivalent",
+      "oracle": "aac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 13808,
+      "precise": false
+    },
+    {
+      "name": "aac-equivalent-edits",
+      "oracle": "aac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 22448,
+      "precise": false
+    },
+    {
+      "name": "ssr-changes",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "precise": false
+    },
+    {
+      "name": "ssr-changes-edits",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "precise": false
+    },
+    {
+      "name": "ssr-fragmented",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "precise": false
+    },
+    {
+      "name": "ssr-fragmented-edits",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "precise": false
+    },
+    {
+      "name": "ssr-third",
+      "oracle": "ssr.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 9976,
+      "precise": false
+    },
+    {
+      "name": "ssr-third-edits",
+      "oracle": "ssr-edits.f32le",
+      "rate": 24000,
+      "channels": 2,
+      "frames": 11224,
+      "precise": false
+    }
+  ],
+  "provenance": "Owned neutral VP9; arithmetic PCM constants; authored AAC spectra, scalar native IMDCT and literal output-grid convolution. No private media, external codec, process, FFmpeg or network."
+}

@@ -4,29 +4,38 @@ from pathlib import Path
 from generate_vp9_chroma import frame,mp4,atom,word
 from generate_mp4_fragment_description_regressions import atoms
 OUT=Path(__file__).resolve().parents[1]/'tests/fixtures/playback-errors/mp4-audio-reconfiguration'
-def generate(pcm_shapes=None,pcm_only=False):
+def generate(pcm_shapes=None,pcm_only=False,pcm_frames=None,pcm_values=None):
     files={};ids=[1,2,3,1,2,3];shapes=pcm_shapes or [(b'sowt',48000,2,16),(b'fl32',32000,1,32),(b'in24',44100,2,24)];entries=[];packets=[];records=[]
+    scale=14112000 if pcm_frames else 1000000
+    durations=[]
     for codec,rate,channels,depth in shapes:
         e=bytearray(28);e[6:8]=struct.pack('>H',1);e[16:20]=struct.pack('>HH',channels,depth);e[24:28]=word(rate<<16)
         entries.append(atom(codec,e+(atom(b'enda',b'\0\1')if codec!=b'sowt'else b'')))
     for i,identity in enumerate(ids):
-        codec,rate,channels,depth=shapes[identity-1];count=rate//50;raw=bytearray();golden=bytearray()
+        codec,rate,channels,depth=shapes[identity-1];count=pcm_frames[i] if pcm_frames else rate//50;raw=bytearray();golden=bytearray()
         for n in range(count):
             for c in range(channels):
                 sign=-1 if c else 1
-                if codec==b'fl32':value=((n%17)-8)/32;raw+=struct.pack('<f',value)
+                if pcm_values is not None:
+                    value=pcm_values[identity-1][c]
+                    if codec==b'fl32':raw+=struct.pack('<f',value)
+                    elif codec==b'fl64':raw+=struct.pack('<d',value)
+                    else:raw+=int(round(value*(1<<(depth-1)))).to_bytes(depth//8,'little',signed=True)
+                elif codec==b'fl32':value=((n%17)-8)/32;raw+=struct.pack('<f',value)
                 else:
                     sample=sign*((1000 if depth==16 else 100000)+n%31+i*7);raw+=sample.to_bytes(depth//8,'little',signed=True);value=sample/(1<<(depth-1))
                 golden+=struct.pack('<f',value)
-        packets.append(bytes(raw));files[f'pcm-{i}.f32le']=bytes(golden);records.append(dict(description=identity,rate=rate,channels=channels,depth=depth,pts=i*20000,frames=count,oracle=f'pcm-{i}.f32le'))
+        packets.append(bytes(raw));files[f'pcm-{i}.f32le']=bytes(golden);records.append(dict(description=identity,rate=rate,channels=channels,depth=depth,pts=sum(durations),frames=count,oracle=f'pcm-{i}.f32le'))
+        assert count*scale%rate==0
+        durations.append(count*scale//rate)
     base=dict(atoms(mp4([frame(8,'420',16,16)]*6,8,'420',(16,16),list(range(1,7)))))
     ftyp=atom(b'ftyp',base[b'ftyp']);offset=len(ftyp)+8+len(base[b'mdat']);offsets=[]
     for p in packets:offsets.append(offset);offset+=len(p)
     def audio(fragmented=False,edits=False):
-        stbl=atom(b'stbl',atom(b'stsd',word(0,3)+b''.join(entries))+atom(b'stts',word(0,0)if fragmented else word(0,1,6,20000))+atom(b'stsz',word(0,0,0)if fragmented else word(0,0,6,*map(len,packets)))+atom(b'stsc',word(0,0)if fragmented else word(0,6)+b''.join(word(i+1,1,d)for i,d in enumerate(ids)))+atom(b'stco',word(0,0)if fragmented else word(0,6,*offsets)))
+        stbl=atom(b'stbl',atom(b'stsd',word(0,3)+b''.join(entries))+atom(b'stts',word(0,0)if fragmented else (word(0,1,6,20000) if pcm_frames is None else word(0,6)+b''.join(word(1,d) for d in durations)))+atom(b'stsz',word(0,0,0)if fragmented else word(0,0,6,*map(len,packets)))+atom(b'stsc',word(0,0)if fragmented else word(0,6)+b''.join(word(i+1,1,d)for i,d in enumerate(ids)))+atom(b'stco',word(0,0)if fragmented else word(0,6,*offsets)))
         dinf=atom(b'dinf',atom(b'dref',word(0,1)+atom(b'url ',word(1))))
-        tkhd=bytearray(84);tkhd[:4]=word(3);tkhd[12:16]=word(2);tkhd[20:24]=word(7 if edits else 6);tkhd[40:44]=tkhd[56:60]=word(65536);tkhd[72:76]=word(0x40000000)
-        mdhd=bytearray(24);mdhd[12:20]=word(1000000,120000)
+        tkhd=bytearray(84);tkhd[:4]=word(3);tkhd[12:16]=word(2);tkhd[20:24]=word(7 if edits else (sum(durations)*50+scale-1)//scale);tkhd[40:44]=tkhd[56:60]=word(65536);tkhd[72:76]=word(0x40000000)
+        mdhd=bytearray(24);mdhd[12:20]=word(scale,sum(durations))
         extra=atom(b'edts',atom(b'elst',word(0,2)+struct.pack('>IiI',1,-1,65536)+struct.pack('>IiI',6,0,65536)))if edits else b''
         return atom(b'trak',atom(b'tkhd',tkhd)+extra+atom(b'mdia',atom(b'mdhd',mdhd)+atom(b'hdlr',word(0,0)+b'soun'+bytes(12))+atom(b'minf',dinf+stbl)))
     files['pcm.mp4']=ftyp+atom(b'mdat',base[b'mdat']+b''.join(packets))+atom(b'moov',base[b'moov']+audio())
@@ -36,8 +45,8 @@ def generate(pcm_shapes=None,pcm_only=False):
     fragment_header=atom(b'ftyp',b'iso5'+word(0)+b'iso5vp09');assert len(fragment_header)==len(ftyp)
     init=fragment_header+atom(b'mdat',base[b'mdat'])+atom(b'moov',base[b'moov']+audio(fragmented=True)+atom(b'mvex',atom(b'trex',word(0,2,1,20000,0,0x02000000))))
     def fragment(i):
-        h=atom(b'tfhd',word(0x02003a,2,ids[i],20000,len(packets[i]),0x02000000))
-        def build(offset):return atom(b'moof',atom(b'mfhd',word(0,i+1))+atom(b'traf',h+atom(b'tfdt',word(0,i*20000))+atom(b'trun',word(1,1,offset))))
+        h=atom(b'tfhd',word(0x02003a,2,ids[i],durations[i],len(packets[i]),0x02000000))
+        def build(offset):return atom(b'moof',atom(b'mfhd',word(0,i+1))+atom(b'traf',h+atom(b'tfdt',word(0,sum(durations[:i])))+atom(b'trun',word(1,1,offset))))
         m=build(0);return build(len(m)+8)+atom(b'mdat',packets[i])
     files['pcm-fragmented.mp4']=init+b''.join(fragment(i)for i in range(6))
     # Same packets, but the first used setup is table entry 3 rather than 1.

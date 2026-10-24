@@ -1,9 +1,19 @@
 pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::Seek>(
+    reader: Mp4TimelineReader<R>,
+    output: &mut impl std::io::Write,
+    interval: Option<(Duration, Duration)>,
+    selected: Option<usize>,
+    control: &mut DecodeProgress<'_>,
+) -> Result<AudioDecodeStats> {
+    decode_mp4_audio_reader_targeted(reader,output,interval,selected,control,None)
+}
+pub(crate) fn decode_mp4_audio_reader_targeted<R: std::io::Read + std::io::Seek>(
     mut reader: Mp4TimelineReader<R>,
     output: &mut impl std::io::Write,
     interval: Option<(Duration, Duration)>,
     selected: Option<usize>,
     control: &mut DecodeProgress<'_>,
+    target: Option<(u32,u16,u32)>,
 ) -> Result<AudioDecodeStats> {
     control.check()?;
     if interval.is_some_and(|(from, to)| from >= to) {
@@ -31,19 +41,23 @@ pub(crate) fn decode_mp4_audio_reader_controlled<R: std::io::Read + std::io::See
     if track.timescale == 0 || initial_setup.sample_rate != rate || (!ps[(initial_description-1) as usize] && initial_setup.channels != channels) {
         return Err(invalid("MP4 audio export requires valid clock and matching audio geometry"));
     }
-    // Validate every used setup before caller-owned output. Output normalization
-    // for a rate/channel change is a separate operation, never reinterpret PCM.
+    // Detect the need for normalization before caller-owned output.
     let mut checked = initial_description;
+    let mut normalize = target.is_some();
     for i in 0..track.samples.len() {
         control.check()?;
         let id = track.samples.get(i).ok_or_else(|| invalid("missing audio sample"))?.description_index;
         if track.sample_descriptions[(id - 1) as usize] != track.sample_descriptions[(checked - 1) as usize] {
             let next = make_decoder(id)?;
-            if next.sample_rate() != rate || next.channels() != channels || next.channel_mask() != decoder.channel_mask() {
-                return Err(invalid("MP4 audio export configuration changes require output geometry normalization"));
+            if next.sample_rate() != rate || next.channels() != channels || next.normalization_mask() != decoder.normalization_mask() {
+                normalize = true;
             }
             checked = id;
         }
+    }
+    if normalize {
+        drop(initial_setup);
+        return decode_mp4_audio_normalized(reader,output,interval,index,track,initial_description,ps,decoder,target,control);
     }
     let sample_position = |ticks: u64| -> Result<u64> {
         let numerator = u128::from(ticks) * u128::from(rate);
@@ -286,3 +300,5 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
     }
     Ok(false)
 }
+
+include!("owned_mp4_audio_normalized_impl.rs");

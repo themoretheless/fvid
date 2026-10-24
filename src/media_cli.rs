@@ -1092,19 +1092,7 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
                         | "--stream-metadata-delete"
                 )
         })
-        && (fvid::native_media::is_owned_audio_trim_source(std::path::Path::new(&args[1]))?
-            || fvid::native_pcm::is_wave(std::path::Path::new(&args[1]))?
-            || fvid_media::owned_container_loudness::recognizes_standalone_audio(std::path::Path::new(&args[1]))?
-            || {
-                let mut head = [0u8; 8];
-                std::fs::File::open(&args[1])
-                    .and_then(|mut f| std::io::Read::read_exact(&mut f, &mut head))
-                    .is_ok_and(|()| {
-                        head.starts_with(&[0x1a, 0x45, 0xdf, 0xa3])
-                            || fvid::container::mp4::recognizes_prefix(&head)
-                    })
-            }
-            || std::path::Path::new(&args[2]).extension().and_then(|s| s.to_str()) == Some("wav"))
+
     {
         let mut parse_args = vec!["decode".to_owned(), args[1].clone()];
         let mut volume = None;
@@ -1206,53 +1194,24 @@ pub fn run(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
         limits.progress = progress;
         let source_path = std::path::Path::new(&args[1]);
         let dest_path = std::path::Path::new(&args[2]);
-        let use_native_export = limits.max_controlled_bytes.is_none()
-            && limits.metadata_set.is_empty()
-            && limits.metadata_delete.is_empty()
-            && limits.stream_metadata_set.is_empty()
-            && limits.stream_metadata_delete.is_empty()
-            && (fvid::native_pcm::is_wave(source_path)?
-                || (fvid::native_media::is_owned_audio_trim_source(source_path)?
-                    && selected.is_none_or(|idx| {
-                        fvid::native_media::audio_source_info_selected(source_path, Some(idx))
-                            .is_ok()
-                    })));
-        if use_native_export {
-            let stats = fvid::native_export::export_audio_pcm_transformed_with_controls(
-                source_path,
-                dest_path,
-                interval,
-                volume.unwrap_or(1.0),
-                channels,
-                sample_rate,
-                &limits,
-            )?;
-            if !quiet {
-                println!(
-                    "{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":0}}",
-                    stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels
-                );
-            }
-        } else {
-            let transform = fvid::media::AudioDecodeTransform {
-                interval: interval.map(|(from, to)| {
-                    (
-                        i64::try_from(from.as_micros()).unwrap_or(i64::MAX),
-                        i64::try_from(to.as_micros()).unwrap_or(i64::MAX),
-                    )
-                }),
-                volume,
-                channels: channels.map(i32::from),
-                sample_rate: sample_rate.map(|r| r as i32),
-            };
-            let stats =
-                fvid::media::decode_audio_transformed(source_path, dest_path, transform, &limits)?;
-            if !quiet {
-                println!(
-                    "{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":{}}}",
-                    stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels, stats.decode_errors
-                );
-            }
+        let transform = fvid::media::AudioDecodeTransform {
+            interval: interval.map(|(from, to)| {
+                (
+                    i64::try_from(from.as_micros()).unwrap_or(i64::MAX),
+                    i64::try_from(to.as_micros()).unwrap_or(i64::MAX),
+                )
+            }),
+            volume,
+            channels: channels.map(i32::from),
+            sample_rate: sample_rate.map(|r| r as i32),
+        };
+        let stats =
+            fvid::media::decode_audio_transformed(source_path, dest_path, transform, &limits)?;
+        if !quiet {
+            println!(
+                "{{\"backend\":\"fvid\",\"sample_frames\":{},\"decoded_frames\":{},\"sample_rate\":{},\"channels\":{},\"sample_format\":\"f32le\",\"decode_errors\":{}}}",
+                stats.sample_frames, stats.decoded_frames, stats.sample_rate, stats.channels, stats.decode_errors
+            );
         }
         return Ok(());
     }

@@ -262,9 +262,10 @@ pub fn plan_decode_audio(
         rate, channels, mask, codec, precision, stream_index,
         adts, mp4, is_matroska, raw_encoded_audio, ogg, g711_wave,
     } = source_descriptor_for_decode(source, options, Some(transform))?;
+    let mp4_target=if mp4 {crate::owned_mp4_audio_export::normalization_target(source,*transform,options,rate,channels,mask)?}else{None};
     let output_channels = transform.channels.unwrap_or(i32::from(channels));
-    let aac_fold=codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router(source,rate,channels,options)?.is_some();
-    if output_channels != i32::from(channels) && !aac_fold {
+    let aac_fold=mp4_target.is_none()&&codec=="aac"&&output_channels!=i32::from(channels)&&matches!(output_channels,1|2)&&crate::owned_aac_export_routing::router(source,rate,channels,options)?.is_some();
+    if mp4_target.is_none() && output_channels != i32::from(channels) && !aac_fold {
         if !((channels <= 8 && matches!(output_channels, 1 | 2))
             || (channels <= 2 && (1..=8).contains(&output_channels)))
         {

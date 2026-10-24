@@ -60,11 +60,13 @@ fn public_transforms_intervals_cancellation_and_options_are_honored() {
     assert!(media::decode_audio(&source, &cancelled, &CopyOptions { cancel: Some(cancel), ..Default::default() }).unwrap_err().contains("cancelled"));
     assert!(!cancelled.exists());
     for options in [CopyOptions { streams: vec![0, 1], ..Default::default() },
-        CopyOptions { max_controlled_bytes: Some(1), ..Default::default() },
         CopyOptions { metadata_set: vec![("title".into(), "x".into())], ..Default::default() }] {
-        assert!(media::decode_audio(&source, &cancelled, &options).unwrap_err().contains("does not yet support"));
+        assert!(media::decode_audio(&source, &cancelled, &options).is_err());
         assert!(!cancelled.exists());
     }
+    let tiny=CopyOptions { max_controlled_bytes:Some(1), ..Default::default() };
+    assert!(media::decode_audio(&source,&cancelled,&tiny).unwrap_err().contains("controlled memory budget exceeded"));
+    assert!(!cancelled.exists());
     assert!(media::decode_audio_interval(&source, &cancelled, Some((-1, 1)), &CopyOptions::default()).is_err());
     assert!(!cancelled.exists());
 }
@@ -84,7 +86,7 @@ fn native_plan_describes_the_actual_export_pipeline_and_rejects_unsupported_opti
             ["decode", "trim", "rematrix", "volume", "resample", "write"]);
         assert!(!format!("{plan:?}").contains("libswresample"));
         for bad in [AudioDecodeTransform { channels: Some(0), ..transform },
-            AudioDecodeTransform { channels: Some(7), ..transform },
+            AudioDecodeTransform { channels: Some(9), ..transform },
             AudioDecodeTransform { volume: Some(f64::NAN), ..transform },
             AudioDecodeTransform { sample_rate: Some(0), ..transform },
             AudioDecodeTransform { interval: Some((10, 1)), ..transform }] {
@@ -217,4 +219,27 @@ fn cli_audio_limits_and_plan_use_owned_export_without_media_feature() {
         assert!(!result.status.success());
         assert!(!rejected.exists());
     }
+}
+
+#[test]
+fn supported_seven_channel_expansion_routes_mono_to_centre_without_invented_surround() {
+    let dir=Directory::new("seven-channel");let source=fixture("aac-mono-44k.aac");
+    let transform=AudioDecodeTransform {interval:Some((10000,50000)),sample_rate:Some(32000),channels:Some(7),volume:Some(0.5)};
+    let plan=media::plan_decode_audio(&source,&transform,&CopyOptions::default()).unwrap();
+    assert!(plan.steps.iter().any(|s|s.action=="rematrix"));
+    let output=dir.0.join("seven.wav");
+    let stats=media::decode_audio_transformed(&source,&output,transform,&CopyOptions::default()).unwrap();
+    assert_eq!((stats.sample_rate,stats.channels,stats.sample_frames),(32000,7,1280));
+    let wave=std::fs::read(output).unwrap();
+    let header=fvid_media::owned_wave_inspect::inspect(&mut std::io::Cursor::new(&wave),None).unwrap();
+    assert_eq!((header.sample_rate,header.channels,header.bits_per_sample),(32000,7,32));
+    let data=&wave[header.data_offset as usize..(header.data_offset+u64::from(header.data_bytes)) as usize];
+    let mut centre_peak=0f32;
+    for frame in data.chunks_exact(7*4) {
+        for (channel,v) in frame.chunks_exact(4).enumerate() {
+            let v=f32::from_le_bytes(v.try_into().unwrap());
+            if channel==2 {centre_peak=centre_peak.max(v.abs());}else{assert!(v.abs()<1e-8);}
+        }
+    }
+    assert!(centre_peak>1e-4);
 }
