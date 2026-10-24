@@ -1141,16 +1141,11 @@ fn parse_track(
     }
     result.name = name;
     result.language = language;
-    // MACE tables count coded samples while the index counts six-sample
-    // blocks. A change in coding/channels needs per-description block sizing.
-    if descriptions.iter().any(|d| is_mace(&d.codec)) && descriptions.iter().any(|d| d.codec != result.codec || d.channels != result.channels) {
-        return Err(unsupported("MP4 MACE description changes require per-description block indexing"));
-    }
     result.sample_descriptions = descriptions;
     // A fragmented track may still carry initial samples in `moov/stbl` before
     // `moof` fragments append to the same track (ISO/IEC 14496-12:2015, 8.8.4),
     // and even an empty init `stbl` must pass structural validation.
-    let Some(index) = sample_index(&stbl, &result.codec, result.channels, mdats, limit, fragmented)? else {
+    let Some(index) = sample_index(&stbl, &result.codec, result.channels, &result.sample_descriptions, mdats, limit, fragmented)? else {
         return Ok(None);
     };
     result.samples = index;
@@ -1409,6 +1404,7 @@ fn sample_index(
     stbl: &[Atom<'_>],
     codec: &[u8; 4],
     channels: u16,
+    descriptions: &[SampleDescription],
     mdats: &[Range<u64>],
     limit: usize,
     fragmented: bool,
@@ -1456,6 +1452,15 @@ fn sample_index(
     if timed != count {
         return Err(invalid("decode-time count differs from sample count"));
     }
+    if descriptions.iter().any(|d| is_mace(&d.codec))
+        && (descriptions.iter().any(|d| d.codec != *codec || d.channels != channels)
+            || timing.len() != 1 || optional(stbl,b"ctts")?.is_some() || optional(stbl,b"stss")?.is_some())
+    {
+        if fragmented || descriptions.iter().any(|d| !is_mace(&d.codec)) {
+            return Err(unsupported("mixed MACE packet/sample-counted tables require per-description sample units"));
+        }
+        return changing_mace_index(stbl, descriptions, count, timing, mdats, limit).map(Some);
+    }
     // Everything the compact form would have to guess is a table it refuses to
     // read alongside it: varying sizes, a second frame length, a composition
     // shift, or a subset of frames worth restarting from.
@@ -1489,7 +1494,7 @@ fn sample_index(
             .checked_mul(u64::try_from(samples_per_unit).unwrap_or(u64::MAX))
             .and_then(|n| u32::try_from(n).ok())
             .ok_or_else(|| invalid("block duration overflow"))?;
-        let chunk_bytes = |_: usize, units: usize| {
+        let chunk_bytes = |_: usize, units: usize, _: u32| {
             u64::try_from(units)
                 .ok()
                 .and_then(|n| n.checked_mul(u64::try_from(bytes_per_unit).unwrap_or(u64::MAX)))
@@ -1509,6 +1514,119 @@ fn sample_index(
         return Ok(Some(index));
     }
     expanded_index(stbl, codec, count, timing, limit, size_at, mdats)
+}
+
+/// QuickTime MACE counts six decoded samples per encoded block. Unlike the
+/// uniform index, each chunk here may select a different block byte width.
+fn changing_mace_index(
+    stbl: &[Atom<'_>],
+    descriptions: &[SampleDescription],
+    count: usize,
+    timing: Vec<(usize, u32)>,
+    mdats: &[Range<u64>],
+    limit: usize,
+) -> Result<SampleIndex> {
+    if !count.is_multiple_of(MACE_SAMPLES_PER_BLOCK) {
+        return Err(invalid("sample count is not a whole number of blocks"));
+    }
+    let blocks = count / MACE_SAMPLES_PER_BLOCK;
+    if blocks > limit {
+        return Err(invalid("MP4 sample count exceeds budget"));
+    }
+    let bytes = |description: u32| -> Result<u32> {
+        let d = descriptions
+            .get(description as usize - 1)
+            .ok_or_else(|| invalid("MACE description index"))?;
+        let (_, bytes) =
+            mace_block(&d.codec, d.channels).ok_or_else(|| invalid("MACE block geometry"))?;
+        u32::try_from(bytes).map_err(|_| invalid("MACE block size overflow"))
+    };
+    let runs = chunk_runs(stbl, blocks, mdats, MACE_SAMPLES_PER_BLOCK, |_, n, d| {
+        (n as u64)
+            .checked_mul(u64::from(bytes(d)?))
+            .ok_or_else(|| invalid("MACE chunk size overflow"))
+    })?;
+    let mut samples = Vec::new();
+    samples
+        .try_reserve_exact(blocks)
+        .map_err(|_| invalid("MACE index allocation failed"))?;
+    let mut timing = timing.into_iter();
+    let (mut remaining, mut delta) = timing.next().unwrap_or((0, 0));
+    let mut dts = 0u64;
+    for run in runs {
+        let size = bytes(run.description_index)?;
+        for i in 0..run.frames {
+            let mut duration = 0u32;
+            for _ in 0..MACE_SAMPLES_PER_BLOCK {
+                if remaining == 0 {
+                    (remaining, delta) = timing
+                        .next()
+                        .ok_or_else(|| invalid("missing MACE sample timing"))?;
+                }
+                duration = duration
+                    .checked_add(delta)
+                    .ok_or_else(|| invalid("MACE block duration overflow"))?;
+                remaining -= 1;
+            }
+            samples.push(Sample {
+                description_index: run.description_index,
+                offset: run
+                    .offset
+                    .checked_add((i as u64) * u64::from(size))
+                    .ok_or_else(|| invalid("MACE block offset overflow"))?,
+                size,
+                dts,
+                pts: i64::try_from(dts).map_err(|_| invalid("MACE timestamp overflow"))?,
+                duration,
+                sync: true,
+            });
+            dts = dts
+                .checked_add(u64::from(duration))
+                .ok_or_else(|| invalid("MACE timestamp overflow"))?;
+        }
+    }
+    if let Some(ctts) = optional(stbl, b"ctts")? {
+        let v = version(ctts, 1)?;
+        let mut at = 0usize;
+        for i in 0..table(ctts, 8, count)? {
+            let n = u32be(ctts, 8 + i * 8)? as usize;
+            if n == 0 || !n.is_multiple_of(6) || n / 6 > blocks - at {
+                return Err(invalid("MACE composition run must cover whole blocks"));
+            }
+            let raw = u32be(ctts, 12 + i * 8)?;
+            let shift = if v == 1 {
+                i64::from(raw as i32)
+            } else {
+                i64::from(raw)
+            };
+            for sample in &mut samples[at..at + n / 6] {
+                sample.pts = sample
+                    .pts
+                    .checked_add(shift)
+                    .ok_or_else(|| invalid("MACE composition timestamp overflow"))?;
+            }
+            at += n / 6;
+        }
+        if at != blocks {
+            return Err(invalid("MACE composition count differs from sample count"));
+        }
+    }
+    if let Some(stss) = optional(stbl, b"stss")? {
+        version(stss, 0)?;
+        for sample in &mut samples {
+            sample.sync = false;
+        }
+        let mut previous = 0;
+        for i in 0..table(stss, 4, count)? {
+            let n = u32be(stss, 8 + i * 4)? as usize;
+            if n <= previous || n > count || !(n - 1).is_multiple_of(6) {
+                return Err(invalid("MACE sync index must select a block start"));
+            }
+            samples[(n - 1) / 6].sync = true;
+            previous = n;
+        }
+    }
+    Ok(SampleIndex::Expanded(samples))
 }
 
 /// The per-sample form: one record for every entry the sample tables count,
@@ -1607,7 +1725,7 @@ fn expanded_index(
             last = index;
         }
     }
-    let chunk_bytes = |first: usize, frames: usize| {
+    let chunk_bytes = |first: usize, frames: usize, _: u32| {
         samples[first..first + frames]
             .iter()
             .try_fold(0u64, |sum, s| sum.checked_add(u64::from(s.size)))
@@ -1986,7 +2104,7 @@ fn chunk_runs(
     count: usize,
     mdats: &[Range<u64>],
     samples_per_unit: usize,
-    chunk_bytes: impl Fn(usize, usize) -> Result<u64>,
+    chunk_bytes: impl Fn(usize, usize, u32) -> Result<u64>,
 ) -> Result<Vec<FrameRun>> {
     let stco = optional(stbl, b"stco")?;
     let co64 = optional(stbl, b"co64")?;
@@ -2047,7 +2165,7 @@ fn chunk_runs(
             return Err(invalid("overlapping or non-increasing MP4 chunk offsets"));
         }
         let end = offset
-            .checked_add(chunk_bytes(first, frames)?)
+            .checked_add(chunk_bytes(first, frames, mapping[run].2)?)
             .ok_or_else(|| invalid("chunk offset overflow"))?;
         let containing = mdats.partition_point(|range| range.start <= offset);
         if containing == 0 || end > mdats[containing - 1].end {

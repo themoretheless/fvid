@@ -17904,3 +17904,32 @@ regeneration with process/socket creation denied is byte-exact: 18 artifacts,
 860440 bytes. This extends finite ALAC transition acceptance;
 AAC, ADPCM, MACE and broader ALAC/mixed-codec matrices remain open. The explicit
 MACE per-description block-indexing refusal remains in the container.
+
+
+### 2026-10-24: MACE description-specific block indexing
+
+The owned witness first failed specifically with `MP4 MACE description changes
+require per-description block indexing` (specific-red log in /tmp). Constant
+controls decoded first, excluding unrelated invalid-file failures. Native MP4
+now constructs six-sample blocks using each chunk's selected MAC3/MAC6 byte
+width, aggregates coded-sample timing, validates media bounds and applies
+block-aligned composition/sync tables. The constant uniform-index path remains.
+The changed-geometry path charges one index record per block against the
+existing sample budget, rather than bypassing memory accounting.
+
+Synthetic acceptance checks exact block offsets/sizes/durations, independent
+constant-setup predictor controls, reordered descriptions, negative PTS, repeated
+edits with silence, real-worker PCM and seek/rewind suffixes. Invalid chunk
+alignment, out-of-mdat offsets, composition alignment and budget are checked for
+their specific reasons. Owned VP9 companions retain exact planes and clocks.
+
+Offline player qualification: library 1036 passed / 26 ignored; eight selected
+MP4/audio integration targets 47 passed; all test targets checked. Additional
+negative-PTS/corrupt-composition MACE target: 5 passed. The generator regenerates
+11 artifacts / 263711 bytes byte-exactly with process/socket creation
+denied. Existing warnings remain. Mixed MACE/non-MACE sample units and fragmented
+MACE changes remain unsupported; AAC/ADPCM transition matrices and universal
+codec coverage are not complete.
+
+Final MACE delivery target: 5 passed, including the negative-PTS video
+companion. Both `fvid` and `fvid-player` built offline with the player feature.

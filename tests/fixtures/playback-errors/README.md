@@ -4744,3 +4744,16 @@ are authored by `generate_mp4_alac_transitions.py`, invoked only by the fixture
 generator. Every matrix movie additionally decodes its exact neutral VP9
 companion. This qualifies these ALAC transitions, not every predictor/profile
 or mixed-codec transition.
+
+`mp4-mace-transitions` contains owned arithmetic MACE blocks and neutral VP9,
+with QuickTime tables counting decoded samples rather than encoded packets.
+MAC3/8 kHz/mono, MAC6/16 kHz/stereo and MAC3/8 kHz/stereo switch with different
+block widths and timing, then return to the first setup. Constant-description
+controls independently establish the predictor-reset baseline. Reordered setup
+tables, negative PTS, repeated edits with silence, worker seek/rewind, exact index
+geometry, video companions, index budget and corrupt chunk/composition tables
+are covered. The pre-fix witness refused specifically for per-description MACE
+block indexing. Regenerate separately with
+`python3 scripts/generate_mp4_mace_transitions.py`; run `mp4_mace_transitions`
+offline. Mixed MACE/non-MACE sample units and fragmented MACE changes remain
+unsupported; this fixture matrix does not prove all MACE container variants.

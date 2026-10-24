@@ -1,0 +1,32 @@
+{
+  "provenance": "Owned arithmetic MACE bytes and neutral VP9. No private media, external codec, FFmpeg or network.",
+  "selection": [
+    0,
+    1,
+    2,
+    0
+  ],
+  "shapes": [
+    {
+      "codec": "MAC3",
+      "rate": 8000,
+      "channels": 1,
+      "block_bytes": 2,
+      "sample_ticks": 6
+    },
+    {
+      "codec": "MAC6",
+      "rate": 16000,
+      "channels": 2,
+      "block_bytes": 2,
+      "sample_ticks": 3
+    },
+    {
+      "codec": "MAC3",
+      "rate": 8000,
+      "channels": 2,
+      "block_bytes": 4,
+      "sample_ticks": 6
+    }
+  ]
+}
