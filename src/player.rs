@@ -3898,7 +3898,9 @@ impl Player {
         if self.buffering
             && let Some(frame) = &self.queued
         {
-            if !self.spool_primed() {
+            // A decoded seek picture is ready to show even while future
+            // read-ahead is pending. Keep the lead requirement for startup.
+            if !self.seek_preview && !self.spool_primed() {
                 ctx.request_repaint();
                 return;
             }
@@ -9981,33 +9983,91 @@ mod tests {
     }
 
     #[test]
-    fn ready_seek_picture_does_not_wait_for_future_spool_lead_after_audio_failure(){
+    fn ready_seek_picture_does_not_wait_for_future_spool_lead_after_audio_failure() {
         struct BrokenAudio;
         impl crate::audio::AudioStream for BrokenAudio {
-            fn codec(&self)->&str{"mp4a"}fn timescale(&self)->u32{44100}fn sample_rate(&self)->u32{44100}fn channels(&self)->u16{2}
-            fn extra_data(&self)->&[u8]{&[]}fn audio_tracks(&self)->Vec<crate::audio::AudioTrack>{Vec::new()}
-            fn next_packet(&mut self)->crate::Result<Option<crate::audio::EncodedPacket>>{Ok(None)}fn rewind(&mut self){}fn seek_to(&mut self,pts:i64)->i64{pts}
-        }
-        let directory=scratch("fvid-ready-seek-spool",&[]);let path=directory.join("clip.mkv");
-        std::fs::write(&path,include_bytes!("../tests/fixtures/playback-errors/seek-ready-pending-spool.mkv")).unwrap();
-        let mut player=Player{queue:vec![path],no_audio:true,..Default::default()};player.play_index(0);assert!(player.error.is_none(),"{:?}",player.error);
-        assert_eq!(player.duration,Some(Duration::from_millis(320)));
-        player.audio=Some(crate::audio_thread::AudioPlayback::start(Box::new(BrokenAudio),||Box::new(crate::audio::NullBackend::default())));
-        let until=Instant::now()+Duration::from_secs(2);
-        while !player.audio_ended{assert!(Instant::now()<until,"audio failure missing");player.poll_audio();std::thread::sleep(Duration::from_millis(1));}
-        assert!(player.audio.is_none());
-        player.spool=Some(player.spool.as_ref().unwrap().pending_lead_for_test());player.spool_wait=Some(Instant::now());assert!(!player.spool_primed());
-        let ctx=eframe::egui::Context::default();
-        for target in [Duration::from_millis(120),Duration::from_millis(200)]{
-            player.seek_time(target);let generation=player.playback.as_ref().unwrap().generation();let until=Instant::now()+Duration::from_secs(2);
-            while player.seek_preview {
-                assert!(Instant::now()<until,"ready seek picture held by future spool lead: queued={:?}",player.queued.as_ref().map(|f|(f.generation,f.pts)));
-                let mut output=ctx.run_ui(Default::default(),|ui|player.present(ui.ctx()));output.textures_delta.clear();std::thread::sleep(Duration::from_millis(1));
+            fn codec(&self) -> &str {
+                "mp4a"
             }
-            assert!(!player.spool_primed(),"future copy must remain pending throughout this witness");assert!(!player.buffering);assert!(!player.paused);assert!(!player.ended);
-            assert_eq!(player.presented.as_ref().unwrap().generation,generation);assert!(player.timeline().0.unwrap()>=target);
+            fn timescale(&self) -> u32 {
+                44100
+            }
+            fn sample_rate(&self) -> u32 {
+                44100
+            }
+            fn channels(&self) -> u16 {
+                2
+            }
+            fn extra_data(&self) -> &[u8] {
+                &[]
+            }
+            fn audio_tracks(&self) -> Vec<crate::audio::AudioTrack> {
+                Vec::new()
+            }
+            fn next_packet(&mut self) -> crate::Result<Option<crate::audio::EncodedPacket>> {
+                Ok(None)
+            }
+            fn rewind(&mut self) {}
+            fn seek_to(&mut self, pts: i64) -> i64 {
+                pts
+            }
         }
-        drop(player);std::fs::remove_dir_all(directory).unwrap();
+        let directory = scratch("fvid-ready-seek-spool", &[]);
+        let path = directory.join("clip.mkv");
+        std::fs::write(
+            &path,
+            include_bytes!("../tests/fixtures/playback-errors/seek-ready-pending-spool.mkv"),
+        )
+        .unwrap();
+        let mut player = Player {
+            queue: vec![path],
+            no_audio: true,
+            ..Default::default()
+        };
+        player.play_index(0);
+        assert!(player.error.is_none(), "{:?}", player.error);
+        assert_eq!(player.duration, Some(Duration::from_millis(320)));
+        player.audio = Some(crate::audio_thread::AudioPlayback::start(
+            Box::new(BrokenAudio),
+            || Box::new(crate::audio::NullBackend::default()),
+        ));
+        let until = Instant::now() + Duration::from_secs(2);
+        while !player.audio_ended {
+            assert!(Instant::now() < until, "audio failure missing");
+            player.poll_audio();
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        assert!(player.audio.is_none());
+        player.spool = Some(player.spool.as_ref().unwrap().pending_lead_for_test());
+        player.spool_wait = Some(Instant::now());
+        assert!(!player.spool_primed());
+        let ctx = eframe::egui::Context::default();
+        for target in [Duration::from_millis(120), Duration::from_millis(200)] {
+            player.seek_time(target);
+            let generation = player.playback.as_ref().unwrap().generation();
+            let until = Instant::now() + Duration::from_secs(2);
+            while player.seek_preview {
+                assert!(
+                    Instant::now() < until,
+                    "ready seek picture held by future spool lead: queued={:?}",
+                    player.queued.as_ref().map(|f| (f.generation, f.pts))
+                );
+                let mut output = ctx.run_ui(Default::default(), |ui| player.present(ui.ctx()));
+                output.textures_delta.clear();
+                std::thread::sleep(Duration::from_millis(1));
+            }
+            assert!(
+                !player.spool_primed(),
+                "future copy must remain pending throughout this witness"
+            );
+            assert!(!player.buffering);
+            assert!(!player.paused);
+            assert!(!player.ended);
+            assert_eq!(player.presented.as_ref().unwrap().generation, generation);
+            assert!(player.timeline().0.unwrap() >= target);
+        }
+        drop(player);
+        std::fs::remove_dir_all(directory).unwrap();
     }
 
     #[test]

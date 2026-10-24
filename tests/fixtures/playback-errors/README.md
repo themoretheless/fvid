@@ -4666,3 +4666,19 @@ worker capture to standalone controls, with separate missing/corrupt/wrong
 selection tests. The API's physical-track index stays zero-based. Regenerate
 with `python3 scripts/generate_eac3_matroska_programmes.py`; ordinary tests
 run `eac3_matroska_programmes` against checked-in bytes offline.
+
+
+`eac3-mp4-programmes` checks explicit independent-programme selection within
+a physical MP4 audio track, with geometry, exact PCM/PTS, edit ranges, seek,
+rewind and worker policy controls. Regenerate with
+`python3 scripts/generate_eac3_mp4_programmes.py`; run `eac3_mp4_programmes`.
+Its multiple-descriptions movie genuinely uses descriptions 1 and 2. The
+refusal test is active; intended playback acceptance stays ignored until the
+parser and decoder transition contract support it.
+
+`seek-ready-pending-spool.mkv` is an owned 320 ms, eight-frame VP9 video.
+Regenerate with `python3 scripts/generate_seek_ready_pending_spool.py`. The
+player unit test freezes reported future spool lead and injects a failing
+audio worker, then verifies both requested seek pictures are presented while
+read-ahead stays pending. The original code times out with the target frame
+already queued. Ordinary tests use the checked-in movie offline.

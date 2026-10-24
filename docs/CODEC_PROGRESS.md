@@ -17631,3 +17631,44 @@ its underlying issue is not claimed fixed.
 This is explicit reader API acceptance. Physical container track indices are
 unchanged; MP4 programme selection, common player selection across containers
 and simultaneous programme mixing remain open along with other codec gaps.
+
+
+### Explicit MP4 E-AC-3 programme selection and ready-seek regression
+
+`Mp4AudioReader::open_programme` selects the independent E-AC-3 programme
+within a zero-based physical audio track. Selected encoded rate, speaker layout
+and decoder choice survive edits, rewind, seek and worker recreation. The
+owned offline matrix contains 20 movies and eight choices each, independent
+programme-zero controls, damaged unselected payloads and physical-track tests.
+RF/dialogue policy is compared with a separately configured typed decoder.
+The 48 kHz edit case additionally checks explicit silence and repeated PCM
+ranges. Related integration targets passed 20 tests with one ignored intended
+acceptance: multiple actually used MP4 sample descriptions still refuse.
+The refusal witness passes; it does not establish playback support.
+MP4 fixture regeneration is byte-identical for 178 artifacts (6,127,530 bytes)
+with process/network creation denied.
+
+The full library then reproduced the existing failed-audio seek stall
+(1032 passed, one failed, 26 ignored). A new owned 320 ms VP9 fixture and
+deterministic test hold future spool lead pending after audio failure. Before
+the fix, a new-generation frame at 120 ms was queued but withheld until the
+test timeout. A ready seek preview now bypasses future read-ahead priming;
+initial playback retains its buffer requirement. The new test passes without
+changing timeout expectations. Fixture regeneration is byte-identical offline
+with subprocess/socket creation denied (33,351 bytes).
+
+This closes the reproduced ready-preview wait, not all seek failures or codec
+coverage. Common container programme UI, simultaneous mixing, changing MP4
+sample descriptions and other codec profiles/tools remain open.
+
+Ready-preview fix verification: sequential offline player library 1034 passed,
+0 failed, 26 ignored (`/tmp/fvid-seek-spool-library.log`). The original
+failed-audio seek scenario additionally passed five consecutive runs of the
+same frozen test executable (`/tmp/fvid-seek-spool-repeats.log`). Both `fvid`
+and `fvid-player` build offline with the player feature; existing warnings
+remain. These results qualify the reproduced case, not universal seek safety.
+
+Publication rerun: all eight new Dolby integration targets pass (16 passed,
+0 failed, one deliberately ignored multiple-description acceptance), offline
+without default features, player enabled
+(`/tmp/fvid-dolby-programmes-publication.log`).
