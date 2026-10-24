@@ -781,5 +781,5 @@
     }
   ],
   "multiple_control": "stereo-48000",
-  "multiple_descriptions_accepted": false
+  "multiple_descriptions_accepted": true
 }

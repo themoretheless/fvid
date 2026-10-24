@@ -17672,3 +17672,56 @@ Publication rerun: all eight new Dolby integration targets pass (16 passed,
 0 failed, one deliberately ignored multiple-description acceptance), offline
 without default features, player enabled
 (`/tmp/fvid-dolby-programmes-publication.log`).
+
+
+### MP4 sample-description indexing (staged reconfiguration work)
+
+The owned demuxer now preserves each parsed `stsd` entry and the one-based
+selection of every expanded sample and compact chunk. Fragment selection
+resolves `tfhd` before the `trex` default and validates a selected nonempty
+run against the actual description count. `Track::description_for_sample`
+returns the selected setup, including geometry, configuration, colour and HDR.
+`Mp4Reader::open_indexed` exposes changing descriptions explicitly. Existing
+`open` consumers retain a constant-configuration contract and reject actual
+changes; constructors accepting a pre-opened demuxer enforce it too. This
+prevents decode, export and remux consumers from silently applying entry 1 to
+changed packets. Equivalent descriptions now play, seek and rewind in regular
+and fragmented VP9 MP4. The formerly ignored E-AC-3 equivalent-description
+PCM acceptance is enabled and passes.
+
+Evidence correction: the earlier E-AC-3 multiple-description witness had a
+second `stsc` row but only one `stco` offset. The old one-entry check refused
+first and hid that unrelated defect. The generator now emits one chunk per
+sample with correct offsets, so the second description is genuinely used.
+The repaired fixture and its unchanged-PCM acceptance pass. Do not treat the
+earlier refusal alone as proof of a valid used-second-description movie.
+
+The new owned matrix includes regular/fragmented 1→2→1 routing, a 16→32→16
+VP9 geometry change with independent valid one-entry playback controls,
+compact PCM routing, invalid chunk/fragment description indices and an
+external second data reference. Exact packet bytes are compared with authored
+standalone payloads. Seven tests pass, including both audio/video constructors with a pre-indexed
+demuxer; the intended changing-geometry playback
+acceptance is explicitly ignored while the refusal test remains active.
+Decoder reconfiguration, draining/reordering across transitions, seek/history
+restoration, audio geometry transitions and muxer configuration changes remain
+open. MACE coding/channel changes additionally require per-description block
+indexing; they retain an explicit refusal. This is a container foundation and
+equivalent-description playback milestone, not general reconfiguration support.
+
+Both generators reproduce offline with subprocess/socket creation denied:
+25 new artifacts / 213,728 bytes; 178 E-AC-3 artifacts / 6,127,537 bytes.
+Ordinary tests read owned checked-in bytes and require no FFmpeg/network.
+Sample-to-chunk mapping reference:
+https://developer.apple.com/documentation/quicktime-file-format/sample-to-chunk_atom/sample-to-chunk_table
+
+Final verification for this stage: offline library 1034 passed / 0 failed /
+26 ignored (`/tmp/fvid-mp4-descriptions-library-qualified.log`). Fifteen related
+MP4 integration targets: 77 passed / 0 failed / one ignored
+(`/tmp/fvid-mp4-descriptions-regressions.log`). The subsequently added
+pre-indexed audio/video constructor guard test also passes; the new target's
+final result is seven passed / one ignored
+(`/tmp/fvid-mp4-descriptions-constructors.log`). Replaying only the historical
+one-entry restriction against the repaired valid fixture produces that exact
+refusal (`/tmp/fvid-mp4-descriptions-legacy-restriction.log`); this was a
+restriction replay, not a complete historical-checkout qualification.

@@ -133,6 +133,7 @@ impl<R: Read + Seek> SingleLayerMp4VideoReader<R> {
             .tracks()
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
+        track.ensure_constant_description()?;
         if track.handler != *b"vide"
             || !matches!(
                 &track.codec,

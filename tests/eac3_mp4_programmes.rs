@@ -187,21 +187,6 @@ fn selected_mp4_programme_supplies_geometry_pcm_edits_navigation_and_worker() {
     }
 }
 #[test]
-fn multiple_used_sample_descriptions_have_an_explicit_refusal_witness() {
-    let error = Mp4AudioReader::open_at(
-        Cursor::new(read("multiple-descriptions.mp4")),
-        Limits::default(),
-        0,
-    )
-    .err()
-    .expect("current parser must explicitly refuse this unsupported case");
-    assert!(
-        error.to_string().contains("multiple sample descriptions"),
-        "{error}"
-    );
-}
-#[test]
-#[ignore = "MP4 multiple sample descriptions are not implemented; passing refusal is not playback acceptance"]
 fn multiple_used_sample_descriptions_play_without_changing_pcm() {
     let mut expected = reference("stereo-48000");
     let wanted = collect(&mut expected);

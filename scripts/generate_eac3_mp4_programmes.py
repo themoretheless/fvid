@@ -20,12 +20,15 @@ def config(records,groups,rate):
  assert len(w.bits)%8==0
  return bytes(sum(w.bits[i+j]<<(7-j)for j in range(8))for i in range(0,len(w.bits),8))
 def movie(groups,records,rate):return rewrite(audiovisual(groups),config(records,groups,rate),rate)
-def transform(data,*,edits=False,clock=False,multiple=False,placeholder=False,audio=False):
+def transform(data,*,edits=False,clock=False,multiple=False,placeholder=False,audio=False,sizes=None):
  out=b''
  for kind,body in boxes(data):
   if kind in [b'moov',b'trak',b'mdia',b'minf',b'stbl']:
    selected=(b'ec-3'in body)if kind==b'trak'else audio
-   body=transform(body,edits=edits,clock=clock,multiple=multiple,placeholder=placeholder,audio=selected)
+   if kind==b'stbl' and selected and multiple:
+    stsz=dict(boxes(body))[b'stsz'];fixed,count=struct.unpack_from('>II',stsz,4)
+    sizes=[fixed]*count if fixed else list(struct.unpack_from('>'+str(count)+'I',stsz,12))
+   body=transform(body,sizes=sizes,edits=edits,clock=clock,multiple=multiple,placeholder=placeholder,audio=selected)
    if kind==b'trak'and selected and edits:
     entries=[(20,-1),(32,256),(32,256)]
     body+=atom(b'edts',atom(b'elst',bytes(4)+struct.pack('>I',3)+b''.join(struct.pack('>IiI',d,s,65536)for d,s in entries)))
@@ -38,6 +41,11 @@ def transform(data,*,edits=False,clock=False,multiple=False,placeholder=False,au
    if multiple:
     assert struct.unpack_from('>I',body,4)[0]==1
     body=body[:4]+struct.pack('>I',2)+body[8:]+body[8:]
+  elif audio and kind==b'stco'and multiple:
+   assert sizes and struct.unpack_from('>I',body,4)[0]==1
+   offset=struct.unpack_from('>I',body,8)[0];offsets=[]
+   for size in sizes:offsets.append(offset);offset+=size
+   body=bytes(4)+struct.pack('>I',len(offsets))+b''.join(struct.pack('>I',n)for n in offsets)
   elif audio and kind==b'stsc'and multiple:body=bytes(4)+struct.pack('>I',2)+struct.pack('>III',1,1,1)+struct.pack('>III',2,1,2)
   out+=atom(kind,body)
  return out
@@ -118,7 +126,7 @@ def generate():
   result+=atom(kind,body)
  files['two-physical-tracks.mp4']=result
  files['multiple-descriptions.mp4']=transform(files['stereo-48000.mp4'],multiple=True)
- files['manifest.json']=(json.dumps(dict(accepted=True,cases=cases,multiple_control='stereo-48000',multiple_descriptions_accepted=False),indent=2)+'\n').encode();return files
+ files['manifest.json']=(json.dumps(dict(accepted=True,cases=cases,multiple_control='stereo-48000',multiple_descriptions_accepted=True),indent=2)+'\n').encode();return files
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)
  for n,b in generate().items():(OUT/n).write_bytes(b)

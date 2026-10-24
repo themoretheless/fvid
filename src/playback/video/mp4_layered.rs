@@ -191,6 +191,7 @@ impl<R: Read + Seek> LayeredMp4VideoReader<R> {
             .tracks()
             .get(track_index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
+        track.ensure_constant_description()?;
         if track.handler != *b"vide" || !matches!(&track.codec, b"hvc1" | b"hev1") {
             return Err(invalid("selected MP4 track is not HEVC video"));
         }

@@ -4672,9 +4672,10 @@ run `eac3_matroska_programmes` against checked-in bytes offline.
 a physical MP4 audio track, with geometry, exact PCM/PTS, edit ranges, seek,
 rewind and worker policy controls. Regenerate with
 `python3 scripts/generate_eac3_mp4_programmes.py`; run `eac3_mp4_programmes`.
-Its multiple-descriptions movie genuinely uses descriptions 1 and 2. The
-refusal test is active; intended playback acceptance stays ignored until the
-parser and decoder transition contract support it.
+Its repaired multiple-descriptions movie uses three real chunks and descriptions
+1 and 2 with equivalent setups. The previously ignored exact PCM acceptance is
+now active. The earlier single-offset fixture was malformed beyond the old
+one-entry refusal; it must not be used as a valid second-description witness.
 
 `seek-ready-pending-spool.mkv` is an owned 320 ms, eight-frame VP9 video.
 Regenerate with `python3 scripts/generate_seek_ready_pending_spool.py`. The
@@ -4682,3 +4683,14 @@ player unit test freezes reported future spool lead and injects a failing
 audio worker, then verifies both requested seek pictures are presented while
 read-ahead stays pending. The original code times out with the target frame
 already queued. Ordinary tests use the checked-in movie offline.
+
+
+`mp4-sample-descriptions` qualifies description indexing and equivalent-entry
+VP9 playback in ordinary/fragmented MP4. It also contains a real 16→32→16
+geometry change, independent one-entry decode controls, compact PCM chunks,
+invalid selected indices and an external second reference. The changing video
+is indexed through `open_indexed`; ordinary consumers explicitly refuse it
+until decoder reconfiguration is implemented. Its playback acceptance stays
+ignored, separate from the active refusal. Regenerate with
+`python3 scripts/generate_mp4_sample_descriptions.py`; ordinary offline tests
+run `mp4_sample_descriptions`. No external encoder or private media is used.

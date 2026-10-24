@@ -253,6 +253,7 @@ impl<R: Read + Seek> Mp4VideoReader<R> {
             .tracks()
             .get(index)
             .ok_or_else(|| invalid("MP4 track index out of range"))?;
+        track.ensure_constant_description()?;
         if matches!(&track.codec, b"hvc1" | b"hev1") {
             let nal = first_active_hevc_vps(&mut demuxer, index, budget)?;
             if let Some(nal) = nal {
