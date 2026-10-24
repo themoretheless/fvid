@@ -35,6 +35,26 @@ pub fn decode_audio_selected(
     {
         return Err("volume must be a finite linear gain within 0..=64".into());
     }
+    // Reuse the library's dynamic-description planner and explicit PCE
+    // destination rules; entry 1 is not necessarily the active decoder setup.
+    {
+        use std::io::{Read, Seek, SeekFrom};
+        let mut file = std::fs::File::open(source).map_err(|e|e.to_string())?;
+        let mut prefix = [0;8];
+        if file.read_exact(&mut prefix).is_ok() && crate::container::mp4::recognizes_prefix(&prefix) {
+            file.seek(SeekFrom::Start(0)).map_err(|e|e.to_string())?;
+            let reader = crate::container::mp4::Mp4Reader::open_indexed(file,Default::default()).map_err(|e|e.to_string())?;
+            let index = crate::native_media::mp4_audio_index(&reader,selected).map_err(|e|e.to_string())?;
+            let track = &reader.tracks()[index];
+            if track.ensure_constant_description().is_err()
+                || transform.channels.is_some_and(|n|track.description_for_sample(0).is_some_and(|d|d.channels>2 && n!=i32::from(d.channels)))
+            {
+                let mut options=fvid_media::CopyOptions::default();
+                options.streams=selected.into_iter().collect();
+                return fvid_media::plan_decode_audio(source,transform,&options);
+            }
+        }
+    }
     let wave=crate::native_pcm::is_wave(source).map_err(|e|e.to_string())?;
     let (index,input_rate,input_channels,codec,decode_detail)=if wave {
         if selected.is_some_and(|n|n!=0) {return Err("WAVE has only stream 0".into());}

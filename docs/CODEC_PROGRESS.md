@@ -18212,8 +18212,7 @@ channel samples, while retaining unsupported-channel/layout refusals.
 Destination normalization currently requires representable supported layouts
 (up to eight destination channels); packet durations must retain native sample
 alignment. General variable-rate handling for other containers, opaque output
-speaker positions, direct legacy native-export file helpers, and remaining
-codec tools/profiles are not completed by this finite matrix. MP4/Matroska remux
+speaker positions, and remaining codec tools/profiles are not completed by this finite matrix. MP4/Matroska remux
 keeps its separate strict configuration guards. Physical devices, Windows/NVIDIA
 and universal codec coverage are not newly qualified here.
 
@@ -18229,3 +18228,26 @@ initialization. Matrix rows are now built directly in heap storage rather than
 returning multiple full-array temporaries through OnceLock. A short owned video
 and a fresh-process, bounded-worker-stack regression cover cold initialization;
 existing direct-convolution QMF tests retain the waveform acceptance boundary.
+
+
+### Direct native MP4 file APIs share dynamic presentation decoding
+
+Native PCM/AAC file export, AAC/ALAC recognition, source audio metadata and native
+planning use indexed MP4 descriptions. Metadata and decoder construction select
+the first actually used entry. Raw float32, WAVE and Matroska output normalize
+real geometry changes on the selected clock before gain and fixed headers.
+The description-geometry probe is shared with fvid-media; controlled native
+exports carry cancellation/RSS checks through used-description PS probes.
+
+Synthetic acceptance covers negative PTS, fragmented entry-3 starts, AAC/Main/SSR
+edits, ALAC raw/Rice and IMA4/IMA-WAV/MS-ADPCM, PCE stereo/7-channel destinations,
+nanosecond intervals, gain, packet prefixes and no-overwrite publication.
+Opaque layouts with unchanged geometry preserve their ordered channels across
+ASC changes. The scalar IMDCT oracle for opaque-same-geometry explicitly retains
+overlap history across equivalent entries. Changing geometry without an explicit
+representable destination retains its specific refusal boundary.
+
+This closes the direct native file API gap for the qualified MP4 sources.
+Other containers, quantized non-native packet clocks, remaining codec tools and
+profiles, physical devices and new Windows/NVIDIA runtime checks remain open.
+Fixed-setup remux guards remain strict.

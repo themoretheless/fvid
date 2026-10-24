@@ -684,7 +684,10 @@ fn probe_mp4_audio_geometry<R: std::io::Read + std::io::Seek>(
         crate::native_media::mp4_aac_index(reader, selected)?
     };
     let in_band_ps = crate::native_media::negotiate_mp4_ps(reader, index, || control.check())?;
-    let track = &reader.tracks()[index];
+    let source_track = &reader.tracks()[index];
+    let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
+    let setup = source_track.decoder_setup(first.description_index)?;
+    let track = &setup;
     let decoder = if in_band_ps {
         crate::native_audio_decoder::PacketPcmDecoder::with_in_band_ps(track)?
     } else {
@@ -756,7 +759,7 @@ fn export_pcm_selected(    source: &Path,
     } else if crate::container::mp4::recognizes_prefix(&prefix) {
         let mut limits = crate::container::mp4::Limits::default();
         if let Some(maximum) = max_packet_bytes { limits.packet_bytes = limits.packet_bytes.min(maximum); }
-        (Some(crate::container::mp4::Mp4Reader::open(input, limits)?), None, None,None)
+        (Some(crate::container::mp4::Mp4Reader::open_indexed(input, limits)?), None, None,None)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
         let mut reader = crate::container::webm::WebmReader::open(input, Default::default())?;
         if let Some(maximum) = max_packet_bytes { reader.restrict_packet_bytes(maximum); }
@@ -768,7 +771,7 @@ fn export_pcm_selected(    source: &Path,
         if selected.is_some_and(|index| index != 0) { return Err(invalid("ADTS has only stream 0")); }
         Some(crate::native_media::negotiate_adts_aac_reader(reader, interval, &mut control)?)
     } else { None };
-    let (input_rate, input_channels, native_mask) = if let Some(reader) = &mut mp4 {
+    let (mut input_rate, mut input_channels, mut native_mask) = if let Some(reader) = &mut mp4 {
         probe_mp4_audio_geometry(reader, allow_wave, selected, &mut control)?
     } else if let Some(reader) = &mut matroska {
         probe_matroska_audio_geometry(reader, allow_wave, selected, &mut control)?
@@ -779,6 +782,28 @@ fn export_pcm_selected(    source: &Path,
         let reader = adts.as_ref().ok_or_else(|| invalid("missing ADTS reader"))?;
         (reader.sample_rate(), reader.channels(), Some(reader.channel_mask()))
     };
+    // Normalize dynamic MP4 runs on the requested output grid before applying
+    // gain or publishing a fixed-geometry header. Decoder clocks remain native.
+    let mp4_target = if let Some(reader) = &mut mp4 {
+        let index = if allow_wave { crate::native_media::mp4_audio_index(reader, selected)? }
+            else { crate::native_media::mp4_aac_index(reader, selected)? };
+        if crate::native_media::mp4_normalized_geometry_controlled(reader,index,||control.check())?.is_some()
+            || channels.is_some_and(|n| n != input_channels)
+            || (native_mask != Some(0) && sample_rate.is_some_and(|n| n != input_rate))
+        {
+            let rate = sample_rate.unwrap_or(input_rate);
+            let count = channels.unwrap_or(input_channels);
+            if !(1..=8).contains(&count) { return Err(invalid("MP4 normalization supports 1..=8 destination channels")); }
+            let mask = if channels.is_some() {
+                fvid_media::owned_pcm_channels::standard_mask(count).unwrap_or(0) as u32
+            } else {
+                native_mask.unwrap_or_else(|| fvid_media::owned_pcm_channels::standard_mask(input_channels).unwrap_or(0) as u32)
+            };
+            if mask == 0 { return Err(invalid("MP4 normalization requires an explicit destination speaker layout")); }
+            input_rate = rate; input_channels = count; native_mask = Some(mask);
+            Some((rate,count,mask))
+        } else { None }
+    } else { None };
     let unknown_pcm_layout = if let Some(reader)=&matroska {
         let index=crate::native_media::matroska_audio_index(reader,selected)?;
         reader.tracks[index].codec.starts_with("A_PCM/") && input_channels>2
@@ -922,7 +947,7 @@ fn export_pcm_selected(    source: &Path,
     )
     .map_err(|e| invalid(&e))?;
     let mut stats = if let Some(reader) = mp4 {
-        crate::native_media::decode_mp4_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
+        crate::native_media::decode_mp4_audio_reader_targeted(reader, &mut pcm, interval, selected, &mut control, mp4_target)?
     } else if let Some(reader) = matroska {
         crate::native_media::decode_matroska_audio_reader_controlled(reader, &mut pcm, interval, selected, &mut control)?
     } else if let Some((reader,info))=wave {

@@ -302,3 +302,26 @@ fn negotiate_mp4_description_ps<R: std::io::Read + std::io::Seek>(
 }
 
 include!("owned_mp4_audio_normalized_impl.rs");
+
+#[allow(dead_code)] // Precise PCM instantiation shares this implementation too.
+pub(crate) fn mp4_normalized_geometry<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize)->Result<Option<(u32,u16,u32)>> {
+    mp4_normalized_geometry_controlled(reader,index,||Ok(()))
+}
+pub(crate) fn mp4_normalized_geometry_controlled<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize,mut check:impl FnMut()->Result<()>)->Result<Option<(u32,u16,u32)>> {
+    let track=&reader.tracks()[index];
+    let first=track.samples.get(0).ok_or_else(||invalid("MP4 audio has no samples"))?.description_index;
+    let setup=track.decoder_setup(first)?;
+    let ps=negotiate_mp4_description_ps(reader,index,first,&mut check)?;
+    let decoder=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
+    let initial=(decoder.sample_rate(),decoder.channels(),decoder.normalization_mask());
+    for i in 0..reader.tracks()[index].sample_descriptions.len() {
+        check()?;
+        let track=&reader.tracks()[index];
+        if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+        let setup=track.decoder_setup((i+1)as u32)?;
+        let ps=negotiate_mp4_description_ps(reader,index,(i+1)as u32,&mut check)?;
+        let next=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
+        if (next.sample_rate(),next.channels(),next.normalization_mask())!=initial {return Ok(Some(initial));}
+    }
+    Ok(None)
+}

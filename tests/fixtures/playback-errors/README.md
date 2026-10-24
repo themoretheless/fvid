@@ -4881,7 +4881,7 @@ The geometry generator also authors a four-front-channel AAC PCE control and
 a changing-layout witness. The default normalization test requires the specific
 explicit-destination refusal before output; acceptance compares 48/32 kHz stereo
 and seven-channel output with independent waveform oracles. The normalization
-set contains 47 artifacts / 3432322 bytes; lossless/ADPCM contains 17 artifacts /
+set contains 51 artifacts / 3787456 bytes; lossless/ADPCM contains 17 artifacts /
 449807 bytes. Regeneration is byte-exact with network and subprocess creation
 disabled. No private media or parameter sets are copied.
 
@@ -4892,3 +4892,12 @@ export witness. Regenerate separately with `scripts/generate_aac_ps_cold_stack.p
 of being masked by a previously warmed global cache. The original selection
 regression and this witness both overflowed before the heap-row matrix fix;
 the test also verifies exact output geometry, silence ranges and nonzero PCM.
+
+`native_mp4_audio_transitions` runs direct native file/metadata/planning APIs
+against these owned controls. `native-api-negative.mp4` reproduces their former
+fixed-reader refusal. Library decode must match independent PCM before native
+acceptance is attempted. `opaque-same-geometry.mp4` changes only ASC padding,
+preserving four opaque positions; its scalar oracle retains overlap history
+across equivalent entries. Both the fixed-reader refusal and false destination
+layout refusal were reproduced before enabling acceptance. Generation remains
+separate; no FFmpeg, network or private media are required.
