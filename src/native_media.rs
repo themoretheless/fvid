@@ -448,7 +448,7 @@ pub fn is_aac_source(path: &std::path::Path) -> std::io::Result<bool> {
         Ok(()) if crate::container::mp4::recognizes_prefix(&prefix) => {
             use std::io::{Seek, SeekFrom};
             file.seek(SeekFrom::Start(0))?;
-            let reader = crate::container::mp4::Mp4Reader::open(file, Default::default())
+            let reader = crate::container::mp4::Mp4Reader::open_indexed(file, Default::default())
                 .map_err(std::io::Error::other)?;
             Ok(reader.tracks().iter().any(|track| track.handler == *b"soun" && track.codec == *b"mp4a"))
         }
@@ -484,10 +484,13 @@ pub fn aac_source_info_selected(source: &Path, selected: Option<usize>) -> Resul
     input.read_exact(&mut prefix)?;
     input.seek(SeekFrom::Start(0))?;
     let (stream_index, asc, declared, in_band_ps) = if crate::container::mp4::recognizes_prefix(&prefix) {
-        let mut reader = crate::container::mp4::Mp4Reader::open(input, Default::default())?;
+        let mut reader = crate::container::mp4::Mp4Reader::open_indexed(input, Default::default())?;
         let index = mp4_aac_index(&reader, selected)?;
         let in_band_ps = negotiate_mp4_ps(&mut reader, index, || Ok(()))?;
-        let track = &reader.tracks()[index];
+        let source_track = &reader.tracks()[index];
+        let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
+        let setup = source_track.decoder_setup(first.description_index)?;
+        let track = &setup;
         (index, crate::codec::config::aac_specific_config(&track.configuration)?.to_vec(),
             (u64::from(track.sample_rate), u64::from(track.channels)), in_band_ps)
     } else if prefix.starts_with(&[0x1a, 0x45, 0xdf, 0xa3]) {
@@ -559,7 +562,7 @@ pub(crate) fn mp4_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::co
     if selected.is_some() && !reader.refused().is_empty() { return Err(invalid("cannot select an MP4 stream while some sample entries are unindexed")); }
     let automatic = if selected.is_none() { reader.automatic_track_indices(&[*b"soun"]) } else { Vec::new() };
     let index = audio_index(reader.tracks().iter().enumerate().map(|(i, t)| t.handler == *b"soun" && (selected.is_some() || automatic.contains(&i))),selected)?;
-    if reader.tracks()[index].codec != *b"mp4a" { return Err(invalid("selected MP4 audio stream is not AAC")); }
+    if reader.tracks()[index].description_for_sample(0).is_none_or(|d|d.codec != *b"mp4a") { return Err(invalid("selected MP4 audio stream is not AAC")); }
     Ok(index)
 }
 pub(crate) fn matroska_aac_index<R: std::io::Read + std::io::Seek>(reader: &crate::container::webm::WebmReader<R>, selected: Option<usize>) -> Result<usize> {
@@ -760,7 +763,7 @@ pub fn is_alac_source(path: &Path) -> Result<bool> {
     }
     if !crate::container::mp4::recognizes_prefix(&prefix) {return Ok(false);}
     input.seek(SeekFrom::Start(0))?;
-    let reader = crate::container::mp4::Mp4Reader::open(BufReader::new(input), Default::default())?;
+    let reader = crate::container::mp4::Mp4Reader::open_indexed(BufReader::new(input), Default::default())?;
     Ok(reader
         .tracks()
         .iter()
@@ -872,13 +875,16 @@ pub fn audio_source_info_selected(
                 },
             });
         }
-        let mut reader = crate::container::mp4::Mp4Reader::open(
+        let mut reader = crate::container::mp4::Mp4Reader::open_indexed(
             BufReader::new(File::open(source)?),
             Default::default(),
         )?;
         let index = mp4_audio_index(&reader, selected)?;
         let in_band_ps = negotiate_mp4_ps(&mut reader,index,||Ok(()))?;
-        let track = &reader.tracks()[index];
+        let source_track = &reader.tracks()[index];
+        let first = source_track.samples.get(0).ok_or_else(|| invalid("MP4 audio has no samples"))?;
+        let setup = source_track.decoder_setup(first.description_index)?;
+        let track = &setup;
         let decoder = if in_band_ps {crate::native_audio_decoder::PacketPcmDecoder::with_in_band_ps(track)?} else {crate::native_audio_decoder::PacketPcmDecoder::new(track)?};
         if track.sample_rate != decoder.sample_rate() || (!in_band_ps && track.channels != decoder.channels()) {
             return Err(invalid("MP4 container and decoder geometry disagree"));

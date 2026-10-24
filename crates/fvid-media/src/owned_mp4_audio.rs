@@ -442,23 +442,6 @@ mod mp4_export_clock {
 }
 include!("owned_mp4_audio_timeline_impl.rs");
 
-pub(crate) fn mp4_normalized_geometry<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize)->Result<Option<(u32,u16,u32)>> {
-    let track=&reader.tracks()[index];
-    let first=track.samples.get(0).ok_or_else(||invalid("MP4 audio has no samples"))?.description_index;
-    let setup=track.decoder_setup(first)?;
-    let ps=negotiate_mp4_description_ps(reader,index,first,||Ok(()))?;
-    let decoder=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
-    let initial=(decoder.sample_rate(),decoder.channels(),decoder.normalization_mask());
-    for i in 0..reader.tracks()[index].sample_descriptions.len() {
-        let track=&reader.tracks()[index];
-        if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
-        let setup=track.decoder_setup((i+1)as u32)?;
-        let ps=negotiate_mp4_description_ps(reader,index,(i+1)as u32,||Ok(()))?;
-        let next=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
-        if (next.sample_rate(),next.channels(),next.normalization_mask())!=initial {return Ok(Some(initial));}
-    }
-    Ok(None)
-}
 
 #[cfg(test)]
 mod admission_tests {

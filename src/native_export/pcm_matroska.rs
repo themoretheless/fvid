@@ -117,7 +117,7 @@ pub(crate) fn extract_source_pcm_metadata(
         if let Some(maximum) = max_packet_bytes {
             limits.packet_bytes = limits.packet_bytes.min(maximum);
         }
-        let reader = crate::container::mp4::Mp4Reader::open(input, limits)?;
+        let reader = crate::container::mp4::Mp4Reader::open_indexed(input, limits)?;
         let index = if allow_wave {
             let automatic = if selected.is_none() {
                 reader.automatic_track_indices(&[*b"soun"])

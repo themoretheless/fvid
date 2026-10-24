@@ -147,6 +147,12 @@ def generate():
     files['opaque-stereo.f32le']=pulse_oracle([(at,F(0))])
     files['opaque-stereo-32k.f32le']=pulse_oracle([(at,F(0))],32000)
     files['opaque-seven.f32le']=pulse_oracle([(at,F(0))],48000,7)
+    opaque_same=aac([shapes[0]]*3,[controls[0]]*3,[configs[0],configs[0]+bytes(1),configs[0]])
+    files['opaque-same-geometry.mp4']=opaque_same['changes.mp4']
+    front_specs=[[(150+f*3+c,(f+c)%4,4+f+c)for c in range(4)]for f in range(3)]
+    files['opaque-same-geometry.f32le']=controls[0][1]*2+oracle(1024,front_specs*2)
+    files['native-api-negative.mp4']=files['pcm-negative.mp4']
+    files['native-api-negative.f32le']=files['pcm-negative.f32le']
     files['manifest.json']=(json.dumps(dict(cases=cases,provenance='Owned neutral VP9; arithmetic PCM constants; authored AAC spectra, scalar native IMDCT and literal output-grid convolution. No private media, external codec, process, FFmpeg or network.'),indent=2)+'\n').encode()
     return files
 if __name__=='__main__':
