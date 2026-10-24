@@ -88,7 +88,28 @@ def generate():
         files[f'control-{i}.mp4'] = single(data)
     from generate_mp4_variable_rate_edits import edit_movie
     files['control-6mono.mp4']=movie([4],[4])
-    for name in ['control-0','control-1','control-2','control-6mono']:
+    def grouped_mono6():
+        original=dict(atoms(files['control-6mono.mp4']))
+        def empty(body,audio=False):
+            out=b''
+            for k,b in atoms(body):
+                if k==b'trak':b=empty(b,b'soun' in b)
+                elif k in [b'moov',b'mdia',b'minf',b'stbl']:b=empty(b,audio)
+                elif audio and k in [b'stts',b'stsc',b'stco']:b=word(0,0)
+                elif audio and k==b'stsz':b=word(0,0,0)
+                out+=atom(k,b)
+            return out
+        brand=bytearray(video[b'ftyp']);brand[:4]=b'iso5';brand[8:12]=b'iso5'
+        result=atom(b'ftyp',brand)+atom(b'mdat',video[b'mdat'])+atom(b'moov',empty(original[b'moov'])+atom(b'mvex',atom(b'trex',word(0,2,1,0,0,0x02000000))))
+        start=0;dts=0
+        for seq,count in enumerate([1,7,32],1):
+            data=packets[4][start:start+count];start+=count;duration=count*36
+            h=atom(b'tfhd',word(0x02003a,2,1,duration,len(data),0x02000000))
+            def moof(offset):return atom(b'moof',atom(b'mfhd',word(0,seq))+atom(b'traf',h+atom(b'tfdt',word(0,dts))+atom(b'trun',word(1,1,offset))))
+            m=moof(0);result+=moof(len(m)+8)+atom(b'mdat',data);dts+=duration
+        return result
+    files['control-6mono-grouped.mp4']=grouped_mono6()
+    for name in ['control-0','control-1','control-2','control-6mono','control-6mono-grouped']:
         files[name+'-edits.mp4']=edit_movie(files[name+'.mp4'],[(3,-1),(8,192),(2,-1),(8,192)])
     files['fragmented-edits.mp4']=edit_movie(files['fragmented.mp4'],[(5,-1),(65,480),(5,-1),(65,480)])
     files['hybrid-edits.mp4']=edit_movie(files['hybrid.mp4'],[(5,-1),(65,480),(5,-1),(65,480)])

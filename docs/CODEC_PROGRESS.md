@@ -18068,3 +18068,44 @@ check and both binaries build. Existing warnings remain. Separate fvid-media
 MP4 MACE demux/decode acceptance, changing-configuration exports, fractional
 clock combinations and physical output continuity remain unqualified. This
 milestone does not establish universal codec coverage.
+
+
+### 2026-10-24: shared MACE engine and fvid-media export parity
+
+The owned lower MP4 demuxer already recognized MACE and counted its six-sample
+blocks; the verified missing link was decoder/admission/export selection. An
+owned witness failed specifically with `selected MP4 audio codec is not owned
+by this export path`. fvid-media now admits and decodes MAC3/MAC6, labels plans
+correctly and publishes native WAVE, using the existing MACE reconstruction.
+
+Predictor tables/state and pure PCM reconstruction moved to one shared Rust
+implementation included by both API frontends. The root byte-PCM adapter/spec
+and its reference tests remain, while fvid-media exposes a pure float-PCM
+decoder without player/graphics dependencies. No second codec algorithm or
+foreign backend was introduced. Root and media decoders preserve packet-cut
+invariance, reset history and reject malformed blocks transactionally. Existing
+static codebook references independently check float PCM in the media crate.
+
+Native admission accounts for MACE state and its decode buffers before output.
+The worst mono MAC6 byte produces six floats plus two i16 planes; the existing
+caller-selected controlled-payload budget now uses a conservative 64-byte
+retained estimate per encoded byte, including reusable encoded capacity. This
+is an admission estimate, not measured physical RSS or a new default cap.
+Tiny-budget acceptance checks reject before writing PCM.
+
+Ordinary and edited mono/stereo controls compare raw/interval PCM, plan labels,
+WAVE payload and frame counts across the APIs. A new owned grouped MAC6 mono
+fragment witness exercises 1+7+32 blocks with increasing packet storage; source
+bytes remain arithmetic and video remains the owned neutral VP9. Regeneration
+with process/socket creation denied is byte-exact: 30 artifacts / 823191 bytes.
+
+Offline qualification: fvid-media library 530 passed / 1 ignored; root player
+library 1037 passed / 26 ignored; eleven selected integration targets 52 passed.
+The headless MACE export/public-engine target passes three tests; root MACE
+numeric/reference tests also passed without player. All player test targets
+compile. Existing warnings remain. Changing descriptions/geometry in export,
+other codec/container combinations and physical device timing remain open;
+this finite parity milestone does not complete the full codec goal.
+
+Both `fvid` and `fvid-player` build offline from the final source with player
+enabled. The owned-library API tests run separately with player disabled.

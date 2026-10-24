@@ -303,3 +303,152 @@ fn mace_export_witnesses_keep_exact_owned_video_planes_and_clocks() {
         }
     }
 }
+
+#[test]
+fn fvid_media_mace_decode_plan_export_and_controlled_budget_match_the_facade() {
+    use fvid_control::CopyOptions;
+    let options = CopyOptions {
+        max_controlled_bytes: Some(32 * 1024 * 1024),
+        ..Default::default()
+    };
+    for name in [
+        "control-0",
+        "control-1",
+        "control-2",
+        "control-6mono",
+        "control-6mono-grouped",
+    ] {
+        let (rate, ch, source) = pcm(name);
+        for is_edited in [false, true] {
+            let stem = if is_edited {
+                format!("{name}-edits")
+            } else {
+                name.to_owned()
+            };
+            let encoded = bytes(&stem);
+            let wanted = if is_edited {
+                edited(rate, ch, &source)
+            } else {
+                source.clone()
+            };
+            for interval in [
+                None,
+                Some((Duration::from_millis(5), Duration::from_millis(14))),
+            ] {
+                let mut output = Vec::new();
+                let stats = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                    Cursor::new(&encoded),
+                    &mut output,
+                    interval,
+                    &options,
+                )
+                .unwrap();
+                let stride = usize::from(ch) * 4;
+                let expected = if interval.is_some() {
+                    &wanted
+                        [(rate as usize * 5 / 1000) * stride..(rate as usize * 14 / 1000) * stride]
+                } else {
+                    &wanted
+                };
+                assert_eq!(output, expected, "{stem}: fvid-media presentation PCM");
+                assert_eq!(
+                    (stats.sample_rate, stats.channels, stats.sample_frames),
+                    (rate, ch, expected.len() as u64 / (u64::from(ch) * 4))
+                );
+            }
+            let path = root().join(format!("{stem}.mp4"));
+            let plan = fvid_media::plan_decode_audio(&path, &Default::default(), &options).unwrap();
+            assert_eq!(
+                plan.streams[0].codec,
+                if name == "control-1" || name.starts_with("control-6mono") {
+                    "mace6"
+                } else {
+                    "mace3"
+                }
+            );
+            let destination = std::env::temp_dir()
+                .join(format!("fvid-media-mace-{}-{stem}.wav", std::process::id()));
+            fvid_media::decode_audio(&path, &destination, &options).unwrap();
+            let wave = std::fs::read(&destination).unwrap();
+            std::fs::remove_file(&destination).unwrap();
+            let header =
+                fvid_media::owned_wave_inspect::inspect(&mut Cursor::new(&wave), None).unwrap();
+            assert_eq!(
+                &wave[header.data_offset as usize
+                    ..(header.data_offset + u64::from(header.data_bytes)) as usize],
+                &wanted
+            );
+            let mut rejected = Vec::new();
+            let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
+                Cursor::new(&encoded),
+                &mut rejected,
+                None,
+                &CopyOptions {
+                    max_controlled_bytes: Some(1),
+                    ..Default::default()
+                },
+            )
+            .unwrap_err()
+            .to_string();
+            assert!(
+                error.contains("controlled memory budget exceeded"),
+                "{error}"
+            );
+            assert!(rejected.is_empty());
+        }
+    }
+}
+
+#[test]
+fn shared_mace_engine_preserves_pcm_across_public_float_byte_and_packet_boundaries() {
+    use fvid_media::owned_mace::{MaceCoding as MediaCoding, MaceDecoder as MediaDecoder};
+    for (coding, media_coding) in [
+        (MaceCoding::ThreeToOne, MediaCoding::ThreeToOne),
+        (MaceCoding::SixToOne, MediaCoding::SixToOne),
+    ] {
+        for channels in [1, 2] {
+            let data: Vec<u8> = (0..2048).map(|n| ((n * 73 + 17) % 256) as u8).collect();
+            let expected = MaceDecoder::new(coding, 8000, channels)
+                .unwrap()
+                .decode_encoded(&data, 0, 0)
+                .unwrap()
+                .unwrap()
+                .data;
+            let mut decoder = MediaDecoder::new(media_coding, 8000, channels).unwrap();
+            let actual: Vec<u8> = decoder
+                .decode_pcm(&data)
+                .unwrap()
+                .into_iter()
+                .flat_map(f32::to_le_bytes)
+                .collect();
+            assert_eq!(actual, expected);
+            decoder.reset();
+            let mut split = Vec::new();
+            let block = media_coding.block_bytes(channels);
+            for packet in data.chunks(block * 7) {
+                split.extend(
+                    decoder
+                        .decode_pcm(packet)
+                        .unwrap()
+                        .into_iter()
+                        .flat_map(f32::to_le_bytes),
+                );
+            }
+            assert_eq!(split, expected);
+            decoder.reset();
+            if block > 1 {
+                assert!(decoder.decode_pcm(&data[..data.len() - 1]).is_err());
+            }
+            let after: Vec<u8> = decoder
+                .decode_pcm(&data)
+                .unwrap()
+                .into_iter()
+                .flat_map(f32::to_le_bytes)
+                .collect();
+            assert_eq!(
+                after, expected,
+                "malformed blocks must not consume predictor history"
+            );
+        }
+    }
+}

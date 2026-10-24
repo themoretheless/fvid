@@ -1,4 +1,4 @@
-//! Owned MP4 AAC/ALAC/PCM/IMA4 presentation decoding, including silence and repeated edits.
+//! Owned MP4 AAC/ALAC/PCM/ADPCM/MACE presentation decoding, including silence and repeated edits.
 use crate::owned_aac::aac_ps_native::InBandPsProbe;
 use crate::owned_codec_config::aac_specific_config as mp4_probe_config;
 pub(crate) enum Mp4AacCheckpoint {
@@ -26,6 +26,7 @@ pub(crate) enum Mp4TimelineDecoder {
     Alac(crate::owned_alac::AlacDecoder),
     Pcm(crate::owned_pcm_decoder::PcmDecoder),
     Ima4(crate::owned_ima4::Ima4Decoder),
+    Mace(crate::owned_mace::MaceDecoder),
     ImaWav(crate::owned_ima_wav::ImaWavDecoder),
     MsAdpcm(crate::owned_ms_adpcm::MsAdpcmDecoder),
 }
@@ -88,6 +89,10 @@ impl Mp4TimelineDecoder {
                 crate::owned_pcm_decoder::PcmDecoder::from_mp4(track)
                     .map_err(|e| invalid(&e.to_string()))?,
             )),
+            b"MAC3" | b"MAC6" => Ok(Self::Mace(crate::owned_mace::MaceDecoder::new(
+                if track.codec==*b"MAC3" {crate::owned_mace::MaceCoding::ThreeToOne}else{crate::owned_mace::MaceCoding::SixToOne},
+                track.sample_rate,track.channels,
+            ).map_err(|e|invalid(&e.to_string()))?)),
             b"ima4" => Ok(Self::Ima4(
                 crate::owned_ima4::Ima4Decoder::new(track.sample_rate, track.channels)
                     .map_err(|e| invalid(&e.to_string()))?,
@@ -120,6 +125,7 @@ impl Mp4TimelineDecoder {
             Self::Alac(d) => d.sample_rate(),
             Self::Pcm(d) => d.sample_rate(),
             Self::Ima4(d) => d.sample_rate(),
+            Self::Mace(d)=>d.sample_rate(),
             Self::ImaWav(d) => d.sample_rate(),
             Self::MsAdpcm(d) => d.sample_rate(),
         }
@@ -131,6 +137,7 @@ impl Mp4TimelineDecoder {
             Self::Alac(d) => d.channels(),
             Self::Pcm(d) => d.channels(),
             Self::Ima4(d) => d.channels(),
+            Self::Mace(d)=>d.channels(),
             Self::ImaWav(d) => d.channels(),
             Self::MsAdpcm(d) => d.channels(),
         }
@@ -139,6 +146,7 @@ impl Mp4TimelineDecoder {
         match self {
             Self::Aac(d) => d.channel_mask(),
             Self::Ps(d) => d.channel_mask(),
+            Self::Mace(d)=>crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0)as u32,
             Self::ImaWav(d) => {
                 crate::owned_pcm_channels::standard_mask(d.channels()).unwrap_or(0) as u32
             }
@@ -157,6 +165,7 @@ impl Mp4TimelineDecoder {
     fn reset(&mut self) {
         match self {
             Self::Aac(d) => d.reset(),
+            Self::Mace(d)=>d.reset(),
             Self::Ps(d) => d.reset(),
             _ => {}
         }
@@ -178,6 +187,7 @@ impl Mp4TimelineDecoder {
             Self::Alac(d) => d.decode_pcm(bytes)?,
             Self::Pcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
             Self::Ima4(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
+            Self::Mace(d)=>d.decode_pcm(bytes).map_err(|e|invalid(&e.to_string()))?,
             Self::ImaWav(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
             Self::MsAdpcm(d) => d.decode_pcm(bytes).map_err(|e| invalid(&e.to_string()))?,
         };
@@ -199,7 +209,7 @@ pub(crate) fn mp4_audio_index<R: Read + Seek>(
         _ => Err(invalid("select exactly one audio stream")),
     }
 }
-/// Admit retained MP4 AAC/ALAC/PCM/ADPCM decode payload before cloning the track or creating
+/// Admit retained MP4 AAC/ALAC/PCM/ADPCM/MACE decode payload before cloning the track or creating
 /// decoder/checkpoint state. Container parsing has its own bounded limits;
 /// parser temporaries and caller-owned I/O are outside this retained estimate.
 pub(crate) fn admit_audio_reader<R: Read + Seek>(
@@ -234,6 +244,13 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
             crate::owned_pcm_decoder::PcmDecoder::from_mp4(track)
                 .map_err(|e| invalid(&e.to_string()))?;
             16 * 1024
+        }
+        b"MAC3" | b"MAC6" => {
+            crate::owned_mace::MaceDecoder::new(
+                if track.codec==*b"MAC3" {crate::owned_mace::MaceCoding::ThreeToOne}else{crate::owned_mace::MaceCoding::SixToOne},
+                track.sample_rate,track.channels,
+            ).map_err(|e|invalid(&e.to_string()))?;
+            16*1024
         }
         b"ima4" => {
             crate::owned_ima4::Ima4Decoder::new(track.sample_rate, track.channels)
@@ -315,7 +332,11 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     // with geometric growth of the reusable encoded packet buffer.
     add(largest_packet
         .checked_mul(
-            if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
+            if matches!(&track.codec,b"MAC3"|b"MAC6") {
+                // Six mono MACE6 samples per byte: two i16 planes plus float
+                // output and reusable encoded capacity need at most 50 bytes.
+                64
+            } else if pcm || matches!(&track.codec, b"ima4" | b"ms\x00\x11" | b"ms\x00\x02") {
                 10
             } else {
                 2

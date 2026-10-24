@@ -4816,3 +4816,14 @@ Regenerate with `python3 scripts/generate_mp4_mace_transitions.py`; run
 export acceptance. Fixture generation stays separate and invokes no FFmpeg or
 network. Changing-configuration and separate lower-level media-export acceptance
 remain outside this finite matrix.
+
+The same MACE target now verifies `fvid-media` directly: native decode, full and
+interval PCM, plan codec names, WAVE publication and controlled-memory refusal
+before output. The grouped MAC6 mono companion places 1+7+32 blocks in three
+fragment packets, preserving the original 40 arithmetic-coded bytes and neutral
+VP9. Its edited companion checks reset/preroll across repeated source ranges.
+The float/byte public engines are compared across both codings, mono/stereo,
+packet cuts and malformed-block transactions. Predictor tables/reconstruction
+now share one Rust implementation between FVid and fvid-media. Existing static
+codebook references also run inside fvid-media; no FFmpeg is invoked by tests.
+Changing-description export remains unqualified.

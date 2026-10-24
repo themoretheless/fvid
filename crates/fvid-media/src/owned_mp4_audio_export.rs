@@ -1,4 +1,4 @@
-//! Owned MP4 AAC/ALAC/PCM/ADPCM file export through presentation decoding and WAVE DSP.
+//! Owned MP4 AAC/ALAC/PCM/ADPCM/MACE file export through presentation decoding and WAVE DSP.
 use fvid_control::CopyOptions;
 use fvid_media_info::{AudioDecodeStats, AudioDecodeTransform};
 use std::{
@@ -42,6 +42,8 @@ pub(crate) fn recognizes(source: &Path, options: &CopyOptions) -> Result<bool> {
                     | b"in32"
                     | b"fl32"
                     | b"fl64"
+                    | b"MAC3"
+                    | b"MAC6"
                     | b"ima4"
                     | b"ms\x00\x11"
                     | b"ms\x00\x02"
@@ -82,6 +84,8 @@ pub(crate) fn descriptor(
         match &track.codec {
             b"mp4a" => "aac",
             b"alac" => "alac",
+            b"MAC3" => "mace3",
+            b"MAC6" => "mace6",
             b"ima4" => "adpcm_ima_qt",
             b"ms\x00\x11" => "adpcm_ima_wav",
             b"ms\x00\x02" => "adpcm_ms",
