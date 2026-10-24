@@ -373,3 +373,5 @@ pub mod owned_ogg_audio_program;
 mod owned_ogg_joint_export;
 
 mod owned_g711_wave_export;
+
+pub mod owned_mp4_audio_packet_frames;

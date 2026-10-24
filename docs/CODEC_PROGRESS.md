@@ -18251,3 +18251,37 @@ This closes the direct native file API gap for the qualified MP4 sources.
 Other containers, quantized non-native packet clocks, remaining codec tools and
 profiles, physical devices and new Windows/NVIDIA runtime checks remain open.
 Fixed-setup remux guards remain strict.
+
+
+### MP4 export recovers cumulative coded clocks beneath coarse ticks
+
+Presentation export preflights real description runs against cumulative coded
+frame counts. Each declared packet start/end must be the exact floor or ceil
+of the rational coded point on the track clock; an exact tick gets no adjacent
+whole-tick tolerance. Compatible runs retain coded sample time across native
+rate/layout changes. Other runs retain explicit container-window validation.
+For unedited, fully inspected zero-origin streams, a compatible final duration
+snaps to the recovered coded endpoint; a capped prefix does not shorten the
+whole track metadata timeline. Edits and intervals keep their rational output
+grid. Body reconstruction still validates every packet.
+
+A shared allocation-free count helper reads PCM/block geometry and AAC config;
+ALAC uses its owned packet-header parser. Clock-run storage joins the opt-in
+allocation estimate (including minimum/geometric capacities); no default cap or
+RSS-peak guarantee is introduced. Stable unrepresentable AAC PCE positions use
+identity routing only after comparing actual ordered positions, rather than
+inventing a WAVE mask. Changing positions still require an explicit destination.
+
+The owned fixture matrix contains 90 coarse-clock variants (900/1000 Hz,
+floor/ceil/nearest cumulative endpoints), regular/fragmented PCM, AAC/SSR/PS,
+ALAC raw/Rice, ADPCM, opaque PCE, repeated edits, nanosecond intervals, float64
+precision, file APIs and capped prefixes. Its exact-end extra-tick witness is a
+refusal check, not acceptance of a real gap. Parent production source rejects
+the valid pcm-900-floor witness with packet-duration/decoded-sample disagreement.
+New export acceptance compares independent arithmetic/scalar DSP oracles.
+
+This is export qualification, not proof of universal timestamp semantics.
+Native real-time AAC playback still has its own strict packet_sample_limit
+clock check and is not qualified by this matrix. Remaining codec tools/profiles,
+other container clocks, sub-tick/ambiguous trim cases and physical-device paths
+remain part of the active codec-coverage goal.

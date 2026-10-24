@@ -227,6 +227,7 @@ impl DecodeProgress<'_> {
         }
         crate::owned_budget::check_rss_budget(self.options).map_err(Error)
     }
+    pub(crate) fn packet_limit(&self) -> Option<u64> { self.options.max_packets }
     pub(crate) fn packet_limit_reached(&self) -> bool {
         self.options
             .max_packets
