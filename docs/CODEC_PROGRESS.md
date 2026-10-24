@@ -18175,3 +18175,51 @@ passed / 26 ignored; seventeen MP4 integration targets passed 89 tests. All
 player test targets compile; both fvid and fvid-player build offline. Source
 hashes remained unchanged through the run. Existing 32 MiB AAC admission
 acceptance passes; the accounting change introduces no default memory cap.
+
+
+### MP4 audio normalization across native rates and speaker layouts
+
+Owned MP4 presentation export now maps rate/channel changes onto the initial
+or explicitly requested output grid through the owned sinc resampler and speaker matrix. Container
+time remains rational through source edits, negative PTS and description-run
+origins; cumulative boundaries select output frames without per-packet clock
+rounding. Native delayed SSR is drained before replacement and at EOF. Actual
+configuration changes bound filter runs using endpoint extension; equivalent
+entries preserve decoder/filter history. Repeated edits replay native preroll
+with bounded retained state, without claiming a new seek-speed improvement.
+
+The playback/export exact clock has one shared implementation. Float64 DSP now
+retains rational output phase and source origin, including equal-rate fractional
+shifts, without narrowing its samples. Opt-in admission includes decoder
+replacement/checkpoint states, filter history, routing and drained buffers;
+there is no new default memory cap or physical-RSS claim. Public decode planning,
+media APIs and the CLI route changing MP4s through the same library spool.
+The CLI no longer makes a separate static-reader decode decision.
+
+Owned PCM/AAC/SSR acceptance covers irregular packet lengths, rate/layout
+changes, first-used-entry-3, regular/fragments, negative PTS, tail trims, repeated
+fractional edits, intervals, WAVE publication and actual CLI output. Float64
+fixtures contain independently known sub-float32 perturbations. ALAC raw/Rice
+and IMA4/IMA-WAV/MS-ADPCM companions qualify native durations on different
+container clocks against arithmetic PCM. Generator execution is separate from
+tests, and default artifacts of the extended generators remain byte-exact.
+
+Three older refusal expectations also fail on the parent production source:
+7-channel expansion, an opt-in allocation-budget error, and known quad/7.1
+stereo folding. Tests now assert the budget category and actual supported
+channel samples, while retaining unsupported-channel/layout refusals.
+
+Destination normalization currently requires representable supported layouts
+(up to eight destination channels); packet durations must retain native sample
+alignment. General variable-rate handling for other containers, opaque output
+speaker positions, direct legacy native-export file helpers, and remaining
+codec tools/profiles are not completed by this finite matrix. MP4/Matroska remux
+keeps its separate strict configuration guards. Physical devices, Windows/NVIDIA
+and universal codec coverage are not newly qualified here.
+
+An initial AAC PCE without a representable speaker mask is preserved by the
+constant-configuration raw path. Changing-geometry normalization requires an
+explicit destination instead of silently guessing source positions. Authored
+four-front-channel PCE controls qualify stereo at 48/32 kHz and seven-channel
+output; known mono is placed in the center, with no invented surround content.
+The planner, admission and publication use the same selected destination.

@@ -77,6 +77,32 @@ pub(crate) fn rematrix_coefficients(
     Ok(coefficients)
 }
 
+/// Route between explicit WAVE speaker layouts, including equal channel counts.
+pub(crate) fn normalization_coefficients(input:u16, output:u16, mask:u32, destination:u32) -> Result<[[f64;8];8],String> {
+    if !rematrix_layout_supported(input,mask) || output==0 || output>8 || destination.count_ones()!=u32::from(output) {
+        return Err("unsupported PCM normalization speaker layout".into());
+    }
+    let mut matrix=[[0.;8];8];
+    if input==output && mask==destination {
+        for i in 0..usize::from(input) { matrix[i][i]=1.; }
+        return Ok(matrix);
+    }
+    let discrete=if mask==0 {Some(stereo_coefficients(input,mask)?)}else{None};
+    for i in 0..usize::from(input) {
+        let speaker=mask_channel_at(u64::from(mask),i as u32);
+        let [left,right]=discrete.as_ref().map_or_else(||stereo_weight(speaker,input==1),|w|w[i]);
+        if output==1 {matrix[i][0]=(left+right)*0.5;}
+        else if output==2 && destination==3 {matrix[i][0]=left;matrix[i][1]=right;}
+        else if let Some(j)=(0..u32::from(output)).find(|&j|speaker.is_some()&&mask_channel_at(u64::from(destination),j)==speaker) {matrix[i][j as usize]=1.;}
+        else {
+            for (bit,value) in [(0,left),(1,right)] {
+                if let Some(j)=(0..u32::from(output)).find(|&j|mask_channel_at(u64::from(destination),j)==Some(bit)) {matrix[i][j as usize]+=value;}
+            }
+        }
+    }
+    Ok(matrix)
+}
+
 /// Conventional default output layout, distinct from explicit rematrix layouts.
 /// In particular three unspecified output channels default to FL/FR/LFE (2.1),
 /// while `standard_mask(3)` intentionally describes FL/FR/FC (3.0).

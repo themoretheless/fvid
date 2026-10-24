@@ -43,6 +43,8 @@ impl StereoRouter {
             source_mask: None,
         })
     }
+    /// Coefficients in emitted input-channel order for a known stereo sink.
+    pub fn coefficients(&self) -> &[[f32; 2]] { &self.coefficients }
     pub fn source_mask(&self) -> Option<u32> {
         self.source_mask
     }

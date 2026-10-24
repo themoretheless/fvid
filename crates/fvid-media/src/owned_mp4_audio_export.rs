@@ -116,6 +116,27 @@ fn geometry(source: &Path, options: &CopyOptions) -> Result<(u32, u16, u32, bool
     let all_pcm = (0..track.samples.len()).all(|n| track.description_for_sample(n).is_some_and(|d| matches!(&d.codec,b"raw "|b"sowt"|b"twos"|b"in24"|b"in32"|b"fl32"|b"fl64")));
     Ok((rate, channels, mask, codec.starts_with("pcm_") && all_pcm))
 }
+pub(crate) fn normalization_target(source:&Path,transform:AudioDecodeTransform,options:&CopyOptions,rate:u32,channels:u16,mask:u32)->Result<Option<(u32,u16,u32)>> {
+    let requested=transform.channels.is_some()||transform.sample_rate.is_some();
+    if !requested&&mask!=0 {return Ok(None);}
+    let mut reader=open(source,options)?;
+    let index=crate::owned_mp4_audio::mp4_audio_index(&reader,options.streams.first().copied()).map_err(|e|e.to_string())?;
+    let changing=reader.tracks()[index].ensure_constant_description().is_err();
+    if !changing {
+        let projection=transform.channels.is_some_and(|c|c!=i32::from(channels)&&(mask==0||(channels>2&&c>2)));
+        if !projection {return Ok(None);}
+    }else if mask==0&&transform.channels.is_none() {
+        if crate::owned_mp4_audio::mp4_normalized_geometry(&mut reader,index).map_err(|e|e.to_string())?.is_some() {
+            return Err("MP4 normalization requires an explicit destination speaker layout".into());
+        }
+        return Ok(None);
+    }
+    if !requested {return Ok(None);}
+    let rate=transform.sample_rate.map(u32::try_from).transpose().map_err(|_|"invalid output rate")?.unwrap_or(rate);
+    let output=transform.channels.map(u16::try_from).transpose().map_err(|_|"invalid output channels")?.unwrap_or(channels);
+    let mask=if transform.channels.is_some() {crate::owned_pcm_channels::standard_mask(output).ok_or("unsupported output speaker layout")? as u32}else{mask};
+    Ok(Some((rate,output,mask)))
+}
 use crate::owned_adts_export::decoded_prefix as prefix;
 pub(crate) fn supports(
     source: &Path,
@@ -126,9 +147,10 @@ pub(crate) fn supports(
         Ok(value) => value,
         Err(error) => return error.starts_with("controlled memory budget exceeded:"),
     };
+    let target=match normalization_target(source,transform,options,rate,channels,mask) {Ok(t)=>t,Err(e)=>return e.starts_with("controlled memory budget exceeded:")};
     let output = transform.channels.unwrap_or(i32::from(channels));
-    let aac_fold=if output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router(source,rate,channels,options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
-    if output != i32::from(channels) && !aac_fold
+    let aac_fold=if target.is_none() && output!=i32::from(channels)&&matches!(output,1|2){match crate::owned_aac_export_routing::router(source,rate,channels,options){Ok(router)=>router.is_some(),Err(error)=>return error.starts_with("controlled memory budget exceeded:")}}else{false};
+    if target.is_none() && output != i32::from(channels) && !aac_fold
         && (!((channels <= 2 && (1..=8).contains(&output))
             || (channels <= 8 && matches!(output, 1 | 2)))
             || !crate::owned_pcm_channels::standard_mask(channels)
@@ -146,18 +168,20 @@ pub(crate) fn supports(
     probe.stream_metadata_set.clear();
     probe.stream_metadata_delete.clear();
     let result = if precise {
-        crate::owned_mp4_audio::decode_mp4_pcm_f64(
+        crate::owned_mp4_audio::decode_mp4_pcm_f64_targeted(
             BufReader::new(file),
             &mut std::io::sink(),
-            prefix(transform, rate),
+            prefix(transform, target.map_or(rate,|t|t.0)),
             &probe,
+            target,
         )
     } else {
-        crate::owned_mp4_audio::decode_mp4_audio_pcm(
+        crate::owned_mp4_audio::decode_mp4_audio_pcm_targeted(
             BufReader::new(file),
             &mut std::io::sink(),
-            prefix(transform, rate),
+            prefix(transform, target.map_or(rate,|t|t.0)),
             &probe,
+            target,
         )
     };
     result.is_ok()
@@ -176,6 +200,8 @@ pub(crate) fn apply(
     }
     crate::owned_budget::check_rss_budget(options)?;
     let (rate, channels, mask, precise) = geometry(source, options)?;
+    let target=normalization_target(source,transform,options,rate,channels,mask)?;
+    let (rate,channels,mask)=target.unwrap_or((rate,channels,mask));
     let info = crate::owned_wave_metadata::mp4_source_info(source, options)?;
     let spool = crate::owned_adts_export::spool_decoded_with_precision(
         rate,
@@ -186,18 +212,20 @@ pub(crate) fn apply(
         |writer, options| {
             let file = BufReader::new(File::open(source).map_err(|e| e.to_string())?);
             let result = if precise {
-                crate::owned_mp4_audio::decode_mp4_pcm_f64(
+                crate::owned_mp4_audio::decode_mp4_pcm_f64_targeted(
                     file,
                     writer,
                     prefix(transform, rate),
                     options,
+                    target,
                 )
             } else {
-                crate::owned_mp4_audio::decode_mp4_audio_pcm(
+                crate::owned_mp4_audio::decode_mp4_audio_pcm_targeted(
                     file,
                     writer,
                     prefix(transform, rate),
                     options,
+                    target,
                 )
             };
             result.map_err(|e| e.to_string())

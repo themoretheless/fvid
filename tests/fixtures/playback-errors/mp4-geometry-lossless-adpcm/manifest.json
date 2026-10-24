@@ -1,0 +1,93 @@
+{
+  "cases": [
+    {
+      "name": "alac-raw",
+      "oracle": "alac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "family": "alac"
+    },
+    {
+      "name": "alac-raw-third",
+      "oracle": "alac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "family": "alac"
+    },
+    {
+      "name": "alac-raw-edits",
+      "oracle": "alac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "family": "alac"
+    },
+    {
+      "name": "alac-rice",
+      "oracle": "alac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "family": "alac"
+    },
+    {
+      "name": "alac-rice-third",
+      "oracle": "alac.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5272,
+      "family": "alac"
+    },
+    {
+      "name": "alac-rice-edits",
+      "oracle": "alac-edits.f32le",
+      "rate": 48000,
+      "channels": 2,
+      "frames": 5168,
+      "family": "alac"
+    },
+    {
+      "name": "adpcm-regular-2000",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "family": "adpcm"
+    },
+    {
+      "name": "adpcm-fragmented-2000",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "family": "adpcm"
+    },
+    {
+      "name": "adpcm-third-96000",
+      "oracle": "adpcm.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 800,
+      "family": "adpcm"
+    },
+    {
+      "name": "adpcm-trim-48000",
+      "oracle": "adpcm-trim.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 768,
+      "family": "adpcm"
+    },
+    {
+      "name": "adpcm-regular-2000-edits",
+      "oracle": "adpcm-edits.f32le",
+      "rate": 8000,
+      "channels": 1,
+      "frames": 520,
+      "family": "adpcm"
+    }
+  ],
+  "provenance": "Owned neutral VP9, arithmetic PCM encoded as ALAC raw/Rice; independently authored IMA4/IMA-WAV/MS-ADPCM predictors and exact cancelled-stereo mono reference. No private media, FFmpeg, external codec/process or network."
+}

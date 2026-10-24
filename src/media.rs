@@ -141,12 +141,38 @@ fn has_only_wave_info_metadata(options: &CopyOptions) -> bool {
             .all(|k| fvid_media::owned_wave_metadata::tag_for_key(k).is_ok())
 }
 
-fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions) -> Result<bool> {
+fn uses_native_audio_route(source: &std::path::Path, options: &CopyOptions, transform: &AudioDecodeTransform) -> Result<bool> {
     if options.max_controlled_bytes.is_some() || has_metadata_mutations(options) {
         return Ok(false);
     }
     if crate::native_pcm::is_wave(source).map_err(|e| e.to_string())? {
         return Ok(true);
+    }
+    // The library spool owns configuration changes, normalization and PCM
+    // precision. Keep the public API and CLI on that same implementation.
+    {
+        use std::io::Read;
+        let mut input = std::fs::File::open(source).map_err(|e| e.to_string())?;
+        let mut prefix = [0u8; 8];
+        match input.read_exact(&mut prefix) {
+            Ok(()) if crate::container::mp4::recognizes_prefix(&prefix) => {
+                use std::io::{Seek, SeekFrom};
+                input.seek(SeekFrom::Start(0)).map_err(|e| e.to_string())?;
+                let reader = crate::container::mp4::Mp4Reader::open_indexed(
+                    std::io::BufReader::new(input),
+                    crate::container::mp4::Limits { packet_bytes: options.max_packet_bytes, ..Default::default() },
+                ).map_err(|e| e.to_string())?;
+                if reader.tracks().iter().any(|t| t.ensure_constant_description().is_err()) {
+                    return Ok(false);
+                }
+                if transform.channels.is_some_and(|c|reader.tracks().iter().enumerate().any(|(i,t)|t.handler==*b"soun"&&(options.streams.is_empty()||options.streams.contains(&i))&&t.description_for_sample(0).is_some_and(|d|d.channels>2&&c!=i32::from(d.channels)))) {
+                    return Ok(false);
+                }
+            }
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::UnexpectedEof => {}
+            Err(e) => return Err(e.to_string()),
+        }
     }
     if !crate::native_media::is_owned_audio_trim_source(source).map_err(|e| e.to_string())? {
         return Ok(false);
@@ -271,7 +297,7 @@ pub fn decode_audio_transformed(
     transform: AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    if !uses_native_audio_route(source, options)? {
+    if !uses_native_audio_route(source, options, &transform)? {
         return decode_fvid_media_audio_to_destination(source, destination, transform, options);
     }
     validate_owned_audio_options_for_destination(options, Some(destination))?;
@@ -365,7 +391,7 @@ pub fn plan_decode_audio(
     transform: &AudioDecodeTransform,
     options: &CopyOptions,
 ) -> Result<MediaPlan> {
-    if !uses_native_audio_route(source, options)? {
+    if !uses_native_audio_route(source, options, transform)? {
         if has_metadata_mutations(options) && !has_only_wave_info_metadata(options) {
             validate_owned_audio_options_for_destination(
                 options,

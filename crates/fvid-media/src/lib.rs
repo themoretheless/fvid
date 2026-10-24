@@ -303,6 +303,7 @@ pub mod owned_mp4_remux;
 
 pub mod owned_mp4_audio_schedule;
 pub mod owned_mp4_audio;
+pub mod owned_mp4_audio_normalization;
 
 mod owned_mp4_audio_export;
 

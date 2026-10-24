@@ -162,6 +162,7 @@ impl Mp4TimelineDecoder {
             Self::Alac(d) => d.channel_mask(),
         }
     }
+    fn normalization_mask(&self) -> u32 { self.channel_mask() }
     fn delayed(&self) -> bool {
         matches!(self, Self::Ps(_)) || matches!(self,Self::Aac(d) if d.delayed())
     }
@@ -266,6 +267,14 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     index: usize,
     options: &CopyOptions,
 ) -> Result<()> {
+    admit_audio_reader_targeted(reader,index,options,None)
+}
+pub(crate) fn admit_audio_reader_targeted<R: Read + Seek>(
+    reader: &Mp4TimelineReader<R>,
+    index: usize,
+    options: &CopyOptions,
+    target: Option<(u32,u16,u32)>,
+) -> Result<()> {
     let Some(limit) = options.max_controlled_bytes else {
         return Ok(());
     };
@@ -297,6 +306,24 @@ pub(crate) fn admit_audio_reader<R: Read + Seek>(
     add(decoder)?;
     add(track.sample_descriptions.len())?; // per-description in-band PS flags
     add(configuration.checked_mul(2).ok_or_else(overflow)?)?; // initial and replacement decoder headers
+    if target.is_some() || (0..track.samples.len()).any(|n|track.description_for_sample(n)!=track.description_for_sample(0)) {
+        let first=track.description_for_sample(0).ok_or_else(||invalid("MP4 audio has no samples"))?;
+        let output_rate=target.map_or(first.sample_rate,|t|t.0);
+        let output_channels=usize::from(target.map_or(first.channels.max(2),|t|t.1));
+        let mut normalization=0usize;
+        for description in &track.sample_descriptions {
+            if description.sample_rate==0 || output_rate==0 {return Err(invalid("zero MP4 normalization clock"));}
+            let radius=usize::try_from(crate::owned_resample::input_radius(description.sample_rate,output_rate)).map_err(|_|overflow())?;
+            // Geometric queue capacity, f64 slots (also bounds f32), four scalar
+            // work arrays, mixed input, and a drained output block coexist.
+            let ring=radius.checked_mul(4).and_then(|n|n.checked_add(16)).and_then(|n|n.checked_mul(255*8)).ok_or_else(overflow)?;
+            let frames=usize::try_from(u64::from(output_rate).div_ceil(u64::from(description.sample_rate))).map_err(|_|overflow())?.max(4096);
+            let buffers=frames.checked_mul(output_channels).and_then(|n|n.checked_mul(8*4)).and_then(|n|n.checked_add(4*255*8+256*8*output_channels)).ok_or_else(overflow)?;
+            normalization=normalization.max(ring.checked_add(buffers).ok_or_else(overflow)?);
+        }
+        add(normalization)?;
+    }
+
     for bytes in [
         track.name.len(),
         track.language.len(),
@@ -357,6 +384,15 @@ pub fn decode_mp4_audio_pcm<R: Read + Seek>(
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
+    decode_mp4_audio_pcm_targeted(source,output,interval,options,None)
+}
+pub(crate) fn decode_mp4_audio_pcm_targeted<R: Read + Seek>(
+    source: R,
+    output: &mut impl Write,
+    interval: Option<(Duration, Duration)>,
+    options: &CopyOptions,
+    target: Option<(u32,u16,u32)>,
+) -> Result<AudioDecodeStats> {
     if !options.metadata_set.is_empty()
         || !options.metadata_delete.is_empty()
         || !options.stream_metadata_set.is_empty()
@@ -390,10 +426,39 @@ pub fn decode_mp4_audio_pcm<R: Read + Seek>(
         },
     )?;
     let index = mp4_audio_index(&reader, selected)?;
-    admit_audio_reader(&reader, index, options)?;
-    decode_mp4_audio_reader_controlled(reader, output, interval, selected, &mut control)
+    admit_audio_reader_targeted(&reader, index, options,target)?;
+    decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control,target)
+}
+use crate::owned_mp4_audio_normalization::coefficients as mp4_normalization_coefficients;
+type Mp4NormalizationTrack = crate::owned_mp4::Track;
+type Mp4PcmScalar = f32;
+type Mp4OutputResampler = crate::owned_resample::Resampler<Vec<u8>>;
+#[allow(dead_code)] // Export uses only the arithmetic subset of the shared playback clock.
+mod mp4_export_clock {
+    use super::{Error, Result, invalid};
+    use crate::owned_mp4::Edit;
+    use std::{cmp::Ordering, time::Duration};
+    include!("owned_mp4_edit_clock_impl.rs");
 }
 include!("owned_mp4_audio_timeline_impl.rs");
+
+pub(crate) fn mp4_normalized_geometry<R:std::io::Read+std::io::Seek>(reader:&mut Mp4TimelineReader<R>,index:usize)->Result<Option<(u32,u16,u32)>> {
+    let track=&reader.tracks()[index];
+    let first=track.samples.get(0).ok_or_else(||invalid("MP4 audio has no samples"))?.description_index;
+    let setup=track.decoder_setup(first)?;
+    let ps=negotiate_mp4_description_ps(reader,index,first,||Ok(()))?;
+    let decoder=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
+    let initial=(decoder.sample_rate(),decoder.channels(),decoder.normalization_mask());
+    for i in 0..reader.tracks()[index].sample_descriptions.len() {
+        let track=&reader.tracks()[index];
+        if !(0..track.samples.len()).any(|n|track.samples.get(n).is_some_and(|s|s.description_index as usize==i+1)) {continue;}
+        let setup=track.decoder_setup((i+1)as u32)?;
+        let ps=negotiate_mp4_description_ps(reader,index,(i+1)as u32,||Ok(()))?;
+        let next=if ps {Mp4TimelineDecoder::with_in_band_ps(&setup)?}else{Mp4TimelineDecoder::new(&setup)?};
+        if (next.sample_rate(),next.channels(),next.normalization_mask())!=initial {return Ok(Some(initial));}
+    }
+    Ok(None)
+}
 
 #[cfg(test)]
 mod admission_tests {
@@ -446,8 +511,12 @@ pub fn decode_mp4_pcm_f64<R: Read + Seek>(
     interval: Option<(Duration, Duration)>,
     options: &CopyOptions,
 ) -> Result<AudioDecodeStats> {
-    precise::decode(source, output, interval, options)
+    precise::decode(source, output, interval, options,None)
 }
+pub(crate) fn decode_mp4_pcm_f64_targeted<R:Read+Seek>(source:R,output:&mut impl Write,interval:Option<(Duration,Duration)>,options:&CopyOptions,target:Option<(u32,u16,u32)>)->Result<AudioDecodeStats> {
+    precise::decode(source,output,interval,options,target)
+}
+
 mod precise {
     use super::*;
     struct Mp4TimelineDecoder(crate::owned_pcm_decoder::PcmDecoder);
@@ -476,6 +545,7 @@ mod precise {
         fn restore_checkpoint(&mut self, _: &Mp4AacCheckpoint) -> Result<bool> {
             Ok(false)
         }
+        fn normalization_mask(&self) -> u32 { self.channel_mask() }
         fn delayed(&self) -> bool {
             false
         }
@@ -494,6 +564,7 @@ mod precise {
         output: &mut impl Write,
         interval: Option<(Duration, Duration)>,
         options: &CopyOptions,
+        target: Option<(u32,u16,u32)>,
     ) -> Result<AudioDecodeStats> {
         if !options.metadata_set.is_empty()
             || !options.metadata_delete.is_empty()
@@ -528,8 +599,10 @@ mod precise {
             },
         )?;
         let index = mp4_audio_index(&reader, selected)?;
-        admit_audio_reader(&reader, index, options)?;
-        decode_mp4_audio_reader_controlled(reader, output, interval, selected, &mut control)
+        admit_audio_reader_targeted(&reader, index, options,target)?;
+        decode_mp4_audio_reader_targeted(reader, output, interval, selected, &mut control,target)
     }
+    type Mp4PcmScalar = f64;
+    type Mp4OutputResampler = crate::owned_resample_f64::Resampler<Vec<u8>>;
     include!("owned_mp4_audio_timeline_impl.rs");
 }

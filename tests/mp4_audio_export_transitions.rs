@@ -110,7 +110,7 @@ fn owned_file_plan_and_wave_publication_accept_configuration_changes() {
     }
 }
 #[test]
-fn memory_limit_and_output_geometry_change_refuse_before_pcm() {
+fn memory_limit_refuses_before_pcm() {
     let mut output = Vec::new();
     let options = fvid_media::CopyOptions {
         max_controlled_bytes: Some(1),
@@ -130,23 +130,7 @@ fn memory_limit_and_output_geometry_change_refuse_before_pcm() {
         "{error}"
     );
     assert!(output.is_empty());
-    let input = std::fs::read(format!(
-        "{}/tests/fixtures/playback-errors/mp4-aac-transitions/changes.mp4",
-        env!("CARGO_MANIFEST_DIR")
-    ))
-    .unwrap();
-    let error = fvid_media::owned_mp4_audio::decode_mp4_audio_pcm(
-        Cursor::new(input),
-        &mut output,
-        None,
-        &Default::default(),
-    )
-    .unwrap_err();
-    assert!(
-        error.to_string().contains("output geometry normalization"),
-        "{error}"
-    );
-    assert!(output.is_empty());
+
 }
 #[test]
 fn pcm_depth_and_coding_changes_preserve_float32_and_float64_samples() {
