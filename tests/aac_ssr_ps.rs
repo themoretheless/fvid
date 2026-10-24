@@ -211,6 +211,7 @@ fn ssr_ps_mp4_matroska_adts_ranges_rewind_seek_and_both_eof_frames_accept() {
                     out.extend(p.data);
                     continue;
                 }
+                Some(AudioStep::ReconfigureDecoder) => panic!("unexpected configuration change in constant-setup fixture"),
                 Some(AudioStep::ResetDecoder) => {
                     decoder.reset();
                     continue;

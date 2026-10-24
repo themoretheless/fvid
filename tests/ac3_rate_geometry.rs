@@ -26,6 +26,7 @@ fn first(
     loop {
         match source.next_step().unwrap().unwrap() {
             AudioStep::Encoded(p) => return p,
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => source.reset_decoder(engine).unwrap(),
             AudioStep::Pcm(_) => panic!("unexpected source silence"),
         }
@@ -136,6 +137,7 @@ fn ac3_configured_rate_must_match_clean_frame_headers_without_disabling_downmix(
                     source.present_decoded(f.packet, f.source_pts).unwrap()
                 }
                 AudioStep::Pcm(p) => Some(p),
+                AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 AudioStep::ResetDecoder => {
                     source.reset_decoder(&mut engine).unwrap();
                     None

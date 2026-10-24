@@ -97,6 +97,7 @@ fn packets(s: &mut dyn AudioStream) -> Vec<(Duration, Vec<u8>)> {
                 .unwrap()
                 .and_then(|d| s.present_decoded(d.packet, d.source_pts).unwrap()),
             AudioStep::Pcm(p) => Some(p),
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => {
                 s.reset_decoder(&mut d).unwrap();
                 None

@@ -31,6 +31,7 @@ fn streaming_transients_match_whole_buffer_oracle_clocks_eof_and_reset() {
         let packet = match video.next_step().unwrap().unwrap() {
             AudioStep::Pcm(p) => p.data,
             AudioStep::Encoded(p) => p.data,
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => panic!("unexpected reset"),
         };
         assert_eq!(floats(&packet), original);

@@ -28,6 +28,7 @@ fn transient_pcm_corrector_matches_independent_scalar_windows_without_touching_n
     let pcm = match video.next_step().unwrap().unwrap() {
         AudioStep::Pcm(p) => p.data,
         AudioStep::Encoded(p) => p.data,
+        AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
         AudioStep::ResetDecoder => panic!("unexpected reset"),
     };
     assert_eq!(pcm, raw);

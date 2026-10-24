@@ -50,6 +50,7 @@ fn owned_adpcm_player_keeps_edits_repeats_seek_and_pcm() {
                 let mut cursor = target as u64;
                 while let Some(step) = stream.next_step().unwrap() {
                     let pcm = match step {
+                        AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                         AudioStep::ResetDecoder => {
                             stream.reset_decoder(&mut decoder).unwrap();
                             continue;

@@ -191,6 +191,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
                     total_frames += pres.data.len() / 8;
                     all_samples.extend(f32_samples(&pres.data));
                 }
+                fvid::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 fvid::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut dec).unwrap(),
             }
         }
@@ -241,6 +242,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
                 fvid::audio::AudioStep::Pcm(pres) => {
                     all_samples.extend(f32_samples(&pres.data));
                 }
+                fvid::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 fvid::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut dec).unwrap(),
             }
         }
@@ -288,6 +290,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
                 fvid::audio::AudioStep::Pcm(pres) => {
                     total_frames += pres.data.len() / 4;
                 }
+                fvid::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 fvid::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut dec).unwrap(),
             }
         }
@@ -319,6 +322,7 @@ fn mp4_and_matroska_containers_decode_eac3_stereo_51_and_conversion_layer_tracks
         let mut dec = stream.make_decoder().unwrap();
         let pkt = match stream.next_step().unwrap().unwrap() {
             fvid::audio::AudioStep::Encoded(p) => p,
+            fvid::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             fvid::audio::AudioStep::ResetDecoder => {
                 stream.reset_decoder(&mut dec).unwrap();
                 match stream.next_step().unwrap().unwrap() {

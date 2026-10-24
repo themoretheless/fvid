@@ -26,7 +26,7 @@ pub enum SampleFormat {
 }
 
 /// Description of a decoded audio stream.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct AudioSpec {
     /// Sample rate in Hz.
     pub sample_rate: u32,
@@ -474,6 +474,15 @@ pub trait AudioBackend {
     /// of leaving the caller waiting for an output device that cannot advance.
     fn drain_status(&self) -> Result<bool, AudioError> { Ok(true) }
 
+    /// Accept more input after an intermediate drain without clearing samples.
+    fn end_drain(&mut self) -> Result<(), AudioError> { Ok(()) }
+
+    /// Replace the source output configuration after drain, or while navigation
+    /// explicitly discards queued output. Preserve controls and the given clock.
+    fn reconfigure(&mut self, _spec: AudioSpec, _router: Option<fvid_media::owned_stereo_router::StereoRouter>, _at: Duration, _playing: bool) -> Result<(), AudioError> {
+        Err(AudioError::PlaybackError("audio backend does not support output reconfiguration".into()))
+    }
+
     /// Current playback position on the stream timeline. Used for
     /// A/V sync: the video presentation waits until the audio clock has
     /// reached the frame's PTS.
@@ -529,6 +538,11 @@ impl Default for NullBackend {
 
 impl AudioBackend for NullBackend {
     fn start(&mut self, _: AudioSpec) -> Result<(), AudioError> {
+        Ok(())
+    }
+
+    fn reconfigure(&mut self, _: AudioSpec, _: Option<fvid_media::owned_stereo_router::StereoRouter>, at: Duration, _: bool) -> Result<(), AudioError> {
+        self.position = at;
         Ok(())
     }
 
@@ -607,7 +621,12 @@ impl AudioTrack {
 pub enum AudioStep {
     Encoded(EncodedPacket),
     Pcm(AudioPacket),
+    /// Discard history at navigation/edit boundaries; do not extend the old
+    /// segment by draining its decoder into the next edit.
     ResetDecoder,
+    /// Natural setup boundary. Drain the old decoder with the old stream
+    /// metadata before committing the next configuration.
+    ReconfigureDecoder,
 }
 
 pub trait AudioStream: Send {
@@ -632,6 +651,11 @@ pub trait AudioStream: Send {
     fn reset_decoder(&mut self, decoder: &mut Box<dyn AudioDecode>) -> crate::Result<()> {
         decoder.reset();
         Ok(())
+    }
+
+    /// Commit a pending natural configuration boundary after draining old PCM.
+    fn advance_configuration(&mut self) -> crate::Result<()> {
+        Err(crate::invalid("audio source has no pending configuration change"))
     }
 
     /// Source timestamp required for the current seek/range preroll.

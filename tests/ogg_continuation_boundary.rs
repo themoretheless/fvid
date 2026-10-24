@@ -137,6 +137,7 @@ mod playback {
         let mut out = Vec::new();
         while let Some(step) = input.next_step().unwrap() {
             match step {
+                AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 AudioStep::ResetDecoder => input.reset_decoder(&mut decoder).unwrap(),
                 AudioStep::Pcm(p) => out.push((p.presentation_time(), p.data)),
                 AudioStep::Encoded(p) => {

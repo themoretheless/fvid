@@ -30,6 +30,7 @@ fn drain(stream: &mut dyn AudioStream, decoder: &mut Box<dyn AudioDecode>) -> Ve
                 }
             }
             AudioStep::Pcm(p) => out.extend(p.data),
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => stream.reset_decoder(decoder).unwrap(),
         }
     }

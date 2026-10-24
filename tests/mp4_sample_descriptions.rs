@@ -155,7 +155,7 @@ mod playback {
         }
     }
     #[test]
-    fn preindexed_video_reconfigures_while_audio_changes_remain_explicit() {
+    fn preindexed_video_and_pcm_audio_reconfigure() {
         let indexed =
             Mp4Reader::open_indexed(Cursor::new(bytes("changing")), Default::default()).unwrap();
         let mut video =
@@ -168,15 +168,16 @@ mod playback {
         }
         let indexed =
             Mp4Reader::open_indexed(Cursor::new(bytes("compact-pcm")), Default::default()).unwrap();
-        let error = fvid::playback_mp4_audio::Mp4AudioReader::from_demuxer(indexed, 0)
-            .err()
-            .expect("audio constructor must validate indexed setup changes");
-        assert!(
-            error
-                .to_string()
-                .contains("sample description changes require decoder reconfiguration"),
-            "{error}"
-        );
+        let mut audio = fvid::playback_mp4_audio::Mp4AudioReader::from_demuxer(indexed, 0).unwrap();
+        use fvid::audio::{AudioStep, AudioStream};
+        let mut changes = 0;
+        while let Some(step) = audio.next_step().unwrap() {
+            if let AudioStep::ReconfigureDecoder = step {
+                audio.advance_configuration().unwrap();
+                changes += 1;
+            }
+        }
+        assert_eq!(changes, 2);
     }
     #[test]
     fn changing_descriptions_present_each_coded_geometry() {

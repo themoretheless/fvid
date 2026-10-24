@@ -57,6 +57,7 @@ fn collect_policy(
     while let Some(step) = s.next_step().unwrap() {
         match step {
             AudioStep::Pcm(p) => out.push((p.presentation_time(), p.data)),
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => s.reset_decoder(&mut d).unwrap(),
             AudioStep::Encoded(p) => {
                 if let Some(p) = d.decode_packet(&p.data, p.pts, p.duration as u64).unwrap() {

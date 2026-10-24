@@ -87,6 +87,7 @@ fn er_aac_ps_native_mp4_and_matroska_acceptance() {
                     out.extend(p.data);
                     continue;
                 }
+                Some(AudioStep::ReconfigureDecoder) => panic!("unexpected configuration change in constant-setup fixture"),
                 Some(AudioStep::ResetDecoder) => {
                     decoder.reset();
                     continue;

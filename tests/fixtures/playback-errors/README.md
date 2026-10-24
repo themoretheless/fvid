@@ -4690,8 +4690,9 @@ VP9 playback in ordinary/fragmented MP4. It also contains a real 16→32→16
 geometry change, independent one-entry decode controls, compact PCM chunks,
 invalid selected indices and an external second reference. The changing video
 is indexed through `open_indexed` and now plays through the native video
-reader with seek/rewind acceptance enabled. Single-configuration consumers
-(including audio/export paths) retain their explicit reconfiguration refusal. Regenerate with
+reader with seek/rewind acceptance enabled. Single-configuration export/remux consumers retain their explicit
+reconfiguration refusal. Native audio now negotiates changing setups without
+edits; its variable-rate edit scheduler remains open. Regenerate with
 `python3 scripts/generate_mp4_sample_descriptions.py`; ordinary offline tests
 run `mp4_sample_descriptions`. No external encoder or private media is used.
 
@@ -4710,5 +4711,16 @@ and uses only owned bitstream writers and parameter sets.
 The video-reconfiguration matrix also includes constant stereo PCM beside the
 changing video. A real captured audio worker must preserve exact float PCM and
 rewind, independently of the video description changes. An unchanged selected
-audio track is accepted; a changing selected audio track keeps its separate
-explicit refusal.
+audio track is accepted; changing selected PCM/E-AC-3 setups now have separate native reconfiguration
+acceptance. Changing setups with edits retain an explicit refusal.
+
+
+`mp4-audio-reconfiguration` contains own PCM and E-AC-3 coding/rate/channel
+changes beside short owned VP9 video. PCM has analytic float32 oracles;
+compressed spans have independent constant-setup controls. Ordinary and iso5
+fragmented PCM, setup 3 at startup, exact worker PCM, delayed decoder tails,
+RF/dialogue policy, seek/rewind, output-drain cancellation and error recovery
+are tested. The variable-rate edit movie has a separate passing refusal and
+an explicitly ignored intended timeline acceptance. Regenerate with
+`python3 scripts/generate_mp4_audio_reconfiguration.py`; run
+`mp4_audio_reconfiguration` offline without FFmpeg/network.

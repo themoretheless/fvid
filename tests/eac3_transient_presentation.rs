@@ -40,6 +40,7 @@ fn packets(s: &mut dyn AudioStream) -> Vec<(Duration, Vec<u8>)> {
                     }
                 }
             }
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => s.reset_decoder(&mut decoder).unwrap(),
             AudioStep::Pcm(_) => panic!("expected coded E-AC-3"),
         }

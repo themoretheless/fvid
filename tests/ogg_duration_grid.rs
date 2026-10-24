@@ -25,6 +25,7 @@ fn collect(source: &mut dyn AudioStream) -> Vec<(Duration, Vec<u8>)> {
     let mut packets = Vec::new();
     while let Some(step) = source.next_step().unwrap() {
         match step {
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => source.reset_decoder(&mut decoder).unwrap(),
             AudioStep::Pcm(p) => packets.push((p.presentation_time(), p.data)),
             AudioStep::Encoded(p) => {

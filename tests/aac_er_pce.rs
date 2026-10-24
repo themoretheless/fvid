@@ -40,6 +40,7 @@ fn play(reader: &mut dyn fvid::audio::AudioStream) -> Vec<u8> {
                 output.extend(p.data);
                 continue;
             }
+            Some(AudioStep::ReconfigureDecoder) => panic!("unexpected configuration change in constant-setup fixture"),
             Some(AudioStep::ResetDecoder) => {
                 decoder.reset();
                 continue;

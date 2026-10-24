@@ -626,6 +626,18 @@ impl AudioBackend for CpalBackend {
             self.start(AudioSpec{channels:2,..spec})?;self.stereo_router=Some(router);Ok(())
         }else{self.start(spec)}
     }
+    fn end_drain(&mut self) -> Result<(), AudioError> {
+        self.check_output()?;
+        self.shared.ring.lock().unwrap().draining = false;
+        Ok(())
+    }
+    fn reconfigure(&mut self, spec: AudioSpec, router: Option<fvid_media::owned_stereo_router::StereoRouter>, at: Duration, playing: bool) -> Result<(), AudioError> {
+        self.stop()?;
+        self.start_with_router(spec, router)?;
+        self.flush(at)?;
+        if playing { self.resume()?; }
+        Ok(())
+    }
     fn push(&mut self, packet: AudioPacket) -> Result<(), AudioError> {
         self.check_output()?;
         if packet.data.len() > MAX_RING_BYTES {

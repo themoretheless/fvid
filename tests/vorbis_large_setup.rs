@@ -57,6 +57,7 @@ fn check(variant: &str) {
             let mut pcm = Vec::new();
             while let Some(step) = stream.next_step().unwrap() {
                 match step {
+                    AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                     AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                     AudioStep::Encoded(packet) => {
                         if let Some(decoded) = decoder

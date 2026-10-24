@@ -86,7 +86,7 @@ fn ogg_vorbis_channel_changes_keep_backend_geometry_through_seek_and_rewind() {
             .unwrap();
         let (_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
-        let mut worker = Worker {
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
             duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: crate::audio_thread::DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,
@@ -162,7 +162,7 @@ fn ogg_vorbis_rate_changes_keep_backend_clock_through_seek_and_rewind() {
             .unwrap();
         let (_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
-        let mut worker = Worker {
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
             duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: crate::audio_thread::DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,
@@ -235,7 +235,7 @@ fn ogg_codec_changes_keep_backend_pcm_clock_through_navigation() {
             .unwrap();
         let (_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
-        let mut worker = Worker {
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
             duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: crate::audio_thread::DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,

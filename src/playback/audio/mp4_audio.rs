@@ -20,8 +20,14 @@ pub struct AudioPacket {
     pub sample_index: usize,
 }
 
+#[derive(Clone, Copy, Default)]
+struct DescriptionState { rate: Option<u32>, channels: Option<u16>, mask: Option<u32>, in_band_ps: bool }
 /// MP4 audio track reader. Extracts encoded packets for decoding.
 pub struct Mp4AudioReader<R> {
+    changing: bool,
+    active_description: usize,
+    configuration_pending: bool,
+    description_states: Vec<Option<DescriptionState>>,
     demuxer: Mp4Reader<R>,
     track_index: usize,
     in_band_ps: bool,
@@ -201,6 +207,9 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     /// Open a specific audio track by index.
     pub fn from_demuxer(demuxer:Mp4Reader<R>,index:usize)->Result<Self>{Self::from_programme(demuxer,index,None)}
     fn from_programme(mut demuxer: Mp4Reader<R>, index: usize,programme:Option<u8>) -> Result<Self> {
+        if demuxer.tracks().get(index).is_some_and(|t|t.ensure_constant_description().is_err()) {
+            return Self::from_changing(demuxer,index,programme);
+        }
         let selected_geometry=if let Some(programme)=programme {
             let track=demuxer.tracks().get(index).ok_or_else(||invalid("MP4 track index out of range"))?;
             if track.handler!=*b"soun" || track.codec!=*b"ec-3"{return Err(unsupported("programme selection requires an E-AC-3 track"));}
@@ -254,6 +263,7 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         // packets. Always re-seek the selected first packet on real playback.
         demuxer.invalidate_position();
         Ok(Self {
+            changing: false, active_description: 0, configuration_pending: false, description_states: Vec::new(),
             dolby_mask,
             dolby_channels,
             dolby_rate:selected_geometry.map(|g|g.0),
@@ -271,10 +281,192 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
         })
     }
 
+    fn setup(&self) -> &crate::container::mp4::SampleDescription {
+        &self.track().sample_descriptions[self.active_description]
+    }
+    fn from_changing(demuxer: Mp4Reader<R>, index: usize, programme: Option<u8>) -> Result<Self> {
+        let track = demuxer
+            .tracks()
+            .get(index)
+            .ok_or_else(|| invalid("MP4 track index out of range"))?;
+        if track.handler != *b"soun"
+            || track
+                .sample_descriptions
+                .iter()
+                .any(|d| !CODECS.contains(&d.codec))
+        {
+            return Err(unsupported(
+                "selected MP4 track contains unsupported audio sample descriptions",
+            ));
+        }
+        if !track.edits.is_empty() {
+            return Err(unsupported(
+                "changing MP4 audio descriptions with edits require a variable-rate edit scheduler",
+            ));
+        }
+        if programme.is_some()
+            && !track
+                .sample_descriptions
+                .iter()
+                .any(|d| d.codec == *b"ec-3")
+        {
+            return Err(unsupported("programme selection requires an E-AC-3 track"));
+        }
+        let first = track
+            .samples
+            .get(0)
+            .ok_or_else(|| invalid("empty MP4 audio track"))?
+            .description_index as usize
+            - 1;
+        let mut states = Vec::new();
+        states
+            .try_reserve_exact(track.sample_descriptions.len())
+            .map_err(|_| invalid("MP4 description state allocation failed"))?;
+        states.resize(track.sample_descriptions.len(), None);
+        let tracks = demuxer.tracks().len();
+        let mut source = Self {
+            changing: true,
+            active_description: first,
+            configuration_pending: false,
+            description_states: states,
+            demuxer,
+            track_index: index,
+            in_band_ps: false,
+            dolby_mask: None,
+            dolby_channels: None,
+            dolby_rate: None,
+            eac3_programme: programme.unwrap_or(0),
+            dolby_track_channels: vec![None; tracks],
+            sample_index: 0,
+            presentation_floor: 0,
+            packet: Vec::new(),
+            timeline: None,
+            edit_cursor: std::cell::Cell::new(0),
+            edit_segment: std::cell::Cell::new(None),
+        };
+        source.configure_description(first)?;
+        Ok(source)
+    }
+    fn configure_description(&mut self, selected: usize) -> Result<()> {
+        let state = if let Some(state) = self.description_states[selected] {
+            state
+        } else {
+            let setup = self.track().sample_descriptions[selected].clone();
+            let mut state = DescriptionState::default();
+            let first = (0..self.track().samples.len())
+                .find(|&i| {
+                    self.track().samples.get(i).unwrap().description_index as usize == selected + 1
+                })
+                .ok_or_else(|| invalid("unused MP4 audio description selected"))?;
+            if setup.codec == *b"mp4a" {
+                let asc = crate::codec::config::aac_specific_config(&setup.configuration)?;
+                let config = crate::codec::config::AudioSpecificConfig::parse(asc)?;
+                if config.ps_present.is_none()
+                    && config.sbr_present != Some(false)
+                    && let Ok(mut probe) =
+                        crate::codec::aac_ps_native::InBandPsProbe::new(asc, setup.sample_rate)
+                {
+                    let mut payload = Vec::new();
+                    for i in first..self.track().samples.len() {
+                        if self.track().samples.get(i).unwrap().description_index as usize
+                            != selected + 1
+                        {
+                            probe.reset();
+                            continue;
+                        }
+                        self.demuxer
+                            .read_packet(self.track_index, i, &mut payload)?;
+                        if probe.read(&payload).is_err() {
+                            probe.reset();
+                            continue;
+                        }
+                        if probe.ps_detected() {
+                            state.in_band_ps = true;
+                            break;
+                        }
+                    }
+                }
+            } else if setup.codec == *b"ac-3" {
+                let mut payload = Vec::new();
+                self.demuxer
+                    .read_packet(self.track_index, first, &mut payload)?;
+                let frame = crate::codec::ac3_decoder::checked_syncframe(&payload)
+                    .ok_or_else(|| invalid("invalid AC-3 description setup"))?;
+                state.rate = Some(frame.sample_rate);
+                state.channels = Some(frame.channels);
+                state.mask = Some(crate::codec::ac3_decoder::speaker_mask(
+                    &payload,
+                    frame.channels,
+                )?);
+            } else if setup.codec == *b"ec-3" {
+                const FRAMES: usize = 2 * 8 * 9;
+                const BYTES: usize = FRAMES * 4096;
+                let end = (first + 1..self.track().samples.len())
+                    .find(|&i| {
+                        self.track().samples.get(i).unwrap().description_index as usize
+                            != selected + 1
+                    })
+                    .unwrap_or(self.track().samples.len());
+                let mut prefix = Vec::new();
+                let mut payload = Vec::new();
+                let mut found = None;
+                for i in first..end.min(first + FRAMES) {
+                    self.demuxer
+                        .read_packet(self.track_index, i, &mut payload)?;
+                    prefix.extend_from_slice(
+                        &payload[..payload.len().min(BYTES.saturating_sub(prefix.len()))],
+                    );
+                    if let Some((frame, layout)) =
+                        crate::codec::eac3_decoder::presentation::probe_programme(
+                            &prefix,
+                            self.eac3_programme,
+                            i + 1 == end,
+                        )?
+                    {
+                        found = Some((
+                            frame.sample_rate,
+                            layout.0.len() as u16,
+                            layout.wave_mask().ok_or_else(|| {
+                                unsupported(
+                                    "E-AC-3 speaker locations need an extended speaker mask",
+                                )
+                            })?,
+                        ));
+                        break;
+                    }
+                    if prefix.len() == BYTES {
+                        break;
+                    }
+                }
+                let (rate, channels, mask) = found.ok_or_else(|| {
+                    invalid("selected E-AC-3 programme is missing or incomplete in setup")
+                })?;
+                state.rate = Some(rate);
+                state.channels = Some(channels);
+                state.mask = Some(mask);
+            }
+            self.description_states[selected] = Some(state);
+            state
+        };
+        self.active_description = selected;
+        self.configuration_pending = false;
+        self.in_band_ps = state.in_band_ps;
+        self.dolby_rate = state.rate;
+        self.dolby_channels = state.channels;
+        self.dolby_mask = state.mask;
+        self.dolby_track_channels[self.track_index] = state.channels;
+        self.demuxer.invalidate_position();
+        Ok(())
+    }
     /// Read the next audio packet. Returns None at end of track.
+    /// Changing setups require `AudioStream::next_step` so the old decoder can
+    /// drain before the source commits the next configuration.
     pub fn read_packet(&mut self) -> Result<Option<AudioPacket>> {
         let track_index = self.track_index;
         let sample_index = self.sample_index;
+        if self.changing && self.track().samples.get(sample_index).is_some_and(|s|s.description_index as usize!=self.active_description+1) {
+            return Err(unsupported("changing MP4 audio descriptions require AudioStream::next_step"));
+        }
         let track = self.track();
         let sample = match track.samples.get(sample_index) {
             Some(s) => s,
@@ -306,6 +498,13 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
     pub fn rewind(&mut self) {
         self.demuxer.invalidate_position();
         self.sample_index = 0;
+        self.configuration_pending = false;
+        if self.changing {
+            let initial=self.track().samples.get(0).unwrap().description_index as usize-1;
+            // The opening configuration was negotiated before exposing the reader.
+            let state=self.description_states[initial].unwrap();self.active_description=initial;
+            self.in_band_ps=state.in_band_ps;self.dolby_rate=state.rate;self.dolby_channels=state.channels;self.dolby_mask=state.mask;
+        }
         self.presentation_floor = 0;
         self.packet.clear();
         self.edit_cursor.set(0);
@@ -327,26 +526,26 @@ impl<R: Read + Seek> Mp4AudioReader<R> {
 /// movie timescale in most files (sample rate versus a nominal 1000 Hz).
 impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     fn speaker_mask(&self)->Result<Option<u32>> {
-        if matches!(&self.track().codec,b"ac-3"|b"ec-3") {return Ok(self.dolby_mask);}
-        if self.track().codec==*b"alac" {crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.track().configuration,self.sample_rate(),self.track().channels).map(Some)}else{Ok(None)}
+        if matches!(&self.setup().codec,b"ac-3"|b"ec-3") {return Ok(self.dolby_mask);}
+        if self.setup().codec==*b"alac" {crate::codec::alac_decoder::AlacDecoder::configuration_mask(&self.setup().configuration,self.sample_rate(),self.setup().channels).map(Some)}else{Ok(None)}
     }
 
     fn stereo_router(&self)->Result<Option<fvid_media::owned_stereo_router::StereoRouter>>{
-        if self.track().codec!=*b"mp4a"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
-        let asc=crate::codec::config::aac_specific_config(&self.track().configuration)?;
+        if self.setup().codec!=*b"mp4a"{return self.speaker_mask()?.map(|mask|fvid_media::owned_stereo_router::StereoRouter::new(self.channels(),mask).map_err(|e|invalid(&e))).transpose();}
+        let asc=crate::codec::config::aac_specific_config(&self.setup().configuration)?;
         fvid_media::owned_aac::speaker_routing::stereo_router(asc,self.sample_rate(),self.channels(),self.in_band_ps).map(Some).map_err(|e|invalid(&e))
     }
 
     fn make_decoder(&self) -> Result<Box<dyn crate::audio::AudioDecode>> {
-        if self.track().codec == *b"ac-3" {
+        if self.setup().codec == *b"ac-3" {
             return Ok(Box::new(crate::codec::ac3_decoder::Ac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?));
         }
-        if self.track().codec == *b"ec-3" {
+        if self.setup().codec == *b"ec-3" {
             return Ok(Box::new(crate::codec::eac3_decoder::Eac3Decoder::for_container(self.extra_data(),self.sample_rate(),self.channels())?.with_programme(self.eac3_programme)?));
         }
         if self.in_band_ps {
             Ok(Box::new(crate::codec::aac_ps_playback::PsAacDecoder::new_with_in_band_ps(
-                &self.track().configuration, self.sample_rate(), 2,
+                &self.setup().configuration, self.sample_rate(), 2,
             )?))
         } else {
             crate::codec::make_audio_decoder(self.codec(), self.extra_data(), self.sample_rate(), self.channels(), self.bits_per_sample())
@@ -354,7 +553,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn codec(&self) -> &str {
-        let track = self.track();
+        let track = self.setup();
         match codec_name(&track.codec) {
             Some(name) => name,
             None => std::str::from_utf8(&track.codec).unwrap_or(""),
@@ -366,19 +565,19 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn sample_rate(&self) -> u32 {
-        self.dolby_rate.unwrap_or(self.track().sample_rate)
+        self.dolby_rate.unwrap_or(self.setup().sample_rate)
     }
 
     fn channels(&self) -> u16 {
-        if self.in_band_ps { 2 } else { self.dolby_channels.unwrap_or(self.track().channels) }
+        if self.in_band_ps { 2 } else { self.dolby_channels.unwrap_or(self.setup().channels) }
     }
 
     fn bits_per_sample(&self) -> u16 {
-        self.track().bit_depth
+        self.setup().bit_depth
     }
 
     fn preroll_target(&self)->Option<i64> {
-        if self.track().codec!=*b"mp4a" {return None;}
+        if self.changing || self.setup().codec!=*b"mp4a" {return None;}
         if let Some(t)=&self.timeline {
             let (_,source)=t.locate(self.edit_cursor.get())?;
             let ticks=u128::from(source?)*u128::from(self.track().timescale)/u128::from(self.sample_rate());
@@ -413,7 +612,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn packet_sample_limit(&self, duration: u64) -> Result<Option<usize>> {
-        if self.track().codec != *b"mp4a" { return Ok(None); }
+        if self.setup().codec != *b"mp4a" { return Ok(None); }
         let rate = u128::from(self.sample_rate());
         let scale = u128::from(self.track().timescale);
         let samples = u128::from(duration) * rate;
@@ -447,7 +646,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
             self.edit_cursor.set(pts+(last-first) as u64);
             return Ok(Some(packet));
         }
-        if track.codec != *b"mp4a" {
+        if self.changing || track.codec != *b"mp4a" {
             let rate = self.sample_rate();
             let scale = track.timescale;
             let stride = usize::from(self.channels()) * 4;
@@ -506,7 +705,7 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn extra_data(&self) -> &[u8] {
-        &self.track().configuration
+        &self.setup().configuration
     }
 
     fn audio_track_index(&self) -> usize { Self::supported(&self.demuxer).iter().position(|&index|index==self.track_index).unwrap_or(0) }
@@ -544,8 +743,28 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
         }
         Ok(())
     }
+    fn advance_configuration(&mut self) -> Result<()> {
+        if !self.changing || !self.configuration_pending {return Err(invalid("no pending MP4 audio configuration"));}
+        let selected=self.track().samples.get(self.sample_index).ok_or_else(||invalid("missing MP4 audio configuration sample"))?.description_index as usize-1;
+        self.configure_description(selected)
+    }
+    fn reset_decoder(&mut self, decoder:&mut Box<dyn crate::audio::AudioDecode>) -> Result<()> {
+        if self.changing {
+            let selected=self.track().samples.get(self.sample_index).or_else(||self.track().samples.get(0)).unwrap().description_index as usize-1;
+            self.configure_description(selected)?;*decoder=self.make_decoder()?;
+        } else {decoder.reset();}
+        Ok(())
+    }
     fn next_step(&mut self)->Result<Option<crate::audio::AudioStep>> {
         use crate::audio::{AudioStep,AudioPacket};
+        if self.changing && let Some(sample)=self.track().samples.get(self.sample_index) {
+            let selected=sample.description_index as usize-1;
+            if selected!=self.active_description {
+                if self.track().sample_descriptions[selected]==*self.setup() {
+                    self.description_states[selected]=self.description_states[self.active_description];self.active_description=selected;
+                } else {self.configuration_pending=true;return Ok(Some(AudioStep::ReconfigureDecoder));}
+            }
+        }
         let Some(timeline)=&self.timeline else {return self.next_packet().map(|p|p.map(AudioStep::Encoded));};
         let cursor=self.edit_cursor.get();
         let Some((index,source))=timeline.locate(cursor) else {return Ok(None);};
@@ -568,6 +787,15 @@ impl<R: Read + Seek + Send> crate::audio::AudioStream for Mp4AudioReader<R> {
     }
 
     fn seek_to(&mut self, pts: i64) -> i64 {
+        if self.changing {
+            let requested=pts.max(0).min(self.track().duration.min(i64::MAX as u64)as i64);
+            let selected=self.track().samples.at_or_before(requested);
+            let codec=self.track().description_for_sample(selected).unwrap().codec;
+            if matches!(&codec,b"mp4a"|b"ac-3"|b"ec-3"|b"MAC3"|b"MAC6") {
+                self.rewind();self.presentation_floor=requested;return requested;
+            }
+            self.seek(requested);self.presentation_floor=requested;return requested;
+        }
         if let Some(timeline)=&self.timeline {
             let rate=u128::from(self.sample_rate());let scale=u128::from(self.track().timescale);
             let cursor=(pts.max(0) as u128*rate/scale).min(u128::from(timeline.sample_frames)) as u64;

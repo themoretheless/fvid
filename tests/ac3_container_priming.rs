@@ -53,6 +53,7 @@ fn container_priming_and_tail_windows_do_not_double_trim_native_ac3_or_add_gaps(
                     source.present_decoded(f.packet, f.source_pts).unwrap()
                 }
                 AudioStep::Pcm(p) => Some(p),
+                AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 AudioStep::ResetDecoder => {
                     source.reset_decoder(&mut engine).unwrap();
                     None
@@ -121,6 +122,7 @@ fn windows(mut source: Box<dyn AudioStream>) -> Vec<(Duration, Vec<u8>)> {
                 source.present_decoded(f.packet, f.source_pts).unwrap()
             }
             AudioStep::Pcm(p) => Some(p),
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => {
                 source.reset_decoder(&mut engine).unwrap();
                 None

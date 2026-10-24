@@ -34,6 +34,7 @@ fn vorbis_granules_mixed_modes_chains_and_seek_present_exact_samples() {
             let mut previous = None;
             while let Some(step) = stream.next_step().unwrap() {
                 match step {
+                    AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                     AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                     AudioStep::Encoded(packet) => {
                         if let Some(decoded) = decoder
@@ -215,6 +216,7 @@ fn vorbis_discrete_channels_play_and_seek_in_ogg_and_matroska() {
                 let mut frames = 0;
                 while let Some(step) = stream.next_step().unwrap() {
                     match step {
+                        AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                         AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                         AudioStep::Encoded(packet) => {
                             if let Some(decoded) = decoder
@@ -264,6 +266,7 @@ fn vorbis_channel_changes_reset_source_decoders_without_changing_player_output()
             let mut frames = 0;
             while let Some(step) = stream.next_step().unwrap() {
                 match step {
+                    AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                     AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                     AudioStep::Encoded(packet) => {
                         if let Some(decoded) = decoder
@@ -321,6 +324,7 @@ fn vorbis_linked_rate_changes_present_exact_pcm_on_one_player_clock() {
             let mut cursor = target as u64;
             while let Some(step) = stream.next_step().unwrap() {
                 match step {
+                    AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                     AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                     AudioStep::Encoded(packet) => {
                         if let Some(decoded) = decoder

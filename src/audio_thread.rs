@@ -113,6 +113,7 @@ impl AudioPlayback {
                 let mut backend = backend_factory();
 
                 let stereo_router=match stream.stereo_router(){Ok(mask)=>mask,Err(error)=>{let _=event_tx.send(AudioEvent::Error(format!("Audio speaker layout: {error}")));return;}};
+                let output_configuration = Some((crate::audio::AudioSpec {sample_rate,channels,format:crate::audio::SampleFormat::F32},stereo_router.clone()));
                 if let Err(e) = backend.start_with_router(crate::audio::AudioSpec {
                     sample_rate,
                     channels,
@@ -134,7 +135,7 @@ impl AudioPlayback {
                 policy.apply_to(&mut *decoder);
                 let _ = event_tx.send(AudioEvent::Started);
 
-                Worker { duration: duration_clone, checkpoints:Vec::new(), dolby_policy:policy,
+                Worker { output_configuration, reconfiguration: None, output_needs_restart: false, duration: duration_clone, checkpoints:Vec::new(), dolby_policy:policy,
                     stream,
                     decoder,
                     backend,
@@ -246,7 +247,12 @@ impl Drop for AudioPlayback {
     }
 }
 
+enum Reconfiguration { DecoderTail, DeviceDrain }
+
 struct Worker {
+    output_configuration: Option<(crate::audio::AudioSpec, Option<fvid_media::owned_stereo_router::StereoRouter>)>,
+    reconfiguration: Option<Reconfiguration>,
+    output_needs_restart: bool,
     duration: Arc<Mutex<Option<Duration>>>,
     checkpoints:Vec<(i64,crate::audio::AudioCheckpoint)>,
     dolby_policy: DolbyPlaybackPolicy,
@@ -264,6 +270,79 @@ struct Worker {
 }
 
 impl Worker {
+    fn sync_output(&mut self, at: Duration) -> crate::Result<()> {
+        let spec = crate::audio::AudioSpec {
+            sample_rate: self.stream.sample_rate(),
+            channels: self.stream.channels(),
+            format: crate::audio::SampleFormat::F32,
+        };
+        let router = self.stream.stereo_router()?;
+        if self.output_needs_restart
+            || self
+                .output_configuration
+                .as_ref()
+                .is_some_and(|current| current.0 != spec || current.1.as_ref() != router.as_ref())
+        {
+            self.backend
+                .reconfigure(spec, router.clone(), at, self.playing)
+                .map_err(|e| crate::invalid(&e.to_string()))?;
+        }
+        self.output_needs_restart = false;
+        self.output_configuration = Some((spec, router));
+        Ok(())
+    }
+    fn reconfigure_next(&mut self) -> (Option<AudioEvent>, Duration) {
+        let result: crate::Result<Option<crate::audio::DecodedAudio>> = (|| {
+            match self.reconfiguration {
+                Some(Reconfiguration::DecoderTail) => {
+                    if let Some(frame) = self.decoder.finish_packet()? {
+                        return Ok(Some(frame));
+                    }
+                    self.backend
+                        .begin_drain()
+                        .map_err(|e| crate::invalid(&e.to_string()))?;
+                    self.reconfiguration = Some(Reconfiguration::DeviceDrain);
+                }
+                Some(Reconfiguration::DeviceDrain) => {
+                    if !self
+                        .backend
+                        .drain_status()
+                        .map_err(|e| crate::invalid(&e.to_string()))?
+                    {
+                        return Ok(None);
+                    }
+                    self.stream.advance_configuration()?;
+                    self.decoder = self.stream.make_decoder()?;
+                    self.dolby_policy.apply_to(&mut *self.decoder);
+                    self.checkpoints.clear();
+                    self.sync_output(self.queued_frontier)?;
+                    self.backend
+                        .end_drain()
+                        .map_err(|e| crate::invalid(&e.to_string()))?;
+                    self.reconfiguration = None;
+                }
+                None => {}
+            }
+            Ok(None)
+        })();
+        match result {
+            Ok(Some(frame)) => self.present_frame(frame),
+            Ok(None) => (
+                None,
+                if self.reconfiguration.is_some() {
+                    Duration::from_millis(5)
+                } else {
+                    Duration::ZERO
+                },
+            ),
+            Err(error) => {
+                self.reconfiguration = None;
+                self.output_needs_restart = true;
+                self.fail_output("configuration change", error);
+                (None, Duration::ZERO)
+            }
+        }
+    }
     fn reset_decoder(&mut self)->crate::Result<()> {
         self.stream.reset_decoder(&mut self.decoder)?;
         self.dolby_policy.apply_to(&mut *self.decoder);
@@ -319,6 +398,7 @@ impl Worker {
     /// Decode and queue one packet, reporting a terminal event if the stream
     /// ended or failed and how long to wait before feeding the next one.
     fn decode_next(&mut self) -> (Option<AudioEvent>, Duration) {
+        if self.reconfiguration.is_some() { return self.reconfigure_next(); }
         if self.draining { return self.drain_output(); }
         let step = match self.stream.next_step() {
             Ok(Some(p)) => p,
@@ -343,6 +423,10 @@ impl Worker {
         };
 
         let (decoded, source_end) = match step {
+            crate::audio::AudioStep::ReconfigureDecoder => {
+                self.reconfiguration = Some(Reconfiguration::DecoderTail);
+                return self.reconfigure_next();
+            }
             crate::audio::AudioStep::ResetDecoder => {
                 if let Err(e)=self.reset_decoder().and_then(|_|self.restore_preroll()) {self.ended=true;return (Some(AudioEvent::Error(e.to_string())),Duration::ZERO);}
                 return (None,Duration::ZERO);
@@ -495,12 +579,14 @@ impl Worker {
                     self.generation += 1;
                     self.ended = false;
                     self.draining = false;
+                    self.reconfiguration = None;
                     nav = Some(DeferredNav::Rewind);
                 }
                 Command::Seek(pts) => {
                     self.generation += 1;
                     self.ended = false;
                     self.draining = false;
+                    self.reconfiguration = None;
                     nav = Some(DeferredNav::Seek(pts));
                 }
                 Command::Level(milli) => latest_level = Some(milli),
@@ -531,6 +617,11 @@ impl Worker {
                     self.fail_output("rewind flush", error);
                     return false;
                 }
+                if let Err(error) = self.sync_output(Duration::ZERO) {
+                    self.fail_output("rewind output configuration", error);return false;
+                }
+                self.queued_frontier = Duration::ZERO;
+
                 if let Ok(mut pos) = self.position.lock() {
                     *pos = Duration::ZERO;
                 }
@@ -548,6 +639,11 @@ impl Worker {
                     self.fail_output("seek flush", error);
                     return false;
                 }
+                if let Err(error) = self.sync_output(anchor) {
+                    self.fail_output("seek output configuration", error);return false;
+                }
+                self.queued_frontier = anchor;
+
                 if let Ok(mut pos) = self.position.lock() {
                     *pos = anchor;
                 }
@@ -849,7 +945,7 @@ mod presentation_window_tests {
         let counts = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let packets = counts.lock().unwrap();
         let sizes:Vec<usize> = packets.iter().map(|p| p.data.len()/8).collect();
@@ -899,7 +995,7 @@ mod no_edit_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..48 { assert!(worker.decode_next().0.is_none()); }
         let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         captured.lock().unwrap().clear();
@@ -952,7 +1048,7 @@ mod preroll_control_tests {
         let worker_commands = command_tx.clone();
         let worker_calls = calls.clone();
         let thread = std::thread::spawn(move || {
-            let worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+            let worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder:Box::new(Decoder { inner,commands:worker_commands,calls:worker_calls }),backend:Box::new(Backend(paused_tx)),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
             worker.run();
         });
         let paused = paused_rx.recv_timeout(Duration::from_secs(5));
@@ -977,7 +1073,7 @@ mod adts_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         for _ in 0..frames { assert!(worker.decode_next().0.is_none()); }
         let expected:Vec<u8> = captured.lock().unwrap().iter().flat_map(|p|p.data.iter().copied()).collect();
         for (request,landed) in [(3000,3000),(0,0)] {
@@ -1004,7 +1100,7 @@ mod matroska_aac_seek_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events,_) = sync_channel(1);
-        let mut worker = Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(), stream:Box::new(stream),decoder,backend:Box::new(Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO)) };
         let mut final_pace = Duration::ZERO;
         for _ in 0..48 {
             let (event,pace) = worker.decode_next();
@@ -1063,7 +1159,7 @@ mod scheduling_step_tests {
         let steps=Steps([pcm(0),AudioStep::ResetDecoder,pcm(960)].into());
         let counts=Arc::new(Mutex::new(Vec::new()));let resets=Arc::new(Mutex::new(0));
         let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(steps),decoder:Box::new(Decoder(resets.clone())),backend:Box::new(super::presentation_window_tests::Capture(counts.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         assert!(worker.decode_next().0.is_none());
         let (event,pace)=worker.decode_next();assert!(event.is_none());assert_eq!(pace,Duration::ZERO);
         assert_eq!(*resets.lock().unwrap(),1);
@@ -1095,7 +1191,7 @@ mod mp4_edit_scheduler_tests {
         let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(data),Default::default()).unwrap();
         let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
         let packets=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker { duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false, duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         for _ in 0..200 {
             let(event,_)=worker.decode_next();
             if let Some(event)=event {assert!(matches!(event,AudioEvent::Ended(_)),"unexpected playback error");break;}
@@ -1141,7 +1237,7 @@ mod checkpoint_seek_tests {
             let scale=stream.timescale();
             let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
             let packets=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream,decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             fn finish(w:&mut Worker)->usize {
                 for n in 0..300 {match w.decode_next().0 {Some(AudioEvent::Ended(_))=>return n,Some(AudioEvent::Error(e))=>panic!("{e}"),_=>{}}}
                 panic!("audio did not end");
@@ -1172,7 +1268,7 @@ mod checkpoint_seek_tests {
         let scale=stream.timescale();let channels=usize::from(stream.channels());
         let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
         let packets=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let(events,_)=sync_channel(1);
-        let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+        let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(packets.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
         fn finish(worker:&mut Worker)->usize {
             for count in 0..300 {
                 match worker.decode_next().0 {
@@ -1222,7 +1318,7 @@ mod ps_eof_tests {
             }
             let mut f=baseline.finish().unwrap().unwrap();f.packet.data.truncate(f.source_duration as usize*8);expected.push(f.packet);
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:7,position:Arc::new(Mutex::new(Duration::ZERO))};
             assert!(worker.decode_next().0.is_none());assert!(captured.lock().unwrap().is_empty());
             for count in 1..=3 {assert!(worker.decode_next().0.is_none());assert!(!worker.ended);assert_eq!(captured.lock().unwrap().len(),count);}
             assert!(matches!(worker.decode_next().0,Some(AudioEvent::Ended(7))));assert!(worker.ended);
@@ -1272,7 +1368,7 @@ mod ps_edit_worker_tests {
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(edited),Default::default()).unwrap();
             let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             run(&mut worker);
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert_eq!(bytes,&expected[from*8..]);};
             check(0);
@@ -1299,7 +1395,7 @@ mod ps_edit_worker_tests {
             assert_eq!(stream.channels(),2);
             let decoder=stream.make_decoder().unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,total as u64);assert!(bytes==expected[from*8..],"implicit PS presentation differs from independently qualified export");};
             run(&mut worker);check(0);
             for request in [4000,(total*2/3) as i64,(total-480) as i64,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(request)));run(&mut worker);check(request as usize);}
@@ -1325,7 +1421,7 @@ mod ps_edit_worker_tests {
             assert!(old_error.contains("configuration disagrees with container sample rate or channels"));
             let decoder=stream.make_decoder().unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let check=|from:usize| {let a=captured.lock().unwrap();let mut cursor=from as u64;let mut bytes=Vec::new();for p in a.iter(){assert_eq!(p.pts,cursor);assert_eq!(p.timebase_den,48000);cursor+=p.data.len() as u64/8;bytes.extend_from_slice(&p.data);}assert_eq!(cursor,9600);assert!(bytes==expected[from*8..],"core/output clock changes altered PCM");};
             run(&mut worker);check(0);
             for sample in [4000,6000,9000,0] {captured.lock().unwrap().clear();worker.drain_commands(Some(Command::Seek(sample/2)));run(&mut worker);check(sample as usize);}
@@ -1337,7 +1433,7 @@ mod ps_edit_worker_tests {
         for bytes in [include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-1024-synthetic.mp4").as_slice(),include_bytes!("../tests/fixtures/playback-errors/he-aac-ps-worker-source-gap-960-synthetic.mp4").as_slice()] {
             let stream=crate::playback_mp4_audio::Mp4AudioReader::open(std::io::Cursor::new(bytes),Default::default()).unwrap();let decoder=crate::codec::make_audio_decoder(stream.codec(),stream.extra_data(),stream.sample_rate(),stream.channels(),stream.bits_per_sample()).unwrap();
             let captured=Arc::new(Mutex::new(Vec::new()));let (_command_tx, commands)=sync_channel(1);let (events,_)=sync_channel(1);
-            let mut worker=Worker {duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,duration: Arc::new(Mutex::new(None)), checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(super::presentation_window_tests::Capture(captured.clone())),commands,events,playing:true,ended:false, draining: false, queued_frontier: Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let mut saw_error=false;for _ in 0..16 {match worker.decode_next().0 {Some(AudioEvent::Error(e))=>{assert!(e.contains("AAC edit extends beyond source packets"),"{e}");saw_error=true;break;},Some(AudioEvent::Ended(_))=>panic!("silently accepted a source gap"),_=>{}}}
             assert!(saw_error);assert_eq!(captured.lock().unwrap().len(),3);
         }
@@ -1380,7 +1476,7 @@ mod ps_matroska_preroll_tests {
             let captured = Arc::new(Mutex::new(Vec::new()));
             let (_command_tx, commands) = sync_channel(1);
             let (events, _) = sync_channel(1);
-            let mut worker = Worker {
+            let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
                 duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),
                 stream: Box::new(stream),
                 decoder,
@@ -1488,7 +1584,7 @@ mod ogg_opus_configuration_tests {
         let captured = Arc::new(Mutex::new(Vec::new()));
         let (_command_tx, commands) = sync_channel(1);
         let (events, _) = sync_channel(8);
-        let mut worker = Worker {
+        let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
             duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),
             stream: Box::new(stream),
             decoder,
@@ -1638,7 +1734,7 @@ mod ogg_opus_output_layout_tests {
                 .unwrap();
             let (_tx, commands) = sync_channel(1);
             let (events, _) = sync_channel(8);
-            let mut worker = Worker {
+            let mut worker = Worker { output_configuration: None, reconfiguration: None, output_needs_restart: false,
                 duration: Arc::new(Mutex::new(None)), checkpoints: Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),
                 stream: Box::new(stream),
                 decoder,
@@ -1839,7 +1935,7 @@ mod duration_publication_guards {
             let stream=Source{value,valid};let decoder=stream.make_decoder().unwrap();
             let duration=Arc::new(Mutex::new(Some(Duration::from_millis(60))));
             let (_tx,commands)=sync_channel(1);let(events,_rx)=sync_channel(1);
-            let mut worker=Worker{duration:duration.clone(),checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(crate::audio::NullBackend::default()),commands,events,playing:true,ended:false,draining:false,queued_frontier:Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
+            let mut worker=Worker{ output_configuration: None, reconfiguration: None, output_needs_restart: false,duration:duration.clone(),checkpoints:Vec::new(), dolby_policy: DolbyPlaybackPolicy::default(),stream:Box::new(stream),decoder,backend:Box::new(crate::audio::NullBackend::default()),commands,events,playing:true,ended:false,draining:false,queued_frontier:Duration::ZERO,generation:0,position:Arc::new(Mutex::new(Duration::ZERO))};
             let result=worker.finish_source().0;
             assert_eq!(*duration.lock().unwrap(),Some(Duration::from_millis(expected)));
             assert_eq!(matches!(result,Some(AudioEvent::Error(_))),!valid);

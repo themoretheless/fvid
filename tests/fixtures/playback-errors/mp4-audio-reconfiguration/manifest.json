@@ -1,0 +1,59 @@
+{
+  "frames": [
+    {
+      "description": 1,
+      "rate": 48000,
+      "channels": 2,
+      "depth": 16,
+      "pts": 0,
+      "frames": 960,
+      "oracle": "pcm-0.f32le"
+    },
+    {
+      "description": 2,
+      "rate": 32000,
+      "channels": 1,
+      "depth": 32,
+      "pts": 20000,
+      "frames": 640,
+      "oracle": "pcm-1.f32le"
+    },
+    {
+      "description": 3,
+      "rate": 44100,
+      "channels": 2,
+      "depth": 24,
+      "pts": 40000,
+      "frames": 882,
+      "oracle": "pcm-2.f32le"
+    },
+    {
+      "description": 1,
+      "rate": 48000,
+      "channels": 2,
+      "depth": 16,
+      "pts": 60000,
+      "frames": 960,
+      "oracle": "pcm-3.f32le"
+    },
+    {
+      "description": 2,
+      "rate": 32000,
+      "channels": 1,
+      "depth": 32,
+      "pts": 80000,
+      "frames": 640,
+      "oracle": "pcm-4.f32le"
+    },
+    {
+      "description": 3,
+      "rate": 44100,
+      "channels": 2,
+      "depth": 24,
+      "pts": 100000,
+      "frames": 882,
+      "oracle": "pcm-5.f32le"
+    }
+  ],
+  "provenance": "Owned stereo16/48k,mono float32/32k,stereo24/44.1k PCM,exact float32 oracles,six20ms spans,owned VP9,E-AC-3 delayed tails with different rates/layouts and nontrivial line/RF/dialogue gains; no external codec,private media,FFmpeg or network."
+}

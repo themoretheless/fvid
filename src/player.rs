@@ -12355,6 +12355,7 @@ fn parallel_vorbis_player_factory_selects_the_second_track() {
     let mut decoder = stream.make_decoder().unwrap();
     let mut frames = 0;
     while let Some(step) = stream.next_step().unwrap() { match step {
+        crate::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
         crate::audio::AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
         crate::audio::AudioStep::Encoded(packet) => {
             if let Some(decoded) = decoder.decode_packet(&packet.data,packet.pts,packet.duration as u64).unwrap() {
@@ -12376,6 +12377,7 @@ fn mixed_ogg_player_catalogue_routes_both_codecs_in_bos_order(){
             let expected=if index==0{first}else if first=="A_OPUS"{"A_VORBIS"}else{"A_OPUS"};assert_eq!(stream.codec(),expected);
             let stride=usize::from(stream.channels())*4;let mut decoder=stream.make_decoder().unwrap();let mut frames=0;
             while let Some(step)=stream.next_step().unwrap(){match step{
+                crate::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 crate::audio::AudioStep::ResetDecoder=>stream.reset_decoder(&mut decoder).unwrap(),
                 crate::audio::AudioStep::Encoded(packet)=>{if let Some(decoded)=decoder.decode_packet(&packet.data,packet.pts,packet.duration as u64).unwrap(){if let Some(pcm)=stream.present_decoded(decoded.packet,decoded.source_pts).unwrap(){frames+=pcm.data.len()/stride;}}},
                 _=>panic!("unexpected mixed audio step"),

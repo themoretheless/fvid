@@ -350,6 +350,7 @@ fn chained_ogg_opus_resets_history_and_preserves_exact_seek_across_segment_windo
         let mut resets = 0;
         while let Some(step) = stream.next_step().unwrap() {
             match step {
+                AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 AudioStep::ResetDecoder => {
                     decoder.reset();
                     resets += 1;
@@ -472,6 +473,7 @@ fn parallel_ogg_opus_tracks_preserve_selection_seek_and_chained_link_identity() 
                 let mut resets = 0;
                 while let Some(step) = stream.next_step().unwrap() {
                     match step {
+                        AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                         AudioStep::ResetDecoder => {
                             decoder.reset();
                             resets += 1;
@@ -542,6 +544,7 @@ fn ogg_opus_mapping_and_gain_changes_rebuild_decoder_for_boundaries_seek_and_rew
         let mut resets = 0;
         while let Some(step) = stream.next_step().unwrap() {
             match step {
+                AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 AudioStep::ResetDecoder => {
                     stream.reset_decoder(&mut decoder).unwrap();
                     resets += 1;
@@ -640,6 +643,7 @@ fn changing_ogg_opus_channel_counts_preserve_speakers_in_one_output_layout() {
             let mut stamps = Vec::new();
             while let Some(step) = stream.next_step().unwrap() {
                 match step {
+                    AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                     AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                     AudioStep::Encoded(packet) => {
                         let decoded = decoder
@@ -742,6 +746,7 @@ fn mono_and_quad_ogg_segments_preserve_named_speakers_across_mapping_families() 
             let mut actual = Vec::new();
             while let Some(step) = stream.next_step().unwrap() {
                 match step {
+                    AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                     AudioStep::ResetDecoder => stream.reset_decoder(&mut decoder).unwrap(),
                     AudioStep::Encoded(p) => {
                         let decoded = decoder

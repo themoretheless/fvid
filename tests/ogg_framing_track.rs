@@ -135,6 +135,7 @@ fn acceptance_ogg_framing_vorbis_chain_eos_and_opus_track_index() {
     let mut vorbis_frames = 0usize;
     while let Some(step) = vorbis.next_step().unwrap() {
         match step {
+            AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
             AudioStep::ResetDecoder => vorbis.reset_decoder(&mut vorbis_dec).unwrap(),
             AudioStep::Pcm(p) => vorbis_frames += p.data.len() / 8,
             AudioStep::Encoded(p) => {

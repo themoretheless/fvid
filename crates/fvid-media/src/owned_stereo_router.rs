@@ -1,4 +1,5 @@
 //! Bounded float32 speaker routing for a known front-left/front-right sink.
+#[derive(Clone, PartialEq)]
 pub struct StereoRouter {
     channels: u16,
     coefficients: Vec<[f32; 2]>,

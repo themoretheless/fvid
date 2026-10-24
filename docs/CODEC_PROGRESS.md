@@ -17795,3 +17795,70 @@ Both player binaries build (`/tmp/fvid-video-reconfiguration-build-final.log`).
 The final owned generator reproduces 49 artifacts / 292,744 bytes exactly with
 subprocess/socket creation denied. This is finite headless acceptance, not
 physical display, universal codec conformance or a 60 fps performance claim.
+
+
+### MP4 natural audio reconfiguration with decoder and device drains
+
+`AudioStep::ReconfigureDecoder` is distinct from edit/navigation history
+reset. The worker drains delayed PCM using the old source metadata, drains
+accepted device output without emitting EOF, then commits the new setup and
+rebuilds the decoder with the session Dolby policy. Output configuration is
+compared by source spec and exact speaker router. CPAL/Null implement the new
+backend hooks; CPAL restarts the device only when its source configuration
+changes, retaining the timeline anchor and shared volume/tempo controls. A
+same-spec boundary unseals the intermediate drain without clearing samples.
+Pause/seek/stop remain responsive while waiting; navigation explicitly flushes
+old output before changing geometry. A failed output change stops the device
+and requires a fresh configuration on recovery.
+
+The MP4 audio reader negotiates the active description, including startup at
+entry 3, and retains old rate/channels/mask/configuration until decoder drain
+completes. It probes AAC PS and Dolby geometry per selected description,
+recreates the decoder on navigation, and preserves the track media clock.
+Changing streams with edits still refuse explicitly pending a variable-rate
+edit scheduler. Direct raw-packet decoding cannot silently cross a setup
+change: consumers must handle the new `next_step` event and commit hook.
+Exhaustive constant-fixture collectors now explicitly reject unexpected
+configuration changes; compilation of all root integration targets verifies
+that the new event has not left a missing match arm.
+
+Owned PCM acceptance covers stereo16/48 kHz, mono float32/32 kHz and stereo24/
+44.1 kHz, ordinary/fragmented movies, reversed setup tables, exact float PCM,
+rewind and a seek into a packet. Real captured audio workers wait on an
+artificially delayed device drain before changing geometry. Controlled gates
+verify paused seek cancellation, stop during a never-completing drain, and
+rewind recovery after an injected output-reconfiguration failure.
+
+Real E-AC-3 stereo48k→mono32k→stereo48k spans compare against independent
+constant-setup controls including all 3×1536 samples per span. Typed RF and
+dialogue-normalization references differ from both line mode and normalization
+off; worker recreation, rewind and seek preserve the selected policy.
+A negative control that intentionally skips old decoder finish produces seven
+PCM packets instead of nine (`/tmp/fvid-audio-skipped-tail-negative-control.log`).
+Replaying the historical constant-description admission guard reproduces the
+specific valid-file refusal (`/tmp/fvid-audio-legacy-admission-replay.log`);
+this is a guard replay, not a full historical-checkout build. Sources were
+restored exactly before qualification.
+
+This is finite PCM/E-AC-3 configuration-transition acceptance, not universal
+audio coding/profile coverage. AAC/ALAC/ADPCM/MACE transition matrices,
+variable-rate edits and physical device renegotiation remain to be qualified;
+MACE also retains the container's per-description block-indexing limitation.
+These headless tests do not prove acoustically gapless CPAL rate renegotiation
+or performance on every device. The full codec goal remains open. No FFmpeg
+or libav path was introduced.
+
+Qualification: all 993 root integration targets compile offline with the player
+feature (`/tmp/fvid-audio-reconfiguration-check-qualified.log`). Sequential
+library: 1034 passed / 0 failed / 26 ignored
+(`/tmp/fvid-audio-reconfiguration-library-qualified.log`). Twenty-one related
+runtime targets: 92 passed / 0 failed / one ignored
+(`/tmp/fvid-audio-reconfiguration-regressions-qualified.log`). Both binaries
+build (`/tmp/fvid-audio-reconfiguration-build-delivery.log`). The subsequently
+added exact VP9 companion acceptance and corrected same-size iso5 ftyp for
+fragmented fixtures are verified by the dedicated target: nine passed / one
+ignored (`/tmp/fvid-audio-reconfiguration-delivery.log`).
+The final generator reproduces 15 owned artifacts / 521,150 bytes exactly with
+process and socket creation denied; generation stays separate from testing.
+The remaining ignored test is intended variable-rate edit acceptance, not a
+passing codec test. Existing compiler warnings remain.

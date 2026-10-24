@@ -123,6 +123,7 @@ mod playback {
         let mut out = Vec::new();
         while let Some(step) = input.next_step().unwrap() {
             let packet = match step {
+                fvid::audio::AudioStep::ReconfigureDecoder => panic!("unexpected configuration change in constant-setup fixture"),
                 fvid::audio::AudioStep::ResetDecoder => {
                     input.reset_decoder(&mut decoder).unwrap();
                     continue;
